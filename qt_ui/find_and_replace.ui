@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>FindAndReplace</class>
+ <widget class="QDialog" name="FindAndReplace">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>425</width>
+    <height>161</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>425</width>
+    <height>161</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>425</width>
+    <height>161</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>Replace</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout_2">
+   <item row="0" column="0">
+    <layout class="QGridLayout" name="gridLayout">
+     <item row="1" column="0">
+      <widget class="QLabel" name="label_2">
+       <property name="text">
+        <string>&amp;Replace with:</string>
+       </property>
+       <property name="buddy">
+        <cstring>uiReplace</cstring>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0">
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>&amp;Find what:</string>
+       </property>
+       <property name="buddy">
+        <cstring>uiFind</cstring>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QCheckBox" name="uiMatchCase">
+       <property name="text">
+        <string>Match case</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QLineEdit" name="uiFind"/>
+     </item>
+     <item row="1" column="1">
+      <widget class="QLineEdit" name="uiReplace"/>
+     </item>
+     <item row="3" column="1">
+      <widget class="QCheckBox" name="uiWholeWord">
+       <property name="text">
+        <string>Match whole word only</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="2" rowspan="4">
+      <layout class="QVBoxLayout" name="verticalLayout_5">
+       <item>
+        <widget class="QPushButton" name="uiFindNext">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string>Find Next</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="uiReplaceOne">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string>Replace</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="uiReplaceAll">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string>Replace All</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="uiClose">
+         <property name="text">
+          <string>Close</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <tabstops>
+  <tabstop>uiFind</tabstop>
+  <tabstop>uiReplace</tabstop>
+  <tabstop>uiFindNext</tabstop>
+  <tabstop>uiReplaceOne</tabstop>
+  <tabstop>uiReplaceAll</tabstop>
+  <tabstop>uiClose</tabstop>
+  <tabstop>uiMatchCase</tabstop>
+  <tabstop>uiWholeWord</tabstop>
+ </tabstops>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>uiClose</sender>
+   <signal>clicked()</signal>
+   <receiver>FindAndReplace</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>376</x>
+     <y>113</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>212</x>
+     <y>80</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

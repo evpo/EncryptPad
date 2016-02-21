@@ -1,0 +1,11 @@
+CRYPT_ROOT=..
+CLI := $(CRYPT_ROOT)/cli
+
+all : cli
+cli : back_end
+	$(MAKE) -C $(CLI)
+back_end :
+	$(MAKE) -f Makefile.back_end
+clean :
+	$(MAKE) -C $(CLI) clean
+	$(MAKE) -f Makefile.back_end clean

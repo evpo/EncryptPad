@@ -1,0 +1,31 @@
+<RCC>
+    <qresource prefix="/">
+        <file>../images/famfamfam/cut.png</file>
+        <file>../images/famfamfam/disk.png</file>
+        <file>../images/famfamfam/disk_multiple.png</file>
+        <file>../images/famfamfam/find.png</file>
+        <file>../images/famfamfam/folder_page_white.png</file>
+        <file>../images/famfamfam/key.png</file>
+        <file>../images/famfamfam/key_add.png</file>
+        <file>../images/famfamfam/key_delete.png</file>
+        <file>../images/famfamfam/lock.png</file>
+        <file>../images/famfamfam/lock_delete.png</file>
+        <file>../images/famfamfam/magnifier.png</file>
+        <file>../images/famfamfam/magnifier_zoom_in.png</file>
+        <file>../images/famfamfam/page_copy.png</file>
+        <file>../images/famfamfam/page_paste.png</file>
+        <file>../images/famfamfam/page_white.png</file>
+        <file>../images/famfamfam/magnifier_zoom_out.png</file>
+        <file>../images/application_icon.png</file>
+        <file>../images/famfamfam/cross.png</file>
+        <file>../images/famfamfam/page_white_gear.png</file>
+        <file>../images/famfamfam/arrow_redo.png</file>
+        <file>../images/famfamfam/arrow_undo.png</file>
+        <file>../images/famfamfam/read_only.png</file>
+        <file>../images/famfamfam/arrow_switch.png</file>
+        <file>../images/famfamfam/wrap.png</file>
+        <file>../images/famfamfam/user_suit.png</file>
+        <file>../images/famfamfam/page_white_text.png</file>
+        <file>../images/famfamfam/page_white_key.png</file>
+    </qresource>
+</RCC>

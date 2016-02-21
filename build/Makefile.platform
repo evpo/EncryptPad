@@ -1,0 +1,5 @@
+include ../deps/makefiles/platform.mak
+
+all:: echo_subdir
+echo_subdir::
+	@echo SUBDIR="$(SUBDIR)"

@@ -1,0 +1,33 @@
+CRYPT_ROOT=..
+QT_UI := $(CRYPT_ROOT)/qt_ui
+QT_BUILD := ./qt_build
+QMAKE := qmake
+
+include ../deps/makefiles/platform.mak
+
+ifeq ($(UNIX),on)
+    QMAKE_SPEC := linux-g++
+else ifeq ($(PLATFORM),MACOS)
+    QMAKE_SPEC := macx-clang
+else
+    QMAKE_SPEC := win32-g++
+endif
+
+ifeq ($(RELEASE),on)
+    QMAKE_CONFIG := release
+else
+    QMAKE_CONFIG := debug
+endif
+
+all:: x_make
+
+x_qmake::
+	mkdir -p $(QT_BUILD)
+	cd $(QT_BUILD) && $(QMAKE) -r -spec $(QMAKE_SPEC) "CONFIG+=$(QMAKE_CONFIG)" ../../qt_ui/EncryptPad.pro
+x_make:: x_qmake
+	$(MAKE) -C $(QT_BUILD)
+clean::
+	if [ -d $(QT_BUILD) ]; \
+	then \
+		$(MAKE) -C $(QT_BUILD) clean RELEASE=$(RELEASE); \
+	fi

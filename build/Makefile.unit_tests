@@ -1,0 +1,14 @@
+CRYPT_ROOT=..
+TESTS := $(CRYPT_ROOT)/tests
+
+all : tests
+tests : back_end gtest
+	$(MAKE) -C $(TESTS)
+gtest :
+	$(MAKE) -f Makefile.gtest
+back_end :
+	$(MAKE) -f Makefile.back_end
+clean :
+	$(MAKE) -C $(TESTS) clean
+	$(MAKE) -f Makefile.gtest clean
+	$(MAKE) -f Makefile.back_end clean

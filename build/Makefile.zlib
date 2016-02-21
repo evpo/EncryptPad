@@ -1,0 +1,23 @@
+CRYPT_ROOT=..
+ZLIB_DIR=$(CRYPT_ROOT)/deps/zlib
+
+include ../deps/makefiles/platform.mak
+ifeq ($(WINDOWS),on)
+MAKE=mingw32-make
+MAKE_FILE=win32/Makefile.gcc
+else
+MAKE=make
+MAKE_FILE=Makefile
+endif
+
+all:: $(ZLIB_DIR)/libz.a
+$(ZLIB_DIR)/libz.a:
+	if [ '$(WINDOWS)' = 'on' ]; \
+	then \
+	$(MAKE) -C $(ZLIB_DIR) -f $(MAKE_FILE) RELEASE=$(RELEASE); \
+	else \
+	cd $(ZLIB_DIR) && ./configure --static; \
+	$(MAKE) -f $(MAKE_FILE) RELEASE=$(RELEASE); \
+	fi
+clean:
+	$(MAKE) -C $(ZLIB_DIR) -f $(MAKE_FILE) clean
