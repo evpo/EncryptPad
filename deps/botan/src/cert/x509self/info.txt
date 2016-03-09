@@ -1,0 +1,6 @@
+define X509_SELF_SIGNED
+
+<requires>
+x509cert
+</requires>
+

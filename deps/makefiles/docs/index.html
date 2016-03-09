@@ -1,0 +1,657 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Makefiles Project - Manual</title>
+<meta name="Author" content="Andy Rushton">
+<meta name="Copyright" content="(c) Andy Rushton 1999 onwards">
+<meta name="License" content="BSD license, see license.html">
+<link rel="stylesheet" media="screen" type="text/css" href="screen.css">
+</head>
+
+<body>
+
+<div id="header">
+
+<div id="headerBanner">
+<h1>The Makefiles Project</h1>
+</div>
+
+<div id="headerNavigation">
+<p>
+<a href="http://stlplus.sourceforge.net/">Website</a>
+<a href="license.html">License</a>
+</p>
+</div>
+
+</div>
+
+<div id="document">
+
+<div id="documentTitle">
+<h1>Manual</h1>
+</div>
+
+<div id="documentNavigation">
+<ul>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#writing">Writing a Makefile</a></li>
+<li><a href="#targets">Make Targets</a></li>
+<li><a href="#name">Project Name</a></li>
+<li><a href="#files">Source Files</a></li>
+<li><a href="#subdir">Working Directory</a></li>
+<li><a href="#variants">Building Variants</a></li>
+<li><a href="#subdirectories">Subdirectories</a></li>
+<li><a href="#wx">Using wxWidgets</a></li>
+<li><a href="#examples">Examples</a></li>
+</ul>
+</div>
+
+<h2 id="introduction">Introduction</h2>
+
+<p>The makefiles project is a set of universal makefiles for building any project
+with Gnu tools (gcc, Gnu make etc.). The idea is that you write a trivial
+Makefile which simply includes a universal makefile and it does the rest for
+you. This makes it very easy to set up new projects and to ensure consistency
+of builds in a multi-library project.</p>
+
+<p>These rules do the following tasks:</p>
+
+<ul>
+<li>compile all the .cpp or .c files in the current directory</li>
+<li>archive the object files together into a single object library</li>
+<li>build all other projects on which the current project depends</li>
+<li>link an image</li>
+</ul>
+
+<p><b>Note:</b> These files are designed for ***Gnu make ONLY***.</p>
+
+<p>A make file contains a set of rules. The scope for writing rules is limited by
+the makefile syntax. Therefore it has been necessary to restrict the
+flexibility of the universal makefile in order for it to be possible to write
+it at all.</p>
+
+<h2 id="writing">Writing a Makefile</h2>
+
+<p>The gcc.mak file should be included in your Makefile to set up the default
+make rules for gcc.</p>
+
+<pre class="script">
+include ../makefiles/gcc.mak
+</pre>
+
+<p>Or whatever the path to the gcc.mak file is. A relative path rather than an
+absolute path is recommended.</p>
+
+<p>You need to define up to two variables in your Makefile <i>before</i> the include to
+control what is to be built:</p>
+
+<dl>
+
+<dt>IMAGE := &lt;path&gt;</dt>
+
+<dd>
+<p>This specifies that you are making an executable image and the path gives
+both the directory and image name.</p>
+
+<p>e.g. IMAGE := demo</p>
+
+<p>Without this, the makefile makes a library only.</p>
+</dd>
+
+
+<dt>LIBRARIES := &lt;path&gt; ...</dt>
+
+<dd>
+<p>A space-separated list of library directories to include/link into the build. Only libraries
+managed by this make system and set of rules should be in the list. See later for how to manage
+third-party libraries.</p>
+
+<p>e.g. LIBRARIES := ../stlplus3/containers</p>
+
+<p>Each path should point to the source directory of a project which is also managed by this
+makefile system.</p>
+
+<p>Note that the part of the path used to create the project name - i.e. the last part excluding
+"source" must be a directory name and must not be "..".</p>
+</dd>
+
+</dl>
+
+<p>In addition to these key variables, there are other variables to control the
+build. These should be modified AFTER the include for this file. The most
+useful are those that allow other libraries to be incorporated into the build
+that are not managed by this make system.</p>
+
+<p>The variables that can be modified are:</p>
+
+
+<dl>
+
+<dt>CPPFLAGS += &lt;options&gt;</dt>
+
+<dd>
+<p>Preprocessor flags common to both C and C++ compiles.</p>
+</dd>
+
+<dt>CFLAGS   += &lt;options&gt;<br/>CXXFLAGS += &lt;options&gt;</dt>
+
+<dd>
+<p>This sets extra options for the gcc compiler. The CFLAGS variable applies to C compiles (.c
+files) and CXXFLAGS applies to C++ compiles (.cpp files). These are typically extra include paths
+for libraries not managed by this make system and therefore not in the LIBRARIES list.</p>
+
+<p>e.g. CXXFLAGS += -I../funnylib/include</p>
+</dd>
+
+<dt>LDFLAGS += &lt;options&gt;</dt>
+
+<dd>
+<p>Sets extra flags for the linker. These are placed <i>before</i> the object files in the link
+command</p>
+</dd>
+
+<dt>LOADLIBES += &lt;objects&gt;</dt>
+<dd>
+<p>Extra object files or libraries to be incorporated into the link which are not managed by this
+make system. These are placed <i>after</i> the object files in the link command.</p>
+
+<p>The LOADLIBES variable can contain names of object files or archive libraries:</p>
+
+<p>e.g. LOADLIBES += -lxyz</p>
+
+<p>So in the above case the library being linked against is libxyz.a.</p>
+
+<p>This options is also used to create a dependency on shared libraries (.dll on Windows or .so on
+Unixes):</p>
+
+<p>e.g. LOADLIBES += -lxyz</p>
+
+<p>So in the above case the library being linked against is either xyz.dll on Windows or libxyz.so
+on Unix.</p>
+
+<p>You may need to use the uppercase -L to specify a search path for these libraries:</p>
+
+<p>e.g. LOADLIBES += -L../xyz -lxyz</p>
+</dd>
+
+</dl>
+
+<p>Note the use of '+=' not ':='. You are adding extra options to the existing
+options created by the make system.</p>
+
+<p>There are also some variables that can be used to switch on or off
+  certain options. These take the values "on" or "off":</p>
+
+<dl>
+
+<dt>RELEASE=on | RELEASE=off (default)</dt>
+<dd><p>When switched on, builds a release version of the
+    application. This has no debugging information and compiler
+    optimisation is turned up to generate a small, fast program. When
+    switched off, this builds a debug version, with full debugger
+    information for use with gdb, and with compiler optimisations
+    disabled. Note: this is usually swiched on from the command line,
+    rather than from the Makefile: see <a href="#variants">Building Variants</a>.</p></dd>
+
+<dt>GPROF=on | GPROF=off (default)</dt>
+<dd><p>When switched on, builds a profiling version of the application
+    for use with the gprof profiler. When switched off, this builds a
+    normal version. Note: this is usually swiched on from the command
+    line, rather than from the Makefile:
+    see <a href="#variants">Building Variants</a>.</p></dd>
+
+<dt>UNICODE=on | UNICODE=off (default)</dt>
+<dd><p>When switched on, enables Unicode character support. In fact,
+    this just enables compiler directives -DUNICODE and -D_UNICODE, so
+    it is up to the programmer to ensure that these are tied to
+    Unicode support. Most libraries follow this convention. This
+    switch is also used in wxWidgets builds to enable the Unicode
+    build of wxWidgets to be used. When switched off, characters are
+    ASCII.</p></dd>
+
+<dt>STATIC=on | STATIC=off (default)</dt>
+<dd><p>When switched on, causes the compiler to link, where possible,
+    with static C and C++ libraries to minimise dependencies on shared
+    libraries. This removes a dependency on the STL shared library and
+    may remove other dependencies too, depending on the
+    application. You still need to check for any remaining
+    unresolvable shared library dependencies. If switched off, the
+    build will use shared libraries where possible to minimise that
+    application size.</p></dd>
+
+<dt>VERBOSE=on | VERBOSE=off (default)</dt>
+<dd><p>When switched off, gives a brief one-line summary of each
+    build command, unless there are errors in which case a standard error
+    report is given. When switched on, the build commands are
+    switched into verbose mode to give more diagnostics.</p></dd>
+
+</dl>
+
+<h2 id="targets">Make Targets</h2>
+
+<p>There are several targets that can be used with make. The idea is that
+you run make from the command line with a target like this:</p>
+
+<pre class="script">
+$ make &lt;target&gt;
+</pre>
+
+<p>The target is optional; if missing then the default target is
+  built.</p>
+
+<p>The targets currently supported by the Makefiles project are:</p>
+
+<dl>
+
+<dt>all (default)</dt>
+<dd><p>Equivalent to target 'build', but you can change the set of targets
+    mapped onto the 'all' target.</p></dd>
+
+<dt>build</dt>
+<dd><p>Compile all source files and link the image if there is one
+    (i.e. if the IMAGE variable is set).</p></dd>
+
+<dt>run</dt>
+<dd><p>Run the program if there is one (i.e. if the IMAGE variable is set).</p></dd>
+
+<dt>tidy</dt>
+<dd><p>Delete intermediate files created during the compile.</p></dd>
+
+<dt>clean</dt>
+<dd><p>Delete all files created during the compile, including
+    temporary files, libraries and the program if there is one</p></dd>
+
+</dl>
+
+<p>Targets can be combined on the command line. For example, to build
+  and run a project:</p>
+
+<pre class="script">
+$ make build run
+</pre>
+
+<h2 id="name">Project Name</h2>
+
+<p>The name of the project is either the name of the directory, unless
+the directory is called "source" in which case the directory above
+that is used. The makefile uses the name of project to generate the
+library name.</p>
+
+<p>For example, here is the directory structure of the STLplus project:</p>
+
+<ul>
+<li class="folder">stlplus
+  <ul>
+  <li class="folder">source
+    <ul>
+    <li class="file"><b>Makefile</b></li>
+    <li class="file">stlplus.hpp</li>
+    <li class="file">cli_parser.cpp</li>
+    <li class="file">...</li>
+    </ul>
+  </li>
+  <li class="folder">messages</li>
+  <li class="folder">docs</li>
+  </ul>
+</li>
+</ul>
+
+<p>In the example above, for the Makefile shown in bold, the project name is "stlplus". This is because the
+directory containing the Makefile is called "source" and so the directory above
+that is used. This directory is called "stlplus".</p>
+
+<p>A simpler directory structure could have been used:</p>
+
+<ul>
+<li class="folder">stlplus
+  <ul>
+  <li class="file"><b>Makefile</b></li>
+  <li class="file">stlplus.hpp</li>
+  <li class="file">cli_parser.cpp</li>
+  <li class="file">...</li>
+  </ul>
+</li>
+</ul>
+
+<p>In this case, the project name is still "stlplus". This is because the
+directory containing the source is called "stlplus" and so this is used as
+the project name.</p>
+
+<p>Project names must be unique within a particular application's development.
+For example, you might be working on an application which is split into
+several projects for coding purposes. Each project that makes up the
+application must have a different project name.</p>
+
+<p>Within a project, all the source code - that is, all headers (.h or .hpp) and
+implementation files (.c or .cpp) - must be in one directory. The Makefile
+should be in this same directory. A multiple-directory structure should be
+built as multiple projects, one per directory.</p>
+
+<h2 id="files">Source Files</h2>
+
+<p>The universal makefile uses file extensions to determine the type of
+compilation to use:</p>
+
+<dl>
+<dt>.c</dt><dd>C source</dd>
+<dt>.cpp</dt><dd>C++ source</dd>
+<dt>.rc</dt><dd>resource definitions (Windows only)</dd>
+</dl>
+
+<p>Any file with these extensions in the project directory will be compiled using
+the appropriate compiler for its type.</p>
+
+<p>So, if you use .c extensions for C++ files you will have problems. I believe
+it is good practice to be clear whether a file is C or C++ and so this is a
+feature, not a bug.</p>
+
+<p>I also recommend:</p>
+
+<dl>
+<dt>.h</dt><dd>a C header</dd>
+<dt>.hpp</dt><dd>a C++ header</dd>
+<dt>.tpp</dt><dd>a C++ template implementation</dd>
+</dl>
+
+<h2 id="subdir">Working Directory</h2>
+
+<p>When you compile files with the universal makefile, it stores all compiled
+object code in a subdirectory of the source directory. You can clean up by
+simply deleting this working directory.</p>
+
+<p>The name of the working directory is derived from the operating system and CPU
+type of the computer you are working on. The universal makefile contains a set
+of rules for working out this name.</p>
+
+<p>The reason for doing this is that some people work on the same source code
+with different compilers and possibly even with disks that are accessed over a
+network from one of a number of different computers. The makefile system keeps
+the compilations for different platforms separate. This means that you can,
+for example, compile your code on one platform, then login to a different
+computer and compile again for the new platform. The makefile syatem keeps the
+working directories separate.</p>
+
+<p>The directory name is in three parts. For example:</p>
+
+<blockquote>
+LINUX-alpha-debug
+</blockquote>
+
+<p>The first part of the name is the generic operating system name - in this case Linux. The
+operating system is put in uppercase to emphasise that the compiler macro LINUX will be defined as a
+compiler directive (in this case -DLINUX) and can be used in the source code in "#ifdef LINUX"
+preprocessor directives.</p>
+
+<p>The second part of the name is the CPU type - in this case "alpha" which is the DEC Alpha 64-bit
+CPU.</p>
+
+<p>The third part of the name is the build variant - in this case "debug". This
+means that this is a debug build of the software - see the next section for
+more details of build variants and how to create them.</p>
+
+<h2 id="variants">Building Variants</h2>
+
+<p>The make system can build different variants of a project depending on the
+argument following make.</p>
+
+<dl>
+
+<dt>make</dt>
+<dd>build a debug version (debug code, no optimisations)</dd>
+
+<dt>make RELEASE=on</dt>
+<dd>build a release version (no debug code, highly optimised)</dd>
+
+<dt>make GPROF=on</dt>
+<dd>build a profiling version (same parameters as the release version)</dd>
+
+</dl>
+
+<p>Note that these variants are created by specifying values for variables used
+to control the build type. See the definitions above for the variables RELEASE,
+GPROF, UNICODE, STATIC and VERBOSE. In fact any variable controlling a build can
+be set either in a Makefile, meaning always use the same value, or from the
+command line, in which case it is a one-off build with that option.</p>
+
+<p>The idea is that you develop using the debug version. This has all symbolic
+information required to run a debugger such as Gnu's "gdb" as well as all
+macros controlled by the NDEBUG preprocessor directive. The NDEBUG directive
+is the ANSI C standard method for including/excluding debugging code in your
+source - it is used by the C macro assert(expr) and also the extended
+debugging macros provided by the STLplus library header debug.hpp.</p>
+
+<p>You can at any time build a profiling variant for use with Gnu's "gprof". This
+allows you to identify any performance problems and optimise code selectively
+based on performance profiles. Typically 95% or more of a program is NOT
+performance critical, so optimising everything is a huge waste of effort.
+Profiling allows you to focus on the 5% of the program that can actually
+benefit from optimisation.</p>
+
+<p>Note that the profiling version is built with the same optimisation level as
+the release version to give an accurate feel for how the release version will
+perform.</p>
+
+<p>Once you are satisfied that your program is entirely bug-free (okay, only
+joking) and blindingly fast (yeah, okay, joking again) you can then build a
+release variant for shipping to the customer. This will not only run about four
+times faster than the debug variant but will be much smaller too. It is also more
+difficult to reverse engineer because it doesn't contain any debugging
+information.</p>
+
+<h2 id="subdirectories">Subdirectories</h2>
+
+<p>There is a separate set of make rules for handling subdirectory structures.
+For example, to make a project with two subprojects, you might have the
+following structure:</p>
+
+<ul>
+  <li class="folder">makefiles
+    <ul>
+      <li class="file">gcc.mak</li>
+      <li class="file">subdirectories.mak</li>
+    </ul>
+  </li>
+  <li class="folder">project
+    <ul>
+      <li class="file"><b>Makefile</b></li>
+      <li class="folder">subsystem1
+        <ul>
+          <li class="file">Makefile</li>
+          <li class="file">xyz123.cpp</li>
+          <li class="file">efg789.cpp</li>
+          <li class="file">...</li>
+        </ul>
+      </li>
+      <li class="folder">subsystem2
+        <ul>
+          <li class="file">Makefile</li>
+          <li class="file">fgh546.cpp</li>
+          <li class="file">kld495.cpp</li>
+          <li class="file">...</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<p>So, I want to write the Makefile (highlighted in bold above) for the top-level "project"
+directory that builds the main project by building the two subprojects.</p>
+
+<p>Create a project/Makefile containing one line:</p>
+
+<pre class="script">
+include ../makefiles/subdirectories.mak
+</pre>
+
+<p>This rule searches for the set of subdirectories that themselves contain a
+Makefile and makes them.</p>
+
+<h2 id="wx">Using wxWidgets</h2>
+
+<p>There is an additional universal makefile for use when building 
+<a href="http://www.wxwidgets.org/">wxWidgets</a> programs. This makefile should be included after the
+gcc.mak file.</p>
+
+<p>For example:</p>
+
+<pre class="script">
+IMAGE     := demo
+LIBRARIES := ../stlplus
+include ../makefiles/gcc.mak
+include ../makefiles/wx.mak
+</pre>
+
+<p>The wx.mak file adds extra compiler and linker options for wxWidgets. It uses
+the wx-config script provided with wxWidgets to adapt to your installation -
+in other words, you need to have run "make install" when you built wxWidgets
+so that the wx-config program is on the path.</p>
+
+<h3>Debug and Release builds</h3>
+
+<p>When building a debug version of the application (make), the
+makefile uses the debug configuration of wxWidgets (wx-config
+--debug=yes) and likewise a release version (make RELEASE=on) gets the
+release configuration of wxWidgets (wx-config --debug=no).</p>
+
+<h3>Unicode support</h3>
+
+<p>The default for the makefiles project prior to v1.7 was to build a
+  non-Unicode variant of your program, using a non-Unicode variant of
+  wxWidgets.</p>
+
+<p>However, it is now practically obligatory to use Unicode in modern
+programs and indeed my version of Linux does not have the non-Unicode
+builds.  The default from makefiles v1.7 onwards is to build a
+Unicode variant of your program, using a Unicode variant of
+wxWidgets. To disable Unicode support, use the UNICODE=off option in the
+Makefile:</p>
+
+<pre class="script">
+IMAGE     := demo
+LIBRARIES := ../stlplus
+UNICODE   := off
+include ../makefiles/gcc.mak
+include ../makefiles/wx.mak
+</pre>
+
+<p>this will build your code without either -DUNICODE or -D_UNICODE
+  compiler directives and it will use the non-Unicode variants of
+  wxWidgets if there is one, which is not possible with the latest
+  versions.</p>
+
+<h3>Shared Library dependencies</h3>
+
+<p>The default is to build a wxWidgets application using shared
+  libraries for the wxWidgets libraries. This is consistent with the
+  default configuration of wxWidgets. However, you can build the
+  application without any wxWidgets shared library dependencies
+  - as a static build - by specifying the WXSTATIC option in the
+  Makefile:</p>
+
+<pre class="script">
+IMAGE     := demo
+LIBRARIES := ../stlplus
+WXSTATIC  := on
+include ../makefiles/gcc.mak
+include ../makefiles/wx.mak
+</pre>
+
+<p>For this to build correctly, you must have a non-shared version of
+  wxWidgets installed, which is done by building wxWidgets with the
+  "--disable-shared" option for the configure script.</p>
+
+<p>Note: this is different from the STATIC option - which controls
+  whether the application depends on the C++ shared libraries. The
+  WXSTATIC option controls whether the application depends on the
+  wxWidgets shared libraries.</p>
+
+<h3>Selecting a wxWidgets version</h3>
+
+<p>It is possible to have several different versions of wxWidgets installed at
+  the same time and to select which one to use at build time. This selection is
+  supported via the WXVERSION option in the Makefile:</p>
+
+<pre class="script">
+IMAGE     := demo
+LIBRARIES := ../stlplus
+WXSTATIC  := on
+WXVERSION := 3.0
+include ../makefiles/gcc.mak
+include ../makefiles/wx.mak
+</pre>
+
+<p>This will select version 3.0 of wxWidgets and build the application with it.</p>
+
+<h2 id="examples">Examples</h2>
+
+<p>Here's a typical Makefile for building an object library:</p>
+
+<pre class="script">
+LIBRARIES := ../stlplus3/portability
+include ../makefiles/gcc.mak
+</pre>
+
+<p>Here's a typical Makefile for building an executable image:</p>
+
+<pre class="script">
+IMAGE     := ../bin/ccolour
+LIBRARIES := ../stlplus3/portability
+include ../makefiles/gcc.mak
+</pre>
+
+<p>To show the whole picture, here's a multi-library project for the "ccolour"
+program with the directory structure and makefiles used to build it. The
+ccolour project uses the stlplus3 project. To build the whole project, all you
+have to do is to go into the source directory of the ccolour directory and run
+make:</p>
+
+<ul>
+<li class="folder">development
+  <ul>
+    <li class="folder">bin
+      <ul>
+        <li class="file">ccolour.exe</li>
+      </ul>
+    </li>
+    <li class="folder">makefiles
+      <ul>
+        <li class="file">gcc.mak</li>
+      </ul>
+    </li>
+    <li class="folder">stlplus3
+      <ul>
+        <li class="folder">portability
+          <ul>
+            <li class="file">Makefile:
+              <pre>include ../../makefiles/gcc.mak</pre>
+            </li>
+            <li class="file">file_system.hpp</li>
+            <li class="file">file_system.cpp</li>
+            <li class="file">...</li>
+          </ul>
+        </li>
+        <li class="folder">containers
+          <ul>
+            <li class="file">...</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li class="folder">ccolour
+      <ul>
+        <li class="file">Makefile:
+          <pre>IMAGE     := ../bin/ccolour<br/>LIBRARIES := ../stlplus3/portability<br/>include ../makefiles/gcc.mak</pre>
+        </li>
+        <li class="file">ccolour.cpp</li>
+        <li class="file">...</li>
+      </ul>
+    </li>
+   </ul>
+  </li>
+</ul>
+
+</div>
+
+</body>
+</html>

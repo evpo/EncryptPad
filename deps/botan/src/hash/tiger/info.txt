@@ -1,0 +1,5 @@
+define TIGER
+
+<requires>
+mdx_hash
+</requires>

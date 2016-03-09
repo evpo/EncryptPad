@@ -1,0 +1,5 @@
+define CRC24
+
+<requires>
+hash
+</requires>

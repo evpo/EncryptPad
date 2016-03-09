@@ -1,0 +1,15 @@
+define ENGINE_SIMD
+
+load_on dep
+
+<source>
+simd_engine.cpp
+</source>
+
+<header:internal>
+simd_engine.h
+</header:internal>
+
+<requires>
+simd
+</requires>

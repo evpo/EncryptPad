@@ -1,0 +1,10 @@
+define PBE_PKCS_V15
+
+<requires>
+asn1
+block
+cbc
+filters
+hash
+pbkdf1
+</requires>

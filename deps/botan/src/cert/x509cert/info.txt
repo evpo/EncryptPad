@@ -1,0 +1,6 @@
+define X509_CERTIFICATES
+
+<requires>
+certstore
+datastor
+</requires>

@@ -1,0 +1,11 @@
+define RUNTIME_BENCHMARKING
+
+<requires>
+algo_factory
+block
+algo_base
+hash
+mac
+rng
+stream
+</requires>

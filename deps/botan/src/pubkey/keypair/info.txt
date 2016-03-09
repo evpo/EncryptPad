@@ -1,0 +1,5 @@
+define KEYPAIR_TESTING
+
+<requires>
+libstate
+</requires>

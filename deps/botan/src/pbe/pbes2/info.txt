@@ -1,0 +1,14 @@
+define PBE_PKCS_V20
+
+<requires>
+algo_factory
+asn1
+block
+cbc
+filters
+hash
+hmac
+libstate
+oid_lookup
+pbkdf2
+</requires>

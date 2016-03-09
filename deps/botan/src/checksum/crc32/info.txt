@@ -1,0 +1,5 @@
+define CRC32
+
+<requires>
+hash
+</requires>

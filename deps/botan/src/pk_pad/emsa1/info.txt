@@ -1,0 +1,5 @@
+define EMSA1
+
+<requires>
+hash
+</requires>

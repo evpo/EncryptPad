@@ -1,0 +1,7 @@
+define XTEA_SIMD
+
+<requires>
+xtea
+simd
+simd_engine
+</requires>

@@ -1,0 +1,7 @@
+define SELFTESTS
+
+<requires>
+algo_factory
+filters
+core_engine
+</requires>

@@ -1,0 +1,6 @@
+define OFB
+
+<requires>
+block
+stream
+</requires>

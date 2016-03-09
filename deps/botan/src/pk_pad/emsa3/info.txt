@@ -1,0 +1,6 @@
+define EMSA3
+
+<requires>
+hash
+hash_id
+</requires>

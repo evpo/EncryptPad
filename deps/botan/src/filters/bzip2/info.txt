@@ -1,0 +1,11 @@
+define COMPRESSOR_BZIP2
+
+load_on request
+
+<libs>
+all -> bz2
+</libs>
+
+<requires>
+filters
+</requires>

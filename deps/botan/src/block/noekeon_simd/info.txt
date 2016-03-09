@@ -1,0 +1,7 @@
+define NOEKEON_SIMD
+
+<requires>
+noekeon
+simd
+simd_engine
+</requires>

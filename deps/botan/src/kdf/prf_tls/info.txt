@@ -1,0 +1,7 @@
+define TLS_V10_PRF
+
+<requires>
+hmac
+md5
+sha1
+</requires>

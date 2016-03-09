@@ -1,0 +1,6 @@
+define RANDPOOL
+
+<requires>
+block
+mac
+</requires>

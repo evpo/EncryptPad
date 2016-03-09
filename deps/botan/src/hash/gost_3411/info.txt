@@ -1,0 +1,5 @@
+define GOST_34_11
+
+<requires>
+gost_28147
+</requires>
