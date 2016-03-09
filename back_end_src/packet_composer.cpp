@@ -1072,6 +1072,9 @@ namespace EncryptPad
         read_bytes = in_.Read(buffer.begin(), 4);
         if(read_bytes != 4)
             return PacketResult::UnexpectedFormat;
+
+        static_assert(sizeof(metadata_.file_date) >= 4, "file_data_ type must be 4 bytes or more");
+
         memcpy(&metadata_.file_date, buffer.begin(), 4);
 
         Buffer copy_buf;
