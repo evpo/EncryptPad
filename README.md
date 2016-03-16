@@ -213,8 +213,8 @@ GNU General Public License for more details.
 
 ##Contacts and Feedback
 
-Evgeny Pokhilko 
+If your question is related to EncryptPad, send it to the mailing list: **encryptpad@googlegroups.com** linked to [the public discussion group](https://groups.google.com/d/forum/encryptpad).
 
-software@evpo.net
+Evgeny Pokhilko **software@evpo.net** for private contacts
 
 [http://www.evpo.net/encryptpad](http://www.evpo.net/encryptpad)
