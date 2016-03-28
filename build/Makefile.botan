@@ -3,7 +3,7 @@ BOTAN_DIR=$(CRYPT_ROOT)/deps/botan
 
 include ../deps/makefiles/platform.mak
 ifeq ($(UNIX),on)
-UNIX_PARAMS=--cc=clang
+UNIX_PARAMS=
 else ifeq ($(PLATFORM),MACOS)
 UNIX_PARAMS=--cc=clang
 else
@@ -12,7 +12,7 @@ endif
 
 all:: $(BOTAN_DIR)/libbotan-1.10.a
 $(BOTAN_DIR)/libbotan-1.10.a:
-	cd $(BOTAN_DIR) && ./configure.py --cpu=x86_32 $(UNIX_PARAMS) --enable-modules=rsa,aes,pbkdf2 --link-method=copy
+	cd $(BOTAN_DIR) && ./configure.py $(UNIX_PARAMS) --enable-modules=rsa,aes,pbkdf2 --link-method=copy
 	$(MAKE) -C $(BOTAN_DIR) static
 clean:
 	$(MAKE) -C $(BOTAN_DIR) clean
