@@ -1,11 +1,11 @@
 
 release_major = 1
 release_minor = 10
-release_patch = 8
+release_patch = 12
 
-release_so_abi_rev = 0
+release_so_abi_rev = 1
 
 # These are set by the distribution script
-release_vc_rev = 'mtn:3e5da04321de05a3ae1f7177e0dd2191e598dca7'
-release_datestamp = 20140410
+release_vc_rev = 'git:94a3fa8ae0dc4df67f6e9ba780427e651baa9dfd'
+release_datestamp = 20160203
 release_type = 'released'

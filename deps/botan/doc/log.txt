@@ -7,6 +7,73 @@ Release Notes
 Series 1.10
 ----------------------------------------
 
+Version 1.10.12, 2016-02-03
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+* In 1.10.11, the check in PointGFp intended to check the affine y
+  argument actually checked the affine x again. Reported by Remi Gacogne
+
+  The CVE-2016-2195 overflow is not exploitable in 1.10.11 due to an
+  additional check in the multiplication function itself which was
+  also added in that release, so there are no security implications
+  from the missed check. However to avoid confusion the change was
+  pushed in a new release immediately.
+
+  The 1.10.11 release notes incorrectly identified CVE-2016-2195 as CVE-2016-2915
+
+Version 1.10.11, 2016-02-01
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+* Resolve heap overflow in ECC point decoding. CVE-2016-2195
+
+* Resolve infinite loop in modular square root algorithm.
+  CVE-2016-2194
+
+* Correct BigInt::to_u32bit to not fail on integers of exactly 32 bits.
+  GH #239
+
+Version 1.10.10, 2015-08-03
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+* SECURITY: The BER decoder would crash due to reading from offset 0
+  of an empty vector if it encountered a BIT STRING which did not
+  contain any data at all. As the type requires a 1 byte field this is
+  not valid BER but could occur in malformed data. Found with afl.
+
+* SECURITY: The BER decoder would allocate a fairly arbitrary amount
+  of memory in a length field, even if there was no chance the read
+  request would succeed. This might cause the process to run out of
+  memory or invoke the OOM killer. Found with afl.
+
+* Due to an ABI incompatible (though not API incompatible) change in
+  this release, the version number of the shared object has been
+  increased.
+
+* The default TLS policy no longer allows RC4.
+
+* Fix a signed integer overflow in Blue Midnight Wish that may cause
+  incorrect computations or undefined behavior.
+
+Version 1.10.9, 2014-12-13
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+* Fixed EAX tag verification to run in constant time
+
+* The default TLS policy now disables SSLv3.
+
+* A crash could occur when reading from a blocking random device if
+  the device initially indicated that entropy was available but
+  a concurrent process drained the entropy pool before the
+  read was initiated.
+
+* Fix decoding indefinite length BER constructs that contain a context
+  sensitive tag of zero. Github pull 26 from Janusz Chorko.
+
+* The `botan-config` script previously tried to guess its prefix from
+  the location of the binary. However this was error prone, and now
+  the script assumes the final installation prefix matches the value
+  set during the build. Github issue 29.
+
 Version 1.10.8, 2014-04-10
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
