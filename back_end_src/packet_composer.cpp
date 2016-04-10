@@ -926,7 +926,7 @@ namespace EncryptPad
             // The complexity below is for leaving last 22 bytes without knowing the length of the pipe
             if(bytes_read >= kLeaveBytes)
             {
-                if(total_count > bytes_read) // not first iteration
+                if(total_count > static_cast<stream_length_type>(bytes_read)) // not first iteration
                 {
                     // previous left bytes
                     hash.update(left_bytes.begin(), kLeaveBytes);
@@ -952,7 +952,7 @@ namespace EncryptPad
             }
         }
 
-        if(total_count < kLeaveBytes)
+        if(total_count < static_cast<stream_length_type>(kLeaveBytes))
             return PacketResult::UnexpectedFormat;
 
         const byte *ptr = left_bytes.begin();

@@ -76,38 +76,9 @@ namespace EncryptPad
             ptr_ = out_->begin() + offset;
         }
     protected:
-        virtual bool DoPut(byte b) override
-        {
-            assert(ptr_ <= out_->end());
-            if(ptr_ == out_->end())
-            {
-                Resize(out_->size() + 1);
-            }
-            *ptr_++ = b;
-            count_++;
-            return true;
-        }
+        virtual bool DoPut(byte b) override;
 
-        virtual bool DoWrite(const byte *in_it, stream_length_type bytes2write) override
-        {
-            assert(ptr_ <= out_->end());
-            assert(bytes2write >= 0);
-
-            if(!bytes2write)
-                return true;
-
-            size_t free_bytes = out_->end() - ptr_;
-            if(free_bytes < bytes2write)
-            {
-                Resize(out_->size() + bytes2write - free_bytes);
-            }
-
-            std::copy_n(in_it, bytes2write, ptr_);
-            ptr_ += bytes2write;
-            count_+=bytes2write;
-            
-            return true;
-        }
+        virtual bool DoWrite(const byte *in_it, stream_length_type bytes2write) override;
     public:
         OutPacketStreamCont():out_{} {}
         OutPacketStreamCont(Botan::SecureVector<byte> &out):out_(&out), ptr_(out.begin()) {}
@@ -136,32 +107,9 @@ namespace EncryptPad
     private:
         FileHndl file_;
     protected:
-        virtual bool DoPut(byte b)
-        {
-            if(fputc(b, file_.get()) == EOF)
-            {
-                return false;
-            }
+        virtual bool DoPut(byte b);
+        virtual bool DoWrite(const byte *in_it, stream_length_type bytes2write);
 
-            count_ ++;
-
-            return true;
-        }
-
-        virtual bool DoWrite(const byte *in_it, stream_length_type bytes2write)
-        {
-            if(!bytes2write)
-                return true;
-
-            assert(bytes2write > 0);
-
-            size_t bytes = fwrite(in_it, sizeof(byte), bytes2write, file_.get());
-            count_+=bytes;
-            return bytes == bytes2write;
-            
-            return true;
-        }
-        
     public:
         OutPacketStreamFile():file_() {}
         OutPacketStreamFile(FileHndl file):file_(file) {}
@@ -476,24 +424,7 @@ namespace EncryptPad
             return b;
         }
 
-        virtual stream_length_type DoRead(byte *out_it, stream_length_type bytes2read) override
-        {
-            bytes2read = std::min(bytes2read, GetCount());
-            int bytes_read = 0;
-
-            while(bytes_read < bytes2read && !streams_.empty())
-            {
-                bytes_read += streams_.front()->Read(out_it, bytes2read - bytes_read);
-                out_it += bytes_read;
-
-                if(streams_.front()->IsEOF())
-                    streams_.pop();
-            }
-
-            count_ -= bytes_read;
-
-            return bytes_read;
-        }
+        virtual stream_length_type DoRead(byte *out_it, stream_length_type bytes2read) override;
 
         virtual stream_length_type DoGetCount() const override
         {

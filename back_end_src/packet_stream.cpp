@@ -50,4 +50,80 @@ namespace EncryptPad
 
         return bytes_read;
     }
+
+    bool OutPacketStreamCont::DoPut(byte b)
+    {
+        assert(ptr_ <= out_->end());
+        if(ptr_ == out_->end())
+        {
+            Resize(out_->size() + 1);
+        }
+        *ptr_++ = b;
+        count_++;
+        return true;
+    }
+
+    bool OutPacketStreamCont::DoWrite(const byte *in_it, stream_length_type bytes2write)
+    {
+        assert(ptr_ <= out_->end());
+        assert(bytes2write >= 0);
+
+        if(!bytes2write)
+            return true;
+
+        size_t free_bytes = out_->end() - ptr_;
+        if(static_cast<stream_length_type>(free_bytes) < bytes2write)
+        {
+            Resize(out_->size() + bytes2write - free_bytes);
+        }
+
+        std::copy_n(in_it, bytes2write, ptr_);
+        ptr_ += bytes2write;
+        count_+=bytes2write;
+
+        return true;
+    }
+
+    bool OutPacketStreamFile::DoPut(byte b)
+    {
+        if(fputc(b, file_.get()) == EOF)
+        {
+            return false;
+        }
+
+        count_ ++;
+
+        return true;
+    }
+
+    bool OutPacketStreamFile::DoWrite(const byte *in_it, stream_length_type bytes2write)
+    {
+        if(!bytes2write)
+            return true;
+
+        assert(bytes2write > 0);
+
+        size_t bytes = fwrite(in_it, sizeof(byte), bytes2write, file_.get());
+        count_+=bytes;
+        return static_cast<stream_length_type>(bytes) == bytes2write;
+    }
+
+    stream_length_type InPacketStreamPipe::DoRead(byte *out_it, stream_length_type bytes2read)
+    {
+        bytes2read = std::min(bytes2read, GetCount());
+        int bytes_read = 0;
+
+        while(bytes_read < bytes2read && !streams_.empty())
+        {
+            bytes_read += streams_.front()->Read(out_it, bytes2read - bytes_read);
+            out_it += bytes_read;
+
+            if(streams_.front()->IsEOF())
+                streams_.pop();
+        }
+
+        count_ -= bytes_read;
+
+        return bytes_read;
+    }
 }

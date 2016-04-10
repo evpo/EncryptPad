@@ -142,19 +142,6 @@ namespace
         auto ext = stlplus::extension_part(file_name);
         return ext == "cpad";
     }
-    
-    bool IsEpadFormat(const std::string &file_name)
-    {
-        auto ext = stlplus::extension_part(file_name);
-        return ext == "epd";
-    }
-
-    bool IsGpgFormat(const std::string &file_name)
-    {
-        auto ext = stlplus::extension_part(file_name);
-        return ext == "gpg";
-    }
-
 }
 
 void Encryptor::SetLibcurlPath(const std::string &path)

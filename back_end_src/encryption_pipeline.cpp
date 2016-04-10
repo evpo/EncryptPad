@@ -28,7 +28,7 @@ namespace EncryptPad
 		{
 			src.read(buf, kBufferSize);
 			const byte *byteArr = reinterpret_cast<const byte *>(buf);
-			auto lastReadCount = static_cast<Botan::u32bit>(src.gcount());
+			auto lastReadCount = static_cast<size_t>(src.gcount());
 			dest.write(byteArr, std::min(lastReadCount, kBufferSize));
 		}
 	}
