@@ -16,7 +16,7 @@ $(ZLIB_DIR)/libz.a:
 	then \
 	$(MAKE) -C $(ZLIB_DIR) -f $(MAKE_FILE) RELEASE=$(RELEASE); \
 	else \
-	cd $(ZLIB_DIR); ./configure --static; \
+	cd $(ZLIB_DIR) && ./configure --static && \
 	$(MAKE) -f $(MAKE_FILE) RELEASE=$(RELEASE); \
 	fi
 clean:
