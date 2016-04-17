@@ -17,6 +17,7 @@ vim.sh
 ./deps/zlib/zconf.h
 README.html
 MINGW-*
+GNULINUX-*
 build-EncryptPad-*
 compile_commands.json
 *.bak
