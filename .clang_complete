@@ -1,0 +1,12 @@
+-D_DEBUG
+-I./back_end_src
+-I./cli
+-I./qt_ui
+-I./tests
+-I./deps
+-I./deps/botan/build/include
+-I./deps/stlplus/subsystems
+-I./deps/stlplus/portability
+-I./deps/stlplus/containers
+-std=c++11
+-w
