@@ -24,12 +24,30 @@
 
 namespace EncryptPad
 {
+    FileHndl OpenInputLinux(const std::string &file_name)
+    {
+        if(file_name == "-")
+            return FileHndl(stdin);
+
+        FileHndl file(fopen(file_name.data(), "rb"));
+        return file;
+    }
+
+    FileHndl OpenOutputLinux(const std::string &file_name)
+    {
+        if(file_name == "-")
+            return FileHndl(stdout);
+
+        FileHndl file(fopen(file_name.data(), "wb"));
+        return file;
+    }
+
     bool OpenFile(const std::string &file_name, InPacketStreamFile &stm)
     {
 #if defined(__MINGW__) || defined(__MINGW32__)
         FileHndl file = OpenInputWin(file_name);
 #else
-        FileHndl file(fopen(file_name.data(), "rb"));
+        FileHndl file = OpenInputLinux(file_name);
 #endif
 
         if(!file)
@@ -51,7 +69,7 @@ namespace EncryptPad
 #if defined(__MINGW__) || defined(__MINGW32__)
         FileHndl file = OpenOutputWin(file_name);
 #else
-        FileHndl file(fopen(file_name.data(), "wb"));
+        FileHndl file = OpenOutputLinux(file_name);
 #endif
         if(!file)
             return false;

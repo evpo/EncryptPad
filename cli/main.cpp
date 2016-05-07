@@ -34,13 +34,16 @@
 
 namespace EncryptPad
 {
+    const char *kStdIn = "-";
+    const char *kStdOut = "-";
+
     void PrintUsage()
     {
-        const char *usage = 
+        const char *usage =
             VER_PRODUCTNAME_STR " " VER_PRODUCTVERSION_STR "\n"
             VER_LEGALCOPYRIGHT_STR "\n"
             "\n"
-            "Syntax: encrypt_cli <command> [options] <file>\n"
+            "Syntax: encrypt_cli <command> [options] [input_file]\n"
             "\n"
             "Commands:\n"
             "-d\t\t\tdecrypt data\n"
@@ -48,10 +51,13 @@ namespace EncryptPad
             "--generate_kf\t\tgenerate key file\n"
             "-h, --help\t\tthis help\n"
             "\n"
+            "Parameters:\n"
+            "input_file file to encrypt (default: stdin)\n"
+            "\n"
             "Options:\n"
-            "-o <file>\t\tuse as output file\n"
-            "-p <passphrase file>\tpassphrase file\n"
-            "-k <key file>\t\tkey file\n"
+            "-o <file>\t\tuse as output file (default: stdout)\n"
+            "-p <passphrase_file>\tpassphrase file\n"
+            "-k <key_file>\t\tkey file\n"
             "-c <cipher_algo>\tcipher algorithm (CAST5, AES, AES256, 3DES)\n"
             "-m <compression_algo>\tcompression algorithm (ZIP, ZLIB, NONE)\n"
             "-g <s2k_digest_algo>\ts2k algorithm (SHA1, SHA256)\n"
@@ -386,20 +392,29 @@ int main(int argc, char *argv[])
         }
     }
 
+    if(in_file.empty() && !generate_kf)
+    {
+        in_file = kStdIn;
+    }
+
+    if(generate_kf)
+    {
+        out_file = in_file;
+    }
+
+    if(out_file.empty())
+    {
+        out_file = kStdOut;
+    }
+
     bool invalid_args = false;
 
     if(generate_kf)
     {
         if(out_file.empty())
             out_file = in_file;
-
-        if(out_file.empty())
-        {
-            invalid_args = true;
-        }
     }
     else if(
-        in_file.empty() ||
         (encrypt && decrypt) ||
         (!encrypt && !decrypt)
         )
@@ -407,13 +422,14 @@ int main(int argc, char *argv[])
         invalid_args = true;
     }
 
+
     if(invalid_args)
     {
         PrintUsage();
         exit(1);
     }
 
-    if(file_exists(out_file) && !overwrite_out_file)
+    if(!out_file.empty() && out_file != kStdOut && file_exists(out_file) && !overwrite_out_file)
     {
         std::cout << "The output file exists. Specify -f to overwrite the output file." << std::endl;
         exit(1);
@@ -425,16 +441,15 @@ int main(int argc, char *argv[])
     }
 
     std::string passphrase;
+
     if(passphrase_file.empty() && !key_only && !(generate_kf && !encrypt_kf))
     {
-        std::cout << "Password: ";
-        GetPassword(passphrase);
+        GetPassword("Password: ", passphrase);
 
         if(encrypt || generate_kf)
         {
-            std::cout << "Confirm: ";
             std::string confirmed;
-            GetPassword(confirmed);
+            GetPassword("Confirm: ", confirmed);
             if(passphrase != confirmed)
             {
                 std::cerr << "Passwords don't match. Please try again.";
@@ -469,8 +484,7 @@ int main(int argc, char *argv[])
 
     if(key_file_passphrase_required && key_file_passphrase_file.empty())
     {
-        std::cout << "Key file password: ";
-        GetPassword(key_file_passphrase);
+        GetPassword("Key file password: ", key_file_passphrase);
     }
     else if(!key_file_passphrase_file.empty())
     {
@@ -488,13 +502,13 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
-    if(!file_exists(in_file))
+    if(in_file != kStdIn && !file_exists(in_file))
     {
         std::cerr << "The input file does not exist" << std::endl;
         exit(1);
     }
 
-    std::string in_file_ext = extension_part(in_file);
+    std::string in_file_ext = in_file == kStdIn ? std::string() : extension_part(in_file);
 
     if(encrypt)
     {
@@ -515,8 +529,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    std::string out_file_ext = extension_part(out_file);
-
+    std::string out_file_ext = out_file == kStdOut ? std::string() : extension_part(out_file);
 
     EncryptParams key_file_encrypt_params = {};
     KeyService key_file_key_service(1);
@@ -571,7 +584,7 @@ int main(int argc, char *argv[])
     {
         enc_params.key_file_encrypt_params = &key_file_encrypt_params;
     }
-        
+
     PacketResult result = PacketResult::None;
     if(encrypt)
     {

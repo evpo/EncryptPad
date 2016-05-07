@@ -65,17 +65,20 @@ namespace EncryptPad
         std::wstring wide;
         Multi2Wide(path, wide);
 
-		wchar_t buffer[MAX_PATH];
-		ExpandEnvironmentStringsW(wide.c_str(), buffer, MAX_PATH);
+        wchar_t buffer[MAX_PATH];
+        ExpandEnvironmentStringsW(wide.c_str(), buffer, MAX_PATH);
         wide = buffer;
 
         std::string multi;
         Wide2Multi(wide, multi);
-		return multi;
+        return multi;
     }
 
     FileHndl OpenInputWin(const std::string &file_name)
-    {   
+    {
+        if(file_name == "-")
+            return FileHndl(stdin);
+
         std::wstring wide;
         Multi2Wide(file_name, wide);
         return FileHndl(_wfopen(wide.data(), L"rb"));
@@ -83,6 +86,9 @@ namespace EncryptPad
 
     FileHndl OpenOutputWin(const std::string &file_name)
     {
+        if(file_name == "-")
+            return FileHndl(stdout);
+
         std::wstring wide;
         Multi2Wide(file_name, wide);
         return FileHndl(_wfopen(wide.data(), L"wb"));

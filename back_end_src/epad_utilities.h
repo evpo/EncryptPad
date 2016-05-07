@@ -114,7 +114,8 @@ namespace EncryptPad
 
         static void Close(FILE *f)
         {
-            fclose(f);
+            if(f != stdin && f != stdout)
+                fclose(f);
         }
     };
 
