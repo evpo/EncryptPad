@@ -20,6 +20,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 #include "packet_stream.h"
 
 namespace EncryptPad
@@ -27,4 +28,9 @@ namespace EncryptPad
     bool OpenFile(const std::string &file_name, InPacketStreamFile &stm);
     bool OpenFile(const std::string &file_name, OutPacketStreamFile &stm);
     bool RemoveFile(const std::string &file_name);
+
+    // The vector is not secure. Only use this method for reading encrypted data
+    // or in CLI.
+    bool LoadFromIOStream(int file_descriptor, std::vector<byte> &buffer);
+    bool SaveToIOStream(int file_descriptor, const Botan::SecureVector<byte> &buffer);
 }

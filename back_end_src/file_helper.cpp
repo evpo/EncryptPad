@@ -86,4 +86,34 @@ namespace EncryptPad
         return remove(file_name.data()) == 0;
 #endif
     }
+
+    bool SaveToIOStream(int file_descriptor, const Botan::SecureVector<byte> &buffer)
+    {
+        FileHndl file = fdopen(file_descriptor, "w");
+        if(!file.Valid())
+            return false;
+
+        size_t count = fwrite(buffer.begin(), 1, buffer.size(), file.get());
+        return !ferror(file.get()) && count == buffer.size();
+    }
+
+    bool LoadFromIOStream(int file_descriptor, std::vector<byte> &buffer)
+    {
+        //TODO: increase the size after debugging
+        const size_t kReadLength = 3;
+        FileHndl file = fdopen(file_descriptor, "r");
+        if(!file.Valid())
+            return false;
+
+        while(!feof(file.get()) && !ferror(file.get()))
+        {
+            size_t prev_size = buffer.size();
+            buffer.resize(prev_size + kReadLength);
+            size_t count = fread(buffer.data() + prev_size, 1, kReadLength, file.get());
+            if(count != kReadLength)
+                buffer.resize(prev_size + count);
+        }
+
+        return !ferror(file.get());
+    }
 }
