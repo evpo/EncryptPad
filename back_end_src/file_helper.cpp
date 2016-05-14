@@ -42,7 +42,7 @@ namespace EncryptPad
         return file;
     }
 
-    bool OpenFile(const std::string &file_name, InPacketStreamFile &stm)
+    OpenFileResult OpenFile(const std::string &file_name, InPacketStreamFile &stm)
     {
 #if defined(__MINGW__) || defined(__MINGW32__)
         FileHndl file = OpenInputWin(file_name);
@@ -51,20 +51,27 @@ namespace EncryptPad
 #endif
 
         if(!file)
-            return false;
+            return OpenFileResult::Error;
 
         if(fseek(file.get(), 0, SEEK_END))
-            return false;
+        {
+            if(errno == ESPIPE || errno == EBADF)
+                return OpenFileResult::NotSeekable;
+
+            return OpenFileResult::Error;
+        }
 
         stream_length_type length = ftell(file.get());
         if(fseek(file.get(), 0, SEEK_SET))
-            return false;
+        {
+            return OpenFileResult::Error;
+        }
 
         stm.Set(file, length);
-        return true;
+        return OpenFileResult::OK;
     }
 
-    bool OpenFile(const std::string &file_name, OutPacketStreamFile &stm)
+    OpenFileResult OpenFile(const std::string &file_name, OutPacketStreamFile &stm)
     {
 #if defined(__MINGW__) || defined(__MINGW32__)
         FileHndl file = OpenOutputWin(file_name);
@@ -72,10 +79,10 @@ namespace EncryptPad
         FileHndl file = OpenOutputLinux(file_name);
 #endif
         if(!file)
-            return false;
+            return OpenFileResult::Error;
 
         stm.Set(file);
-        return true;
+        return OpenFileResult::OK;
     }
 
     bool RemoveFile(const std::string &file_name)
@@ -115,5 +122,15 @@ namespace EncryptPad
         }
 
         return !ferror(file.get());
+    }
+
+    int GetStdinNo()
+    {
+        return fileno(stdin);
+    }
+
+    int GetStdoutNo()
+    {
+        return fileno(stdout);
     }
 }

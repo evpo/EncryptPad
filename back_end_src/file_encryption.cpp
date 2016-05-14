@@ -188,13 +188,41 @@ namespace
     PacketResult WriteFile(const std::string &file_name, const Buffer &stm)
     {
         OutPacketStreamFile out;
-        if(!OpenFile(file_name, out))
+        if(OpenFile(file_name, out) != OpenFileResult::OK)
             return PacketResult::IOErrorOutput;
 
         if(!out.Write(stm.begin(), stm.size()))
             return PacketResult::IOErrorOutput;
 
         return PacketResult::Success;
+    }
+
+    // Factory method that opens file_in. If file_in is a pipe or it is not seekable for another reason,
+    // fall_back_buffer is used to read the whole input and the returned stream reads from the
+    // buffer
+    // Returns empty unique_ptr if fails
+    std::unique_ptr<RandomInStream> CreateInStream(const std::string &file_in, std::vector<byte> &fall_back_buffer)
+    {
+        InPacketStreamFile *in_stm_file;
+        std::unique_ptr<RandomInStream> in_stm(in_stm_file = new InPacketStreamFile());
+
+        OpenFileResult result = OpenFile(file_in, *in_stm_file);
+
+        if(result == OpenFileResult::NotSeekable && file_in == "-")
+        {
+            in_stm.reset();
+            if(!LoadFromIOStream(GetStdinNo(), fall_back_buffer))
+                return in_stm;
+
+            in_stm = std::unique_ptr<RandomInStream>(new InPacketStreamMemory(fall_back_buffer.data(), fall_back_buffer.data()
+                        + fall_back_buffer.size()));
+        }
+        else if(result != OpenFileResult::OK)
+        {
+            in_stm.reset();
+        }
+
+        return in_stm;
     }
 }
 
@@ -227,7 +255,7 @@ namespace EncryptPad
             InPacketStreamMemory stm_in(input_buffer.begin(), input_buffer.end());
 
             OutPacketStreamFile out;
-            if(!OpenFile(file_out, out))
+            if(OpenFile(file_out, out) != OpenFileResult::OK)
                 return PacketResult::IOErrorOutput;
 
             result = EncryptStream(stm_in, encrypt_params, out, metadata); 
@@ -243,22 +271,20 @@ namespace EncryptPad
     PacketResult EncryptPacketFile(const std::string &file_in, const std::string &file_out, 
             EncryptParams &encrypt_params, PacketMetadata &metadata)
     {
-        PacketResult result = PacketResult::None;
+        std::vector<byte> fall_back_buffer;
+        std::unique_ptr<RandomInStream> in = CreateInStream(file_in, fall_back_buffer);
+        if(in.get() == nullptr)
+            return PacketResult::IOErrorInput;
 
+        OutPacketStreamFile out;
+        if(OpenFile(file_out, out) != OpenFileResult::OK)
         {
-            // Wrap in brackets because we need stream objects to be destroyed before we clean up
-            InPacketStreamFile in;
-            if(!OpenFile(file_in, in))
-                return PacketResult::IOErrorInput;
-
-            OutPacketStreamFile out;
-            if(!OpenFile(file_out, out))
-                return PacketResult::IOErrorOutput;
-
-            result = EncryptStream(in, encrypt_params, out, metadata);
+            return PacketResult::IOErrorOutput;
         }
 
-        if(result != PacketResult::Success)
+        PacketResult result = EncryptStream(*in, encrypt_params, out, metadata);
+
+        if(result != PacketResult::Success && file_out != "-")
         {
             RemoveFile(file_out);
         }
@@ -270,19 +296,20 @@ namespace EncryptPad
     {
         const int kInvalid = -1;
 
-        InPacketStreamFile stm;
-        if(!OpenFile(file_in, stm))
+        std::vector<byte> fall_back_buffer;
+        std::unique_ptr<RandomInStream> stm = CreateInStream(file_in, fall_back_buffer);
+        if(stm.get() == nullptr)
             return PacketResult::IOErrorInput;
 
         auto out_stm = MakeOutStream(output_buffer);
 
-        int b = stm.Get();
+        int b = stm->Get();
 
         // Check if the file is empty
         if(b == kInvalid)
             return PacketResult::UnexpectedFormat;
 
-        stm.Seek(0);
+        stm->Seek(0);
         // gpg should have this bit set
         // 0xEF is BOM or a new format 47 packet that is not known to us. Let's assume it is BOM.
         if(b & 0x80 && b != 0xEF)
@@ -291,20 +318,20 @@ namespace EncryptPad
             if(metadata.key_only)
             {
                 // It is a file with GPG extension that doesn't support WAD format
-                result = DecryptWithKey(stm, encrypt_params, *out_stm, metadata);
+                result = DecryptWithKey(*stm, encrypt_params, *out_stm, metadata);
                 if(result == PacketResult::InvalidSurrogateIV)
                     result = PacketResult::InvalidKeyFile;
             }
             else
             {
-                result = DecryptStream(stm, encrypt_params, *out_stm, metadata);
+                result = DecryptStream(*stm, encrypt_params, *out_stm, metadata);
             }
             output_buffer.resize(out_stm->GetCount());
             return result;
         }
         else // wad starts from I or P, in which the most significant bit is not set
         {
-            auto result = DecryptWad(stm, metadata.key_file, encrypt_params, *out_stm, metadata);
+            auto result = DecryptWad(*stm, metadata.key_file, encrypt_params, *out_stm, metadata);
             output_buffer.resize(out_stm->GetCount());
 
             if(result == PacketResult::InvalidWadFile)
@@ -338,7 +365,7 @@ namespace EncryptPad
         wad_file = false;
         key_file.clear();
         InPacketStreamFile stm;
-        if(!OpenFile(file_name, stm))
+        if(OpenFile(file_name, stm) != OpenFileResult::OK)
             return false;
 
         int b = stm.Get();

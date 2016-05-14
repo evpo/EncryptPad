@@ -31,7 +31,7 @@ namespace
     {
         const char *exception_msg = "Cannot write to the file";
         OutPacketStreamFile stm;
-        if(!OpenFile(key_file_path, stm))
+        if(OpenFile(key_file_path, stm) != OpenFileResult::OK)
             throw IoException(exception_msg);
 
 		if(!stm.Write(reinterpret_cast<const byte*>(content.c_str()), content.length()))

@@ -290,7 +290,7 @@ EncryptPadEncryptor::Result Encryptor::Save(const string &fileName, const Secure
 
     OutPacketStreamFile file;
 
-	if (!OpenFile(fileName, file))
+	if (OpenFile(fileName, file) != OpenFileResult::OK)
 	{
 		return Result::CpadFileIOError;
 	}
@@ -387,7 +387,7 @@ Result Encryptor::Load(const std::string &fileName, SecureVector<byte> &content,
 
     InPacketStreamFile file;
 
-	if (!OpenFile(fileName, file))
+	if (OpenFile(fileName, file) != OpenFileResult::OK)
 	{
 		return Result::CpadFileIOError;
 	}

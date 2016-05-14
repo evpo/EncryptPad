@@ -30,8 +30,11 @@ namespace EncryptPad
     bool LoadStringFromFile(const std::string &file_name, std::string &content)
     {
         InPacketStreamFile stm;
-        OpenFile(file_name, stm); 
+        if(OpenFile(file_name, stm) != OpenFileResult::OK)
+            return false;
+
         content.resize(stm.GetCount());
-        return stm.Read(reinterpret_cast<byte*>(&content[0]), content.size());
+        stm.Read(reinterpret_cast<byte*>(&content[0]), content.size());
+        return true;
     }
 }
