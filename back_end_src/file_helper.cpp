@@ -55,7 +55,7 @@ namespace EncryptPad
 
         if(fseek(file.get(), 0, SEEK_END))
         {
-            if(errno == ESPIPE || errno == EBADF)
+            if(errno == ESPIPE || errno == EBADF || errno == EINVAL)
                 return OpenFileResult::NotSeekable;
 
             return OpenFileResult::Error;

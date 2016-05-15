@@ -27,6 +27,32 @@
 
 #include <windows.h>
 
+namespace
+{
+    class HandleTraits
+    {
+    public:
+        static HANDLE InvalidHandle()
+        {
+            return INVALID_HANDLE_VALUE;
+        }
+
+        static void Close(HANDLE h)
+        {
+            CloseHandle(h);
+        }
+    };
+
+    typedef EncryptPad::UniqueHandler<HANDLE, HandleTraits> Hndl; 
+
+    void WriteToConsole(const std::string &prompt)
+    {
+        Hndl h = CreateFile("CONOUT$", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0);
+        bool result = WriteConsoleA(h.get(), prompt.data(), prompt.size(), NULL, NULL);
+        assert(result);
+    }
+}
+
 namespace EncryptPad
 {
     void GetPassword(const std::string &prompt, std::string &password)
@@ -38,15 +64,16 @@ namespace EncryptPad
 
         unsigned char ch=0;
 
+        WriteToConsole(prompt);
+
         DWORD con_mode;
         DWORD read_word;
+        Hndl h = CreateFile("CONIN$", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0);
 
-        HANDLE h = GetStdHandle(STD_INPUT_HANDLE);
+        GetConsoleMode(h.get(), &con_mode);
+        SetConsoleMode(h.get(), con_mode & ~(ENABLE_ECHO_INPUT | ENABLE_LINE_INPUT));
 
-        GetConsoleMode( h, &con_mode );
-        SetConsoleMode( h, con_mode & ~(ENABLE_ECHO_INPUT | ENABLE_LINE_INPUT) );
-
-        while(ReadConsoleA( h, &ch, 1, &read_word, NULL) && ch != kReturn)
+        while(ReadConsoleA(h.get(), &ch, 1, &read_word, NULL) && ch != kReturn)
         {
             if(ch == kBackSpace)
             {
@@ -60,7 +87,8 @@ namespace EncryptPad
                 password+=ch;
             }
         }
-        std::cout << std::endl;
+
+        WriteToConsole("\n");
     }
 
 }
