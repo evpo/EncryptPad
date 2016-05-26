@@ -13,6 +13,10 @@ DECRYPTOR="$1"
 IN_DIR="$2"
 TMP_DIR="./tmp"
 PASSPHRASE_FILE="passphrase.txt"
+if [ "$PLAIN_TEXT_FILE" = "" ]
+then
+    PLAIN_TEXT_FILE=plain_text.txt
+fi
 
 mkdir -p $TMP_DIR
 
@@ -32,7 +36,7 @@ do
         continue
     fi
 
-    if diff plain_text.txt $TMP_DIR/out_file.txt
+    if diff $PLAIN_TEXT_FILE $TMP_DIR/out_file.txt
     then
         echo ok
     else
