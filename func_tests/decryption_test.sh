@@ -46,5 +46,4 @@ do
     rm $TMP_DIR/out_file.txt
 done
 
-rm -R $TMP_DIR
 exit $RESULT

@@ -223,6 +223,4 @@ rm $TMP_DIR/encrypted_key.key
 # Conclusion
 ###########
 
-rm -R $TMP_DIR
-
 exit $RESULT

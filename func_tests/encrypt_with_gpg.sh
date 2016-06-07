@@ -1,6 +1,10 @@
 #!/bin/sh
 CMD="gpg -c --verbose --no-use-agent --passphrase-file passphrase.txt"
-IN=plain_text.txt
+
+if [ "$PLAIN_TEXT_FILE" = "" ]
+then
+    PLAIN_TEXT_FILE=plain_text.txt
+fi
 OUT_DIR="./gpg_encrypted_last"
 ALGOS=algos.txt
 COMPRESSIONS=`awk '$1 == "compress" { print $2 }' algos.txt`
@@ -21,7 +25,7 @@ do
                 COMPRESS_CLAUSE="--compress-algo $COMPRESS"
             fi
 
-            $CMD -o ${OUT_DIR}/${CIPHER}_${S2K_ALGO}_${COMPRESS}.gpg $COMPRESS_CLAUSE --s2k-digest-algo $S2K_ALGO --cipher-algo $CIPHER plain_text.txt
+            $CMD -o ${OUT_DIR}/${CIPHER}_${S2K_ALGO}_${COMPRESS}.gpg $COMPRESS_CLAUSE --s2k-digest-algo $S2K_ALGO --cipher-algo $CIPHER $PLAIN_TEXT_FILE
         done
     done
 done
