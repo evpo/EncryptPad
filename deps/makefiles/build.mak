@@ -47,6 +47,11 @@ else
 LOADLIBES += -lstdc++
 endif
 
+ifeq ($(PLATFORM),GNULINUX)
+# Issue found on Fedora. All other components used fPIC.
+CPPFLAGS += -fPIC
+endif
+
 ################################################################################
 # Configure build variant
 # there are four different build variants:
