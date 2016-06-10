@@ -48,8 +48,8 @@ namespace
     void WriteToConsole(const std::string &prompt)
     {
         Hndl h = CreateFile("CONOUT$", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0);
-        bool result = WriteConsoleA(h.get(), prompt.data(), prompt.size(), NULL, NULL);
-        assert(result);
+        if(!WriteConsoleA(h.get(), prompt.data(), prompt.size(), NULL, NULL))
+            assert(false);
     }
 }
 

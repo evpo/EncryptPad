@@ -11,12 +11,8 @@ fi
 BIN="$1"
 TMP_DIR="./tmp"
 OS=$(uname)
-if [ "$OS" = "Linux" ]
-then
-    PLAIN_TEXT_FILE=$TMP_DIR/random.dat
-else
-    PLAIN_TEXT_FILE=plain_text.txt
-fi
+
+PLAIN_TEXT_FILE=$TMP_DIR/random.dat
 
 export PLAIN_TEXT_FILE
 
@@ -25,10 +21,7 @@ rm -Rf ./epd_encrypted_last
 rm -Rf ./gpg_encrypted_last
 
 mkdir -p $TMP_DIR
-if [ "$OS" = "Linux" ]
-then
-    dd if=/dev/urandom of=$PLAIN_TEXT_FILE bs=1M count=15
-fi
+dd if=/dev/urandom of=$PLAIN_TEXT_FILE bs=1M count=15
 
 # diffrent key file and passphrase combinations
 ./epd_encryption_test.sh $BIN "$PLAIN_TEXT_FILE"

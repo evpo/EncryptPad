@@ -26,6 +26,8 @@
 #include "stringapiset.h"
 #include "windows.h"
 #include "userenv.h"
+#include "io.h"
+#include "fcntl.h"
 
 namespace
 {
@@ -77,7 +79,12 @@ namespace EncryptPad
     FileHndl OpenInputWin(const std::string &file_name)
     {
         if(file_name == "-")
+        {
+            if(_setmode(fileno(stdin), _O_BINARY) == -1)
+                return FileHndl();
+
             return FileHndl(stdin);
+        }
 
         std::wstring wide;
         Multi2Wide(file_name, wide);
@@ -87,7 +94,12 @@ namespace EncryptPad
     FileHndl OpenOutputWin(const std::string &file_name)
     {
         if(file_name == "-")
+        {
+            if(_setmode(fileno(stdout), _O_BINARY) == -1)
+                return FileHndl();
+
             return FileHndl(stdout);
+        }
 
         std::wstring wide;
         Multi2Wide(file_name, wide);
