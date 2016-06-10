@@ -137,6 +137,7 @@ namespace EncryptPad
         FileHndl term_file(fopen(termid, "r+"));
         size_t res = fwrite(prompt.c_str(), 1, prompt.size(), term_file.get());
         assert(res == prompt.size());
+        (void)res;
 
         while((ch = Getch(term_file.get())) != kReturn && ch != kInvalid)
         {

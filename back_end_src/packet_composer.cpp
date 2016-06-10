@@ -361,7 +361,7 @@ namespace EncryptPad
         if(result != Z_OK)
             return PacketResult::CompressionError;
 
-        assert(out.GetCount() - debug_test_counter == zs.total_out); 
+        assert(static_cast<unsigned long>(out.GetCount() - debug_test_counter) == zs.total_out); 
         return PacketResult::Success;
     }
 
@@ -1041,7 +1041,7 @@ namespace EncryptPad
         if(result != Z_OK)
             return PacketResult::CompressionError;
 
-        assert(out_.GetCount() - debug_test_counter == zs.total_out); 
+        assert(static_cast<unsigned long>(out_.GetCount() - debug_test_counter) == zs.total_out); 
         return PacketResult::Success;
     }
 
