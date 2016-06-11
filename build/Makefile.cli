@@ -3,9 +3,9 @@ CLI := $(CRYPT_ROOT)/cli
 
 all : cli
 cli : back_end
-	$(MAKE) -C $(CLI)
+	$(MAKE) -C $(CLI) USE_SYSTEM_LIBS=$(USE_SYSTEM_LIBS)
 back_end :
-	$(MAKE) -f Makefile.back_end
+	$(MAKE) -f Makefile.back_end USE_SYSTEM_LIBS=$(USE_SYSTEM_LIBS)
 clean :
 	$(MAKE) -C $(CLI) clean
 	$(MAKE) -f Makefile.back_end clean

@@ -3,11 +3,11 @@ TESTS := $(CRYPT_ROOT)/tests
 
 all : tests
 tests : back_end gtest
-	$(MAKE) -C $(TESTS)
+	$(MAKE) -C $(TESTS) USE_SYSTEM_LIBS=$(USE_SYSTEM_LIBS)
 gtest :
 	$(MAKE) -f Makefile.gtest
 back_end :
-	$(MAKE) -f Makefile.back_end
+	$(MAKE) -f Makefile.back_end USE_SYSTEM_LIBS=$(USE_SYSTEM_LIBS)
 clean :
 	$(MAKE) -C $(TESTS) clean
 	$(MAKE) -f Makefile.gtest clean

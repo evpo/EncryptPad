@@ -1,10 +1,14 @@
 CRYPT_ROOT = ..
-BOTAN = $(CRYPT_ROOT)/deps/botan
-PORTABILITY = $(CRYPT_ROOT)/deps/stlplus/portability
-ZLIB = $(CRYPT_ROOT)/deps/zlib
+PORTABILITY = -I$(CRYPT_ROOT)/deps/stlplus/portability
+ifneq ($(USE_SYSTEM_LIBS),on)
+	BOTAN = -I$(CRYPT_ROOT)/deps/botan/build/include
+	ZLIB = -I$(CRYPT_ROOT)/deps/zlib
+else
+	BOTAN = $(shell pkg-config --cflags botan-1.10)
+endif
 LIBRARIES :=
 CXXFLAGS += -ggdb -Wall -Wextra
 LDFLAGS += -Wall
 
-CXXFLAGS += -I$(BOTAN)/build/include -I$(PORTABILITY) -I$(ZLIB) -std=c++11
+CXXFLAGS += $(BOTAN) $(PORTABILITY) $(ZLIB) -std=c++11
 include ../deps/makefiles/gcc.mak

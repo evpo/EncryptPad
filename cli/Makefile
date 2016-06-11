@@ -6,8 +6,10 @@ ifneq ($(RELEASE),on)
 CXXFLAGS += -ggdb
 endif
 
+ifneq ($(USE_SYSTEM_LIBS),on)
 ifneq ($(PLATFORM),MACOS)
 LDFLAGS += -static
+endif
 endif
 
 ifeq ($(PLATFORM),WINDOWS)
@@ -17,7 +19,15 @@ endif
 CXXFLAGS += -Wall -Wextra
 LDFLAGS += -Wall
 
-LOADLIBES += ../deps/botan/libbotan-1.10.a ../deps/zlib/libz.a -lpthread 
+ifneq ($(USE_SYSTEM_LIBS),on)
+LOADLIBES += ../deps/botan/libbotan-1.10.a ../deps/zlib/libz.a -lpthread
 CXXFLAGS += -I../deps/botan/build/include -I../deps/zlib -pthread -std=c++11
+else
+BOTANLIB := $(shell pkg-config --libs botan-1.10)
+BOTANCXX := $(shell pkg-config --cflags botan-1.10)
+LOADLIBES += $(BOTANLIB) -lz -lpthread
+CXXFLAGS += $(BOTANCXX) -pthread -std=c++11
+endif
+
 IMAGENAME := encrypt_cli
 include ../deps/makefiles/gcc.mak

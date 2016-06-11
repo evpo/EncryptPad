@@ -19,6 +19,10 @@ else
     QMAKE_CONFIG := debug
 endif
 
+ifeq ($(USE_SYSTEM_LIBS),on)
+    QMAKE_CONFIG += USE_SYSTEM_LIBS
+endif
+
 all:: x_make
 
 x_qmake::

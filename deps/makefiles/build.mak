@@ -192,14 +192,14 @@ build:: $(LIBRARY) $(ARCHIVE_LIBRARIES) $(IMAGE)
 $(SUBDIR)/%.o: %.cpp
 	@echo "$(LIBNAME):$(SUBDIR): C++ compiling $<"
 	@mkdir -p $(SUBDIR)
-	@$(CXX) -x c++ -c -MMD $(CPPFLAGS) $(CXXFLAGS) $(INCLUDES) $< -o $@
+	$(CXX) -x c++ -c -MMD $(CPPFLAGS) $(CXXFLAGS) $(INCLUDES) $< -o $@
 
 # the rule for compiling a C source file
 
 $(SUBDIR)/%.o: %.c
 	@echo "$(LIBNAME):$(SUBDIR): C compiling $<"
 	@mkdir -p $(SUBDIR)
-	@$(CC) -x c -c -MMD $(CPPFLAGS) $(CFLAGS) $(INCLUDES) $< -o $@
+	$(CC) -x c -c -MMD $(CPPFLAGS) $(CFLAGS) $(INCLUDES) $< -o $@
 
 ifeq ($(WINDOWS),on)
 # the rule for compiling a resource file
@@ -207,7 +207,7 @@ ifeq ($(WINDOWS),on)
 $(SUBDIR)/%_rc.o: %.rc
 	@echo "$(LIBNAME):$(SUBDIR): RC compiling $<"
 	@mkdir -p $(SUBDIR)
-	@$(RC) $(RCFLAGS) $< -o $@
+	$(RC) $(RCFLAGS) $< -o $@
 endif
 
 # Detect that a file is out of date with respect to its headers by including
@@ -221,7 +221,7 @@ endif
 
 $(LIBRARY): $(OBJECTS)
 	@echo "$(LIBNAME):$(SUBDIR): Updating library $@"
-	@$(AR) crus $(LIBRARY) $(OBJECTS)
+	$(AR) crus $(LIBRARY) $(OBJECTS)
 
 # The library dependencies are only built and the image is only linked if the IMAGE variable is defined
 # only update other libraries if we are linking since just building an object library doesn't need the
@@ -232,7 +232,7 @@ ifneq ($(IMAGE),)
 # the rule for building the library dependencies unconditionally runs a recursive Make
 
 $(ARCHIVE_LIBRARIES): FORCE
-	@$(MAKE) -C $@
+	$(MAKE) -C $@
 
 # the rule for linking an image
 
@@ -242,7 +242,7 @@ $(IMAGE): $(LIBRARY) $(ARCHIVES)
 	@for l in $(LIBRARY) $(ARCHIVES); do echo "$(LIBNAME):$(SUBDIR):   using: $$l"; done
 	@echo "$(LIBNAME):$(SUBDIR):   libs: $(LOADLIBES)"
 	@mkdir -p $(dir $(IMAGE))
-	@$(CXX) $(LDFLAGS) $(RC_OBJECTS) $^ $(LOADLIBES) -o $(IMAGE)
+	$(CXX) $(LDFLAGS) $(RC_OBJECTS) $^ $(LOADLIBES) -o $(IMAGE)
 
 endif
 

@@ -41,12 +41,24 @@ FORMS += \
 
 win32: LIBS += -luserenv
 #unix: LIBS += ldl
-LIBS += -L$$PWD/../deps/stlplus/portability/$$DEPS_SUBDIR -L$$PWD/../deps/botan \
+LIBS += -L$$PWD/../deps/stlplus/portability/$$DEPS_SUBDIR \
      -L$$PWD/../back_end_src/$$DEPS_SUBDIR \
-     -lback_end_src -lportability -lbotan-1.10 $$PWD/../deps/zlib/libz.a 
+     -lback_end_src -lportability
 
+!USE_SYSTEM_LIBS {
+    LIBS += -L$$PWD/../deps/botan -lbotan-1.10 $$PWD/../deps/zlib/libz.a
+} else {
+    BOTANLIB = $$system(pkg-config --libs botan-1.10)
+    LIBS += $$BOTANLIB -lz
+}
+
+!USE_SYSTEM_LIBS {
+    INCLUDEPATH += $$PWD/../deps/botan/build/include
+} else {
+    BOTANCXX = $$system(pkg-config --cflags botan-1.10)
+    QMAKE_CXXFLAGS += $$BOTANCXX
+}
 INCLUDEPATH += $$PWD/../deps/stlplus/portability
-INCLUDEPATH += $$PWD/../deps/botan/build/include
 INCLUDEPATH += $$PWD/../back_end_src
 
 SOURCES += \
