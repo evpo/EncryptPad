@@ -28,8 +28,6 @@ then
     exit -1
 fi
 
-
-
 UNAME=`uname`
 MAKE=make
 if [[ $UNAME == *MINGW* ]]
@@ -51,6 +49,11 @@ do
             QT_BIN_SUB=debug
             ;;
         --use-system-libs)
+            if [[ $UNAME == *MINGW* ]]
+            then
+                echo "--use-system-libs is not supported in MINGW"
+                exit -1
+            fi
             USE_SYSTEM_LIBS=on
             ;;
         *)
@@ -59,6 +62,12 @@ do
     esac
     shift
 done
+
+CONFIG_DIR=release
+if [[ ! "$RELEASE" == "on" ]]
+then
+    CONFIG_DIR=debug
+fi
 
 case $COMMAND in
 -a|--all)
@@ -69,29 +78,31 @@ case $COMMAND in
     $MAKE -f Makefile RELEASE=$RELEASE USE_SYSTEM_LIBS=$USE_SYSTEM_LIBS
     if [[ $SUBDIR == *MACOS* ]]
     then
-        cd ../macos_deployment && ./prepare_bundle.sh ../build/qt_build/${QT_BIN_SUB}/${TARGET}.app
+        cd ../macos_deployment && ./prepare_bundle.sh ../bin/${CONFIG_DIR}/${TARGET}.app
     fi
     ;;
--c|--clean) 
+-c|--clean)
     $MAKE -f Makefile.qt_ui clean RELEASE=$RELEASE 
     $MAKE -f Makefile clean RELEASE=$RELEASE 
 
     if [[ $SUBDIR == *MACOS* ]]
     then
-        rm -Rf ./qt_build/${QT_BIN_SUB}/${TARGET}.app
+        rm -Rf ../bin/${CONFIG_DIR}/${TARGET}.app
     elif [[ $UNAME == *MINGW* ]]
     then
-        rm -f ./qt_build/${QT_BIN_SUB}/${TARGET}.exe
+        rm -f ../bin/${CONFIG_DIR}/${TARGET}.exe
+        rm -f ../bin/${CONFIG_DIR}/encrypt_cli.exe
     else
-        rm -f ./qt_build/${QT_BIN_SUB}/${TARGET}
+        rm -f ../bin/${CONFIG_DIR}/${TARGET}
+        rm -f ../bin/${CONFIG_DIR}/encrypt_cli
     fi
     ;;
--r|--run) 
+-r|--run)
     if [[ $SUBDIR == *MACOS* ]]
     then
-        ./qt_build/${QT_BIN_SUB}/${TARGET}.app/Contents/MacOS/${TARGET} &
+        ../bin/${CONFIG_DIR}/${TARGET}.app/Contents/MacOS/${TARGET} &
     else
-        ./qt_build/${QT_BIN_SUB}/${TARGET} &
+        ../bin/${CONFIG_DIR}/${TARGET} &
     fi
     ;;
 -b|--botan) $MAKE -f Makefile.botan ;;
@@ -101,11 +112,14 @@ case $COMMAND in
     $MAKE -f Makefile.cli RELEASE=$RELEASE USE_SYSTEM_LIBS=$USE_SYSTEM_LIBS
     ;;
 -u|--tests) $MAKE -f Makefile.unit_tests USE_SYSTEM_LIBS=$USE_SYSTEM_LIBS;;
--n|--clean-tests) $MAKE -f Makefile.unit_tests clean ;;
+-n|--clean-tests)
+    $MAKE -f Makefile.unit_tests clean 
+    rm -f ../bin/debug/${TEST_TARGET}
+    ;;
 -t|--run-tests)
     # Unit tests should run from tests directory because they need files the directory contains
     pushd ../tests >/dev/null
-    ./${SUBDIR}/${TEST_TARGET}
+    ../bin/debug/${TEST_TARGET}
     RESULT=$?
     popd >/dev/null
 
@@ -117,7 +131,7 @@ case $COMMAND in
 
     # Functional tests
     # pushd ../func_tests >/dev/null
-    # ./decryption_test.sh ../cli/${SUBDIR}/encrypt_cli gpg_encrypted
+    # ./decryption_test.sh ../bin/${CONFIG_DIR}/encrypt_cli gpg_encrypted
     # RESULT=$?
     # popd >/dev/null
 

@@ -28,5 +28,12 @@ CXXFLAGS += $(BOTANCXX)
 endif
 
 LDFLAGS += -Wall
-IMAGENAME := encrypt_pad_tests
+
+ifeq ($(RELEASE),on)
+TARGETDIR := ../../bin/release
+else
+TARGETDIR := ../../bin/debug
+endif
+
+IMAGENAME := $(TARGETDIR)/encrypt_pad_tests
 include ../deps/makefiles/gcc.mak

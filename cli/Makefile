@@ -29,5 +29,11 @@ LOADLIBES += $(BOTANLIB) -lz -lpthread
 CXXFLAGS += $(BOTANCXX) -pthread -std=c++11
 endif
 
-IMAGENAME := encrypt_cli
+ifeq ($(RELEASE),on)
+TARGETDIR := ../../bin/release
+else
+TARGETDIR := ../../bin/debug
+endif
+
+IMAGENAME := $(TARGETDIR)/encrypt_cli
 include ../deps/makefiles/gcc.mak

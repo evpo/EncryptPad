@@ -121,5 +121,5 @@ RESOURCES += \
     EncryptPad.qrc
 
 RC_FILE = encrypt_pad.rc
-DESTDIR = $$CONFIG_NAME
+DESTDIR = ../../bin/$$CONFIG_NAME
 OBJECTS_DIR = $$CONFIG_NAME/obj
