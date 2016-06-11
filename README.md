@@ -6,8 +6,7 @@ EncryptPad is an application for viewing and editing symmetrically encrypted tex
 
 Screenshots and tutorials are at [evpo.net/encryptpad/](http://evpo.net/encryptpad/)
 
-<small>
-###Table of Contents
+##Table of Contents
 * [Features](#features)
 * [Why EncryptPad?](#why-encryptpad)
 * [When Do I Need EncryptPad?](#when-encryptpad)
@@ -32,7 +31,6 @@ Screenshots and tutorials are at [evpo.net/encryptpad/](http://evpo.net/encryptp
     - [Step by Step Verfification Process](#verification-process)
 * [License](#license)
 * [Contacts and Feedback](#contacts)
-</small>
 
 <div id="features" />
 ##Features
