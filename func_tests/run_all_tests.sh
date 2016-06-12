@@ -21,7 +21,7 @@ rm -Rf ./epd_encrypted_last
 rm -Rf ./gpg_encrypted_last
 
 mkdir -p $TMP_DIR
-dd if=/dev/urandom of=$PLAIN_TEXT_FILE bs=1M count=15
+dd if=/dev/urandom of=$PLAIN_TEXT_FILE bs=1048576 count=15
 
 # diffrent key file and passphrase combinations
 ./epd_encryption_test.sh $BIN "$PLAIN_TEXT_FILE"

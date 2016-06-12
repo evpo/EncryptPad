@@ -18,6 +18,7 @@ vim.sh
 README.html
 MINGW-*
 GNULINUX-*
+MACOS-*
 build-EncryptPad-*
 compile_commands.json
 *.bak

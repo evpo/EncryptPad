@@ -19,6 +19,7 @@
 //**********************************************************************************
 #include "file_helper.h"
 #include <cstdio>
+#include <cerrno>
 #include "win_file_reader.h"
 #include "epad_utilities.h"
 
