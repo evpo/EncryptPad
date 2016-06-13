@@ -8,14 +8,15 @@ Screenshots and tutorials are at [evpo.net/encryptpad/](http://evpo.net/encryptp
 
 ##Table of Contents
 * [Features](#features)
+* [Supported Platforms](#supported-platforms)
 * [Why EncryptPad?](#why-encryptpad)
 * [When Do I Need EncryptPad?](#when-encryptpad)
 * [When Can I Not Use EncryptPad?](#when-can-i-not)
-* [Supported Platforms](#supported-platforms)
 * [File Types](#file-types)
   - [GPG](#gpg)
   - [EPD](#epd)
   - [Feature Support](#feature-support)
+* [What Is EncrypPad Key File?](#key-file)
 * [EPD File Format When Encrypting With a Key](#epd-file-format)
 * [Use cURL To Automatically Download Keys From A Remote Storage](#use-curl)
 * [Known Weaknesses](#known-weaknesses)
@@ -53,6 +54,15 @@ Screenshots and tutorials are at [evpo.net/encryptpad/](http://evpo.net/encryptp
 * Hash algorithms: **SHA-1, SHA256**
 * Integrity protection: **SHA-1**
 * Compression: **ZLIB, ZIP**
+
+<div id="supported-platforms" />
+##Supported Platforms
+
+* Windows
+
+* Linux
+
+* Mac OS
 
 <div id="why-encryptpad" />
 ##Why EncryptPad?
@@ -93,15 +103,6 @@ Screenshots and tutorials are at [evpo.net/encryptpad/](http://evpo.net/encryptp
 
 * **IMPORTANT**: If you forgot your password or lost a key file, there is nothing that can be done to open your encrypted information. There are no backdoors in the formats that EncryptPad supports. EncryptPad developers take no responsibility for corrupted or invalid files in accordance with the license.
 
-<div id="supported-platforms" />
-##Supported Platforms
-
-* Windows
-
-* Linux
-
-* Mac OS
-
 <div id="file-types" />
 ##File Types
 
@@ -133,6 +134,43 @@ EncryptPad specific format. Other OpenPGP software will not be able to open it u
 </table>
 
 \* Key file location is persisted in the header of an encrypted file so the user does not need to specify it when decrypting.
+
+<div id="key-file" />
+##What Is EncrypPad Key File?
+In symmetric encryption the same sequence is used to encrypt and decrypt data. The user or another
+application usually provides this sequence in the form of an entered password or a file. In addition to
+entered passwords, EncryptPad generates files with random sequences called "key files".
+
+When the user creates a key file, EncryptPad generates a random sequence of bytes, asks the
+user for a password, encrypts the generated sequence and saves it to a file.
+
+The format of the file is OpenPGP. Other OpenPGP implementations can also create and 
+open EncryptPad key files as below shell commands demonstrate.
+
+When EncryptPad generates a new key file, it is roughly equivalent to the following `gpg2` command.
+
+    pwmake 1024 | gpg2 -c --armor --cipher-algo AES256 > ~/.encryptpad/foo.key
+
+`pwmake` generates a random sequence, which `gpg2` in-turn encrypts. It will ask for the
+password to encrypt the sequence.
+
+When you use this key to encrypt `test3.txt`, the equivalent `gpg` command is below.
+
+    gpg2 --decrypt ~/.encryptpad/foo.key \
+    | gpg2 --passphrase-fd 0 --batch -c --cipher-algo AES256 \
+    -o /tmp/test3.txt.gpg /tmp/test3.txt
+
+The left `gpg2` process decrypts `foo.key` and directs it to descriptor 0 of the right process
+through a pipe. `gpg2` reads the sequence from the descriptor with `--passphrase-fd 0`.
+
+When EncryptPad opens the encrypted file protected with `foo.key`, the equivalent `gpg` commands are
+these:
+
+    gpg2 --decrypt ~/.encryptpad/foo.key \
+    | gpg2 --passphrase-fd 0 --batch --decrypt \
+    -o /tmp/test4.txt /tmp/test3.txt.gpg
+
+As you see, other OpenPGP implementations can also use EncryptPad keys.
 
 <div id="epd-file-format" />
 ##EPD File Format When Encrypting With a Key
@@ -277,6 +315,8 @@ GNU General Public License for more details.
 ##Contacts and Feedback
 
 If your question is related to EncryptPad, send it to the mailing list: **encryptpad@googlegroups.com** linked to [the public discussion group](https://groups.google.com/d/forum/encryptpad).
+
+Bug tracker: [github.com/evpo/EncryptPad/issues](https://github.com/evpo/EncryptPad/issues)
 
 Evgeny Pokhilko **software@evpo.net** for private contacts
 

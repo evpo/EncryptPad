@@ -10,16 +10,17 @@
 
 <ul>
 <li><a href="#features">Features</a></li>
+<li><a href="#supported-platforms">Supported Platforms</a></li>
 <li><a href="#why-encryptpad">Why EncryptPad?</a></li>
 <li><a href="#when-encryptpad">When Do I Need EncryptPad?</a></li>
 <li><a href="#when-can-i-not">When Can I Not Use EncryptPad?</a></li>
-<li><a href="#supported-platforms">Supported Platforms</a></li>
 <li><a href="#file-types">File Types</a>
 <ul>
 <li><a href="#gpg">GPG</a></li>
 <li><a href="#epd">EPD</a></li>
 <li><a href="#feature-support">Feature Support</a></li>
 </ul></li>
+<li><a href="#key-file">What Is EncrypPad Key File?</a></li>
 <li><a href="#epd-file-format">EPD File Format When Encrypting With a Key</a></li>
 <li><a href="#use-curl">Use cURL To Automatically Download Keys From A Remote Storage</a></li>
 <li><a href="#known-weaknesses">Known Weaknesses</a></li>
@@ -68,6 +69,16 @@
 <li>Compression: <strong>ZLIB, ZIP</strong></li>
 </ul>
 
+<p><div id="supported-platforms" /></p>
+
+<h2>Supported Platforms</h2>
+
+<ul>
+<li><p>Windows</p></li>
+<li><p>Linux</p></li>
+<li><p>Mac OS</p></li>
+</ul>
+
 <p><div id="why-encryptpad" /></p>
 
 <h2>Why EncryptPad?</h2>
@@ -102,16 +113,6 @@
 <li><p>EncryptPad is not effective on a computer infected with spyware or a virus. Do not use it on a <strong>public, shared or compromised computer</strong> if you do not trust its safety.</p></li>
 <li><p><strong>IMPORTANT</strong>: Before using EncryptPad ensure that it is legal in your country to use encryption ciphers that EncryptPad provides. You may find useful information at <a href="http://www.cryptolaw.org/">cryptolaw.org</a>.</p></li>
 <li><p><strong>IMPORTANT</strong>: If you forgot your password or lost a key file, there is nothing that can be done to open your encrypted information. There are no backdoors in the formats that EncryptPad supports. EncryptPad developers take no responsibility for corrupted or invalid files in accordance with the license.</p></li>
-</ul>
-
-<p><div id="supported-platforms" /></p>
-
-<h2>Supported Platforms</h2>
-
-<ul>
-<li><p>Windows</p></li>
-<li><p>Linux</p></li>
-<li><p>Mac OS</p></li>
 </ul>
 
 <p><div id="file-types" /></p>
@@ -149,6 +150,48 @@
 </table>
 
 <p>* Key file location is persisted in the header of an encrypted file so the user does not need to specify it when decrypting.</p>
+
+<p><div id="key-file" /></p>
+
+<h2>What Is EncrypPad Key File?</h2>
+
+<p>In symmetric encryption the same sequence is used to encrypt and decrypt data. The user or another
+application usually provides this sequence in the form of an entered password or a file. In addition to
+entered passwords, EncryptPad generates files with random sequences called "key files".</p>
+
+<p>When the user creates a key file, EncryptPad generates a random sequence of bytes, asks the
+user for a password, encrypts the generated sequence and saves it to a file.</p>
+
+<p>The format of the file is OpenPGP. Other OpenPGP implementations can also create and 
+open EncryptPad key files as below shell commands demonstrate.</p>
+
+<p>When EncryptPad generates a new key file, it is roughly equivalent to the following <code>gpg2</code> command.</p>
+
+<pre><code>pwmake 1024 | gpg2 -c --armor --cipher-algo AES256 &gt; ~/.encryptpad/foo.key
+</code></pre>
+
+<p><code>pwmake</code> generates a random sequence, which <code>gpg2</code> in-turn encrypts. It will ask for the
+password to encrypt the sequence.</p>
+
+<p>When you use this key to encrypt <code>test3.txt</code>, the equivalent <code>gpg</code> command is below.</p>
+
+<pre><code>gpg2 --decrypt ~/.encryptpad/foo.key \
+| gpg2 --passphrase-fd 0 --batch -c --cipher-algo AES256 \
+-o /tmp/test3.txt.gpg /tmp/test3.txt
+</code></pre>
+
+<p>The left <code>gpg2</code> process decrypts <code>foo.key</code> and directs it to descriptor 0 of the right process
+through a pipe. <code>gpg2</code> reads the sequence from the descriptor with <code>--passphrase-fd 0</code>.</p>
+
+<p>When EncryptPad opens the encrypted file protected with <code>foo.key</code>, the equivalent <code>gpg</code> commands are
+these:</p>
+
+<pre><code>gpg2 --decrypt ~/.encryptpad/foo.key \
+| gpg2 --passphrase-fd 0 --batch --decrypt \
+-o /tmp/test4.txt /tmp/test3.txt.gpg
+</code></pre>
+
+<p>As you see, other OpenPGP implementations can also use EncryptPad keys.</p>
 
 <p><div id="epd-file-format" /></p>
 
@@ -326,6 +369,8 @@ GNU General Public License for more details.</p>
 <h2>Contacts and Feedback</h2>
 
 <p>If your question is related to EncryptPad, send it to the mailing list: <strong>encryptpad@googlegroups.com</strong> linked to <a href="https://groups.google.com/d/forum/encryptpad">the public discussion group</a>.</p>
+
+<p>Bug tracker: <a href="https://github.com/evpo/EncryptPad/issues">github.com/evpo/EncryptPad/issues</a></p>
 
 <p>Evgeny Pokhilko <strong>software@evpo.net</strong> for private contacts</p>
 
