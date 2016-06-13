@@ -231,7 +231,7 @@ There is **encrypt_cli** executable to encrypt / decrypt files from command line
 
 The Makefiles system uses **uname** to identify the OS and platform. You may need to modify uname parameters in **./deps/makefiles/platform.mak** to make it work. See Makefiles documentation and configure.sh script if you have any problems.
 
-If the build is successful, you should see the executable **./build/qt_build/release/EncryptPad.exe**
+If the build is successful, you should see the executable **./bin/release/EncryptPad.exe**
 
 Note that if you want EncryptPad to work as a single executable without dlls, you need to build Qt framework yourself statically. It takes a few hours. There are plenty of instructions on how to do this in the internet. The most popular article recommends using a powershell script. While it is convenient and I did it once, sometimes you don't want to upgrade your powershell and install heavy dependencies coming with it. So the next time I had to do that, I read the script and did everything manually. Luckily there are not too many steps in it.
 
