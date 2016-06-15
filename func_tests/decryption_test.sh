@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 USAGE1="decryption_test.sh <path_to_decryptor> <directory_with_encrypted_files>"
-USAGE2="path_to_decryptor - path to encrypt_cli or gpg"
+USAGE2="path_to_decryptor - path to encryptcli or gpg"
 if [ $# -lt 2 ]
 then
     echo $USAGE1

@@ -1,6 +1,6 @@
 #!/bin/sh
 set -e
-USAGE="epd_encryption_test.sh <path_to_encrypt_cli> <tested_file>"
+USAGE="epd_encryption_test.sh <path_to_encryptcli> <tested_file>"
 if [ $# -lt 2 ]
 then
     echo $USAGE

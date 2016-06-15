@@ -2,7 +2,7 @@
 
 set -e
 
-USAGE="random_content.sh <path_to_encrypt_cli>"
+USAGE="random_content.sh <path_to_encryptcli>"
 if [ $# -lt 1 ]
 then
     echo $USAGE

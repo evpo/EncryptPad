@@ -27,6 +27,17 @@
 
 namespace EncryptPad
 {
+    bool LoadStringFromDescriptor(int descriptor, std::string &content)
+    {
+        std::vector<byte> buffer;
+        if(!LoadFromIOStream(descriptor, buffer))
+            return false;
+
+        content.resize(buffer.size());
+        std::copy_n(reinterpret_cast<const char *>(buffer.data()), buffer.size(), &content[0]);
+        return true;
+    }
+
     bool LoadStringFromFile(const std::string &file_name, std::string &content)
     {
         InPacketStreamFile stm;

@@ -97,7 +97,7 @@ namespace EncryptPad
 
     bool SaveToIOStream(int file_descriptor, const Botan::SecureVector<byte> &buffer)
     {
-        FileHndl file = fdopen(file_descriptor, "w");
+        FileHndl file = fdopen(file_descriptor, "wb");
         if(!file.Valid())
             return false;
 
@@ -107,9 +107,8 @@ namespace EncryptPad
 
     bool LoadFromIOStream(int file_descriptor, std::vector<byte> &buffer)
     {
-        //TODO: increase the size after debugging
         const size_t kReadLength = 3;
-        FileHndl file = fdopen(file_descriptor, "r");
+        FileHndl file = fdopen(file_descriptor, "rb");
         if(!file.Valid())
             return false;
 

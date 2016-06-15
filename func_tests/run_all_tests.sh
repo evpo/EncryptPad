@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-USAGE="run_all_tests.sh <path_to_encrypt_cli>"
+USAGE="run_all_tests.sh <path_to_encryptcli>"
 if [ $# -lt 1 ]
 then
     echo $USAGE

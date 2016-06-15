@@ -91,10 +91,10 @@ case $COMMAND in
     elif [[ $UNAME == *MINGW* ]]
     then
         rm -f ../bin/${CONFIG_DIR}/${TARGET}.exe
-        rm -f ../bin/${CONFIG_DIR}/encrypt_cli.exe
+        rm -f ../bin/${CONFIG_DIR}/encryptcli.exe
     else
         rm -f ../bin/${CONFIG_DIR}/${TARGET}
-        rm -f ../bin/${CONFIG_DIR}/encrypt_cli
+        rm -f ../bin/${CONFIG_DIR}/encryptcli
     fi
     ;;
 -r|--run)
@@ -131,7 +131,7 @@ case $COMMAND in
 
     # Functional tests
     # pushd ../func_tests >/dev/null
-    # ./decryption_test.sh ../bin/${CONFIG_DIR}/encrypt_cli gpg_encrypted
+    # ./decryption_test.sh ../bin/${CONFIG_DIR}/encryptcli gpg_encrypted
     # RESULT=$?
     # popd >/dev/null
 

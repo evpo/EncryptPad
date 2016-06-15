@@ -35,5 +35,5 @@ else
 TARGETDIR := ../../bin/debug
 endif
 
-IMAGENAME := $(TARGETDIR)/encrypt_cli
+IMAGENAME := $(TARGETDIR)/encryptcli
 include ../deps/makefiles/gcc.mak

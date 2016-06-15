@@ -2,7 +2,7 @@
 
 set -e
 
-USAGE="io_redir_test.sh <path_to_encrypt_cli>"
+USAGE="io_redir_test.sh <path_to_encryptcli>"
 if [ $# -lt 1 ]
 then
     echo $USAGE
