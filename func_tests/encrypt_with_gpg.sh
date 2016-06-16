@@ -1,4 +1,6 @@
-#!/bin/sh
+#!/bin/bash
+set -e
+set -o pipefail
 CMD="gpg -c --verbose --no-use-agent --passphrase-file passphrase.txt"
 
 if [ "$PLAIN_TEXT_FILE" = "" ]

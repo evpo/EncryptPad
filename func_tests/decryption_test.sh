@@ -1,5 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 set -e
+set -o pipefail
 USAGE1="decryption_test.sh <path_to_decryptor> <directory_with_encrypted_files>"
 USAGE2="path_to_decryptor - path to encryptcli or gpg"
 if [ $# -lt 2 ]
@@ -28,7 +29,7 @@ do
     then
         gpg -d --no-use-agent --passphrase-file $PASSPHRASE_FILE -o $TMP_DIR/out_file.txt $FILE
     else
-        $DECRYPTOR -d -p $PASSPHRASE_FILE -o $TMP_DIR/out_file.txt $FILE
+        cat $PASSPHRASE_FILE | $DECRYPTOR -d --pwd-fd 0 -o $TMP_DIR/out_file.txt $FILE
     fi
 
     if ! [ -r $TMP_DIR/out_file.txt ]

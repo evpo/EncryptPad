@@ -481,6 +481,7 @@ int main(int argc, char *argv[])
 
     if(generate_kf)
     {
+        passphrase_fd_str = key_file_passphrase_fd_str;
         passphrase_fd = key_file_passphrase_fd;
     }
 

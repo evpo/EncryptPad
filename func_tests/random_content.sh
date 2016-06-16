@@ -1,6 +1,7 @@
-#!/bin/sh
+#!/bin/bash
 
 set -e
+set -o pipefail
 
 USAGE="random_content.sh <path_to_encryptcli>"
 if [ $# -lt 1 ]

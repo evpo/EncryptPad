@@ -1,6 +1,7 @@
-#!/bin/sh
+#!/bin/bash
 
 set -e
+set -o pipefail
 
 USAGE="io_redir_test.sh <path_to_encryptcli>"
 if [ $# -lt 1 ]
@@ -9,7 +10,8 @@ then
     exit 1
 fi
 
-CMD="$1 -p passphrase.txt"
+CMD="$1 --pwd-fd 3"
+PASSPHRASE_FILE="passphrase.txt"
 
 TMP_DIR="./tmp"
 ENC_DIR="./epd_encrypted_last"
@@ -22,7 +24,7 @@ fi
 rm -fR $ENC_DIR
 mkdir -p $ENC_DIR
 
-$CMD -e < $PLAIN_TEXT_FILE > $ENC_DIR/random1.dat.gpg
-cat $PLAIN_TEXT_FILE | $CMD -e > $ENC_DIR/random2.dat.gpg
-cat $PLAIN_TEXT_FILE | $CMD -e | cat > $ENC_DIR/random3.dat.gpg
-$CMD -e < $PLAIN_TEXT_FILE | cat > $ENC_DIR/random4.dat.gpg
+$CMD -e < $PLAIN_TEXT_FILE > $ENC_DIR/random1.dat.gpg 3< $PASSPHRASE_FILE
+cat $PLAIN_TEXT_FILE | $CMD -e > $ENC_DIR/random2.dat.gpg 3< $PASSPHRASE_FILE
+cat $PLAIN_TEXT_FILE | $CMD -e  3< $PASSPHRASE_FILE | cat > $ENC_DIR/random3.dat.gpg
+$CMD -e < $PLAIN_TEXT_FILE 3< $PASSPHRASE_FILE | cat > $ENC_DIR/random4.dat.gpg
