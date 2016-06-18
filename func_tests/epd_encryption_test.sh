@@ -205,9 +205,8 @@ rm $TMP_DIR/epad_out_file.txt
 echo "EncryptPad encrypts and decrypts with an encrypted key in double protection mode"
 
 cat $PASSPHRASE_FILE | $ENCRYPT_CLI --generate-key --key-pwd-fd 0 $TMP_DIR/encrypted_key.key
-
-cat $PASSPHRASE_FILE | $ENCRYPT_CLI -e -k $TMP_DIR/encrypted_key.key --key-pwd-fd 3 --pwd-fd 0 -o $TMP_DIR/out_file.epd $FILE 3< $PASSPHRASE_FILE
-cat $PASSPHRASE_FILE | $ENCRYPT_CLI -d -k $TMP_DIR/encrypted_key.key --key-pwd-fd 3 --pwd-fd 0 -o $TMP_DIR/out_file.txt $TMP_DIR/out_file.epd 3< $PASSPHRASE_FILE
+cat $PASSPHRASE_FILE | $ENCRYPT_CLI -e -k $TMP_DIR/encrypted_key.key --key-pwd-file $PASSPHRASE_FILE --pwd-fd 0 -o $TMP_DIR/out_file.epd $FILE
+cat $PASSPHRASE_FILE | $ENCRYPT_CLI -d -k $TMP_DIR/encrypted_key.key --key-pwd-file $PASSPHRASE_FILE --pwd-fd 0 -o $TMP_DIR/out_file.txt $TMP_DIR/out_file.epd
 
 if diff $FILE $TMP_DIR/out_file.txt
 then

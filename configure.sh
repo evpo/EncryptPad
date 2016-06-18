@@ -3,20 +3,21 @@
 USAGE="USAGE:\n\
 configure.sh <command> [option]\n\n\
 COMMANDS:\n\
--a, --all\tbuild everything required to run the application including Botan\n\
--c, --clean\tclean the application build files\n\
--r, --run\trun the application\n\
--b, --botan\tbuild Botan\n\
--o, --clean-botan\tclean Botan\n\
--e, --back-end\tbuild the back end with CLI\n\
--u, --tests\tbuild the unit tests\n\
--t, --run-tests\trun the unit tests\n\
--n, --clean-tests\tclean the unit tests\n\
--h, --help\thelp\n\n\
+-a, --all            build everything required to run the application\n\
+-c, --clean          clean the application build files\n\
+-r, --run            run the application\n\
+-b, --botan          build Botan\n\
+-o, --clean-botan    clean Botan\n\
+-e, --back-end       build the back end with CLI\n\
+-u, --tests          build the unit tests\n\
+-t, --run-tests      run the unit tests\n\
+-f, --run-func-tests run functional tests\n\
+-n, --clean-tests    clean the unit tests\n\
+-h, --help           help\n\n\
 OPTIONS:\n\
---debug\tdebug configuration. If not specified, the release configuration is used. The unit tests\n\
-are always built with the debug configuration.\n\
---use-system-libs\tuse botan, zlib and other shared libraries installed on the system."
+--debug              debug configuration. If not specified, the release configuration is used. The unit tests\n\
+                     are always built with the debug configuration.\n\
+--use-system-libs    use botan, zlib and other shared libraries installed on the system."
 
 TARGET=EncryptPad
 TEST_TARGET=encrypt_pad_tests
@@ -24,7 +25,7 @@ TEST_TARGET=encrypt_pad_tests
 if [[ $# > 3 ]] || [[ $# < 1 ]]
 then
     echo Invalid parameters >&2
-    echo -e $USAGE
+    echo -e "$USAGE"
     exit -1
 fi
 
@@ -116,6 +117,13 @@ case $COMMAND in
     $MAKE -f Makefile.unit_tests clean 
     rm -f ../bin/debug/${TEST_TARGET}
     ;;
+-f|--run-func-tests)
+    pushd ../func_tests >/dev/null
+    ./run_all_tests.sh ../bin/${CONFIG_DIR}/encryptcli
+    RESULT=$?
+    popd >/dev/null
+    exit $RESULT
+    ;;
 -t|--run-tests)
     # Unit tests should run from tests directory because they need files the directory contains
     pushd ../tests >/dev/null
@@ -138,9 +146,11 @@ case $COMMAND in
     popd >/dev/null
     exit $RESULT
     ;;
--h|--help) echo -e $USAGE ;;
+-h|--help)
+    echo -e "$USAGE"
+    ;;
 *)  echo -e "$COMMAND is invalid parameter" >&2
-    echo -e $USAGE
+    echo -e "$USAGE"
     popd >/dev/null
     exit -1
     ;;

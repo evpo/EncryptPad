@@ -31,6 +31,7 @@
 #include "get_password.h"
 #include "version.h"
 #include "key_generation.h"
+#include "file_helper.h"
 
 namespace EncryptPad
 {
@@ -42,7 +43,7 @@ namespace EncryptPad
         const char *usage =
             VER_PRODUCTNAME_STR " " VER_PRODUCTVERSION_STR "\n"
             "\n"
-            "Usage: encryptcli <command> [options] [input-file]\n"
+            "Usage: encryptcli <command> [options] [input-file] | [key-file]\n"
             "Utility to encrypt, decrypt OpenPGP files or generate key files.\n"
             "\n"
             "Commands:\n"
@@ -53,6 +54,7 @@ namespace EncryptPad
             "\n"
             "Parameters:\n"
             "input-file                            file to encrypt or decrypt (default: stdin)\n"
+            "key-file                              generated key file in --generate-key mode (default: stdin)\n"
             "\n"
             "Options:\n"
             "-o|--output                           output file (default: stdout)\n"
@@ -61,10 +63,12 @@ namespace EncryptPad
             "--key-only                            key only, no passphrase\n"
             "--persist-key                         persist key location in the encrypted file\n"
             "--key-pwd-fd <file-descriptor>        file descriptor from which to read the key file passphrase\n"
+            "--key-pwd-file <file>                 file with key password\n"
             "--libcurl-path <libcurl-path>         path to libcurl executable to download a remote key file\n"
             "--force-key-pwd                       force key password entry\n"
             "--plain-text-key                      plain text key (not recommended)\n"
             "--pwd-fd <file-descriptor>            password file descriptor\n"
+            "--pwd-file <file>                     file with password\n"
             "--cipher-algo <cipher-algo>           cipher algorithm (CAST5, AES, AES256, 3DES; default: AES256)\n"
             "--compress-algo <compression-algo>    compression algorithm (ZIP, ZLIB, NONE; default: ZIP)\n"
             "--s2k-digest-algo <s2k-digest-algo>   s2k digest algorithm (SHA1, SHA256; default: SHA256)\n"
@@ -236,6 +240,13 @@ int main(int argc, char *argv[])
             ""
         },
         {
+            "key-pwd-file",
+            cli_kind_t::cli_value_kind,
+            cli_mode_t::cli_single_mode,
+            "key file passphrase file",
+            ""
+        },
+        {
             "libcurl-path",
             cli_kind_t::cli_value_kind,
             cli_mode_t::cli_single_mode,
@@ -261,6 +272,13 @@ int main(int argc, char *argv[])
             cli_kind_t::cli_value_kind,
             cli_mode_t::cli_single_mode,
             "password file descriptor",
+            ""
+        },
+        {
+            "pwd-file",
+            cli_kind_t::cli_value_kind,
+            cli_mode_t::cli_single_mode,
+            "password file",
             ""
         },
         {
@@ -315,12 +333,16 @@ int main(int argc, char *argv[])
     bool encrypted_kf = true;
 
     std::string out_file;
+    std::string out_file_ext;
+    std::string in_file_ext;
     std::string in_file;
     std::string passphrase_fd_str;
+    std::string passphrase_file;
     int passphrase_fd = -1;
     std::string key_file;
     std::string key_file_passphrase;
     std::string key_file_passphrase_fd_str;
+    std::string key_file_passphrase_file;
     int key_file_passphrase_fd = -1;
     std::string cipher_algo;
     std::string compress_algo;
@@ -366,6 +388,10 @@ int main(int argc, char *argv[])
         {
             key_file_passphrase_fd_str = parser.string_value(i);
         }
+        else if(parser.name(i) == "key-pwd-file")
+        {
+            key_file_passphrase_file = parser.string_value(i);
+        }
         else if(parser.name(i) == "libcurl-path")
         {
             libcurl_path = parser.string_value(i);
@@ -377,6 +403,10 @@ int main(int argc, char *argv[])
         else if(parser.name(i) == "plain-text-key")
         {
             encrypted_kf = false;
+        }
+        else if(parser.name(i) == "pwd-file")
+        {
+            passphrase_file = parser.string_value(i);
         }
         else if(parser.name(i) == "pwd-fd")
         {
@@ -405,6 +435,11 @@ int main(int argc, char *argv[])
         }
     }
 
+    if(!in_file.empty())
+    {
+        in_file_ext = extension_part(in_file);
+    }
+
     if(in_file.empty() && !generate_kf)
     {
         in_file = kStdIn;
@@ -419,13 +454,30 @@ int main(int argc, char *argv[])
     {
         out_file = kStdOut;
     }
+    else
+    {
+        out_file_ext = extension_part(out_file);
+    }
+
+    // Disable password entry when gpg format and key provided
+    if(encrypt && !key_only && !key_file.empty() && !out_file_ext.empty() && 
+            (out_file_ext == "gpg" || out_file_ext == "GPG"))
+    {
+        key_only = true;
+    }
+
+    if(decrypt && !key_only && !key_file.empty() && !in_file_ext.empty() && 
+            (in_file_ext == "gpg" || in_file_ext == "GPG"))
+    {
+        key_only = true;
+    }
 
     if((!key_file.empty() || key_only) && encrypted_kf)
     {
         key_file_passphrase_required = true;
     }
 
-    if(!key_file_passphrase_fd_str.empty())
+    if(!key_file_passphrase_fd_str.empty() || !key_file_passphrase_file.empty())
     {
         key_file_passphrase_required = true;
     }
@@ -451,6 +503,18 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
+    if(!key_file_passphrase_file.empty() && !key_file_passphrase_fd_str.empty())
+    {
+        std::cerr << "Ambiguous arguments: both key-pwd-file and key-pwd-fd provided" << std::endl;
+        exit(1);
+    }
+
+    if(!passphrase_file.empty() && !passphrase_fd_str.empty())
+    {
+        std::cerr << "Ambiguous arguments: both pwd-file and pwd-fd provided" << std::endl;
+        exit(1);
+    }
+
     if(!key_file_passphrase_fd_str.empty())
     {
         std::istringstream fd_stm(key_file_passphrase_fd_str);
@@ -458,6 +522,13 @@ int main(int argc, char *argv[])
         if(fd_stm.fail())
         {
             std::cerr << "key-pwd-fd: '" << key_file_passphrase_fd_str << "' is not a number" << std::endl;
+            exit(1);
+        }
+
+        std::string message;
+        if(!ValidateFileDescriptor(key_file_passphrase_fd, message))
+        {
+            std::cerr << "Invalid file descriptor '" << key_file_passphrase_fd << "':"  << message << std::endl;
             exit(1);
         }
     }
@@ -469,6 +540,20 @@ int main(int argc, char *argv[])
         if(fd_stm.fail())
         {
             std::cerr << "pwd-fd: '" << passphrase_fd_str << "' is not a number" << std::endl;
+            exit(1);
+        }
+
+        std::string message;
+        if(!ValidateFileDescriptor(passphrase_fd, message))
+        {
+            std::cerr << "Invalid file descriptor '" << passphrase_fd << "':" << message << std::endl;
+            exit(1);
+        }
+
+        if(!key_file_passphrase_fd_str.empty() && passphrase_fd == key_file_passphrase_fd)
+        {
+            std::cerr << "The same file descriptor for pwd-fd and key-pwd-fd is not allowed" <<
+                std::endl;
             exit(1);
         }
     }
@@ -483,11 +568,12 @@ int main(int argc, char *argv[])
     {
         passphrase_fd_str = key_file_passphrase_fd_str;
         passphrase_fd = key_file_passphrase_fd;
+        passphrase_file = key_file_passphrase_file;
     }
 
     std::string passphrase;
 
-    if(passphrase_fd_str.empty() && !key_only && !(generate_kf && !encrypted_kf))
+    if(passphrase_fd_str.empty() && passphrase_file.empty() && !key_only && !(generate_kf && !encrypted_kf))
     {
         GetPassword("Password: ", passphrase);
 
@@ -504,10 +590,21 @@ int main(int argc, char *argv[])
     }
     else if(!key_only && !(generate_kf && !encrypted_kf))
     {
-        if(!LoadStringFromDescriptor(passphrase_fd, passphrase))
+        if(!passphrase_fd_str.empty())
         {
-            std::cerr << "Cannot read from the specified passphrase file" << std::endl;
-            exit(1);
+            if(!LoadStringFromDescriptor(passphrase_fd, passphrase))
+            {
+                std::cerr << "Cannot read from the specified passphrase file descriptor" << std::endl;
+                exit(1);
+            }
+        }
+        else if(!passphrase_file.empty())
+        {
+            if(!LoadStringFromFile(passphrase_file, passphrase))
+            {
+                std::cerr << "Cannot read from the specified passphrase file" << std::endl;
+                exit(1);
+            }
         }
     }
 
@@ -527,13 +624,22 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    if(key_file_passphrase_required && key_file_passphrase_fd_str.empty())
+    if(key_file_passphrase_required && key_file_passphrase_fd_str.empty() &&
+            key_file_passphrase_file.empty())
     {
         GetPassword("Key file password: ", key_file_passphrase);
     }
     else if(!key_file_passphrase_fd_str.empty())
     {
         if(!LoadStringFromDescriptor(key_file_passphrase_fd, key_file_passphrase))
+        {
+            std::cerr << "Cannot read from the specified key file password file descriptor" << std::endl;
+            exit(1);
+        }
+    }
+    else if(!key_file_passphrase_file.empty())
+    {
+        if(!LoadStringFromFile(key_file_passphrase_file, key_file_passphrase))
         {
             std::cerr << "Cannot read from the specified key file password file" << std::endl;
             exit(1);
@@ -553,7 +659,7 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
-    std::string in_file_ext = in_file == kStdIn ? std::string() : extension_part(in_file);
+    in_file_ext = in_file == kStdIn ? std::string() : extension_part(in_file);
 
     if(encrypt)
     {
@@ -574,7 +680,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    std::string out_file_ext = out_file == kStdOut ? std::string() : extension_part(out_file);
+    out_file_ext = out_file == kStdOut ? std::string() : extension_part(out_file);
 
     EncryptParams key_file_encrypt_params = {};
     KeyService key_file_key_service(1);

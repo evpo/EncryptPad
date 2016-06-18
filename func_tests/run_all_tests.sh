@@ -4,7 +4,7 @@ set -o pipefail
 
 S="$SHELL"
 
-USAGE="run_all_tests.sh <path_to_encryptcli>"
+USAGE="run_all_tests.sh <path-to-encryptcli>"
 if [ $# -lt 1 ]
 then
     echo $USAGE
@@ -49,6 +49,10 @@ rm -R ./epd_encrypted_last
 # input output redirection and pipes
 $S ./io_redir_test.sh $BIN
 $S ./decryption_test.sh "$1" ./epd_encrypted_last
+
+# backward compatibility tests
+echo "Backward compatility test"
+$S ./compat_test.sh $BIN
 rm -Rf ./epd_encrypted_last
 rm -Rf ./gpg_encrypted_last
 rm -Rf ./tmp

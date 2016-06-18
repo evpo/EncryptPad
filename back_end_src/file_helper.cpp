@@ -133,4 +133,21 @@ namespace EncryptPad
     {
         return fileno(stdout);
     }
+    bool ValidateFileDescriptor(int fd, std::string &message)
+    {
+        if(fd < 0)
+        {
+            message = "file descriptor must be greater than zero";
+            return false;
+        }
+
+#if defined(__MINGW__) || defined(__MINGW32__)
+        if(fd > 2)
+        {
+            message = "Only 0, 1, 2 file descriptors supported on Windows";
+            return false;
+        }
+#endif
+        return true;
+    }
 }

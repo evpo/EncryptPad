@@ -42,4 +42,6 @@ namespace EncryptPad
     bool SaveToIOStream(int file_descriptor, const Botan::SecureVector<byte> &buffer);
     int GetStdinNo();
     int GetStdoutNo();
+
+    bool ValidateFileDescriptor(int fd, std::string &message);
 }
