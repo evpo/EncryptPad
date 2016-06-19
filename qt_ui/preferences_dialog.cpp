@@ -80,6 +80,16 @@ void PreferencesDialog::setSaveLastUsedDirectory(bool val)
     return ui->uiLastUsedDirectory->setChecked(val);
 }
 
+bool PreferencesDialog::getEnableBakFiles() const
+{
+    return ui->uiEnableBakFiles->isChecked();
+}
+
+void PreferencesDialog::setEnableBakFiles(bool val)
+{
+    return ui->uiEnableBakFiles->setChecked(val);
+}
+
 QString PreferencesDialog::getLibcurlPath() const
 {
     return ui->uiLibcurl->text();

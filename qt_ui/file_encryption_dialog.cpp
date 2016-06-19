@@ -345,7 +345,19 @@ void FileEncryptionDialog::WorkDone()
             break;
         case PacketResult::InvalidKeyFilePassphrase:
             kfKeyService.Clear();
-            request_kf_passphrase = true;
+
+            if(IsEncryption())
+            {
+                QMessageBox::warning(
+                        this,
+                        "EncryptPad",
+                        "Invalid password for key file");
+                rejected = true;
+            }
+            else
+            {
+                request_kf_passphrase = true;
+            }
             break;
 
         default:

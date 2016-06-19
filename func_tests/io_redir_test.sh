@@ -1,15 +1,17 @@
-#!/bin/sh
+#!/bin/bash
 
 set -e
+set -o pipefail
 
-USAGE="io_redir_test.sh <path_to_encrypt_cli>"
+USAGE="io_redir_test.sh <path_to_encryptcli>"
 if [ $# -lt 1 ]
 then
     echo $USAGE
     exit 1
 fi
 
-CMD="$1 -p passphrase.txt"
+PASSPHRASE_FILE="passphrase.txt"
+CMD="$1 --pwd-file $PASSPHRASE_FILE"
 
 TMP_DIR="./tmp"
 ENC_DIR="./epd_encrypted_last"

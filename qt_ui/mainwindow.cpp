@@ -55,6 +55,9 @@ namespace
     const char *kRepositoryDirName = ".encryptpad";
 #endif
 
+    const char *kConfigFileName = "encryptpad.ini";
+    const bool kDefaultWindowsEol = false;
+
     void SetDefaultMetadataValues(EncryptPad::PacketMetadata &metadata)
     {
         using namespace EncryptPad;
@@ -66,8 +69,28 @@ namespace
         metadata.file_name = "CONSOLE";
     }
 
-    const char *kConfigFileName = "encryptpad.ini";
-    const bool kDefaultWindowsEol = false;
+    // TakeBakFile
+    // returns true if ok and false if we need to cancel the whole operation
+    bool TakeBakFile(const QString &fileName)
+    {
+        QFileInfo fileInfo(fileName);
+        QFile file(fileName);
+
+        if(!file.exists())
+            return true;
+
+        QString bakFileName = fileInfo.dir().path() + "/" + fileInfo.completeBaseName() + QString(".bak");
+        if(QFile::exists(bakFileName))
+        {
+            if(!QFile::remove(bakFileName))
+                return false;
+        }
+
+        if(!file.rename(bakFileName))
+            return false;
+
+        return true;
+    }
 }
 
 const int MainWindow::maxZoomIn = 75;
@@ -75,7 +98,7 @@ const int MainWindow::minZoomOut = 3;
 
 MainWindow::MainWindow(): encryptionKeyFile(tr("")), persistEncryptionKeyPath(false), 
     enc(), metadata(), encryptionModified(false), isBusy(false), saveLastUsedDirectory(false),
-    windowsEol(kDefaultWindowsEol), currentZoom(0), load_state_machine_(enc),
+    enableBakFiles(false), takeBakFile(false), windowsEol(kDefaultWindowsEol), currentZoom(0), load_state_machine_(enc),
     plain_text_switch_(this), plain_text_functor_(plain_text_switch_), recent_files_service_(this),
     loadAdapter(this),
     loadHandler(this, loadAdapter, metadata),
@@ -308,6 +331,12 @@ void MainWindow::AsyncOperationCompleted()
         }
         // at this point only textEdit contains unencrypted data
         setCurrentFile(load_state_machine_.get_file_name());
+
+        if(enableBakFiles)
+        {
+            takeBakFile = true;
+        }
+
         statusBar()->showMessage(tr("File loaded"), 2000);
 
         recent_files_service_.PushFile(load_state_machine_.get_file_name());
@@ -452,7 +481,6 @@ bool MainWindow::save()
 
 bool MainWindow::saveAs()
 {
-
     QString selectedFilter;
     if(!curFile.isEmpty())
     {
@@ -468,6 +496,12 @@ bool MainWindow::saveAs()
 
     if(selection.cancelled)
         return false;
+
+    // Set the bak file flag if the file name has changed
+    if(curFile != selection.file_name && enableBakFiles)
+    {
+        takeBakFile = true;
+    }
 
     return saveFile(selection.file_name);
 }
@@ -596,11 +630,14 @@ void MainWindow::documentWasModified()
 
 void MainWindow::openPreferences()
 {
+    bool lastEnableBakFiles = enableBakFiles;
+
     PreferencesDialog dlg(this);
     dlg.setFont(textEdit->font());
     dlg.setRecentFiles(recent_files_service_.GetMaxFiles());
     dlg.setWordWrap(wordWrapAct->isChecked());
     dlg.setSaveLastUsedDirectory(saveLastUsedDirectory);
+    dlg.setEnableBakFiles(enableBakFiles);
     dlg.setLibcurlPath(QString::fromStdString(enc.GetLibcurlPath()));
     if(dlg.exec() == QDialog::Rejected)
         return;
@@ -610,7 +647,13 @@ void MainWindow::openPreferences()
     textEdit->setFont(dlg.getFont());
     wordWrapAct->setChecked(dlg.getWordWrap());
     saveLastUsedDirectory = dlg.getSaveLastUsedDirectory();
+    enableBakFiles = dlg.getEnableBakFiles();
     enc.SetLibcurlPath(dlg.getLibcurlPath().toStdString());
+
+    if(enableBakFiles && !lastEnableBakFiles)
+    {
+        takeBakFile = true;
+    }
 }
 
 void MainWindow::createActions()
@@ -1035,6 +1078,7 @@ void MainWindow::readSettings()
     passwordGenerationSettings = settings.value(
                 "password_generation", QVariant().toStringList()).toStringList();
     saveLastUsedDirectory = settings.value("save_last_used_directory", QVariant(true)).toBool();
+    enableBakFiles = settings.value("enable_bak_files", QVariant(true)).toBool();
     file_request_service_.set_current_directory(
                 saveLastUsedDirectory ? settings.value("last_used_directory", QVariant(QString())).toString()
                                       : QString());
@@ -1066,6 +1110,7 @@ void MainWindow::writeSettings()
     settings.setValue("word_wrap", QVariant(wordWrapAct->isChecked()));
     settings.setValue("password_generation", QVariant(passwordGenerationSettings));
     settings.setValue("save_last_used_directory", QVariant(saveLastUsedDirectory));
+    settings.setValue("enable_bak_files", QVariant(enableBakFiles));
     settings.setValue("last_used_directory", QVariant(saveLastUsedDirectory ? file_request_service_.get_current_directory() : QString()));
     settings.setValue("libcurl_path", QVariant(QString::fromStdString(enc.GetLibcurlPath())));
 }
@@ -1164,7 +1209,7 @@ void MainWindow::startSave(const QString &fileName, std::string &kf_passphrase)
 #ifndef QT_NO_CURSOR
     QApplication::setOverrideCursor(Qt::WaitCursor);
 #endif
-	{
+    {
         QString str = textEdit->toPlainText();
         QByteArray byteArr;
 
@@ -1177,11 +1222,23 @@ void MainWindow::startSave(const QString &fileName, std::string &kf_passphrase)
             ConvertToWindowsEOL(str, byteArr);
         }
 
-		Botan::SecureVector<byte> secureVect(reinterpret_cast<const byte*>(byteArr.constData()), byteArr.size());
-        result = enc.Save(fileName.toUtf8().constData(), secureVect, 
-                          encryptionKeyFile.toStdString(), persistEncryptionKeyPath,
-                          &metadata, !kf_passphrase.empty() ? &kf_passphrase : nullptr);
-	}
+        Botan::SecureVector<byte> secureVect(reinterpret_cast<const byte*>(byteArr.constData()), byteArr.size());
+        if(takeBakFile)
+        {
+            if(!TakeBakFile(fileName))
+            {
+                result = EncryptPadEncryptor::Result::BakFileMoveFailed;
+            }
+            takeBakFile = false;
+        }
+
+        if(result != EncryptPadEncryptor::Result::BakFileMoveFailed)
+        {
+            result = enc.Save(fileName.toUtf8().constData(), secureVect, 
+                    encryptionKeyFile.toStdString(), persistEncryptionKeyPath,
+                    &metadata, !kf_passphrase.empty() ? &kf_passphrase : nullptr);
+        }
+    }
 #ifndef QT_NO_CURSOR
     QApplication::restoreOverrideCursor();
 #endif
@@ -1209,6 +1266,9 @@ void MainWindow::startSave(const QString &fileName, std::string &kf_passphrase)
     case EncryptPadEncryptor::Result::EncryptionError:
         warningMessage = "Unknown encryption error";
         break;
+    case EncryptPadEncryptor::Result::BakFileMoveFailed:
+        warningMessage = "Cannot create bak file";
+        break;
     case EncryptPadEncryptor::Result::InvalidKeyFilePassphrase:
         // Ask for the password again
         enc.ClearKFPassphrase();
@@ -1231,7 +1291,7 @@ void MainWindow::startSave(const QString &fileName, std::string &kf_passphrase)
         return;
     }
 
-	setCurrentFile(fileName);
+    setCurrentFile(fileName);
     statusBar()->showMessage(tr("File saved"), 2000);
     recent_files_service_.PushFile(fileName);
     saveSuccess = true;

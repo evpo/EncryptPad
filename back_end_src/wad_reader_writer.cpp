@@ -54,35 +54,52 @@ namespace
 
     bool WriteWadImpl(InStream &in, OutStream &out, const std::string &key_file)
     {
+        // uint32_t dir_offset = 12 + payload_size + key_file.size(); // 12 - these 4 items
+
+        // Header
         out.Write(reinterpret_cast<const byte*>("PWAD"), 4);
         uint32_t lumps = 2;
         WriteUint(out, lumps); // 2 lumps
+        uint32_t dir_offset = 12;
+        WriteUint(out, dir_offset);
+        // Header end
+
+        uint32_t header_size = out.GetCount();
+        uint32_t directory_size = 2 * (4 + 4 + 8); // 2 records in the directory
+        uint32_t key_file_offset = header_size + directory_size;
+        uint32_t key_file_size = key_file.size();
+        assert(dir_offset == out.GetCount());
+
+        // Directory
+        std::string lump_name = "__X2_KEY";
+        WriteUint(out, key_file_offset);
+        WriteUint(out, key_file_size);
+        assert(lump_name.size() == 8);
+        out.Write(reinterpret_cast<const byte*>(&lump_name[0]), 8);
+
+        lump_name = "_PAYLOAD";
         uint32_t payload_size = in.GetCount();
-        uint32_t dir_offset = 12 + payload_size + key_file.size(); // 12 - these 4 items
-        WriteUint(out, dir_offset); 
-        uint32_t payload_offset = out.GetCount();
+        uint32_t payload_offset = header_size + directory_size + key_file_size;
+        WriteUint(out, payload_offset);
+        WriteUint(out, payload_size);
+        assert(lump_name.size() == 8);
+        out.Write(reinterpret_cast<const byte*>(&lump_name[0]), 8);
+        // Directory end
+
+        assert(key_file_offset == out.GetCount());
+
+        // Key
+        out.Write(reinterpret_cast<const byte*>(key_file.c_str()), key_file_size);
+
+        assert(payload_offset == out.GetCount());
+
+        // Payload
         int b;
         while((b = in.Get()) != -1)
         {
             out.Put(b);
         }
-        uint32_t key_file_offset = out.GetCount();
-        uint32_t key_file_size = key_file.size();
-        out.Write(reinterpret_cast<const byte*>(key_file.c_str()), key_file_size);
-        assert(dir_offset == out.GetCount());
-        // Directory
-        std::string lump_name = "_PAYLOAD";
-        WriteUint(out, payload_offset);
-        WriteUint(out, payload_size);
-        assert(lump_name.size() == 8);
-        out.Write(reinterpret_cast<const byte*>(&lump_name[0]), 8);
 
-        lump_name = "__X2_KEY";
-        WriteUint(out, key_file_offset);
-        WriteUint(out, key_file_size);
-        assert(lump_name.size() == 8);
-        out.Write(reinterpret_cast<const byte*>(&lump_name[0]), 8);
-        
         return true;
     }
 
@@ -131,7 +148,7 @@ namespace
             uint32_t offset;
             uint32_t size;
             std::string name(8, ' ');
-            
+
             if(!ReadUint(stm, offset))
                 return PacketResult::InvalidWadFile;
 
@@ -186,7 +203,7 @@ namespace EncryptPad
 
         if(!in.Seek(metadata.key_file_offset))
             return PacketResult::InvalidWadFile;
-        
+
         key_file.resize(metadata.key_file_size);
         if(in.Read(reinterpret_cast<byte *>(&key_file[0]), metadata.key_file_size) != metadata.key_file_size)
             return PacketResult::InvalidWadFile;

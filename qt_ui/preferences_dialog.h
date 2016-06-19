@@ -58,6 +58,9 @@ public:
     bool getSaveLastUsedDirectory() const;
     void setSaveLastUsedDirectory(bool val);
 
+    bool getEnableBakFiles() const;
+    void setEnableBakFiles(bool val);
+
     QString getLibcurlPath() const;
     void setLibcurlPath(const QString &path);
 

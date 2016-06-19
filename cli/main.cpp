@@ -31,45 +31,60 @@
 #include "get_password.h"
 #include "version.h"
 #include "key_generation.h"
+#include "file_helper.h"
 
 namespace EncryptPad
 {
     const char *kStdIn = "-";
     const char *kStdOut = "-";
 
-    void PrintUsage()
+    void PrintUsage(bool use_cout = false)
     {
         const char *usage =
             VER_PRODUCTNAME_STR " " VER_PRODUCTVERSION_STR "\n"
-            VER_LEGALCOPYRIGHT_STR "\n"
             "\n"
-            "Syntax: encrypt_cli <command> [options] [input_file]\n"
+            "Usage: encryptcli <command> [options] [input-file] | [key-file]\n"
+            "Utility to encrypt, decrypt OpenPGP files or generate key files.\n"
             "\n"
             "Commands:\n"
-            "-d\t\t\tdecrypt data\n"
-            "-e\t\t\tencrypt data\n"
-            "--generate_kf\t\tgenerate key file\n"
-            "-h, --help\t\tthis help\n"
+            "-e|--encrypt          encrypt data\n"
+            "-d|--decrypt          decrypt data\n"
+            "--generate-key     generate key file\n"
+            "--help             this help\n"
             "\n"
             "Parameters:\n"
-            "input_file file to encrypt (default: stdin)\n"
+            "input-file                            file to encrypt or decrypt (default: stdin)\n"
+            "key-file                              generated key file in --generate-key mode (default: stdin)\n"
             "\n"
             "Options:\n"
-            "-o <file>\t\tuse as output file (default: stdout)\n"
-            "-p <passphrase_file>\tpassphrase file\n"
-            "-k <key_file>\t\tkey file\n"
-            "-c <cipher_algo>\tcipher algorithm (CAST5, AES, AES256, 3DES)\n"
-            "-m <compression_algo>\tcompression algorithm (ZIP, ZLIB, NONE)\n"
-            "-g <s2k_digest_algo>\ts2k algorithm (SHA1, SHA256)\n"
-            "-n\t\t\tno passphrase, key only\n"
-            "-s\t\t\tpersist key location in the encrypted file\n"
-            "-f\t\t\toverwrite output file if exists\n"
-            "--libcurl_path\t\tpath to libcurl executable to load remote key files\n"
-            "--encrypt_kf\t\tencrypt generated key file\n"
-            "--kf_passphrase_file <key file passphrase file>\t\tkey file passphrase file\n"
-            "--kf_passphrase_required \t\t\t\tkey file passphrase required\n"
+            "-o|--output                           output file (default: stdout)\n"
+            "-f|--force                            overwrite output file\n"
+            "--key-file <key-file>                 key file\n"
+            "--key-only                            key only, no passphrase\n"
+            "--persist-key                         persist key location in the encrypted file\n"
+            "--key-pwd-fd <file-descriptor>        file descriptor from which to read the key file passphrase\n"
+            "--key-pwd-file <file>                 file with key password\n"
+            "--libcurl-path <libcurl-path>         path to libcurl executable to download a remote key file\n"
+            "--force-key-pwd                       force key password entry\n"
+            "--plain-text-key                      plain text key (not recommended)\n"
+            "--pwd-fd <file-descriptor>            password file descriptor\n"
+            "--pwd-file <file>                     file with password\n"
+            "--cipher-algo <cipher-algo>           cipher algorithm (CAST5, AES, AES256, 3DES; default: AES256)\n"
+            "--compress-algo <compression-algo>    compression algorithm (ZIP, ZLIB, NONE; default: ZIP)\n"
+            "--s2k-digest-algo <s2k-digest-algo>   s2k digest algorithm (SHA1, SHA256; default: SHA256)\n"
+            "\n"
+            "Feedback: evpo.net/encryptpad\n"
             ;
-        std::cout << usage << std::endl;
+
+
+        if(use_cout)
+        {
+            std::cout << usage << std::endl;
+        }
+        else
+        {
+            std::cerr << usage << std::endl;
+        }
     }
 
     void StringToUpper(std::string &str)
@@ -155,119 +170,133 @@ int main(int argc, char *argv[])
 
     cli_definitions_t cli_defs = {
         {
-            "d",
-            cli_kind_t::cli_switch_kind,
-            cli_mode_t::cli_single_mode,
-            "decrypt data",
-            ""
-        },
-        {
-            "e",
+            "encrypt",
             cli_kind_t::cli_switch_kind,
             cli_mode_t::cli_single_mode,
             "encrypt data",
             ""
         },
         {
-            "-help",
+            "decrypt",
             cli_kind_t::cli_switch_kind,
             cli_mode_t::cli_single_mode,
-            "-help",
+            "decrypt data",
             ""
         },
         {
-            "f",
-            cli_kind_t::cli_switch_kind,
-            cli_mode_t::cli_single_mode,
-            "overwrite output file",
-            ""
-        },
-        {
-            "n",
-            cli_kind_t::cli_switch_kind,
-            cli_mode_t::cli_single_mode,
-            "no passphrase, key only",
-            ""
-        },
-        {
-            "s",
-            cli_kind_t::cli_switch_kind,
-            cli_mode_t::cli_single_mode,
-            "persist key location in the encrypted file",
-            ""
-        },
-        {
-            "o",
-            cli_kind_t::cli_value_kind,
-            cli_mode_t::cli_single_mode,
-            "use as output file",
-            ""
-        },
-        {
-            "p",
-            cli_kind_t::cli_value_kind,
-            cli_mode_t::cli_single_mode,
-            "passphrase file",
-            ""
-        },
-        {
-            "k",
-            cli_kind_t::cli_value_kind,
-            cli_mode_t::cli_single_mode,
-            "key file",
-            ""
-        },
-        {
-            "-libcurl_path",
-            cli_kind_t::cli_value_kind,
-            cli_mode_t::cli_single_mode,
-            "path to libcurl executable to download remote key files",
-            ""
-        },
-        {
-            "-kf_passphrase_file",
-            cli_kind_t::cli_value_kind,
-            cli_mode_t::cli_single_mode,
-            "key file passphrase file",
-            ""
-        },
-        {
-            "-kf_passphrase_required",
-            cli_kind_t::cli_switch_kind,
-            cli_mode_t::cli_single_mode,
-            "key file passphrase required",
-            ""
-        },
-        {
-            "-generate_kf",
+            "generate-key",
             cli_kind_t::cli_switch_kind,
             cli_mode_t::cli_single_mode,
             "generate key file",
             ""
         },
         {
-            "-encrypt_kf",
+            "help",
             cli_kind_t::cli_switch_kind,
             cli_mode_t::cli_single_mode,
-            "encrypt key file",
+            "help",
             ""
         },
         {
-            "c",
+            "output",
+            cli_kind_t::cli_value_kind,
+            cli_mode_t::cli_single_mode,
+            "output file",
+            ""
+        },
+        {
+            "force",
+            cli_kind_t::cli_switch_kind,
+            cli_mode_t::cli_single_mode,
+            "overwrite output file",
+            ""
+        },
+        {
+            "key-file",
+            cli_kind_t::cli_value_kind,
+            cli_mode_t::cli_single_mode,
+            "key file",
+            ""
+        },
+        {
+            "key-only",
+            cli_kind_t::cli_switch_kind,
+            cli_mode_t::cli_single_mode,
+            "key only, no passphrase",
+            ""
+        },
+        {
+            "persist-key",
+            cli_kind_t::cli_switch_kind,
+            cli_mode_t::cli_single_mode,
+            "persist key location in the encrypted file",
+            ""
+        },
+        {
+            "key-pwd-fd",
+            cli_kind_t::cli_value_kind,
+            cli_mode_t::cli_single_mode,
+            "key file passphrase file descriptor",
+            ""
+        },
+        {
+            "key-pwd-file",
+            cli_kind_t::cli_value_kind,
+            cli_mode_t::cli_single_mode,
+            "key file passphrase file",
+            ""
+        },
+        {
+            "libcurl-path",
+            cli_kind_t::cli_value_kind,
+            cli_mode_t::cli_single_mode,
+            "path to libcurl executable to download remote key files",
+            ""
+        },
+        {
+            "force-key-pwd",
+            cli_kind_t::cli_switch_kind,
+            cli_mode_t::cli_single_mode,
+            "request key password entry",
+            ""
+        },
+        {
+            "plain-text-key",
+            cli_kind_t::cli_switch_kind,
+            cli_mode_t::cli_single_mode,
+            "plain text key",
+            ""
+        },
+        {
+            "pwd-fd",
+            cli_kind_t::cli_value_kind,
+            cli_mode_t::cli_single_mode,
+            "password file descriptor",
+            ""
+        },
+        {
+            "pwd-file",
+            cli_kind_t::cli_value_kind,
+            cli_mode_t::cli_single_mode,
+            "password file",
+            ""
+        },
+        {
+            "cipher-algo",
             cli_kind_t::cli_value_kind,
             cli_mode_t::cli_single_mode,
             "cipher algorithm",
             "AES256"
         },
         {
-            "m",
+            "compress-algo",
             cli_kind_t::cli_value_kind,
             cli_mode_t::cli_single_mode,
             "compression algorithm",
             "ZIP"
         },
         {
-            "g",
+            "s2k-digest-algo",
             cli_kind_t::cli_value_kind,
             cli_mode_t::cli_single_mode,
             "s2k digest algorithm",
@@ -301,14 +330,20 @@ int main(int argc, char *argv[])
     bool key_only = false;
     bool persist_key = false;
     bool key_file_passphrase_required = false;
-    bool encrypt_kf = false;
+    bool encrypted_kf = true;
 
     std::string out_file;
+    std::string out_file_ext;
+    std::string in_file_ext;
     std::string in_file;
+    std::string passphrase_fd_str;
     std::string passphrase_file;
+    int passphrase_fd = -1;
     std::string key_file;
     std::string key_file_passphrase;
+    std::string key_file_passphrase_fd_str;
     std::string key_file_passphrase_file;
+    int key_file_passphrase_fd = -1;
     std::string cipher_algo;
     std::string compress_algo;
     std::string hash_algo;
@@ -317,73 +352,81 @@ int main(int argc, char *argv[])
 
     for(unsigned i = 0; i < parser.size(); i++)
     {
-        if(parser.name(i) == "e")
+        if(parser.name(i) == "encrypt")
         {
             encrypt = true;
         }
-        else if(parser.name(i) == "d")
+        else if(parser.name(i) == "decrypt")
         {
             decrypt = true;
         }
-        else if(parser.name(i) == "-generate_kf")
+        else if(parser.name(i) == "generate-key")
         {
             generate_kf = true;
         }
-        else if(parser.name(i) == "f")
-        {
-            overwrite_out_file = true;
-        }
-        else if(parser.name(i) == "-encrypt_kf")
-        {
-            encrypt_kf = true;
-        }
-        else if(parser.name(i) == "n")
-        {
-            key_only = true;
-        }
-        else if(parser.name(i) == "s")
-        {
-            persist_key = true;
-        }
-        else if(parser.name(i) == "-kf_passphrase_required")
-        {
-            key_file_passphrase_required = true;
-        }
-        else if(parser.name(i) == "o")
+        else if(parser.name(i) == "output")
         {
             out_file = parser.string_value(i);
         }
-        else if(parser.name(i) == "p")
+        else if(parser.name(i) == "force")
         {
-            passphrase_file = parser.string_value(i);
+            overwrite_out_file = true;
         }
-        else if(parser.name(i) == "k")
+        else if(parser.name(i) == "key-file")
         {
             key_file = parser.string_value(i);
         }
-        else if(parser.name(i) == "-kf_passphrase_file")
+        else if(parser.name(i) == "key-only")
+        {
+            key_only = true;
+        }
+        else if(parser.name(i) == "persist-key")
+        {
+            persist_key = true;
+        }
+        else if(parser.name(i) == "key-pwd-fd")
+        {
+            key_file_passphrase_fd_str = parser.string_value(i);
+        }
+        else if(parser.name(i) == "key-pwd-file")
         {
             key_file_passphrase_file = parser.string_value(i);
         }
-        else if(parser.name(i) == "c")
-        {
-            cipher_algo = parser.string_value(i);
-        }
-        else if(parser.name(i) == "m")
-        {
-            compress_algo = parser.string_value(i);
-        }
-        else if(parser.name(i) == "g")
-        {
-            hash_algo = parser.string_value(i);
-        }
-        else if(parser.name(i) == "-libcurl_path")
+        else if(parser.name(i) == "libcurl-path")
         {
             libcurl_path = parser.string_value(i);
         }
-        else if(parser.name(i) == "-help")
+        else if(parser.name(i) == "force-key-pwd")
         {
-            PrintUsage();
+            key_file_passphrase_required = true;
+        }
+        else if(parser.name(i) == "plain-text-key")
+        {
+            encrypted_kf = false;
+        }
+        else if(parser.name(i) == "pwd-file")
+        {
+            passphrase_file = parser.string_value(i);
+        }
+        else if(parser.name(i) == "pwd-fd")
+        {
+            passphrase_fd_str = parser.string_value(i);
+        }
+        else if(parser.name(i) == "cipher-algo")
+        {
+            cipher_algo = parser.string_value(i);
+        }
+        else if(parser.name(i) == "compress-algo")
+        {
+            compress_algo = parser.string_value(i);
+        }
+        else if(parser.name(i) == "s2k-digest-algo")
+        {
+            hash_algo = parser.string_value(i);
+        }
+        else if(parser.name(i) == "help")
+        {
+            PrintUsage(true);
             exit(1);
         }
         else if(parser.name(i) == "")
@@ -392,12 +435,17 @@ int main(int argc, char *argv[])
         }
     }
 
+    if(!in_file.empty())
+    {
+        in_file_ext = extension_part(in_file);
+    }
+
     if(in_file.empty() && !generate_kf)
     {
         in_file = kStdIn;
     }
 
-    if(generate_kf)
+    if(generate_kf && !in_file.empty())
     {
         out_file = in_file;
     }
@@ -405,6 +453,33 @@ int main(int argc, char *argv[])
     if(out_file.empty())
     {
         out_file = kStdOut;
+    }
+    else
+    {
+        out_file_ext = extension_part(out_file);
+    }
+
+    // Disable password entry when gpg format and key provided
+    if(encrypt && !key_only && !key_file.empty() && !out_file_ext.empty() && 
+            (out_file_ext == "gpg" || out_file_ext == "GPG"))
+    {
+        key_only = true;
+    }
+
+    if(decrypt && !key_only && !key_file.empty() && !in_file_ext.empty() && 
+            (in_file_ext == "gpg" || in_file_ext == "GPG"))
+    {
+        key_only = true;
+    }
+
+    if((!key_file.empty() || key_only) && encrypted_kf)
+    {
+        key_file_passphrase_required = true;
+    }
+
+    if(!key_file_passphrase_fd_str.empty() || !key_file_passphrase_file.empty())
+    {
+        key_file_passphrase_required = true;
     }
 
     bool invalid_args = false;
@@ -422,27 +497,83 @@ int main(int argc, char *argv[])
         invalid_args = true;
     }
 
-
     if(invalid_args)
     {
         PrintUsage();
         exit(1);
     }
 
+    if(!key_file_passphrase_file.empty() && !key_file_passphrase_fd_str.empty())
+    {
+        std::cerr << "Ambiguous arguments: both key-pwd-file and key-pwd-fd provided" << std::endl;
+        exit(1);
+    }
+
+    if(!passphrase_file.empty() && !passphrase_fd_str.empty())
+    {
+        std::cerr << "Ambiguous arguments: both pwd-file and pwd-fd provided" << std::endl;
+        exit(1);
+    }
+
+    if(!key_file_passphrase_fd_str.empty())
+    {
+        std::istringstream fd_stm(key_file_passphrase_fd_str);
+        fd_stm >> key_file_passphrase_fd;
+        if(fd_stm.fail())
+        {
+            std::cerr << "key-pwd-fd: '" << key_file_passphrase_fd_str << "' is not a number" << std::endl;
+            exit(1);
+        }
+
+        std::string message;
+        if(!ValidateFileDescriptor(key_file_passphrase_fd, message))
+        {
+            std::cerr << "Invalid file descriptor '" << key_file_passphrase_fd << "':"  << message << std::endl;
+            exit(1);
+        }
+    }
+
+    if(!passphrase_fd_str.empty())
+    {
+        std::istringstream fd_stm(passphrase_fd_str);
+        fd_stm >> passphrase_fd;
+        if(fd_stm.fail())
+        {
+            std::cerr << "pwd-fd: '" << passphrase_fd_str << "' is not a number" << std::endl;
+            exit(1);
+        }
+
+        std::string message;
+        if(!ValidateFileDescriptor(passphrase_fd, message))
+        {
+            std::cerr << "Invalid file descriptor '" << passphrase_fd << "':" << message << std::endl;
+            exit(1);
+        }
+
+        if(!key_file_passphrase_fd_str.empty() && passphrase_fd == key_file_passphrase_fd)
+        {
+            std::cerr << "The same file descriptor for pwd-fd and key-pwd-fd is not allowed" <<
+                std::endl;
+            exit(1);
+        }
+    }
+
     if(!out_file.empty() && out_file != kStdOut && file_exists(out_file) && !overwrite_out_file)
     {
-        std::cout << "The output file exists. Specify -f to overwrite the output file." << std::endl;
+        std::cerr << "The output file exists. Specify -f to overwrite the output file." << std::endl;
         exit(1);
     }
 
     if(generate_kf)
     {
+        passphrase_fd_str = key_file_passphrase_fd_str;
+        passphrase_fd = key_file_passphrase_fd;
         passphrase_file = key_file_passphrase_file;
     }
 
     std::string passphrase;
 
-    if(passphrase_file.empty() && !key_only && !(generate_kf && !encrypt_kf))
+    if(passphrase_fd_str.empty() && passphrase_file.empty() && !key_only && !(generate_kf && !encrypted_kf))
     {
         GetPassword("Password: ", passphrase);
 
@@ -457,12 +588,23 @@ int main(int argc, char *argv[])
             }
         }
     }
-    else if(!key_only && !(generate_kf && !encrypt_kf))
+    else if(!key_only && !(generate_kf && !encrypted_kf))
     {
-        if(!LoadStringFromFile(passphrase_file, passphrase))
+        if(!passphrase_fd_str.empty())
         {
-            std::cerr << "Cannot read from the specified passphrase file" << std::endl;
-            exit(1);
+            if(!LoadStringFromDescriptor(passphrase_fd, passphrase))
+            {
+                std::cerr << "Cannot read from the specified passphrase file descriptor" << std::endl;
+                exit(1);
+            }
+        }
+        else if(!passphrase_file.empty())
+        {
+            if(!LoadStringFromFile(passphrase_file, passphrase))
+            {
+                std::cerr << "Cannot read from the specified passphrase file" << std::endl;
+                exit(1);
+            }
         }
     }
 
@@ -482,9 +624,18 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    if(key_file_passphrase_required && key_file_passphrase_file.empty())
+    if(key_file_passphrase_required && key_file_passphrase_fd_str.empty() &&
+            key_file_passphrase_file.empty())
     {
         GetPassword("Key file password: ", key_file_passphrase);
+    }
+    else if(!key_file_passphrase_fd_str.empty())
+    {
+        if(!LoadStringFromDescriptor(key_file_passphrase_fd, key_file_passphrase))
+        {
+            std::cerr << "Cannot read from the specified key file password file descriptor" << std::endl;
+            exit(1);
+        }
     }
     else if(!key_file_passphrase_file.empty())
     {
@@ -497,7 +648,7 @@ int main(int argc, char *argv[])
 
     if(encrypt && key_only && key_file.empty())
     {
-        std::cerr << "Invalid arguments: -n (key only, no password) requires -k (key file) option" << std::endl;
+        std::cerr << "Invalid arguments: --key-only (key only, no password) requires --key-file (key file) option" << std::endl;
         PrintUsage();
         exit(1);
     }
@@ -508,7 +659,7 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
-    std::string in_file_ext = in_file == kStdIn ? std::string() : extension_part(in_file);
+    in_file_ext = in_file == kStdIn ? std::string() : extension_part(in_file);
 
     if(encrypt)
     {
@@ -529,7 +680,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    std::string out_file_ext = out_file == kStdOut ? std::string() : extension_part(out_file);
+    out_file_ext = out_file == kStdOut ? std::string() : extension_part(out_file);
 
     EncryptParams key_file_encrypt_params = {};
     KeyService key_file_key_service(1);
@@ -565,13 +716,13 @@ int main(int argc, char *argv[])
 
     if(metadata.cannot_use_wad && metadata.persist_key_path)
     {
-        std::cout << "GPG format does not support persisted key path. Use EPD extension." << std::endl;
+        std::cerr << "GPG format does not support persisted key path. Use EPD extension." << std::endl;
         exit(1);
     }
 
     if(metadata.cannot_use_wad && !passphrase.empty() && !metadata.key_only && !metadata.key_file.empty())
     {
-        std::cout << "GPG format does not support password and key protection together. Use either or use EPD extension." << std::endl;
+        std::cerr << "GPG format does not support password and key protection together. Use either or use EPD extension." << std::endl;
         exit(1);
     }
 
@@ -593,6 +744,12 @@ int main(int argc, char *argv[])
     else if(decrypt)
     {
         result = DecryptPacketFile(in_file, out_file, enc_params, metadata);
+    }
+
+    if(result == PacketResult::InvalidKeyFilePassphrase && !key_file_passphrase_required)
+    {
+        std::cerr << "File is encrypted with an encrypted key file. Use '--force-key-pwd' switch." << std::endl;
+        exit(1);
     }
 
     if(result != PacketResult::Success)

@@ -50,6 +50,8 @@ namespace EncryptPad
         }
     };
 
+    bool LoadStringFromDescriptor(int descriptor, std::string &content);
+
     bool LoadStringFromFile(const std::string &file_name, std::string &content);
 
     template<typename Handle, typename Traits>

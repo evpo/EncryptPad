@@ -97,7 +97,7 @@ namespace EncryptPad
 
     bool SaveToIOStream(int file_descriptor, const Botan::SecureVector<byte> &buffer)
     {
-        FileHndl file = fdopen(file_descriptor, "w");
+        FileHndl file = fdopen(file_descriptor, "wb");
         if(!file.Valid())
             return false;
 
@@ -107,9 +107,8 @@ namespace EncryptPad
 
     bool LoadFromIOStream(int file_descriptor, std::vector<byte> &buffer)
     {
-        //TODO: increase the size after debugging
         const size_t kReadLength = 3;
-        FileHndl file = fdopen(file_descriptor, "r");
+        FileHndl file = fdopen(file_descriptor, "rb");
         if(!file.Valid())
             return false;
 
@@ -133,5 +132,22 @@ namespace EncryptPad
     int GetStdoutNo()
     {
         return fileno(stdout);
+    }
+    bool ValidateFileDescriptor(int fd, std::string &message)
+    {
+        if(fd < 0)
+        {
+            message = "file descriptor must be greater than zero";
+            return false;
+        }
+
+#if defined(__MINGW__) || defined(__MINGW32__)
+        if(fd > 2)
+        {
+            message = "Only 0, 1, 2 file descriptors supported on Windows";
+            return false;
+        }
+#endif
+        return true;
     }
 }

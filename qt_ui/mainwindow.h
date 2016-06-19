@@ -168,6 +168,8 @@ private:
     bool encryptionModified;
     bool isBusy;
     bool saveLastUsedDirectory;
+    bool enableBakFiles;
+    bool takeBakFile;
     bool windowsEol;
 
 	void createActions();

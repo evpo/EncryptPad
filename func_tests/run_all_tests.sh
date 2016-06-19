@@ -1,7 +1,10 @@
-#!/bin/sh
+#!/bin/bash
 set -e
+set -o pipefail
 
-USAGE="run_all_tests.sh <path_to_encrypt_cli>"
+S="$SHELL"
+
+USAGE="run_all_tests.sh <path-to-encryptcli>"
 if [ $# -lt 1 ]
 then
     echo $USAGE
@@ -24,28 +27,33 @@ mkdir -p $TMP_DIR
 dd if=/dev/urandom of=$PLAIN_TEXT_FILE bs=1048576 count=15
 
 # diffrent key file and passphrase combinations
-./epd_encryption_test.sh $BIN "$PLAIN_TEXT_FILE"
+$S ./epd_encryption_test.sh $BIN "$PLAIN_TEXT_FILE"
 
 #encryption with an empty file
-./epd_encryption_test.sh $BIN empty.txt
+$S ./epd_encryption_test.sh $BIN empty.txt
 
 # encrypt files with gpg
-./encrypt_with_gpg.sh
+$S ./encrypt_with_gpg.sh
 
 # decrypt gpg files with epd
-./decryption_test.sh $BIN ./gpg_encrypted_last
+$S ./decryption_test.sh $BIN ./gpg_encrypted_last
 rm -R ./gpg_encrypted_last
 
 # encrypt with epd
-./encrypt_with_epd.sh $BIN "$PLAIN_TEXT_FILE"
+$S ./encrypt_with_epd.sh $BIN "$PLAIN_TEXT_FILE"
 
 # decrypt the above with gpg
-./decryption_test.sh gpg ./epd_encrypted_last
+$S ./decryption_test.sh gpg ./epd_encrypted_last
 rm -R ./epd_encrypted_last
 
 # input output redirection and pipes
-./io_redir_test.sh $BIN
-./decryption_test.sh "$1" ./epd_encrypted_last
+echo "Input / output redirection tests"
+$S ./io_redir_test.sh $BIN
+$S ./decryption_test.sh "$1" ./epd_encrypted_last
+
+# backward compatibility tests
+echo "Backward compatibility tests"
+$S ./compat_test.sh $BIN
 rm -Rf ./epd_encrypted_last
 rm -Rf ./gpg_encrypted_last
 rm -Rf ./tmp
