@@ -47,11 +47,12 @@ $S ./decryption_test.sh gpg ./epd_encrypted_last
 rm -R ./epd_encrypted_last
 
 # input output redirection and pipes
+echo "Input / output redirection tests"
 $S ./io_redir_test.sh $BIN
 $S ./decryption_test.sh "$1" ./epd_encrypted_last
 
 # backward compatibility tests
-echo "Backward compatility test"
+echo "Backward compatibility tests"
 $S ./compat_test.sh $BIN
 rm -Rf ./epd_encrypted_last
 rm -Rf ./gpg_encrypted_last
