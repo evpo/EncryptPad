@@ -89,6 +89,7 @@ case $COMMAND in
     if [[ $SUBDIR == *MACOS* ]]
     then
         rm -Rf ../bin/${CONFIG_DIR}/${TARGET}.app
+        rm -f ../bin/${CONFIG_DIR}/encryptcli
     elif [[ $UNAME == *MINGW* ]]
     then
         rm -f ../bin/${CONFIG_DIR}/${TARGET}.exe

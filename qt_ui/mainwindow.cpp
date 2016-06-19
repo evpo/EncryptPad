@@ -80,6 +80,13 @@ namespace
             return true;
 
         QString bakFileName = fileInfo.dir().path() + "/" + fileInfo.completeBaseName() + QString(".bak");
+
+        if(bakFileName.toUpper() == fileName.toUpper())
+        {
+            // we are editing the bak file
+            return true;
+        }
+
         if(QFile::exists(bakFileName))
         {
             if(!QFile::remove(bakFileName))
