@@ -41,6 +41,7 @@ namespace EncryptPadEncryptor
         X2CurlIsNotFound,
         X2CurlExitNonZero,
         InvalidKeyFilePassphrase,
+        BakFileMoveFailed,
         None,
 	};
 
