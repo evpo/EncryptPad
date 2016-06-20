@@ -1,0 +1,56 @@
+#!/bin/bash
+set -e
+set -o pipefail
+FPATH=$1
+if [ "${FPATH: -4}" != '.gpg' ];then
+    echo 'Expected .gpg extension'
+    exit 1
+fi
+
+# readlink -f canonicalizes the path, resolving all symlinks
+if uname | grep -q 'Darwin'; then
+    if ! hash greadlink ; then
+        echo 'Please install coreutils from homebrew or similar'
+        echo 'to provide greadlink (GNU readlink)'
+        exit 1
+    fi
+    SOURCE=$(greadlink -f ${BASH_SOURCE})
+    READLINK_TOOL=greadlink
+else
+    # assume Linux with GNU readlink
+    SOURCE=$(readlink -f ${BASH_SOURCE})
+    READLINK_TOOL=readlink
+fi
+if ! hash vipe ; then
+    echo 'Please install moreutils from homebrew, dnf/yum, apt'
+    echo 'to provide vipe'
+    exit 1
+fi
+if mountpoint -q /dev/shm ; then
+    # safer tmpdir for vipe
+    export TMPDIR=/dev/shm
+fi
+BASEDIR=$(dirname ${SOURCE})
+export EDITOR=${EDITOR:-vim -n}
+if [ -z "$KEYFILE" ]; then
+    echo "Please set KEYFILE environment variable pointing to the encrypted key file location."
+    exit 1;
+fi
+if [ ! -e "$KEYFILE" ]; then
+    echo "Cannot find $KEYFILE ."
+    exit 1;
+fi
+if [ ! -e "$FPATH" ]; then
+    echo "Cannot find $FPATH ."
+    exit 1;
+fi
+#
+# vipe uses TMPDIR and cleans up after itself. On modern Linux and OS X, TMPDIR is a ramdisk.
+#
+# We use AES256 for compat with EncryptPad
+(gpg2 -q --decrypt ${KEYFILE} | gpg2 -q --passphrase-fd 0  --batch --decrypt ${FPATH} ) \
+    | vipe \
+    | gpg2 -q --passphrase-fd 3 --batch -c --cipher-algo AES256 3< <(gpg2 -q --decrypt ${KEYFILE} ) \
+    > $FPATH.new
+test -e $FPATH.new
+mv -f $FPATH.new $1
