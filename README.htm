@@ -32,6 +32,7 @@
 </ul></li>
 <li><a href="#build-on-mac-linux">Build EncryptPad on Mac/Linux</a>
 <ul>
+<li><a href="#dynamic-build">Dynamic Build</a></li>
 <li><a href="#build-on-fedora">Fedora</a></li>
 </ul></li>
 <li><a href="#acknowledgements">Acknowledgements</a></li>
@@ -238,7 +239,18 @@ these:</p>
 
 <h2>Command Line Interface</h2>
 
-<p>There is <strong>encrypt_cli</strong> executable to encrypt / decrypt files from command line. Run without arguments to see available parameters. Please note that the decrypted file is saved to a disk.</p>
+<p>There is <strong>encryptcli</strong> executable to encrypt / decrypt files in command line. Run without
+arguments to see available parameters. Below is an example of encrypting a file with a key.</p>
+
+<pre><code># generate a new key and protect it with the password "key".
+# --key-pwd-fd 0 for reading the key password from descriptor 0
+echo -n "key" | encryptcli --generate-key --key-pwd-fd 0 my_key.key
+
+# encrypt plain_text.txt with my_key.key created above.
+# The key password is sent through file descriptor 3
+cat plain_text.txt | encryptcli -e --key-file my_key.key \
+--key-only --key-pwd-fd 3 -o plain_text.txt.gpg 3&lt; &lt;(echo -n "key")
+</code></pre>
 
 <p><div id="build-on-windows" /></p>
 
@@ -281,6 +293,17 @@ these:</p>
 <pre><code>./configure.sh --all
 </code></pre>
 
+<p><div id="dynamic-build"/></p>
+
+<h3>Dynamic Build</h3>
+
+<pre><code>./configure.sh --all --use-system-libs
+</code></pre>
+
+<p>Build with dynamic linking to libraries. It also uses <code>Botan</code> and <code>Zlib</code> installed on the system instead
+of compiling their source code under <code>deps</code>. On Ubuntu, install <code>libbotan1.10-dev</code> and <code>zlib1g-dev</code>
+packages before building.</p>
+
 <p><div id="build-on-fedora" /></p>
 
 <h3>Fedora</h3>
@@ -295,6 +318,12 @@ export PATH
 <p>Open encryptpad directory:</p>
 
 <pre><code>./configure.sh --all
+</code></pre>
+
+<p>or for dynamic build with system libraries:</p>
+
+<pre><code>dnf install botan-devel
+./configure.sh --all --use-system-libs
 </code></pre>
 
 <p><div id="acknowledgements" /></p>
@@ -370,7 +399,7 @@ GNU General Public License for more details.</p>
 
 <p>If your question is related to EncryptPad, send it to the mailing list: <strong>encryptpad@googlegroups.com</strong> linked to <a href="https://groups.google.com/d/forum/encryptpad">the public discussion group</a>.</p>
 
-<p>Bug tracker: <a href="https://github.com/evpo/EncryptPad/issues">github.com/evpo/EncryptPad/issues</a></p>
+<p>Bug tracker and contributions: <a href="https://github.com/evpo/EncryptPad/issues">github.com/evpo/EncryptPad/issues</a></p>
 
 <p>Evgeny Pokhilko <strong>software@evpo.net</strong> for private contacts</p>
 

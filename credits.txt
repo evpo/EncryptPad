@@ -1,0 +1,7 @@
+Evgeny Pokhilko
+Original developer and maintainer.
+software@evpo.net
+
+Martin Langhoff
+contrib/gpgvim script for interoperability with GnuPG.
+GPG bash commands in the README file that demonstrate what the EncryptPad key is.

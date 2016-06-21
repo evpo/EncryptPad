@@ -13,8 +13,4 @@ Commandline utility that allows using `vim` (or your preferred editor, if you se
 
 Also useful to validate EncryptPad's encryption mechanism.
 
-__Note:__ `gpgvim` makes every effort to ensure safe handling of temp files. However, if gpgvim dies, tempfiles revealing your secrets might be left behind. In addition, some editors create tempfiles or backup files outside of `TMPDIR`. The `vim` default has options set to prevent this, if you override `EDITOR` you should check your editor's behaviour.
-
-###Add your utility name here...
-
-
+__Note:__ `gpgvim` makes every effort to ensure safe handling of temp files. However, tempfiles (in case the editor shuts down unexpectedly) or free space (unclaimed bytes on disk after the temp file was deleted) revealing your secrets might be left behind. In addition, some editors create tempfiles or backup files outside of `TMPDIR`. The `vim` default has options set to prevent this, if you override `EDITOR` you should check your editor's behaviour.

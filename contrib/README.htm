@@ -1,0 +1,18 @@
+<h1>Contributions</h1>
+
+<h2>Overview</h2>
+
+<p>This directory is for utilities, scripts, documents and examples related to EncryptPad. You will
+find descriptions and feedback contacts in the list below and source files in each subdirectory.</p>
+
+<h2>List</h2>
+
+<h2><code>gpgvim</code></h2>
+
+<p>Commandline utility that allows using <code>vim</code> (or your preferred editor, if you set the <code>EDITOR</code> environment variable) in a mode compatible with EncryptPad. It uses <code>gpg2</code> for encryption and <code>vipe</code> (from <code>moreutils</code>). Useful to open and edit files without a GUI.</p>
+
+<p>Also useful to validate EncryptPad's encryption mechanism.</p>
+
+<p><strong>Note:</strong> <code>gpgvim</code> makes every effort to ensure safe handling of temp files. However, tempfiles (in case the editor shuts down unexpectedly) or free space (unclaimed bytes on disk after the temp file was deleted) revealing your secrets might be left behind. In addition, some editors create tempfiles or backup files outside of <code>TMPDIR</code>. The <code>vim</code> default has options set to prevent this, if you override <code>EDITOR</code> you should check your editor's behaviour.</p>
+
+<p><strong>Contributed By:</strong> Martin Langhoff</p>

@@ -25,6 +25,7 @@ Screenshots and tutorials are at [evpo.net/encryptpad/](http://evpo.net/encryptp
   - [Prerequisites](#prerequisites)
   - [Steps](#steps)
 * [Build EncryptPad on Mac/Linux](#build-on-mac-linux)
+    - [Dynamic Build](#dynamic-build)
     - [Fedora](#build-on-fedora)
 * [Acknowledgements](#acknowledgements)
 * [EncryptPad Integrity Verification](#integrity-verification)
@@ -206,7 +207,17 @@ If this file gets into the hands of a perpetrator, he or she will need to brute 
 <div id="command-line-interface" />
 ##Command Line Interface
 
-There is **encrypt_cli** executable to encrypt / decrypt files from command line. Run without arguments to see available parameters. Please note that the decrypted file is saved to a disk.
+There is **encryptcli** executable to encrypt / decrypt files in command line. Run without
+arguments to see available parameters. Below is an example of encrypting a file with a key.
+
+    # generate a new key and protect it with the password "key".
+    # --key-pwd-fd 0 for reading the key password from descriptor 0
+    echo -n "key" | encryptcli --generate-key --key-pwd-fd 0 my_key.key
+
+    # encrypt plain_text.txt with my_key.key created above.
+    # The key password is sent through file descriptor 3
+    cat plain_text.txt | encryptcli -e --key-file my_key.key \
+    --key-only --key-pwd-fd 3 -o plain_text.txt.gpg 3< <(echo -n "key")
 
 <div id="build-on-windows" />
 ## Build EncryptPad on Windows
@@ -242,6 +253,15 @@ It is easier than building on Windows. All you need is to install Qt, Python and
 
     ./configure.sh --all
 
+<div id="dynamic-build"/>
+###Dynamic Build
+
+    ./configure.sh --all --use-system-libs
+
+Build with dynamic linking to libraries. It also uses `Botan` and `Zlib` installed on the system instead
+of compiling their source code under `deps`. On Ubuntu, install `libbotan1.10-dev` and `zlib1g-dev`
+packages before building.
+
 <div id="build-on-fedora" />
 ###Fedora###
 
@@ -254,6 +274,11 @@ Install dependencies and tools:
 Open encryptpad directory:
 
     ./configure.sh --all
+
+or for dynamic build with system libraries:
+
+    dnf install botan-devel
+    ./configure.sh --all --use-system-libs
 
 <div id="acknowledgements" />
 ##Acknowledgements
@@ -316,7 +341,7 @@ GNU General Public License for more details.
 
 If your question is related to EncryptPad, send it to the mailing list: **encryptpad@googlegroups.com** linked to [the public discussion group](https://groups.google.com/d/forum/encryptpad).
 
-Bug tracker: [github.com/evpo/EncryptPad/issues](https://github.com/evpo/EncryptPad/issues)
+Bug tracker and contributions: [github.com/evpo/EncryptPad/issues](https://github.com/evpo/EncryptPad/issues)
 
 Evgeny Pokhilko **software@evpo.net** for private contacts
 
