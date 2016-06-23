@@ -7,6 +7,9 @@ script: ./configure --all --use-system-libs
 
 addons:
     apt:
+        sources:
+            - ubuntu-toolchain-r-test
+            
         packages:
             - libbotan1.10-dev
             - zlib1g-dev
