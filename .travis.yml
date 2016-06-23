@@ -3,7 +3,7 @@ os: linux
 compiler: gcc
 env: CONFIG=Release
 
-script: ./configure --all --use-system-libs
+script: ./configure.sh --all --use-system-libs
 
 addons:
     apt:
