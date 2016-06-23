@@ -1,11 +1,9 @@
-os:
-    - linux
+language: cpp
+os: linux
 
-compiler:
-    - gcc
+compiler: gcc
 
-script:
-    - ./configure --all --use-system-libs
+script: ./configure --all --use-system-libs
 
 addons:
     apt:
