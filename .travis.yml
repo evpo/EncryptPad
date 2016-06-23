@@ -1,0 +1,15 @@
+os:
+    - linux
+
+compiler:
+    - gcc
+
+script:
+    - ./configure --all --use-system-libs
+
+addons:
+    apt:
+        packages:
+            libbotan1.10-dev
+            zlib1g-dev
+            qtbase5-dev
