@@ -4,13 +4,23 @@ compiler: gcc
 env: CONFIG=Release
 
 install:
-    - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
-
-script: 
-    - qmake -qt=qt5 -v
-    - qmake -qt=qt5
+    - sudo apt-add-repository -y ppa:beineri/opt-qt532
+    - sudo apt-get -qq update
+    - sudo apt-get install qt53tools
+    - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 50
+    - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-5 50
+    
+script:
+    - QTDIR="/opt/qt53"
+    - PATH="$QTDIR/bin:$PATH"
+    - qt53-env.sh
+    - qmake -v
     - ./configure.sh --all --use-system-libs
-
+    - ./configure.sh --back-end --debug --use-system-libs
+    - ./configure.sh --tests --use-system-libs
+    - ./configure.sh --run-tests
+    - ./configure.sh --run-func-tests --debug
+    
 addons:
     apt:
         sources:
@@ -19,4 +29,4 @@ addons:
         packages:
             - libbotan1.10-dev
             - zlib1g-dev
-            - g++-4.8
+            - g++-5
