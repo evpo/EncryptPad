@@ -2,6 +2,8 @@ language: cpp
 os: linux
 compiler: gcc
 env: CONFIG=Release
+install:
+    - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
 
 script: ./configure.sh --all --use-system-libs
 
