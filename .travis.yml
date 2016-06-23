@@ -10,6 +10,6 @@ script:
 addons:
     apt:
         packages:
-            libbotan1.10-dev
-            zlib1g-dev
-            qtbase5-dev
+            - libbotan1.10-dev
+            - zlib1g-dev
+            - qtbase5-dev
