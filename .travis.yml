@@ -1,13 +1,15 @@
 language: cpp
 os: linux
 compiler: gcc
-env: CONFIG=Release QT=5
+env: CONFIG=Release
 
 install:
     - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
 
-before_script: qmake -v
-script: ./configure.sh --all --use-system-libs
+script: 
+    - qmake -qt=qt5 -v
+    - qmake -qt=qt5
+    - ./configure.sh --all --use-system-libs
 
 addons:
     apt:
