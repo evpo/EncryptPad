@@ -23,6 +23,9 @@ Screenshots and tutorials are at [evpo.net/encryptpad/](http://evpo.net/encryptp
 * [Use cURL To Automatically Download Keys From A Remote Storage](#use-curl)
 * [Known Weaknesses](#known-weaknesses)
 * [Command Line Interface](#command-line-interface)
+* [Installing EncryptPad](#installing)
+    - [Portable Executable](#portable-exe)
+    - [Arch Linux](#install-on-arch)
 * [Build EncryptPad on Windows](#build-on-windows)
   - [Prerequisites](#prerequisites)
   - [Steps](#steps)
@@ -220,6 +223,28 @@ arguments to see available parameters. Below is an example of encrypting a file 
     # The key password is sent through file descriptor 3
     cat plain_text.txt | encryptcli -e --key-file my_key.key \
     --key-only --key-pwd-fd 3 -o plain_text.txt.gpg 3< <(echo -n "key")
+
+<div id="installing" />
+##Installing EncryptPad
+
+<div id="portable-exe" />
+###Portable Executable
+
+Portable binaries are available for Windows and Apple. They can be copied on a memory stick or
+placed on a network share.
+
+<div id="install-on-arch" />
+###Arch Linux
+
+Use fingerprints to receive gpg keys for EncryptPad and Botan.
+
+    gpg --recv-key 621DAF6411E1851C4CF9A2E16211EBF1EFBADFBC
+    gpg --recv-key 634BFC0CCC426C74389D89310F1CFF71A2813E85
+
+Install two AUR packages: [botan-stable](https://aur.archlinux.org/packages/botan-stable/) and
+[encryptpad](https://aur.archlinux.org/packages/encryptpad/)
+
+`pacaur` installs `botan-stable` automatically as `encryptpad` dependency.
 
 <div id="build-on-windows" />
 ## Build EncryptPad on Windows

@@ -6,6 +6,8 @@
 
 <p>Screenshots and tutorials are at <a href="http://evpo.net/encryptpad/">evpo.net/encryptpad/</a></p>
 
+<p><a href="https://travis-ci.org/evpo/EncryptPad"><img src="https://travis-ci.org/evpo/EncryptPad.svg?branch=master" alt="Build Status" title="" /></a></p>
+
 <h2>Table of Contents</h2>
 
 <ul>
@@ -25,6 +27,11 @@
 <li><a href="#use-curl">Use cURL To Automatically Download Keys From A Remote Storage</a></li>
 <li><a href="#known-weaknesses">Known Weaknesses</a></li>
 <li><a href="#command-line-interface">Command Line Interface</a></li>
+<li><a href="#installing">Installing EncryptPad</a>
+<ul>
+<li><a href="#portable-exe">Portable Executable</a></li>
+<li><a href="#install-on-arch">Arch Linux</a></li>
+</ul></li>
 <li><a href="#build-on-windows">Build EncryptPad on Windows</a>
 <ul>
 <li><a href="#prerequisites">Prerequisites</a></li>
@@ -251,6 +258,32 @@ echo -n "key" | encryptcli --generate-key --key-pwd-fd 0 my_key.key
 cat plain_text.txt | encryptcli -e --key-file my_key.key \
 --key-only --key-pwd-fd 3 -o plain_text.txt.gpg 3&lt; &lt;(echo -n "key")
 </code></pre>
+
+<p><div id="installing" /></p>
+
+<h2>Installing EncryptPad</h2>
+
+<p><div id="portable-exe" /></p>
+
+<h3>Portable Executable</h3>
+
+<p>Portable binaries are available for Windows and Apple. They can be copied on a memory stick or
+placed on a network share.</p>
+
+<p><div id="install-on-arch" /></p>
+
+<h3>Arch Linux</h3>
+
+<p>Use fingerprints to receive gpg keys for EncryptPad and Botan.</p>
+
+<pre><code>gpg --recv-key 621DAF6411E1851C4CF9A2E16211EBF1EFBADFBC
+gpg --recv-key 634BFC0CCC426C74389D89310F1CFF71A2813E85
+</code></pre>
+
+<p>Install two AUR packages: <a href="https://aur.archlinux.org/packages/botan-stable/">botan-stable</a> and
+<a href="https://aur.archlinux.org/packages/encryptpad/">encryptpad</a></p>
+
+<p><code>pacaur</code> installs <code>botan-stable</code> automatically as <code>encryptpad</code> dependency.</p>
 
 <p><div id="build-on-windows" /></p>
 
