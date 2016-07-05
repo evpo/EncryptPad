@@ -241,8 +241,10 @@ Use fingerprints to receive gpg keys for EncryptPad and Botan.
     gpg --recv-key 621DAF6411E1851C4CF9A2E16211EBF1EFBADFBC
     gpg --recv-key 634BFC0CCC426C74389D89310F1CFF71A2813E85
 
-Install two AUR packages: [botan-stable](https://aur.archlinux.org/packages/botan-stable/) and
-[encryptpad](https://aur.archlinux.org/packages/encryptpad/)
+Install the AUR packages below.
+
+- [botan-stable](https://aur.archlinux.org/packages/botan-stable/)<sup><small>AUR</small></sup>
+- [encryptpad](https://aur.archlinux.org/packages/encryptpad/)<sup><small>AUR</small></sup>
 
 `pacaur` installs `botan-stable` automatically as `encryptpad` dependency.
 
