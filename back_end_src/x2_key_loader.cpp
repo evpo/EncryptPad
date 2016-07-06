@@ -32,7 +32,7 @@ namespace
 #if defined(__APPLE__) || defined(unix) || defined(__unix__) || defined(__unix)
     const char *keyStorageDirectory = "~/.encryptpad";
     const char *directorySeparator = "/";
-#else defined(__MINGW32__) || defined(_MSC_VER)
+#elif defined(__MINGW32__) || defined(_MSC_VER)
     const char *keyStorageDirectory = "%USERPROFILE%\\_encryptpad";
     const char *directorySeparator = "\\";
 #endif
