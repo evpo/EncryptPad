@@ -39,13 +39,13 @@ namespace
     const char *sOpenDialogFilter = "Encrypted Files (*.epd *.gpg *.cpad);; Plain Text (*.txt)";
     const char *sKeyDialogFilter = "Key (*.key)";
 
-#if defined(__APPLE__) || defined(__linux__)
+#if defined(__APPLE__) || defined(unix) || defined(__unix__) || defined(__unix)
     const char *sAllFilesFilter = "All Files (*)";
 #else // WINDOWS
     const char *sAllFilesFilter = "All Files (*.*)";
 #endif
 
-#if defined(__APPLE__) || defined(__linux__)
+#if defined(__APPLE__) || defined(unix) || defined(__unix__) || defined(__unix)
     const char *kLibcurlFilter = "*";
 #else
     const char *kLibcurlFilter = "*.exe";
@@ -63,7 +63,7 @@ namespace
 #pragma GCC diagnostic pop
 #endif
 
-#if defined(__linux__)
+#if defined(unix) || defined(__unix__) || defined(__unix)
     QString AppendExtensionForFileDialog(QString fileName, QString selectedFilter)
     {
         if(selectedFilter.isEmpty())

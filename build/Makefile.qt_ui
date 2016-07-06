@@ -5,8 +5,10 @@ QMAKE := qmake
 
 include ../deps/makefiles/platform.mak
 
-ifeq ($(UNIX),on)
+ifeq ($(GNULINUX),on)
     QMAKE_SPEC := linux-g++
+else ifeq ($(PLATFORM),FREEBSD)
+    QMAKE_SPEC := freebsd-clang
 else ifeq ($(PLATFORM),MACOS)
     QMAKE_SPEC := macx-clang
 else
