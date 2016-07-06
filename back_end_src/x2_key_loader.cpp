@@ -29,16 +29,10 @@ using namespace Botan;
 
 namespace 
 {
-#ifdef __APPLE__
+#if defined(__APPLE__) || defined(unix) || defined(__unix__) || defined(__unix)
     const char *keyStorageDirectory = "~/.encryptpad";
     const char *directorySeparator = "/";
-#elif __linux__
-    const char *keyStorageDirectory = "~/.encryptpad";
-    const char *directorySeparator = "/";
-#elif __MINGW32__
-    const char *keyStorageDirectory = "%USERPROFILE%\\_encryptpad";
-    const char *directorySeparator = "\\";
-#elif _MSC_VER
+#elif defined(__MINGW32__) || defined(_MSC_VER)
     const char *keyStorageDirectory = "%USERPROFILE%\\_encryptpad";
     const char *directorySeparator = "\\";
 #endif

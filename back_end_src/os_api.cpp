@@ -33,7 +33,7 @@
 	}
 #endif
 
-#if defined(__APPLE__) || defined(__linux__)
+#if defined(__APPLE__) || defined(unix) || defined(__unix__) || defined(__unix)
 	std::string ExpandVariables(const std::string &path)
     {
         wordexp_t p;

@@ -93,7 +93,7 @@ namespace EncryptPad
 
 }
 
-#elif defined(__APPLE__) || defined(__linux__) 
+#elif defined(__APPLE__) || defined(unix) || defined(__unix__) || defined(__unix)
 
 #include "termios.h"
 #include "unistd.h"

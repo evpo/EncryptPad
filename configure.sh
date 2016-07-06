@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 USAGE="USAGE:\n\
 configure.sh <command> [option]\n\n\
@@ -30,7 +30,7 @@ then
 fi
 
 UNAME=`uname`
-MAKE=make
+MAKE="${MAKE:-make}"
 if [[ $UNAME == *MINGW* ]]
 then
     MAKE=mingw32-make

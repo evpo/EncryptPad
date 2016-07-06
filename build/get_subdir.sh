@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-MAKE=make
+MAKE="${MAKE:-make}"
 if [[ `uname` == *MINGW* ]]
 then
     MAKE=mingw32-make
