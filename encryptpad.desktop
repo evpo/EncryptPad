@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=EncryptPad
+Comment=Secure text editor and binary encryptor
+Icon=encryptpad
+Exec=EncryptPad %f
+Categories=Utility;TextEditor;
+StartupNotify=false
+Terminal=false
+MimeType=application/x-encryptpad

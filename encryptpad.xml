@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mime-info xmlns='http://www.freedesktop.org/standards/shared-mime-info'>
+  <mime-type type="application/x-encryptpad">
+    <comment>EncryptPad file</comment>
+    <glob pattern="*.epd"/>
+    <icon name="encryptpad"/>
+  </mime-type>
+</mime-info>
