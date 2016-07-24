@@ -19,6 +19,7 @@
 //**********************************************************************************
 #include <QApplication>
 #include <QTextCodec>
+#include <QTranslator>
 #include "mainwindow.h"
 #include "application.h"
 
@@ -30,6 +31,11 @@ int main(int argc, char *argv[])
 
     Application app(argc, argv);
     //QTextCodec::setCodecForTr(QTextCodec::codecForName("Unicode"));
+
+    QTranslator translator;
+    translator.load("encryptpad_ru_ru");
+
+    app.installTranslator(&translator);
 
     app.setOrganizationName("Evpo"); //
     app.setApplicationName("EncryptPad");

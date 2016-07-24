@@ -20,10 +20,10 @@
 #pragma once
 #include <QString>
 
-const char *GetOpenDialogFilter();
-const char *GetSaveDialogFilter();
-const char *GetKeyDialogFilter();
-const char *GetAllFilesFilter();
+QString GetOpenDialogFilter();
+QString GetSaveDialogFilter();
+QString GetKeyDialogFilter();
+QString GetAllFilesFilter();
 
 QString AppendExtensionForFileDialog(QString fileName, QString selectedFilter);
 

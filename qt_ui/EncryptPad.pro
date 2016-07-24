@@ -120,6 +120,11 @@ HEADERS += \
 RESOURCES += \
     EncryptPad.qrc
 
+TRANSLATIONS = \
+    encryptpad_en_gb.ts \
+    encryptpad_ru_ru.ts \
+    encryptpad_fr_fr.ts
+
 RC_FILE = encrypt_pad.rc
 DESTDIR = ../../bin/$$CONFIG_NAME
 OBJECTS_DIR = $$CONFIG_NAME/obj

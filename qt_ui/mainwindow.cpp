@@ -454,7 +454,7 @@ void MainWindow::open(QString fileName)
                         this,
                         tr("Open File"),
                         QString(),
-                        tr(GetOpenDialogFilter()));
+                        GetOpenDialogFilter());
 
             if(!selection.cancelled)
             {
