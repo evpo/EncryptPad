@@ -26,6 +26,7 @@ Screenshots and tutorials are at [evpo.net/encryptpad/](http://evpo.net/encryptp
 * [Installing EncryptPad](#installing)
     - [Portable Executable](#portable-exe)
     - [Arch Linux](#install-on-arch)
+    - [Ubuntu or Linux Mint](#install-on-ubuntu)
 * [Build EncryptPad on Windows](#build-on-windows)
   - [Prerequisites](#prerequisites)
   - [Steps](#steps)
@@ -248,8 +249,16 @@ Install the AUR packages below.
 
 `pacaur` installs `botan-stable` automatically as `encryptpad` dependency.
 
+<div id="install-on-ubuntu" />
+###Ubuntu or Linux Mint
+
+Alin Andrei from [**webupd8.org**](http://webupd8.org) kindly created EncryptPad packages for several distributions.
+See [Install EcryptPad in Ubuntu or Linux Mint via PPA on
+webupd8.org](http://www.webupd8.org/2016/07/encryptpad-secure-text-editor-that.html) for
+description and instructions.
+
 <div id="build-on-windows" />
-## Build EncryptPad on Windows
+##Build EncryptPad on Windows
 
 <div id="prerequisites" />
 ###Prerequisites
