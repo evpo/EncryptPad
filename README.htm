@@ -292,12 +292,62 @@ gpg --recv-key 634BFC0CCC426C74389D89310F1CFF71A2813E85
 
 <p><div id="install-on-ubuntu" /></p>
 
-<h3>Ubuntu or Linux Mint</h3>
+<h3>Ubuntu or Linux Mint via PPA</h3>
 
-<p>Alin Andrei from <a href="http://webupd8.org"><strong>webupd8.org</strong></a> kindly created EncryptPad packages for several distributions.
-See <a href="http://www.webupd8.org/2016/07/encryptpad-secure-text-editor-that.html">Install EcryptPad in Ubuntu or Linux Mint via PPA on
-webupd8.org</a> for
-description and instructions.</p>
+<p>Alin Andrei from <a href="http://webupd8.org"><strong>webupd8.org</strong></a> kindly created EncryptPad packages for
+several distributions. See instructions below on how to install them.</p>
+
+<h4>Installation</h4>
+
+<p>Use the commands below to install the packages.</p>
+
+<pre><code>sudo add-apt-repository ppa:nilarimogard/webupd8
+sudo apt update
+sudo apt install encryptpad encryptcli
+</code></pre>
+
+<h4>Integrity verification procedure</h4>
+
+<p>Below are steps to verify the SHA1 hashes of the source files in <a href="https://launchpad.net/~nilarimogard/+archive/ubuntu/webupd8/+packages">Launchpad webupd8 PPA</a> used for building the packages. Ideally, you need to be familiar with the PPA concepts.</p>
+
+<p>1. Download one of the <code>changes</code> files below depending on your distribution.</p>
+
+<ul>
+<li><p>Xenial</p>
+
+<pre><code>wget https://launchpadlibrarian.net/274427013/encryptpad_0.3.2.2-1~webupd8~xenial1_source.changes
+</code></pre></li>
+<li><p>Wily</p>
+
+<pre><code>wget https://launchpadlibrarian.net/274427018/encryptpad_0.3.2.2-1~webupd8~wily1_source.changes
+</code></pre></li>
+<li><p>Vivid</p>
+
+<pre><code>wget https://launchpadlibrarian.net/274427103/encryptpad_0.3.2.2-1~webupd8~vivid1_source.changes
+</code></pre></li>
+<li><p>Trusty</p>
+
+<pre><code>wget https://launchpadlibrarian.net/274427338/encryptpad_0.3.2.2-1~webupd8~trusty1_source.changes
+</code></pre></li>
+</ul>
+
+<p>2. Download the signed manifest with SHA1 hashes:</p>
+
+<pre><code>wget https://github.com/evpo/EncryptPad/releases/download/v0.3.2.2/encryptpad0_3_2_2_webupd8_ppa_manifest.asc
+</code></pre>
+
+<p>3. Receive and verify the <code>EncryptPad Release</code> key</p>
+
+<pre><code>gpg --recv-key 634BFC0CCC426C74389D89310F1CFF71A2813E85
+</code></pre>
+
+<p>4. Verify the signature on the manifest</p>
+
+<pre><code>gpg --verify encryptpad0_3_2_2_webupd8_ppa_manifest.asc
+</code></pre>
+
+<p>5. Open the manifest asc file in a text editor and the <code>changes</code> text file. Compare that the SHA1
+    hashes on the listed source files match.</p>
 
 <p><div id="build-on-windows" /></p>
 

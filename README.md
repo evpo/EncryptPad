@@ -250,12 +250,55 @@ Install the AUR packages below.
 `pacaur` installs `botan-stable` automatically as `encryptpad` dependency.
 
 <div id="install-on-ubuntu" />
-###Ubuntu or Linux Mint
+###Ubuntu or Linux Mint via PPA
 
-Alin Andrei from [**webupd8.org**](http://webupd8.org) kindly created EncryptPad packages for several distributions.
-See [Install EcryptPad in Ubuntu or Linux Mint via PPA on
-webupd8.org](http://www.webupd8.org/2016/07/encryptpad-secure-text-editor-that.html) for
-description and instructions.
+Alin Andrei from [**webupd8.org**](http://webupd8.org) kindly created EncryptPad packages for
+several distributions. See instructions below on how to install them.
+
+#### Installation
+
+Use the commands below to install the packages.
+
+    sudo add-apt-repository ppa:nilarimogard/webupd8
+    sudo apt update
+    sudo apt install encryptpad encryptcli
+
+#### Integrity verification procedure
+
+Below are steps to verify the SHA1 hashes of the source files in [Launchpad webupd8 PPA](https://launchpad.net/~nilarimogard/+archive/ubuntu/webupd8/+packages) used for building the packages. Ideally, you need to be familiar with the PPA concepts.
+
+1\. Download one of the `changes` files below depending on your distribution.
+
+- Xenial
+
+        wget https://launchpadlibrarian.net/274427013/encryptpad_0.3.2.2-1~webupd8~xenial1_source.changes
+
+- Wily
+
+        wget https://launchpadlibrarian.net/274427018/encryptpad_0.3.2.2-1~webupd8~wily1_source.changes
+
+- Vivid
+
+        wget https://launchpadlibrarian.net/274427103/encryptpad_0.3.2.2-1~webupd8~vivid1_source.changes
+
+- Trusty
+
+        wget https://launchpadlibrarian.net/274427338/encryptpad_0.3.2.2-1~webupd8~trusty1_source.changes
+
+2\. Download the signed manifest with SHA1 hashes:
+
+    wget https://github.com/evpo/EncryptPad/releases/download/v0.3.2.2/encryptpad0_3_2_2_webupd8_ppa_manifest.asc
+
+3\. Receive and verify the `EncryptPad Release` key
+
+    gpg --recv-key 634BFC0CCC426C74389D89310F1CFF71A2813E85
+
+4\. Verify the signature on the manifest
+
+    gpg --verify encryptpad0_3_2_2_webupd8_ppa_manifest.asc
+
+5\. Open the manifest asc file in a text editor and the `changes` text file. Compare that the SHA1
+    hashes on the listed source files match.
 
 <div id="build-on-windows" />
 ##Build EncryptPad on Windows
