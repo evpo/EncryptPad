@@ -26,73 +26,72 @@ SetPasswordDialog::SetPasswordDialog(QWidget *parent, const bool enableConfirmat
     :QDialog(parent, kDefaultWindowFlags)
 {
     setWindowModality(Qt::WindowModality::ApplicationModal);
-	mConfirmationEnabled = enableConfirmation;
-	pwdLabel = new QLabel(tr("&Password:"));
-	pwdLineEdit = new QLineEdit;
-	pwdLineEdit->setEchoMode(QLineEdit::Password);
-	pwdLabel->setBuddy(pwdLineEdit);
-	
-	confirmPwdLabel = new QLabel(tr("&Confirm:"));
-	confirmPwdLineEdit = new QLineEdit;
-	confirmPwdLineEdit->setEchoMode(QLineEdit::Password);
-	confirmPwdLabel->setBuddy(confirmPwdLineEdit);
-	if(!mConfirmationEnabled)
-	{
-		HideConfirmation();
-	}
+    mConfirmationEnabled = enableConfirmation;
+    pwdLabel = new QLabel(tr("&Password:"));
+    pwdLineEdit = new QLineEdit;
+    pwdLineEdit->setEchoMode(QLineEdit::Password);
+    pwdLabel->setBuddy(pwdLineEdit);
 
-	okButton = new QPushButton(tr("&OK"));
+    confirmPwdLabel = new QLabel(tr("&Confirm:"));
+    confirmPwdLineEdit = new QLineEdit;
+    confirmPwdLineEdit->setEchoMode(QLineEdit::Password);
+    confirmPwdLabel->setBuddy(confirmPwdLineEdit);
+    if(!mConfirmationEnabled)
+    {
+        HideConfirmation();
+    }
 
-	cancelButton = new QPushButton(tr("Cancel"));
+    okButton = new QPushButton(tr("&OK"));
 
-	connect(okButton, SIGNAL(clicked()),this, SLOT(okClicked()));
-	connect(cancelButton, SIGNAL(clicked()), this, SLOT(reject()));
+    cancelButton = new QPushButton(tr("Cancel"));
 
-	QVBoxLayout *leftLayout = new QVBoxLayout;
-	leftLayout->addWidget(pwdLabel);
-	leftLayout->addWidget(confirmPwdLabel);
+    connect(okButton, SIGNAL(clicked()),this, SLOT(okClicked()));
+    connect(cancelButton, SIGNAL(clicked()), this, SLOT(reject()));
 
-	QVBoxLayout *middleLayout = new QVBoxLayout;
-	middleLayout->addWidget(pwdLineEdit);
-	middleLayout->addWidget(confirmPwdLineEdit);
-	
-	QVBoxLayout *rightLayout = new QVBoxLayout;
-	rightLayout->addWidget(okButton);
-	rightLayout->addWidget(cancelButton);
-	rightLayout->addStretch();
+    QVBoxLayout *leftLayout = new QVBoxLayout;
+    leftLayout->addWidget(pwdLabel);
+    leftLayout->addWidget(confirmPwdLabel);
 
-	QHBoxLayout *mainLayout = new QHBoxLayout;
-	mainLayout->addLayout(leftLayout);
-	mainLayout->addLayout(middleLayout);
-	mainLayout->addLayout(rightLayout);
+    QVBoxLayout *middleLayout = new QVBoxLayout;
+    middleLayout->addWidget(pwdLineEdit);
+    middleLayout->addWidget(confirmPwdLineEdit);
 
-	setLayout(mainLayout);
+    QVBoxLayout *rightLayout = new QVBoxLayout;
+    rightLayout->addWidget(okButton);
+    rightLayout->addWidget(cancelButton);
+    rightLayout->addStretch();
 
-	setWindowTitle(tr("Set Password"));
-	setFixedHeight(sizeHint().height());
+    QHBoxLayout *mainLayout = new QHBoxLayout;
+    mainLayout->addLayout(leftLayout);
+    mainLayout->addLayout(middleLayout);
+    mainLayout->addLayout(rightLayout);
+
+    setLayout(mainLayout);
+
+    setWindowTitle(tr("Set Password"));
+    setFixedHeight(sizeHint().height());
 }
 
 void SetPasswordDialog::HideConfirmation()
 {
-	confirmPwdLabel->hide();
-	confirmPwdLineEdit->hide();
+    confirmPwdLabel->hide();
+    confirmPwdLineEdit->hide();
 }
 
 void SetPasswordDialog::okClicked()
 {
-	if(mConfirmationEnabled && pwdLineEdit->text() != confirmPwdLineEdit->text())
-	{
-		QMessageBox::warning(
-			this,
-			"Set Password",
-			"The confirmed password does not match");
-		return;
-	}
-	
-	done(QDialog::Accepted);
+    if(mConfirmationEnabled && pwdLineEdit->text() != confirmPwdLineEdit->text())
+    {
+        QMessageBox::warning(
+            this,
+            tr("Set Password"),
+            tr("The confirmed password does not match"));
+        return;
+    }
+    done(QDialog::Accepted);
 }
 
 const QString SetPasswordDialog::GetValue()
 {
-	return pwdLineEdit->text();
+    return pwdLineEdit->text();
 }

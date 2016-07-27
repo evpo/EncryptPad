@@ -29,10 +29,8 @@ void FindDialog::on_uiFind_textChanged(const QString &text)
     ui->uiFindNext->setEnabled(!text.isEmpty());
 }
 
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic push
 void FindDialog::on_FindDialog_finished(int result)
 {
+    (void)result;
     ui->uiFind->setFocus();
 }
-#pragma GCC diagnostic pop

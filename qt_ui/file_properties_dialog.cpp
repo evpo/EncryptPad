@@ -20,6 +20,7 @@
 #include "file_properties_dialog.h"
 #include "ui_file_properties_dialog.h"
 #include <QDebug>
+#include <QtGlobal>
 #include <sstream>
 #include "common_definitions.h"
 
@@ -42,7 +43,7 @@ namespace
         c->clear();
         while(p->name)
         {
-            c->addItem(QString(p->name), ToInt(p->id));
+            c->addItem(qApp->translate("FilePropertiesDialog", p->name), ToInt(p->id));
             p++;
         }
     }
@@ -78,7 +79,7 @@ void FilePropertiesDialog::PopulateItems()
         {"TripleDES", ToInt(CipherAlgo::TripleDES)},
         {"CAST5", ToInt(CipherAlgo::CAST5)},
         {"AES128", ToInt(CipherAlgo::AES128)},
-        {"AES256 (recommended)", ToInt(CipherAlgo::AES256)},
+        {QT_TRANSLATE_NOOP("FilePropertiesDialog", "AES256 (recommended)"), ToInt(CipherAlgo::AES256)},
         {nullptr, 0}
     };
 
@@ -91,7 +92,7 @@ void FilePropertiesDialog::PopulateItems()
 
     static Name2Id compressions[] =
     {
-        {"Uncompressed", ToInt(Compression::Uncompressed)},
+        {QT_TRANSLATE_NOOP("FilePropertiesDialog", "Uncompressed"), ToInt(Compression::Uncompressed)},
         {"ZIP", ToInt(Compression::ZIP)},
         {"ZLIB", ToInt(Compression::ZLIB)},
         {nullptr, 0}

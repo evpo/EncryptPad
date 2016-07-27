@@ -48,7 +48,6 @@ typedef unsigned char byte;
 
 namespace 
 {
-    
 #if defined(__MINGW__) || defined(__MINGW32__)
     const char *kRepositoryDirName = "_encryptpad";
 #else
@@ -142,7 +141,7 @@ MainWindow::MainWindow(): encryptionKeyFile(tr("")), persistEncryptionKeyPath(fa
 
     plain_text_functor_.EncryptedPlainSwitchChange(!enc.GetIsPlainText());
     enc.SetEncryptedPlainSwitchFunctor(&plain_text_functor_);
-	setCurrentFile("");
+    setCurrentFile("");
 
     update();
 
@@ -159,8 +158,8 @@ void MainWindow::updateLineStatus()
 
     int lineNumber = cursor.blockNumber();
 
-    lineStatus->setText(tr("ln: ") + QString::number(lineNumber + 1) + " of " + QString::number(count));
-    charStatus->setText(tr("chars: ") + QString::number(charCount - 1));
+    lineStatus->setText(tr("ln: %1 of %2").arg(QString::number(lineNumber + 1)).arg(QString::number(count)));
+    charStatus->setText(tr("chars: %1").arg(QString::number(charCount - 1)));
 }
 
 void MainWindow::cursorPositionChanged()
@@ -177,14 +176,14 @@ void MainWindow::onUrlDrop(QUrl url)
 
 void MainWindow::UpdateEncryptedPlainSwitch(bool encrypted)
 {
-	if(!encrypted)
+    if(!encrypted)
     {
-        passwordSet->setText(tr("<span style=\"color:#FF0000;\">Password not set"));
+        passwordSet->setText(QString("<span style=\"color:#FF0000;\">") + tr("Password not set") + QString("</span>"));
         clearPasswordAct->setEnabled(false);
     }
-	else
+    else
     {
-        passwordSet->setText(tr("<b>Password protected</b>"));
+        passwordSet->setText(QString("<b>") + tr("Password protected") + QString("</b>"));
         clearPasswordAct->setEnabled(true);
     }
 }
@@ -236,7 +235,7 @@ void MainWindow::AsyncOperationCompleted()
         QMessageBox::warning(
                     this,
                     "EncryptPad",
-                    "Cannot open '" + load_state_machine_.get_file_name() + "'");
+                    tr("Cannot open '%1'").arg(load_state_machine_.get_file_name()));
         rejected = true;
         break;
     case EncryptPadEncryptor::Result::EncryptionError:
@@ -248,7 +247,7 @@ void MainWindow::AsyncOperationCompleted()
             QMessageBox::warning(
                 this,
                 "EncryptPad",
-                "Cannot open '" + load_state_machine_.get_file_name() + "'");
+                tr("Cannot open '%1'").arg(load_state_machine_.get_file_name()));
             rejected = true;
         }
         else
@@ -266,28 +265,28 @@ void MainWindow::AsyncOperationCompleted()
         QMessageBox::warning(
                     this,
                     "EncryptPad",
-                    "Cannot open the encryption key");
+                    tr("Cannot open the encryption key"));
         rejected = true;
         break;
     case EncryptPadEncryptor::Result::InvalidX2File:
         QMessageBox::warning(
                     this,
                     "EncryptPad",
-                    "The encryption key is invalid");
+                    tr("The encryption key is invalid"));
         rejected = true;
         break;
     case EncryptPadEncryptor::Result::X2CurlIsNotFound:
         QMessageBox::warning(
                     this,
                     "EncryptPad",
-                    "Cannot download the encryption key. CURL tool is not found.");
+                    tr("Cannot download the encryption key. CURL tool is not found."));
         rejected = true;
         break;
     case EncryptPadEncryptor::Result::X2CurlExitNonZero:
         QMessageBox::warning(
                     this,
                     "EncryptPad",
-                    "Cannot download the key. CURL returned non zero exit code");
+                    tr("Cannot download the key. CURL returned non zero exit code"));
         rejected = true;
         break;
     case EncryptPadEncryptor::Result::X2FileIsRequired:
@@ -409,15 +408,14 @@ void MainWindow::onApplicationActive()
     if(lastModified == modified)
         return;
 
-    QString message = tr("The file has been modified by another program. Do you want to reload it");
+    QString message = tr("The file has been modified by another program. Do you want to reload it?");
     if(textEdit->document()->isModified())
     {
-        message += " and lose the changes made in this application";
+        message = tr("The file has been modified by another program. Do you want to reload it"
+            " and lose the changes made in this application?");
     }
 
-    message += "?";
-
-    auto reply = QMessageBox::question(this, tr("EncryptPad"),
+    auto reply = QMessageBox::question(this, "EncryptPad",
         message,
         QMessageBox::Yes | QMessageBox::No,
         QMessageBox::Yes);
@@ -522,8 +520,8 @@ QString MainWindow::accessRepositoryPath(const QString &fileName)
     {
         QMessageBox::warning(
                     this,
-                    tr("EncryptPad"),
-                    "Cannot create the repository directory in HOME");
+                    "EncryptPad",
+                    tr("Cannot create the repository directory in HOME"));
         return QString();
     }
 
@@ -548,8 +546,8 @@ void MainWindow::createNewKey()
     QString filePath = fileName;
     if(isRepo)
     {
-        if(!fileName.endsWith(tr(".key"), Qt::CaseInsensitive))
-            fileName += tr(".key");
+        if(!fileName.endsWith(".key", Qt::CaseInsensitive))
+            fileName += ".key";
 
         filePath = accessRepositoryPath(fileName);
         if(filePath.isEmpty())
@@ -564,7 +562,7 @@ void MainWindow::createNewKey()
     {
         auto ret = QMessageBox::warning(
                     this,
-                    tr("EncryptPad"),
+                    "EncryptPad",
                     tr("You left the password blank. The key file is going to be UNENCRYPTED. Do you want to continue?"),
                     QMessageBox::Ok | QMessageBox::Cancel
                     );
@@ -595,8 +593,8 @@ void MainWindow::createNewKey()
     {
         QMessageBox::warning(
             this,
-            tr("EncryptPad"),
-            "Cannot generate the key '" + fileName + "' Check the path and permissions.");
+            "EncryptPad",
+            tr("Cannot generate the key '%1' Check the path and permissions.").arg(fileName));
 
         statusBar()->showMessage(tr("Cannot generate key"));
         return;
@@ -616,15 +614,15 @@ void MainWindow::createNewKey()
 void MainWindow::about()
 {
    QMessageBox::about(this, tr("About EncryptPad"),
-            tr("<b>EncryptPad " VER_PRODUCTVERSION_STR " Beta</b><br/><br/>"
+            tr("<b>EncryptPad %1 Beta</b><br/><br/>"
                "Minimalist secure text editor and binary encryptor that implements <br/>"
                "RFC 4880 Open PGP format: "
                "symmetrically encrypted, compressed and integrity protected. "
                "The editor can ptotect files with passwords, key files or both.<br/><br/>"
-               VER_LEGALCOPYRIGHT_STR "<br/>"
+               "%2<br/>"
                "GNU General Public License v2<br/><br/>"
-               "<a href=\"http://www.evpo.net/encryptpad\">http://www.evpo.net/encryptpad</a>"
-               ));
+               ).arg(VER_PRODUCTVERSION_STR).arg(VER_LEGALCOPYRIGHT_STR) +
+               QString("<a href=\"http://www.evpo.net/encryptpad\">http://www.evpo.net/encryptpad</a>"));
 }
 
 void MainWindow::documentWasModified()
@@ -699,8 +697,8 @@ void MainWindow::createActions()
     connect(createNewKeyAct, SIGNAL(triggered()), this, SLOT(createNewKey()));
 
     setPasswordAct = new QAction(QIcon(":/images/famfamfam/lock.png"), tr("Set &Password..."), this);
-	setPasswordAct->setStatusTip(tr("Set password for encryption and decryption"));
-	connect(setPasswordAct, SIGNAL(triggered()), this, SLOT(setPassword()));
+    setPasswordAct->setStatusTip(tr("Set password for encryption and decryption"));
+    connect(setPasswordAct, SIGNAL(triggered()), this, SLOT(setPassword()));
 
     setEncryptionKeyAct = new QAction(QIcon(":/images/famfamfam/key.png"), tr("Set &Encryption Key..."), this);
     setEncryptionKeyAct->setStatusTip(tr("Set encryption key file"));
@@ -795,7 +793,7 @@ void MainWindow::createActions()
     connect(zoomOutAct, SIGNAL(triggered()), this, SLOT(zoomOut()));
 
     resetZoomAct = new QAction(QIcon(":/images/famfamfam/magnifier.png"), tr("&Reset Zoom"), this);
-    resetZoomAct->setShortcut(QKeySequence(tr("Ctrl+0")));
+    resetZoomAct->setShortcut(QKeySequence("Ctrl+0"));
     resetZoomAct->setStatusTip(tr("Reset Zoom"));
     connect(resetZoomAct, SIGNAL(triggered()), this, SLOT(resetZoom()));
 
@@ -994,7 +992,7 @@ void MainWindow::createMenus()
     menuBar()->addSeparator();
 
     encMenu = menuBar()->addMenu(tr("En&cryption"));
-	encMenu->addAction(setPasswordAct);
+    encMenu->addAction(setPasswordAct);
     encMenu->addAction(clearPasswordAct);
     encMenu->addSeparator();
     encMenu->addAction(createNewKeyAct);
@@ -1029,8 +1027,8 @@ void MainWindow::createToolBars()
     editToolBar->addAction(generatePasswordAct);
     editToolBar->addAction(readOnlyAct);
 
-	encToolBar = addToolBar(tr("Encryption"));
-	encToolBar->addAction(setPasswordAct);
+    encToolBar = addToolBar(tr("Encryption"));
+    encToolBar->addAction(setPasswordAct);
     encToolBar->addAction(clearPasswordAct);
     encToolBar->addAction(createNewKeyAct);
     encToolBar->addAction(setEncryptionKeyAct);
@@ -1048,18 +1046,17 @@ void MainWindow::createStatusBar()
 {
     statusBar()->showMessage(tr("Ready"));
 
-    lineStatus = new QLabel(tr(""), this);
+    lineStatus = new QLabel("", this);
     statusBar()->addPermanentWidget(lineStatus);
 
-    charStatus = new QLabel(tr(""), this);
+    charStatus = new QLabel("", this);
     statusBar()->addPermanentWidget(charStatus);
 
-    passwordSet = new QLabel(tr(""), this);
+    passwordSet = new QLabel("", this);
     statusBar()->addPermanentWidget(passwordSet);
 
-    encryptionKeySet = new QLabel(tr(""), this);
+    encryptionKeySet = new QLabel("", this);
     statusBar()->addPermanentWidget(encryptionKeySet);
-
 }
 
 void MainWindow::readSettings()
@@ -1126,7 +1123,7 @@ bool MainWindow::maybeSave()
 {
     if (isWindowModified()) {
         QMessageBox::StandardButton ret;
-        ret = QMessageBox::warning(this, tr("EncryptPad"),
+        ret = QMessageBox::warning(this, "EncryptPad",
                      tr("The document has been modified.\n"
                         "Do you want to save your changes?"),
                      QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
@@ -1256,25 +1253,25 @@ void MainWindow::startSave(const QString &fileName, std::string &kf_passphrase)
         break;
     case EncryptPadEncryptor::Result::CpadFileIOError:
     case EncryptPadEncryptor::Result::InvalidCpadFile:
-        warningMessage = "Cannot save '" + fileName + "'";
+        warningMessage = tr("Cannot save '%1'").arg(fileName);
         break;
     case EncryptPadEncryptor::Result::X2KeyIOError:
-        warningMessage = "Cannot open the specified encryption key";
+        warningMessage = tr("Cannot open the specified encryption key");
         break;
     case EncryptPadEncryptor::Result::InvalidX2File:
-        warningMessage = "The specified encryption key is invalid";
+        warningMessage = tr("The specified encryption key is invalid");
         break;
     case EncryptPadEncryptor::Result::X2CurlIsNotFound:
-        warningMessage = "Cannot download the encryption key. CURL tool is not found";
+        warningMessage = tr("Cannot download the encryption key. CURL tool is not found");
         break;
     case EncryptPadEncryptor::Result::X2CurlExitNonZero:
-        warningMessage = "Cannot download the encryption key. CURL returned non zero exit code";
+        warningMessage = tr("Cannot download the encryption key. CURL returned non zero exit code");
         break;
     case EncryptPadEncryptor::Result::EncryptionError:
-        warningMessage = "Unknown encryption error";
+        warningMessage = tr("Unknown encryption error");
         break;
     case EncryptPadEncryptor::Result::BakFileMoveFailed:
-        warningMessage = "Cannot create bak file";
+        warningMessage = tr("Cannot create bak file");
         break;
     case EncryptPadEncryptor::Result::InvalidKeyFilePassphrase:
         // Ask for the password again
@@ -1282,7 +1279,7 @@ void MainWindow::startSave(const QString &fileName, std::string &kf_passphrase)
         saveFile(fileName);
         return;
     default:
-        warningMessage = "Unknown error";
+        warningMessage = tr("Unknown error");
     }
 
     if(result != EncryptPadEncryptor::Result::OK)
@@ -1322,7 +1319,7 @@ void MainWindow::clearPassword(bool makeFileDirty)
 void MainWindow::clearEncryptionKey(bool makeFileDirty)
 {
     persistEncryptionKeyPath = false;
-    setEncryptionKeyFile(tr(""));
+    setEncryptionKeyFile("");
     updateEncryptionKeyStatus();
     if(makeFileDirty)
         makeDirty();
@@ -1359,7 +1356,7 @@ void MainWindow::setFileProperties()
     dlg.SetUiFromMetadata(metadata);
     if(dlg.exec() == QDialog::Rejected || !dlg.GetIsDirty())
         return;
-    
+
     dlg.UpdateMetadataFromUi(metadata);
     // if an algorithm has changed, the keys need to be regenerated.
     clearPassword();
@@ -1493,7 +1490,7 @@ void MainWindow::zoomIn()
 
     textEdit->zoomIn();
     currentZoom++;
-    statusBar()->showMessage(tr("Font size: ") + QString::number(++pointSize));
+    statusBar()->showMessage(tr("Font size: %1").arg(QString::number(++pointSize)));
 }
 
 void MainWindow::zoomOut()
@@ -1507,7 +1504,7 @@ void MainWindow::zoomOut()
 
     textEdit->zoomOut();
     currentZoom--;
-    statusBar()->showMessage(tr("Font size: ") + QString::number(--pointSize));
+    statusBar()->showMessage(tr("Font size: ").arg(QString::number(--pointSize)));
 }
 
 void MainWindow::resetZoom()
@@ -1522,7 +1519,7 @@ void MainWindow::resetZoom()
 
     currentZoom = 0;
     int pointSize = textEdit->font().pointSize();
-    statusBar()->showMessage(tr("Font size: ") + QString::number(pointSize));
+    statusBar()->showMessage(tr("Font size: ").arg(QString::number(pointSize)));
 }
 
 bool MainWindow::saveFile(const QString &fileName)
@@ -1557,8 +1554,17 @@ void MainWindow::setCurrentFile(const QString &fileName)
 
 void MainWindow::updateEncryptionKeyStatus()
 {
-    QString str = encryptionKeyFile.length() > 0 ? tr("<b>Key protected") : tr("<span style=\"color:#FF0000;\">Key not set</span>");
-    str += tr(persistEncryptionKeyPath ? " (persisted)</b>" : "</b>");
+    QString key_protected = tr("Key protected");
+    QString key_not_set = tr("Key not set");
+    QString persisted = tr("persisted");
+
+    QString str = encryptionKeyFile.length() > 0 ?
+        (QString("<b>") + key_protected) :
+        (QString("<span style=\"color:#FF0000;\">") + key_not_set + QString("</span>"));
+
+    str += persistEncryptionKeyPath ? (QString(" (") + persisted + QString(")</b>"))
+        : QString("</b>");
+
     if(encryptionKeyFile.length() == 0)
         clearEncryptionKeyAct->setEnabled(false);
     else

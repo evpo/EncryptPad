@@ -19,6 +19,7 @@
 //**********************************************************************************
 #include "load_save_handler.h"
 #include <QtGui>
+#include <QtGlobal>
 #include <QString>
 #include <QObject>
 #include <QMessageBox>
@@ -34,7 +35,7 @@
 
 namespace EncryptPad
 {
-    const char *kKeyFilePassphraseWindowTitle = "Password for Key File";
+    const char *kKeyFilePassphraseWindowTitle = QT_TRANSLATE_NOOP("LoadSaveHandler", "Password for Key File");
 
     bool LoadHandler::LoadFile(const QString &fileName, bool force_kf_passphrase_request)
     {
@@ -49,8 +50,8 @@ namespace EncryptPad
         {
             QMessageBox::warning(
                     parent,
-                    QObject::tr("EncryptPad"),
-                    QObject::tr("Cannot open the file because it does not exist"));
+                    "EncryptPad",
+                    qApp->translate("LoadSaveHandler", "Cannot open the file because it does not exist"));
 
             return false;
         }
@@ -133,7 +134,7 @@ namespace EncryptPad
         std::string kf_passphrase;
         if((isKey && !client.HasKeyFilePassphrase()) || force_kf_passphrase_request)
         {
-            if(!OpenPasswordDialog(false, &kf_passphrase, false, kKeyFilePassphraseWindowTitle))
+            if(!OpenPasswordDialog(false, &kf_passphrase, false, qApp->translate("LoadSaveHandler", kKeyFilePassphraseWindowTitle)))
                 return false;
         }
 
@@ -160,8 +161,8 @@ namespace EncryptPad
             {
                 auto ret = QMessageBox::warning(
                         parent,
-                        QObject::tr("EncryptPad"),
-                        QObject::tr("GPG format does not support persisted key path.\n"
+                        "EncryptPad",
+                        qApp->translate("LoadSaveHandler", "GPG format does not support persisted key path.\n"
                             "Do you want to disable it?"),
                         QMessageBox::Ok | QMessageBox::Cancel
                         );
@@ -177,8 +178,8 @@ namespace EncryptPad
             {
                 QMessageBox::warning(
                         parent,
-                        QObject::tr("EncryptPad"),
-                        QObject::tr("GPG format does not support the password and key file double protection.\n"
+                        "EncryptPad",
+                        qApp->translate("LoadSaveHandler", "GPG format does not support the password and key file double protection.\n"
                             "Use EPD format or disable either password or key protection."));
 
                 return false;
@@ -202,8 +203,8 @@ namespace EncryptPad
         {
             auto ret = QMessageBox::warning(
                     parent,
-                    QObject::tr("EncryptPad"),
-                    QObject::tr("Neither a key file nor password is set. The file is going to be saved UNENCRYPTED."),
+                    "EncryptPad",
+                    qApp->translate("LoadSaveHandler", "Neither a key file nor password is set. The file is going to be saved UNENCRYPTED."),
                     QMessageBox::Ok | QMessageBox::Cancel
                     );
 
@@ -260,7 +261,7 @@ namespace EncryptPad
 
         if(set_client_password)
             client.SetPassword(pwd, metadata);
-        
+
         if(passphrase)
             *passphrase = pwd;
         return true;
