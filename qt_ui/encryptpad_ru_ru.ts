@@ -246,17 +246,17 @@ Do you want to replace it?</source>
     <message>
         <location filename="file_properties_dialog.ui" line="29"/>
         <source>File Properties</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Свойства Файла</translation>
     </message>
     <message>
         <location filename="file_properties_dialog.ui" line="55"/>
         <source>Cipher:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Алгоритм:</translation>
     </message>
     <message>
         <location filename="file_properties_dialog.ui" line="65"/>
         <source>Iterations:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Итерации:</translation>
     </message>
     <message>
         <location filename="file_properties_dialog.ui" line="73"/>
@@ -280,12 +280,12 @@ Do you want to replace it?</source>
         <location filename="file_properties_dialog.ui" line="88"/>
         <source>AES256 (recommended)</source>
         <comment>9</comment>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">AES256 (рекомендован)</translation>
     </message>
     <message>
         <location filename="file_properties_dialog.ui" line="96"/>
         <source>Compression:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Компрессия:</translation>
     </message>
     <message>
         <location filename="file_properties_dialog.ui" line="107"/>
@@ -314,17 +314,17 @@ Do you want to replace it?</source>
         <location filename="file_properties_dialog.ui" line="136"/>
         <source>SHA256 (recommended)</source>
         <comment>8</comment>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">SHA256 (рекомендован)</translation>
     </message>
     <message>
         <location filename="file_properties_dialog.ui" line="144"/>
         <source>Hash:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Хэш:</translation>
     </message>
     <message>
         <location filename="file_properties_dialog.ui" line="176"/>
         <source>Salt:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Соль:</translation>
     </message>
     <message>
         <location filename="file_properties_dialog.ui" line="183"/>
@@ -336,6 +336,16 @@ Do you want to replace it?</source>
         <source>PropertyChanged</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <location filename="file_properties_dialog.cpp" line="82"/>
+        <source>AES256 (recommended)</source>
+        <translation type="unfinished">AES256 (рекомендован)</translation>
+    </message>
+    <message>
+        <location filename="file_properties_dialog.cpp" line="95"/>
+        <source>Uncompressed</source>
+        <translation type="unfinished">Без компрессии</translation>
+    </message>
 </context>
 <context>
     <name>FindAndReplace</name>
@@ -343,42 +353,42 @@ Do you want to replace it?</source>
         <location filename="find_and_replace.ui" line="26"/>
         <location filename="find_and_replace.ui" line="89"/>
         <source>Replace</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Заменить</translation>
     </message>
     <message>
         <location filename="find_and_replace.ui" line="34"/>
         <source>&amp;Replace with:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&amp;Заменить на:</translation>
     </message>
     <message>
         <location filename="find_and_replace.ui" line="44"/>
         <source>&amp;Find what:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&amp;Найти:</translation>
     </message>
     <message>
         <location filename="find_and_replace.ui" line="54"/>
         <source>Match case</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Различать заглавные</translation>
     </message>
     <message>
         <location filename="find_and_replace.ui" line="67"/>
         <source>Match whole word only</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Все слово</translation>
     </message>
     <message>
         <location filename="find_and_replace.ui" line="79"/>
         <source>Find Next</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Следующий</translation>
     </message>
     <message>
         <location filename="find_and_replace.ui" line="99"/>
         <source>Replace All</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Заменить Все</translation>
     </message>
     <message>
         <location filename="find_and_replace.ui" line="106"/>
         <source>Close</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Закрыть</translation>
     </message>
 </context>
 <context>
@@ -386,42 +396,42 @@ Do you want to replace it?</source>
     <message>
         <location filename="find_dialog.ui" line="26"/>
         <source>Find</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Найти</translation>
     </message>
     <message>
         <location filename="find_dialog.ui" line="34"/>
         <source>&amp;Down</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">В&amp;низ</translation>
     </message>
     <message>
         <location filename="find_dialog.ui" line="44"/>
         <source>Match whole &amp;word only</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&amp;Все слово</translation>
     </message>
     <message>
         <location filename="find_dialog.ui" line="51"/>
         <source>&amp;Up</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Вв&amp;ерх</translation>
     </message>
     <message>
         <location filename="find_dialog.ui" line="58"/>
         <source>&amp;Match case</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&amp;Разл. загл.</translation>
     </message>
     <message>
         <location filename="find_dialog.ui" line="65"/>
         <source>&amp;Find what:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&amp;Найти:</translation>
     </message>
     <message>
         <location filename="find_dialog.ui" line="83"/>
         <source>Find &amp;Next</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&amp;Следующий</translation>
     </message>
     <message>
         <location filename="find_dialog.ui" line="90"/>
         <source>&amp;Close</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&amp;Закрыть</translation>
     </message>
 </context>
 <context>
@@ -429,17 +439,17 @@ Do you want to replace it?</source>
     <message>
         <location filename="get_password_dialog.ui" line="26"/>
         <source>Password</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Пароль</translation>
     </message>
     <message>
         <location filename="get_password_dialog.ui" line="49"/>
         <source>&amp;Password:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&amp;Пароль:</translation>
     </message>
     <message>
         <location filename="get_password_dialog.ui" line="65"/>
         <source>Leave blank when password is not needed</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Оставить пустым если пароль не требуется</translation>
     </message>
 </context>
 <context>
@@ -447,562 +457,676 @@ Do you want to replace it?</source>
     <message>
         <location filename="get_password_or_key_dialog.ui" line="14"/>
         <source>Password or Key File</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Пароль или Ключ</translation>
     </message>
     <message>
         <location filename="get_password_or_key_dialog.ui" line="37"/>
         <source>Password:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Пароль:</translation>
     </message>
     <message>
         <location filename="get_password_or_key_dialog.ui" line="47"/>
         <source>Key File:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Ключ:</translation>
     </message>
     <message>
         <location filename="get_password_or_key_dialog.ui" line="67"/>
         <source>Leave blank when password is not needed</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Оставить пустым если пароль не требуется</translation>
     </message>
     <message>
         <location filename="get_password_or_key_dialog.ui" line="80"/>
         <location filename="get_password_or_key_dialog.ui" line="105"/>
         <source>Select...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Выбрать...</translation>
     </message>
     <message>
         <location filename="get_password_or_key_dialog.ui" line="108"/>
         <source>Select key file</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Выбрать ключ</translation>
+    </message>
+</context>
+<context>
+    <name>LoadSaveHandler</name>
+    <message>
+        <location filename="load_save_handler.cpp" line="38"/>
+        <source>Password for Key File</source>
+        <translation type="unfinished">Пароль для Ключа</translation>
+    </message>
+    <message>
+        <location filename="load_save_handler.cpp" line="54"/>
+        <source>Cannot open the file because it does not exist</source>
+        <translation type="unfinished">Не могу открыть файл, так как он не существует</translation>
+    </message>
+    <message>
+        <location filename="load_save_handler.cpp" line="165"/>
+        <source>GPG format does not support persisted key path.</source>
+        <oldsource>GPG format does not support persisted key path.
+Do you want to disable it?</oldsource>
+        <translation type="unfinished">Формат GPG не поддерживает сохранение пути к ключу.</translation>
+    </message>
+    <message>
+        <location filename="load_save_handler.cpp" line="167"/>
+        <source>Do you want to disable it?</source>
+        <translation type="unfinished">Хотите отключить?</translation>
+    </message>
+    <message>
+        <location filename="load_save_handler.cpp" line="183"/>
+        <source>GPG format does not support the password and key file double protection.</source>
+        <translation type="unfinished">Формат GPG не поддерживает двойную защиту паролем и ключем.</translation>
+    </message>
+    <message>
+        <location filename="load_save_handler.cpp" line="185"/>
+        <source>Use EPD format or disable either password or key protection.</source>
+        <translation type="unfinished">Используйте формат EPD или отключите одну из двух защит.</translation>
+    </message>
+    <message>
+        <location filename="load_save_handler.cpp" line="209"/>
+        <source>Neither a key file nor password is set. The file is going to be saved UNENCRYPTED.</source>
+        <translation type="unfinished">Защита паролем или ключем не задана. Файл будет сохранен ОТКРЫТЫМ ТЕКСТОМ.</translation>
     </message>
 </context>
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="mainwindow.cpp" line="162"/>
-        <source>ln: </source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="mainwindow.cpp" line="163"/>
-        <source>chars: </source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="mainwindow.cpp" line="182"/>
-        <source>&lt;span style=&quot;color:#FF0000;&quot;&gt;Password not set</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="mainwindow.cpp" line="187"/>
-        <source>&lt;b&gt;Password protected&lt;/b&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="mainwindow.cpp" line="305"/>
+        <location filename="mainwindow.cpp" line="304"/>
         <source>Cannot load the file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="347"/>
+        <location filename="mainwindow.cpp" line="346"/>
         <source>File loaded</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="412"/>
-        <source>The file has been modified by another program. Do you want to reload it</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="mainwindow.cpp" line="420"/>
-        <location filename="mainwindow.cpp" line="525"/>
-        <location filename="mainwindow.cpp" line="567"/>
-        <location filename="mainwindow.cpp" line="598"/>
-        <location filename="mainwindow.cpp" line="604"/>
-        <location filename="mainwindow.cpp" line="1129"/>
+        <location filename="mainwindow.cpp" line="602"/>
         <source>EncryptPad</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="455"/>
+        <location filename="mainwindow.cpp" line="453"/>
         <source>Open File</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="499"/>
+        <location filename="mainwindow.cpp" line="161"/>
+        <source>ln: %1 of %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="162"/>
+        <source>chars: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="181"/>
+        <source>Password not set</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="186"/>
+        <source>Password protected</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="238"/>
+        <location filename="mainwindow.cpp" line="250"/>
+        <source>Cannot open &apos;%1&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="268"/>
+        <source>Cannot open the encryption key</source>
+        <translation type="unfinished">Не могу открыть ключ шифрования.</translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="275"/>
+        <source>The encryption key is invalid</source>
+        <translation type="unfinished">Ключ шифрования не верен.</translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="282"/>
+        <source>Cannot download the encryption key. CURL tool is not found.</source>
+        <translation type="unfinished">Не могу закачать ключ шифрования. Утилита CURL не найдена.</translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="289"/>
+        <source>Cannot download the key. CURL returned non zero exit code</source>
+        <translation type="unfinished">Не могу закачать ключ шифрования. CURL вернул не нулевой код.</translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="411"/>
+        <source>The file has been modified by another program. Do you want to reload it?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="414"/>
+        <source>The file has been modified by another program. Do you want to reload it and lose the changes made in this application?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="497"/>
         <source>Save File As</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="551"/>
-        <location filename="mainwindow.cpp" line="552"/>
-        <source>.key</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="mainwindow.cpp" line="560"/>
+        <location filename="mainwindow.cpp" line="558"/>
         <source>Password for Key File</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Пароль для Ключа</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="568"/>
+        <location filename="mainwindow.cpp" line="566"/>
         <source>You left the password blank. The key file is going to be UNENCRYPTED. Do you want to continue?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="601"/>
+        <location filename="mainwindow.cpp" line="599"/>
         <source>Cannot generate key</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="605"/>
+        <location filename="mainwindow.cpp" line="603"/>
         <source>Do you want to use the generated key for this file?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="618"/>
+        <location filename="mainwindow.cpp" line="616"/>
         <source>About EncryptPad</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="619"/>
-        <source>&lt;b&gt;EncryptPad </source>
+        <location filename="mainwindow.cpp" line="524"/>
+        <source>Cannot create the repository directory in HOME</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="668"/>
+        <location filename="mainwindow.cpp" line="597"/>
+        <source>Cannot generate the key &apos;%1&apos; Check the path and permissions.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="617"/>
+        <source>&lt;b&gt;EncryptPad %1 Beta&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;Minimalist secure text editor and binary encryptor that implements &lt;br/&gt;RFC 4880 Open PGP format: symmetrically encrypted, compressed and integrity protected. The editor can ptotect files with passwords, key files or both.&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;GNU General Public License v2&lt;br/&gt;&lt;br/&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="666"/>
         <source>&amp;New</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="670"/>
+        <location filename="mainwindow.cpp" line="668"/>
         <source>Create a new file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="673"/>
+        <location filename="mainwindow.cpp" line="671"/>
         <source>&amp;Open...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="675"/>
+        <location filename="mainwindow.cpp" line="673"/>
         <source>Open an existing file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="678"/>
+        <location filename="mainwindow.cpp" line="676"/>
         <source>&amp;Save</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="680"/>
+        <location filename="mainwindow.cpp" line="678"/>
         <source>Save the document to disk</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="683"/>
+        <location filename="mainwindow.cpp" line="681"/>
         <source>Save &amp;As...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="685"/>
+        <location filename="mainwindow.cpp" line="683"/>
         <source>Save the document under a new name</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="688"/>
+        <location filename="mainwindow.cpp" line="686"/>
         <source>File &amp;Properties...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="689"/>
+        <location filename="mainwindow.cpp" line="687"/>
         <source>Set file properties</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="692"/>
+        <location filename="mainwindow.cpp" line="690"/>
         <source>&amp;Close and Reset</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="694"/>
+        <location filename="mainwindow.cpp" line="692"/>
         <source>Close and reset security settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="697"/>
+        <location filename="mainwindow.cpp" line="695"/>
         <source>Generate Key...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="698"/>
+        <location filename="mainwindow.cpp" line="696"/>
         <source>Generate a new key file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="701"/>
+        <location filename="mainwindow.cpp" line="699"/>
         <source>Set &amp;Password...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="702"/>
+        <location filename="mainwindow.cpp" line="700"/>
         <source>Set password for encryption and decryption</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="705"/>
+        <location filename="mainwindow.cpp" line="703"/>
         <source>Set &amp;Encryption Key...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="706"/>
+        <location filename="mainwindow.cpp" line="704"/>
         <source>Set encryption key file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="709"/>
+        <location filename="mainwindow.cpp" line="707"/>
         <source>Clear &amp;Encryption Key</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="710"/>
+        <location filename="mainwindow.cpp" line="708"/>
         <source>Clear encryption key file. Password only (if set).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="713"/>
+        <location filename="mainwindow.cpp" line="711"/>
         <source>&amp;Clear Password</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="714"/>
+        <location filename="mainwindow.cpp" line="712"/>
         <source>Save without password encryption. File key encryption only (if enabled).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="717"/>
+        <location filename="mainwindow.cpp" line="715"/>
         <source>E&amp;xit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="720"/>
+        <location filename="mainwindow.cpp" line="718"/>
         <source>Exit the application</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="mainwindow.cpp" line="721"/>
         <location filename="mainwindow.cpp" line="723"/>
-        <location filename="mainwindow.cpp" line="725"/>
         <source>Undo</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="mainwindow.cpp" line="726"/>
         <location filename="mainwindow.cpp" line="728"/>
-        <location filename="mainwindow.cpp" line="730"/>
         <source>Redo</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="733"/>
+        <location filename="mainwindow.cpp" line="731"/>
         <source>Cu&amp;t</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="735"/>
+        <location filename="mainwindow.cpp" line="733"/>
         <source>Cut the current selection&apos;s contents to the clipboard</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="739"/>
+        <location filename="mainwindow.cpp" line="737"/>
         <source>&amp;Copy</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="741"/>
+        <location filename="mainwindow.cpp" line="739"/>
         <source>Copy the current selection&apos;s contents to the clipboard</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="745"/>
+        <location filename="mainwindow.cpp" line="743"/>
         <source>&amp;Paste</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="747"/>
+        <location filename="mainwindow.cpp" line="745"/>
         <source>Paste the clipboard&apos;s contents into the current selection</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="751"/>
+        <location filename="mainwindow.cpp" line="749"/>
         <source>&amp;Select All</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="753"/>
+        <location filename="mainwindow.cpp" line="751"/>
         <source>Select all text</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="756"/>
+        <location filename="mainwindow.cpp" line="754"/>
         <source>&amp;Find...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="758"/>
+        <location filename="mainwindow.cpp" line="756"/>
         <source>Find in text</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="761"/>
+        <location filename="mainwindow.cpp" line="759"/>
         <source>&amp;Go to...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="762"/>
-        <location filename="mainwindow.cpp" line="1470"/>
+        <location filename="mainwindow.cpp" line="760"/>
+        <location filename="mainwindow.cpp" line="1467"/>
         <source>Go to</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="766"/>
+        <location filename="mainwindow.cpp" line="764"/>
         <source>&amp;Generate Password...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="767"/>
+        <location filename="mainwindow.cpp" line="765"/>
         <source>Generate password</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="770"/>
+        <location filename="mainwindow.cpp" line="768"/>
         <source>&amp;Replace...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="772"/>
+        <location filename="mainwindow.cpp" line="770"/>
         <source>Find and replace text</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="775"/>
+        <location filename="mainwindow.cpp" line="773"/>
         <source>Read Only</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="777"/>
+        <location filename="mainwindow.cpp" line="775"/>
         <source>Switch Read Only mode</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="782"/>
+        <location filename="mainwindow.cpp" line="780"/>
         <source>Word Wrap</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="784"/>
+        <location filename="mainwindow.cpp" line="782"/>
         <source>Switch Word Wrap</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="787"/>
+        <location filename="mainwindow.cpp" line="785"/>
         <source>&amp;Zoom In</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="789"/>
+        <location filename="mainwindow.cpp" line="787"/>
         <source>Zoom In</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="792"/>
+        <location filename="mainwindow.cpp" line="790"/>
         <source>&amp;Zoom Out</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="794"/>
+        <location filename="mainwindow.cpp" line="792"/>
         <source>Zoom Out</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="797"/>
+        <location filename="mainwindow.cpp" line="795"/>
         <source>&amp;Reset Zoom</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="798"/>
-        <source>Ctrl+0</source>
+        <location filename="mainwindow.cpp" line="1557"/>
+        <source>Key protected</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="799"/>
+        <location filename="mainwindow.cpp" line="1558"/>
+        <source>Key not set</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="1559"/>
+        <source>persisted</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="797"/>
         <source>Reset Zoom</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="802"/>
+        <location filename="mainwindow.cpp" line="800"/>
         <source>&amp;About...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="803"/>
+        <location filename="mainwindow.cpp" line="801"/>
         <source>Show the application&apos;s About box</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="807"/>
+        <location filename="mainwindow.cpp" line="805"/>
         <source>About &amp;Qt</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="808"/>
+        <location filename="mainwindow.cpp" line="806"/>
         <source>Show the Qt library&apos;s About box</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="811"/>
+        <location filename="mainwindow.cpp" line="809"/>
         <source>&amp;Preferences...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="812"/>
+        <location filename="mainwindow.cpp" line="810"/>
         <source>Application preferences</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="815"/>
+        <location filename="mainwindow.cpp" line="813"/>
         <source>File Encryption...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="816"/>
+        <location filename="mainwindow.cpp" line="814"/>
         <source>File encryption</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="819"/>
+        <location filename="mainwindow.cpp" line="817"/>
         <source>Windows EOL</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="820"/>
+        <location filename="mainwindow.cpp" line="818"/>
         <source>Windows end of line: CR LN</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="915"/>
+        <location filename="mainwindow.cpp" line="913"/>
         <source>End of file reached. Started from the top.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="931"/>
+        <location filename="mainwindow.cpp" line="929"/>
         <source>Text not found.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="945"/>
+        <location filename="mainwindow.cpp" line="943"/>
         <source>Text found.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="952"/>
+        <location filename="mainwindow.cpp" line="950"/>
         <source>&amp;File</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="969"/>
+        <location filename="mainwindow.cpp" line="967"/>
         <source>&amp;Edit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="987"/>
+        <location filename="mainwindow.cpp" line="985"/>
         <source>&amp;View</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="996"/>
+        <location filename="mainwindow.cpp" line="994"/>
         <source>En&amp;cryption</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1004"/>
+        <location filename="mainwindow.cpp" line="1002"/>
         <source>&amp;Settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1007"/>
+        <location filename="mainwindow.cpp" line="1005"/>
         <source>&amp;Help</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1013"/>
+        <location filename="mainwindow.cpp" line="1011"/>
         <source>File</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1024"/>
+        <location filename="mainwindow.cpp" line="1022"/>
         <source>Edit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1032"/>
+        <location filename="mainwindow.cpp" line="1030"/>
         <source>Encryption</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1039"/>
+        <location filename="mainwindow.cpp" line="1037"/>
         <source>View</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1049"/>
+        <location filename="mainwindow.cpp" line="1047"/>
         <source>Ready</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1130"/>
+        <location filename="mainwindow.cpp" line="1127"/>
         <source>The document has been modified.
 Do you want to save your changes?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1296"/>
+        <location filename="mainwindow.cpp" line="1256"/>
+        <source>Cannot save &apos;%1&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="1259"/>
+        <source>Cannot open the specified encryption key</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="1262"/>
+        <source>The specified encryption key is invalid</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="1265"/>
+        <source>Cannot download the encryption key. CURL tool is not found</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="1268"/>
+        <source>Cannot download the encryption key. CURL returned non zero exit code</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="1271"/>
+        <source>Unknown encryption error</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="1274"/>
+        <source>Cannot create bak file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="1282"/>
+        <source>Unknown error</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="1293"/>
         <source>Cannot save file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1302"/>
+        <location filename="mainwindow.cpp" line="1299"/>
         <source>File saved</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1470"/>
+        <location filename="mainwindow.cpp" line="1467"/>
         <source>Line number:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1490"/>
+        <location filename="mainwindow.cpp" line="1487"/>
         <source>Maximum zoom</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1496"/>
-        <location filename="mainwindow.cpp" line="1510"/>
-        <location filename="mainwindow.cpp" line="1525"/>
+        <location filename="mainwindow.cpp" line="1493"/>
+        <source>Font size: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="1507"/>
+        <location filename="mainwindow.cpp" line="1522"/>
         <source>Font size: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1504"/>
+        <location filename="mainwindow.cpp" line="1501"/>
         <source>Minimum zoom</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="mainwindow.cpp" line="1560"/>
-        <source>&lt;b&gt;Key protected</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="mainwindow.cpp" line="1560"/>
-        <source>&lt;span style=&quot;color:#FF0000;&quot;&gt;Key not set&lt;/span&gt;</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1036,7 +1160,7 @@ Do you want to save your changes?</source>
     <message>
         <location filename="new_key_dialog.ui" line="83"/>
         <source>Browse...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Просмотр...</translation>
     </message>
     <message>
         <location filename="new_key_dialog.ui" line="93"/>
@@ -1187,7 +1311,7 @@ Do you want to save your changes?</source>
     <message>
         <location filename="preferences_dialog.ui" line="125"/>
         <source>Browse...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Просмотр...</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="138"/>
@@ -1236,39 +1360,6 @@ Do you want to save your changes?</source>
     </message>
 </context>
 <context>
-    <name>QObject</name>
-    <message>
-        <location filename="load_save_handler.cpp" line="52"/>
-        <location filename="load_save_handler.cpp" line="163"/>
-        <location filename="load_save_handler.cpp" line="180"/>
-        <location filename="load_save_handler.cpp" line="205"/>
-        <source>EncryptPad</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="load_save_handler.cpp" line="53"/>
-        <source>Cannot open the file because it does not exist</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="load_save_handler.cpp" line="164"/>
-        <source>GPG format does not support persisted key path.
-Do you want to disable it?</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="load_save_handler.cpp" line="181"/>
-        <source>GPG format does not support the password and key file double protection.
-Use EPD format or disable either password or key protection.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="load_save_handler.cpp" line="206"/>
-        <source>Neither a key file nor password is set. The file is going to be saved UNENCRYPTED.</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>SetKeyDialog</name>
     <message>
         <location filename="set_key_dialog.ui" line="29"/>
@@ -1311,12 +1402,12 @@ Use EPD format or disable either password or key protection.</source>
     <message>
         <location filename="set_password_dialog.cpp" line="30"/>
         <source>&amp;Password:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&amp;Пароль:</translation>
     </message>
     <message>
         <location filename="set_password_dialog.cpp" line="35"/>
         <source>&amp;Confirm:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&amp;Подтвердить:</translation>
     </message>
     <message>
         <location filename="set_password_dialog.cpp" line="44"/>
@@ -1330,8 +1421,14 @@ Use EPD format or disable either password or key protection.</source>
     </message>
     <message>
         <location filename="set_password_dialog.cpp" line="71"/>
+        <location filename="set_password_dialog.cpp" line="87"/>
         <source>Set Password</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Установить Пароль</translation>
+    </message>
+    <message>
+        <location filename="set_password_dialog.cpp" line="88"/>
+        <source>The confirmed password does not match</source>
+        <translation type="unfinished">Подтвержденный пароль отличается</translation>
     </message>
 </context>
 </TS>
