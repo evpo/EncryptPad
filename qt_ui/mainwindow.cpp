@@ -599,7 +599,7 @@ void MainWindow::createNewKey()
         statusBar()->showMessage(tr("Cannot generate key"));
         return;
     }
-    auto reply = QMessageBox::question(this, tr("EncryptPad"),
+    auto reply = QMessageBox::question(this, "EncryptPad",
         tr("Do you want to use the generated key for this file?"),
         QMessageBox::Yes | QMessageBox::No);
 

@@ -539,11 +539,6 @@ Do you want to disable it?</oldsource>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="602"/>
-        <source>EncryptPad</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="mainwindow.cpp" line="453"/>
         <source>Open File</source>
         <translation type="unfinished"></translation>

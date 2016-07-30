@@ -496,7 +496,7 @@ Do you want to replace it?</source>
     <message>
         <location filename="load_save_handler.cpp" line="54"/>
         <source>Cannot open the file because it does not exist</source>
-        <translation type="unfinished">Не могу открыть файл, так как он не существует</translation>
+        <translation type="unfinished">Невозможно открыть файл, так как он не существует</translation>
     </message>
     <message>
         <location filename="load_save_handler.cpp" line="165"/>
@@ -531,53 +531,48 @@ Do you want to disable it?</oldsource>
     <message>
         <location filename="mainwindow.cpp" line="304"/>
         <source>Cannot load the file</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Невозможно загрузить файл</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="346"/>
         <source>File loaded</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="mainwindow.cpp" line="602"/>
-        <source>EncryptPad</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Файл загружен</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="453"/>
         <source>Open File</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Открыть Файл</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="161"/>
         <source>ln: %1 of %2</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">стр: %1 из %2</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="162"/>
         <source>chars: %1</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">симв: %1</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="181"/>
         <source>Password not set</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Пароль не задан</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="186"/>
         <source>Password protected</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Защищен паролем</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="238"/>
         <location filename="mainwindow.cpp" line="250"/>
         <source>Cannot open &apos;%1&apos;</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Невозможно открыть &apos;%1&apos;</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="268"/>
         <source>Cannot open the encryption key</source>
-        <translation type="unfinished">Не могу открыть ключ шифрования.</translation>
+        <translation type="unfinished">Невозможно открыть ключ шифрования.</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="275"/>
@@ -597,17 +592,17 @@ Do you want to disable it?</oldsource>
     <message>
         <location filename="mainwindow.cpp" line="411"/>
         <source>The file has been modified by another program. Do you want to reload it?</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Файл был изменен внешней программой. Загрузить его снова?</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="414"/>
         <source>The file has been modified by another program. Do you want to reload it and lose the changes made in this application?</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Файл был изменен внешней программой. Хотите загрузить его снова с потерей текущих изменений?</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="497"/>
         <source>Save File As</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Сохранить Как</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="558"/>
@@ -617,142 +612,142 @@ Do you want to disable it?</oldsource>
     <message>
         <location filename="mainwindow.cpp" line="566"/>
         <source>You left the password blank. The key file is going to be UNENCRYPTED. Do you want to continue?</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Вы не установили пароль. Файл ключа НЕ БУДЕТ ЗАШИФРОВАН. Продолжить?</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="599"/>
         <source>Cannot generate key</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Невозможно сгенерировать ключ</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="603"/>
         <source>Do you want to use the generated key for this file?</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Хотите использовать сгенерированный ключ для этого файла?</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="616"/>
         <source>About EncryptPad</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Об EncryptPad</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="524"/>
         <source>Cannot create the repository directory in HOME</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Невозможно создать репозитарий в HOME</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="597"/>
         <source>Cannot generate the key &apos;%1&apos; Check the path and permissions.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Невозможно сгенерировать ключ &apos;%1&apos;. Проверьте правильность пути и разрешений.</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="617"/>
         <source>&lt;b&gt;EncryptPad %1 Beta&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;Minimalist secure text editor and binary encryptor that implements &lt;br/&gt;RFC 4880 Open PGP format: symmetrically encrypted, compressed and integrity protected. The editor can ptotect files with passwords, key files or both.&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;GNU General Public License v2&lt;br/&gt;&lt;br/&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&lt;b&gt;EncryptPad %1 Beta&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;Упрощенный и защищенный текстовый редактор который реализует &lt;br/&gt;RGC 4880 Open PGP формат: симетричное шифрование, архивация и проверка целостности. Редактор может защищать файлы паролями, файловыми ключами или обоими.&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;GNU General Public License v2&lt;br/&gt;&lt;br/&gt;</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="666"/>
         <source>&amp;New</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&amp;Новый</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="668"/>
         <source>Create a new file</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Создать новый файл</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="671"/>
         <source>&amp;Open...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&amp;Открыть...</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="673"/>
         <source>Open an existing file</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Открыть существующий файл</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="676"/>
         <source>&amp;Save</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&amp;Сохранить</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="678"/>
         <source>Save the document to disk</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Сохранить документ на диск</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="681"/>
         <source>Save &amp;As...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Сохранить &amp;Как...</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="683"/>
         <source>Save the document under a new name</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Сохранить документ под другим именем</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="686"/>
         <source>File &amp;Properties...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Свойства &amp;Файла...</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="687"/>
         <source>Set file properties</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Установить свойства файла</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="690"/>
         <source>&amp;Close and Reset</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&amp;Закрыть и сбросить</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="692"/>
         <source>Close and reset security settings</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Закрыть и сбросить установки защиты</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="695"/>
         <source>Generate Key...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Генерировать Ключ...</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="696"/>
         <source>Generate a new key file</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Создать новый файл ключа</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="699"/>
         <source>Set &amp;Password...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Задать &amp;Пароль...</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="700"/>
         <source>Set password for encryption and decryption</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Установить пароль для шифрации</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="703"/>
         <source>Set &amp;Encryption Key...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Установить &amp;Ключ Шифрации...</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="704"/>
         <source>Set encryption key file</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Установить файл ключа шифрования</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="707"/>
         <source>Clear &amp;Encryption Key</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">С&amp;бросить Ключ Шифрования</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="708"/>
         <source>Clear encryption key file. Password only (if set).</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Сбросить ключ шифрования. Только пароль (если задан).</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="711"/>
         <source>&amp;Clear Password</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Сб&amp;росить Пароль</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="712"/>
