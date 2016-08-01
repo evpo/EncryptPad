@@ -1124,9 +1124,9 @@ bool MainWindow::maybeSave()
     if (isWindowModified()) {
         QMessageBox::StandardButton ret;
         ret = QMessageBox::warning(this, "EncryptPad",
-                     tr("The document has been modified.\n"
-                        "Do you want to save your changes?"),
-                     QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+                tr("The document has been modified.") + QString("\n") +
+                tr("Do you want to save your changes?"),
+                QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
         if (ret == QMessageBox::Save)
             return save();
         else if (ret == QMessageBox::Cancel)

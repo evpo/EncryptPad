@@ -903,6 +903,11 @@ Do you want to disable it?</oldsource>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="mainwindow.cpp" line="1128"/>
+        <source>Do you want to save your changes?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="mainwindow.cpp" line="1557"/>
         <source>Key protected</source>
         <translation type="unfinished"></translation>
@@ -1044,8 +1049,9 @@ Do you want to disable it?</oldsource>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="1127"/>
-        <source>The document has been modified.
-Do you want to save your changes?</source>
+        <source>The document has been modified.</source>
+        <oldsource>The document has been modified.
+Do you want to save your changes?</oldsource>
         <translation type="unfinished"></translation>
     </message>
     <message>

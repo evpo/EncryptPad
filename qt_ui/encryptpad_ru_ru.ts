@@ -752,215 +752,220 @@ Do you want to disable it?</oldsource>
     <message>
         <location filename="mainwindow.cpp" line="712"/>
         <source>Save without password encryption. File key encryption only (if enabled).</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Сохранять без защиты паролем. Будет использован только ключ (если он установлен).</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="715"/>
         <source>E&amp;xit</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&amp;Выход</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="718"/>
         <source>Exit the application</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Выйти из приложения</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="721"/>
         <location filename="mainwindow.cpp" line="723"/>
         <source>Undo</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Отменить</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="726"/>
         <location filename="mainwindow.cpp" line="728"/>
         <source>Redo</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Вперед</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="731"/>
         <source>Cu&amp;t</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&amp;Вырезать</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="733"/>
         <source>Cut the current selection&apos;s contents to the clipboard</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Вырезать выбранное в буфер обмена</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="737"/>
         <source>&amp;Copy</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&amp;Копировать</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="739"/>
         <source>Copy the current selection&apos;s contents to the clipboard</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Копировать выбранное в буфер обмена</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="743"/>
         <source>&amp;Paste</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Вс&amp;тавить</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="745"/>
         <source>Paste the clipboard&apos;s contents into the current selection</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Вставить содержимое буфера обмена в выбранную область</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="749"/>
         <source>&amp;Select All</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Вы&amp;брать Все</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="751"/>
         <source>Select all text</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Выбрать весь текст</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="754"/>
         <source>&amp;Find...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&amp;Найти...</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="756"/>
         <source>Find in text</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Найти в тексте</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="759"/>
         <source>&amp;Go to...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&amp;Перейти...</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="760"/>
         <location filename="mainwindow.cpp" line="1467"/>
         <source>Go to</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Перейти</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="764"/>
         <source>&amp;Generate Password...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&amp;Генерировать Пароль...</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="765"/>
         <source>Generate password</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Генерировать пароль</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="768"/>
         <source>&amp;Replace...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&amp;Заменить...</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="770"/>
         <source>Find and replace text</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Найти и заменить текст</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="773"/>
         <source>Read Only</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Только Чтение</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="775"/>
         <source>Switch Read Only mode</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Переключить Режим Только Чтение</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="780"/>
         <source>Word Wrap</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Переносить Слова</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="782"/>
         <source>Switch Word Wrap</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Переключить Перенос Слов</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="785"/>
         <source>&amp;Zoom In</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&amp;Увеличить</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="787"/>
         <source>Zoom In</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Увеличить</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="790"/>
         <source>&amp;Zoom Out</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Уме&amp;ньшить</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="792"/>
         <source>Zoom Out</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Уменьшить</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="795"/>
         <source>&amp;Reset Zoom</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&amp;Сбросить Увеличение</translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="1128"/>
+        <source>Do you want to save your changes?</source>
+        <translation type="unfinished">Хотите сохранить изменения?</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="1557"/>
         <source>Key protected</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Защита ключем</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="1558"/>
         <source>Key not set</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Ключ не установлен</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="1559"/>
         <source>persisted</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">сохранять путь</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="797"/>
         <source>Reset Zoom</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Сбросить Приближение</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="800"/>
         <source>&amp;About...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&amp;О Программе...</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="801"/>
         <source>Show the application&apos;s About box</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Показать окно О Программе</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="805"/>
         <source>About &amp;Qt</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">О &amp;Qt</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="806"/>
         <source>Show the Qt library&apos;s About box</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Показать диалог О Qt библиотеке</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="809"/>
         <source>&amp;Preferences...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&amp;Параметры...</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="810"/>
         <source>Application preferences</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Параметры приложения</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="813"/>
         <source>File Encryption...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Шифрование Файлов...</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="814"/>
         <source>File encryption</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Шифрование файлов</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="817"/>
@@ -970,159 +975,160 @@ Do you want to disable it?</oldsource>
     <message>
         <location filename="mainwindow.cpp" line="818"/>
         <source>Windows end of line: CR LN</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Окончания строк Windows: CR LN</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="913"/>
         <source>End of file reached. Started from the top.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Достигнут конец файла. Начали сверху.</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="929"/>
         <source>Text not found.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Текст не найден.</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="943"/>
         <source>Text found.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Текст найден.</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="950"/>
         <source>&amp;File</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&amp;Файл</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="967"/>
         <source>&amp;Edit</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&amp;Редактирование</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="985"/>
         <source>&amp;View</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&amp;Просмотр</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="994"/>
         <source>En&amp;cryption</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&amp;Шифрование</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="1002"/>
         <source>&amp;Settings</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&amp;Установки</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="1005"/>
         <source>&amp;Help</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&amp;Помощь</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="1011"/>
         <source>File</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Файл</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="1022"/>
         <source>Edit</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Редактирование</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="1030"/>
         <source>Encryption</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Шифрование</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="1037"/>
         <source>View</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Просмотр</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="1047"/>
         <source>Ready</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Готов</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="1127"/>
-        <source>The document has been modified.
-Do you want to save your changes?</source>
-        <translation type="unfinished"></translation>
+        <source>The document has been modified.</source>
+        <oldsource>The document has been modified.
+Do you want to save your changes?</oldsource>
+        <translation type="unfinished">Документ был изменен.</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="1256"/>
         <source>Cannot save &apos;%1&apos;</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Невозможно сохранить &apos;%1&apos;</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="1259"/>
         <source>Cannot open the specified encryption key</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Невозможно открыть указанный ключ шифрования</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="1262"/>
         <source>The specified encryption key is invalid</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Указанный ключ шифрования не верен</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="1265"/>
         <source>Cannot download the encryption key. CURL tool is not found</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Невозможно закачать ключ шифрования. Утилита CURL не найдена</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="1268"/>
         <source>Cannot download the encryption key. CURL returned non zero exit code</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Невозможно закачать ключ шифрования. Утилита CURL вернула не нулевой код</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="1271"/>
         <source>Unknown encryption error</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Неизвестная ошибка при шифровании</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="1274"/>
         <source>Cannot create bak file</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Невозможно создать файл резервного копирования</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="1282"/>
         <source>Unknown error</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Неизвестная ошибка</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="1293"/>
         <source>Cannot save file</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Невозможно сохранить файл</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="1299"/>
         <source>File saved</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Файл сохранен</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="1467"/>
         <source>Line number:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Номер строки:</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="1487"/>
         <source>Maximum zoom</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Максимальное увеличение</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="1493"/>
         <source>Font size: %1</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Размер шрифта: %1</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="1507"/>
         <location filename="mainwindow.cpp" line="1522"/>
         <source>Font size: </source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Размер шрифта: </translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="1501"/>
         <source>Minimum zoom</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Минимально увеличение</translation>
     </message>
 </context>
 <context>
@@ -1130,27 +1136,27 @@ Do you want to save your changes?</source>
     <message>
         <location filename="new_key_dialog.ui" line="26"/>
         <source>Generate Key</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Генерировать Ключ</translation>
     </message>
     <message>
         <location filename="new_key_dialog.ui" line="49"/>
         <source>&amp;Key Path</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&amp;Путь К Ключу</translation>
     </message>
     <message>
         <location filename="new_key_dialog.ui" line="59"/>
         <source>Key In &amp;Repository</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Ключ в &amp;Хранилище</translation>
     </message>
     <message>
         <location filename="new_key_dialog.ui" line="66"/>
         <source>Key path</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Путь к ключу</translation>
     </message>
     <message>
         <location filename="new_key_dialog.ui" line="73"/>
         <source>Repository is the &lt;b&gt;.encryptpad&lt;/b&gt; (&lt;b&gt;_encryptpad&lt;/b&gt; on Windows) directory in the user&apos;s home folder. If it does not exist, it will be created.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Хранилище это директория &lt;b&gt;.encryptpad&lt;/b&gt; (&lt;b&gt;_encryptpad&lt;/b&gt; на Windows) в домашней дирректории пользователя. Если не существует, то она будет создана.</translation>
     </message>
     <message>
         <location filename="new_key_dialog.ui" line="83"/>
@@ -1160,12 +1166,12 @@ Do you want to save your changes?</source>
     <message>
         <location filename="new_key_dialog.ui" line="93"/>
         <source>Key name in the repository</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Имя ключа в хранилище</translation>
     </message>
     <message>
         <location filename="new_key_dialog.cpp" line="62"/>
         <source>Save New Key To</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Сохранить Новый Ключ В</translation>
     </message>
 </context>
 <context>
@@ -1296,7 +1302,7 @@ Do you want to save your changes?</source>
     <message>
         <location filename="preferences_dialog.ui" line="98"/>
         <source>Word Wrap</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Переносить Слова</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="118"/>
