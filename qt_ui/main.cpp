@@ -20,6 +20,7 @@
 #include <QApplication>
 #include <QTextCodec>
 #include <QTranslator>
+#include <QResource>
 #include "mainwindow.h"
 #include "application.h"
 
@@ -31,18 +32,19 @@ int main(int argc, char *argv[])
 
     Application app(argc, argv);
     //QTextCodec::setCodecForTr(QTextCodec::codecForName("Unicode"));
+    QResource translator_res(":/encryptpad_ru_ru.qm");
 
     QTranslator translator;
-    translator.load("encryptpad_ru_ru");
+    translator.load(translator_res.data(), translator_res.size());
 
     app.installTranslator(&translator);
 
     app.setOrganizationName("Evpo"); //
     app.setApplicationName("EncryptPad");
 
-	QString fileName;
-	if(argc > 1)
-		fileName = argv[1];
+    QString fileName;
+    if(argc > 1)
+        fileName = argv[1];
     MainWindow mainWin;
     app.setMainWindow(&mainWin);
 #if defined(Q_OS_SYMBIAN)
