@@ -1179,27 +1179,27 @@ Do you want to save your changes?</oldsource>
     <message>
         <location filename="password_generation_dialog.ui" line="20"/>
         <source>Generate Password</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Генерировать Пароль</translation>
     </message>
     <message>
         <location filename="password_generation_dialog.ui" line="54"/>
         <source>Custom:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Другие:</translation>
     </message>
     <message>
         <location filename="password_generation_dialog.ui" line="61"/>
         <source>Lowercase a-z</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Прописные a-z</translation>
     </message>
     <message>
         <location filename="password_generation_dialog.ui" line="71"/>
         <source>Numbers 0-9</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Цифры 0-9</translation>
     </message>
     <message>
         <location filename="password_generation_dialog.ui" line="81"/>
         <source>Symbols:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Символы:</translation>
     </message>
     <message>
         <location filename="password_generation_dialog.ui" line="91"/>
@@ -1224,62 +1224,62 @@ Do you want to save your changes?</oldsource>
     <message>
         <location filename="password_generation_dialog.ui" line="130"/>
         <source>Custom</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Другая</translation>
     </message>
     <message>
         <location filename="password_generation_dialog.ui" line="165"/>
         <source>Uppercase A-Z</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Заглавные A-Z</translation>
     </message>
     <message>
         <location filename="password_generation_dialog.ui" line="216"/>
         <source>&amp;Regenerate</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&amp;Генерировать</translation>
     </message>
     <message>
         <location filename="password_generation_dialog.ui" line="223"/>
         <source>Insert &amp;All</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Вставить &amp;Все</translation>
     </message>
     <message>
         <location filename="password_generation_dialog.ui" line="271"/>
         <source>&amp;Length:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&amp;Длина:</translation>
     </message>
     <message>
         <location filename="password_generation_dialog.ui" line="281"/>
         <source>Select &amp;Password:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Выбрать &amp;Пароль:</translation>
     </message>
     <message>
         <location filename="password_generation_dialog.ui" line="304"/>
         <source>Limit Group Occurrence (1 to max chars)</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Предел Для Групп (1 до макс. символов)</translation>
     </message>
     <message>
         <location filename="password_generation_dialog.ui" line="314"/>
         <source>Groups</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Группы</translation>
     </message>
     <message>
         <location filename="password_generation_dialog.ui" line="323"/>
         <source>Regenerate</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Генерировать</translation>
     </message>
     <message>
         <location filename="password_generation_dialog.cpp" line="40"/>
         <source>7 passwords</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">7 паролей</translation>
     </message>
     <message>
         <location filename="password_generation_dialog.cpp" line="41"/>
         <source>15 passwords</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">15 паролей</translation>
     </message>
     <message>
         <location filename="password_generation_dialog.cpp" line="42"/>
         <source>25 passwords</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">25 паролей</translation>
     </message>
 </context>
 <context>
@@ -1287,17 +1287,17 @@ Do you want to save your changes?</oldsource>
     <message>
         <location filename="preferences_dialog.ui" line="26"/>
         <source>Preferences</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Настройки</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="49"/>
         <source>Path to libCURL executable</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Путь к libCURL утилите</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="52"/>
         <source>Libcurl Path:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Путь к Libcurl:</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="98"/>
@@ -1307,7 +1307,7 @@ Do you want to save your changes?</oldsource>
     <message>
         <location filename="preferences_dialog.ui" line="118"/>
         <source>Font:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Шрифт:</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="125"/>
@@ -1317,32 +1317,32 @@ Do you want to save your changes?</oldsource>
     <message>
         <location filename="preferences_dialog.ui" line="138"/>
         <source>Recent Files:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Послед. файлы:</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="166"/>
         <source>Font...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Шрифт...</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="224"/>
         <source>Retain last used directory between EncryptPad sessions</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Сохранить последнюю использованную директорию между запусками</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="227"/>
         <source>Save Last Used Directory</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Сохранить Послед. Директорию</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="234"/>
         <source>Enable BAK Files</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Включить BAK Файлы</translation>
     </message>
     <message>
         <location filename="preferences_dialog.cpp" line="41"/>
         <source> (Size: </source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"> (Размер:</translation>
     </message>
     <message>
         <location filename="preferences_dialog.cpp" line="43"/>
@@ -1352,12 +1352,12 @@ Do you want to save your changes?</oldsource>
     <message>
         <location filename="preferences_dialog.cpp" line="106"/>
         <source>Select Font</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Выбрать Шрифт</translation>
     </message>
     <message>
         <location filename="preferences_dialog.cpp" line="117"/>
         <source>Path to Libcurl</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Путь к Libcurl</translation>
     </message>
 </context>
 <context>
@@ -1365,37 +1365,37 @@ Do you want to save your changes?</oldsource>
     <message>
         <location filename="set_key_dialog.ui" line="29"/>
         <source>Set Encryption Key</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Установить Ключ Шифрования</translation>
     </message>
     <message>
         <location filename="set_key_dialog.ui" line="64"/>
         <source>Key &amp;Repository:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&amp;Хранилище:</translation>
     </message>
     <message>
         <location filename="set_key_dialog.ui" line="125"/>
         <source>&amp;Browse...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&amp;Просмотр...</translation>
     </message>
     <message>
         <location filename="set_key_dialog.ui" line="150"/>
         <source>&amp;Key File Path:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&amp;Путь Ключа:</translation>
     </message>
     <message>
         <location filename="set_key_dialog.ui" line="160"/>
         <source>&amp;Persist key location in encrypted file</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&amp;Сохранить путь ключа в зашифрованом файле</translation>
     </message>
     <message>
         <location filename="set_key_dialog.ui" line="167"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Key repository is &lt;span style=&quot; font-weight:600;&quot;&gt;.encryptpad&lt;/span&gt; (&lt;b&gt;_encryptpad&lt;/b&gt; on Windows) directory in the user&apos;s profile. Select a key or specify a file name without path for repository keys.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Хранилище это директория &lt;span style=&quot; font-weight:600;&quot;&gt;.encryptpad&lt;/span&gt; (&lt;b&gt;_encryptpad&lt;/b&gt; на Windows) в домашней дирректории пользователя. Выберите ключ или укажите имя файла без пути для ключей в хранилище.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="set_key_dialog.cpp" line="88"/>
         <source>Specify encryption key location</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Укажите расположение ключа шифрования</translation>
     </message>
 </context>
 <context>
@@ -1418,7 +1418,7 @@ Do you want to save your changes?</oldsource>
     <message>
         <location filename="set_password_dialog.cpp" line="46"/>
         <source>Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Отменить</translation>
     </message>
     <message>
         <location filename="set_password_dialog.cpp" line="71"/>
