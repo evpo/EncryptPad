@@ -49,6 +49,7 @@ FileEncryptionDialog::FileEncryptionDialog(QWidget *parent, FileRequestService &
     metadata.compression = kDefaultCompression;
     metadata.iterations = kDefaultIterations;
     metadata.persist_key_path = false;
+    metadata.is_binary = true;
     metadata.file_name = "CONSOLE";
 }
 
