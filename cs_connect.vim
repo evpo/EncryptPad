@@ -1,1 +1,0 @@
-cs add cscope.out

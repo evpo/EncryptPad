@@ -1,0 +1,191 @@
+Botan
+========================================================================
+Copyright: 1999-2011 Jack Lloyd
+Copyright: 2001 Peter J Jones
+Copyright: 2004-2007 Justin Karneges
+Copyright: 2004 Vaclav Ovsik
+Copyright: 2005 Matthew Gregan
+Copyright: 2005-2006 Matt Johnston
+Copyright: 2006 Luca Piccarreta
+Copyright: 2007 Yves Jerschow
+Copyright: 2007-2008 FlexSecure GmbH
+Copyright: 2007-2008 Technische Universitat Darmstadt
+Copyright: 2007-2008 Falko Strenzke
+Copyright: 2007-2008 Martin Doering
+Copyright: 2007 Manuel Hartl
+Copyright: 2007 Christoph Ludwig
+Copyright: 2007 Patrick Sona
+Copyright: 2010 Olivier de Gaalon
+License:
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions are
+ met:
+
+ 1. Redistributions of source code must retain the above copyright
+ notice, this list of conditions, and the following disclaimer.
+
+ 2. Redistributions in binary form must reproduce the above copyright
+ notice, this list of conditions, and the following disclaimer in the
+ documentation and/or other materials provided with the distribution.
+
+ THIS SOFTWARE IS PROVIDED BY THE AUTHOR(S) "AS IS" AND ANY EXPRESS OR
+ IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE,
+ ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR(S) OR CONTRIBUTOR(S) BE
+ LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+ BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+ OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
+ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+famfamfam
+========================================================================
+Copyright: 2006 Mark James
+License: Creative Commons Attribution 2.5 License.
+ THE WORK (AS DEFINED BELOW) IS PROVIDED UNDER THE TERMS OF THIS CREATIVE 
+ COMMONS PUBLIC LICENCE ("CCPL" OR "LICENCE"). THE WORK IS PROTECTED BY 
+ COPYRIGHT AND/OR OTHER APPLICABLE LAW. ANY USE OF THE WORK OTHER THAN AS 
+ AUTHORISED UNDER THIS LICENCE AND/OR APPLICABLE LAW IS PROHIBITED.
+
+ BY EXERCISING ANY RIGHTS TO THE WORK PROVIDED HERE, YOU ACCEPT AND AGREE 
+ TO BE BOUND BY THE TERMS OF THIS LICENCE. THE LICENSOR GRANTS YOU 
+ THE RIGHTS CONTAINED HERE IN CONSIDERATION OF YOUR ACCEPTANCE OF 
+ SUCH TERMS AND CONDITIONS.
+
+Google Testing Framework
+========================================================================
+Copyright: 2008 Google Inc.
+License:
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions are
+ met:
+ 
+     * Redistributions of source code must retain the above copyright
+ notice, this list of conditions and the following disclaimer.
+     * Redistributions in binary form must reproduce the above
+ copyright notice, this list of conditions and the following disclaimer
+ in the documentation and/or other materials provided with the
+ distribution.
+     * Neither the name of Google Inc. nor the names of its
+ contributors may be used to endorse or promote products derived from
+ this software without specific prior written permission.
+ 
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+stlplus and makefiles
+========================================================================
+Copyright: 1999-2004 Southampton University
+Copyright: 2004-2016 Andy Rushton
+License: BSD
+
+ Redistribution and use in source and binary forms, with or without 
+ modification, are permitted provided that the following conditions are met:
+ 
+ Redistributions of source code must retain the above Copyright notice, 
+ this list of conditions and the following disclaimer.
+ Redistributions in binary form must reproduce the above Copyright notice, 
+ this list of conditions and the following disclaimer in the documentation 
+ and/or other materials provided with the distribution.
+ Neither the name of the STLplus library nor the names of its contributors 
+ may be used to endorse or promote products derived from this software 
+ without specific prior written permission.
+ This software is provided by the Copyright holders and contributors 
+ "as is" and any express or implied warranties, including, but not 
+ limited to, the implied warranties of merchantability and fitness for 
+ a particular purpose are disclaimed. In no event shall the Copyright owner 
+ or contributors be liable for any direct, indirect, incidental, special, 
+ exemplary, or consequential damages (including, but not limited to, 
+ procurement of substitute goods or services; loss of use, data, or profits; 
+ or business interruption) however caused and on any theory of liability, 
+ whether in contract, strict liability, or tort (including negligence 
+ or otherwise) arising in any way out of the use of this software, even 
+ if advised of the possibility of such damage.
+
+zlib
+========================================================================
+Copyright: 1995-2013 Jean-loup Gailly
+Copyright: 1995-2013 Mark Adler
+License:
+ This software is provided 'as-is', without any express or implied
+ warranty.  In no event will the authors be held liable for any damages
+ arising from the use of this software.
+
+ Permission is granted to anyone to use this software for any purpose,
+ including commercial applications, and to alter it and redistribute it
+ freely, subject to the following restrictions:
+
+ 1. The origin of this software must not be misrepresented; you must not
+    claim that you wrote the original software. If you use this software
+    in a product, an acknowledgment in the product documentation would be
+    appreciated but is not required.
+ 2. Altered source versions must be plainly marked as such, and must not be
+    misrepresented as being the original software.
+ 3. This notice may not be removed or altered from any source distribution.
+
+Qt
+========================================================================
+Copyright: 2012 Nokia Corporation
+           2012-2014 Digia Plc and/or its subsidiary(-ies).
+License: LGPL-2.1-or-3 with Digia-1.1 exception
+ GNU Lesser General Public License:
+ This file may be used under the terms of the GNU Lesser General Public
+ License version 2.1 or version 3 as published by the Free Software
+ Foundation and appearing in the file LICENSE.LGPLv21 and LICENSE.LGPLv3
+ included in the packaging of this file. Please review the following
+ information to ensure the GNU Lesser General Public License requirements
+ will be met: https://www.gnu.org/licenses/lgpl.html.
+ .
+ In addition, as a special exception, Digia gives you certain additional
+ rights. These rights are described in the Digia Qt LGPL Exception
+ version 1.1, included in the file LGPL_EXCEPTION.txt in this package.
+ .
+ On Debian systems, the complete text of the GNU Lesser General Public
+ License version 2.1 can be found in `/usr/share/common-licenses/LGPL-2.1`.
+ The complete text of the GNU Lesser General Public License version 3 can be
+ found in `/usr/share/common-licenses/LGPL-3`.
+ .
+ Digia Qt LGPL Exception version 1.1:
+ As an additional permission to the GNU Lesser General Public License version
+ 2.1, the object code form of a "work that uses the Library" may incorporate
+ material from a header file that is part of the Library.  You may distribute
+ such object code under terms of your choice, provided that:
+     (i)   the header files of the Library have not been modified; and
+     (ii)  the incorporated material is limited to numerical parameters, data
+           structure layouts, accessors, macros, inline functions and
+           templates; and
+     (iii) you comply with the terms of Section 6 of the GNU Lesser General
+           Public License version 2.1.
+ .
+ Moreover, you may apply this exception to a modified version of the Library,
+ provided that such modification does not involve copying material from the
+ Library into the modified Library's header files unless such material is
+ limited to (i) numerical parameters; (ii) data structure layouts;
+ (iii) accessors; and (iv) small macros, templates and inline functions of
+ five lines or less in length.
+ .
+ Furthermore, you are not required to apply this additional permission to a
+ modified version of the Library.
+
+License: LGPL-2.1
+ This file may be used under the terms of the GNU Lesser General Public
+ License version 2.1 as published by the Free Software Foundation and
+ appearing in the file LICENSE.LGPL included in the packaging of this file.
+ Please review the following information to ensure the GNU Lesser General
+ Public License version 2.1 requirements will be met:
+ http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
+ .
+ On Debian systems, the complete text of the GNU Lesser General Public License
+ can be found in `/usr/share/common-licenses/LGPL-2.1`.
