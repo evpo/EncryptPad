@@ -81,7 +81,9 @@ function build_all {
     $MAKE -f Makefile RELEASE=$RELEASE USE_SYSTEM_LIBS=$USE_SYSTEM_LIBS LOCALIZATION=$LOCALIZATION
     if [[ $SUBDIR == *MACOS* ]]
     then
-        cd ../macos_deployment && ./prepare_bundle.sh ../bin/${CONFIG_DIR}/${TARGET}.app
+        pushd ../macos_deployment > /dev/null
+        ./prepare_bundle.sh ../bin/${CONFIG_DIR}/${TARGET}.app
+        popd
     fi
 }
 
@@ -95,12 +97,18 @@ case $COMMAND in
     for TSFILE in ../qt_ui/*.ts
     do
         CULTUREFILE=$(echo -n "$TSFILE" | sed -n -e "s/..\/qt_ui\///" -e "s/\.ts$//p")
+        echo $CULTUREFILE
         lrelease $TSFILE -qm ./qt_build/${CULTUREFILE}.qm
         echo "const char *kCultureFile=\"${CULTUREFILE}.qm\";" > ./qt_build/culture_name.h
         cp ../qt_ui/${CULTUREFILE}.qrc ./qt_build/culture.qrc
         build_all
         mkdir -p ../bin/${CONFIG_DIR}/${CULTUREFILE}/
-        mv ../bin/${CONFIG_DIR}/${TARGET} ../bin/${CONFIG_DIR}/${CULTUREFILE}/
+        if [[ $SUBDIR == *MACOS* ]]
+        then
+            mv ../bin/${CONFIG_DIR}/${TARGET}.app ../bin/${CONFIG_DIR}/${CULTUREFILE}/
+        else
+            mv ../bin/${CONFIG_DIR}/${TARGET} ../bin/${CONFIG_DIR}/${CULTUREFILE}/
+        fi
     done
     ;;
 -c|--clean)
