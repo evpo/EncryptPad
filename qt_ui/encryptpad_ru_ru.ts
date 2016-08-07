@@ -513,7 +513,7 @@ Do you want to disable it?</oldsource>
     <message>
         <location filename="load_save_handler.cpp" line="183"/>
         <source>GPG format does not support the password and key file double protection.</source>
-        <translation type="unfinished">Формат GPG не поддерживает двойную защиту паролем и ключем.</translation>
+        <translation type="unfinished">Формат GPG не поддерживает двойную защиту паролем и ключом.</translation>
     </message>
     <message>
         <location filename="load_save_handler.cpp" line="185"/>
@@ -523,7 +523,7 @@ Do you want to disable it?</oldsource>
     <message>
         <location filename="load_save_handler.cpp" line="209"/>
         <source>Neither a key file nor password is set. The file is going to be saved UNENCRYPTED.</source>
-        <translation type="unfinished">Защита паролем или ключем не задана. Файл будет сохранен ОТКРЫТЫМ ТЕКСТОМ.</translation>
+        <translation type="unfinished">Защита паролем или ключом не задана. Файл будет сохранен ОТКРЫТЫМ ТЕКСТОМ.</translation>
     </message>
 </context>
 <context>
@@ -617,12 +617,12 @@ Do you want to disable it?</oldsource>
     <message>
         <location filename="mainwindow.cpp" line="599"/>
         <source>Cannot generate key</source>
-        <translation type="unfinished">Невозможно сгенерировать ключ</translation>
+        <translation type="unfinished">Невозможно генерировать ключ</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="603"/>
         <source>Do you want to use the generated key for this file?</source>
-        <translation type="unfinished">Хотите использовать сгенерированный ключ для этого файла?</translation>
+        <translation type="unfinished">Хотите использовать cгенерированный ключ для этого файла?</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="616"/>
@@ -632,17 +632,17 @@ Do you want to disable it?</oldsource>
     <message>
         <location filename="mainwindow.cpp" line="524"/>
         <source>Cannot create the repository directory in HOME</source>
-        <translation type="unfinished">Невозможно создать репозитарий в HOME</translation>
+        <translation type="unfinished">Невозможно создать хранилище в HOME</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="597"/>
         <source>Cannot generate the key &apos;%1&apos; Check the path and permissions.</source>
-        <translation type="unfinished">Невозможно сгенерировать ключ &apos;%1&apos;. Проверьте правильность пути и разрешений.</translation>
+        <translation type="unfinished">Невозможно генерировать ключ &apos;%1&apos;. Проверьте правильность пути и разрешений.</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="617"/>
         <source>&lt;b&gt;EncryptPad %1 Beta&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;Minimalist secure text editor and binary encryptor that implements &lt;br/&gt;RFC 4880 Open PGP format: symmetrically encrypted, compressed and integrity protected. The editor can ptotect files with passwords, key files or both.&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;GNU General Public License v2&lt;br/&gt;&lt;br/&gt;</source>
-        <translation type="unfinished">&lt;b&gt;EncryptPad %1 Beta&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;Упрощенный и защищенный текстовый редактор который реализует &lt;br/&gt;RFC 4880 Open PGP формат: симетричное шифрование, архивация и проверка целостности. Редактор может защищать файлы паролями, файловыми ключами или обоими.&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;GNU General Public License v2&lt;br/&gt;&lt;br/&gt;</translation>
+        <translation type="unfinished">&lt;b&gt;EncryptPad %1 Beta&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;Упрощенный и защищенный текстовый редактор который реализует &lt;br/&gt;RFC 4880 Open PGP формат: симметричное шифрование, архивация и проверка целостности. Редактор может защищать файлы паролями, файловыми ключами или обоими.&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;GNU General Public License v2&lt;br/&gt;&lt;br/&gt;</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="666"/>
@@ -722,12 +722,12 @@ Do you want to disable it?</oldsource>
     <message>
         <location filename="mainwindow.cpp" line="700"/>
         <source>Set password for encryption and decryption</source>
-        <translation type="unfinished">Установить пароль для шифрации</translation>
+        <translation type="unfinished">Установить пароль для шифрования...</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="703"/>
         <source>Set &amp;Encryption Key...</source>
-        <translation type="unfinished">Установить &amp;Ключ Шифрации...</translation>
+        <translation type="unfinished">Установить &amp;Ключ Шифрования...</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="704"/>
@@ -910,7 +910,7 @@ Do you want to disable it?</oldsource>
     <message>
         <location filename="mainwindow.cpp" line="1557"/>
         <source>Key protected</source>
-        <translation type="unfinished">Защита ключем</translation>
+        <translation type="unfinished">Защита ключом</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="1558"/>
@@ -1156,7 +1156,7 @@ Do you want to save your changes?</oldsource>
     <message>
         <location filename="new_key_dialog.ui" line="73"/>
         <source>Repository is the &lt;b&gt;.encryptpad&lt;/b&gt; (&lt;b&gt;_encryptpad&lt;/b&gt; on Windows) directory in the user&apos;s home folder. If it does not exist, it will be created.</source>
-        <translation type="unfinished">Хранилище это директория &lt;b&gt;.encryptpad&lt;/b&gt; (&lt;b&gt;_encryptpad&lt;/b&gt; на Windows) в домашней дирректории пользователя. Если не существует, то она будет создана.</translation>
+        <translation type="unfinished">Хранилище это директория &lt;b&gt;.encryptpad&lt;/b&gt; (&lt;b&gt;_encryptpad&lt;/b&gt; на Windows) в домашней директории пользователя. Если не существует, то она будет создана.</translation>
     </message>
     <message>
         <location filename="new_key_dialog.ui" line="83"/>
@@ -1385,12 +1385,12 @@ Do you want to save your changes?</oldsource>
     <message>
         <location filename="set_key_dialog.ui" line="160"/>
         <source>&amp;Persist key location in encrypted file</source>
-        <translation type="unfinished">&amp;Сохранить путь ключа в зашифрованом файле</translation>
+        <translation type="unfinished">&amp;Сохранить путь ключа в зашифрованном файле</translation>
     </message>
     <message>
         <location filename="set_key_dialog.ui" line="167"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Key repository is &lt;span style=&quot; font-weight:600;&quot;&gt;.encryptpad&lt;/span&gt; (&lt;b&gt;_encryptpad&lt;/b&gt; on Windows) directory in the user&apos;s profile. Select a key or specify a file name without path for repository keys.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Хранилище это директория &lt;span style=&quot; font-weight:600;&quot;&gt;.encryptpad&lt;/span&gt; (&lt;b&gt;_encryptpad&lt;/b&gt; на Windows) в домашней дирректории пользователя. Выберите ключ или укажите имя файла без пути для ключей в хранилище.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="unfinished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Хранилище это директория &lt;span style=&quot; font-weight:600;&quot;&gt;.encryptpad&lt;/span&gt; (&lt;b&gt;_encryptpad&lt;/b&gt; на Windows) в домашней директории пользователя. Выберите ключ или укажите имя файла без пути для ключей в хранилище.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="set_key_dialog.cpp" line="88"/>
