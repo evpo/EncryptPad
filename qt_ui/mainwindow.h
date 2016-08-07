@@ -73,11 +73,11 @@ private slots:
     bool newFile();
     void open();
     bool save();
-	bool saveAs();
+    bool saveAs();
     void setFileProperties();
     void closeAndReset();
     void createNewKey();
-	void setPassword();
+    void setPassword();
     void setEncryptionKey();
     void clearPassword(bool makeFileDirty = true);
     void clearEncryptionKey(bool makeFileDirty = true);
@@ -111,7 +111,7 @@ private:
     bool persistEncryptionKeyPath;
     QDateTime lastModified;
 
-	QLabel *passwordSet;
+    QLabel *passwordSet;
     QLabel *encryptionKeySet;
     QLabel *lineStatus;
     QLabel *charStatus;
@@ -128,7 +128,7 @@ private:
     QMenu *helpMenu;
     QToolBar *fileToolBar;
     QToolBar *editToolBar;
-	QToolBar *encToolBar;
+    QToolBar *encToolBar;
     QToolBar *zoomToolBar;
     QAction *newAct;
     QAction *openAct;
@@ -151,7 +151,7 @@ private:
     QAction *resetZoomAct;
     QAction *aboutAct;
     QAction *aboutQtAct;
-	QAction *setPasswordAct;
+    QAction *setPasswordAct;
     QAction *clearPasswordAct;
     QAction *setEncryptionKeyAct;
     QAction *clearEncryptionKeyAct;
@@ -172,7 +172,7 @@ private:
     bool takeBakFile;
     bool windowsEol;
 
-	void createActions();
+    void createActions();
     void createMenus();
     void createToolBars();
     void createStatusBar();

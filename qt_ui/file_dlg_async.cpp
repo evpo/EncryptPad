@@ -33,8 +33,6 @@ FileDlgAsync::FileDlgAsync(PacketMetadata &metadata)
 
 void FileDlgAsync::DoWork()
 {
-    qDebug() << "in FileDlgAsync::DoWork";
-
     EncryptParams enc_params = {};
 
     enc_params.passphrase = !passphrase_.empty() ? &passphrase_ : nullptr;
@@ -66,8 +64,6 @@ void FileDlgAsync::DoWork()
 
     std::fill(std::begin(kf_passphrase_), std::end(kf_passphrase_), '0');
     kf_passphrase_.clear();
-
-    qDebug() << "after FileDlgAsync::DoWork";
 
     emit WorkDone();
     thread_->quit();

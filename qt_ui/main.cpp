@@ -19,24 +19,38 @@
 //**********************************************************************************
 #include <QApplication>
 #include <QTextCodec>
+#include <QTranslator>
+#include <QResource>
 #include "mainwindow.h"
 #include "application.h"
 
-
+#ifdef LOCALIZATION
+#include "culture_name.h"
+#endif
 
 int main(int argc, char *argv[])
 {
     Q_INIT_RESOURCE(EncryptPad);
 
     Application app(argc, argv);
-    //QTextCodec::setCodecForTr(QTextCodec::codecForName("Unicode"));
+
+#ifdef LOCALIZATION
+    QString culture(":/cultures/");
+    culture += kCultureFile;
+    QResource translator_res(culture);
+
+    QTranslator translator;
+    translator.load(translator_res.data(), translator_res.size());
+
+    app.installTranslator(&translator);
+#endif
 
     app.setOrganizationName("Evpo"); //
     app.setApplicationName("EncryptPad");
 
-	QString fileName;
-	if(argc > 1)
-		fileName = argv[1];
+    QString fileName;
+    if(argc > 1)
+        fileName = argv[1];
     MainWindow mainWin;
     app.setMainWindow(&mainWin);
 #if defined(Q_OS_SYMBIAN)

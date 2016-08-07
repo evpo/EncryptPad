@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="cultures/">
+        <file>encryptpad_en_gb.qm</file>
+    </qresource>
+</RCC>

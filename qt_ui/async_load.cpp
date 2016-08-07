@@ -29,7 +29,6 @@ AsyncLoad::AsyncLoad(EncryptPadEncryptor::Encryptor &encryptor)
 
 void AsyncLoad::Load()
 {
-    qDebug() << "in Load";
     load_result_ = encryptor_.Load(file_name_.toUtf8().constData(), file_data_,
                                    encryption_key_file_.toStdString(), passphrase_.empty() ? nullptr : &passphrase_, metadata_,
                                    kf_passphrase_.empty() ? nullptr : &kf_passphrase_);
@@ -38,16 +37,6 @@ void AsyncLoad::Load()
     std::fill(std::begin(kf_passphrase_), std::end(kf_passphrase_), '0');
     passphrase_.clear();
     kf_passphrase_.clear();
-
-   // // imitate a long load
-   // for(int i = 0; i < 10; i++)
-   // {
-   //     QThread::sleep(1);
-   //     emit UpdateStatus(QString::number(i) + tr(" seconds..."));
-   // }
-   // emit UpdateStatus(tr("10 seconds. Done."));
-
-    qDebug() << "after Load";
 
     emit AsyncOperationCompleted();
     thread_->quit();

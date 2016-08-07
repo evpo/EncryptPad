@@ -87,7 +87,7 @@ void SetKeyDialog::on_uiFileDialog_clicked()
                 this,
                 tr("Specify encryption key location"),
                 fileName,
-                tr(GetKeyDialogFilter()));
+                GetKeyDialogFilter());
 
     if(selection.cancelled)
         return;

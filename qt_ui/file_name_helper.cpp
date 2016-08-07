@@ -18,6 +18,8 @@
 //along with EncryptPad.  If not, see <http://www.gnu.org/licenses/>.
 //**********************************************************************************
 #include "file_name_helper.h"
+#include <QtGlobal>
+#include <QApplication>
 
 namespace
 {
@@ -32,17 +34,17 @@ namespace
         {".epd", "EncryptPad (*.epd)"},
         {".gpg", "GnuPG (*.gpg)"},
         {".cpad", "EncryptPad Alpha (*.cpad)"},
-        {".txt", "Plain Text (*.txt)"},
+        {".txt", QT_TRANSLATE_NOOP("FileExtensions", "Plain Text (*.txt)")},
         {nullptr, nullptr}
     };
 
-    const char *sOpenDialogFilter = "Encrypted Files (*.epd *.gpg *.cpad);; Plain Text (*.txt)";
-    const char *sKeyDialogFilter = "Key (*.key)";
+    const char *sOpenDialogFilter = QT_TRANSLATE_NOOP("FileExtensions", "Encrypted Files (*.epd *.gpg *.cpad);; Plain Text (*.txt)");
+    const char *sKeyDialogFilter = QT_TRANSLATE_NOOP("FileExtensions", "Key (*.key)");
 
 #if defined(__APPLE__) || defined(unix) || defined(__unix__) || defined(__unix)
-    const char *sAllFilesFilter = "All Files (*)";
+    const char *sAllFilesFilter = QT_TRANSLATE_NOOP("FileExtensions", "All Files (*)");
 #else // WINDOWS
-    const char *sAllFilesFilter = "All Files (*.*)";
+    const char *sAllFilesFilter = QT_TRANSLATE_NOOP("FileExtensions", "All Files (*.*)");
 #endif
 
 #if defined(__APPLE__) || defined(unix) || defined(__unix__) || defined(__unix)
@@ -51,16 +53,41 @@ namespace
     const char *kLibcurlFilter = "*.exe";
 #endif
 
+    QString AppendAllFiles(const QString &otherFiles)
+    {
+        QString buf;
+        buf += otherFiles;
+        buf += ";; ";
+        buf += qApp->translate("FileExtensions", sAllFilesFilter);
+        return buf;
+    }
+
+    const QString &GetFiltersWithoutAllFiles()
+    {
+        static QString str;
+        if(str.isEmpty())
+        {
+            const FileFormat *format = fileFormats;
+            while(format->ext)
+            {
+                if(!str.isEmpty())
+                    str.append(";; ");
+
+                str.append(qApp->translate("FileExtensions", format->filter));
+                format++;
+            }
+        }
+
+        return str;
+    }
 }
 
 #if defined(_MSC_VER) || defined(__MINGW32__) || defined(__APPLE__)
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic push
     QString AppendExtensionForFileDialog(QString fileName, QString selectedFilter)
     {
+        (void)selectedFilter;
         return fileName;
     }
-#pragma GCC diagnostic pop
 #endif
 
 #if defined(unix) || defined(__unix__) || defined(__unix)
@@ -97,57 +124,25 @@ namespace
     }
 #endif
 
-const char *GetFiltersWithoutAllFiles()
+
+QString GetSaveDialogFilter()
 {
-    static std::string str;
-    if(str.empty())
-    {
-        const FileFormat *format = fileFormats;
-        while(format->ext)
-        {
-            if(!str.empty())
-                str.append(";; ");
-
-            str.append(format->filter);
-            format++;
-        }
-    }
-
-    return str.c_str();
+    return AppendAllFiles(GetFiltersWithoutAllFiles());
 }
 
-const char *AppendAllFilesIfNeeded(std::string &buf, const char *otherFiles)
+QString GetOpenDialogFilter()
 {
-    if(buf.empty())
-    {
-        buf += otherFiles;
-        buf += ";; ";
-        buf += sAllFilesFilter;
-    }
-    return buf.c_str();
+    return AppendAllFiles(qApp->translate("FileExtensions", sOpenDialogFilter));
 }
 
-const char *GetSaveDialogFilter()
+QString GetKeyDialogFilter()
 {
-    static std::string buf;
-    return AppendAllFilesIfNeeded(buf, GetFiltersWithoutAllFiles());
+    return AppendAllFiles(qApp->translate("FileExtensions", sKeyDialogFilter));
 }
 
-const char *GetOpenDialogFilter()
+QString GetAllFilesFilter()
 {
-    static std::string buf;
-    return AppendAllFilesIfNeeded(buf, sOpenDialogFilter);
-}
-
-const char *GetKeyDialogFilter()
-{
-    static std::string buf;
-    return AppendAllFilesIfNeeded(buf, sKeyDialogFilter);
-}
-
-const char *GetAllFilesFilter()
-{
-    return sAllFilesFilter;
+    return qApp->translate("FileExtensions", sAllFilesFilter);
 }
 
 bool IsEncryptPadFormat(const QString &fileName)
@@ -171,12 +166,12 @@ QString GetFileFilterFromFileName(const QString &fileName)
     while(table->ext)
     {
         if(fileName.endsWith(QString(table->ext), Qt::CaseInsensitive))
-            return QString(table->filter);
+            return qApp->translate("FileExtensions", table->filter);
 
         table ++;
     }
 
-    return QString(GetAllFilesFilter());
+    return GetAllFilesFilter();
 }
 
 QString GetLibcurlFilter()

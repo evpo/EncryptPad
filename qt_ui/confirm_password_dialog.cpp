@@ -40,8 +40,8 @@ void ConfirmPasswordDialog::invokeOk()
     {
         QMessageBox::warning(
             this,
-            "Set Password",
-            "The confirmed password does not match");
+            tr("Set Password"),
+            tr("The confirmed password does not match"));
         return;
     }
 

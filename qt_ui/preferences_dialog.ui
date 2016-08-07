@@ -218,7 +218,7 @@
        </property>
       </widget>
      </item>
-     <item row="4" column="1">
+     <item row="4" column="1" colspan="2">
       <widget class="QCheckBox" name="uiLastUsedDirectory">
        <property name="toolTip">
         <string>Retain last used directory between EncryptPad sessions</string>
@@ -228,7 +228,7 @@
        </property>
       </widget>
      </item>
-     <item row="5" column="1">
+     <item row="5" column="1" colspan="2">
       <widget class="QCheckBox" name="uiEnableBakFiles">
        <property name="text">
         <string>Enable BAK Files</string>

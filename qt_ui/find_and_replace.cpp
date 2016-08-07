@@ -48,13 +48,11 @@ void FindAndReplace::SetFind(const QString &str)
     ui->uiFind->setText(str);
 }
 
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic push
 void FindAndReplace::on_FindAndReplace_finished(int result)
 {
+    (void)result;
     ui->uiFind->setFocus();
 }
-#pragma GCC diagnostic pop
 
 void FindAndReplace::on_uiFindNext_clicked()
 {

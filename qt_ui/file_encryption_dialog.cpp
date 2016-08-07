@@ -189,7 +189,7 @@ void FileEncryptionDialog::on_uiInputBrowse_clicked()
                 this,
                 tr("Input File"),
                 inputFile,
-                tr(GetOpenDialogFilter()),
+                GetOpenDialogFilter(),
                 ui->uiEncryptRadio->isChecked() ? &allFilesFilter : nullptr);
 
     if(selection.cancelled)
@@ -251,7 +251,7 @@ void FileEncryptionDialog::on_uiStart_clicked()
         QMessageBox::warning(
                 this,
                 tr("EncryptPad"),
-                inputFile + tr(" does not exist."));
+                tr("%1 does not exist.").arg(inputFile));
         return;
     }
 
@@ -260,7 +260,7 @@ void FileEncryptionDialog::on_uiStart_clicked()
         auto ret = QMessageBox::warning(
                 this,
                 tr("EncryptPad"),
-                outputFile + tr(" already exists.\nDo you want to replace it?"),
+                tr("%1 already exists.\nDo you want to replace it?").arg(outputFile),
                 QMessageBox::Yes | QMessageBox::No
                 );
 
@@ -274,7 +274,7 @@ void FileEncryptionDialog::on_uiStart_clicked()
         {
             QByteArray byte_array = ui->uiPassword->text().toUtf8();
             const char *pwd = byte_array.constData();
-        
+
             std::string passphrase(pwd);
             keyService.ChangePassphrase(passphrase, metadata.hash_algo, 
                 GetAlgoSpec(metadata.cipher_algo).key_size);
@@ -316,28 +316,28 @@ void FileEncryptionDialog::WorkDone()
             QMessageBox::warning(
                         this,
                         "EncryptPad",
-                        "Cannot open the encryption key");
+                        tr("Cannot open the encryption key"));
             rejected = true;
             break;
         case PacketResult::InvalidKeyFile:
             QMessageBox::warning(
                         this,
                         "EncryptPad",
-                        "The encryption key is invalid");
+                        tr("The encryption key is invalid"));
             rejected = true;
             break;
         case PacketResult::CurlIsNotFound:
             QMessageBox::warning(
                         this,
                         "EncryptPad",
-                        "Cannot download the encryption key. CURL tool is not found.");
+                        tr("Cannot download the encryption key. CURL tool is not found."));
             rejected = true;
             break;
         case PacketResult::CurlExitNonZero:
             QMessageBox::warning(
                         this,
                         "EncryptPad",
-                        "Cannot download the key. CURL returned non zero exit code");
+                        tr("Cannot download the key. CURL returned non zero exit code"));
             rejected = true;
             break;
         case PacketResult::KeyFileNotSpecified:
@@ -352,7 +352,7 @@ void FileEncryptionDialog::WorkDone()
                 QMessageBox::warning(
                         this,
                         "EncryptPad",
-                        "Invalid password for key file");
+                        tr("Invalid password for key file"));
                 rejected = true;
             }
             else
@@ -376,7 +376,8 @@ void FileEncryptionDialog::WorkDone()
         QMessageBox::information(
                 this,
                 "EncryptPad",
-                IsEncryption() ? "File has been encrypted successfully." : "File has been decrypted successfully.");
+                IsEncryption() ? tr("File has been encrypted successfully.") :
+                    tr("File has been decrypted successfully."));
     }
     else
     {
