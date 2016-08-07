@@ -25,6 +25,10 @@ ifeq ($(USE_SYSTEM_LIBS),on)
     QMAKE_CONFIG += USE_SYSTEM_LIBS
 endif
 
+ifeq ($(LOCALIZATION),on)
+    QMAKE_CONFIG += LOCALIZATION
+endif
+
 all:: x_make
 
 x_qmake::

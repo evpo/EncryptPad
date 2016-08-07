@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+set -e
+set -o pipefail
 
 USAGE="USAGE:\n\
 configure.sh <command> [option]\n\n\
@@ -13,6 +15,7 @@ COMMANDS:\n\
 -t, --run-tests      run the unit tests\n\
 -f, --run-func-tests run functional tests\n\
 -n, --clean-tests    clean the unit tests\n\
+--all-cultures       the same as all but builds binaries for all cultures\n\
 -h, --help           help\n\n\
 OPTIONS:\n\
 --debug              debug configuration. If not specified, the release configuration is used. The unit tests\n\
@@ -70,17 +73,35 @@ then
     CONFIG_DIR=debug
 fi
 
-case $COMMAND in
--a|--all)
+function build_all {
     if [[ ! "$USE_SYSTEM_LIBS" == "on" ]]
     then
         $MAKE -f Makefile.botan
     fi
-    $MAKE -f Makefile RELEASE=$RELEASE USE_SYSTEM_LIBS=$USE_SYSTEM_LIBS
+    $MAKE -f Makefile RELEASE=$RELEASE USE_SYSTEM_LIBS=$USE_SYSTEM_LIBS LOCALIZATION=$LOCALIZATION
     if [[ $SUBDIR == *MACOS* ]]
     then
         cd ../macos_deployment && ./prepare_bundle.sh ../bin/${CONFIG_DIR}/${TARGET}.app
     fi
+}
+
+case $COMMAND in
+-a|--all)
+    build_all
+    ;;
+--all-cultures)
+    LOCALIZATION=on
+    mkdir -p qt_build
+    for TSFILE in ../qt_ui/*.ts
+    do
+        CULTUREFILE=$(echo -n "$TSFILE" | sed -n -e "s/..\/qt_ui\///" -e "s/\.ts$//p")
+        lrelease $TSFILE -qm ./qt_build/${CULTUREFILE}.qm
+        echo "const char *kCultureFile=\"${CULTUREFILE}.qm\";" > ./qt_build/culture_name.h
+        cp ../qt_ui/${CULTUREFILE}.qrc ./qt_build/culture.qrc
+        build_all
+        mkdir -p ../bin/${CONFIG_DIR}/${CULTUREFILE}/
+        mv ../bin/${CONFIG_DIR}/${TARGET} ../bin/${CONFIG_DIR}/${CULTUREFILE}/
+    done
     ;;
 -c|--clean)
     $MAKE -f Makefile.qt_ui clean RELEASE=$RELEASE 

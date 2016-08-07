@@ -697,7 +697,7 @@ Do you want to disable it?</oldsource>
     <message>
         <location filename="mainwindow.cpp" line="690"/>
         <source>&amp;Close and Reset</source>
-        <translation type="unfinished">&amp;Закрыть и сбросить</translation>
+        <translation type="unfinished">&amp;Закрыть и Сбросить</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="692"/>

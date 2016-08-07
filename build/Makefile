@@ -1,5 +1,5 @@
 all:: back_end cli
-	$(MAKE) -f Makefile.qt_ui RELEASE=$(RELEASE) USE_SYSTEM_LIBS=$(USE_SYSTEM_LIBS)
+	$(MAKE) -f Makefile.qt_ui RELEASE=$(RELEASE) USE_SYSTEM_LIBS=$(USE_SYSTEM_LIBS) LOCALIZATION=$(LOCALIZATION)
 back_end::
 	$(MAKE) -f Makefile.back_end RELEASE=$(RELEASE) USE_SYSTEM_LIBS=$(USE_SYSTEM_LIBS)
 cli:

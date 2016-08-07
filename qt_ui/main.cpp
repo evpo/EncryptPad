@@ -24,20 +24,26 @@
 #include "mainwindow.h"
 #include "application.h"
 
-
+#ifdef LOCALIZATION
+#include "culture_name.h"
+#endif
 
 int main(int argc, char *argv[])
 {
     Q_INIT_RESOURCE(EncryptPad);
 
     Application app(argc, argv);
-    //QTextCodec::setCodecForTr(QTextCodec::codecForName("Unicode"));
-    QResource translator_res(":/encryptpad_ru_ru.qm");
+
+#ifdef LOCALIZATION
+    QString culture(":/cultures/");
+    culture += kCultureFile;
+    QResource translator_res(culture);
 
     QTranslator translator;
     translator.load(translator_res.data(), translator_res.size());
 
     app.installTranslator(&translator);
+#endif
 
     app.setOrganizationName("Evpo"); //
     app.setApplicationName("EncryptPad");
