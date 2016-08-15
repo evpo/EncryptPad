@@ -89,6 +89,7 @@ function build_all {
 
 case $COMMAND in
 -a|--all)
+    mkdir -p qt_build
     build_all
     ;;
 --all-cultures)
@@ -99,7 +100,6 @@ case $COMMAND in
         CULTUREFILE=$(echo -n "$TSFILE" | sed -n -e "s/..\/qt_ui\///" -e "s/\.ts$//p")
         echo $CULTUREFILE
         lrelease $TSFILE -qm ./qt_build/${CULTUREFILE}.qm
-        echo "const char *kCultureFile=\"${CULTUREFILE}.qm\";" > ./qt_build/culture_name.h
         cp ../qt_ui/${CULTUREFILE}.qrc ./qt_build/culture.qrc
         build_all
         mkdir -p ../bin/${CONFIG_DIR}/${CULTUREFILE}/
@@ -110,6 +110,10 @@ case $COMMAND in
             mv ../bin/${CONFIG_DIR}/${TARGET} ../bin/${CONFIG_DIR}/${CULTUREFILE}/
         fi
     done
+
+    LOCALIZATION=
+    rm ./qt_build/${CONFIG_DIR}/obj/main.o
+    build_all
     ;;
 -c|--clean)
     $MAKE -f Makefile.qt_ui clean RELEASE=$RELEASE 

@@ -21,12 +21,9 @@
 #include <QTextCodec>
 #include <QTranslator>
 #include <QResource>
+#include <QDirIterator>
 #include "mainwindow.h"
 #include "application.h"
-
-#ifdef LOCALIZATION
-#include "culture_name.h"
-#endif
 
 int main(int argc, char *argv[])
 {
@@ -35,14 +32,16 @@ int main(int argc, char *argv[])
     Application app(argc, argv);
 
 #ifdef LOCALIZATION
-    QString culture(":/cultures/");
-    culture += kCultureFile;
-    QResource translator_res(culture);
+    QDirIterator it(":/cultures/");
+    assert(it.hasNext());
+    QResource translator_res(it.next());
 
     QTranslator translator;
-    translator.load(translator_res.data(), translator_res.size());
+    bool result = translator.load(translator_res.data(), translator_res.size());
+    assert(result);
 
-    app.installTranslator(&translator);
+    result = app.installTranslator(&translator);
+    assert(result);
 #endif
 
     app.setOrganizationName("Evpo"); //

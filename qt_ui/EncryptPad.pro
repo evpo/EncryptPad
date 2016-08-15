@@ -117,19 +117,17 @@ HEADERS += \
     common_definitions.h \
     find_dialog.h
 
+QMAKE_RESOURCE_FLAGS += -no-compress
 RESOURCES += \
     EncryptPad.qrc
 
 LOCALIZATION {
 RESOURCES += \
     culture.qrc
-HEADERS += \
-    culture_name.h
 QMAKE_CXXFLAGS += -DLOCALIZATION
     }
 
 TRANSLATIONS = \
-    encryptpad_en_gb.ts \
     encryptpad_ru_ru.ts \
     encryptpad_fr_fr.ts
 
