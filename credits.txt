@@ -10,3 +10,6 @@ the EncryptPad key is.
 Dmitri Goutnik (enodata)
 Fixes for Arch Linux and Freebsd and other unix like systems.
 Arch Linux AUR package.
+
+Alain-Olivier (Localization Lab / OTF)
+French translation and imrovements in the English version
