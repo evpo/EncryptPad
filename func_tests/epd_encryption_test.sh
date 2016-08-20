@@ -20,9 +20,9 @@ mkdir -p $TMP_DIR
 RESULT=0
 
 ############
-# Password only
+# Passphrase only
 ############
-echo "Password only"
+echo "Passphrase only"
 
 cat $PASSPHRASE_FILE | $ENCRYPT_CLI -e --pwd-fd 0 -o $TMP_DIR/out_file.gpg $FILE
 if ! [ -r $TMP_DIR/out_file.gpg ]
@@ -113,9 +113,9 @@ rm $TMP_DIR/out_file.epd
 rm $TMP_DIR/out_file.txt
 
 ############
-# Key and password
+# Key and passphrase
 ############
-echo "Key and password"
+echo "Key and passphrase"
 
 cat $PASSPHRASE_FILE | $ENCRYPT_CLI -e -k $KEY_FILE --plain-text-key --pwd-fd 0 -o $TMP_DIR/out_file.epd $FILE
 cat $PASSPHRASE_FILE | $ENCRYPT_CLI -d -k $KEY_FILE --plain-text-key --pwd-fd 0 -o $TMP_DIR/out_file.txt $TMP_DIR/out_file.epd
@@ -131,9 +131,9 @@ rm $TMP_DIR/out_file.epd
 rm $TMP_DIR/out_file.txt
 
 ############
-# Key (persisted) and password
+# Key (persisted) and passphrase
 ############
-echo "Key (persisted) and password"
+echo "Key (persisted) and passphrase"
 
 cat $PASSPHRASE_FILE | $ENCRYPT_CLI -e --persist-key --plain-text-key -k $KEY_FILE --pwd-fd 0 -o $TMP_DIR/out_file.epd $FILE
 cat $PASSPHRASE_FILE | $ENCRYPT_CLI -d --pwd-fd 0 --plain-text-key -o $TMP_DIR/out_file.txt $TMP_DIR/out_file.epd

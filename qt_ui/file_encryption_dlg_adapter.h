@@ -32,7 +32,7 @@ public:
     FileEncryptionDlgAdapter(FileEncryptionDialog *parent);
     virtual bool IsPassphraseNotSet() const override;
     virtual void SetIsPlainText() override;
-    virtual void SetPassword(const char *pwd, EncryptPad::PacketMetadata &metadata) override;
+    virtual void SetPassphrase(const char *pwd, EncryptPad::PacketMetadata &metadata) override;
     virtual QString EncryptionKeyFile() const override;
     virtual void EncryptionKeyFile(const QString &keyFile) override;
     virtual bool PersistEncryptionKeyPath() const override;

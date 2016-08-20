@@ -56,7 +56,7 @@ namespace EncryptPad
             :chars(chars_p), min(min_p), max(max_p), range(range){}
     };
 
-    std::vector<std::string> GeneratePasswords(const std::vector<CharSet> &char_sets, int pwd_length, int pwd_count);
+    std::vector<std::string> GeneratePassphrases(const std::vector<CharSet> &char_sets, int pwd_length, int pwd_count);
 
     const std::string &GetLowerAtoZ();
     const std::string &GetUpperAtoZ();

@@ -55,12 +55,12 @@ namespace
 
 namespace EncryptPad
 {
-    void GetPassword(const std::string &prompt, std::string &password)
+    void GetPassphrase(const std::string &prompt, std::string &passphrase)
     {
         const char kBackSpace=8;
         const char kReturn=13;
 
-        password.clear();
+        passphrase.clear();
 
         unsigned char ch=0;
 
@@ -77,14 +77,14 @@ namespace EncryptPad
         {
             if(ch == kBackSpace)
             {
-                if(password.length() != 0)
+                if(passphrase.length() != 0)
                 {
-                    password.resize(password.length() - 1);
+                    passphrase.resize(passphrase.length() - 1);
                 }
             }
             else
             {
-                password+=ch;
+                passphrase+=ch;
             }
         }
 
@@ -128,9 +128,9 @@ namespace
 
 namespace EncryptPad
 {
-    void GetPassword(const std::string &prompt, std::string &password)
+    void GetPassphrase(const std::string &prompt, std::string &passphrase)
     {
-        password.clear();
+        passphrase.clear();
         unsigned char ch=0;
 
         const char *termid = ctermid(NULL);
@@ -143,14 +143,14 @@ namespace EncryptPad
         {
             if(ch == kBackspace)
             {
-                if(password.length() != 0)
+                if(passphrase.length() != 0)
                 {
-                    password.resize(password.length() - 1);
+                    passphrase.resize(passphrase.length() - 1);
                 }
             }
             else
             {
-                password += ch;
+                passphrase += ch;
             }
         }
 

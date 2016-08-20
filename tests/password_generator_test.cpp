@@ -30,32 +30,32 @@ vector<CharSet> GetCharSets()
     return GetCharSets(CharRange::All);
 }
 
-TEST(PasswordGenerator, It_generates_correct_number_of_passwords)
+TEST(PassphraseGenerator, It_generates_correct_number_of_passphrases)
 {
     //Arrange
     int pwd_count = 5;
 
     //Act
-    vector<string> passwords = GeneratePasswords(GetCharSets(), 12, pwd_count);
+    vector<string> passphrases = GeneratePassphrases(GetCharSets(), 12, pwd_count);
 
     //Assert
-    ASSERT_EQ(5, passwords.size());
+    ASSERT_EQ(5, passphrases.size());
 
 }
 
-TEST(PasswordGenerator, When_no_char_sets_It_returns_empty_collection)
+TEST(PassphraseGenerator, When_no_char_sets_It_returns_empty_collection)
 {
     //Arrange
     vector<CharSet> sets;
 
     //Act
-    vector<string> passwords = GeneratePasswords(sets, 8, 3);
+    vector<string> passphrases = GeneratePassphrases(sets, 8, 3);
 
     //Assert
-    ASSERT_TRUE(passwords.empty());
+    ASSERT_TRUE(passphrases.empty());
 }
 
-TEST(PasswordGenerator, When_max_char_count_is_less_than_password_length_Generated_passwords_are_cut_to_max_char_count)
+TEST(PassphraseGenerator, When_max_char_count_is_less_than_passphrase_length_Generated_passphrases_are_cut_to_max_char_count)
 {
     //Arrange
     int pwd_length = 12;
@@ -64,16 +64,16 @@ TEST(PasswordGenerator, When_max_char_count_is_less_than_password_length_Generat
     sets.push_back(CharSet(GetUpperAtoZ(), CharRange::UpperAtoZ, 1, 3));
 
     //Act
-    vector<string> passwords = GeneratePasswords(sets, pwd_length, 3);
+    vector<string> passphrases = GeneratePassphrases(sets, pwd_length, 3);
 
     //Assert
-    ASSERT_EQ(3, passwords.size());
-    ASSERT_EQ(5, passwords[0].size());
-    ASSERT_EQ(5, passwords[1].size());
-    ASSERT_EQ(5, passwords[2].size());
+    ASSERT_EQ(3, passphrases.size());
+    ASSERT_EQ(5, passphrases[0].size());
+    ASSERT_EQ(5, passphrases[1].size());
+    ASSERT_EQ(5, passphrases[2].size());
 }
 
-TEST(PasswordGenerator, Boundary_case_in_which_max_char_count_is_password_length)
+TEST(PassphraseGenerator, Boundary_case_in_which_max_char_count_is_passphrase_length)
 {
     //Arrange
     int pwd_length = 12;
@@ -81,31 +81,31 @@ TEST(PasswordGenerator, Boundary_case_in_which_max_char_count_is_password_length
     sets.push_back(CharSet(GetLowerAtoZ(), CharRange::LowerAtoZ, 1, pwd_length));
 
     //Act
-    vector<string> passwords = GeneratePasswords(sets, pwd_length, 3);
+    vector<string> passphrases = GeneratePassphrases(sets, pwd_length, 3);
 
     //Assert
-    ASSERT_EQ(3, passwords.size());
-    ASSERT_EQ(pwd_length, passwords[0].size());
-    ASSERT_EQ(pwd_length, passwords[1].size());
-    ASSERT_EQ(pwd_length, passwords[2].size());
+    ASSERT_EQ(3, passphrases.size());
+    ASSERT_EQ(pwd_length, passphrases[0].size());
+    ASSERT_EQ(pwd_length, passphrases[1].size());
+    ASSERT_EQ(pwd_length, passphrases[2].size());
 }
 
-TEST(PasswordGenerator, It_generates_passwords_of_correct_length)
+TEST(PassphraseGenerator, It_generates_passphrases_of_correct_length)
 {
     //Arrange
     int pwd_length = 12;
 
     //Act
-    vector<string> passwords = GeneratePasswords(GetCharSets(), pwd_length, 3);
+    vector<string> passphrases = GeneratePassphrases(GetCharSets(), pwd_length, 3);
 
     //Assert
-    ASSERT_EQ(3, passwords.size());
-    ASSERT_EQ(pwd_length, passwords[0].size());
-    ASSERT_EQ(pwd_length, passwords[1].size());
-    ASSERT_EQ(pwd_length, passwords[2].size());
+    ASSERT_EQ(3, passphrases.size());
+    ASSERT_EQ(pwd_length, passphrases[0].size());
+    ASSERT_EQ(pwd_length, passphrases[1].size());
+    ASSERT_EQ(pwd_length, passphrases[2].size());
 }
 
-TEST(PasswordGenerator, Boundary_test_in_which_min_char_count_takes_all_chars)
+TEST(PassphraseGenerator, Boundary_test_in_which_min_char_count_takes_all_chars)
 {
     //Arrange
     vector<CharSet> sets;
@@ -113,11 +113,11 @@ TEST(PasswordGenerator, Boundary_test_in_which_min_char_count_takes_all_chars)
     sets.push_back(CharSet(GetUpperAtoZ(), CharRange::UpperAtoZ, 1, 1));
 
     //Act
-    vector<string> passwords = GeneratePasswords(sets, 2, 1);
+    vector<string> passphrases = GeneratePassphrases(sets, 2, 1);
 
     //Assert
-    ASSERT_EQ(1, passwords.size());
-    string &pwd = passwords[0];
+    ASSERT_EQ(1, passphrases.size());
+    string &pwd = passphrases[0];
     ASSERT_EQ(2, pwd.size());
     bool lower1 = GetLowerAtoZ().find(pwd[0]) != string::npos; 
     bool lower2 = GetLowerAtoZ().find(pwd[1]) != string::npos; 
@@ -126,7 +126,7 @@ TEST(PasswordGenerator, Boundary_test_in_which_min_char_count_takes_all_chars)
     ASSERT_TRUE((lower1 && upper2) || (upper1 && lower2));
 }
 
-TEST(PasswordGenerator, Boundary_test_in_which_max_char_count_is_one)
+TEST(PassphraseGenerator, Boundary_test_in_which_max_char_count_is_one)
 {
     //Arrange
     vector<CharSet> sets;
@@ -136,11 +136,11 @@ TEST(PasswordGenerator, Boundary_test_in_which_max_char_count_is_one)
     sets.push_back(CharSet(GetUpperAtoZ(), CharRange::UpperAtoZ, 1, max_char_count));
 
     //Act
-    vector<string> passwords = GeneratePasswords(sets, 100, 1);
+    vector<string> passphrases = GeneratePassphrases(sets, 100, 1);
 
     //Assert
-    ASSERT_EQ(1, passwords.size());
-    string &pwd = passwords[0];
+    ASSERT_EQ(1, passphrases.size());
+    string &pwd = passphrases[0];
 
     ASSERT_EQ(100, pwd.size());
 
@@ -154,7 +154,7 @@ TEST(PasswordGenerator, Boundary_test_in_which_max_char_count_is_one)
     ASSERT_EQ(1, out_it - buf.begin());
 }
 
-TEST(PasswordGenerator, Passwords_do_not_exceed_char_set_maximum_and_reach_char_set_minimum)
+TEST(PassphraseGenerator, Passphrases_do_not_exceed_char_set_maximum_and_reach_char_set_minimum)
 {
     //Arrange
     vector<CharSet> sets;
@@ -162,17 +162,17 @@ TEST(PasswordGenerator, Passwords_do_not_exceed_char_set_maximum_and_reach_char_
     sets.push_back(CharSet(GetUpperAtoZ(), CharRange::UpperAtoZ, 1, 3));
 
     //Act
-    vector<string> passwords = GeneratePasswords(sets, 100, 1000);
+    vector<string> passphrases = GeneratePassphrases(sets, 100, 1000);
     
     //Assert
-    ASSERT_EQ(1000, passwords.size());
+    ASSERT_EQ(1000, passphrases.size());
 
     const string &upperChars = GetUpperAtoZ();
     string buf;
     buf.resize(upperChars.size());
 
-    auto pwd_it = passwords.begin();
-    for(; pwd_it != passwords.end(); pwd_it ++)
+    auto pwd_it = passphrases.begin();
+    for(; pwd_it != passphrases.end(); pwd_it ++)
     {
         ASSERT_EQ(100, pwd_it->size());
         std::sort(pwd_it->begin(), pwd_it->end());
@@ -183,21 +183,21 @@ TEST(PasswordGenerator, Passwords_do_not_exceed_char_set_maximum_and_reach_char_
     }
 }
 
-TEST(PasswordGenerator, Passwords_contain_all_sets)
+TEST(PassphraseGenerator, Passphrases_contain_all_sets)
 {
     //Arrange
     auto sets = GetCharSets();
 
     //Act
-    vector<string> passwords = GeneratePasswords(sets, 6, 1000);
+    vector<string> passphrases = GeneratePassphrases(sets, 6, 1000);
 
     //Assert
-    vector<string>::iterator pwd_it = passwords.begin();
+    vector<string>::iterator pwd_it = passphrases.begin();
     vector<char> buf;
 
-    ASSERT_EQ(1000, passwords.size());
+    ASSERT_EQ(1000, passphrases.size());
 
-    for(;pwd_it != passwords.end(); pwd_it++)
+    for(;pwd_it != passphrases.end(); pwd_it++)
     {
         string &pwd = *pwd_it;
         std::sort(pwd.begin(), pwd.end());

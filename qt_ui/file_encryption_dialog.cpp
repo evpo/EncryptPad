@@ -73,7 +73,7 @@ void FileEncryptionDialog::EncryptionFilePath(const QString &path)
     return ui->uiKeyFilePath->setText(path);
 }
 
-void FileEncryptionDialog::SetPassword(const char *pwd, EncryptPad::PacketMetadata &metadata)
+void FileEncryptionDialog::SetPassphrase(const char *pwd, EncryptPad::PacketMetadata &metadata)
 {
     keyService.Clear();
     std::string passphrase(pwd);
@@ -103,7 +103,7 @@ FileRequestService &FileEncryptionDialog::GetFileRequestService()
     return fileRequestService;
 }
 
-void FileEncryptionDialog::ClearPassword()
+void FileEncryptionDialog::ClearPassphrase()
 {
     keyService.Clear();
 }
@@ -237,12 +237,12 @@ void FileEncryptionDialog::on_uiStart_clicked()
     if(inputFile.isEmpty() || outputFile.isEmpty())
         return;
 
-    if(ui->uiPassword->text() != ui->uiConfirmPassword->text())
+    if(ui->uiPassphrase->text() != ui->uiConfirmPassphrase->text())
     {
         QMessageBox::warning(
                 this,
                 tr("EncryptPad"),
-                tr("Confirmation password does not match."));
+                tr("Confirmation passphrase does not match."));
         return;
     }
 
@@ -270,9 +270,9 @@ void FileEncryptionDialog::on_uiStart_clicked()
 
     if(IsEncryption())
     {
-        if(!ui->uiPassword->text().isEmpty())
+        if(!ui->uiPassphrase->text().isEmpty())
         {
-            QByteArray byte_array = ui->uiPassword->text().toUtf8();
+            QByteArray byte_array = ui->uiPassphrase->text().toUtf8();
             const char *pwd = byte_array.constData();
 
             std::string passphrase(pwd);
@@ -352,7 +352,7 @@ void FileEncryptionDialog::WorkDone()
                 QMessageBox::warning(
                         this,
                         "EncryptPad",
-                        tr("Invalid password for key file"));
+                        tr("Invalid passphrase for key file"));
                 rejected = true;
             }
             else
@@ -387,8 +387,8 @@ void FileEncryptionDialog::WorkDone()
 
 void FileEncryptionDialog::on_actionSwitchDirection_triggered()
 {
-    ui->uiPassword->clear();
-    ui->uiConfirmPassword->clear();
+    ui->uiPassphrase->clear();
+    ui->uiConfirmPassphrase->clear();
     QString filePath = ui->uiOutputFile->text();
     ui->uiOutputFile->setText(ui->uiInputFile->text());
     ui->uiInputFile->setText(filePath);

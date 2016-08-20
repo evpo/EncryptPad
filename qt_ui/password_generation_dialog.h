@@ -27,16 +27,16 @@
 #include "password_generator.h"
 
 namespace Ui {
-class PasswordGenerationDialog;
+class PassphraseGenerationDialog;
 }
 
-class PasswordGenerationDialog : public QDialog
+class PassphraseGenerationDialog : public QDialog
 {
     Q_OBJECT
 private:
-    Ui::PasswordGenerationDialog *ui;
+    Ui::PassphraseGenerationDialog *ui;
     bool ignoreRegenerate;
-    bool allPasswords;
+    bool allPassphrases;
     int getLength();
     void setLength(int length);
     EncryptPad::CharRange getCharRange();
@@ -75,14 +75,14 @@ private:
     const SpinBox2CharRange *getMaxControl2CharRange();
 
 public:
-    explicit PasswordGenerationDialog(QWidget *parent = 0);
-    ~PasswordGenerationDialog();
+    explicit PassphraseGenerationDialog(QWidget *parent = 0);
+    ~PassphraseGenerationDialog();
 
     QStringList getSettings();
     void setSettings(const QStringList &list);
-    QStringList getPasswords() const;
-    QString getCurrentPassword() const;
-    bool getAllPasswords() const;
+    QStringList getPassphrases() const;
+    QString getCurrentPassphrase() const;
+    bool getAllPassphrases() const;
 
 private slots:
     void on_actionRegenerate_triggered();

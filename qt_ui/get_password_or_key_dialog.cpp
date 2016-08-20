@@ -22,42 +22,42 @@
 #include "set_encryption_key.h"
 #include "common_definitions.h"
 
-GetPasswordOrKeyDialog::GetPasswordOrKeyDialog(QWidget *parent, FileRequestService &fileRequestService_p)
+GetPassphraseOrKeyDialog::GetPassphraseOrKeyDialog(QWidget *parent, FileRequestService &fileRequestService_p)
     :
     QDialog(parent, kDefaultWindowFlags),
-    ui(new Ui::GetPasswordOrKeyDialog),
+    ui(new Ui::GetPassphraseOrKeyDialog),
     persistKeyPath(false),
     fileRequestService(fileRequestService_p)
 {
     ui->setupUi(this);
 }
 
-GetPasswordOrKeyDialog::~GetPasswordOrKeyDialog()
+GetPassphraseOrKeyDialog::~GetPassphraseOrKeyDialog()
 {
     delete ui;
 }
 
-bool GetPasswordOrKeyDialog::GetPersistKeyPath() const
+bool GetPassphraseOrKeyDialog::GetPersistKeyPath() const
 {
     return persistKeyPath;
 }
 
-bool GetPasswordOrKeyDialog::IsPasswordSelected() const
+bool GetPassphraseOrKeyDialog::IsPassphraseSelected() const
 {
-    return ui->uiPasswordRadio->isChecked();
+    return ui->uiPassphraseRadio->isChecked();
 }
 
-QString GetPasswordOrKeyDialog::GetKeyFilePath() const
+QString GetPassphraseOrKeyDialog::GetKeyFilePath() const
 {
     return ui->uiKeyFile->text();
 }
 
-QString GetPasswordOrKeyDialog::GetPassword() const
+QString GetPassphraseOrKeyDialog::GetPassphrase() const
 {
-    return ui->uiPassword->text();
+    return ui->uiPassphrase->text();
 }
 
-void GetPasswordOrKeyDialog::on_actionSelectKeyFile_triggered()
+void GetPassphraseOrKeyDialog::on_actionSelectKeyFile_triggered()
 {
     using namespace EncryptPad;
     EncryptionKeySelectionResult selection;

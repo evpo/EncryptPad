@@ -27,11 +27,11 @@ class QLabel;
 class QLineEdit;
 class QPushButton;
 
-class SetPasswordDialog : public QDialog
+class SetPassphraseDialog : public QDialog
 {
 	Q_OBJECT
 public:
-	SetPasswordDialog(QWidget *parent = 0, const bool enableConfirmation = true);
+	SetPassphraseDialog(QWidget *parent = 0, const bool enableConfirmation = true);
 	const QString GetValue();
 private slots:
 	void okClicked();

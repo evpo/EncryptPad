@@ -24,27 +24,27 @@
 #include "file_request_service.h"
 
 namespace Ui {
-class GetPasswordOrKeyDialog;
+class GetPassphraseOrKeyDialog;
 }
 
-class GetPasswordOrKeyDialog : public QDialog
+class GetPassphraseOrKeyDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit GetPasswordOrKeyDialog(QWidget *parent, FileRequestService &fileRequestService_p);
-    ~GetPasswordOrKeyDialog();
+    explicit GetPassphraseOrKeyDialog(QWidget *parent, FileRequestService &fileRequestService_p);
+    ~GetPassphraseOrKeyDialog();
 
     bool GetPersistKeyPath() const;
-    bool IsPasswordSelected() const;
+    bool IsPassphraseSelected() const;
     QString GetKeyFilePath() const;
-    QString GetPassword() const;
+    QString GetPassphrase() const;
 
 private slots:
     void on_actionSelectKeyFile_triggered();
 
 private:
-    Ui::GetPasswordOrKeyDialog *ui;
+    Ui::GetPassphraseOrKeyDialog *ui;
     bool persistKeyPath;
     FileRequestService &fileRequestService;
 };

@@ -23,21 +23,21 @@
 #include <QDialog>
 
 namespace Ui {
-class GetPasswordDialog;
+class GetPassphraseDialog;
 }
 
-class GetPasswordDialog : public QDialog
+class GetPassphraseDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit GetPasswordDialog(QWidget *parent = 0);
-    ~GetPasswordDialog();
+    explicit GetPassphraseDialog(QWidget *parent = 0);
+    ~GetPassphraseDialog();
 
-    QString GetPassword() const;
+    QString GetPassphrase() const;
 
 private:
-    Ui::GetPasswordDialog *ui;
+    Ui::GetPassphraseDialog *ui;
 };
 
 #endif // GET_PASSWORD_DIALOG_H

@@ -178,13 +178,13 @@ void MainWindow::UpdateEncryptedPlainSwitch(bool encrypted)
 {
     if(!encrypted)
     {
-        passwordSet->setText(QString("<span style=\"color:#FF0000;\">") + tr("Password not set") + QString("</span>"));
-        clearPasswordAct->setEnabled(false);
+        passphraseSet->setText(QString("<span style=\"color:#FF0000;\">") + tr("Passphrase not set") + QString("</span>"));
+        clearPassphraseAct->setEnabled(false);
     }
     else
     {
-        passwordSet->setText(QString("<b>") + tr("Password protected") + QString("</b>"));
-        clearPasswordAct->setEnabled(true);
+        passphraseSet->setText(QString("<b>") + tr("Passphrase protected") + QString("</b>"));
+        clearPassphraseAct->setEnabled(true);
     }
 }
 
@@ -241,7 +241,7 @@ void MainWindow::AsyncOperationCompleted()
     case EncryptPadEncryptor::Result::EncryptionError:
         if(enc.GetIsPlainText())
         {
-            // This is not normal. We decrypted without a password.
+            // This is not normal. We decrypted without a passphrase.
             // There must have been a key so we should have got InvalidX2File instead
             // Process it just in case
             QMessageBox::warning(
@@ -371,7 +371,7 @@ bool MainWindow::newFile()
         if(algo_before != metadata.cipher_algo || hash_algo_before != metadata.hash_algo 
                 || iterations_before != metadata.iterations)
         {
-            clearPassword();
+            clearPassphrase();
         }
 
         setWindowsEol(kDefaultWindowsEol);
@@ -389,7 +389,7 @@ void MainWindow::closeAndReset()
     if(newFile())
     {
         bool makeFileDirty = false;
-        clearPassword(makeFileDirty);
+        clearPassphrase(makeFileDirty);
         clearEncryptionKey(makeFileDirty);
     }
 }
@@ -555,7 +555,7 @@ void MainWindow::createNewKey()
     }
 
     std::string kf_passphrase;
-    if(!loadHandler.OpenPasswordDialog(true, &kf_passphrase, false, tr("Password for Key File")))
+    if(!loadHandler.OpenPassphraseDialog(true, &kf_passphrase, false, tr("Passphrase for Key File")))
         return;
 
     if(kf_passphrase.empty())
@@ -563,7 +563,7 @@ void MainWindow::createNewKey()
         auto ret = QMessageBox::warning(
                     this,
                     "EncryptPad",
-                    tr("You left the password blank. The key file is going to be UNENCRYPTED. Do you want to continue?"),
+                    tr("You left the passphrase blank. The key file is going to be UNENCRYPTED. Do you want to continue?"),
                     QMessageBox::Ok | QMessageBox::Cancel
                     );
 
@@ -618,7 +618,7 @@ void MainWindow::about()
                "Minimalist secure text editor and binary encryptor that implements <br/>"
                "RFC 4880 Open PGP format: "
                "symmetrically encrypted, compressed and integrity protected. "
-               "The editor can ptotect files with passwords, key files or both.<br/><br/>"
+               "The editor can ptotect files with passphrases, key files or both.<br/><br/>"
                "%2<br/>"
                "GNU General Public License v2<br/><br/>"
                ).arg(VER_PRODUCTVERSION_STR).arg(VER_LEGALCOPYRIGHT_STR) +
@@ -696,21 +696,21 @@ void MainWindow::createActions()
     createNewKeyAct->setStatusTip(tr("Generate a new key file"));
     connect(createNewKeyAct, SIGNAL(triggered()), this, SLOT(createNewKey()));
 
-    setPasswordAct = new QAction(QIcon(":/images/famfamfam/lock.png"), tr("Set &Password..."), this);
-    setPasswordAct->setStatusTip(tr("Set password for encryption and decryption"));
-    connect(setPasswordAct, SIGNAL(triggered()), this, SLOT(setPassword()));
+    setPassphraseAct = new QAction(QIcon(":/images/famfamfam/lock.png"), tr("Set &Passphrase..."), this);
+    setPassphraseAct->setStatusTip(tr("Set passphrase for encryption and decryption"));
+    connect(setPassphraseAct, SIGNAL(triggered()), this, SLOT(setPassphrase()));
 
     setEncryptionKeyAct = new QAction(QIcon(":/images/famfamfam/key.png"), tr("Set &Encryption Key..."), this);
     setEncryptionKeyAct->setStatusTip(tr("Set encryption key file"));
     connect(setEncryptionKeyAct, SIGNAL(triggered()), this, SLOT(setEncryptionKey()));
 
     clearEncryptionKeyAct = new QAction(QIcon(":/images/famfamfam/key_delete.png"), tr("Clear &Encryption Key"), this);
-    clearEncryptionKeyAct->setStatusTip(tr("Clear encryption key file. Password only (if set)."));
+    clearEncryptionKeyAct->setStatusTip(tr("Clear encryption key file. Passphrase only (if set)."));
     connect(clearEncryptionKeyAct, SIGNAL(triggered()), this, SLOT(clearEncryptionKey()));
 
-    clearPasswordAct = new QAction(QIcon(":/images/famfamfam/lock_delete.png"), tr("&Clear Password"), this);
-    clearPasswordAct->setStatusTip(tr("Save without password encryption. File key encryption only (if enabled)."));
-    connect(clearPasswordAct, SIGNAL(triggered()), this, SLOT(clearPassword()));
+    clearPassphraseAct = new QAction(QIcon(":/images/famfamfam/lock_delete.png"), tr("&Clear Passphrase"), this);
+    clearPassphraseAct->setStatusTip(tr("Save without passphrase encryption. File key encryption only (if enabled)."));
+    connect(clearPassphraseAct, SIGNAL(triggered()), this, SLOT(clearPassphrase()));
 
     exitAct = new QAction(tr("E&xit"), this);
     exitAct->setShortcuts(QKeySequence::Quit);
@@ -761,9 +761,9 @@ void MainWindow::createActions()
     gotoAct->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_G));
     connect(gotoAct, SIGNAL(triggered()), this, SLOT(gotoTriggered()));
 
-    generatePasswordAct = new QAction(QIcon(":/images/famfamfam/user_suit.png"), tr("&Generate Password..."), this);
-    generatePasswordAct->setStatusTip(tr("Generate password"));
-    connect(generatePasswordAct, SIGNAL(triggered()), this, SLOT(generatePassword()));
+    generatePassphraseAct = new QAction(QIcon(":/images/famfamfam/user_suit.png"), tr("&Generate Passphrase..."), this);
+    generatePassphraseAct->setStatusTip(tr("Generate passphrase"));
+    connect(generatePassphraseAct, SIGNAL(triggered()), this, SLOT(generatePassphrase()));
 
     replaceAct = new QAction(tr("&Replace..."), this);
     replaceAct->setShortcut(QKeySequence::Replace);
@@ -775,7 +775,7 @@ void MainWindow::createActions()
     readOnlyAct->setStatusTip(tr("Switch Read Only mode"));
     connect(readOnlyAct, SIGNAL(toggled(bool)), this, SLOT(readOnlyToggled(bool)));
     connect(readOnlyAct, SIGNAL(toggled(bool)), replaceAct, SLOT(setDisabled(bool)));
-    connect(readOnlyAct, SIGNAL(toggled(bool)), generatePasswordAct, SLOT(setDisabled(bool)));
+    connect(readOnlyAct, SIGNAL(toggled(bool)), generatePassphraseAct, SLOT(setDisabled(bool)));
 
     wordWrapAct = new QAction(QIcon(":/images/famfamfam/wrap.png"), tr("Word Wrap"), this);
     wordWrapAct->setCheckable(true);
@@ -978,7 +978,7 @@ void MainWindow::createMenus()
     editMenu->addAction(gotoAct);
     editMenu->addSeparator();
     editMenu->addAction(windowsEolAct);
-    editMenu->addAction(generatePasswordAct);
+    editMenu->addAction(generatePassphraseAct);
     editMenu->addSeparator();
     editMenu->addAction(readOnlyAct);
 
@@ -992,8 +992,8 @@ void MainWindow::createMenus()
     menuBar()->addSeparator();
 
     encMenu = menuBar()->addMenu(tr("En&cryption"));
-    encMenu->addAction(setPasswordAct);
-    encMenu->addAction(clearPasswordAct);
+    encMenu->addAction(setPassphraseAct);
+    encMenu->addAction(clearPassphraseAct);
     encMenu->addSeparator();
     encMenu->addAction(createNewKeyAct);
     encMenu->addAction(setEncryptionKeyAct);
@@ -1024,12 +1024,12 @@ void MainWindow::createToolBars()
     editToolBar->addAction(copyAct);
     editToolBar->addAction(pasteAct);
     editToolBar->addAction(searchAct);
-    editToolBar->addAction(generatePasswordAct);
+    editToolBar->addAction(generatePassphraseAct);
     editToolBar->addAction(readOnlyAct);
 
     encToolBar = addToolBar(tr("Encryption"));
-    encToolBar->addAction(setPasswordAct);
-    encToolBar->addAction(clearPasswordAct);
+    encToolBar->addAction(setPassphraseAct);
+    encToolBar->addAction(clearPassphraseAct);
     encToolBar->addAction(createNewKeyAct);
     encToolBar->addAction(setEncryptionKeyAct);
     encToolBar->addAction(clearEncryptionKeyAct);
@@ -1052,8 +1052,8 @@ void MainWindow::createStatusBar()
     charStatus = new QLabel("", this);
     statusBar()->addPermanentWidget(charStatus);
 
-    passwordSet = new QLabel("", this);
-    statusBar()->addPermanentWidget(passwordSet);
+    passphraseSet = new QLabel("", this);
+    statusBar()->addPermanentWidget(passphraseSet);
 
     encryptionKeySet = new QLabel("", this);
     statusBar()->addPermanentWidget(encryptionKeySet);
@@ -1079,8 +1079,8 @@ void MainWindow::readSettings()
     recent_files_service_.Deserialize(
             settings.value("recent_file_list", QVariant().toStringList()).toStringList(),
             max_files);
-    passwordGenerationSettings = settings.value(
-                "password_generation", QVariant().toStringList()).toStringList();
+    passphraseGenerationSettings = settings.value(
+                "passphrase_generation", QVariant().toStringList()).toStringList();
     saveLastUsedDirectory = settings.value("save_last_used_directory", QVariant(true)).toBool();
     enableBakFiles = settings.value("enable_bak_files", QVariant(true)).toBool();
     file_request_service_.set_current_directory(
@@ -1112,7 +1112,7 @@ void MainWindow::writeSettings()
     settings.setValue("font", QVariant(textEdit->font().toString()));
     settings.setValue("read_only", QVariant(readOnlyAct->isChecked()));
     settings.setValue("word_wrap", QVariant(wordWrapAct->isChecked()));
-    settings.setValue("password_generation", QVariant(passwordGenerationSettings));
+    settings.setValue("passphrase_generation", QVariant(passphraseGenerationSettings));
     settings.setValue("save_last_used_directory", QVariant(saveLastUsedDirectory));
     settings.setValue("enable_bak_files", QVariant(enableBakFiles));
     settings.setValue("last_used_directory", QVariant(saveLastUsedDirectory ? file_request_service_.get_current_directory() : QString()));
@@ -1143,9 +1143,9 @@ void MainWindow::makeDirty()
     encryptionModified = true;
 }
 
-bool MainWindow::OpenPasswordDialog(bool confirmationEnabled, std::string *passphrase)
+bool MainWindow::OpenPassphraseDialog(bool confirmationEnabled, std::string *passphrase)
 {
-    return loadHandler.OpenPasswordDialog(confirmationEnabled, passphrase);
+    return loadHandler.OpenPassphraseDialog(confirmationEnabled, passphrase);
 }
 
 void MainWindow::EnterWaitState()
@@ -1274,7 +1274,7 @@ void MainWindow::startSave(const QString &fileName, std::string &kf_passphrase)
         warningMessage = tr("Cannot create bak file");
         break;
     case EncryptPadEncryptor::Result::InvalidKeyFilePassphrase:
-        // Ask for the password again
+        // Ask for the passphrase again
         enc.ClearKFPassphrase();
         saveFile(fileName);
         return;
@@ -1309,7 +1309,7 @@ void MainWindow::loadFile(const QString &fileName, bool force_kf_passphrase_requ
         isBusy = false;
 }
 
-void MainWindow::clearPassword(bool makeFileDirty)
+void MainWindow::clearPassphrase(bool makeFileDirty)
 {
     enc.SetIsPlainText();
     if(makeFileDirty)
@@ -1325,9 +1325,9 @@ void MainWindow::clearEncryptionKey(bool makeFileDirty)
         makeDirty();
 }
 
-void MainWindow::setPassword()
+void MainWindow::setPassphrase()
 {
-    bool result = OpenPasswordDialog(true);
+    bool result = OpenPassphraseDialog(true);
     if(result)
         makeDirty();
 }
@@ -1359,7 +1359,7 @@ void MainWindow::setFileProperties()
 
     dlg.UpdateMetadataFromUi(metadata);
     // if an algorithm has changed, the keys need to be regenerated.
-    clearPassword();
+    clearPassphrase();
 }
 
 void MainWindow::setEncryptionKey()
@@ -1426,24 +1426,24 @@ void MainWindow::search()
     findDialog->show();
 }
 
-void MainWindow::generatePassword()
+void MainWindow::generatePassphrase()
 {
-    PasswordGenerationDialog dlg(this);
-    dlg.setSettings(passwordGenerationSettings);
+    PassphraseGenerationDialog dlg(this);
+    dlg.setSettings(passphraseGenerationSettings);
     auto result = dlg.exec();
     if(result == QDialog::Rejected)
         return;
 
-    passwordGenerationSettings = dlg.getSettings();
+    passphraseGenerationSettings = dlg.getSettings();
 
     QTextCursor cursor = textEdit->textCursor();
-    if(!dlg.getAllPasswords())
+    if(!dlg.getAllPassphrases())
     {
-        cursor.insertText(dlg.getCurrentPassword());
+        cursor.insertText(dlg.getCurrentPassphrase());
     }
     else
     {
-        QStringList list = dlg.getPasswords();
+        QStringList list = dlg.getPassphrases();
         QString text;
         foreach(QString pwd, list)
         {

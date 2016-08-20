@@ -22,12 +22,12 @@
 #include "set_password_dialog.h"
 #include "common_definitions.h"
 
-SetPasswordDialog::SetPasswordDialog(QWidget *parent, const bool enableConfirmation)
+SetPassphraseDialog::SetPassphraseDialog(QWidget *parent, const bool enableConfirmation)
     :QDialog(parent, kDefaultWindowFlags)
 {
     setWindowModality(Qt::WindowModality::ApplicationModal);
     mConfirmationEnabled = enableConfirmation;
-    pwdLabel = new QLabel(tr("&Password:"));
+    pwdLabel = new QLabel(tr("&Passphrase:"));
     pwdLineEdit = new QLineEdit;
     pwdLineEdit->setEchoMode(QLineEdit::Password);
     pwdLabel->setBuddy(pwdLineEdit);
@@ -68,30 +68,30 @@ SetPasswordDialog::SetPasswordDialog(QWidget *parent, const bool enableConfirmat
 
     setLayout(mainLayout);
 
-    setWindowTitle(tr("Set Password"));
+    setWindowTitle(tr("Set Passphrase"));
     setFixedHeight(sizeHint().height());
 }
 
-void SetPasswordDialog::HideConfirmation()
+void SetPassphraseDialog::HideConfirmation()
 {
     confirmPwdLabel->hide();
     confirmPwdLineEdit->hide();
 }
 
-void SetPasswordDialog::okClicked()
+void SetPassphraseDialog::okClicked()
 {
     if(mConfirmationEnabled && pwdLineEdit->text() != confirmPwdLineEdit->text())
     {
         QMessageBox::warning(
             this,
-            tr("Set Password"),
-            tr("The confirmed password does not match"));
+            tr("Set Passphrase"),
+            tr("The confirmed passphrase does not match"));
         return;
     }
     done(QDialog::Accepted);
 }
 
-const QString SetPasswordDialog::GetValue()
+const QString SetPassphraseDialog::GetValue()
 {
     return pwdLineEdit->text();
 }

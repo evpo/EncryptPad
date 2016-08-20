@@ -47,7 +47,7 @@ namespace
 
 namespace EncryptPad
 {
-    vector<string> GeneratePasswords(const vector<CharSet> &char_sets, int pwd_length, int pwd_count)
+    vector<string> GeneratePassphrases(const vector<CharSet> &char_sets, int pwd_length, int pwd_count)
     {
         assert(pwd_length > 0);
         assert(pwd_count > 0);

@@ -30,45 +30,45 @@
 
 using namespace EncryptPad;
 
-PasswordGenerationDialog::PasswordGenerationDialog(QWidget *parent) :
+PassphraseGenerationDialog::PassphraseGenerationDialog(QWidget *parent) :
     QDialog(parent, kDefaultWindowFlags),
-    ui(new Ui::PasswordGenerationDialog),
+    ui(new Ui::PassphraseGenerationDialog),
     ignoreRegenerate(true),
-    allPasswords(false)
+    allPassphrases(false)
 {
     ui->setupUi(this);
-    ui->uiPasswordCount->addItem(tr("7 passwords"), QVariant(7));
-    ui->uiPasswordCount->addItem(tr("15 passwords"), QVariant(15));
-    ui->uiPasswordCount->addItem(tr("25 passwords"), QVariant(25));
-    ui->uiPasswordCount->setCurrentIndex(0);
+    ui->uiPassphraseCount->addItem(tr("7 passphrases"), QVariant(7));
+    ui->uiPassphraseCount->addItem(tr("15 passphrases"), QVariant(15));
+    ui->uiPassphraseCount->addItem(tr("25 passphrases"), QVariant(25));
+    ui->uiPassphraseCount->setCurrentIndex(0);
     const QFont fixedFont = QFontDatabase::systemFont(QFontDatabase::FixedFont);
-    ui->uiPasswords->setFont(fixedFont);
+    ui->uiPassphrases->setFont(fixedFont);
     ignoreRegenerate = false;
     ui->actionRegenerate->trigger();
 }
 
-QStringList PasswordGenerationDialog::getPasswords() const
+QStringList PassphraseGenerationDialog::getPassphrases() const
 {
     QStringList list;
 
-    for(int i = 0; i < ui->uiPasswords->count(); i++)
+    for(int i = 0; i < ui->uiPassphrases->count(); i++)
     {
-        list.push_back(ui->uiPasswords->item(i)->text());
+        list.push_back(ui->uiPassphrases->item(i)->text());
     }
     return list;
 }
 
-QString PasswordGenerationDialog::getCurrentPassword() const
+QString PassphraseGenerationDialog::getCurrentPassphrase() const
 {
-    return ui->uiPasswords->currentItem()->text();
+    return ui->uiPassphrases->currentItem()->text();
 }
 
-bool PasswordGenerationDialog::getAllPasswords() const
+bool PassphraseGenerationDialog::getAllPassphrases() const
 {
-    return allPasswords;
+    return allPassphrases;
 }
 
-int PasswordGenerationDialog::getLength()
+int PassphraseGenerationDialog::getLength()
 {
     int length = 0;
     const Control2Length *table = getControl2LengthTable();
@@ -91,7 +91,7 @@ int PasswordGenerationDialog::getLength()
     return length;
 }
 
-void PasswordGenerationDialog::setLength(int length)
+void PassphraseGenerationDialog::setLength(int length)
 {
     const Control2Length *table = getControl2LengthTable();
     while(table->control)
@@ -112,7 +112,7 @@ void PasswordGenerationDialog::setLength(int length)
     }
 }
 
-CharRange PasswordGenerationDialog::getCharRange()
+CharRange PassphraseGenerationDialog::getCharRange()
 {
     CharRange range = CharRange::None;
     const Control2CharRange *table = getControl2CharRange();
@@ -127,7 +127,7 @@ CharRange PasswordGenerationDialog::getCharRange()
     return range;
 }
 
-void PasswordGenerationDialog::setCharRange(CharRange range)
+void PassphraseGenerationDialog::setCharRange(CharRange range)
 {
     const Control2CharRange *table = getControl2CharRange();
     while(table->control)
@@ -137,7 +137,7 @@ void PasswordGenerationDialog::setCharRange(CharRange range)
     }
 }
 
-const PasswordGenerationDialog::Control2Length *PasswordGenerationDialog::getControl2LengthTable()
+const PassphraseGenerationDialog::Control2Length *PassphraseGenerationDialog::getControl2LengthTable()
 {
     typedef Control2Length C;
     if(control2LengthTable.empty())
@@ -152,7 +152,7 @@ const PasswordGenerationDialog::Control2Length *PasswordGenerationDialog::getCon
     return control2LengthTable.data();
 }
 
-const PasswordGenerationDialog::SpinBox2CharRange *PasswordGenerationDialog::getMaxControl2CharRange()
+const PassphraseGenerationDialog::SpinBox2CharRange *PassphraseGenerationDialog::getMaxControl2CharRange()
 {
     typedef SpinBox2CharRange C;
     if(maxControl2CharRange.empty())
@@ -169,7 +169,7 @@ const PasswordGenerationDialog::SpinBox2CharRange *PasswordGenerationDialog::get
     return maxControl2CharRange.data();
 }
 
-const PasswordGenerationDialog::Control2CharRange *PasswordGenerationDialog::getControl2CharRange()
+const PassphraseGenerationDialog::Control2CharRange *PassphraseGenerationDialog::getControl2CharRange()
 {
     typedef Control2CharRange C;
     if(control2CharRange.empty())
@@ -186,7 +186,7 @@ const PasswordGenerationDialog::Control2CharRange *PasswordGenerationDialog::get
     return control2CharRange.data();
 }
 
-void PasswordGenerationDialog::setSettings(const QStringList &list)
+void PassphraseGenerationDialog::setSettings(const QStringList &list)
 {
     if(list.empty())
         return;
@@ -202,10 +202,10 @@ void PasswordGenerationDialog::setSettings(const QStringList &list)
     ui->uiNumbersMax->setValue((it++)->toInt());
     ui->uiSymbolsMax->setValue((it++)->toInt());
     ui->uiCustomSymbolsMax->setValue((it++)->toInt());
-    ui->uiPasswordCount->setCurrentIndex((it++)->toInt());
+    ui->uiPassphraseCount->setCurrentIndex((it++)->toInt());
 }
 
-QStringList PasswordGenerationDialog::getSettings()
+QStringList PassphraseGenerationDialog::getSettings()
 {
     QStringList list;
     list.push_back(QString::number(getLength()));
@@ -216,22 +216,22 @@ QStringList PasswordGenerationDialog::getSettings()
     list.push_back(QString::number(ui->uiNumbersMax->value()));
     list.push_back(QString::number(ui->uiSymbolsMax->value()));
     list.push_back(QString::number(ui->uiCustomSymbolsMax->value()));
-    list.push_back(QString::number(ui->uiPasswordCount->currentIndex()));
+    list.push_back(QString::number(ui->uiPassphraseCount->currentIndex()));
     return list;
 }
 
-PasswordGenerationDialog::~PasswordGenerationDialog()
+PassphraseGenerationDialog::~PassphraseGenerationDialog()
 {
     delete ui;
 }
 
-void PasswordGenerationDialog::on_actionRegenerate_triggered()
+void PassphraseGenerationDialog::on_actionRegenerate_triggered()
 {
     if(ignoreRegenerate)
         return;
 
     ignoreRegenerate = true;
-    ui->uiPasswords->clear();
+    ui->uiPassphrases->clear();
 
     int length = getLength();
     CharRange range = getCharRange();
@@ -256,25 +256,25 @@ void PasswordGenerationDialog::on_actionRegenerate_triggered()
         table++;
     }
 
-    std::vector<std::string> passwords = GeneratePasswords(sets, length, ui->uiPasswordCount->currentData().toInt());
-    auto pwd_it = passwords.begin();
-    for(; pwd_it != passwords.end(); pwd_it++)
+    std::vector<std::string> passphrases = GeneratePassphrases(sets, length, ui->uiPassphraseCount->currentData().toInt());
+    auto pwd_it = passphrases.begin();
+    for(; pwd_it != passphrases.end(); pwd_it++)
     {
-        QListWidgetItem *item = new QListWidgetItem(QString::fromStdString(*pwd_it), ui->uiPasswords);
+        QListWidgetItem *item = new QListWidgetItem(QString::fromStdString(*pwd_it), ui->uiPassphrases);
         item->setTextAlignment(Qt::AlignCenter);
-        ui->uiPasswords->addItem(item);
+        ui->uiPassphrases->addItem(item);
     }
 
-    if(ui->uiPasswords->count() > 0)
+    if(ui->uiPassphrases->count() > 0)
     {
-        ui->uiPasswords->setCurrentRow(0);
+        ui->uiPassphrases->setCurrentRow(0);
     }
 
     ignoreRegenerate = false;
 }
 
-void PasswordGenerationDialog::on_uiInsertAll_clicked()
+void PassphraseGenerationDialog::on_uiInsertAll_clicked()
 {
-    allPasswords = true;
+    allPassphrases = true;
     this->accept();
 }

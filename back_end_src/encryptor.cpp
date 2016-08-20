@@ -195,7 +195,7 @@ const string &Encryptor::GetX2KeyLocation() const
 	return this->mX2KeyLocation;
 }
 
-void Encryptor::SetPassword(const char *pwd, EncryptPad::PacketMetadata *metadata)
+void Encryptor::SetPassphrase(const char *pwd, EncryptPad::PacketMetadata *metadata)
 {
 
     key_service_.Clear();
@@ -400,7 +400,7 @@ Result Encryptor::Load(const std::string &fileName, SecureVector<byte> &content,
         return Result::OK;
     }
 
-	// phase 1 decrypt with the password
+	// phase 1 decrypt with the passphrase
 	Pipe pipe;
 
 	try

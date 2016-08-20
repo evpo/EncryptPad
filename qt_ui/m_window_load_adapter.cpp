@@ -30,9 +30,9 @@
         parent->enc.SetIsPlainText();
     }
 
-    void LoadHandlerAdapter::SetPassword(const char *pwd, EncryptPad::PacketMetadata &metadata)
+    void LoadHandlerAdapter::SetPassphrase(const char *pwd, EncryptPad::PacketMetadata &metadata)
     {
-        parent->enc.SetPassword(pwd, &metadata);
+        parent->enc.SetPassphrase(pwd, &metadata);
     }
 
     QString LoadHandlerAdapter::EncryptionKeyFile() const

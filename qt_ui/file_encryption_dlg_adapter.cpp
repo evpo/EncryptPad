@@ -32,12 +32,12 @@ bool FileEncryptionDlgAdapter::IsPassphraseNotSet() const
 
 void FileEncryptionDlgAdapter::SetIsPlainText()
 {
-    parent->ClearPassword();
+    parent->ClearPassphrase();
 }
 
-void FileEncryptionDlgAdapter::SetPassword(const char *pwd, EncryptPad::PacketMetadata &metadata)
+void FileEncryptionDlgAdapter::SetPassphrase(const char *pwd, EncryptPad::PacketMetadata &metadata)
 {
-    parent->SetPassword(pwd, metadata);
+    parent->SetPassphrase(pwd, metadata);
 }
 
 QString FileEncryptionDlgAdapter::EncryptionKeyFile() const

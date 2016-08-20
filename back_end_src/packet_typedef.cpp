@@ -29,7 +29,7 @@ namespace EncryptPad
             case PacketResult::UnexpectedError:
                 return "Unexpected error";
             case PacketResult::InvalidSurrogateIV:
-                return "Incorrect password";
+                return "Incorrect passphrase";
             case PacketResult::Empty:
                 return "Composite packet is empty";
             case PacketResult::UnexpectedFormat:

@@ -21,19 +21,19 @@
 #include "ui_get_password_dialog.h"
 #include "common_definitions.h"
 
-GetPasswordDialog::GetPasswordDialog(QWidget *parent) :
+GetPassphraseDialog::GetPassphraseDialog(QWidget *parent) :
     QDialog(parent, kDefaultWindowFlags),
-    ui(new Ui::GetPasswordDialog)
+    ui(new Ui::GetPassphraseDialog)
 {
     ui->setupUi(this);
 }
 
-GetPasswordDialog::~GetPasswordDialog()
+GetPassphraseDialog::~GetPassphraseDialog()
 {
     delete ui;
 }
 
-QString GetPasswordDialog::GetPassword() const
+QString GetPassphraseDialog::GetPassphrase() const
 {
-    return ui->uiPassword->text();
+    return ui->uiPassphrase->text();
 }

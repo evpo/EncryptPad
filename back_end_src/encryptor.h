@@ -76,7 +76,7 @@ namespace EncryptPadEncryptor
             return kf_key_service_;
         }
 
-		void SetPassword(const char *pwd, EncryptPad::PacketMetadata *metadata = nullptr);
+		void SetPassphrase(const char *pwd, EncryptPad::PacketMetadata *metadata = nullptr);
 		void SetIsPlainText();
 		bool GetIsPlainText();
         bool UnusedKeysExist();

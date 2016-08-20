@@ -22,5 +22,5 @@
 
 namespace EncryptPad
 {
-    void GetPassword(const std::string &prompt, std::string &password);
+    void GetPassphrase(const std::string &prompt, std::string &passphrase);
 }

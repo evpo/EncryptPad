@@ -77,9 +77,9 @@ private slots:
     void setFileProperties();
     void closeAndReset();
     void createNewKey();
-    void setPassword();
+    void setPassphrase();
     void setEncryptionKey();
-    void clearPassword(bool makeFileDirty = true);
+    void clearPassphrase(bool makeFileDirty = true);
     void clearEncryptionKey(bool makeFileDirty = true);
     void zoomIn();
     void zoomOut();
@@ -87,7 +87,7 @@ private slots:
     void search();
     void replace();
     void gotoTriggered();
-    void generatePassword();
+    void generatePassphrase();
     void readOnlyToggled(bool flag);
     void wordWrapToggled(bool flag);
     void windowsEolToggled(bool flag);
@@ -111,7 +111,7 @@ private:
     bool persistEncryptionKeyPath;
     QDateTime lastModified;
 
-    QLabel *passwordSet;
+    QLabel *passphraseSet;
     QLabel *encryptionKeySet;
     QLabel *lineStatus;
     QLabel *charStatus;
@@ -151,8 +151,8 @@ private:
     QAction *resetZoomAct;
     QAction *aboutAct;
     QAction *aboutQtAct;
-    QAction *setPasswordAct;
-    QAction *clearPasswordAct;
+    QAction *setPassphraseAct;
+    QAction *clearPassphraseAct;
     QAction *setEncryptionKeyAct;
     QAction *clearEncryptionKeyAct;
     QAction *openPreferencesAct;
@@ -161,7 +161,7 @@ private:
     QAction *windowsEolAct;
     QAction *openFileEncryptionAct;
     QAction *gotoAct;
-    QAction *generatePasswordAct;
+    QAction *generatePassphraseAct;
 
     EncryptPadEncryptor::Encryptor enc;
     EncryptPad::PacketMetadata metadata;
@@ -192,7 +192,7 @@ private:
     QString strippedName(const QString &fullFileName);
     void setWindowsEol(bool flag);
 
-    bool OpenPasswordDialog(bool confirmationEnabled, std::string *passphrase = nullptr);
+    bool OpenPassphraseDialog(bool confirmationEnabled, std::string *passphrase = nullptr);
     bool OpenSetEncryptionKeyDialogue();
     void EnterWaitState();
     void ExitWaitState();
@@ -211,7 +211,7 @@ private:
     LoadHandlerAdapter loadAdapter;
     EncryptPad::LoadHandler loadHandler;
     bool saveSuccess;
-    QStringList passwordGenerationSettings;
+    QStringList passphraseGenerationSettings;
 };
 
 #endif

@@ -22,33 +22,33 @@
 #include <QMessageBox>
 #include "common_definitions.h"
 
-ConfirmPasswordDialog::ConfirmPasswordDialog(QWidget *parent) :
+ConfirmPassphraseDialog::ConfirmPassphraseDialog(QWidget *parent) :
     QDialog(parent, kDefaultWindowFlags),
-    ui(new Ui::ConfirmPasswordDialog)
+    ui(new Ui::ConfirmPassphraseDialog)
 {
     ui->setupUi(this);
 }
 
-ConfirmPasswordDialog::~ConfirmPasswordDialog()
+ConfirmPassphraseDialog::~ConfirmPassphraseDialog()
 {
     delete ui;
 }
 
-void ConfirmPasswordDialog::invokeOk()
+void ConfirmPassphraseDialog::invokeOk()
 {
-    if(ui->uiPassword->text() != ui->uiConfirm->text())
+    if(ui->uiPassphrase->text() != ui->uiConfirm->text())
     {
         QMessageBox::warning(
             this,
-            tr("Set Password"),
-            tr("The confirmed password does not match"));
+            tr("Set Passphrase"),
+            tr("The confirmed passphrase does not match"));
         return;
     }
 
     done(QDialog::Accepted);
 }
 
-QString ConfirmPasswordDialog::GetPassword() const
+QString ConfirmPassphraseDialog::GetPassphrase() const
 {
-    return ui->uiPassword->text();
+    return ui->uiPassphrase->text();
 }

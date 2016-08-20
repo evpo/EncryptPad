@@ -24,24 +24,24 @@
 #include <QString>
 
 namespace Ui {
-class ConfirmPasswordDialog;
+class ConfirmPassphraseDialog;
 }
 
-class ConfirmPasswordDialog : public QDialog
+class ConfirmPassphraseDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit ConfirmPasswordDialog(QWidget *parent = 0);
-    ~ConfirmPasswordDialog();
+    explicit ConfirmPassphraseDialog(QWidget *parent = 0);
+    ~ConfirmPassphraseDialog();
 
 public slots:
     void invokeOk();
 private:
-    Ui::ConfirmPasswordDialog *ui;
+    Ui::ConfirmPassphraseDialog *ui;
 
 public:
-    QString GetPassword() const;
+    QString GetPassphrase() const;
 
 };
 

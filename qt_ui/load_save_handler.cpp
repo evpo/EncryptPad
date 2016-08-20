@@ -35,7 +35,7 @@
 
 namespace EncryptPad
 {
-    const char *kKeyFilePassphraseWindowTitle = QT_TRANSLATE_NOOP("LoadSaveHandler", "Password for Key File");
+    const char *kKeyFilePassphraseWindowTitle = QT_TRANSLATE_NOOP("LoadSaveHandler", "Passphrase for Key File");
 
     bool LoadHandler::LoadFile(const QString &fileName, bool force_kf_passphrase_request)
     {
@@ -80,10 +80,10 @@ namespace EncryptPad
         std::string passphrase;
         if(isGpg)
         {
-            // Password and key file are both or none. We need to display the key or password dialog.
+            // Passphrase and key file are both or none. We need to display the key or passphrase dialog.
             if(!(isPwd ^ isKey))
             {
-                GetPasswordOrKeyDialog dlg(parent, client.GetFileRequestService());
+                GetPassphraseOrKeyDialog dlg(parent, client.GetFileRequestService());
                 if(dlg.exec() == QDialog::Rejected)
                     return false;
 
@@ -91,14 +91,14 @@ namespace EncryptPad
                 client.PersistEncryptionKeyPath(false);
                 client.SetIsPlainText();
 
-                if(dlg.IsPasswordSelected())
+                if(dlg.IsPassphraseSelected())
                 {
-                    QString pwdString = dlg.GetPassword();
+                    QString pwdString = dlg.GetPassphrase();
                     QByteArray byte_array = pwdString.toUtf8();
                     const char *pwd = byte_array.constData();
                     passphrase = pwd;
                     if(passphrase.size() > 0)
-                        client.SetPassword(pwd, metadata);
+                        client.SetPassphrase(pwd, metadata);
                 }
                 else
                 {
@@ -109,7 +109,7 @@ namespace EncryptPad
                 client.UpdateEncryptionKeyStatus();
             }
         }
-        else if(client.IsPassphraseNotSet() && can_be_passphrase_protected && !OpenPasswordDialog(false, &passphrase))
+        else if(client.IsPassphraseNotSet() && can_be_passphrase_protected && !OpenPassphraseDialog(false, &passphrase))
         {
             return false;
         }
@@ -134,7 +134,7 @@ namespace EncryptPad
         std::string kf_passphrase;
         if((isKey && !client.HasKeyFilePassphrase()) || force_kf_passphrase_request)
         {
-            if(!OpenPasswordDialog(false, &kf_passphrase, false, qApp->translate("LoadSaveHandler", kKeyFilePassphraseWindowTitle)))
+            if(!OpenPassphraseDialog(false, &kf_passphrase, false, qApp->translate("LoadSaveHandler", kKeyFilePassphraseWindowTitle)))
                 return false;
         }
 
@@ -151,7 +151,7 @@ namespace EncryptPad
 
     bool LoadHandler::SaveFile(const QString &fileName)
     {
-        bool passwordSet = !client.IsPassphraseNotSet();
+        bool passphraseSet = !client.IsPassphraseNotSet();
         bool isGpg = IsGpgFormat(fileName);
         bool isEncryptedFormat = IsCryptPadFormat(fileName) || IsEncryptPadFormat(fileName) || isGpg;
 
@@ -175,18 +175,18 @@ namespace EncryptPad
                 client.UpdateEncryptionKeyStatus();
             }
 
-            if(passwordSet && !client.EncryptionKeyFile().isEmpty())
+            if(passphraseSet && !client.EncryptionKeyFile().isEmpty())
             {
                 QMessageBox::warning(
                         parent,
                         "EncryptPad",
-                        qApp->translate("LoadSaveHandler", "GPG format does not support the password and key file double protection.")
+                        qApp->translate("LoadSaveHandler", "GPG format does not support the passphrase and key file double protection.")
                             + QString("\n") +
-                        qApp->translate( "LoadSaveHandler", "Use EPD format or disable either password or key protection."));
+                        qApp->translate( "LoadSaveHandler", "Use EPD format or disable either passphrase or key protection."));
 
                 return false;
             }
-            else if(!passwordSet && client.EncryptionKeyFile().isEmpty() && !OpenPasswordDialog(true))
+            else if(!passphraseSet && client.EncryptionKeyFile().isEmpty() && !OpenPassphraseDialog(true))
             {
                 return false;
             }
@@ -194,19 +194,19 @@ namespace EncryptPad
             assert(client.IsPassphraseNotSet() || client.EncryptionKeyFile().isEmpty());
             assert(!client.PersistEncryptionKeyPath());
         }
-        else if(!passwordSet && isEncryptedFormat && !OpenPasswordDialog(true))
+        else if(!passphraseSet && isEncryptedFormat && !OpenPassphraseDialog(true))
         {
             return false;
         }
 
-        passwordSet = !client.IsPassphraseNotSet();
+        passphraseSet = !client.IsPassphraseNotSet();
 
-        if(isEncryptedFormat && !passwordSet && client.EncryptionKeyFile().isEmpty())
+        if(isEncryptedFormat && !passphraseSet && client.EncryptionKeyFile().isEmpty())
         {
             auto ret = QMessageBox::warning(
                     parent,
                     "EncryptPad",
-                    qApp->translate("LoadSaveHandler", "Neither a key file nor password is set. The file is going to be saved UNENCRYPTED."),
+                    qApp->translate("LoadSaveHandler", "Neither a key file nor passphrase is set. The file is going to be saved UNENCRYPTED."),
                     QMessageBox::Ok | QMessageBox::Cancel
                     );
 
@@ -217,7 +217,7 @@ namespace EncryptPad
         std::string kf_passphrase;
 
         if(!client.EncryptionKeyFile().isEmpty() && !client.HasKeyFilePassphrase() &&
-                !OpenPasswordDialog(false, &kf_passphrase, false, kKeyFilePassphraseWindowTitle))
+                !OpenPassphraseDialog(false, &kf_passphrase, false, kKeyFilePassphraseWindowTitle))
         {
             return false;
         }
@@ -228,7 +228,7 @@ namespace EncryptPad
         return true;
     }
 
-    bool LoadHandler::OpenPasswordDialog(bool confirmationEnabled, std::string *passphrase, bool set_client_password, const QString &title)
+    bool LoadHandler::OpenPassphraseDialog(bool confirmationEnabled, std::string *passphrase, bool set_client_passphrase, const QString &title)
     {
         if(passphrase)
             passphrase->clear();
@@ -236,24 +236,24 @@ namespace EncryptPad
         QString pwdString;
         if(confirmationEnabled)
         {
-            ConfirmPasswordDialog dlg(parent);
+            ConfirmPassphraseDialog dlg(parent);
             dlg.setWindowTitle(title);
             if(dlg.exec() == QDialog::Rejected)
                 return false;
-            pwdString = dlg.GetPassword();
+            pwdString = dlg.GetPassphrase();
         }
         else
         {
-            GetPasswordDialog dlg(parent);
+            GetPassphraseDialog dlg(parent);
             dlg.setWindowTitle(title);
             if(dlg.exec() == QDialog::Rejected)
                 return false;
-            pwdString = dlg.GetPassword();
+            pwdString = dlg.GetPassphrase();
         }
 
         if(pwdString.isEmpty())
         {
-            if(set_client_password)
+            if(set_client_passphrase)
                 client.SetIsPlainText();
             return true;
         }
@@ -261,8 +261,8 @@ namespace EncryptPad
         QByteArray byte_array = pwdString.toUtf8();
         const char *pwd = byte_array.constData();
 
-        if(set_client_password)
-            client.SetPassword(pwd, metadata);
+        if(set_client_passphrase)
+            client.SetPassphrase(pwd, metadata);
 
         if(passphrase)
             *passphrase = pwd;

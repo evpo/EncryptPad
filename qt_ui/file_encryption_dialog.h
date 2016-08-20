@@ -62,8 +62,8 @@ public:
 
     void StartEncryption(const QString &fileName, std::string &kf_passphrase);
 
-    void SetPassword(const char *pwd, EncryptPad::PacketMetadata &metadata);
-    void ClearPassword();
+    void SetPassphrase(const char *pwd, EncryptPad::PacketMetadata &metadata);
+    void ClearPassphrase();
 
     bool IsPassphraseNotSet() const;
 

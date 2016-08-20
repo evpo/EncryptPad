@@ -194,10 +194,10 @@
            </size>
           </property>
           <property name="text">
-           <string>Password:</string>
+           <string>Passphrase:</string>
           </property>
           <property name="buddy">
-           <cstring>uiPassword</cstring>
+           <cstring>uiPassphrase</cstring>
           </property>
          </widget>
         </item>
@@ -213,19 +213,19 @@
            <string>Confirm:</string>
           </property>
           <property name="buddy">
-           <cstring>uiConfirmPassword</cstring>
+           <cstring>uiConfirmPassphrase</cstring>
           </property>
          </widget>
         </item>
         <item row="0" column="1">
-         <widget class="QLineEdit" name="uiPassword">
+         <widget class="QLineEdit" name="uiPassphrase">
           <property name="echoMode">
            <enum>QLineEdit::Password</enum>
           </property>
          </widget>
         </item>
         <item row="1" column="1">
-         <widget class="QLineEdit" name="uiConfirmPassword">
+         <widget class="QLineEdit" name="uiConfirmPassphrase">
           <property name="echoMode">
            <enum>QLineEdit::Password</enum>
           </property>
@@ -344,8 +344,8 @@
   <tabstop>uiInputBrowse</tabstop>
   <tabstop>uiOutputFile</tabstop>
   <tabstop>uiOutputBrowse</tabstop>
-  <tabstop>uiPassword</tabstop>
-  <tabstop>uiConfirmPassword</tabstop>
+  <tabstop>uiPassphrase</tabstop>
+  <tabstop>uiConfirmPassphrase</tabstop>
   <tabstop>uiKeyFilePath</tabstop>
   <tabstop>uiSelectKeyFile</tabstop>
   <tabstop>uiStart</tabstop>
@@ -405,7 +405,7 @@
   <connection>
    <sender>uiEncryptRadio</sender>
    <signal>toggled(bool)</signal>
-   <receiver>uiConfirmPassword</receiver>
+   <receiver>uiConfirmPassphrase</receiver>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -421,7 +421,7 @@
   <connection>
    <sender>uiEncryptRadio</sender>
    <signal>toggled(bool)</signal>
-   <receiver>uiPassword</receiver>
+   <receiver>uiPassphrase</receiver>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">

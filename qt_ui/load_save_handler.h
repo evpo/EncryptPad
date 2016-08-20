@@ -31,7 +31,7 @@ namespace EncryptPad
     public:
         virtual bool IsPassphraseNotSet() const = 0;
         virtual void SetIsPlainText() = 0;
-        virtual void SetPassword(const char *pwd, EncryptPad::PacketMetadata &metadata) = 0;
+        virtual void SetPassphrase(const char *pwd, EncryptPad::PacketMetadata &metadata) = 0;
         virtual QString EncryptionKeyFile() const = 0;
         virtual void EncryptionKeyFile(const QString &keyFile) = 0;
         virtual bool HasKeyFilePassphrase() const = 0;
@@ -57,7 +57,7 @@ namespace EncryptPad
         {
         }
 
-        bool OpenPasswordDialog(bool confirmationEnabled, std::string *passphrase = nullptr, bool set_client_password = true, const QString &title = "Password");
+        bool OpenPassphraseDialog(bool confirmationEnabled, std::string *passphrase = nullptr, bool set_client_passphrase = true, const QString &title = "Passphrase");
         bool OpenSetEncryptionKeyDialogue();
 
         // returns true if StartLoad was called

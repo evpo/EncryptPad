@@ -120,7 +120,7 @@ TEST_F(EncryptorFixture, When_plain_text_without_X2_File_is_saved_in_plain_text)
 	ASSERT_EQ(text_to_encrypt_, str);
 }
 
-TEST_F(EncryptorFixture, When_file_is_plain_text_File_is_loaded_without_password_and_X2)
+TEST_F(EncryptorFixture, When_file_is_plain_text_File_is_loaded_without_passphrase_and_X2)
 {
 	// Arrange
 	ofstream stm(temp_file_);
@@ -138,12 +138,12 @@ TEST_F(EncryptorFixture, When_file_is_plain_text_File_is_loaded_without_password
 
 // Exceptions
 
-TEST_F(EncryptorFixture, When_password_is_wrong_and_without_X2_Encryption_error)
+TEST_F(EncryptorFixture, When_passphrase_is_wrong_and_without_X2_Encryption_error)
 {
 	// Arrange
-	encryptor_.SetPassword("123");
+	encryptor_.SetPassphrase("123");
 	// encryptor_.Save(temp_file_, initial_string_);
-	// encryptor_.SetPassword("321");
+	// encryptor_.SetPassphrase("321");
     //
 	// // Act
 	// Result load_result = encryptor_.Load(temp_file_, buffer_);
@@ -152,10 +152,10 @@ TEST_F(EncryptorFixture, When_password_is_wrong_and_without_X2_Encryption_error)
 	// ASSERT_EQ(Result::EncryptionError, load_result);
 }
 
-TEST_F(EncryptorFixture, When_password_is_correct_and_X2_file_does_not_exist_X2_key_IO_error)
+TEST_F(EncryptorFixture, When_passphrase_is_correct_and_X2_file_does_not_exist_X2_key_IO_error)
 {
 	// Arrange
-	encryptor_.SetPassword("123");
+	encryptor_.SetPassphrase("123");
 	bool persist_x2_location = false;
 	encryptor_.Save(temp_file_, initial_string_, x2_key_file_, persist_x2_location);
 
@@ -166,10 +166,10 @@ TEST_F(EncryptorFixture, When_password_is_correct_and_X2_file_does_not_exist_X2_
 	ASSERT_EQ(Result::X2KeyIOError, load_result);
 }
 
-TEST_F(EncryptorFixture, When_password_is_correct_and_X2_file_persisted_and_does_not_exist_X2_IO_error)
+TEST_F(EncryptorFixture, When_passphrase_is_correct_and_X2_file_persisted_and_does_not_exist_X2_IO_error)
 {
 	// Arrange
-	encryptor_.SetPassword("123");
+	encryptor_.SetPassphrase("123");
 	bool persist_x2_location = true;
 	remove("x2_copy.key");
 	CopyFile(x2_key_file_, "x2_copy.key");
@@ -183,10 +183,10 @@ TEST_F(EncryptorFixture, When_password_is_correct_and_X2_file_persisted_and_does
 	ASSERT_EQ(Result::X2KeyIOError, load_result);
 }
 
-TEST_F(EncryptorFixture, When_password_is_correct_and_X2_file_is_wrong_Encryption_error)
+TEST_F(EncryptorFixture, When_passphrase_is_correct_and_X2_file_is_wrong_Encryption_error)
 {
 	// Arrange
-	encryptor_.SetPassword("123");
+	encryptor_.SetPassphrase("123");
 	CreateFile("x2-invalid.key", "FKeYEq3z3S8krxeWX+gFRnmkTzRTjwyjRxgOFw+eP3s=");
 
 
@@ -205,7 +205,7 @@ TEST_F(EncryptorFixture, When_password_is_correct_and_X2_file_is_wrong_Encryptio
 TEST_F(EncryptorFixture, When_invalid_X2_file_Save_result_is_invalid_X2_file)
 {
 	// Arrange
-	encryptor_.SetPassword("123");
+	encryptor_.SetPassphrase("123");
 	CreateFile("x2-invalid.key", "ICANTBEAKEY     DFSFSDFSDF\t\r\n^*&%*&^*&^*(&^");
 	bool persist_x2_location = false;
 	
@@ -217,11 +217,11 @@ TEST_F(EncryptorFixture, When_invalid_X2_file_Save_result_is_invalid_X2_file)
 	ASSERT_EQ(Result::InvalidX2File, save_result);
 }
 
-TEST_F(EncryptorFixture, When_password_is_correct_and_X2_file_is_invalid_Invalid_X2_file)
+TEST_F(EncryptorFixture, When_passphrase_is_correct_and_X2_file_is_invalid_Invalid_X2_file)
 {
 	// Arrange
 	
-	encryptor_.SetPassword("123");
+	encryptor_.SetPassphrase("123");
 	CreateFile("x2-invalid.key", "ICANTBEAKEY     DFSFSDFSDF\t\r\n^*&%*&^*&^*(&^");
 	bool persist_x2_location = false;
 	encryptor_.Save(temp_file_, initial_string_, x2_key_file_, persist_x2_location);
@@ -250,10 +250,10 @@ TEST_F(EncryptorFixture, When_plain_text_and_invalid_X2_file_Load_result_is_inva
 	ASSERT_EQ(Result::InvalidX2File, load_result);
 }
 
-TEST_F(EncryptorFixture, When_password_and_X2_and_X2_not_persisted_and_loaded_without_X2_Result_is_X2_required)
+TEST_F(EncryptorFixture, When_passphrase_and_X2_and_X2_not_persisted_and_loaded_without_X2_Result_is_X2_required)
 {
 	// Arrange
-	encryptor_.SetPassword("123");
+	encryptor_.SetPassphrase("123");
 	bool persiste_x2_location = false;
 	encryptor_.Save(temp_file_, initial_string_, x2_key_file_, persiste_x2_location);
 
@@ -291,10 +291,10 @@ TEST_F(EncryptorFixture, When_plain_text_and_saved_without_key_The_result_of_loa
 	ASSERT_EQ(Result::OK, load_result);
 }
 
-TEST_F(EncryptorFixture, When_password_used_and_saved_without_key_The_result_of_load_with_key_and_password_is_OK)
+TEST_F(EncryptorFixture, When_passphrase_used_and_saved_without_key_The_result_of_load_with_key_and_passphrase_is_OK)
 {
 	// Arrange
-	encryptor_.SetPassword("123");
+	encryptor_.SetPassphrase("123");
 	encryptor_.Save(temp_file_, initial_string_);
 
 	// Act
@@ -304,10 +304,10 @@ TEST_F(EncryptorFixture, When_password_used_and_saved_without_key_The_result_of_
 	ASSERT_EQ(Result::OK, load_result);
 }
 
-TEST_F(EncryptorFixture, When_password_used_with_persisted_key_Key_information_is_available_after_load)
+TEST_F(EncryptorFixture, When_passphrase_used_with_persisted_key_Key_information_is_available_after_load)
 {
 	// Arrange
-	encryptor_.SetPassword("123");
+	encryptor_.SetPassphrase("123");
 	bool persistX2KeyLocation = true;
 	encryptor_.Save(temp_file_, initial_string_, x2_key_file_, persistX2KeyLocation);
 
@@ -323,8 +323,8 @@ TEST_F(EncryptorFixture, When_password_used_with_persisted_key_Key_information_i
 
 struct TestParam
 {
-	string password;
-	bool usePassword;
+	string passphrase;
+	bool usePassphrase;
 	bool useX2;
 	bool persistX2;
 	bool useX2ParameterInLoad;
@@ -349,7 +349,7 @@ protected:
 
 TestParam EncryptorFixtureWithParam::ParameterCombination[] = 
 {
-	//pwd	usePassword	useX2	persistX2	useX2ParameterInLoad
+	//pwd	usePassphrase	useX2	persistX2	useX2ParameterInLoad
 	{"123",	true,		false,	false,		false},
 	{"123",	true,		true,	false,		true},
 	{"123",	true,		true,	true,		false},
@@ -364,8 +364,8 @@ TEST_P(EncryptorFixtureWithParam, When_combination_of_pwd_X2_persist_File_is_sav
 {
 	// Arrange
 	const TestParam &testParam = GetParam();
-	if(!testParam.password.empty())
-		encryptor_.SetPassword(testParam.password.c_str());
+	if(!testParam.passphrase.empty())
+		encryptor_.SetPassphrase(testParam.passphrase.c_str());
 	else
 		encryptor_.SetIsPlainText();
 
