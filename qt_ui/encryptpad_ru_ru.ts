@@ -145,70 +145,70 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="file_encryption_dialog.cpp" line="189"/>
+        <location filename="file_encryption_dialog.cpp" line="190"/>
         <source>Input File</source>
         <translation type="unfinished">Входной Файл</translation>
     </message>
     <message>
-        <location filename="file_encryption_dialog.cpp" line="206"/>
+        <location filename="file_encryption_dialog.cpp" line="207"/>
         <source>Output File</source>
         <translation type="unfinished">Выходной Файл</translation>
     </message>
     <message>
-        <location filename="file_encryption_dialog.cpp" line="243"/>
-        <location filename="file_encryption_dialog.cpp" line="252"/>
-        <location filename="file_encryption_dialog.cpp" line="261"/>
+        <location filename="file_encryption_dialog.cpp" line="244"/>
+        <location filename="file_encryption_dialog.cpp" line="253"/>
+        <location filename="file_encryption_dialog.cpp" line="262"/>
         <source>EncryptPad</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="file_encryption_dialog.cpp" line="244"/>
+        <location filename="file_encryption_dialog.cpp" line="245"/>
         <source>Confirmation password does not match.</source>
         <translation type="unfinished">Подтвержденный пароль отличается.</translation>
     </message>
     <message>
-        <location filename="file_encryption_dialog.cpp" line="253"/>
+        <location filename="file_encryption_dialog.cpp" line="254"/>
         <source>%1 does not exist.</source>
         <translation type="unfinished">%1 не существует.</translation>
     </message>
     <message>
-        <location filename="file_encryption_dialog.cpp" line="262"/>
+        <location filename="file_encryption_dialog.cpp" line="263"/>
         <source>%1 already exists.
 Do you want to replace it?</source>
         <translation type="unfinished">%1 уже существует.\nХотите заменить его?</translation>
     </message>
     <message>
-        <location filename="file_encryption_dialog.cpp" line="318"/>
+        <location filename="file_encryption_dialog.cpp" line="319"/>
         <source>Cannot open the encryption key</source>
         <translation type="unfinished">Не могу открыть ключ шифрования.</translation>
     </message>
     <message>
-        <location filename="file_encryption_dialog.cpp" line="325"/>
+        <location filename="file_encryption_dialog.cpp" line="326"/>
         <source>The encryption key is invalid</source>
         <translation type="unfinished">Ключ шифрования не верен.</translation>
     </message>
     <message>
-        <location filename="file_encryption_dialog.cpp" line="332"/>
+        <location filename="file_encryption_dialog.cpp" line="333"/>
         <source>Cannot download the encryption key. CURL tool is not found.</source>
         <translation type="unfinished">Не могу закачать ключ шифрования. Утилита CURL не найдена.</translation>
     </message>
     <message>
-        <location filename="file_encryption_dialog.cpp" line="339"/>
+        <location filename="file_encryption_dialog.cpp" line="340"/>
         <source>Cannot download the key. CURL returned non zero exit code</source>
         <translation type="unfinished">Не могу закачать ключ шифрования. CURL вернул не нулевой код.</translation>
     </message>
     <message>
-        <location filename="file_encryption_dialog.cpp" line="354"/>
+        <location filename="file_encryption_dialog.cpp" line="355"/>
         <source>Invalid password for key file</source>
         <translation type="unfinished">Не верный пароль для файла ключа.</translation>
     </message>
     <message>
-        <location filename="file_encryption_dialog.cpp" line="378"/>
+        <location filename="file_encryption_dialog.cpp" line="379"/>
         <source>File has been encrypted successfully.</source>
         <translation type="unfinished">Файл зашифрован успешно.</translation>
     </message>
     <message>
-        <location filename="file_encryption_dialog.cpp" line="379"/>
+        <location filename="file_encryption_dialog.cpp" line="380"/>
         <source>File has been decrypted successfully.</source>
         <translation type="unfinished">Файл расшифрован успешно.</translation>
     </message>
