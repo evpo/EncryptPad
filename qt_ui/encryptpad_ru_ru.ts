@@ -2,22 +2,22 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="ru_RU">
 <context>
-    <name>ConfirmPasswordDialog</name>
+    <name>ConfirmPassphraseDialog</name>
     <message>
         <location filename="confirm_password_dialog.ui" line="26"/>
         <location filename="confirm_password_dialog.cpp" line="43"/>
-        <source>Set Password</source>
+        <source>Set Passphrase</source>
         <translation type="unfinished">Установить Пароль</translation>
     </message>
     <message>
         <location filename="confirm_password_dialog.ui" line="55"/>
         <location filename="confirm_password_dialog.ui" line="107"/>
-        <source>Leave blank when password is not needed</source>
+        <source>Leave blank when passphrase is not needed</source>
         <translation type="unfinished">Оставить пустым если пароль не требуется</translation>
     </message>
     <message>
         <location filename="confirm_password_dialog.ui" line="65"/>
-        <source>&amp;Password:</source>
+        <source>&amp;Passphrase:</source>
         <translation type="unfinished">&amp;Пароль:</translation>
     </message>
     <message>
@@ -37,8 +37,31 @@
     </message>
     <message>
         <location filename="confirm_password_dialog.cpp" line="44"/>
-        <source>The confirmed password does not match</source>
+        <source>The confirmed passphrase does not match</source>
         <translation type="unfinished">Подтвержденный пароль отличается</translation>
+    </message>
+</context>
+<context>
+    <name>ConfirmPasswordDialog</name>
+    <message>
+        <source>Set Passphrase</source>
+        <translation type="obsolete">Установить Пароль</translation>
+    </message>
+    <message>
+        <source>Leave blank when passphrase is not needed</source>
+        <translation type="obsolete">Оставить пустым если пароль не требуется</translation>
+    </message>
+    <message>
+        <source>&amp;Passphrase:</source>
+        <translation type="obsolete">&amp;Пароль:</translation>
+    </message>
+    <message>
+        <source>&amp;Confirm:</source>
+        <translation type="obsolete">&amp;Подтвердить:</translation>
+    </message>
+    <message>
+        <source>The confirmed passphrase does not match</source>
+        <translation type="obsolete">Подтвержденный пароль отличается</translation>
     </message>
 </context>
 <context>
@@ -101,7 +124,7 @@
     </message>
     <message>
         <location filename="file_encryption_dialog.ui" line="197"/>
-        <source>Password:</source>
+        <source>Passphrase:</source>
         <translation type="unfinished">Пароль:</translation>
     </message>
     <message>
@@ -163,7 +186,7 @@
     </message>
     <message>
         <location filename="file_encryption_dialog.cpp" line="245"/>
-        <source>Confirmation password does not match.</source>
+        <source>Confirmation passphrase does not match.</source>
         <translation type="unfinished">Подтвержденный пароль отличается.</translation>
     </message>
     <message>
@@ -199,7 +222,7 @@ Do you want to replace it?</source>
     </message>
     <message>
         <location filename="file_encryption_dialog.cpp" line="355"/>
-        <source>Invalid password for key file</source>
+        <source>Invalid passphrase for key file</source>
         <translation type="unfinished">Не верный пароль для файла ключа.</translation>
     </message>
     <message>
@@ -435,33 +458,33 @@ Do you want to replace it?</source>
     </message>
 </context>
 <context>
-    <name>GetPasswordDialog</name>
+    <name>GetPassphraseDialog</name>
     <message>
         <location filename="get_password_dialog.ui" line="26"/>
-        <source>Password</source>
-        <translation type="unfinished">Пароль</translation>
+        <source>Passphrase</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="get_password_dialog.ui" line="49"/>
-        <source>&amp;Password:</source>
+        <source>&amp;Passphrase:</source>
         <translation type="unfinished">&amp;Пароль:</translation>
     </message>
     <message>
         <location filename="get_password_dialog.ui" line="65"/>
-        <source>Leave blank when password is not needed</source>
+        <source>Leave blank when passphrase is not needed</source>
         <translation type="unfinished">Оставить пустым если пароль не требуется</translation>
     </message>
 </context>
 <context>
-    <name>GetPasswordOrKeyDialog</name>
+    <name>GetPassphraseOrKeyDialog</name>
     <message>
         <location filename="get_password_or_key_dialog.ui" line="14"/>
-        <source>Password or Key File</source>
+        <source>Passphrase or Key File</source>
         <translation type="unfinished">Пароль или Ключ</translation>
     </message>
     <message>
         <location filename="get_password_or_key_dialog.ui" line="37"/>
-        <source>Password:</source>
+        <source>Passphrase:</source>
         <translation type="unfinished">Пароль:</translation>
     </message>
     <message>
@@ -471,7 +494,7 @@ Do you want to replace it?</source>
     </message>
     <message>
         <location filename="get_password_or_key_dialog.ui" line="67"/>
-        <source>Leave blank when password is not needed</source>
+        <source>Leave blank when passphrase is not needed</source>
         <translation type="unfinished">Оставить пустым если пароль не требуется</translation>
     </message>
     <message>
@@ -487,10 +510,52 @@ Do you want to replace it?</source>
     </message>
 </context>
 <context>
+    <name>GetPasswordDialog</name>
+    <message>
+        <source>Passphrase</source>
+        <translation type="obsolete">Пароль</translation>
+    </message>
+    <message>
+        <source>&amp;Passphrase:</source>
+        <translation type="obsolete">&amp;Пароль:</translation>
+    </message>
+    <message>
+        <source>Leave blank when passphrase is not needed</source>
+        <translation type="obsolete">Оставить пустым если пароль не требуется</translation>
+    </message>
+</context>
+<context>
+    <name>GetPasswordOrKeyDialog</name>
+    <message>
+        <source>Passphrase or Key File</source>
+        <translation type="obsolete">Пароль или Ключ</translation>
+    </message>
+    <message>
+        <source>Passphrase:</source>
+        <translation type="obsolete">Пароль:</translation>
+    </message>
+    <message>
+        <source>Key File:</source>
+        <translation type="obsolete">Ключ:</translation>
+    </message>
+    <message>
+        <source>Leave blank when passphrase is not needed</source>
+        <translation type="obsolete">Оставить пустым если пароль не требуется</translation>
+    </message>
+    <message>
+        <source>Select...</source>
+        <translation type="obsolete">Выбрать...</translation>
+    </message>
+    <message>
+        <source>Select key file</source>
+        <translation type="obsolete">Выбрать ключ</translation>
+    </message>
+</context>
+<context>
     <name>LoadSaveHandler</name>
     <message>
         <location filename="load_save_handler.cpp" line="38"/>
-        <source>Password for Key File</source>
+        <source>Passphrase for Key File</source>
         <translation type="unfinished">Пароль для Ключа</translation>
     </message>
     <message>
@@ -512,17 +577,17 @@ Do you want to disable it?</oldsource>
     </message>
     <message>
         <location filename="load_save_handler.cpp" line="183"/>
-        <source>GPG format does not support the password and key file double protection.</source>
+        <source>GPG format does not support the passphrase and key file double protection.</source>
         <translation type="unfinished">Формат GPG не поддерживает двойную защиту паролем и ключом.</translation>
     </message>
     <message>
         <location filename="load_save_handler.cpp" line="185"/>
-        <source>Use EPD format or disable either password or key protection.</source>
+        <source>Use EPD format or disable either passphrase or key protection.</source>
         <translation type="unfinished">Используйте формат EPD или отключите одну из двух защит.</translation>
     </message>
     <message>
         <location filename="load_save_handler.cpp" line="209"/>
-        <source>Neither a key file nor password is set. The file is going to be saved UNENCRYPTED.</source>
+        <source>Neither a key file nor passphrase is set. The file is going to be saved UNENCRYPTED.</source>
         <translation type="unfinished">Защита паролем или ключом не задана. Файл будет сохранен ОТКРЫТЫМ ТЕКСТОМ.</translation>
     </message>
 </context>
@@ -555,12 +620,12 @@ Do you want to disable it?</oldsource>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="181"/>
-        <source>Password not set</source>
+        <source>Passphrase not set</source>
         <translation type="unfinished">Пароль не задан</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="186"/>
-        <source>Password protected</source>
+        <source>Passphrase protected</source>
         <translation type="unfinished">Защищен паролем</translation>
     </message>
     <message>
@@ -606,12 +671,12 @@ Do you want to disable it?</oldsource>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="558"/>
-        <source>Password for Key File</source>
+        <source>Passphrase for Key File</source>
         <translation type="unfinished">Пароль для Ключа</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="566"/>
-        <source>You left the password blank. The key file is going to be UNENCRYPTED. Do you want to continue?</source>
+        <source>You left the passphrase blank. The key file is going to be UNENCRYPTED. Do you want to continue?</source>
         <translation type="unfinished">Вы не установили пароль. Файл ключа НЕ БУДЕТ ЗАШИФРОВАН. Продолжить?</translation>
     </message>
     <message>
@@ -641,7 +706,8 @@ Do you want to disable it?</oldsource>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="617"/>
-        <source>&lt;b&gt;EncryptPad %1 Beta&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;Minimalist secure text editor and binary encryptor that implements &lt;br/&gt;RFC 4880 Open PGP format: symmetrically encrypted, compressed and integrity protected. The editor can ptotect files with passwords, key files or both.&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;GNU General Public License v2&lt;br/&gt;&lt;br/&gt;</source>
+        <source>&lt;b&gt;EncryptPad %1 Beta&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;Minimalist secure text editor and binary encryptor that implements &lt;br/&gt;RFC 4880 Open PGP format: symmetrically encrypted, compressed and integrity protected. The editor can ptotect files with passphrases, key files or both.&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;GNU General Public License v2&lt;br/&gt;&lt;br/&gt;</source>
+        <oldsource>&lt;b&gt;EncryptPad %1 Beta&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;Minimalist secure text editor and binary encryptor that implements &lt;br/&gt;RFC 4880 Open PGP format: symmetrically encrypted, compressed and integrity protected. The editor can ptotect files with passwords, key files or both.&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;GNU General Public License v2&lt;br/&gt;&lt;br/&gt;</oldsource>
         <translation type="unfinished">&lt;b&gt;EncryptPad %1 Beta&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;Упрощенный и защищенный текстовый редактор который реализует &lt;br/&gt;RFC 4880 Open PGP формат: симметричное шифрование, архивация и проверка целостности. Редактор может защищать файлы паролями, файловыми ключами или обоими.&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;GNU General Public License v2&lt;br/&gt;&lt;br/&gt;</translation>
     </message>
     <message>
@@ -716,12 +782,12 @@ Do you want to disable it?</oldsource>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="699"/>
-        <source>Set &amp;Password...</source>
+        <source>Set &amp;Passphrase...</source>
         <translation type="unfinished">Задать &amp;Пароль...</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="700"/>
-        <source>Set password for encryption and decryption</source>
+        <source>Set passphrase for encryption and decryption</source>
         <translation type="unfinished">Установить пароль для шифрования...</translation>
     </message>
     <message>
@@ -741,17 +807,17 @@ Do you want to disable it?</oldsource>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="708"/>
-        <source>Clear encryption key file. Password only (if set).</source>
+        <source>Clear encryption key file. Passphrase only (if set).</source>
         <translation type="unfinished">Сбросить ключ шифрования. Только пароль (если задан).</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="711"/>
-        <source>&amp;Clear Password</source>
+        <source>&amp;Clear Passphrase</source>
         <translation type="unfinished">Сб&amp;росить Пароль</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="712"/>
-        <source>Save without password encryption. File key encryption only (if enabled).</source>
+        <source>Save without passphrase encryption. File key encryption only (if enabled).</source>
         <translation type="unfinished">Сохранять без защиты паролем. Будет использован только ключ (если он установлен).</translation>
     </message>
     <message>
@@ -839,12 +905,12 @@ Do you want to disable it?</oldsource>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="764"/>
-        <source>&amp;Generate Password...</source>
+        <source>&amp;Generate Passphrase...</source>
         <translation type="unfinished">&amp;Генерировать Пароль...</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="765"/>
-        <source>Generate password</source>
+        <source>Generate passphrase</source>
         <translation type="unfinished">Генерировать пароль</translation>
     </message>
     <message>
@@ -1175,10 +1241,10 @@ Do you want to save your changes?</oldsource>
     </message>
 </context>
 <context>
-    <name>PasswordGenerationDialog</name>
+    <name>PassphraseGenerationDialog</name>
     <message>
         <location filename="password_generation_dialog.ui" line="20"/>
-        <source>Generate Password</source>
+        <source>Generate Passphrase</source>
         <translation type="unfinished">Генерировать Пароль</translation>
     </message>
     <message>
@@ -1248,7 +1314,7 @@ Do you want to save your changes?</oldsource>
     </message>
     <message>
         <location filename="password_generation_dialog.ui" line="281"/>
-        <source>Select &amp;Password:</source>
+        <source>Select &amp;Passphrase:</source>
         <translation type="unfinished">Выбрать &amp;Пароль:</translation>
     </message>
     <message>
@@ -1268,18 +1334,89 @@ Do you want to save your changes?</oldsource>
     </message>
     <message>
         <location filename="password_generation_dialog.cpp" line="40"/>
-        <source>7 passwords</source>
-        <translation type="unfinished">7 паролей</translation>
+        <source>7 passphrases</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="password_generation_dialog.cpp" line="41"/>
-        <source>15 passwords</source>
-        <translation type="unfinished">15 паролей</translation>
+        <source>15 passphrases</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="password_generation_dialog.cpp" line="42"/>
+        <source>25 passphrases</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>PasswordGenerationDialog</name>
+    <message>
+        <source>Generate Passphrase</source>
+        <translation type="obsolete">Генерировать Пароль</translation>
+    </message>
+    <message>
+        <source>Custom:</source>
+        <translation type="obsolete">Другие:</translation>
+    </message>
+    <message>
+        <source>Lowercase a-z</source>
+        <translation type="obsolete">Прописные a-z</translation>
+    </message>
+    <message>
+        <source>Numbers 0-9</source>
+        <translation type="obsolete">Цифры 0-9</translation>
+    </message>
+    <message>
+        <source>Symbols:</source>
+        <translation type="obsolete">Символы:</translation>
+    </message>
+    <message>
+        <source>Custom</source>
+        <translation type="obsolete">Другая</translation>
+    </message>
+    <message>
+        <source>Uppercase A-Z</source>
+        <translation type="obsolete">Заглавные A-Z</translation>
+    </message>
+    <message>
+        <source>&amp;Regenerate</source>
+        <translation type="obsolete">&amp;Генерировать</translation>
+    </message>
+    <message>
+        <source>Insert &amp;All</source>
+        <translation type="obsolete">Вставить &amp;Все</translation>
+    </message>
+    <message>
+        <source>&amp;Length:</source>
+        <translation type="obsolete">&amp;Длина:</translation>
+    </message>
+    <message>
+        <source>Select &amp;Passphrase:</source>
+        <translation type="obsolete">Выбрать &amp;Пароль:</translation>
+    </message>
+    <message>
+        <source>Limit Group Occurrence (1 to max chars)</source>
+        <translation type="obsolete">Предел Для Групп (1 до макс. символов)</translation>
+    </message>
+    <message>
+        <source>Groups</source>
+        <translation type="obsolete">Группы</translation>
+    </message>
+    <message>
+        <source>Regenerate</source>
+        <translation type="obsolete">Генерировать</translation>
+    </message>
+    <message>
+        <source>7 passwords</source>
+        <translation type="obsolete">7 паролей</translation>
+    </message>
+    <message>
+        <source>15 passwords</source>
+        <translation type="obsolete">15 паролей</translation>
+    </message>
+    <message>
         <source>25 passwords</source>
-        <translation type="unfinished">25 паролей</translation>
+        <translation type="obsolete">25 паролей</translation>
     </message>
 </context>
 <context>
@@ -1399,10 +1536,10 @@ Do you want to save your changes?</oldsource>
     </message>
 </context>
 <context>
-    <name>SetPasswordDialog</name>
+    <name>SetPassphraseDialog</name>
     <message>
         <location filename="set_password_dialog.cpp" line="30"/>
-        <source>&amp;Password:</source>
+        <source>&amp;Passphrase:</source>
         <translation type="unfinished">&amp;Пароль:</translation>
     </message>
     <message>
@@ -1423,13 +1560,36 @@ Do you want to save your changes?</oldsource>
     <message>
         <location filename="set_password_dialog.cpp" line="71"/>
         <location filename="set_password_dialog.cpp" line="87"/>
-        <source>Set Password</source>
+        <source>Set Passphrase</source>
         <translation type="unfinished">Установить Пароль</translation>
     </message>
     <message>
         <location filename="set_password_dialog.cpp" line="88"/>
-        <source>The confirmed password does not match</source>
+        <source>The confirmed passphrase does not match</source>
         <translation type="unfinished">Подтвержденный пароль отличается</translation>
+    </message>
+</context>
+<context>
+    <name>SetPasswordDialog</name>
+    <message>
+        <source>&amp;Passphrase:</source>
+        <translation type="obsolete">&amp;Пароль:</translation>
+    </message>
+    <message>
+        <source>&amp;Confirm:</source>
+        <translation type="obsolete">&amp;Подтвердить:</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation type="obsolete">Отменить</translation>
+    </message>
+    <message>
+        <source>Set Passphrase</source>
+        <translation type="obsolete">Установить Пароль</translation>
+    </message>
+    <message>
+        <source>The confirmed passphrase does not match</source>
+        <translation type="obsolete">Подтвержденный пароль отличается</translation>
     </message>
 </context>
 </TS>
