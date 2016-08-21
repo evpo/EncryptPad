@@ -38,8 +38,8 @@ public:
     explicit SetKeyDialog(QWidget *parent, FileRequestService &file_request_service);
     ~SetKeyDialog();
     QString GetKeyFilePath() const;
-    bool GetIsKeyPathPersisted() const;
-    void SetIsKeyPathPersisted(bool persisted);
+    bool GetIsKeyPathPersistent() const;
+    void SetIsKeyPathPersistent(bool persistent);
     void SetKeyFilePath(const QString &path);
     void SetRepositoryListModel(QFileSystemModel &repository_list_model, const QModelIndex &index);
 public slots:

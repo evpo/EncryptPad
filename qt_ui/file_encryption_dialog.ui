@@ -210,7 +210,7 @@
            </size>
           </property>
           <property name="text">
-           <string>Confirm:</string>
+           <string>Confirmation:</string>
           </property>
           <property name="buddy">
            <cstring>uiConfirmPassphrase</cstring>

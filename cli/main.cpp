@@ -580,7 +580,7 @@ int main(int argc, char *argv[])
         if(encrypt || generate_kf)
         {
             std::string confirmed;
-            GetPassphrase("Confirm: ", confirmed);
+            GetPassphrase("Confirmation: ", confirmed);
             if(passphrase != confirmed)
             {
                 std::cerr << "Passphrases don't match. Please try again.";
@@ -716,7 +716,7 @@ int main(int argc, char *argv[])
 
     if(metadata.cannot_use_wad && metadata.persist_key_path)
     {
-        std::cerr << "GPG format does not support persisted key path. Use EPD extension." << std::endl;
+        std::cerr << "GPG format does not support persistent key path. Use EPD extension." << std::endl;
         exit(1);
     }
 

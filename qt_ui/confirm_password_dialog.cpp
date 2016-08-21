@@ -41,7 +41,7 @@ void ConfirmPassphraseDialog::invokeOk()
         QMessageBox::warning(
             this,
             tr("Set Passphrase"),
-            tr("The confirmed passphrase does not match"));
+            tr("The confirmation passphrase does not match"));
         return;
     }
 

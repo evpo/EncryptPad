@@ -32,7 +32,7 @@ SetPassphraseDialog::SetPassphraseDialog(QWidget *parent, const bool enableConfi
     pwdLineEdit->setEchoMode(QLineEdit::Password);
     pwdLabel->setBuddy(pwdLineEdit);
 
-    confirmPwdLabel = new QLabel(tr("&Confirm:"));
+    confirmPwdLabel = new QLabel(tr("&Confirmation:"));
     confirmPwdLineEdit = new QLineEdit;
     confirmPwdLineEdit->setEchoMode(QLineEdit::Password);
     confirmPwdLabel->setBuddy(confirmPwdLineEdit);
@@ -85,7 +85,7 @@ void SetPassphraseDialog::okClicked()
         QMessageBox::warning(
             this,
             tr("Set Passphrase"),
-            tr("The confirmed passphrase does not match"));
+            tr("The confirmation passphrase does not match"));
         return;
     }
     done(QDialog::Accepted);

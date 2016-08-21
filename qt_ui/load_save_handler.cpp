@@ -162,7 +162,7 @@ namespace EncryptPad
                 auto ret = QMessageBox::warning(
                         parent,
                         "EncryptPad",
-                        qApp->translate("LoadSaveHandler", "GPG format does not support persisted key path.") 
+                        qApp->translate("LoadSaveHandler", "GPG format does not support persistent key path.") 
                             + QString("\n") +
                             qApp->translate("LoadSaveHandler", "Do you want to disable it?"),
                         QMessageBox::Ok | QMessageBox::Cancel
@@ -180,7 +180,7 @@ namespace EncryptPad
                 QMessageBox::warning(
                         parent,
                         "EncryptPad",
-                        qApp->translate("LoadSaveHandler", "GPG format does not support the passphrase and key file double protection.")
+                        qApp->translate("LoadSaveHandler", "GPG format does not support double protection by passphrase and key file.")
                             + QString("\n") +
                         qApp->translate( "LoadSaveHandler", "Use EPD format or disable either passphrase or key protection."));
 

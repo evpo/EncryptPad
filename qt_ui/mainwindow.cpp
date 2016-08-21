@@ -618,7 +618,7 @@ void MainWindow::about()
                "Minimalist secure text editor and binary encryptor that implements <br/>"
                "RFC 4880 Open PGP format: "
                "symmetrically encrypted, compressed and integrity protected. "
-               "The editor can ptotect files with passphrases, key files or both.<br/><br/>"
+               "The editor can protect files with passphrases, key files or both.<br/><br/>"
                "%2<br/>"
                "GNU General Public License v2<br/><br/>"
                ).arg(VER_PRODUCTVERSION_STR).arg(VER_LEGALCOPYRIGHT_STR) +
@@ -772,14 +772,14 @@ void MainWindow::createActions()
 
     readOnlyAct = new QAction(QIcon(":/images/famfamfam/read_only.png"), tr("Read Only"), this);
     readOnlyAct->setCheckable(true);
-    readOnlyAct->setStatusTip(tr("Switch Read Only mode"));
+    readOnlyAct->setStatusTip(tr("Enable Read Only mode"));
     connect(readOnlyAct, SIGNAL(toggled(bool)), this, SLOT(readOnlyToggled(bool)));
     connect(readOnlyAct, SIGNAL(toggled(bool)), replaceAct, SLOT(setDisabled(bool)));
     connect(readOnlyAct, SIGNAL(toggled(bool)), generatePassphraseAct, SLOT(setDisabled(bool)));
 
     wordWrapAct = new QAction(QIcon(":/images/famfamfam/wrap.png"), tr("Word Wrap"), this);
     wordWrapAct->setCheckable(true);
-    wordWrapAct->setStatusTip(tr("Switch Word Wrap"));
+    wordWrapAct->setStatusTip(tr("Enable Word Wrap"));
     connect(wordWrapAct, SIGNAL(toggled(bool)), this, SLOT(wordWrapToggled(bool)));
 
     zoomInAct = new QAction(QIcon(":/images/famfamfam/magnifier_zoom_in.png"), tr("&Zoom In"), this);
@@ -815,7 +815,7 @@ void MainWindow::createActions()
     connect(openFileEncryptionAct, SIGNAL(triggered()), this, SLOT(openFileEncryption()));
 
     windowsEolAct = new QAction(tr("Windows EOL"), this);
-    windowsEolAct->setStatusTip(tr("Windows end of line: CR LN"));
+    windowsEolAct->setStatusTip(tr("\"Windows\" end of line: CR+LF"));
     windowsEolAct->setCheckable(true);
     connect(windowsEolAct, SIGNAL(toggled(bool)), this, SLOT(windowsEolToggled(bool)));
     setWindowsEol(false);
@@ -1556,13 +1556,13 @@ void MainWindow::updateEncryptionKeyStatus()
 {
     QString key_protected = tr("Key protected");
     QString key_not_set = tr("Key not set");
-    QString persisted = tr("persisted");
+    QString persistent = tr("persistent");
 
     QString str = encryptionKeyFile.length() > 0 ?
         (QString("<b>") + key_protected) :
         (QString("<span style=\"color:#FF0000;\">") + key_not_set + QString("</span>"));
 
-    str += persistEncryptionKeyPath ? (QString(" (") + persisted + QString(")</b>"))
+    str += persistEncryptionKeyPath ? (QString(" (") + persistent + QString(")</b>"))
         : QString("</b>");
 
     if(encryptionKeyFile.length() == 0)

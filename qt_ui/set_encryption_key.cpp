@@ -35,7 +35,7 @@ namespace EncryptPad
     {
         QFileSystemModel model(parent);
         SetKeyDialog dlg(parent, file_request_service);
-        dlg.SetIsKeyPathPersisted(persist_key_path);
+        dlg.SetIsKeyPathPersistent(persist_key_path);
         dlg.SetKeyFilePath(key_file_path);
         QDir dir(QDir::home());
         if(dir.cd(kRepositoryDirName))
@@ -52,7 +52,7 @@ namespace EncryptPad
             return false;
 
         result_out.key_file_path = dlg.GetKeyFilePath();
-        result_out.persist_key_path = dlg.GetIsKeyPathPersisted();
+        result_out.persist_key_path = dlg.GetIsKeyPathPersistent();
         if(result_out.key_file_path.isNull() || result_out.key_file_path.isEmpty())
         {
             result_out.persist_key_path = false;

@@ -420,7 +420,7 @@ Result Encryptor::Load(const std::string &fileName, SecureVector<byte> &content,
 	if (mX2KeyLocation.empty())
 	{
 		parseResult = ParseX2Key(pipe, mX2KeyLocation);
-		// Special case: the file is x2 encrypted but the key is not persisted and not provided
+		// Special case: the file is x2 encrypted but the key is not persistent and not provided
 		if(parseResult && mX2KeyLocation.empty())
 			return Result::X2FileIsRequired;
 	}

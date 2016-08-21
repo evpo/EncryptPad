@@ -76,17 +76,17 @@ void FilePropertiesDialog::PopulateItems()
     using namespace EncryptPad;
     static Name2Id ciphers[] =
     {
-        {"TripleDES", ToInt(CipherAlgo::TripleDES)},
+        {"Triple DES", ToInt(CipherAlgo::TripleDES)},
         {"CAST5", ToInt(CipherAlgo::CAST5)},
-        {"AES128", ToInt(CipherAlgo::AES128)},
-        {QT_TRANSLATE_NOOP("FilePropertiesDialog", "AES256 (recommended)"), ToInt(CipherAlgo::AES256)},
+        {"AES-128", ToInt(CipherAlgo::AES128)},
+        {QT_TRANSLATE_NOOP("FilePropertiesDialog", "AES-256 (recommended)"), ToInt(CipherAlgo::AES256)},
         {nullptr, 0}
     };
 
     static Name2Id hashes[] =
     {
-        {"SHA160", ToInt(HashAlgo::SHA160)},
-        {"SHA256", ToInt(HashAlgo::SHA256)},
+        {"SHA-1", ToInt(HashAlgo::SHA160)},
+        {"SHA-256", ToInt(HashAlgo::SHA256)},
         {nullptr, 0}
     };
 

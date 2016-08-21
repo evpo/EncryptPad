@@ -52,7 +52,7 @@
      <item row="0" column="0">
       <widget class="QLabel" name="label">
        <property name="text">
-        <string>Cipher:</string>
+        <string>Algorithm:</string>
        </property>
        <property name="buddy">
         <cstring>uiCipherAlgo</cstring>
@@ -70,7 +70,7 @@
       <widget class="QComboBox" name="uiCipherAlgo">
        <item>
         <property name="text">
-         <string comment="2">TripleDES</string>
+         <string comment="2">Triple DES</string>
         </property>
        </item>
        <item>
@@ -80,12 +80,12 @@
        </item>
        <item>
         <property name="text">
-         <string comment="7">AES128</string>
+         <string comment="7">AES-128</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string comment="9">AES256 (recommended)</string>
+         <string comment="9">AES-256 (recommended)</string>
         </property>
        </item>
       </widget>
@@ -128,12 +128,12 @@
       <widget class="QComboBox" name="uiHashAlgo">
        <item>
         <property name="text">
-         <string comment="2">SHA160</string>
+         <string comment="2">SHA-1</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string comment="8">SHA256 (recommended)</string>
+         <string comment="8">SHA-256 (recommended)</string>
         </property>
        </item>
       </widget>

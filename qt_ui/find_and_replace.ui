@@ -41,7 +41,7 @@
      <item row="0" column="0">
       <widget class="QLabel" name="label">
        <property name="text">
-        <string>&amp;Find what:</string>
+        <string>&amp;Find:</string>
        </property>
        <property name="buddy">
         <cstring>uiFind</cstring>

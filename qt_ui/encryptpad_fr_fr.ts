@@ -22,7 +22,7 @@
     </message>
     <message>
         <location filename="confirm_password_dialog.ui" line="91"/>
-        <source>&amp;Confirm:</source>
+        <source>&amp;Confirmation:</source>
         <translation type="unfinished">&amp;Confirmation :</translation>
     </message>
     <message>
@@ -37,7 +37,7 @@
     </message>
     <message>
         <location filename="confirm_password_dialog.cpp" line="44"/>
-        <source>The confirmed passphrase does not match</source>
+        <source>The confirmation passphrase does not match</source>
         <translation type="unfinished">Le mot de passe de confirmation ne correspond pas</translation>
     </message>
 </context>
@@ -56,7 +56,7 @@
         <translation type="vanished">&amp;Mot de passe :</translation>
     </message>
     <message>
-        <source>&amp;Confirm:</source>
+        <source>&amp;Confirmation:</source>
         <translation type="vanished">&amp;Confirmation :</translation>
     </message>
     <message>
@@ -68,7 +68,7 @@
         <translation type="vanished">Retour</translation>
     </message>
     <message>
-        <source>The confirmed passphrase does not match</source>
+        <source>The confirmation passphrase does not match</source>
         <translation type="vanished">Le mot de passe de confirmation ne correspond pas</translation>
     </message>
 </context>
@@ -137,7 +137,7 @@
     </message>
     <message>
         <location filename="file_encryption_dialog.ui" line="213"/>
-        <source>Confirm:</source>
+        <source>Confirmation:</source>
         <translation type="unfinished">Confirmation :</translation>
     </message>
     <message>
@@ -282,7 +282,7 @@ Souhaitez-vous le remplacer ?</translation>
     </message>
     <message>
         <location filename="file_properties_dialog.ui" line="55"/>
-        <source>Cipher:</source>
+        <source>Algorithm:</source>
         <translation>Algorithme de chiffrement :</translation>
     </message>
     <message>
@@ -292,7 +292,7 @@ Souhaitez-vous le remplacer ?</translation>
     </message>
     <message>
         <location filename="file_properties_dialog.ui" line="73"/>
-        <source>TripleDES</source>
+        <source>Triple DES</source>
         <comment>2</comment>
         <translation>Triple DES</translation>
     </message>
@@ -304,15 +304,15 @@ Souhaitez-vous le remplacer ?</translation>
     </message>
     <message>
         <location filename="file_properties_dialog.ui" line="83"/>
-        <source>AES128</source>
+        <source>AES-128</source>
         <comment>7</comment>
-        <translation>AES128</translation>
+        <translation>AES-128</translation>
     </message>
     <message>
         <location filename="file_properties_dialog.ui" line="88"/>
-        <source>AES256 (recommended)</source>
+        <source>AES-256 (recommended)</source>
         <comment>9</comment>
-        <translation>AES256 (recommandé)</translation>
+        <translation>AES-256 (recommandé)</translation>
     </message>
     <message>
         <location filename="file_properties_dialog.ui" line="96"/>
@@ -338,13 +338,13 @@ Souhaitez-vous le remplacer ?</translation>
     </message>
     <message>
         <location filename="file_properties_dialog.ui" line="131"/>
-        <source>SHA160</source>
+        <source>SHA-1</source>
         <comment>2</comment>
-        <translation>SHA-160</translation>
+        <translation>SHA-1</translation>
     </message>
     <message>
         <location filename="file_properties_dialog.ui" line="136"/>
-        <source>SHA256 (recommended)</source>
+        <source>SHA-256 (recommended)</source>
         <comment>8</comment>
         <translation>SHA-256 (recommandé)</translation>
     </message>
@@ -370,8 +370,8 @@ Souhaitez-vous le remplacer ?</translation>
     </message>
     <message>
         <location filename="file_properties_dialog.cpp" line="82"/>
-        <source>AES256 (recommended)</source>
-        <translation>AES256 (recommandé)</translation>
+        <source>AES-256 (recommended)</source>
+        <translation>AES-256 (recommandé)</translation>
     </message>
     <message>
         <location filename="file_properties_dialog.cpp" line="95"/>
@@ -394,7 +394,7 @@ Souhaitez-vous le remplacer ?</translation>
     </message>
     <message>
         <location filename="find_and_replace.ui" line="44"/>
-        <source>&amp;Find what:</source>
+        <source>&amp;Find:</source>
         <translation>&amp;Chercher :</translation>
     </message>
     <message>
@@ -452,7 +452,7 @@ Souhaitez-vous le remplacer ?</translation>
     </message>
     <message>
         <location filename="find_dialog.ui" line="65"/>
-        <source>&amp;Find what:</source>
+        <source>&amp;Find:</source>
         <translation>&amp;Chercher :</translation>
     </message>
     <message>
@@ -574,8 +574,8 @@ Souhaitez-vous le remplacer ?</translation>
     </message>
     <message>
         <location filename="load_save_handler.cpp" line="165"/>
-        <source>GPG format does not support persisted key path.</source>
-        <oldsource>GPG format does not support persisted key path.
+        <source>GPG format does not support persistent key path.</source>
+        <oldsource>GPG format does not support persistent key path.
 Do you want to disable it?</oldsource>
         <translation>Le format  GPG ne prend pas en charge les chemins de clé persistents.</translation>
     </message>
@@ -586,7 +586,7 @@ Do you want to disable it?</oldsource>
     </message>
     <message>
         <location filename="load_save_handler.cpp" line="183"/>
-        <source>GPG format does not support the passphrase and key file double protection.</source>
+        <source>GPG format does not support double protection by passphrase and key file.</source>
         <translation>Le format  GPG ne prend pas en charge la protection double par mot de passe et fichier clé.</translation>
     </message>
     <message>
@@ -715,8 +715,8 @@ Do you want to disable it?</oldsource>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="617"/>
-        <source>&lt;b&gt;EncryptPad %1 Beta&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;Minimalist secure text editor and binary encryptor that implements &lt;br/&gt;RFC 4880 Open PGP format: symmetrically encrypted, compressed and integrity protected. The editor can ptotect files with passphrases, key files or both.&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;GNU General Public License v2&lt;br/&gt;&lt;br/&gt;</source>
-        <oldsource>&lt;b&gt;EncryptPad %1 Beta&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;Minimalist secure text editor and binary encryptor that implements &lt;br/&gt;RFC 4880 Open PGP format: symmetrically encrypted, compressed and integrity protected. The editor can ptotect files with passwords, key files or both.&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;GNU General Public License v2&lt;br/&gt;&lt;br/&gt;</oldsource>
+        <source>&lt;b&gt;EncryptPad %1 Beta&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;Minimalist secure text editor and binary encryptor that implements &lt;br/&gt;RFC 4880 Open PGP format: symmetrically encrypted, compressed and integrity protected. The editor can protect files with passphrases, key files or both.&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;GNU General Public License v2&lt;br/&gt;&lt;br/&gt;</source>
+        <oldsource>&lt;b&gt;EncryptPad %1 Beta&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;Minimalist secure text editor and binary encryptor that implements &lt;br/&gt;RFC 4880 Open PGP format: symmetrically encrypted, compressed and integrity protected. The editor can protect files with passwords, key files or both.&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;GNU General Public License v2&lt;br/&gt;&lt;br/&gt;</oldsource>
         <translation type="unfinished">&lt;b&gt;EncryptPad %1 bêta&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;Un éditeur de texte sécurisé minimaliste et un outil de chiffrement binaire qui implémente &lt;br/&gt;le format RFC 4880 Open PGP : chiffré symétriquement, compressé et dont l&apos;intégrité est protégée. L&apos;éditeur peut protéger les fichiers par mot de passe, fichier clé ou les deux.&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;Licence publique générale GNU v2&lt;br/&gt;&lt;br/&gt;</translation>
     </message>
     <message>
@@ -939,7 +939,7 @@ Do you want to disable it?</oldsource>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="775"/>
-        <source>Switch Read Only mode</source>
+        <source>Enable Read Only mode</source>
         <translation>Activer le mode lecture seule</translation>
     </message>
     <message>
@@ -949,7 +949,7 @@ Do you want to disable it?</oldsource>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="782"/>
-        <source>Switch Word Wrap</source>
+        <source>Enable Word Wrap</source>
         <translation>Activer le retour à la ligne automatique </translation>
     </message>
     <message>
@@ -994,7 +994,7 @@ Do you want to disable it?</oldsource>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="1559"/>
-        <source>persisted</source>
+        <source>persistent</source>
         <translation>persistent</translation>
     </message>
     <message>
@@ -1049,8 +1049,8 @@ Do you want to disable it?</oldsource>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="818"/>
-        <source>Windows end of line: CR LN</source>
-        <translation>Fin de ligne Windows : CR LN</translation>
+        <source>"Windows" end of line: CR+LF</source>
+        <translation>Fin de ligne "Windows" : CR LN</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="913"/>
@@ -1569,7 +1569,7 @@ Do you want to save your changes?</oldsource>
     </message>
     <message>
         <location filename="set_password_dialog.cpp" line="35"/>
-        <source>&amp;Confirm:</source>
+        <source>&amp;Confirmation:</source>
         <translation type="unfinished">&amp;Confirmation :</translation>
     </message>
     <message>
@@ -1590,7 +1590,7 @@ Do you want to save your changes?</oldsource>
     </message>
     <message>
         <location filename="set_password_dialog.cpp" line="88"/>
-        <source>The confirmed passphrase does not match</source>
+        <source>The confirmation passphrase does not match</source>
         <translation type="unfinished">Le mot de passe de confirmation ne correspond pas</translation>
     </message>
 </context>
@@ -1601,7 +1601,7 @@ Do you want to save your changes?</oldsource>
         <translation type="vanished">&amp;Mot de passe :</translation>
     </message>
     <message>
-        <source>&amp;Confirm:</source>
+        <source>&amp;Confirmation:</source>
         <translation type="vanished">&amp;Confirmation :</translation>
     </message>
     <message>
@@ -1617,7 +1617,7 @@ Do you want to save your changes?</oldsource>
         <translation type="vanished">Définir le mot de passe</translation>
     </message>
     <message>
-        <source>The confirmed passphrase does not match</source>
+        <source>The confirmation passphrase does not match</source>
         <translation type="vanished">Le mot de passe de confirmation ne correspond pas</translation>
     </message>
 </context>

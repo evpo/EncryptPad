@@ -22,7 +22,7 @@
     </message>
     <message>
         <location filename="confirm_password_dialog.ui" line="91"/>
-        <source>&amp;Confirm:</source>
+        <source>&amp;Confirmation:</source>
         <translation type="unfinished">&amp;Подтвердить:</translation>
     </message>
     <message>
@@ -37,7 +37,7 @@
     </message>
     <message>
         <location filename="confirm_password_dialog.cpp" line="44"/>
-        <source>The confirmed passphrase does not match</source>
+        <source>The confirmation passphrase does not match</source>
         <translation type="unfinished">Подтвержденный пароль отличается</translation>
     </message>
 </context>
@@ -56,11 +56,11 @@
         <translation type="obsolete">&amp;Пароль:</translation>
     </message>
     <message>
-        <source>&amp;Confirm:</source>
+        <source>&amp;Confirmation:</source>
         <translation type="obsolete">&amp;Подтвердить:</translation>
     </message>
     <message>
-        <source>The confirmed passphrase does not match</source>
+        <source>The confirmation passphrase does not match</source>
         <translation type="obsolete">Подтвержденный пароль отличается</translation>
     </message>
 </context>
@@ -129,7 +129,7 @@
     </message>
     <message>
         <location filename="file_encryption_dialog.ui" line="213"/>
-        <source>Confirm:</source>
+        <source>Confirmation:</source>
         <translation type="unfinished">Подтвердить:</translation>
     </message>
     <message>
@@ -273,7 +273,7 @@ Do you want to replace it?</source>
     </message>
     <message>
         <location filename="file_properties_dialog.ui" line="55"/>
-        <source>Cipher:</source>
+        <source>Algorithm:</source>
         <translation type="unfinished">Алгоритм:</translation>
     </message>
     <message>
@@ -295,15 +295,15 @@ Do you want to replace it?</source>
     </message>
     <message>
         <location filename="file_properties_dialog.ui" line="83"/>
-        <source>AES128</source>
+        <source>AES-128</source>
         <comment>7</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="file_properties_dialog.ui" line="88"/>
-        <source>AES256 (recommended)</source>
+        <source>AES-256 (recommended)</source>
         <comment>9</comment>
-        <translation type="unfinished">AES256 (рекомендован)</translation>
+        <translation type="unfinished">AES-256 (рекомендован)</translation>
     </message>
     <message>
         <location filename="file_properties_dialog.ui" line="96"/>
@@ -329,15 +329,15 @@ Do you want to replace it?</source>
     </message>
     <message>
         <location filename="file_properties_dialog.ui" line="131"/>
-        <source>SHA160</source>
+        <source>SHA-1</source>
         <comment>2</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="file_properties_dialog.ui" line="136"/>
-        <source>SHA256 (recommended)</source>
+        <source>SHA-256 (recommended)</source>
         <comment>8</comment>
-        <translation type="unfinished">SHA256 (рекомендован)</translation>
+        <translation type="unfinished">SHA-256 (рекомендован)</translation>
     </message>
     <message>
         <location filename="file_properties_dialog.ui" line="144"/>
@@ -361,8 +361,8 @@ Do you want to replace it?</source>
     </message>
     <message>
         <location filename="file_properties_dialog.cpp" line="82"/>
-        <source>AES256 (recommended)</source>
-        <translation type="unfinished">AES256 (рекомендован)</translation>
+        <source>AES-256 (recommended)</source>
+        <translation type="unfinished">AES-256 (рекомендован)</translation>
     </message>
     <message>
         <location filename="file_properties_dialog.cpp" line="95"/>
@@ -385,7 +385,7 @@ Do you want to replace it?</source>
     </message>
     <message>
         <location filename="find_and_replace.ui" line="44"/>
-        <source>&amp;Find what:</source>
+        <source>&amp;Find:</source>
         <translation type="unfinished">&amp;Найти:</translation>
     </message>
     <message>
@@ -443,7 +443,7 @@ Do you want to replace it?</source>
     </message>
     <message>
         <location filename="find_dialog.ui" line="65"/>
-        <source>&amp;Find what:</source>
+        <source>&amp;Find:</source>
         <translation type="unfinished">&amp;Найти:</translation>
     </message>
     <message>
@@ -565,8 +565,8 @@ Do you want to replace it?</source>
     </message>
     <message>
         <location filename="load_save_handler.cpp" line="165"/>
-        <source>GPG format does not support persisted key path.</source>
-        <oldsource>GPG format does not support persisted key path.
+        <source>GPG format does not support persistent key path.</source>
+        <oldsource>GPG format does not support persistent key path.
 Do you want to disable it?</oldsource>
         <translation type="unfinished">Формат GPG не поддерживает сохранение пути к ключу.</translation>
     </message>
@@ -577,7 +577,7 @@ Do you want to disable it?</oldsource>
     </message>
     <message>
         <location filename="load_save_handler.cpp" line="183"/>
-        <source>GPG format does not support the passphrase and key file double protection.</source>
+        <source>GPG format does not support double protection by passphrase and key file.</source>
         <translation type="unfinished">Формат GPG не поддерживает двойную защиту паролем и ключом.</translation>
     </message>
     <message>
@@ -706,8 +706,8 @@ Do you want to disable it?</oldsource>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="617"/>
-        <source>&lt;b&gt;EncryptPad %1 Beta&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;Minimalist secure text editor and binary encryptor that implements &lt;br/&gt;RFC 4880 Open PGP format: symmetrically encrypted, compressed and integrity protected. The editor can ptotect files with passphrases, key files or both.&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;GNU General Public License v2&lt;br/&gt;&lt;br/&gt;</source>
-        <oldsource>&lt;b&gt;EncryptPad %1 Beta&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;Minimalist secure text editor and binary encryptor that implements &lt;br/&gt;RFC 4880 Open PGP format: symmetrically encrypted, compressed and integrity protected. The editor can ptotect files with passwords, key files or both.&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;GNU General Public License v2&lt;br/&gt;&lt;br/&gt;</oldsource>
+        <source>&lt;b&gt;EncryptPad %1 Beta&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;Minimalist secure text editor and binary encryptor that implements &lt;br/&gt;RFC 4880 Open PGP format: symmetrically encrypted, compressed and integrity protected. The editor can protect files with passphrases, key files or both.&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;GNU General Public License v2&lt;br/&gt;&lt;br/&gt;</source>
+        <oldsource>&lt;b&gt;EncryptPad %1 Beta&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;Minimalist secure text editor and binary encryptor that implements &lt;br/&gt;RFC 4880 Open PGP format: symmetrically encrypted, compressed and integrity protected. The editor can protect files with passwords, key files or both.&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;GNU General Public License v2&lt;br/&gt;&lt;br/&gt;</oldsource>
         <translation type="unfinished">&lt;b&gt;EncryptPad %1 Beta&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;Упрощенный и защищенный текстовый редактор который реализует &lt;br/&gt;RFC 4880 Open PGP формат: симметричное шифрование, архивация и проверка целостности. Редактор может защищать файлы паролями, файловыми ключами или обоими.&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;GNU General Public License v2&lt;br/&gt;&lt;br/&gt;</translation>
     </message>
     <message>
@@ -930,7 +930,7 @@ Do you want to disable it?</oldsource>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="775"/>
-        <source>Switch Read Only mode</source>
+        <source>Enable Read Only mode</source>
         <translation type="unfinished">Переключить Режим Только Чтение</translation>
     </message>
     <message>
@@ -940,7 +940,7 @@ Do you want to disable it?</oldsource>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="782"/>
-        <source>Switch Word Wrap</source>
+        <source>Enable Word Wrap</source>
         <translation type="unfinished">Переключить Перенос Слов</translation>
     </message>
     <message>
@@ -985,7 +985,7 @@ Do you want to disable it?</oldsource>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="1559"/>
-        <source>persisted</source>
+        <source>persistent</source>
         <translation type="unfinished">сохранять путь</translation>
     </message>
     <message>
@@ -1040,8 +1040,8 @@ Do you want to disable it?</oldsource>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="818"/>
-        <source>Windows end of line: CR LN</source>
-        <translation type="unfinished">Окончания строк Windows: CR LN</translation>
+        <source>"Windows" end of line: CR+LF</source>
+        <translation type="unfinished">Окончания строк "Windows": CR+LF</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="913"/>
@@ -1544,7 +1544,7 @@ Do you want to save your changes?</oldsource>
     </message>
     <message>
         <location filename="set_password_dialog.cpp" line="35"/>
-        <source>&amp;Confirm:</source>
+        <source>&amp;Confirmation:</source>
         <translation type="unfinished">&amp;Подтвердить:</translation>
     </message>
     <message>
@@ -1565,7 +1565,7 @@ Do you want to save your changes?</oldsource>
     </message>
     <message>
         <location filename="set_password_dialog.cpp" line="88"/>
-        <source>The confirmed passphrase does not match</source>
+        <source>The confirmation passphrase does not match</source>
         <translation type="unfinished">Подтвержденный пароль отличается</translation>
     </message>
 </context>
@@ -1576,7 +1576,7 @@ Do you want to save your changes?</oldsource>
         <translation type="obsolete">&amp;Пароль:</translation>
     </message>
     <message>
-        <source>&amp;Confirm:</source>
+        <source>&amp;Confirmation:</source>
         <translation type="obsolete">&amp;Подтвердить:</translation>
     </message>
     <message>
@@ -1588,7 +1588,7 @@ Do you want to save your changes?</oldsource>
         <translation type="obsolete">Установить Пароль</translation>
     </message>
     <message>
-        <source>The confirmed passphrase does not match</source>
+        <source>The confirmation passphrase does not match</source>
         <translation type="obsolete">Подтвержденный пароль отличается</translation>
     </message>
 </context>

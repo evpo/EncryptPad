@@ -50,14 +50,14 @@ QString SetKeyDialog::GetKeyFilePath() const
     return ui->uiKeyFilePath->text();
 }
 
-bool SetKeyDialog::GetIsKeyPathPersisted() const
+bool SetKeyDialog::GetIsKeyPathPersistent() const
 {
     return ui->uiPersistKeyLocation->checkState() == Qt::CheckState::Checked;
 }
 
-void SetKeyDialog::SetIsKeyPathPersisted(bool persisted)
+void SetKeyDialog::SetIsKeyPathPersistent(bool persistent)
 {
-    ui->uiPersistKeyLocation->setCheckState(persisted ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
+    ui->uiPersistKeyLocation->setCheckState(persistent ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
 }
 
 void SetKeyDialog::SetKeyFilePath(const QString &path)
