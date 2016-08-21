@@ -1049,8 +1049,8 @@ Do you want to disable it?</oldsource>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="818"/>
-        <source>"Windows" end of line: CR+LF</source>
-        <translation>Fin de ligne "Windows" : CR LN</translation>
+        <source>&quot;Windows&quot; end of line: CR+LF</source>
+        <translation>Fin de ligne &quot;Windows&quot; : CR LN</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="913"/>

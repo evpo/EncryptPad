@@ -283,7 +283,8 @@ Do you want to replace it?</source>
     </message>
     <message>
         <location filename="file_properties_dialog.ui" line="73"/>
-        <source>TripleDES</source>
+        <source>Triple DES</source>
+        <oldsource>TripleDES</oldsource>
         <comment>2</comment>
         <translation type="unfinished"></translation>
     </message>
@@ -1040,8 +1041,8 @@ Do you want to disable it?</oldsource>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="818"/>
-        <source>"Windows" end of line: CR+LF</source>
-        <translation type="unfinished">Окончания строк "Windows": CR+LF</translation>
+        <source>&quot;Windows&quot; end of line: CR+LF</source>
+        <translation type="unfinished">Окончания строк &quot;Windows&quot;: CR+LF</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="913"/>
