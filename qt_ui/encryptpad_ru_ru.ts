@@ -817,7 +817,7 @@ Do you want to disable it?</oldsource>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="712"/>
-        <source>Save without passphrase encryption. File key encryption only (if enabled).</source>
+        <source>Save without passphrase protected encryption. Encryption with file key only (if enabled).</source>
         <translation type="unfinished">Сохранять без защиты паролем. Будет использован только ключ (если он установлен).</translation>
     </message>
     <message>
@@ -1221,7 +1221,7 @@ Do you want to save your changes?</oldsource>
     </message>
     <message>
         <location filename="new_key_dialog.ui" line="73"/>
-        <source>Repository is the &lt;b&gt;.encryptpad&lt;/b&gt; (&lt;b&gt;_encryptpad&lt;/b&gt; on Windows) directory in the user&apos;s home folder. If it does not exist, it will be created.</source>
+        <source>The repository is the &lt;b&gt;.encryptpad&lt;/b&gt; (&lt;b&gt;_encryptpad&lt;/b&gt; on Windows) directory in the user&apos;s home folder. If it does not exist, it will be created.</source>
         <translation type="unfinished">Хранилище это директория &lt;b&gt;.encryptpad&lt;/b&gt; (&lt;b&gt;_encryptpad&lt;/b&gt; на Windows) в домашней директории пользователя. Если не существует, то она будет создана.</translation>
     </message>
     <message>
@@ -1521,12 +1521,12 @@ Do you want to save your changes?</oldsource>
     </message>
     <message>
         <location filename="set_key_dialog.ui" line="160"/>
-        <source>&amp;Persist key location in encrypted file</source>
+        <source>&amp;Persistent key location in the encrypted file</source>
         <translation type="unfinished">&amp;Сохранить путь ключа в зашифрованном файле</translation>
     </message>
     <message>
         <location filename="set_key_dialog.ui" line="167"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Key repository is &lt;span style=&quot; font-weight:600;&quot;&gt;.encryptpad&lt;/span&gt; (&lt;b&gt;_encryptpad&lt;/b&gt; on Windows) directory in the user&apos;s profile. Select a key or specify a file name without path for repository keys.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The key repository is &lt;span style=&quot; font-weight:600;&quot;&gt;.encryptpad&lt;/span&gt; (&lt;b&gt;_encryptpad&lt;/b&gt; on Windows) directory in the user&apos;s profile. Select a key or specify a file name without path for the repository keys.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Хранилище это директория &lt;span style=&quot; font-weight:600;&quot;&gt;.encryptpad&lt;/span&gt; (&lt;b&gt;_encryptpad&lt;/b&gt; на Windows) в домашней директории пользователя. Выберите ключ или укажите имя файла без пути для ключей в хранилище.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>

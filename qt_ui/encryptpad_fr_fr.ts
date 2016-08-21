@@ -826,7 +826,7 @@ Do you want to disable it?</oldsource>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="712"/>
-        <source>Save without passphrase encryption. File key encryption only (if enabled).</source>
+        <source>Save without passphrase protected encryption. Encryption with file key only (if enabled).</source>
         <translation>Enregistrer sans proctection par mot de passe. Chiffrement avec fichier clé seulement (si l&apos;option est activée).</translation>
     </message>
     <message>
@@ -1230,7 +1230,7 @@ Do you want to save your changes?</oldsource>
     </message>
     <message>
         <location filename="new_key_dialog.ui" line="73"/>
-        <source>Repository is the &lt;b&gt;.encryptpad&lt;/b&gt; (&lt;b&gt;_encryptpad&lt;/b&gt; on Windows) directory in the user&apos;s home folder. If it does not exist, it will be created.</source>
+        <source>The repository is the &lt;b&gt;.encryptpad&lt;/b&gt; (&lt;b&gt;_encryptpad&lt;/b&gt; on Windows) directory in the user&apos;s home folder. If it does not exist, it will be created.</source>
         <translation>Le dépôt est le répertoire &lt;b&gt;.encryptpad&lt;/b&gt; (&lt;b&gt;_encryptpad&lt;/b&gt; sous Windows) dans le dossier personnel de l&apos;utilisateur. S&apos;il n&apos;existe pas, il sera créé.</translation>
     </message>
     <message>
@@ -1546,12 +1546,12 @@ Do you want to save your changes?</oldsource>
     </message>
     <message>
         <location filename="set_key_dialog.ui" line="160"/>
-        <source>&amp;Persist key location in encrypted file</source>
+        <source>&amp;Persistent key location in the encrypted file</source>
         <translation>&amp;Emplacement de clé persistent dans le fichier chiffré</translation>
     </message>
     <message>
         <location filename="set_key_dialog.ui" line="167"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Key repository is &lt;span style=&quot; font-weight:600;&quot;&gt;.encryptpad&lt;/span&gt; (&lt;b&gt;_encryptpad&lt;/b&gt; on Windows) directory in the user&apos;s profile. Select a key or specify a file name without path for repository keys.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The key repository is &lt;span style=&quot; font-weight:600;&quot;&gt;.encryptpad&lt;/span&gt; (&lt;b&gt;_encryptpad&lt;/b&gt; on Windows) directory in the user&apos;s profile. Select a key or specify a file name without path for the repository keys.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Le dépôt de clé est le répertoire &lt;span style=&quot; font-weight:600;&quot;&gt;.encryptpad&lt;/span&gt; (&lt;b&gt;_encryptpad&lt;/b&gt; sous Windows) dans le profile de l&apos;utilisateur. Choisir une clé ou spécifier un nom de fichier sans chemin pour les clés du dépôt.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>

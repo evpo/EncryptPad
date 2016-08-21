@@ -709,7 +709,7 @@ void MainWindow::createActions()
     connect(clearEncryptionKeyAct, SIGNAL(triggered()), this, SLOT(clearEncryptionKey()));
 
     clearPassphraseAct = new QAction(QIcon(":/images/famfamfam/lock_delete.png"), tr("&Clear Passphrase"), this);
-    clearPassphraseAct->setStatusTip(tr("Save without passphrase encryption. File key encryption only (if enabled)."));
+    clearPassphraseAct->setStatusTip(tr("Save without passphrase protected encryption. Encryption with file key only (if enabled)."));
     connect(clearPassphraseAct, SIGNAL(triggered()), this, SLOT(clearPassphrase()));
 
     exitAct = new QAction(tr("E&xit"), this);
