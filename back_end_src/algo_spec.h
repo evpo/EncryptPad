@@ -44,6 +44,7 @@ namespace EncryptPad
         Unknown = -1,
         SHA160 = 2,
         SHA256 = 8,
+        SHA512 = 10,
     };
 
     struct AlgoSpec

@@ -87,6 +87,7 @@ void FilePropertiesDialog::PopulateItems()
     {
         {"SHA-1", ToInt(HashAlgo::SHA160)},
         {"SHA-256", ToInt(HashAlgo::SHA256)},
+        {"SHA-512", ToInt(HashAlgo::SHA512)},
         {nullptr, 0}
     };
 

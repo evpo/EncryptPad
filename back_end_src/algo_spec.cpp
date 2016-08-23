@@ -67,6 +67,7 @@ namespace EncryptPad
                     256
                 };
                 return aes256;
+
             default:
                 static AlgoSpec unknown =
                 {
@@ -97,6 +98,13 @@ namespace EncryptPad
                     "OpenPGP-S2K(SHA-256)"
                 };
                 return sha256;
+            case HashAlgo::SHA512:
+                static HashSpec sha512 =
+                {
+                    HashAlgo::SHA512,
+                    "OpenPGP-S2K(SHA-512)"
+                };
+                return sha512;
             default:
                 static HashSpec unknown =
                 {

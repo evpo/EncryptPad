@@ -749,6 +749,7 @@ namespace EncryptPad
         {
             case HashAlgo::SHA160:
             case HashAlgo::SHA256:
+            case HashAlgo::SHA512:
                 break;
             default:
                 return PacketResult::UnsupportedS2K;

@@ -7,3 +7,4 @@ cipher AES
 cipher AES256
 s2k_algo SHA1
 s2k_algo SHA256
+s2k_algo SHA512

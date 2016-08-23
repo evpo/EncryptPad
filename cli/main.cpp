@@ -130,6 +130,10 @@ namespace EncryptPad
         {
             return HashAlgo::SHA256;
         }
+        else if(str == "SHA512")
+        {
+            return HashAlgo::SHA512;
+        }
         else
         {
             return kDefaultHashAlgo;
