@@ -1,12 +1,17 @@
 #include "find_dialog.h"
+#include <QtGlobal>
 #include "ui_find_dialog.h"
 #include "common_definitions.h"
+
+const char *kFindDialogWidth = QT_TRANSLATE_NOOP("FindDialog", "425");
 
 FindDialog::FindDialog(QWidget *parent) :
     QDialog(parent, kDefaultWindowFlags),
     ui(new Ui::FindDialog)
 {
     ui->setupUi(this);
+    setMinimumSize(sizeHint());
+    adjustSize();
 }
 
 FindDialog::~FindDialog()

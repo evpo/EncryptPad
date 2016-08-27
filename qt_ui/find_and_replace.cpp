@@ -26,6 +26,8 @@ FindAndReplace::FindAndReplace(QWidget *parent) :
     ui(new Ui::FindAndReplace)
 {
     ui->setupUi(this);
+    setMinimumSize(sizeHint());
+    adjustSize();
 }
 
 FindAndReplace::~FindAndReplace()

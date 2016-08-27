@@ -217,7 +217,7 @@ namespace EncryptPad
         std::string kf_passphrase;
 
         if(!client.EncryptionKeyFile().isEmpty() && !client.HasKeyFilePassphrase() &&
-                !OpenPassphraseDialog(false, &kf_passphrase, false, kKeyFilePassphraseWindowTitle))
+                !OpenPassphraseDialog(false, &kf_passphrase, false, qApp->translate("LoadSaveHandler", kKeyFilePassphraseWindowTitle)))
         {
             return false;
         }
@@ -237,7 +237,8 @@ namespace EncryptPad
         if(confirmationEnabled)
         {
             ConfirmPassphraseDialog dlg(parent);
-            dlg.setWindowTitle(title);
+            if(!title.isEmpty())
+                dlg.setWindowTitle(title);
             if(dlg.exec() == QDialog::Rejected)
                 return false;
             pwdString = dlg.GetPassphrase();
@@ -245,7 +246,8 @@ namespace EncryptPad
         else
         {
             GetPassphraseDialog dlg(parent);
-            dlg.setWindowTitle(title);
+            if(!title.isEmpty())
+                dlg.setWindowTitle(title);
             if(dlg.exec() == QDialog::Rejected)
                 return false;
             pwdString = dlg.GetPassphrase();

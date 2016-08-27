@@ -31,6 +31,8 @@ SetKeyDialog::SetKeyDialog(QWidget *parent, FileRequestService &file_request_ser
     file_request_service_(file_request_service)
 {
     ui->setupUi(this);
+    setMinimumSize(sizeHint());
+    adjustSize();
 }
 
 void SetKeyDialog::on_uiRepositoryListView_current_changed(QModelIndex index, QModelIndex)

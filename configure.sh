@@ -94,8 +94,9 @@ case $COMMAND in
     ;;
 --all-cultures)
     LOCALIZATION=on
+    $MAKE -f Makefile.qt_ui clean RELEASE=$RELEASE 
     mkdir -p qt_build
-    for TSFILE in ../qt_ui/*.ts
+    for TSFILE in ../qt_ui/encryptpad_*.ts
     do
         CULTUREFILE=$(echo -n "$TSFILE" | sed -n -e "s/..\/qt_ui\///" -e "s/\.ts$//p")
         echo $CULTUREFILE
@@ -112,7 +113,7 @@ case $COMMAND in
     done
 
     LOCALIZATION=
-    rm ./qt_build/${CONFIG_DIR}/obj/main.o
+    $MAKE -f Makefile.qt_ui clean RELEASE=$RELEASE 
     build_all
     ;;
 -c|--clean)

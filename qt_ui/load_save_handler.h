@@ -57,7 +57,7 @@ namespace EncryptPad
         {
         }
 
-        bool OpenPassphraseDialog(bool confirmationEnabled, std::string *passphrase = nullptr, bool set_client_passphrase = true, const QString &title = "Passphrase");
+        bool OpenPassphraseDialog(bool confirmationEnabled, std::string *passphrase = nullptr, bool set_client_passphrase = true, const QString &title = QString());
         bool OpenSetEncryptionKeyDialogue();
 
         // returns true if StartLoad was called

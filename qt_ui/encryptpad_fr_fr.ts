@@ -7,7 +7,7 @@
         <location filename="confirm_password_dialog.ui" line="26"/>
         <location filename="confirm_password_dialog.cpp" line="43"/>
         <source>Set Passphrase</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Définir le mot de passe</translation>
     </message>
     <message>
         <location filename="confirm_password_dialog.ui" line="55"/>
@@ -471,7 +471,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="get_password_dialog.ui" line="26"/>
         <source>Passphrase</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Mot de passe</translation>
     </message>
     <message>
         <location filename="get_password_dialog.ui" line="49"/>
@@ -1344,17 +1344,17 @@ Do you want to save your changes?</oldsource>
     <message>
         <location filename="password_generation_dialog.cpp" line="40"/>
         <source>7 passphrases</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">7 mots de passe</translation>
     </message>
     <message>
         <location filename="password_generation_dialog.cpp" line="41"/>
         <source>15 passphrases</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">15 mots de passe</translation>
     </message>
     <message>
         <location filename="password_generation_dialog.cpp" line="42"/>
         <source>25 passphrases</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">25 mots de passe</translation>
     </message>
 </context>
 <context>
@@ -1430,18 +1430,6 @@ Do you want to save your changes?</oldsource>
     <message>
         <source>Regenerate</source>
         <translation type="vanished">Régénérer</translation>
-    </message>
-    <message>
-        <source>7 passwords</source>
-        <translation type="vanished">7 mots de passe</translation>
-    </message>
-    <message>
-        <source>15 passwords</source>
-        <translation type="vanished">15 mots de passe</translation>
-    </message>
-    <message>
-        <source>25 passwords</source>
-        <translation type="vanished">25 mots de passe</translation>
     </message>
 </context>
 <context>
@@ -1586,7 +1574,7 @@ Do you want to save your changes?</oldsource>
         <location filename="set_password_dialog.cpp" line="71"/>
         <location filename="set_password_dialog.cpp" line="87"/>
         <source>Set Passphrase</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Définir le mot de passe</translation>
     </message>
     <message>
         <location filename="set_password_dialog.cpp" line="88"/>

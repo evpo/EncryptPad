@@ -37,6 +37,8 @@ PassphraseGenerationDialog::PassphraseGenerationDialog(QWidget *parent) :
     allPassphrases(false)
 {
     ui->setupUi(this);
+    setMinimumSize(sizeHint());
+    adjustSize();
     ui->uiPassphraseCount->addItem(tr("7 passphrases"), QVariant(7));
     ui->uiPassphraseCount->addItem(tr("15 passphrases"), QVariant(15));
     ui->uiPassphraseCount->addItem(tr("25 passphrases"), QVariant(25));

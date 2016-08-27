@@ -440,7 +440,7 @@ Do you want to replace it?</source>
     <message>
         <location filename="find_dialog.ui" line="58"/>
         <source>&amp;Match case</source>
-        <translation type="unfinished">&amp;Разл. загл.</translation>
+        <translation type="unfinished">&amp;Различать заглавные</translation>
     </message>
     <message>
         <location filename="find_dialog.ui" line="65"/>
@@ -463,7 +463,7 @@ Do you want to replace it?</source>
     <message>
         <location filename="get_password_dialog.ui" line="26"/>
         <source>Passphrase</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Пароль</translation>
     </message>
     <message>
         <location filename="get_password_dialog.ui" line="49"/>
@@ -1336,17 +1336,17 @@ Do you want to save your changes?</oldsource>
     <message>
         <location filename="password_generation_dialog.cpp" line="40"/>
         <source>7 passphrases</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">7 паролей</translation>
     </message>
     <message>
         <location filename="password_generation_dialog.cpp" line="41"/>
         <source>15 passphrases</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">15 паролей</translation>
     </message>
     <message>
         <location filename="password_generation_dialog.cpp" line="42"/>
         <source>25 passphrases</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">25 паролей</translation>
     </message>
 </context>
 <context>
@@ -1407,18 +1407,6 @@ Do you want to save your changes?</oldsource>
         <source>Regenerate</source>
         <translation type="obsolete">Генерировать</translation>
     </message>
-    <message>
-        <source>7 passwords</source>
-        <translation type="obsolete">7 паролей</translation>
-    </message>
-    <message>
-        <source>15 passwords</source>
-        <translation type="obsolete">15 паролей</translation>
-    </message>
-    <message>
-        <source>25 passwords</source>
-        <translation type="obsolete">25 паролей</translation>
-    </message>
 </context>
 <context>
     <name>PreferencesDialog</name>
@@ -1470,7 +1458,7 @@ Do you want to save your changes?</oldsource>
     <message>
         <location filename="preferences_dialog.ui" line="227"/>
         <source>Save Last Used Directory</source>
-        <translation type="unfinished">Сохранить Послед. Директорию</translation>
+        <translation type="unfinished">Сохранить Последнюю Директорию</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="234"/>
