@@ -48,6 +48,11 @@ namespace
     void WriteToConsole(const std::string &prompt)
     {
         Hndl h = CreateFile("CONOUT$", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0);
+        if(!h.Valid())
+        {
+            std::cerr << "Cannot open the terminal for output" << std::endl;
+            return;
+        }
         if(!WriteConsoleA(h.get(), prompt.data(), prompt.size(), NULL, NULL))
             assert(false);
     }
@@ -69,6 +74,11 @@ namespace EncryptPad
         DWORD con_mode;
         DWORD read_word;
         Hndl h = CreateFile("CONIN$", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0);
+        if(!h.Valid())
+        {
+            std::cerr << "Cannot open the terminal for input" << std::endl;
+            return;
+        }
 
         GetConsoleMode(h.get(), &con_mode);
         SetConsoleMode(h.get(), con_mode & ~(ENABLE_ECHO_INPUT | ENABLE_LINE_INPUT));
@@ -135,6 +145,12 @@ namespace EncryptPad
 
         const char *termid = ctermid(NULL);
         FileHndl term_file(fopen(termid, "r+"));
+        if(!term_file.Valid())
+        {
+            std::cerr << "Cannot open the terminal for output" << std::endl;
+            return;
+        }
+
         size_t res = fwrite(prompt.c_str(), 1, prompt.size(), term_file.get());
         assert(res == prompt.size());
         (void)res;
