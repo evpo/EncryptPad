@@ -24,8 +24,8 @@
 #include <iostream>
 #include <string>
 #include <algorithm>
-#include "get_password_dialog.h"
-#include "confirm_password_dialog.h"
+#include "get_passphrase_dialog.h"
+#include "confirm_passphrase_dialog.h"
 #include "mainwindow.h"
 #include "key_generation.h"
 #include "file_encryption.h"
@@ -37,9 +37,9 @@
 #include "preferences_dialog.h"
 #include "find_and_replace.h"
 #include "set_encryption_key.h"
-#include "get_password_or_key_dialog.h"
+#include "get_passphrase_or_key_dialog.h"
 #include "file_encryption_dialog.h"
-#include "password_generation_dialog.h"
+#include "passphrase_generation_dialog.h"
 #include "version.h"
 #include "plain_text_edit.h"
 #include "common_definitions.h"

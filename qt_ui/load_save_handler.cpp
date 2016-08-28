@@ -27,11 +27,11 @@
 #include <QFile>
 #include "file_encryption.h"
 #include "file_name_helper.h"
-#include "get_password_dialog.h"
-#include "confirm_password_dialog.h"
-#include "get_password_dialog.h"
+#include "get_passphrase_dialog.h"
+#include "confirm_passphrase_dialog.h"
+#include "get_passphrase_dialog.h"
 #include "set_encryption_key.h"
-#include "get_password_or_key_dialog.h"
+#include "get_passphrase_or_key_dialog.h"
 
 namespace EncryptPad
 {

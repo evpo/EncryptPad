@@ -24,7 +24,7 @@
 #include <QAbstractButton>
 #include <QSpinBox>
 #include <vector>
-#include "password_generator.h"
+#include "passphrase_generator.h"
 
 namespace Ui {
 class PassphraseGenerationDialog;

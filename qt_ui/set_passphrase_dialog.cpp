@@ -19,7 +19,7 @@
 //**********************************************************************************
 #include <QtGui>
 #include <QtWidgets>
-#include "set_password_dialog.h"
+#include "set_passphrase_dialog.h"
 #include "common_definitions.h"
 
 SetPassphraseDialog::SetPassphraseDialog(QWidget *parent, const bool enableConfirmation)

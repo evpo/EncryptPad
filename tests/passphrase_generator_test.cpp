@@ -19,7 +19,7 @@
 //**********************************************************************************
 
 #include "gtest/gtest.h"
-#include "password_generator.h"
+#include "passphrase_generator.h"
 #include <algorithm>
 
 using namespace EncryptPad;

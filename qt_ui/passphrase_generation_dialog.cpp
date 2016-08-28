@@ -17,14 +17,14 @@
 //You should have received a copy of the GNU General Public License
 //along with EncryptPad.  If not, see <http://www.gnu.org/licenses/>.
 //**********************************************************************************
-#include "password_generation_dialog.h"
-#include "ui_password_generation_dialog.h"
+#include "passphrase_generation_dialog.h"
+#include "ui_passphrase_generation_dialog.h"
 #include <QStringList>
 #include <QFontDatabase>
 #include <QListWidgetItem>
 #include <vector>
 #include <algorithm>
-#include "password_generator.h"
+#include "passphrase_generator.h"
 #include "assert.h"
 #include "common_definitions.h"
 

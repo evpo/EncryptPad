@@ -17,7 +17,7 @@
 //You should have received a copy of the GNU General Public License
 //along with EncryptPad.  If not, see <http://www.gnu.org/licenses/>.
 //**********************************************************************************
-#include "get_password.h"
+#include "get_passphrase.h"
 #include <string>
 #include <iostream>
 #include "assert.h"

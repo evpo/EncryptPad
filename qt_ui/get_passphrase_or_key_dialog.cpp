@@ -17,8 +17,8 @@
 //You should have received a copy of the GNU General Public License
 //along with EncryptPad.  If not, see <http://www.gnu.org/licenses/>.
 //**********************************************************************************
-#include "get_password_or_key_dialog.h"
-#include "ui_get_password_or_key_dialog.h"
+#include "get_passphrase_or_key_dialog.h"
+#include "ui_get_passphrase_or_key_dialog.h"
 #include "set_encryption_key.h"
 #include "common_definitions.h"
 

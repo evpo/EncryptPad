@@ -32,11 +32,11 @@ FORMS += \
     new_key_dialog.ui \
     preferences_dialog.ui \
     find_and_replace.ui \
-    get_password_dialog.ui \
-    confirm_password_dialog.ui \
-    get_password_or_key_dialog.ui \
+    get_passphrase_dialog.ui \
+    confirm_passphrase_dialog.ui \
+    get_passphrase_or_key_dialog.ui \
     file_encryption_dialog.ui \
-    password_generation_dialog.ui \
+    passphrase_generation_dialog.ui \
     find_dialog.ui
 
 win32: LIBS += -luserenv
@@ -67,7 +67,7 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     set_key_dialog.cpp \
-    set_password_dialog.cpp \
+    set_passphrase_dialog.cpp \
     async_load.cpp \
     plain_text_switch.cpp \
     file_properties_dialog.cpp \
@@ -75,15 +75,15 @@ SOURCES += \
     preferences_dialog.cpp \
     recent_files_service.cpp \
     find_and_replace.cpp \
-    get_password_dialog.cpp \
-    confirm_password_dialog.cpp \
-    get_password_or_key_dialog.cpp \
+    get_passphrase_dialog.cpp \
+    confirm_passphrase_dialog.cpp \
+    get_passphrase_or_key_dialog.cpp \
     set_encryption_key.cpp \
     file_encryption_dialog.cpp \
     m_window_load_adapter.cpp \
     file_encryption_dlg_adapter.cpp \
     file_dlg_async.cpp \
-    password_generation_dialog.cpp \
+    passphrase_generation_dialog.cpp \
     load_save_handler.cpp \
     file_request_service.cpp \
     plain_text_edit.cpp \
@@ -94,7 +94,7 @@ HEADERS += \
     file_name_helper.h \
     mainwindow.h \
     set_key_dialog.h \
-    set_password_dialog.h \
+    set_passphrase_dialog.h \
     async_load.h \
     plain_text_switch.h \
     file_properties_dialog.h \
@@ -102,15 +102,15 @@ HEADERS += \
     preferences_dialog.h \
     recent_files_service.h \
     find_and_replace.h \
-    get_password_dialog.h \
-    confirm_password_dialog.h \
-    get_password_or_key_dialog.h \
+    get_passphrase_dialog.h \
+    confirm_passphrase_dialog.h \
+    get_passphrase_or_key_dialog.h \
     set_encryption_key.h \
     file_encryption_dialog.h \
     m_window_load_adapter.h \
     file_encryption_dlg_adapter.h \
     file_dlg_async.h \
-    password_generation_dialog.h \
+    passphrase_generation_dialog.h \
     load_save_handler.h \
     file_request_service.h \
     plain_text_edit.h \

@@ -28,7 +28,7 @@
 #include "epad_utilities.h"
 #include "file_encryption.h"
 #include "key_service.h"
-#include "get_password.h"
+#include "get_passphrase.h"
 #include "version.h"
 #include "key_generation.h"
 #include "file_helper.h"
