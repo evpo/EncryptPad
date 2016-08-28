@@ -710,7 +710,7 @@ int main(int argc, char *argv[])
         if(!metadata.key_only)
         {
             key_service.ChangePassphrase(
-                    passphrase, metadata.hash_algo, GetAlgoSpec(metadata.cipher_algo).key_size);
+                    passphrase, metadata.hash_algo, GetAlgoSpec(metadata.cipher_algo).key_size, metadata.iterations);
         }
 
         metadata.file_name = in_file;
@@ -777,7 +777,8 @@ void GenerateKeyFile(const std::string &path, const std::string &passphrase)
         kf_encrypt_params.key_service = &key_service;
         PacketMetadata metadata = GetDefaultKFMetadata();
         kf_encrypt_params.key_service->ChangePassphrase(
-                    passphrase, metadata.hash_algo, GetAlgoSpec(metadata.cipher_algo).key_size);
+                    passphrase, metadata.hash_algo, GetAlgoSpec(metadata.cipher_algo).key_size,
+                    metadata.iterations);
         GenerateNewKey(path, &kf_encrypt_params, &metadata);
     }
 }

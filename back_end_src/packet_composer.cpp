@@ -850,8 +850,9 @@ namespace EncryptPad
                     *passphrase,
                     this->metadata_.hash_algo,
                     algo_spec.key_size,
-                    this->metadata_.salt,
-                    this->metadata_.iterations);
+                    this->metadata_.iterations,
+                    this->metadata_.salt
+                    );
         }
         else
         {

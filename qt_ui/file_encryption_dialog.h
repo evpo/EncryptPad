@@ -71,6 +71,8 @@ public:
 
     FileRequestService &GetFileRequestService();
 
+    void SetDefaultIterations(int defaultIterations);
+
 private slots:
     void WorkDone();
 

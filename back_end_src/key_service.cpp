@@ -73,8 +73,8 @@ namespace EncryptPad
         return **it;
     }
 
-    const KeyRecord &KeyService::ChangePassphrase(const std::string &passphrase, HashAlgo hash_algo, int key_size, 
-            const Botan::SecureVector<byte> &salt, int iterations)
+    const KeyRecord &KeyService::ChangePassphrase(const std::string &passphrase, HashAlgo hash_algo, int key_size,
+            int iterations, const Botan::SecureVector<byte> &salt)
     {
         using namespace Botan;
 

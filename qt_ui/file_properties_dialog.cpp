@@ -121,7 +121,6 @@ void FilePropertiesDialog::SetUiFromMetadata(const EncryptPad::PacketMetadata &m
         stm << std::uppercase << std::hex << static_cast<int>(*it);
     }
     std::string s = stm.str();
-    std::cout << s << std::endl;
     QString qs = QString::fromStdString(s);
     ui->uiSalt->setText(qs);
     isDirty = false;

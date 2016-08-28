@@ -91,8 +91,8 @@ namespace EncryptPad
         // Clears all previous keys and generates new keys from passphrase with different salts, 
         // one of them has the salt from the parameter.
         // Returns the key with the salt from the parameter. This key is also marked as used.
-        const KeyRecord &ChangePassphrase(const std::string &passphrase, HashAlgo hash_algo, int key_size, 
-                const Botan::SecureVector<byte> &salt = Botan::SecureVector<byte>(), int iterations = kDefaultIterations);
+        const KeyRecord &ChangePassphrase(const std::string &passphrase, HashAlgo hash_algo, int key_size,
+                int iterations, const Botan::SecureVector<byte> &salt = Botan::SecureVector<byte>());
 
         // Returns a key generated from the current passphrase and marks it as used so it is not used for saving again. 
         // When all key_count_ keys have been used, it returns an empty record and all keys are deleted.

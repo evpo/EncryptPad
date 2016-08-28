@@ -50,7 +50,7 @@ namespace
 
         KeyService key_service(1);
         key_service.ChangePassphrase(key_phrase, metadata.hash_algo, 
-                GetAlgoSpec(metadata.cipher_algo).key_size);
+                GetAlgoSpec(metadata.cipher_algo).key_size, metadata.iterations);
         EncryptParams enc_params = {};
         enc_params.key_service = &key_service;
 

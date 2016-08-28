@@ -57,14 +57,14 @@ namespace
     const char *kConfigFileName = "encryptpad.ini";
     const bool kDefaultWindowsEol = false;
 
-    void SetDefaultMetadataValues(EncryptPad::PacketMetadata &metadata)
+    void SetDefaultMetadataValues(EncryptPad::PacketMetadata &metadata, int defaultIterations)
     {
         using namespace EncryptPad;
         metadata = {};
         metadata.cipher_algo = kDefaultCipherAlgo;
         metadata.hash_algo = kDefaultHashAlgo;
         metadata.compression = kDefaultCompression;
-        metadata.iterations = kDefaultIterations;
+        metadata.iterations = defaultIterations;
         metadata.file_name = "CONSOLE";
     }
 
@@ -102,15 +102,16 @@ namespace
 const int MainWindow::maxZoomIn = 75;
 const int MainWindow::minZoomOut = 3;
 
-MainWindow::MainWindow(): encryptionKeyFile(tr("")), persistEncryptionKeyPath(false), 
-    enc(), metadata(), encryptionModified(false), isBusy(false), saveLastUsedDirectory(false),
-    enableBakFiles(false), takeBakFile(false), windowsEol(kDefaultWindowsEol), currentZoom(0), load_state_machine_(enc),
+MainWindow::MainWindow(): encryptionKeyFile(tr("")), persistEncryptionKeyPath(false),
+    enc(), metadata(), defaultIterations(EncryptPad::kDefaultIterations), encryptionModified(false), isBusy(false),
+    saveLastUsedDirectory(false), enableBakFiles(false), takeBakFile(false), windowsEol(kDefaultWindowsEol),
+    currentZoom(0), load_state_machine_(enc),
     plain_text_switch_(this), plain_text_functor_(plain_text_switch_), recent_files_service_(this),
     loadAdapter(this),
     loadHandler(this, loadAdapter, metadata),
     saveSuccess(false)
 {
-    SetDefaultMetadataValues(metadata);
+    SetDefaultMetadataValues(metadata, defaultIterations);
     setWindowIcon(QIcon(":/images/application_icon.png"));
 
     textEdit = new PlainTextEdit(this);
@@ -365,8 +366,8 @@ bool MainWindow::newFile()
         CipherAlgo algo_before = metadata.cipher_algo;
         HashAlgo hash_algo_before = metadata.hash_algo;
         unsigned int iterations_before = metadata.iterations;
-        
-        SetDefaultMetadataValues(metadata);
+
+        SetDefaultMetadataValues(metadata, defaultIterations);
 
         if(algo_before != metadata.cipher_algo || hash_algo_before != metadata.hash_algo 
                 || iterations_before != metadata.iterations)
@@ -580,7 +581,8 @@ void MainWindow::createNewKey()
             enc.ClearKFPassphrase();
             PacketMetadata metadata = GetDefaultKFMetadata();
             kf_encrypt_params.key_service->ChangePassphrase(
-                    kf_passphrase, metadata.hash_algo, GetAlgoSpec(metadata.cipher_algo).key_size);
+                    kf_passphrase, metadata.hash_algo, GetAlgoSpec(metadata.cipher_algo).key_size,
+                    metadata.iterations);
             std::fill(kf_passphrase.begin(), kf_passphrase.end(), '\0');
             GenerateNewKey(filePath.toStdString(), &kf_encrypt_params, &metadata);
         }
@@ -1087,6 +1089,11 @@ void MainWindow::readSettings()
                 saveLastUsedDirectory ? settings.value("last_used_directory", QVariant(QString())).toString()
                                       : QString());
     enc.SetLibcurlPath(settings.value("libcurl_path", QVariant(QString())).toString().toStdString());
+    defaultIterations = settings.value("default_iterations", QVariant(EncryptPad::kDefaultIterations)).toInt();
+    if(defaultIterations < EncryptPad::kDefaultIterations || defaultIterations > EncryptPad::kMaxIterations)
+        defaultIterations = EncryptPad::kDefaultIterations;
+
+    metadata.iterations = defaultIterations;
 
     QFont font;
     font.fromString(fontString);
@@ -1586,5 +1593,6 @@ void MainWindow::setWindowsEol(bool flag)
 void MainWindow::openFileEncryption()
 {
     FileEncryptionDialog dlg(this, file_request_service_);
+    dlg.SetDefaultIterations(defaultIterations);
     dlg.exec();
 }

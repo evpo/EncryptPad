@@ -205,7 +205,8 @@ void Encryptor::SetPassphrase(const char *pwd, EncryptPad::PacketMetadata *metad
         key_service_.ChangePassphrase(
                 passphrase, 
                 metadata->hash_algo, 
-                GetAlgoSpec(metadata->cipher_algo).key_size);
+                GetAlgoSpec(metadata->cipher_algo).key_size,
+                metadata->iterations);
         std::fill(std::begin(passphrase), std::end(passphrase), '0');
 
         // if there was key_only before, switch it off

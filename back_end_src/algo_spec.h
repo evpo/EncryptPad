@@ -67,5 +67,6 @@ namespace EncryptPad
     const HashAlgo kDefaultHashAlgo = HashAlgo::SHA256;
     const CipherAlgo kDefaultCipherAlgo = CipherAlgo::AES256;
     const int kDefaultIterations = 65536;
+    const int kMaxIterations = 65011712;
     const Compression kDefaultCompression = Compression::ZLIB; 
 }

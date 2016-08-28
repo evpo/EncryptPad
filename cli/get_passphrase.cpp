@@ -53,8 +53,15 @@ namespace
             std::cerr << "Cannot open the terminal for output" << std::endl;
             return;
         }
-        if(!WriteConsoleA(h.get(), prompt.data(), prompt.size(), NULL, NULL))
-            assert(false);
+
+        FileHndl file = fopen("CONOUT$", "w", "t");
+        if(!file.Valid())
+        {
+            std::cerr << "Cannot open the terminal descriptor for output" << std::endl;
+            return;
+        }
+
+        fputs(prompt.data(), file.get());
     }
 }
 

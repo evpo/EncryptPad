@@ -80,12 +80,18 @@ void FileEncryptionDialog::SetPassphrase(const char *pwd, EncryptPad::PacketMeta
     keyService.ChangePassphrase(
             passphrase, 
             metadata.hash_algo, 
-            GetAlgoSpec(metadata.cipher_algo).key_size);
+            GetAlgoSpec(metadata.cipher_algo).key_size,
+            metadata.iterations);
 
     std::fill(std::begin(passphrase), std::end(passphrase), '0');
 
     // if there was key_only before, switch it off
     metadata.key_only = false;
+}
+
+void FileEncryptionDialog::SetDefaultIterations(int defaultIterations)
+{
+    metadata.iterations = defaultIterations;
 }
 
 bool FileEncryptionDialog::IsPassphraseNotSet() const
@@ -277,7 +283,8 @@ void FileEncryptionDialog::on_uiStart_clicked()
 
             std::string passphrase(pwd);
             keyService.ChangePassphrase(passphrase, metadata.hash_algo, 
-                GetAlgoSpec(metadata.cipher_algo).key_size);
+                GetAlgoSpec(metadata.cipher_algo).key_size,
+                metadata.iterations);
         }
 
         loadHandler.SaveFile(ui->uiOutputFile->text());

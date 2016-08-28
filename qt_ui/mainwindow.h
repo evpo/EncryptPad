@@ -165,6 +165,7 @@ private:
 
     EncryptPadEncryptor::Encryptor enc;
     EncryptPad::PacketMetadata metadata;
+    int defaultIterations;
     bool encryptionModified;
     bool isBusy;
     bool saveLastUsedDirectory;
