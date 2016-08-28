@@ -1124,6 +1124,7 @@ void MainWindow::writeSettings()
     settings.setValue("enable_bak_files", QVariant(enableBakFiles));
     settings.setValue("last_used_directory", QVariant(saveLastUsedDirectory ? file_request_service_.get_current_directory() : QString()));
     settings.setValue("libcurl_path", QVariant(QString::fromStdString(enc.GetLibcurlPath())));
+    settings.setValue("default_iterations", QVariant(defaultIterations));
 }
 
 bool MainWindow::maybeSave()
