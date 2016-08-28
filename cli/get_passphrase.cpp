@@ -90,7 +90,15 @@ namespace EncryptPad
         GetConsoleMode(h.get(), &con_mode);
         SetConsoleMode(h.get(), con_mode & ~(ENABLE_ECHO_INPUT | ENABLE_LINE_INPUT));
 
-        while(ReadConsoleA(h.get(), &ch, 1, &read_word, NULL) && ch != kReturn)
+        FileHndl file=fopen("CONIN$", "r", "t");
+        if(!file.Valid())
+        {
+            std::cerr << "Cannot open the terminal descriptor for input" << std::endl;
+            return;
+        }
+
+        int read_result = -1;
+        while((read_result = fgetc(file.get()))!=EOF && (ch = static_cast<unsigned char>(read_result)) != kReturn)
         {
             if(ch == kBackSpace)
             {
