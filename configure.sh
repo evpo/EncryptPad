@@ -22,7 +22,7 @@ OPTIONS:\n\
                      are always built with the debug configuration.\n\
 --use-system-libs    use botan, zlib and other shared libraries installed on the system."
 
-TARGET=EncryptPad
+TARGET=encryptpad
 TEST_TARGET=encrypt_pad_tests
 
 if [[ $# > 3 ]] || [[ $# < 1 ]]
