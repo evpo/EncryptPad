@@ -47,14 +47,9 @@ namespace
 
     void WriteToConsole(const std::string &prompt)
     {
-        Hndl h = CreateFile("CONOUT$", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0);
-        if(!h.Valid())
-        {
-            std::cerr << "Cannot open the terminal for output" << std::endl;
-            return;
-        }
+        using namespace EncryptPad;
 
-        FileHndl file = fopen("CONOUT$", "w", "t");
+        FileHndl file = fopen("CONOUT$", "wt");
         if(!file.Valid())
         {
             std::cerr << "Cannot open the terminal descriptor for output" << std::endl;
@@ -70,7 +65,7 @@ namespace EncryptPad
     void GetPassphrase(const std::string &prompt, std::string &passphrase)
     {
         const char kBackSpace=8;
-        const char kReturn=13;
+        const int kReturn='\n';
 
         passphrase.clear();
 
@@ -79,7 +74,6 @@ namespace EncryptPad
         WriteToConsole(prompt);
 
         DWORD con_mode;
-        DWORD read_word;
         Hndl h = CreateFile("CONIN$", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0);
         if(!h.Valid())
         {
@@ -88,18 +82,19 @@ namespace EncryptPad
         }
 
         GetConsoleMode(h.get(), &con_mode);
-        SetConsoleMode(h.get(), con_mode & ~(ENABLE_ECHO_INPUT | ENABLE_LINE_INPUT));
+        SetConsoleMode(h.get(), con_mode & (~ENABLE_ECHO_INPUT));
 
-        FileHndl file=fopen("CONIN$", "r", "t");
+        FileHndl file=fopen("CONIN$", "rt");
         if(!file.Valid())
         {
             std::cerr << "Cannot open the terminal descriptor for input" << std::endl;
             return;
         }
 
-        int read_result = -1;
-        while((read_result = fgetc(file.get()))!=EOF && (ch = static_cast<unsigned char>(read_result)) != kReturn)
+        int result = -1;
+        while((result=getc(file.get()))!=EOF && result != kReturn)
         {
+            ch = static_cast<unsigned char>(result);
             if(ch == kBackSpace)
             {
                 if(passphrase.length() != 0)
@@ -113,6 +108,7 @@ namespace EncryptPad
             }
         }
 
+        SetConsoleMode(h.get(), con_mode);
         WriteToConsole("\n");
     }
 

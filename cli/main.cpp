@@ -72,7 +72,7 @@ namespace EncryptPad
             "--pwd-file <file>                     file with passphrase\n"
             "--cipher-algo <cipher-algo>           cipher algorithm (CAST5, AES, AES256, 3DES; default: AES256)\n"
             "--compress-algo <compression-algo>    compression algorithm (ZIP, ZLIB, NONE; default: ZIP)\n"
-            "--s2k-digest-algo <s2k-digest-algo>   s2k digest algorithm (SHA1, SHA256; default: SHA256)\n"
+            "--s2k-digest-algo <s2k-digest-algo>   s2k digest algorithm (SHA1, SHA256; SHA512; default: SHA256)\n"
             "--s2k-count <s2k-count>               s2k iteration count\n"
             "\n"
             "Feedback: evpo.net/encryptpad\n"
