@@ -134,4 +134,5 @@ TRANSLATIONS = \
 RC_FILE = encrypt_pad.rc
 DESTDIR = ../../bin/$$CONFIG_NAME
 OBJECTS_DIR = $$CONFIG_NAME/obj
-TARGET = encryptpad
+unix|win32:TARGET = encryptpad
+macx:TARGET = EncryptPad
