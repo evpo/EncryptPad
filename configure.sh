@@ -23,6 +23,7 @@ OPTIONS:\n\
 --use-system-libs    use botan, zlib and other shared libraries installed on the system."
 
 TARGET=encryptpad
+OSX_APP=EncryptPad.app
 TEST_TARGET=encrypt_pad_tests
 
 if [[ $# > 3 ]] || [[ $# < 1 ]]
@@ -82,7 +83,7 @@ function build_all {
     if [[ $SUBDIR == *MACOS* ]]
     then
         pushd ../macos_deployment > /dev/null
-        ./prepare_bundle.sh ../bin/${CONFIG_DIR}/${TARGET}.app
+        ./prepare_bundle.sh ../bin/${CONFIG_DIR}/${OSX_APP}
         popd
     fi
 }
@@ -106,7 +107,7 @@ case $COMMAND in
         mkdir -p ../bin/${CONFIG_DIR}/${CULTUREFILE}/
         if [[ $SUBDIR == *MACOS* ]]
         then
-            mv ../bin/${CONFIG_DIR}/${TARGET}.app ../bin/${CONFIG_DIR}/${CULTUREFILE}/
+            mv ../bin/${CONFIG_DIR}/${OSX_APP} ../bin/${CONFIG_DIR}/${CULTUREFILE}/
         else
             mv ../bin/${CONFIG_DIR}/${TARGET} ../bin/${CONFIG_DIR}/${CULTUREFILE}/
         fi
@@ -122,7 +123,7 @@ case $COMMAND in
 
     if [[ $SUBDIR == *MACOS* ]]
     then
-        rm -Rf ../bin/${CONFIG_DIR}/${TARGET}.app
+        rm -Rf ../bin/${CONFIG_DIR}/${OSX_APP}
         rm -f ../bin/${CONFIG_DIR}/encryptcli
     elif [[ $UNAME == *MINGW* ]]
     then
@@ -136,7 +137,7 @@ case $COMMAND in
 -r|--run)
     if [[ $SUBDIR == *MACOS* ]]
     then
-        ../bin/${CONFIG_DIR}/${TARGET}.app/Contents/MacOS/${TARGET} &
+        ../bin/${CONFIG_DIR}/${OSX_APP}/Contents/MacOS/${TARGET} &
     else
         ../bin/${CONFIG_DIR}/${TARGET} &
     fi
