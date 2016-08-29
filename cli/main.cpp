@@ -22,6 +22,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <ctime>
 #include "assert.h"
 #include "cli_parser.hpp"
 #include "file_system.hpp"
@@ -72,6 +73,7 @@ namespace EncryptPad
             "--cipher-algo <cipher-algo>           cipher algorithm (CAST5, AES, AES256, 3DES; default: AES256)\n"
             "--compress-algo <compression-algo>    compression algorithm (ZIP, ZLIB, NONE; default: ZIP)\n"
             "--s2k-digest-algo <s2k-digest-algo>   s2k digest algorithm (SHA1, SHA256; default: SHA256)\n"
+            "--s2k-count <s2k-count>               s2k iteration count\n"
             "\n"
             "Feedback: evpo.net/encryptpad\n"
             ;
@@ -307,6 +309,13 @@ int main(int argc, char *argv[])
             "SHA256"
         },
         {
+            "s2k-count",
+            cli_kind_t::cli_value_kind,
+            cli_mode_t::cli_single_mode,
+            "s2k iteration count",
+            ""
+        },
+        {
             "",
             cli_kind_t::cli_value_kind,
             cli_mode_t::cli_single_mode,
@@ -351,6 +360,8 @@ int main(int argc, char *argv[])
     std::string cipher_algo;
     std::string compress_algo;
     std::string hash_algo;
+    int s2k_count = kDefaultIterations;
+    std::string s2k_count_str;
 
     std::string libcurl_path;
 
@@ -427,6 +438,10 @@ int main(int argc, char *argv[])
         else if(parser.name(i) == "s2k-digest-algo")
         {
             hash_algo = parser.string_value(i);
+        }
+        else if(parser.name(i) == "s2k-count")
+        {
+            s2k_count_str = parser.string_value(i);
         }
         else if(parser.name(i) == "help")
         {
@@ -533,6 +548,22 @@ int main(int argc, char *argv[])
         if(!ValidateFileDescriptor(key_file_passphrase_fd, message))
         {
             std::cerr << "Invalid file descriptor '" << key_file_passphrase_fd << "':"  << message << std::endl;
+            exit(1);
+        }
+    }
+
+    if(!s2k_count_str.empty())
+    {
+        std::istringstream s2k_stm(s2k_count_str);
+        s2k_stm >> s2k_count;
+        if(s2k_stm.fail())
+        {
+            std::cerr << "s2k-count: '" << s2k_count_str << "' is not a number" << std::endl;
+            exit(1);
+        }
+        else if(s2k_count < kDefaultIterations || s2k_count > kMaxIterations)
+        {
+            std::cerr << "s2k-count: '" << s2k_count_str << "' is invalid" << std::endl;
             exit(1);
         }
     }
@@ -704,7 +735,7 @@ int main(int argc, char *argv[])
     {
         metadata.hash_algo = ParseHashAlgo(hash_algo);
         metadata.cipher_algo = ParseCipherAlgo(cipher_algo);
-        metadata.iterations = kDefaultIterations;
+        metadata.iterations = s2k_count;
         metadata.compression = ParseCompression(compress_algo);
 
         if(!metadata.key_only)
@@ -714,7 +745,7 @@ int main(int argc, char *argv[])
         }
 
         metadata.file_name = in_file;
-        metadata.file_date = 0;
+        metadata.file_date = static_cast<FileDate>(time(NULL));
         metadata.is_binary = true;
     }
 

@@ -18,6 +18,7 @@
 //along with EncryptPad.  If not, see <http://www.gnu.org/licenses/>.
 //**********************************************************************************
 #include "file_encryption_dialog.h"
+#include <ctime>
 #include <QFileDialog>
 #include <QFile>
 #include "ui_file_encryption_dialog.h"
@@ -50,7 +51,7 @@ FileEncryptionDialog::FileEncryptionDialog(QWidget *parent, FileRequestService &
     metadata.iterations = kDefaultIterations;
     metadata.persist_key_path = false;
     metadata.is_binary = true;
-    metadata.file_name = "CONSOLE";
+    metadata.file_name = "_CONSOLE";
 }
 
 FileEncryptionDialog::~FileEncryptionDialog()
@@ -123,6 +124,7 @@ void FileEncryptionDialog::StartEncryption(const QString &fileName, std::string 
     assert(!inputFile.isEmpty());
     QFileInfo file(inputFile);
     metadata.file_name = file.fileName().toStdString();
+    metadata.file_date = static_cast<FileDate>(time(NULL));
 
     metadata.cannot_use_wad = IsGpgFormat(inputFile);
     metadata.key_file = EncryptionFilePath().toStdString();

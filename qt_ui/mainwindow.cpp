@@ -24,6 +24,7 @@
 #include <iostream>
 #include <string>
 #include <algorithm>
+#include <ctime>
 #include "get_passphrase_dialog.h"
 #include "confirm_passphrase_dialog.h"
 #include "mainwindow.h"
@@ -65,7 +66,7 @@ namespace
         metadata.hash_algo = kDefaultHashAlgo;
         metadata.compression = kDefaultCompression;
         metadata.iterations = defaultIterations;
-        metadata.file_name = "CONSOLE";
+        metadata.file_name = "_CONSOLE";
     }
 
     // TakeBakFile
@@ -1246,6 +1247,7 @@ void MainWindow::startSave(const QString &fileName, std::string &kf_passphrase)
 
         if(result != EncryptPadEncryptor::Result::BakFileMoveFailed)
         {
+            metadata.file_date = static_cast<EncryptPad::FileDate>(time(NULL));
             result = enc.Save(fileName.toUtf8().constData(), secureVect, 
                     encryptionKeyFile.toStdString(), persistEncryptionKeyPath,
                     &metadata, !kf_passphrase.empty() ? &kf_passphrase : nullptr);
