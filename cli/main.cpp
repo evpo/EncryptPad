@@ -169,7 +169,7 @@ namespace EncryptPad
 using namespace EncryptPad;
 using namespace stlplus;
 
-void GenerateKeyFile(const std::string &path, const std::string &passphrase);
+void GenerateKeyFile(const std::string &path, const std::string &passphrase, int s2k_count);
 
 // end Packet read write tests
 int main(int argc, char *argv[])
@@ -649,7 +649,7 @@ int main(int argc, char *argv[])
     {
         try
         {
-            GenerateKeyFile(out_file, passphrase);
+            GenerateKeyFile(out_file, passphrase, s2k_count);
         }
         catch(EncryptPad::IoException &ex)
         {
@@ -797,7 +797,7 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-void GenerateKeyFile(const std::string &path, const std::string &passphrase)
+void GenerateKeyFile(const std::string &path, const std::string &passphrase, int s2k_count)
 {
     if(passphrase.empty())
     {
@@ -808,7 +808,7 @@ void GenerateKeyFile(const std::string &path, const std::string &passphrase)
         EncryptParams kf_encrypt_params;
         KeyService key_service(1);
         kf_encrypt_params.key_service = &key_service;
-        PacketMetadata metadata = GetDefaultKFMetadata();
+        PacketMetadata metadata = GetDefaultKFMetadata(s2k_count);
         kf_encrypt_params.key_service->ChangePassphrase(
                     passphrase, metadata.hash_algo, GetAlgoSpec(metadata.cipher_algo).key_size,
                     metadata.iterations);

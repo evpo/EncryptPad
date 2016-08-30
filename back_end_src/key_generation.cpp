@@ -62,11 +62,11 @@ namespace EncryptPad
         WriteKeyFile(key_file_path, key_string);
     }
 
-    PacketMetadata GetDefaultKFMetadata()
+    PacketMetadata GetDefaultKFMetadata(int iterations)
     {
         PacketMetadata metadata;
         metadata.cipher_algo = kDefaultCipherAlgo;
-        metadata.iterations = kDefaultIterations;
+        metadata.iterations = iterations;
         // Key file is too small for compression
         metadata.compression = Compression::Uncompressed;
         metadata.hash_algo = kDefaultHashAlgo;

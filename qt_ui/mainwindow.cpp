@@ -581,7 +581,7 @@ void MainWindow::createNewKey()
         {
             kf_encrypt_params.key_service = &enc.GetKFKeyService();
             enc.ClearKFPassphrase();
-            PacketMetadata metadata = GetDefaultKFMetadata();
+            PacketMetadata metadata = GetDefaultKFMetadata(defaultIterations);
             kf_encrypt_params.key_service->ChangePassphrase(
                     kf_passphrase, metadata.hash_algo, GetAlgoSpec(metadata.cipher_algo).key_size,
                     metadata.iterations);
