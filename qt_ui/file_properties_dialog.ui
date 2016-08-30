@@ -64,6 +64,9 @@
        <property name="text">
         <string>Iterations:</string>
        </property>
+       <property name="buddy">
+        <cstring>uiIterations</cstring>
+       </property>
       </widget>
      </item>
      <item row="0" column="1">
@@ -114,16 +117,6 @@
        </item>
       </widget>
      </item>
-     <item row="2" column="1">
-      <widget class="QLabel" name="uiIterations">
-       <property name="text">
-        <string>99999999</string>
-       </property>
-       <property name="textFormat">
-        <enum>Qt::PlainText</enum>
-       </property>
-      </widget>
-     </item>
      <item row="1" column="1">
       <widget class="QComboBox" name="uiHashAlgo">
        <item>
@@ -136,6 +129,13 @@
          <string comment="8">SHA-256 (recommended)</string>
         </property>
        </item>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QLabel" name="label_5">
+       <property name="text">
+        <string>Salt:</string>
+       </property>
       </widget>
      </item>
      <item row="1" column="0">
@@ -170,13 +170,6 @@
        </property>
       </widget>
      </item>
-     <item row="3" column="0">
-      <widget class="QLabel" name="label_5">
-       <property name="text">
-        <string>Salt:</string>
-       </property>
-      </widget>
-     </item>
      <item row="3" column="1">
       <widget class="QLabel" name="uiSalt">
        <property name="text">
@@ -184,6 +177,19 @@
        </property>
        <property name="textFormat">
         <enum>Qt::PlainText</enum>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QSpinBox" name="uiIterations">
+       <property name="minimum">
+        <number>65536</number>
+       </property>
+       <property name="maximum">
+        <number>65011712</number>
+       </property>
+       <property name="singleStep">
+        <number>300000</number>
        </property>
       </widget>
      </item>
@@ -199,6 +205,7 @@
  <tabstops>
   <tabstop>uiCipherAlgo</tabstop>
   <tabstop>uiHashAlgo</tabstop>
+  <tabstop>uiIterations</tabstop>
   <tabstop>uiCompressionAlgo</tabstop>
  </tabstops>
  <resources/>

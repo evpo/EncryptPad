@@ -52,6 +52,16 @@ void PreferencesDialog::setFont(QFont newFont)
     updateFont();
 }
 
+int PreferencesDialog::getIterations() const
+{
+    return ui->uiIterations->value();
+}
+
+void PreferencesDialog::setIterations(int iterations)
+{
+    ui->uiIterations->setValue(iterations);
+}
+
 void PreferencesDialog::setRecentFiles(int newRecentFiles)
 {
     ui->uiRecentFiles->setValue(newRecentFiles);

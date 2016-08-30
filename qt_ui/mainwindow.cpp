@@ -44,6 +44,7 @@
 #include "version.h"
 #include "plain_text_edit.h"
 #include "common_definitions.h"
+#include "openpgp_conversions.h"
 
 typedef unsigned char byte;
 
@@ -647,6 +648,7 @@ void MainWindow::openPreferences()
     dlg.setSaveLastUsedDirectory(saveLastUsedDirectory);
     dlg.setEnableBakFiles(enableBakFiles);
     dlg.setLibcurlPath(QString::fromStdString(enc.GetLibcurlPath()));
+    dlg.setIterations(defaultIterations);
     if(dlg.exec() == QDialog::Rejected)
         return;
 
@@ -657,6 +659,7 @@ void MainWindow::openPreferences()
     saveLastUsedDirectory = dlg.getSaveLastUsedDirectory();
     enableBakFiles = dlg.getEnableBakFiles();
     enc.SetLibcurlPath(dlg.getLibcurlPath().toStdString());
+    defaultIterations = DecodeS2KIterations(EncodeS2KIterations(dlg.getIterations()));
 
     if(enableBakFiles && !lastEnableBakFiles)
     {
@@ -1094,6 +1097,7 @@ void MainWindow::readSettings()
     if(defaultIterations < EncryptPad::kDefaultIterations || defaultIterations > EncryptPad::kMaxIterations)
         defaultIterations = EncryptPad::kDefaultIterations;
 
+    defaultIterations = DecodeS2KIterations(EncodeS2KIterations(defaultIterations));
     metadata.iterations = defaultIterations;
 
     QFont font;

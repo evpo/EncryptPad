@@ -64,6 +64,9 @@ public:
     QString getLibcurlPath() const;
     void setLibcurlPath(const QString &path);
 
+    int getIterations() const;
+    void setIterations(int iterations);
+
 public slots:
     void selectFont();
 private slots:

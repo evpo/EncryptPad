@@ -23,6 +23,7 @@
 #include <QtGlobal>
 #include <sstream>
 #include "common_definitions.h"
+#include "openpgp_conversions.h"
 
 namespace
 {
@@ -64,6 +65,7 @@ FilePropertiesDialog::FilePropertiesDialog(QWidget *parent) :
     connect(ui->uiCipherAlgo, SIGNAL(currentIndexChanged(int)), this, SLOT(PropertyChanged()));
     connect(ui->uiHashAlgo, SIGNAL(currentIndexChanged(int)), this, SLOT(PropertyChanged()));
     connect(ui->uiCompressionAlgo, SIGNAL(currentIndexChanged(int)), this, SLOT(PropertyChanged()));
+    connect(ui->uiIterations, SIGNAL(valueChanged(int)), this, SLOT(PropertyChanged()));
 }
 
 FilePropertiesDialog::~FilePropertiesDialog()
@@ -110,7 +112,7 @@ void FilePropertiesDialog::SetUiFromMetadata(const EncryptPad::PacketMetadata &m
     SetCurrent(ui->uiCipherAlgo, metadata.cipher_algo);
     SetCurrent(ui->uiHashAlgo, metadata.hash_algo);
     SetCurrent(ui->uiCompressionAlgo, metadata.compression);
-    ui->uiIterations->setText(QString::number(metadata.iterations));
+    ui->uiIterations->setValue(metadata.iterations);
 
     std::ostringstream stm;
     auto it = metadata.salt.begin();
@@ -137,6 +139,7 @@ void FilePropertiesDialog::UpdateMetadataFromUi(EncryptPad::PacketMetadata &meta
     metadata.cipher_algo = static_cast<CipherAlgo>(ui->uiCipherAlgo->currentData().toInt());
     metadata.hash_algo = static_cast<HashAlgo>(ui->uiHashAlgo->currentData().toInt());
     metadata.compression = static_cast<Compression>(ui->uiCompressionAlgo->currentData().toInt());
+    metadata.iterations = DecodeS2KIterations(EncodeS2KIterations(ui->uiIterations->value()));
 }
 
 void FilePropertiesDialog::PropertyChanged()
