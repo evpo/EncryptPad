@@ -33,6 +33,7 @@
 #include "version.h"
 #include "key_generation.h"
 #include "file_helper.h"
+#include "openpgp_conversions.h"
 
 namespace EncryptPad
 {
@@ -566,6 +567,7 @@ int main(int argc, char *argv[])
             std::cerr << "s2k-count: '" << s2k_count_str << "' is invalid" << std::endl;
             exit(1);
         }
+        s2k_count = DecodeS2KIterations(EncodeS2KIterations(s2k_count));
     }
 
     if(!passphrase_fd_str.empty())
