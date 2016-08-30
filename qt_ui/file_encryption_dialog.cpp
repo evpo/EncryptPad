@@ -126,7 +126,7 @@ void FileEncryptionDialog::StartEncryption(const QString &fileName, std::string 
     metadata.file_name = file.fileName().toStdString();
     metadata.file_date = static_cast<FileDate>(time(NULL));
 
-    metadata.cannot_use_wad = IsGpgFormat(inputFile);
+    metadata.cannot_use_wad = IsGpgFormat(fileName);
     metadata.key_file = EncryptionFilePath().toStdString();
     if(!metadata.key_file.empty() && !keyService.UnusedKeysExist())
         metadata.key_only = true;
