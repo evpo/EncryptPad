@@ -1481,7 +1481,7 @@ Do you want to save your changes?</oldsource>
     <message>
         <location filename="preferences_dialog.ui" line="241"/>
         <source>Default Iterations:</source>
-        <translation type="unfinished">Défaut itérations :</translation>
+        <translation type="unfinished">Itérations par défaut :</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="105"/>
