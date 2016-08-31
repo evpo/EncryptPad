@@ -29,6 +29,18 @@
 #include "file_encryption.h"
 #include "common_definitions.h"
 
+using namespace EncryptPad;
+namespace
+{
+    void ClearFileSpecificParameters(PacketMetadata &metadata)
+    {
+        metadata.file_name.clear();
+        metadata.file_date = 0;
+        metadata.cannot_use_wad = false;
+        metadata.salt.clear();
+        metadata.key_only = false;
+    }
+}
 
 FileEncryptionDialog::FileEncryptionDialog(QWidget *parent, FileRequestService &fileRequestService_p) :
     QDialog(parent, kDefaultWindowFlags),
@@ -275,6 +287,8 @@ void FileEncryptionDialog::on_uiStart_clicked()
         if(ret == QMessageBox::No)
             return;
     }
+
+    ClearFileSpecificParameters(metadata);
 
     if(IsEncryption())
     {
