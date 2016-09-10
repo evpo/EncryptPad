@@ -135,12 +135,12 @@
     <message>
         <location filename="file_encryption_dialog.ui" line="330"/>
         <source>SwitchDirection</source>
-        <translation type="unfinished"/>
+        <translation>SwitchDirection</translation>
     </message>
     <message>
         <location filename="file_encryption_dialog.ui" line="335"/>
         <source>IOChange</source>
-        <translation type="unfinished"/>
+        <translation>IOChange</translation>
     </message>
     <message>
         <location filename="file_encryption_dialog.cpp" line="210"/>
@@ -157,7 +157,7 @@
         <location filename="file_encryption_dialog.cpp" line="273"/>
         <location filename="file_encryption_dialog.cpp" line="282"/>
         <source>EncryptPad</source>
-        <translation type="unfinished"/>
+        <translation>EncryptPad</translation>
     </message>
     <message>
         <location filename="file_encryption_dialog.cpp" line="265"/>
@@ -260,19 +260,19 @@ Do you want to replace it?</source>
         <location filename="file_properties_dialog.ui" line="76"/>
         <source>Triple DES</source>
         <comment>2</comment>
-        <translation type="unfinished"/>
+        <translation>Triple DES</translation>
     </message>
     <message>
         <location filename="file_properties_dialog.ui" line="81"/>
         <source>CAST5</source>
         <comment>3</comment>
-        <translation type="unfinished"/>
+        <translation>CAST5</translation>
     </message>
     <message>
         <location filename="file_properties_dialog.ui" line="86"/>
         <source>AES-128</source>
         <comment>7</comment>
-        <translation type="unfinished"/>
+        <translation>AES-128</translation>
     </message>
     <message>
         <location filename="file_properties_dialog.ui" line="91"/>
@@ -289,19 +289,19 @@ Do you want to replace it?</source>
         <location filename="file_properties_dialog.ui" line="110"/>
         <source>ZIP</source>
         <comment>1</comment>
-        <translation type="unfinished"/>
+        <translation>ZIP</translation>
     </message>
     <message>
         <location filename="file_properties_dialog.ui" line="115"/>
         <source>ZLIB</source>
         <comment>2</comment>
-        <translation type="unfinished"/>
+        <translation>ZLIB</translation>
     </message>
     <message>
         <location filename="file_properties_dialog.ui" line="124"/>
         <source>SHA-1</source>
         <comment>2</comment>
-        <translation type="unfinished"/>
+        <translation>SHA-1</translation>
     </message>
     <message>
         <location filename="file_properties_dialog.ui" line="129"/>
@@ -322,12 +322,12 @@ Do you want to replace it?</source>
     <message>
         <location filename="file_properties_dialog.ui" line="176"/>
         <source>FFFFFFFFFFFFFFFF</source>
-        <translation type="unfinished"/>
+        <translation>FFFFFFFFFFFFFFFF</translation>
     </message>
     <message>
         <location filename="file_properties_dialog.ui" line="201"/>
         <source>PropertyChanged</source>
-        <translation type="unfinished"/>
+        <translation>PropertyChanged</translation>
     </message>
     <message>
         <location filename="file_properties_dialog.cpp" line="84"/>
@@ -429,7 +429,7 @@ Do you want to replace it?</source>
     <message>
         <location filename="find_dialog.cpp" line="6"/>
         <source>425</source>
-        <translation type="unfinished"/>
+        <translation>425</translation>
     </message>
 </context>
 <context>
@@ -946,7 +946,7 @@ Do you want to replace it?</source>
     <message>
         <location filename="mainwindow.cpp" line="823"/>
         <source>Windows EOL</source>
-        <translation type="unfinished"/>
+        <translation>Конец Строки Windows</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="824"/>
@@ -1198,22 +1198,22 @@ Do you want to replace it?</source>
     <message>
         <location filename="passphrase_generation_dialog.ui" line="91"/>
         <source>` ~ ! @ # $ % ^ &amp; * ( ) _ - + = { } [ ]  | : ; &quot; &apos; &lt; &gt; , . ? /</source>
-        <translation type="unfinished"/>
+        <translation>` ~ ! @ # $ % ^ &amp; * ( ) _ - + = { } [ ]  | : ; &quot; &apos; &lt; &gt; , . ? /</translation>
     </message>
     <message>
         <location filename="passphrase_generation_dialog.ui" line="106"/>
         <source>8</source>
-        <translation type="unfinished"/>
+        <translation>8</translation>
     </message>
     <message>
         <location filename="passphrase_generation_dialog.ui" line="113"/>
         <source>12</source>
-        <translation type="unfinished"/>
+        <translation>12</translation>
     </message>
     <message>
         <location filename="passphrase_generation_dialog.ui" line="123"/>
         <source>16</source>
-        <translation type="unfinished"/>
+        <translation>16</translation>
     </message>
     <message>
         <location filename="passphrase_generation_dialog.ui" line="130"/>
@@ -1346,7 +1346,7 @@ Do you want to replace it?</source>
     <message>
         <location filename="preferences_dialog.cpp" line="45"/>
         <source>)</source>
-        <translation type="unfinished"/>
+        <translation>)</translation>
     </message>
     <message>
         <location filename="preferences_dialog.cpp" line="118"/>
@@ -1412,7 +1412,7 @@ Do you want to replace it?</source>
     <message>
         <location filename="set_passphrase_dialog.cpp" line="44"/>
         <source>&amp;OK</source>
-        <translation type="unfinished"/>
+        <translation>&amp;ОК</translation>
     </message>
     <message>
         <location filename="set_passphrase_dialog.cpp" line="46"/>
