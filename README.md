@@ -269,25 +269,28 @@ Below are steps to verify the SHA1 hashes of the source files in [Launchpad webu
 
 1\. Download one of the `changes` files below depending on your distribution.
 
+- Yakkety
+        wget https://launchpadlibrarian.net/282249531/encryptpad_0.3.2.3-1~webupd8~yakkety1_source.changes
+
 - Xenial
 
-        wget https://launchpadlibrarian.net/274427013/encryptpad_0.3.2.2-1~webupd8~xenial1_source.changes
+        wget https://launchpadlibrarian.net/282249418/encryptpad_0.3.2.3-1~webupd8~xenial1_source.changes
 
 - Wily
 
-        wget https://launchpadlibrarian.net/274427018/encryptpad_0.3.2.2-1~webupd8~wily1_source.changes
+        wget https://launchpadlibrarian.net/282249155/encryptpad_0.3.2.3-1~webupd8~wily1_source.changes
 
 - Vivid
 
-        wget https://launchpadlibrarian.net/274427103/encryptpad_0.3.2.2-1~webupd8~vivid1_source.changes
+        wget https://launchpadlibrarian.net/282249098/encryptpad_0.3.2.3-1~webupd8~vivid1_source.changes
 
 - Trusty
 
-        wget https://launchpadlibrarian.net/274427338/encryptpad_0.3.2.2-1~webupd8~trusty1_source.changes
+        wget https://launchpadlibrarian.net/282247738/encryptpad_0.3.2.3-1~webupd8~trusty1_source.changes
 
 2\. Download the signed manifest with SHA1 hashes:
 
-    wget https://github.com/evpo/EncryptPad/releases/download/v0.3.2.2/encryptpad0_3_2_2_webupd8_ppa_manifest.asc
+    wget https://github.com/evpo/EncryptPad/releases/download/v0.3.2.3/encryptpad0_3_2_3_webupd8_ppa_manifest.asc
 
 3\. Receive and verify the `EncryptPad Release` key
 
@@ -295,7 +298,7 @@ Below are steps to verify the SHA1 hashes of the source files in [Launchpad webu
 
 4\. Verify the signature on the manifest
 
-    gpg --verify encryptpad0_3_2_2_webupd8_ppa_manifest.asc
+    gpg --verify encryptpad0_3_2_3_webupd8_ppa_manifest.asc
 
 5\. Open the manifest asc file in a text editor and the `changes` text file. Compare that the SHA1
     hashes on the listed source files match.
