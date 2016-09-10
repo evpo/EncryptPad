@@ -270,6 +270,7 @@ Below are steps to verify the SHA1 hashes of the source files in [Launchpad webu
 1\. Download one of the `changes` files below depending on your distribution.
 
 - Yakkety
+
         wget https://launchpadlibrarian.net/282249531/encryptpad_0.3.2.3-1~webupd8~yakkety1_source.changes
 
 - Xenial
