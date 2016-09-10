@@ -100,6 +100,11 @@ case $COMMAND in
     for TSFILE in ../qt_ui/encryptpad_*.ts
     do
         CULTUREFILE=$(echo -n "$TSFILE" | sed -n -e "s/..\/qt_ui\///" -e "s/\.ts$//p")
+        if [[ $CULTUREFILE == encryptpad_en_gb ]]
+        then
+            continue
+        fi
+
         echo $CULTUREFILE
         lrelease $TSFILE -qm ./qt_build/${CULTUREFILE}.qm
         cp ../qt_ui/${CULTUREFILE}.qrc ./qt_build/culture.qrc

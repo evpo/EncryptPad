@@ -128,6 +128,7 @@ QMAKE_CXXFLAGS += -DLOCALIZATION
     }
 
 TRANSLATIONS = \
+    encryptpad_en_gb.ts \
     encryptpad_ru_ru.ts \
     encryptpad_fr_fr.ts
 
