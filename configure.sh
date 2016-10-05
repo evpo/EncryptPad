@@ -16,6 +16,8 @@ COMMANDS:\n\
 -f, --run-func-tests run functional tests\n\
 -n, --clean-tests    clean the unit tests\n\
 --all-cultures       the same as all but builds binaries for all cultures\n\
+--docs               build docs directory from markdown files (requres the markdown utility)\n\
+--update-htm         update htm files (README.htm and CHANGES.htm)\n\
 -h, --help           help\n\n\
 OPTIONS:\n\
 --debug              debug configuration. If not specified, the release configuration is used. The unit tests\n\
@@ -187,9 +189,18 @@ case $COMMAND in
     popd >/dev/null
     exit $RESULT
     ;;
+--docs)
+    mkdir -p ./bin
+    ../contrib/markdown2web ../docs ../bin/docs
+    ;;
+--update-htm)
+    markdown ../README.md > ../README.htm
+    markdown ../CHANGES.md > ../CHANGES.htm
+    ;;
 -h|--help)
     echo -e "$USAGE"
     ;;
+
 *)  echo -e "$COMMAND is invalid parameter" >&2
     echo -e "$USAGE"
     popd >/dev/null

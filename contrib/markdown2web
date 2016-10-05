@@ -1,0 +1,33 @@
+#!/bin/bash
+
+USAGE="markdown2web <SOURCEDIR> <TARGETDIR>"
+
+if [[ $# < 2 ]]
+then
+    echo $USAGE
+    exit -1
+fi
+
+if [ ! -d "$2" ]
+then
+    mkdir "$2"
+fi
+
+pushd "$2"
+TGTDIR=$(pwd)
+popd
+
+pushd "$1" > /dev/null
+
+find ./ -type f -print0 | while read -d $'\0' f
+do
+    mkdir -p $TGTDIR/$(dirname $f)
+    if [[ ${f%.md} = $f ]]
+    then
+        cp -f $f $TGTDIR/$f
+    else
+        markdown $f > $TGTDIR/${f%.md}.htm
+    fi
+done
+
+popd > /dev/null
