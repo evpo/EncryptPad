@@ -1,0 +1,50 @@
+[main]
+host = https://www.transifex.com
+
+[encryptpad.encryptpad_en_gbts]
+file_filter = qt_ui/encryptpad_<lang>_<lang>.ts
+source_file = qt_ui/encryptpad_en_gb.ts
+source_lang = en
+type = QT
+
+[encryptpad.readme_md]
+file_filter = docs/<lang>/readme.md
+source_file = docs/en/readme.md
+source_lang = en
+type = TXT
+
+[encryptpad.changes_md]
+file_filter = docs/<lang>/changes.md
+source_file = docs/en/changes.md
+source_lang = en
+type = TXT
+
+[encryptpad.tutorials_open_plain_text_protect_with_password_password_protection_md]
+file_filter = docs/<lang>/tutorials/open_plain_text_protect_with_password/password_protection.md
+source_file = docs/en/tutorials/open_plain_text_protect_with_password/password_protection.md
+source_lang = en
+type = TXT
+
+[encryptpad.tutorials_index_md]
+file_filter = docs/<lang>/tutorials/index.md
+source_file = docs/en/tutorials/index.md
+source_lang = en
+type = TXT
+
+[encryptpad.tutorials_open_plain_text_protect_with_key_file_key_file_protection_md]
+file_filter = docs/<lang>/tutorials/open_plain_text_protect_with_key_file/key_file_protection.md
+source_file = docs/en/tutorials/open_plain_text_protect_with_key_file/key_file_protection.md
+source_lang = en
+type = TXT
+
+[encryptpad.tutorials_open_plain_text_protect_with_key_and_password_double_protection_md]
+file_filter = docs/<lang>/tutorials/open_plain_text_protect_with_key_and_password/double_protection.md
+source_file = docs/en/tutorials/open_plain_text_protect_with_key_and_password/double_protection.md
+source_lang = en
+type = TXT
+
+[encryptpad.tutorials_encrypt_binary_file_binary_file_md]
+file_filter = docs/<lang>/tutorials/encrypt_binary_file/binary_file.md
+source_file = docs/en/tutorials/encrypt_binary_file/binary_file.md
+source_lang = en
+type = TXT

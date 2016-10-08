@@ -16,6 +16,8 @@ COMMANDS:\n\
 -f, --run-func-tests run functional tests\n\
 -n, --clean-tests    clean the unit tests\n\
 --all-cultures       the same as all but builds binaries for all cultures\n\
+--docs               build docs directory from markdown files (requres the markdown utility)\n\
+--update-htm         update htm files (README.htm and CHANGES.htm)\n\
 -h, --help           help\n\n\
 OPTIONS:\n\
 --debug              debug configuration. If not specified, the release configuration is used. The unit tests\n\
@@ -100,6 +102,11 @@ case $COMMAND in
     for TSFILE in ../qt_ui/encryptpad_*.ts
     do
         CULTUREFILE=$(echo -n "$TSFILE" | sed -n -e "s/..\/qt_ui\///" -e "s/\.ts$//p")
+        if [[ $CULTUREFILE == encryptpad_en_gb ]]
+        then
+            continue
+        fi
+
         echo $CULTUREFILE
         lrelease $TSFILE -qm ./qt_build/${CULTUREFILE}.qm
         cp ../qt_ui/${CULTUREFILE}.qrc ./qt_build/culture.qrc
@@ -182,9 +189,22 @@ case $COMMAND in
     popd >/dev/null
     exit $RESULT
     ;;
+--docs)
+    mkdir -p ./bin
+    ../contrib/markdown2web ../docs ../bin/docs
+    ;;
+--update-htm)
+    sed 1,/cutline/d ../README.md > /tmp/tmp_cut_readme.md
+    markdown /tmp/tmp_cut_readme.md > ../README.htm
+    cp /tmp/tmp_cut_readme.md ../docs/en/readme.md
+    rm /tmp/tmp_cut_readme.md
+    cp ../CHANGES.md ../docs/en/changes.md
+    markdown ../CHANGES.md > ../CHANGES.htm
+    ;;
 -h|--help)
     echo -e "$USAGE"
     ;;
+
 *)  echo -e "$COMMAND is invalid parameter" >&2
     echo -e "$USAGE"
     popd >/dev/null
