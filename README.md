@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/evpo/EncryptPad.svg?branch=master)](https://travis-ci.org/evpo/EncryptPad)
+
 Screenshots and tutorials are at [evpo.net/encryptpad/](http://evpo.net/encryptpad/)
 
 #EncryptPad
