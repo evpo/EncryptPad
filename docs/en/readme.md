@@ -317,6 +317,10 @@ Below are steps to verify the SHA1 hashes of the source files in [Launchpad webu
 
     ./configure.sh --all
 
+or for localized binaries
+
+    ./configure.sh --all-cultures
+
 The Makefiles system uses **uname** to identify the OS and platform. You may need to modify uname parameters in **./deps/makefiles/platform.mak** to make it work. See Makefiles documentation and configure.sh script if you have any problems.
 
 If the build is successful, you should see the executable **./bin/release/EncryptPad.exe**
