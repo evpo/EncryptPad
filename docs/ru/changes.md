@@ -1,3 +1,9 @@
+<style type="text/css">
+h2
+{
+    text-align: center;
+}
+</style>
 ##Изменения Релизов##
 
 ###Версия 0.3.2.3

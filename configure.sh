@@ -192,9 +192,13 @@ case $COMMAND in
 --docs)
     mkdir -p ./bin
     ../contrib/markdown2web ../docs ../bin/docs
+    markdown ../CHANGES.md > ../bin/docs/en/changes.htm
+    sed 1,/cutline/d ../README.md > /tmp/tmp_cut_readme.md
+    markdown /tmp/tmp_cut_readme.md > ../bin/docs/en/readme.htm
     ;;
 --update-htm)
-    markdown ../README.md > ../README.htm
+    sed 1,/cutline/d ../README.md > /tmp/tmp_cut_readme.md
+    markdown /tmp/tmp_cut_readme.md > ../README.htm
     markdown ../CHANGES.md > ../CHANGES.htm
     ;;
 -h|--help)

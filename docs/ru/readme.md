@@ -1,12 +1,4 @@
-#EncryptPad
-
-![README.png](README.png)
-
 EncryptPad это приложение для просмотра и редактирования симметрично зашифрованного текста. Он так же предоставляет утилиту для шифрования бинарных файлов на диске. The application offers effective measures for protecting information with simple and convenient graphical and command line interface. The editor uses most widely chosen quality file format **OpenPGP** [RFC 4880](https://tools.ietf.org/html/rfc4880). Unlike other OpenPGP software which main purpose is asymmetric encryption, the primary focus of EncryptPad is symmetric encryption.
-
-Screenshots and tutorials are at [evpo.net/encryptpad/](http://evpo.net/encryptpad/)
-
-[![Build Status](https://travis-ci.org/evpo/EncryptPad.svg?branch=master)](https://travis-ci.org/evpo/EncryptPad)
 
 ##Table of Contents
 * [Features](#features)

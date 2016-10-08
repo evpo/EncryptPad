@@ -1,12 +1,12 @@
+[![Build Status](https://travis-ci.org/evpo/EncryptPad.svg?branch=master)](https://travis-ci.org/evpo/EncryptPad)
+Screenshots and tutorials are at [evpo.net/encryptpad/](http://evpo.net/encryptpad/)
+
 #EncryptPad
 
 ![README.png](README.png)
 
+<div id="cutline"/>
 EncryptPad is an application for viewing and editing symmetrically encrypted text. It also provides a tool for encrypting and decrypting binary files on disk. The application offers effective measures for protecting information with simple and convenient graphical and command line interface. The editor uses most widely chosen quality file format **OpenPGP** [RFC 4880](https://tools.ietf.org/html/rfc4880). Unlike other OpenPGP software which main purpose is asymmetric encryption, the primary focus of EncryptPad is symmetric encryption.
-
-Screenshots and tutorials are at [evpo.net/encryptpad/](http://evpo.net/encryptpad/)
-
-[![Build Status](https://travis-ci.org/evpo/EncryptPad.svg?branch=master)](https://travis-ci.org/evpo/EncryptPad)
 
 ##Table of Contents
 * [Features](#features)
