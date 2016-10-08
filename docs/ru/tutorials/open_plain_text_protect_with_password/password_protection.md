@@ -1,4 +1,4 @@
-# Открыть простой текст, защитить его с помощью пароля и сохранить в виде GPG файла
+# Open a plain text file, protect it with a password and save as a GPG file
 
 We are going to open a plain text file, protect it with a password and save as a GPG file.
 

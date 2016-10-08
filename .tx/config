@@ -7,3 +7,9 @@ source_file = qt_ui/encryptpad_en_gb.ts
 source_lang = en
 type = QT
 
+[encryptpad.readme_md]
+file_filter = docs/<lang>/readme.md
+source_file = docs/en/readme.md
+source_lang = en
+type = TXT
+
