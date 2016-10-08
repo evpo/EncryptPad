@@ -5,18 +5,18 @@
         <location filename="confirm_passphrase_dialog.ui" line="26"/>
         <location filename="confirm_passphrase_dialog.cpp" line="43"/>
         <source>Set Passphrase</source>
-        <translation>Définir le mot de passe</translation>
+        <translation>Définir la phrase de passe</translation>
     </message>
     <message>
         <location filename="confirm_passphrase_dialog.ui" line="55"/>
         <location filename="confirm_passphrase_dialog.ui" line="107"/>
         <source>Leave blank when passphrase is not needed</source>
-        <translation>Laisser vide si aucun mot de passe n&apos;est souhaité</translation>
+        <translation>Laisser vide si aucune phrase de passe n&apos;est souhaitée</translation>
     </message>
     <message>
         <location filename="confirm_passphrase_dialog.ui" line="65"/>
         <source>&amp;Passphrase:</source>
-        <translation>&amp;Mot de passe :</translation>
+        <translation>&amp;Phrase de passe :</translation>
     </message>
     <message>
         <location filename="confirm_passphrase_dialog.ui" line="91"/>
@@ -36,7 +36,7 @@
     <message>
         <location filename="confirm_passphrase_dialog.cpp" line="44"/>
         <source>The confirmation passphrase does not match</source>
-        <translation>Le mot de passe de confirmation ne correspond pas</translation>
+        <translation>La phrase de passe de confirmation ne correspond pas</translation>
     </message>
 </context>
 <context>
@@ -100,7 +100,7 @@
     <message>
         <location filename="file_encryption_dialog.ui" line="197"/>
         <source>Passphrase:</source>
-        <translation>Mot de passe :</translation>
+        <translation>Phrase de passe :</translation>
     </message>
     <message>
         <location filename="file_encryption_dialog.ui" line="213"/>
@@ -135,12 +135,12 @@
     <message>
         <location filename="file_encryption_dialog.ui" line="330"/>
         <source>SwitchDirection</source>
-        <translation>ChangerDirection</translation>
+        <translation>SwitchDirection</translation>
     </message>
     <message>
         <location filename="file_encryption_dialog.ui" line="335"/>
         <source>IOChange</source>
-        <translation>ChangementES</translation>
+        <translation>IOChange</translation>
     </message>
     <message>
         <location filename="file_encryption_dialog.cpp" line="210"/>
@@ -162,7 +162,7 @@
     <message>
         <location filename="file_encryption_dialog.cpp" line="265"/>
         <source>Confirmation passphrase does not match.</source>
-        <translation>Le mot de passe de confirmation ne correspond pas.</translation>
+        <translation>La phrase de passe de confirmation ne correspond pas.</translation>
     </message>
     <message>
         <location filename="file_encryption_dialog.cpp" line="274"/>
@@ -173,7 +173,7 @@
         <location filename="file_encryption_dialog.cpp" line="283"/>
         <source>%1 already exists.
 Do you want to replace it?</source>
-        <translation>%1 existe déja.
+        <translation>%1 existe déjà.
 Souhaitez-vous le remplacer ?</translation>
     </message>
     <message>
@@ -199,7 +199,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="file_encryption_dialog.cpp" line="378"/>
         <source>Invalid passphrase for key file</source>
-        <translation>Le mot de passe de la clé est erroné</translation>
+        <translation>La phrase de passe du fichier clé est erronée</translation>
     </message>
     <message>
         <location filename="file_encryption_dialog.cpp" line="402"/>
@@ -250,7 +250,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="file_properties_dialog.ui" line="55"/>
         <source>Algorithm:</source>
-        <translation>Algorithme de chiffrement :</translation>
+        <translation>Algorithme :</translation>
     </message>
     <message>
         <location filename="file_properties_dialog.ui" line="65"/>
@@ -328,7 +328,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="file_properties_dialog.ui" line="201"/>
         <source>PropertyChanged</source>
-        <translation>PropriétéModifiée</translation>
+        <translation>PropertyChanged</translation>
     </message>
     <message>
         <location filename="file_properties_dialog.cpp" line="84"/>
@@ -438,17 +438,17 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="get_passphrase_dialog.ui" line="26"/>
         <source>Passphrase</source>
-        <translation>Mot de passe</translation>
+        <translation>Phrase de passe</translation>
     </message>
     <message>
         <location filename="get_passphrase_dialog.ui" line="49"/>
         <source>&amp;Passphrase:</source>
-        <translation>&amp;Mot de passe :</translation>
+        <translation>&amp;Phrase de passe :</translation>
     </message>
     <message>
         <location filename="get_passphrase_dialog.ui" line="65"/>
         <source>Leave blank when passphrase is not needed</source>
-        <translation>Laisser vide si aucun mot de passe n&apos;est souhaité</translation>
+        <translation>Laisser vide si aucune phrase de passe n&apos;est souhaitée</translation>
     </message>
 </context>
 <context>
@@ -456,12 +456,12 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="get_passphrase_or_key_dialog.ui" line="14"/>
         <source>Passphrase or Key File</source>
-        <translation>Mot de passe ou fichier clé</translation>
+        <translation>Phrase de passe ou fichier clé</translation>
     </message>
     <message>
         <location filename="get_passphrase_or_key_dialog.ui" line="37"/>
         <source>Passphrase:</source>
-        <translation>Mot de passe :</translation>
+        <translation>Phrase de passe :</translation>
     </message>
     <message>
         <location filename="get_passphrase_or_key_dialog.ui" line="47"/>
@@ -471,7 +471,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="get_passphrase_or_key_dialog.ui" line="67"/>
         <source>Leave blank when passphrase is not needed</source>
-        <translation>Laisser vide si aucun mot de passe n&apos;est souhaité</translation>
+        <translation>Laisser vide si aucune phrase de passe n&apos;est souhaitée</translation>
     </message>
     <message>
         <location filename="get_passphrase_or_key_dialog.ui" line="80"/>
@@ -482,7 +482,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="get_passphrase_or_key_dialog.ui" line="108"/>
         <source>Select key file</source>
-        <translation>Choisir un fichier clé</translation>
+        <translation>Sélectionner un fichier clé</translation>
     </message>
 </context>
 <context>
@@ -490,17 +490,17 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="load_save_handler.cpp" line="38"/>
         <source>Passphrase for Key File</source>
-        <translation>Mot de passe du fichier clé</translation>
+        <translation>Phrase de passe du fichier clé</translation>
     </message>
     <message>
         <location filename="load_save_handler.cpp" line="54"/>
         <source>Cannot open the file because it does not exist</source>
-        <translation>Impossible d&apos;ouvrir le fichier, car il n&apos;esite pas</translation>
+        <translation>Impossible d&apos;ouvrir le fichier, car il n&apos;existe pas</translation>
     </message>
     <message>
         <location filename="load_save_handler.cpp" line="165"/>
         <source>GPG format does not support persistent key path.</source>
-        <translation>Le format  GPG ne prend pas en charge les chemins de clé persistents.</translation>
+        <translation>Le format GPG ne prend pas en charge les chemins de clé persistants.</translation>
     </message>
     <message>
         <location filename="load_save_handler.cpp" line="167"/>
@@ -510,17 +510,17 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="load_save_handler.cpp" line="183"/>
         <source>GPG format does not support double protection by passphrase and key file.</source>
-        <translation>Le format  GPG ne prend pas en charge la protection double par mot de passe et fichier clé.</translation>
+        <translation>Le format GPG ne prend pas en charge la protection double par phrase  de passe et fichier clé.</translation>
     </message>
     <message>
         <location filename="load_save_handler.cpp" line="185"/>
         <source>Use EPD format or disable either passphrase or key protection.</source>
-        <translation>Utiliser le format EPD ou désactiver soit le mot de passe, soit la protection par clé.</translation>
+        <translation>Utiliser le format EPD ou désactiver la protection soit par phrase de passe, soit par clé.</translation>
     </message>
     <message>
         <location filename="load_save_handler.cpp" line="209"/>
         <source>Neither a key file nor passphrase is set. The file is going to be saved UNENCRYPTED.</source>
-        <translation>Aucun fichier clé ni mot de passe n&apos;est défini. Le fichier sera enregistré SANS CHIFFREMENT.</translation>
+        <translation>Aucun fichier clé ni phrase de passe n&apos;est défini. Le fichier sera enregistré SANS CHIFFREMENT.</translation>
     </message>
 </context>
 <context>
@@ -538,12 +538,12 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="mainwindow.cpp" line="184"/>
         <source>Passphrase not set</source>
-        <translation>Le mot de passe n&apos;est pas défini</translation>
+        <translation>La phrase de passe n&apos;est pas définie</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="189"/>
         <source>Passphrase protected</source>
-        <translation>Protégé par mot de passe</translation>
+        <translation>Protégé par phrase de passe</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="241"/>
@@ -609,12 +609,12 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="mainwindow.cpp" line="561"/>
         <source>Passphrase for Key File</source>
-        <translation>Mot de passe du fichier clé</translation>
+        <translation>Phrase de passe du fichier clé</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="569"/>
         <source>You left the passphrase blank. The key file is going to be UNENCRYPTED. Do you want to continue?</source>
-        <translation>Vous avez laissé le mot de passe vide. Le fichier clé  NE SERA PAS CHIFFRÉ. Souhaitez-vous poursuivre ?</translation>
+        <translation>Vous avez laissé la phrase de passe vide. Le fichier clé NE SERA PAS CHIFFRÉ. Souhaitez-vous poursuivre ?</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="601"/>
@@ -639,7 +639,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="mainwindow.cpp" line="621"/>
         <source>&lt;b&gt;EncryptPad %1 Beta&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;Minimalist secure text editor and binary encryptor that implements &lt;br/&gt;RFC 4880 Open PGP format: symmetrically encrypted, compressed and integrity protected. The editor can protect files with passphrases, key files or both.&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;GNU General Public License v2&lt;br/&gt;&lt;br/&gt;</source>
-        <translation>&lt;b&gt;EncryptPad %1 bêta&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;Un éditeur de texte sécurisé minimaliste et un outil de chiffrement binaire qui implémente &lt;br/&gt;le format RFC 4880 Open PGP : chiffré symétriquement, compressé et dont l&apos;intégrité est protégée. L&apos;éditeur peut protéger les fichiers par mot de passe, fichier clé ou les deux.&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;Licence publique générale GNU v2&lt;br/&gt;&lt;br/&gt;</translation>
+        <translation>&lt;b&gt;EncryptPad %1 bêta&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;Un éditeur de texte sécurisé minimaliste et un outil de chiffrement binaire qui implémente &lt;br/&gt;le format RFC 4880 Open PGP : chiffré symétriquement, compressé et dont l&apos;intégrité est protégée. L&apos;éditeur peut protéger les fichiers par phrase de passe, fichier clé ou les deux.&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;Licence publique générale GNU v2&lt;br/&gt;&lt;br/&gt;</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="672"/>
@@ -714,12 +714,12 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="mainwindow.cpp" line="705"/>
         <source>Set &amp;Passphrase...</source>
-        <translation>Définir un &amp;mot de passe...</translation>
+        <translation>Définir une &amp;phrase de passe...</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="706"/>
         <source>Set passphrase for encryption and decryption</source>
-        <translation>Définir un mot de passe de chiffrement et de déchiffrement</translation>
+        <translation>Définir une phrase de passe pour le chiffrement et le déchiffrement</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="709"/>
@@ -739,17 +739,17 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="mainwindow.cpp" line="714"/>
         <source>Clear encryption key file. Passphrase only (if set).</source>
-        <translation>Effacer la clé de chiffrement. Mot de passe seulement (si défini).</translation>
+        <translation>Effacer la clé de chiffrement. Phrase de passe seulement (si définie).</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="717"/>
         <source>&amp;Clear Passphrase</source>
-        <translation>&amp;Effacer le mot de passe</translation>
+        <translation>&amp;Effacer la phrase de passe</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="718"/>
         <source>Save without passphrase protected encryption. Encryption with file key only (if enabled).</source>
-        <translation>Enregistrer sans proctection par mot de passe. Chiffrement avec fichier clé seulement (si l&apos;option est activée).</translation>
+        <translation>Enregistrer sans chiffrement protégé par phrase de passe. Chiffrement avec fichier clé seulement (si l&apos;option est activée).</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="721"/>
@@ -837,12 +837,12 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="mainwindow.cpp" line="770"/>
         <source>&amp;Generate Passphrase...</source>
-        <translation>&amp;Générer un mot de passe...</translation>
+        <translation>&amp;Générer une phrase de passe...</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="771"/>
         <source>Generate passphrase</source>
-        <translation>Générer un mot de passe</translation>
+        <translation>Générer une phrase de passe</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="774"/>
@@ -952,7 +952,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="mainwindow.cpp" line="824"/>
         <source>&quot;Windows&quot; end of line: CR+LF</source>
-        <translation>Fin de ligne &quot;Windows&quot; : CR LN</translation>
+        <translation>Fin de ligne « Windows » : CR+LF</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="919"/>
@@ -1092,7 +1092,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="mainwindow.cpp" line="1501"/>
         <source>Maximum zoom</source>
-        <translation>Zoom maximale</translation>
+        <translation>Zoom maximal</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="1507"/>
@@ -1102,7 +1102,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="mainwindow.cpp" line="1515"/>
         <source>Minimum zoom</source>
-        <translation>Zoom minimale</translation>
+        <translation>Zoom minimal</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="1521"/>
@@ -1123,7 +1123,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="mainwindow.cpp" line="1573"/>
         <source>persistent</source>
-        <translation>persistent</translation>
+        <translation>persistant</translation>
     </message>
 </context>
 <context>
@@ -1174,7 +1174,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="passphrase_generation_dialog.ui" line="20"/>
         <source>Generate Passphrase</source>
-        <translation>Générer un mot de passe</translation>
+        <translation>Générer une phrase de passe</translation>
     </message>
     <message>
         <location filename="passphrase_generation_dialog.ui" line="54"/>
@@ -1244,12 +1244,12 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="passphrase_generation_dialog.ui" line="281"/>
         <source>Select &amp;Passphrase:</source>
-        <translation>Choisir un &amp;mot de passe :</translation>
+        <translation>Choisir une &amp;phrase de passe :</translation>
     </message>
     <message>
         <location filename="passphrase_generation_dialog.ui" line="304"/>
         <source>Limit Group Occurrence (1 to max chars)</source>
-        <translation>Limiter les occurences par groupe (de 1 au maximum de caractères )</translation>
+        <translation>Limiter les occurrences par groupe (de 1 au maximum de caractères)</translation>
     </message>
     <message>
         <location filename="passphrase_generation_dialog.ui" line="314"/>
@@ -1264,17 +1264,17 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="passphrase_generation_dialog.cpp" line="42"/>
         <source>7 passphrases</source>
-        <translation>7 mots de passe</translation>
+        <translation>7 phrases de passe</translation>
     </message>
     <message>
         <location filename="passphrase_generation_dialog.cpp" line="43"/>
         <source>15 passphrases</source>
-        <translation>15 mots de passe</translation>
+        <translation>15 phrases de passe</translation>
     </message>
     <message>
         <location filename="passphrase_generation_dialog.cpp" line="44"/>
         <source>25 passphrases</source>
-        <translation>25 mots de passe</translation>
+        <translation>25 phrases de passe</translation>
     </message>
 </context>
 <context>
@@ -1352,7 +1352,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="preferences_dialog.cpp" line="118"/>
         <source>Select Font</source>
-        <translation>Chiosir une police</translation>
+        <translation>Choisir une police</translation>
     </message>
     <message>
         <location filename="preferences_dialog.cpp" line="129"/>
@@ -1385,7 +1385,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="set_key_dialog.ui" line="160"/>
         <source>&amp;Persistent key location in the encrypted file</source>
-        <translation>&amp;Emplacement de clé persistent dans le fichier chiffré</translation>
+        <translation>&amp;Emplacement de clé persistant dans le fichier chiffré</translation>
     </message>
     <message>
         <location filename="set_key_dialog.ui" line="167"/>
@@ -1395,7 +1395,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="set_key_dialog.cpp" line="90"/>
         <source>Specify encryption key location</source>
-        <translation>Spcécifier l&apos;emplacement de la clé de chiffrement</translation>
+        <translation>Spécifier l&apos;emplacement de la clé de chiffrement</translation>
     </message>
 </context>
 <context>
@@ -1403,7 +1403,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="set_passphrase_dialog.cpp" line="30"/>
         <source>&amp;Passphrase:</source>
-        <translation>&amp;Mot de passe :</translation>
+        <translation>&amp;Phrase de passe :</translation>
     </message>
     <message>
         <location filename="set_passphrase_dialog.cpp" line="35"/>
@@ -1424,12 +1424,12 @@ Souhaitez-vous le remplacer ?</translation>
         <location filename="set_passphrase_dialog.cpp" line="71"/>
         <location filename="set_passphrase_dialog.cpp" line="87"/>
         <source>Set Passphrase</source>
-        <translation>Définir le mot de passe</translation>
+        <translation>Définir la phrase de passe</translation>
     </message>
     <message>
         <location filename="set_passphrase_dialog.cpp" line="88"/>
         <source>The confirmation passphrase does not match</source>
-        <translation>Le mot de passe de confirmation ne correspond pas</translation>
+        <translation>La phrase de passe de confirmation ne correspond pas</translation>
     </message>
 </context>
 </TS>

@@ -4,9 +4,9 @@ h2
     text-align: center;
 }
 </style>
-##Release Notes##
+##Версии##
 
-###Version 0.3.2.3
+###Версия 0.3.2.3
 
 * Configurable s2k iteration count. It can be set per file and the default value for new files. That value is also used for protecting file keys.
 * Support for the timestamp bytes in GPG files.
@@ -19,7 +19,7 @@ h2
 * Bug fixed: In the file encryption dialogue, when clearing the passphrase and setting it again, the passphrase is ignored and the file is saved as "key only".
 * Bug fixed: In the file encryption, gpg files were encrypted with 't' flag. It lead to removal of 0x0D bytes when GPG decrypted the files because it thought that the files were textual. The problem did not manifest on Windows and when EncryptPad was used for decryption. It was only in the direction from EncryptPad to Linux/Unix GPG.
 
-###Version 0.3.2.2
+###Версия 0.3.2.2
 
 * Bug fixed: In file encryption dialogue, when the key file password was wrong, a message box did
     not inform the user.
@@ -37,7 +37,6 @@ h2
 * Fixed build on Fedora 23
 * Fixed warnings
 
-###Version 0.3.2.1
+###Версия 0.3.2.1
 
 * Initial open source release
-

@@ -77,4 +77,3 @@ EncryptPad "thinks" that the file is encrypted with a password because its mode 
 ![Clear password or Close and Reset](images/clear_pwd_or_close_and_reset.png)
 
 Now you can open your plain text file.
-
