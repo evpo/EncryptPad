@@ -1,44 +1,44 @@
-EncryptPad is an application for viewing and editing symmetrically encrypted text. It also provides a tool for encrypting and decrypting binary files on disk. The application offers effective measures for protecting information with simple and convenient graphical and command line interface. The editor uses most widely chosen quality file format **OpenPGP** [RFC 4880](https://tools.ietf.org/html/rfc4880). Unlike other OpenPGP software which main purpose is asymmetric encryption, the primary focus of EncryptPad is symmetric encryption.
+EncryptPad est une application de visualisation et d'édition de texte chiffré symétriquement. Elle propose aussi un outil pour chiffrer et déchiffrer des fichiers binaires sur le disque. L'application offre des mesures efficaces pour protéger les informations. Ses interfaces graphique et en ligne de commande sont simples et conviviales. L'éditeur utilise le format de fichier **OpenPGP** [RFC 4880] (https://tools.ietf.org/html/rfc4880) qui est largement adopté pour sa qualité. Contrairement à d'autres logiciels OpenPGP dont le but est le chiffrement asymétrique, l'objectif principal d'EncryptPad est le chiffrement symétrique.
 
-##Table of Contents
-* [Features](#features)
-* [Supported Platforms](#supported-platforms)
-* [Why EncryptPad?](#why-encryptpad)
-* [When Do I Need EncryptPad?](#when-encryptpad)
-* [When Can I Not Use EncryptPad?](#when-can-i-not)
-* [File Types](#file-types)
+##Table des matières
+* [Caractéristiques](#features)
+* [Plateformes prises en charge](#supported-platforms)
+* [Pourquoi EncryptPad ?](#why-encryptpad)
+* [Quand ai-je besoin d'EncryptPad ?](#when-encryptpad)
+* [Quand ne puis-je pas utiliser EncryptPad ?](#when-can-i-not)
+* [Types de fichiers](#file-types)
   - [GPG](#gpg)
   - [EPD](#epd)
-  - [Feature Support](#feature-support)
-* [What Is EncrypPad Key File?](#key-file)
-* [EPD File Format When Encrypting With a Key](#epd-file-format)
-* [Use cURL To Automatically Download Keys From A Remote Storage](#use-curl)
-* [Known Weaknesses](#known-weaknesses)
-* [Command Line Interface](#command-line-interface)
-* [Installing EncryptPad](#installing)
-    - [Portable Executable](#portable-exe)
+  - [Prise en charge des fonctions](#feature-support)
+* [Qu'est-ce qu'un fichier clé EncryptPad ?](#key-file)
+* [Format de fichier EPD lors du chiffrement avec clé](#epd-file-format)
+* [Utiliser cURL pour télécharger automatiquement des clés d'un stockage distant](#use-curl)
+* [Faiblesses connues](#known-weaknesses)
+* [Interface en ligne de commande](#command-line-interface)
+* [Installer EncryptPad](#installing)
+    - [Exécutable portable](#portable-exe)
     - [Arch Linux](#install-on-arch)
-    - [Ubuntu or Linux Mint](#install-on-ubuntu)
+    - [Ubuntu ou Linux Mint](#install-on-ubuntu)
 * [Build EncryptPad on Windows](#build-on-windows)
-  - [Prerequisites](#prerequisites)
-  - [Steps](#steps)
+  - [Prérequis](#prerequisites)
+  - [Étapes](#steps)
 * [Build EncryptPad on Mac/Linux](#build-on-mac-linux)
     - [Dynamic Build](#dynamic-build)
     - [Fedora](#build-on-fedora)
-* [Acknowledgements](#acknowledgements)
-* [EncryptPad Integrity Verification](#integrity-verification)
-    - [OpenPGP Singing and Certification Authority](#openpgp-signing)
-    - [Step by Step Verfification Process](#verification-process)
-* [License](#license)
-* [Contacts and Feedback](#contacts)
+* [Remerciements](#acknowledgements)
+* [Vérification de l'intégrité par EncryptPad](#integrity-verification)
+    - [Signature OpenPGP et autorité de certification](#openpgp-signing)
+    - [Processus de vérification étape par étape](#verification-process)
+* [Licence](#license)
+* [Contact et rétroaction](#contacts)
 
 <div id="features" />
-##Features
+##Caractéristiques
 
-* **Symmetric** encryption
-* **Password** protection
+* Chiffrement **symétrique**
+* Protection par **mot de passe**
 * **Key file** protection
-* Combination of **password and key file**
+* Combinaison d'un **mot de passe et d'un fichier clé**
 * Random **key file generator** 
 * **Key repository** in a hidden directory in user's home folder
 * Path to a key file can be stored in an encrypted file. If enabled, **you do not need to specify the key file** every time you open files.
@@ -46,7 +46,7 @@ EncryptPad is an application for viewing and editing symmetrically encrypted tex
 * **Read only** mode to prevent accidental file modification
 * **UTF8** text encoding
 * Windows/Unix **configurable line endings**
-* Customisable **password generator** helps create strong random passwords.
+* Un **générateur de mots de passe** personnalisable aide à créer des mots de passe aléatoires robustes.
 * File format compatible with **OpenPGP**
 * **Iterated and salted S2K**
 * Cipher algorithms: **CAST5, TripleDES, AES128, AES256**
@@ -76,7 +76,7 @@ EncryptPad is an application for viewing and editing symmetrically encrypted tex
 
 * **OpenPGP** file format: you can encrypt a file with another tool (gpg for example) implementing the format and open it with EncryptPad and vice versa.
 
-* **Double protection:** randomly generated key files in addition to passwords.
+* **Protection double** : des fichiers clés générés au hasard en plus des mots de passe.
 
 <div id="when-encryptpad" />
 ##When Do I Need EncryptPad?
