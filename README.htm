@@ -51,9 +51,9 @@
 
 <ul>
 <li><strong>Symmetric</strong> encryption</li>
-<li><strong>Password</strong> protection</li>
+<li><strong>Passphrase</strong> protection</li>
 <li><strong>Key file</strong> protection</li>
-<li>Combination of <strong>password and key file</strong></li>
+<li>Combination of <strong>passphrase and key file</strong></li>
 <li>Random <strong>key file generator</strong> </li>
 <li><strong>Key repository</strong> in a hidden directory in user's home folder</li>
 <li>Path to a key file can be stored in an encrypted file. If enabled, <strong>you do not need to specify the key file</strong> every time you open files.</li>
@@ -61,7 +61,7 @@
 <li><strong>Read only</strong> mode to prevent accidental file modification</li>
 <li><strong>UTF8</strong> text encoding</li>
 <li>Windows/Unix <strong>configurable line endings</strong></li>
-<li>Customisable <strong>password generator</strong> helps create strong random passwords.</li>
+<li>Customisable <strong>passphrase generator</strong> helps create strong random passphrases.</li>
 <li>File format compatible with <strong>OpenPGP</strong></li>
 <li><strong>Iterated and salted S2K</strong></li>
 <li>Cipher algorithms: <strong>CAST5, TripleDES, AES128, AES256</strong></li>
@@ -90,7 +90,7 @@
 <li><p><strong>Simple to use</strong>: EncryptPad is a text editor and an encryption tool for binary files but it saves encrypted, compressed and integrity protected files.</p></li>
 <li><p><strong>Open source</strong> with concise codebase: you can read the code or ask somebody you trust to read it for you to ensure that there are no back doors and your information is safe.</p></li>
 <li><p><strong>OpenPGP</strong> file format: you can encrypt a file with another tool (gpg for example) implementing the format and open it with EncryptPad and vice versa.</p></li>
-<li><p><strong>Double protection:</strong> randomly generated key files in addition to passwords.</p></li>
+<li><p><strong>Double protection:</strong> randomly generated key files in addition to passphrases.</p></li>
 </ul>
 
 <p><div id="when-encryptpad" /></p>
@@ -98,10 +98,10 @@
 <h2>When Do I Need EncryptPad?</h2>
 
 <ul>
-<li><p>You have a file containing sensitive information such as account names, passwords or ID numbers. It is stored on unprotected media or unwanted people can access the file. Such storage can be a computer at work, carried laptop, memory stick or a cloud drive.</p></li>
-<li><p>You need to send an encrypted file to somebody with whom you prearranged a shared secret (a password or a key file). In this case, you need to exchange the secret personally (not via an accessible Internet protocol) before sending the protected file.</p></li>
+<li><p>You have a file containing sensitive information such as account names, passphrases or ID numbers. It is stored on unprotected media or unwanted people can access the file. Such storage can be a computer at work, carried laptop, memory stick or a cloud drive.</p></li>
+<li><p>You need to send an encrypted file to somebody with whom you prearranged a shared secret (a passphrase or a key file). In this case, you need to exchange the secret personally (not via an accessible Internet protocol) before sending the protected file.</p></li>
 <li><p>You store or receive a file and need to ensure that it has not been modified or corrupted in the process of transmission. EncryptPad uses SHA-1 hashing algorithm to verify integrity. </p></li>
-<li><p>You need protection against a brute force attack in case your storage gets in somebody's hands. EncryptPad allows to generate a key and store it separately from encrypted information. The unwanted person would need two secrets to open an encrypted file: the password and the key. Consider this example: you store your encrypted file on a memory stick, and protect it with a password. In addition to that, you protect the file with a file key and store the key on computers where you open the file. If the memory stick is lost, the password is not enough to decrypt your information. The key file is also needed and it is not on the memory stick.</p></li>
+<li><p>You need protection against a brute force attack in case your storage gets in somebody's hands. EncryptPad allows to generate a key and store it separately from encrypted information. The unwanted person would need two secrets to open an encrypted file: the passphrase and the key. Consider this example: you store your encrypted file on a memory stick, and protect it with a passphrase. In addition to that, you protect the file with a file key and store the key on computers where you open the file. If the memory stick is lost, the passphrase is not enough to decrypt your information. The key file is also needed and it is not on the memory stick.</p></li>
 </ul>
 
 <p><div id="when-can-i-not" /></p>
@@ -109,11 +109,11 @@
 <h2>When Can I Not Use EncryptPad?</h2>
 
 <ul>
-<li><p>You need to send a file to somebody with whom you have <strong>not prearranged a shared secret</strong> (a password or a key file). In this case, you need asymmetric encryption with public and private keys. Fortunately, there are many convenient tools suitable for the task. </p></li>
+<li><p>You need to send a file to somebody with whom you have <strong>not prearranged a shared secret</strong> (a passphrase or a key file). In this case, you need asymmetric encryption with public and private keys. Fortunately, there are many convenient tools suitable for the task. </p></li>
 <li><p>You are on public transport or a common area where <strong>somebody can see your screen</strong>.</p></li>
 <li><p>EncryptPad is not effective on a computer infected with spyware or a virus. Do not use it on a <strong>public, shared or compromised computer</strong> if you do not trust its safety.</p></li>
 <li><p><strong>IMPORTANT</strong>: Before using EncryptPad ensure that it is legal in your country to use encryption ciphers that EncryptPad provides. You may find useful information at <a href="http://www.cryptolaw.org/">cryptolaw.org</a>.</p></li>
-<li><p><strong>IMPORTANT</strong>: If you forgot your password or lost a key file, there is nothing that can be done to open your encrypted information. There are no backdoors in the formats that EncryptPad supports. EncryptPad developers take no responsibility for corrupted or invalid files in accordance with the license.</p></li>
+<li><p><strong>IMPORTANT</strong>: If you forgot your passphrase or lost a key file, there is nothing that can be done to open your encrypted information. There are no backdoors in the formats that EncryptPad supports. EncryptPad developers take no responsibility for corrupted or invalid files in accordance with the license.</p></li>
 </ul>
 
 <p><div id="file-types" /></p>
@@ -126,13 +126,13 @@
 
 <h3>GPG</h3>
 
-<p>This file type conforms to Open PGP format and it is compatible with other OpenPGP tools. Use it if you need to open a file where EncryptPad is not available. The format does not support double protection (key file + password). So you need to choose between key file or password and cannot use both. In addition, it cannot store file key path in the encrypted file. It means that every time you open a file encrypted with a key file, the application will ask you which key file to use.</p>
+<p>This file type conforms to Open PGP format and it is compatible with other OpenPGP tools. Use it if you need to open a file where EncryptPad is not available. The format does not support double protection (key file + passphrase). So you need to choose between key file or passphrase and cannot use both. In addition, it cannot store file key path in the encrypted file. It means that every time you open a file encrypted with a key file, the application will ask you which key file to use.</p>
 
 <p><div id="epd" /></p>
 
 <h3>EPD</h3>
 
-<p>EncryptPad specific format. Other OpenPGP software will not be able to open it unless the file was only protected with a password. If password only protection was used, the file is effectively a GPG file (see GPG section above). However, when a key file protection is involved, it is a GPG file in a <a href="https://en.wikipedia.org/wiki/Doom_WAD">WAD</a> container. See the following chapter for details.</p>
+<p>EncryptPad specific format. Other OpenPGP software will not be able to open it unless the file was only protected with a passphrase. If passphrase only protection was used, the file is effectively a GPG file (see GPG section above). However, when a key file protection is involved, it is a GPG file in a <a href="https://en.wikipedia.org/wiki/Doom_WAD">WAD</a> container. See the following chapter for details.</p>
 
 <p><div id="feature-support" /></p>
 
@@ -142,12 +142,12 @@
 <tr>
 <th>Type</th><th>Feature</th><th>Supported</th><th>Key file path\*</th><th>OpenPGP compatible</th><th>File format</th>
 </tr>
-<tr><td>GPG</td><td>Password</td><td>yes</td><td>n/a</td><td>yes</td><td>OpenPGP file</td></tr>
+<tr><td>GPG</td><td>Passphrase</td><td>yes</td><td>n/a</td><td>yes</td><td>OpenPGP file</td></tr>
 <tr><td>GPG</td><td>Key file</td><td>yes</td><td>no</td><td>yes</td><td>OpenPGP file</td></tr>
-<tr><td>GPG</td><td>Key file and password</td><td>no</td><td>n/a</td><td>n/a</td><td>n/a</td></tr>
-<tr><td>EPD</td><td>Password</td><td>yes</td><td>n/a</td><td>yes</td><td>OpenPGP file</td></tr>
+<tr><td>GPG</td><td>Key file and passphrase</td><td>no</td><td>n/a</td><td>n/a</td><td>n/a</td></tr>
+<tr><td>EPD</td><td>Passphrase</td><td>yes</td><td>n/a</td><td>yes</td><td>OpenPGP file</td></tr>
 <tr><td>EPD</td><td>Key file</td><td>yes</td><td>yes</td><td>no</td><td>Nested: WAD/OpenPGP</td></tr>
-<tr><td>EPD</td><td>Key file and password</td><td>yes</td><td>yes</td><td>no</td><td>Nested: OpenPGP/WAD/OpenPGP</td></tr>
+<tr><td>EPD</td><td>Key file and passphrase</td><td>yes</td><td>yes</td><td>no</td><td>Nested: OpenPGP/WAD/OpenPGP</td></tr>
 </table>
 
 <p>* Key file location is persisted in the header of an encrypted file so the user does not need to specify it when decrypting.</p>
@@ -157,11 +157,11 @@
 <h2>What Is EncrypPad Key File?</h2>
 
 <p>In symmetric encryption the same sequence is used to encrypt and decrypt data. The user or another
-application usually provides this sequence in the form of an entered password or a file. In addition to
-entered passwords, EncryptPad generates files with random sequences called "key files".</p>
+application usually provides this sequence in the form of an entered passphrase or a file. In addition to
+entered passphrases, EncryptPad generates files with random sequences called "key files".</p>
 
 <p>When the user creates a key file, EncryptPad generates a random sequence of bytes, asks the
-user for a password, encrypts the generated sequence and saves it to a file.</p>
+user for a passphrase, encrypts the generated sequence and saves it to a file.</p>
 
 <p>The format of the file is OpenPGP. Other OpenPGP implementations can also create and 
 open EncryptPad key files as below shell commands demonstrate.</p>
@@ -172,7 +172,7 @@ open EncryptPad key files as below shell commands demonstrate.</p>
 </code></pre>
 
 <p><code>pwmake</code> generates a random sequence, which <code>gpg2</code> in-turn encrypts. It will ask for the
-password to encrypt the sequence.</p>
+passphrase to encrypt the sequence.</p>
 
 <p>When you use this key to encrypt <code>test3.txt</code>, the equivalent <code>gpg</code> command is below.</p>
 
@@ -201,14 +201,14 @@ these:</p>
 <p>There are three different structures a saved file can have depending on protection mode:</p>
 
 <ol>
-<li><p><strong>Password only</strong> (password is used to protect a file but no keys are specified). The file is an ordinary OpenPGP file.</p></li>
-<li><p><strong>Key only</strong> (password is not set but a key file is used for protection). The file is a WAD file. <a href="https://en.wikipedia.org/wiki/Doom_WAD">WAD</a> is a simple format for combining multiple binary files in one. You can open a WAD file in <a href="http://slade.mancubus.net/">Slade</a>. It contains two files internally: </p>
+<li><p><strong>Passphrase only</strong> (passphrase is used to protect a file but no keys are specified). The file is an ordinary OpenPGP file.</p></li>
+<li><p><strong>Key only</strong> (passphrase is not set but a key file is used for protection). The file is a WAD file. <a href="https://en.wikipedia.org/wiki/Doom_WAD">WAD</a> is a simple format for combining multiple binary files in one. You can open a WAD file in <a href="http://slade.mancubus.net/">Slade</a>. It contains two files internally: </p>
 
 <ul>
 <li>OpenPGP file encrypted with the key</li>
 <li><code>__X2_KEY</code> is a plain text file containing the path to the key if "persist key path" is enabled. Otherwise, it has zero length.</li>
 </ul></li>
-<li><p><strong>Protected with password and key</strong>. The resulting file is an OpenPGP file containing a WAD file as in point 2.</p></li>
+<li><p><strong>Protected with passphrase and key</strong>. The resulting file is an OpenPGP file containing a WAD file as in point 2.</p></li>
 </ol>
 
 <p><div id="use-curl" /></p>
@@ -217,15 +217,15 @@ these:</p>
 
 <p>If <strong><a href="http://curl.haxx.se/">CURL</a></strong> URL is specified in <strong>Key File Path</strong> field in the <strong>Set Encryption Key</strong> dialog, EncryptPad will attempt to start a curl process to download the key from a remote host. If you want to use this feature, you need to set the path to the CURL executable in the EncryptPad settings. </p>
 
-<p>Consider this use case scenario: you travel with your laptop and open an encrypted file on the laptop. If you protect the file with a password and a key and your laptop is lost or stolen, the perpetrator will be able to make a brute force attack on your file because the key is also stored on the laptop. To avoid it EncryptPad makes the following steps:</p>
+<p>Consider this use case scenario: you travel with your laptop and open an encrypted file on the laptop. If you protect the file with a passphrase and a key and your laptop is lost or stolen, the perpetrator will be able to make a brute force attack on your file because the key is also stored on the laptop. To avoid it EncryptPad makes the following steps:</p>
 
 <ol>
 <li>Encrypts the plain text file with the key</li>
 <li>Copies the encrypted file into a WAD file together with the unencrypted HTTPS or SFTP URL to the key file containing authentication parameters.</li>
-<li>Encrypts the WAD file from point 2 with the password. </li>
+<li>Encrypts the WAD file from point 2 with the passphrase. </li>
 </ol>
 
-<p>If this file gets into the hands of a perpetrator, he or she will need to brute force the password first to be able to obtain the key URL and the authentication parameters. Since a brute force attack takes a lot of time, the user will be able to remove the key or change the authentication so the previous parameters become obsolete.</p>
+<p>If this file gets into the hands of a perpetrator, he or she will need to brute force the passphrase first to be able to obtain the key URL and the authentication parameters. Since a brute force attack takes a lot of time, the user will be able to remove the key or change the authentication so the previous parameters become obsolete.</p>
 
 <p><div id="known-weaknesses" /></p>
 
@@ -242,12 +242,12 @@ these:</p>
 <p>There is <strong>encryptcli</strong> executable to encrypt / decrypt files in command line. Run without
 arguments to see available parameters. Below is an example of encrypting a file with a key.</p>
 
-<pre><code># generate a new key and protect it with the password "key".
-# --key-pwd-fd 0 for reading the key password from descriptor 0
+<pre><code># generate a new key and protect it with the passphrase "key".
+# --key-pwd-fd 0 for reading the key passphrase from descriptor 0
 echo -n "key" | encryptcli --generate-key --key-pwd-fd 0 my_key.key
 
 # encrypt plain_text.txt with my_key.key created above.
-# The key password is sent through file descriptor 3
+# The key passphrase is sent through file descriptor 3
 cat plain_text.txt | encryptcli -e --key-file my_key.key \
 --key-only --key-pwd-fd 3 -o plain_text.txt.gpg 3&lt; &lt;(echo -n "key")
 </code></pre>
