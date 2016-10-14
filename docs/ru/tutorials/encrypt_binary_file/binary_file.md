@@ -10,9 +10,9 @@
 
 ![Generate Key dialogue](images/generate_key_dialog.png)
 
-3\. You will be asked to enter a password to protect the key file on the disk.
+3\. You will be asked to enter a passphrase to protect the key file on the disk.
 
-![Key File Password](images/set_password_for_key.png)
+![Key File passphrase](images/set_passphrase_for_key.png)
 
 4\. Click **No** as it applies to the edited text and we are encrypting binary files.
 
@@ -28,13 +28,13 @@
 
 ![Browse for input file](images/select_input_file.png) 
 
-7\. Select an input file and click OK. The output file name and location will be suggested by adding `.epd` extension to your input file path (see the first image below). **IMPORTANT: to ensure that your output file is compatible with OpenGPG, change the extension from `.epd` to `.gpg` (see the second image below). Note that only `.epd` file with password protection is compatible with OpenPGP.**
+7\. Select an input file and click OK. The output file name and location will be suggested by adding `.epd` extension to your input file path (see the first image below). **IMPORTANT: to ensure that your output file is compatible with OpenGPG, change the extension from `.epd` to `.gpg` (see the second image below). Note that only `.epd` file with passphrase protection is compatible with OpenPGP.**
 
 ![Suggested output file name](images/input_file_selected.png)
 
 ![Renamed to gpg](images/renamed_to_gpg.png)
 
-8\. If you want to use a key file, specify it in the Key File Path text box by clicking Select Key... button. Note that either a password or key file should be used for GPG type and not both.
+8\. If you want to use a key file, specify it in the Key File Path text box by clicking Select Key... button. Note that either a passphrase or key file should be used for GPG type and not both.
 
 ![Set Key dialogue](images/set_key_dialog.png)
 
@@ -46,7 +46,7 @@ File without path is looked for in the EncryptPad directory first and then in th
 
 ![Start button](images/start_button.png)
 
-If you have not set a password and key file, EncryptPad will ask you to enter one.
+If you have not set a passphrase and key file, EncryptPad will ask you to enter one.
 
 10\. If encryption succeeds, you will see the following message.
 

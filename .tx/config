@@ -19,9 +19,9 @@ source_file = docs/en/changes.md
 source_lang = en
 type = TXT
 
-[encryptpad.tutorials_open_plain_text_protect_with_password_password_protection_md]
-file_filter = docs/<lang>/tutorials/open_plain_text_protect_with_password/password_protection.md
-source_file = docs/en/tutorials/open_plain_text_protect_with_password/password_protection.md
+[encryptpad.tutorials_open_plain_text_protect_with_passphrase_passphrase_protection_md]
+file_filter = docs/<lang>/tutorials/open_plain_text_protect_with_passphrase/passphrase_protection.md
+source_file = docs/en/tutorials/open_plain_text_protect_with_passphrase/passphrase_protection.md
 source_lang = en
 type = TXT
 
@@ -37,9 +37,9 @@ source_file = docs/en/tutorials/open_plain_text_protect_with_key_file/key_file_p
 source_lang = en
 type = TXT
 
-[encryptpad.tutorials_open_plain_text_protect_with_key_and_password_double_protection_md]
-file_filter = docs/<lang>/tutorials/open_plain_text_protect_with_key_and_password/double_protection.md
-source_file = docs/en/tutorials/open_plain_text_protect_with_key_and_password/double_protection.md
+[encryptpad.tutorials_open_plain_text_protect_with_key_and_passphrase_double_protection_md]
+file_filter = docs/<lang>/tutorials/open_plain_text_protect_with_key_and_passphrase/double_protection.md
+source_file = docs/en/tutorials/open_plain_text_protect_with_key_and_passphrase/double_protection.md
 source_lang = en
 type = TXT
 

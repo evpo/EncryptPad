@@ -28,9 +28,9 @@ Now EncryptPad is in unprotected plain text mode. It works as an ordinary text e
 
 ![Generate Key dialogue](images/generate_key_dialog.png)
 
-6\. You will be asked to enter a password to protect the key file on the disk.
+6\. You will be asked to enter a passphrase to protect the key file on the disk.
 
-![Key File Password](images/set_password_for_key.png)
+![Key File passphrase](images/set_passphrase_for_key.png)
 
 Enter `KeyPwd`
 
@@ -52,7 +52,7 @@ Here is the content of the file (it will be different for you as the key is rand
     =bXn9
     -----END PGP MESSAGE-----
 
-This is a random sequence in Base64, from which the encryption key is derived. It is encrypted with the key file password that you provided and it can also be unencrypted with GnuGPG. If you have [Gpg4Win](https://www.gpg4win.org/) installed, you can right click on the file in explorer and open "More GPG EX options" and "Decrypt". Enter `KeyPwd` as a password and gpg will decrypt the file and create my_new_key.key.out. The content of the file will be similar to this:
+This is a random sequence in Base64, from which the encryption key is derived. It is encrypted with the key file passphrase that you provided and it can also be unencrypted with GnuGPG. If you have [Gpg4Win](https://www.gpg4win.org/) installed, you can right click on the file in explorer and open "More GPG EX options" and "Decrypt". Enter `KeyPwd` as a passphrase and gpg will decrypt the file and create my_new_key.key.out. The content of the file will be similar to this:
 
     T6/vlnb0aysdr+xUriwwwrC844iVImiG4T/sCgF+ETQ=
 

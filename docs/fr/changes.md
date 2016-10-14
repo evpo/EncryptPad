@@ -4,7 +4,7 @@ h2
     text-align: center;
 }
 </style>
-##Notes de version##
+##Release Notes##
 
 ###Version 0.3.2.3
 
@@ -40,3 +40,4 @@ h2
 ###Version 0.3.2.1
 
 * Initial open source release
+

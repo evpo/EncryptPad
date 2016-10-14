@@ -1,6 +1,6 @@
-# Open a plain text file, protect it with a password and save as a GPG file
+# Open a plain text file, protect it with a passphrase and save as a GPG file
 
-We are going to open a plain text file, protect it with a password and save as a GPG file.
+We are going to open a plain text file, protect it with a passphrase and save as a GPG file.
 
 ## Open a plain text file
 
@@ -20,7 +20,7 @@ Now EncryptPad is in unprotected plain text mode. It works as an ordinary text e
 
 ![Unprotected mode](images/unprotected_status.png)
 
-## Protect with a password and save as a GPG file
+## Protect with a passphrase and save as a GPG file
 
 4\. Click the Save As tool button.
 
@@ -32,11 +32,11 @@ Now EncryptPad is in unprotected plain text mode. It works as an ordinary text e
 
 Please note that the file name has changed to "war and peace.gpg" in the Save As dialogue.
 
-6\. You will be asked to enter a password twice. Enter `DemoPwd` for this example and click OK.
+6\. You will be asked to enter a passphrase twice. Enter `DemoPwd` for this example and click OK.
 
-![Set Password](images/set_password.png)
+![Set passphrase](images/set_passphrase.png)
 
-7\. Now the file has been saved on the disk and it is encrypted with our password. See the file extension and the status on the picture below.
+7\. Now the file has been saved on the disk and it is encrypted with our passphrase. See the file extension and the status on the picture below.
 
 ![GPG file saved](images/gpg_file_saved.png)
 
@@ -64,7 +64,7 @@ GPG packet --list-packets command output:
 
 ## Update the file
 
-If you modify the text now and click Save tool button, EncryptPad will not ask you to enter the password again because it stores several salted hashes of your password.
+If you modify the text now and click Save tool button, EncryptPad will not ask you to enter the passphrase again because it stores several salted hashes of your passphrase.
 
 ## Open another plain text file
 
@@ -72,9 +72,9 @@ If you try to open a plain text file now, it will fail with the following messag
 
 ![Cannot open plain text](images/open_another_plain_text.png)
 
-EncryptPad "thinks" that the file is encrypted with a password because its mode is "Password protected" as you can see in the status bar. It tried to decrypt the plain text and failed. To proceed with opening the file, clear password protection by clicking the Clear Password tool button or even better click Close and Reset. The latter will close the text file and reset both parts of the protection.
+EncryptPad "thinks" that the file is encrypted with a passphrase because its mode is "passphrase protected" as you can see in the status bar. It tried to decrypt the plain text and failed. To proceed with opening the file, clear passphrase protection by clicking the Clear passphrase tool button or even better click Close and Reset. The latter will close the text file and reset both parts of the protection.
 
-![Clear password or Close and Reset](images/clear_pwd_or_close_and_reset.png)
+![Clear passphrase or Close and Reset](images/clear_pwd_or_close_and_reset.png)
 
 Now you can open your plain text file.
 
