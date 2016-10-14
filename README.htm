@@ -4,45 +4,45 @@
 
 <ul>
 <li><a href="#features">Features</a></li>
-<li><a href="#supported-platforms">Supported Platforms</a></li>
-<li><a href="#why-encryptpad">Why EncryptPad?</a></li>
-<li><a href="#when-encryptpad">When Do I Need EncryptPad?</a></li>
-<li><a href="#when-can-i-not">When Can I Not Use EncryptPad?</a></li>
-<li><a href="#file-types">File Types</a>
+<li><a href="#supported-platforms">Supported platforms</a></li>
+<li><a href="#why-use-encryptpad">Why use EncryptPad?</a></li>
+<li><a href="#when-encryptpad">When do I need EncryptPad?</a></li>
+<li><a href="#when-can-i-not">When can I not use EncryptPad?</a></li>
+<li><a href="#file-types">File types</a>
 <ul>
 <li><a href="#gpg">GPG</a></li>
 <li><a href="#epd">EPD</a></li>
-<li><a href="#feature-support">Feature Support</a></li>
+<li><a href="#feature-support">Feature support</a></li>
 </ul></li>
-<li><a href="#key-file">What Is EncrypPad Key File?</a></li>
-<li><a href="#epd-file-format">EPD File Format When Encrypting With a Key</a></li>
-<li><a href="#use-curl">Use cURL To Automatically Download Keys From A Remote Storage</a></li>
-<li><a href="#known-weaknesses">Known Weaknesses</a></li>
-<li><a href="#command-line-interface">Command Line Interface</a></li>
+<li><a href="#key-file">What is an EncrypPad key file?</a></li>
+<li><a href="#epd-file-format">EPD file format when encrypting with a key</a></li>
+<li><a href="#use-curl">Use CURL to automatically download keys from a remote storage</a></li>
+<li><a href="#known-weaknesses">Known weaknesses</a></li>
+<li><a href="#command-line-interface">Command line interface</a></li>
 <li><a href="#installing">Installing EncryptPad</a>
 <ul>
-<li><a href="#portable-exe">Portable Executable</a></li>
+<li><a href="#portable-exe">Portable executable</a></li>
 <li><a href="#install-on-arch">Arch Linux</a></li>
 <li><a href="#install-on-ubuntu">Ubuntu or Linux Mint</a></li>
 </ul></li>
-<li><a href="#build-on-windows">Build EncryptPad on Windows</a>
+<li><a href="#compile-on-windows">Compile EncryptPad on Windows</a>
 <ul>
 <li><a href="#prerequisites">Prerequisites</a></li>
 <li><a href="#steps">Steps</a></li>
 </ul></li>
-<li><a href="#build-on-mac-linux">Build EncryptPad on Mac/Linux</a>
+<li><a href="#compile-on-mac-linux">Compile EncryptPad on Mac/Linux</a>
 <ul>
-<li><a href="#dynamic-build">Dynamic Build</a></li>
+<li><a href="#dynamic-build">Dynamic build</a></li>
 <li><a href="#build-on-fedora">Fedora</a></li>
 </ul></li>
 <li><a href="#acknowledgements">Acknowledgements</a></li>
-<li><a href="#integrity-verification">EncryptPad Integrity Verification</a>
+<li><a href="#integrity-verification">EncryptPad integrity verification</a>
 <ul>
-<li><a href="#openpgp-signing">OpenPGP Singing and Certification Authority</a></li>
-<li><a href="#verification-process">Step by Step Verfification Process</a></li>
+<li><a href="#openpgp-signing">OpenPGP signing and certification authority</a></li>
+<li><a href="#verification-process">Step by step verfification process</a></li>
 </ul></li>
 <li><a href="#license">License</a></li>
-<li><a href="#contacts">Contacts and Feedback</a></li>
+<li><a href="#contact">Contact and feedback</a></li>
 </ul>
 
 <p><div id="features" /></p>
@@ -72,7 +72,7 @@
 
 <p><div id="supported-platforms" /></p>
 
-<h2>Supported Platforms</h2>
+<h2>Supported platforms</h2>
 
 <ul>
 <li><p>Windows</p></li>
@@ -80,9 +80,9 @@
 <li><p>Mac OS</p></li>
 </ul>
 
-<p><div id="why-encryptpad" /></p>
+<p><div id="why-use-encryptpad" /></p>
 
-<h2>Why EncryptPad?</h2>
+<h2>Why use EncryptPad?</h2>
 
 <ul>
 <li><p><strong>Multi-platform</strong> codebase: it has been compiled on three popular operating systems and can be adapted to more.</p></li>
@@ -95,7 +95,7 @@
 
 <p><div id="when-encryptpad" /></p>
 
-<h2>When Do I Need EncryptPad?</h2>
+<h2>When do I need EncryptPad?</h2>
 
 <ul>
 <li><p>You have a file containing sensitive information such as account names, passphrases or ID numbers. It is stored on unprotected media or unwanted people can access the file. Such storage can be a computer at work, carried laptop, memory stick or a cloud drive.</p></li>
@@ -106,7 +106,7 @@
 
 <p><div id="when-can-i-not" /></p>
 
-<h2>When Can I Not Use EncryptPad?</h2>
+<h2>When can I not use EncryptPad?</h2>
 
 <ul>
 <li><p>You need to send a file to somebody with whom you have <strong>not prearranged a shared secret</strong> (a passphrase or a key file). In this case, you need asymmetric encryption with public and private keys. Fortunately, there are many convenient tools suitable for the task. </p></li>
@@ -118,7 +118,7 @@
 
 <p><div id="file-types" /></p>
 
-<h2>File Types</h2>
+<h2>File types</h2>
 
 <p>The format is determined by an extension of a file. Main extensions of encrypted files are GPG and EPD.</p>
 
@@ -136,7 +136,7 @@
 
 <p><div id="feature-support" /></p>
 
-<h3>Feature Support</h3>
+<h3>Feature support</h3>
 
 <table style="border: 1px solid black">
 <tr>
@@ -154,7 +154,7 @@
 
 <p><div id="key-file" /></p>
 
-<h2>What Is EncrypPad Key File?</h2>
+<h2>What is an EncrypPad key file?</h2>
 
 <p>In symmetric encryption the same sequence is used to encrypt and decrypt data. The user or another
 application usually provides this sequence in the form of an entered passphrase or a file. In addition to
@@ -196,7 +196,7 @@ these:</p>
 
 <p><div id="epd-file-format" /></p>
 
-<h2>EPD File Format When Encrypting With a Key</h2>
+<h2>EPD file format when encrypting with a key</h2>
 
 <p>There are three different structures a saved file can have depending on protection mode:</p>
 
@@ -213,7 +213,7 @@ these:</p>
 
 <p><div id="use-curl" /></p>
 
-<h2>Use cURL To Automatically Download Keys From A Remote Storage</h2>
+<h2>Use CURL to automatically download keys from a remote storage</h2>
 
 <p>If <strong><a href="http://curl.haxx.se/">CURL</a></strong> URL is specified in <strong>Key File Path</strong> field in the <strong>Set Encryption Key</strong> dialog, EncryptPad will attempt to start a curl process to download the key from a remote host. If you want to use this feature, you need to set the path to the CURL executable in the EncryptPad settings. </p>
 
@@ -229,7 +229,7 @@ these:</p>
 
 <p><div id="known-weaknesses" /></p>
 
-<h2>Known Weaknesses</h2>
+<h2>Known weaknesses</h2>
 
 <ul>
 <li>EncryptPad stores unencrypted text in memory. If a memory dump is automatically taken after a system or application crash or some of the memory is saved to a swap file, the sensitive information will occur on the disk. Sometimes it is possible to configure an operating system not to use a dump and swap files. It is a good practice to close EncrypPad when not in use.</li>
@@ -237,7 +237,7 @@ these:</p>
 
 <p><div id="command-line-interface" /></p>
 
-<h2>Command Line Interface</h2>
+<h2>Command line interface</h2>
 
 <p>There is <strong>encryptcli</strong> executable to encrypt / decrypt files in command line. Run without
 arguments to see available parameters. Below is an example of encrypting a file with a key.</p>
@@ -258,7 +258,7 @@ cat plain_text.txt | encryptcli -e --key-file my_key.key \
 
 <p><div id="portable-exe" /></p>
 
-<h3>Portable Executable</h3>
+<h3>Portable executable</h3>
 
 <p>Portable binaries are available for Windows and Apple. They can be copied on a memory stick or
 placed on a network share.</p>
@@ -345,9 +345,9 @@ sudo apt install encryptpad encryptcli
 <p>5. Open the manifest asc file in a text editor and the <code>changes</code> text file. Compare that the SHA1
     hashes on the listed source files match.</p>
 
-<p><div id="build-on-windows" /></p>
+<p><div id="compile-on-windows" /></p>
 
-<h2>Build EncryptPad on Windows</h2>
+<h2>Compile EncryptPad on Windows</h2>
 
 <p><div id="prerequisites" /></p>
 
@@ -382,9 +382,9 @@ sudo apt install encryptpad encryptcli
 
 <p>Note that if you want EncryptPad to work as a single executable without dlls, you need to build Qt framework yourself statically. It takes a few hours. There are plenty of instructions on how to do this in the internet. The most popular article recommends using a powershell script. While it is convenient and I did it once, sometimes you don't want to upgrade your powershell and install heavy dependencies coming with it. So the next time I had to do that, I read the script and did everything manually. Luckily there are not too many steps in it.</p>
 
-<p><div id="build-on-mac-linux" /></p>
+<p><div id="compile-on-mac-linux" /></p>
 
-<h2>Build EncryptPad on Mac/Linux</h2>
+<h2>Compile EncryptPad on Mac/Linux</h2>
 
 <p>It is easier than building on Windows. All you need is to install Qt, Python and run</p>
 
@@ -393,7 +393,7 @@ sudo apt install encryptpad encryptcli
 
 <p><div id="dynamic-build"/></p>
 
-<h3>Dynamic Build</h3>
+<h3>Dynamic build</h3>
 
 <pre><code>./configure.sh --all --use-system-libs
 </code></pre>
@@ -442,11 +442,11 @@ export PATH
 
 <p><div id="integrity-verification" /></p>
 
-<h2>EncryptPad Integrity Verification</h2>
+<h2>EncryptPad integrity verification</h2>
 
 <p><div id="openpgp-signing" /></p>
 
-<h3>OpenPGP Singing and Certification Authority</h3>
+<h3>OpenPGP signing and certification authority</h3>
 
 <p>All EncryptPad related downloads are signed with the following OpenPGP key.</p>
 
@@ -468,7 +468,7 @@ export PATH
 
 <p><div id="verification-process" /></p>
 
-<h3>Step by Step Verfification Process</h3>
+<h3>Step by step verfification process</h3>
 
 <ol>
 <li>Download packages and their detached OpenPGP signatures.</li>
@@ -491,9 +491,9 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.</p>
 
-<p><div id="contacts" /></p>
+<p><div id="contact" /></p>
 
-<h2>Contacts and Feedback</h2>
+<h2>Contact and feedback</h2>
 
 <p>If your question is related to EncryptPad, send it to the mailing list: <strong>encryptpad@googlegroups.com</strong> linked to <a href="https://groups.google.com/d/forum/encryptpad">the public discussion group</a>.</p>
 

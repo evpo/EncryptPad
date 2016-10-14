@@ -3,7 +3,7 @@ EncryptPad est une application de visualisation et d'édition de texte chiffré 
 ##Table des matières
 * [Caractéristiques](#features)
 * [Plateformes prises en charge](#supported-platforms)
-* [Pourquoi EncryptPad ?](#why-encryptpad)
+* [Pourquoi EncryptPad ?](#why-use-encryptpad)
 * [Quand ai-je besoin d'EncryptPad ?](#when-encryptpad)
 * [Quand ne puis-je pas utiliser EncryptPad ?](#when-can-i-not)
 * [Types de fichiers](#file-types)
@@ -12,18 +12,18 @@ EncryptPad est une application de visualisation et d'édition de texte chiffré 
   - [Prise en charge des fonctions](#feature-support)
 * [Qu'est-ce qu'un fichier clé EncryptPad ?](#key-file)
 * [Format de fichier EPD lors du chiffrement avec clé](#epd-file-format)
-* [Utiliser cURL pour télécharger automatiquement des clés d'un stockage distant](#use-curl)
+* [Utiliser CURL pour télécharger automatiquement des clés d'un stockage distant](#use-curl)
 * [Faiblesses connues](#known-weaknesses)
 * [Interface en ligne de commande](#command-line-interface)
 * [Installer EncryptPad](#installing)
     - [Exécutable portable](#portable-exe)
     - [Arch Linux](#install-on-arch)
     - [Ubuntu ou Linux Mint](#install-on-ubuntu)
-* [Build EncryptPad on Windows](#build-on-windows)
+* [Compile EncryptPad on Windows](#compile-on-windows)
   - [Prérequis](#prerequisites)
   - [Étapes](#steps)
 * [Build EncryptPad on Mac/Linux](#build-on-mac-linux)
-    - [Dynamic Build](#dynamic-build)
+    - [Dynamic build](#dynamic-build)
     - [Fedora](#build-on-fedora)
 * [Remerciements](#acknowledgements)
 * [Vérification de l'intégrité par EncryptPad](#integrity-verification)
@@ -55,7 +55,7 @@ EncryptPad est une application de visualisation et d'édition de texte chiffré 
 * Compression: **ZLIB, ZIP**
 
 <div id="supported-platforms" />
-##Supported Platforms
+##Supported platforms
 
 * Windows
 
@@ -63,8 +63,8 @@ EncryptPad est une application de visualisation et d'édition de texte chiffré 
 
 * Mac OS
 
-<div id="why-encryptpad" />
-##Why EncryptPad?
+<div id="why-use-encryptpad" />
+##Why use EncryptPad?
 
 * **Multi-platform** codebase: it has been compiled on three popular operating systems and can be adapted to more.
 
@@ -79,7 +79,7 @@ EncryptPad est une application de visualisation et d'édition de texte chiffré 
 * **Double protection:** randomly generated key files in addition to passphrases.
 
 <div id="when-encryptpad" />
-##When Do I Need EncryptPad?
+##When do I need EncryptPad?
 
 * You have a file containing sensitive information such as account names, passphrases or ID numbers. It is stored on unprotected media or unwanted people can access the file. Such storage can be a computer at work, carried laptop, memory stick or a cloud drive.
 
@@ -90,7 +90,7 @@ EncryptPad est une application de visualisation et d'édition de texte chiffré 
 * You need protection against a brute force attack in case your storage gets in somebody's hands. EncryptPad allows to generate a key and store it separately from encrypted information. The unwanted person would need two secrets to open an encrypted file: the passphrase and the key. Consider this example: you store your encrypted file on a memory stick, and protect it with a passphrase. In addition to that, you protect the file with a file key and store the key on computers where you open the file. If the memory stick is lost, the passphrase is not enough to decrypt your information. The key file is also needed and it is not on the memory stick.
 
 <div id="when-can-i-not" />
-##When Can I Not Use EncryptPad?
+##When can I not use EncryptPad?
 
 * You need to send a file to somebody with whom you have **not prearranged a shared secret** (a passphrase or a key file). In this case, you need asymmetric encryption with public and private keys. Fortunately, there are many convenient tools suitable for the task. 
 
@@ -103,7 +103,7 @@ EncryptPad est une application de visualisation et d'édition de texte chiffré 
 * **IMPORTANT**: If you forgot your passphrase or lost a key file, there is nothing that can be done to open your encrypted information. There are no backdoors in the formats that EncryptPad supports. EncryptPad developers take no responsibility for corrupted or invalid files in accordance with the license.
 
 <div id="file-types" />
-##File Types
+##File types
 
 The format is determined by an extension of a file. Main extensions of encrypted files are GPG and EPD.
 
@@ -118,7 +118,7 @@ This file type conforms to Open PGP format and it is compatible with other OpenP
 EncryptPad specific format. Other OpenPGP software will not be able to open it unless the file was only protected with a passphrase. If passphrase only protection was used, the file is effectively a GPG file (see GPG section above). However, when a key file protection is involved, it is a GPG file in a [WAD](https://en.wikipedia.org/wiki/Doom_WAD) container. See the following chapter for details.
 
 <div id="feature-support" />
-### Feature Support
+### Feature support
 
 <table style="border: 1px solid black">
 <tr>
@@ -135,7 +135,7 @@ EncryptPad specific format. Other OpenPGP software will not be able to open it u
 \* Key file location is persisted in the header of an encrypted file so the user does not need to specify it when decrypting.
 
 <div id="key-file" />
-##What Is EncrypPad Key File?
+##What is an EncrypPad key file?
 In symmetric encryption the same sequence is used to encrypt and decrypt data. The user or another
 application usually provides this sequence in the form of an entered passphrase or a file. In addition to
 entered passphrases, EncryptPad generates files with random sequences called "key files".
@@ -172,7 +172,7 @@ these:
 As you see, other OpenPGP implementations can also use EncryptPad keys.
 
 <div id="epd-file-format" />
-##EPD File Format When Encrypting With a Key
+##EPD file format when encrypting with a key
 
 There are three different structures a saved file can have depending on protection mode:
 
@@ -185,7 +185,7 @@ There are three different structures a saved file can have depending on protecti
 3. **Protected with passphrase and key**. The resulting file is an OpenPGP file containing a WAD file as in point 2.
 
 <div id="use-curl" />
-##Use cURL To Automatically Download Keys From A Remote Storage
+##Use CURL to automatically download keys from a remote storage
 
 If **[CURL](http://curl.haxx.se/)** URL is specified in **Key File Path** field in the **Set Encryption Key** dialog, EncryptPad will attempt to start a curl process to download the key from a remote host. If you want to use this feature, you need to set the path to the CURL executable in the EncryptPad settings. 
 
@@ -198,12 +198,12 @@ Consider this use case scenario: you travel with your laptop and open an encrypt
 If this file gets into the hands of a perpetrator, he or she will need to brute force the passphrase first to be able to obtain the key URL and the authentication parameters. Since a brute force attack takes a lot of time, the user will be able to remove the key or change the authentication so the previous parameters become obsolete.
 
 <div id="known-weaknesses" />
-##Known Weaknesses
+##Known weaknesses
 
 * EncryptPad stores unencrypted text in memory. If a memory dump is automatically taken after a system or application crash or some of the memory is saved to a swap file, the sensitive information will occur on the disk. Sometimes it is possible to configure an operating system not to use a dump and swap files. It is a good practice to close EncrypPad when not in use.
 
 <div id="command-line-interface" />
-##Command Line Interface
+##Command line interface
 
 There is **encryptcli** executable to encrypt / decrypt files in command line. Run without
 arguments to see available parameters. Below is an example of encrypting a file with a key.
@@ -221,7 +221,7 @@ arguments to see available parameters. Below is an example of encrypting a file 
 ##Installing EncryptPad
 
 <div id="portable-exe" />
-###Portable Executable
+###Portable executable
 
 Portable binaries are available for Windows and Apple. They can be copied on a memory stick or
 placed on a network share.
@@ -296,8 +296,8 @@ Below are steps to verify the SHA1 hashes of the source files in [Launchpad webu
 5\. Open the manifest asc file in a text editor and the `changes` text file. Compare that the SHA1
     hashes on the listed source files match.
 
-<div id="build-on-windows" />
-##Build EncryptPad on Windows
+<div id="compile-on-windows" />
+##Compile EncryptPad on Windows
 
 <div id="prerequisites" />
 ###Prerequisites
@@ -335,7 +335,7 @@ It is easier than building on Windows. All you need is to install Qt, Python and
     ./configure.sh --all
 
 <div id="dynamic-build"/>
-###Dynamic Build
+###Dynamic build
 
     ./configure.sh --all --use-system-libs
 
@@ -375,10 +375,10 @@ EncryptPad uses the following frameworks and libraries.
 7. [**famfamfam Silk iconset 1.3**](http://www.famfamfam.com/lab/icons/silk/)
 
 <div id="integrity-verification" />
-##EncryptPad Integrity Verification
+##EncryptPad integrity verification
 
 <div id="openpgp-signing" />
-###OpenPGP Singing and Certification Authority
+###OpenPGP signing and certification authority
 
 All EncryptPad related downloads are signed with the following OpenPGP key.
 
@@ -397,7 +397,7 @@ There is a few reasons why I did not simply use the CA certificate:
 3. It does not have the running cost that CA certification incurs.
 
 <div id="verification-process" />
-### Step by Step Verfification Process
+### Step by step verfification process
 
 1. Download packages and their detached OpenPGP signatures.
 2. Import the EncryptPad (Releases) key to your GPG keyring.
@@ -417,8 +417,8 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
-<div id="contacts" />
-##Contacts and Feedback
+<div id="contact" />
+##Contact and feedback
 
 If your question is related to EncryptPad, send it to the mailing list: **encryptpad@googlegroups.com** linked to [the public discussion group](https://groups.google.com/d/forum/encryptpad).
 

@@ -133,4 +133,3 @@ Note that the `__X2_KEY` file contains the name of our key file `my_new_key.key`
 ![Kleopatra decrypted our file](images/kleopatra_decrypted.png)
 
 25\. The result of this decryption will be your original plain text file.
-

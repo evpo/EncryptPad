@@ -119,4 +119,3 @@ EncryptPad "thinks" that the file is encrypted with a key file because its mode 
 ![Clear Key or Close and Reset](images/clear_key_or_close_and_reset.png)
 
 Now you can open your plain text file.
-
