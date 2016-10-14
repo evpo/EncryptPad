@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/evpo/EncryptPad.svg?branch=master)](https://travis-ci.org/evpo/EncryptPad)
+[![Join the chat at https://gitter.im/EncryptPad/Lobby](https://badges.gitter.im/EncryptPad/Lobby.svg)](https://gitter.im/EncryptPad/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 Screenshots and tutorials are at [evpo.net/encryptpad/](http://evpo.net/encryptpad/)
 
