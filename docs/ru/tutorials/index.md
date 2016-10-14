@@ -4,7 +4,7 @@ h2
     text-align: center;
 }
 </style>
-##Tutorials
+##Инструкции
 
 ###[1. Open a plain text file, protect it with *a passphrase* and save as a GPG file](open_plain_text_protect_with_passphrase/passphrase_protection.htm)
 
