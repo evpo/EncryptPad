@@ -1,4 +1,4 @@
-EncryptPad is an application for viewing and editing symmetrically encrypted text. Using a simple and convenient graphical command line interface, EncryptPad provides a tool for encrypting and decrypting binary files on disk while offering effective measures for protecting information, and it uses the most widely chosen quality file format **OpenPGP** [RFC 4880][RFC 4880](https://tools.ietf.org/html/rfc4880). Unlike other OpenPGP software which main purpose is asymmetric encryption, the primary focus of EncryptPad is symmetric encryption.
+EncryptPad это приложение для просмотра и редактирования симметрично зашифрованных файлов. Приложение, так же, включает утилиту для шифрования бинарных файлов на диске. Программа предлагает эффективные способы защиты информации с помощью простого и удобного графического интерфейса и командной строки. Редактор использует наиболее распространенный формат **OpenPGP** [RFC 4880](https://tools.ietf.org/html/rfc4880). В отличит от других OpenPGP программ, главной задачей которых является ассиметричное шифрование, основная цель EncryptPad симметричное шифрование.
 
 ##Table of Contents
 * [Features](#features)
