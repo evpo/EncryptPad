@@ -22,7 +22,7 @@ EncryptPad est une application de visualisation et d'édition de texte chiffré 
 * [Compile EncryptPad on Windows](#compile-on-windows)
   - [Prérequis](#prerequisites)
   - [Étapes](#steps)
-* [Build EncryptPad on Mac/Linux](#build-on-mac-linux)
+* [Compile EncryptPad on Mac/Linux](#compile-on-mac-linux)
     - [Dynamic build](#dynamic-build)
     - [Fedora](#build-on-fedora)
 * [Remerciements](#acknowledgements)
@@ -327,8 +327,8 @@ If the build is successful, you should see the executable **./bin/release/Encryp
 
 Note that if you want EncryptPad to work as a single executable without dlls, you need to build Qt framework yourself statically. It takes a few hours. There are plenty of instructions on how to do this in the internet. The most popular article recommends using a powershell script. While it is convenient and I did it once, sometimes you don't want to upgrade your powershell and install heavy dependencies coming with it. So the next time I had to do that, I read the script and did everything manually. Luckily there are not too many steps in it.
 
-<div id="build-on-mac-linux" />
-##Build EncryptPad on Mac/Linux
+<div id="compile-on-mac-linux" />
+##Compile EncryptPad on Mac/Linux
 
 It is easier than building on Windows. All you need is to install Qt, Python and run
 
