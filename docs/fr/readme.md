@@ -1,4 +1,4 @@
-EncryptPad est une application de visualisation et d'édition de texte chiffré symétriquement. Elle propose aussi un outil pour chiffrer et déchiffrer des fichiers binaires sur le disque. L'application offre des mesures efficaces pour protéger les informations. Ses interfaces graphique et en ligne de commande sont simples et conviviales. L'éditeur utilise le format de fichier **OpenPGP** [RFC 4880] (https://tools.ietf.org/html/rfc4880) qui est largement adopté pour sa qualité. Contrairement à d'autres logiciels OpenPGP dont le but est le chiffrement asymétrique, l'objectif principal d'EncryptPad est le chiffrement symétrique.
+EncryptPad est une application de visualisation et d'édition de texte chiffré symétriquement. Elle propose aussi un outil pour chiffrer et déchiffrer des fichiers binaires sur le disque. L'application offre des mesures efficaces pour protéger les informations. Ses interfaces graphique et en ligne de commande sont simples et conviviales. L'éditeur utilise le format de fichier **OpenPGP** [RFC 4880](https://tools.ietf.org/html/rfc4880) qui est largement adopté pour sa qualité. Contrairement à d'autres logiciels OpenPGP dont le but est le chiffrement asymétrique, l'objectif principal d'EncryptPad est le chiffrement symétrique. (La traduction est en cours)
 
 ##Table des matières
 * [Caractéristiques](#features)
@@ -19,11 +19,11 @@ EncryptPad est une application de visualisation et d'édition de texte chiffré 
     - [Exécutable portable](#portable-exe)
     - [Arch Linux](#install-on-arch)
     - [Ubuntu ou Linux Mint](#install-on-ubuntu)
-* [Compile EncryptPad on Windows](#compile-on-windows)
+* [Compiler EncryptPad sous Windows](#compile-on-windows)
   - [Prérequis](#prerequisites)
   - [Étapes](#steps)
-* [Compile EncryptPad on Mac/Linux](#compile-on-mac-linux)
-    - [Dynamic build](#dynamic-build)
+* [Compiler EncryptPad sous Mac/Linux](#compile-on-mac-linux)
+    - [Version dynamique](#dynamic-build)
     - [Fedora](#build-on-fedora)
 * [Remerciements](#acknowledgements)
 * [Vérification de l'intégrité par EncryptPad](#integrity-verification)
@@ -36,7 +36,7 @@ EncryptPad est une application de visualisation et d'édition de texte chiffré 
 ##Caractéristiques
 
 * Chiffrement **symétrique**
-* **Passphrase** protection
+* Protection par **phrase de passe**
 * **Key file** protection
 * Combinaison d'un **mot de passe et d'un fichier clé**
 * Random **key file generator** 
