@@ -1,9 +1,9 @@
-EncryptPad est une application de visualisation et d'édition de texte chiffré symétriquement. Elle propose aussi un outil pour chiffrer et déchiffrer des fichiers binaires sur le disque. L'application offre des mesures efficaces pour protéger les informations. Ses interfaces graphique et en ligne de commande sont simples et conviviales. L'éditeur utilise le format de fichier **OpenPGP** [RFC 4880](https://tools.ietf.org/html/rfc4880) qui est largement adopté pour sa qualité. Contrairement à d'autres logiciels OpenPGP dont le but est le chiffrement asymétrique, l'objectif principal d'EncryptPad est le chiffrement symétrique. (La traduction est en cours)
+EncryptPad est une application de visualisation et d'édition de texte chiffré symétriquement. Grâce à son interface graphique et en ligne de commande simple, EncryptPad propose un outil pour chiffrer et déchiffrer des fichiers binaires sur le disque, tout en offrant des mesures efficaces pour protéger les informations, et EncryptPad utilise le format de fichier **OpenPGP** [RFC 4880](https://tools.ietf.org/html/rfc4880) qui est largement adopté pour sa qualité. Contrairement à d'autres logiciels OpenPGP dont le but principal est le chiffrement asymétrique, l'objectif premier d'EncryptPad est le chiffrement symétrique.
 
 ##Table des matières
 * [Caractéristiques](#features)
 * [Plateformes prises en charge](#supported-platforms)
-* [Pourquoi EncryptPad ?](#why-use-encryptpad)
+* [Pourquoi utiliser EncryptPad ?](#why-use-encryptpad)
 * [Quand ai-je besoin d'EncryptPad ?](#when-encryptpad)
 * [Quand ne puis-je pas utiliser EncryptPad ?](#when-can-i-not)
 * [Types de fichiers](#file-types)
@@ -37,25 +37,25 @@ EncryptPad est une application de visualisation et d'édition de texte chiffré 
 
 * Chiffrement **symétrique**
 * Protection par **phrase de passe**
-* **Key file** protection
-* Combinaison d'un **mot de passe et d'un fichier clé**
-* Random **key file generator** 
-* **Key repository** in a hidden directory in user's home folder
-* Path to a key file can be stored in an encrypted file. If enabled, **you do not need to specify the key file** every time you open files.
-* Encryption of **binary files** (images, videos, archives etc.)
-* **Read only** mode to prevent accidental file modification
-* **UTF8** text encoding
-* Windows/Unix **configurable line endings**
-* Un **générateur de mots de passe** personnalisable aide à créer des mots de passe aléatoires robustes.
-* File format compatible with **OpenPGP**
+* Protection par **fichier clé**
+* Combinaison d'un **phrase de passe et d'un fichier clé**
+* **Générateur de fichiers clés** aléatoires 
+* **Dépôt de clés** dans un dossier caché du répertoire personnel de l'utilisateur
+* Le chemin d'un fichier clé peut être stocké dans un fichier chiffré. Si cette option est activée, **vous n'avez pas à spécifier le fichier clé** chaque fois que vous ouvrez des fichiers.
+* Chiffrement de **fichiers binaires** (images, vidéos, fichiers compressés, etc.)
+* Mode **lecture seulement** pour empêcher les modifications accidentelles de fichiers
+* Encodage de texte **UTF8**
+* **Fins de ligne configurable** Windows ou Unix
+* Un **générateur de phrases de passe** personnalisable aide à créer des phrases de passe aléatoires robustes.
+* Format de fichier compatible avec **OpenPGP**
 * **Iterated and salted S2K**
-* Cipher algorithms: **CAST5, TripleDES, AES128, AES256**
-* Hash algorithms: **SHA-1, SHA256**
-* Integrity protection: **SHA-1**
-* Compression: **ZLIB, ZIP**
+* Algorithmes de chiffrement : **CAST5, TripleDES, AES128, AES256** 
+* Algorithmes de hachage : **SHA-1, SHA256**
+* Protection de l'intégrité : **SHA-1**
+* Compression : **ZLIB, ZIP**
 
 <div id="supported-platforms" />
-##Supported platforms
+## Plateformes prises en charge
 
 * Windows
 
@@ -64,13 +64,13 @@ EncryptPad est une application de visualisation et d'édition de texte chiffré 
 * Mac OS
 
 <div id="why-use-encryptpad" />
-##Why use EncryptPad?
+## Pourquoi utiliser EncryptPad ?
 
-* **Multi-platform** codebase: it has been compiled on three popular operating systems and can be adapted to more.
+* **Multiplateforme : EncryptPad a été compilé sur trois systèmes d'exploitation populaires et peut être adapté à d'autres.
 
-* **Portable**: simply copy the executable to a memory stick or a network drive and use on all your computers.
+* **Portable** : il suffit de copier l'exécutable sur une clé USB ou un disque réseau pour l'utiliser sur tous vos ordinateurs.
 
-* **Simple to use**: EncryptPad is a text editor and an encryption tool for binary files but it saves encrypted, compressed and integrity protected files.
+* **Convivial** : EncryptPad est un éditeur de texte et un outil de chiffrement pour fichiers binaires, mais il enregistre des fichiers chiffrés, compressés et dont l'intégrité est protégée.
 
 * **Open source** with concise codebase: you can read the code or ask somebody you trust to read it for you to ensure that there are no back doors and your information is safe.
 
