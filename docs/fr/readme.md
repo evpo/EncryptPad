@@ -23,7 +23,7 @@ EncryptPad est une application de visualisation et d'édition de texte chiffré 
   - [Prérequis](#prerequisites)
   - [Étapes](#steps)
 * [Compiler EncryptPad sous Mac/Linux](#compile-on-mac-linux)
-    - [Version dynamique](#dynamic-build)
+    - [Compilation dynamique](#dynamic-build)
     - [Fedora](#build-on-fedora)
 * [Remerciements](#acknowledgements)
 * [Vérification de l'intégrité par EncryptPad](#integrity-verification)
@@ -55,7 +55,7 @@ EncryptPad est une application de visualisation et d'édition de texte chiffré 
 * Compression : **ZLIB, ZIP**
 
 <div id="supported-platforms" />
-## Plateformes prises en charge
+##Plateformes prises en charge
 
 * Windows
 
@@ -64,96 +64,96 @@ EncryptPad est une application de visualisation et d'édition de texte chiffré 
 * Mac OS
 
 <div id="why-use-encryptpad" />
-## Pourquoi utiliser EncryptPad ?
+##Pourquoi utiliser EncryptPad ?
 
-* **Multiplateforme : EncryptPad a été compilé sur trois systèmes d'exploitation populaires et peut être adapté à d'autres.
+* Code base **multiplateforme : EncryptPad a été compilé sur trois systèmes d'exploitation populaires et peut être adapté à d'autres.
 
 * **Portable** : il suffit de copier l'exécutable sur une clé USB ou un disque réseau pour l'utiliser sur tous vos ordinateurs.
 
 * **Convivial** : EncryptPad est un éditeur de texte et un outil de chiffrement pour fichiers binaires, mais il enregistre des fichiers chiffrés, compressés et dont l'intégrité est protégée.
 
-* **Open source** with concise codebase: you can read the code or ask somebody you trust to read it for you to ensure that there are no back doors and your information is safe.
+* À **code source ouvert** avec un code base concis : vous pouvez lire le code ou demander à quelqu'un de confiance de le lire pour vous afin de vous assurer qu'il n'y a pas de porte dérobée et que vos informations sont en sécurité.
 
-* **OpenPGP** file format: you can encrypt a file with another tool (gpg for example) implementing the format and open it with EncryptPad and vice versa.
+* Format de fichier **OpenPGP** : vous pouvez chiffrer un fichier avec un autre outil (gpg par exemple) qui utilise ce format, et l'ouvrir ensuite avec EncryptPad, et vice versa.
 
-* **Double protection:** randomly generated key files in addition to passphrases.
+* **Protection double** : des fichiers clés générés aléatoirement en plus de phrases de passe.
 
 <div id="when-encryptpad" />
-##When do I need EncryptPad?
+##Quand ai-je besoin d'EncryptPad ?
 
-* You have a file containing sensitive information such as account names, passphrases or ID numbers. It is stored on unprotected media or unwanted people can access the file. Such storage can be a computer at work, carried laptop, memory stick or a cloud drive.
+* Vous avez un fichier contenant des informations délicates telles que des noms de compte, des phrases de passe ou des numéros d'identification. Ce fichier est stocké sur un support sans protection, ou vous ne pouvez pas contrôler qui y accède, que ce soit au travail, sur un ordinateur portable lors de déplacements, un clé USB ou un disque nuagique.
 
-* You need to send an encrypted file to somebody with whom you prearranged a shared secret (a passphrase or a key file). In this case, you need to exchange the secret personally (not via an accessible Internet protocol) before sending the protected file.
+* Vous devez envoyer un fichier chiffré à quelqu'un avec qui vous avez prédéterminé un secret (une phrase de passe ou un fichier clé). Dans ce cas, vous devez échanger le secret en personne (pas par un protocole Internet accessible) pour que le fichier protégé soit déchiffré par le destinataire.
 
-* You store or receive a file and need to ensure that it has not been modified or corrupted in the process of transmission. EncryptPad uses SHA-1 hashing algorithm to verify integrity. 
+* Vous stockez ou recevez un fichier et vous devez vous assurez qu'il n'a pas été altéré ou corrompu pendant la transmission. EncryptPad utilise l'algorithme de hachage SHA-1 pour contrôler l'intégrité du fichier. 
 
-* You need protection against a brute force attack in case your storage gets in somebody's hands. EncryptPad allows to generate a key and store it separately from encrypted information. The unwanted person would need two secrets to open an encrypted file: the passphrase and the key. Consider this example: you store your encrypted file on a memory stick, and protect it with a passphrase. In addition to that, you protect the file with a file key and store the key on computers where you open the file. If the memory stick is lost, the passphrase is not enough to decrypt your information. The key file is also needed and it is not on the memory stick.
+* Vous devez être protégé contre une attaque par force brute au cas où votre moyen de stockage tomberait dans les mains de quelqu'un. EncryptPad permet de générer une clé et de la stocker séparément des informations chiffrées. Une personne non autorisée aurait besoin de deux secrets pour ouvrir un fichier : la phrase de passe et la clé. Examinons cet exemple : vous stockez votre fichier chiffré sur une carte mémoire flash et vous le protégez par phrase de passe. De plus, vous protégez le fichier avec un fichier clé et stockez la clé sur les ordinateurs utilisés pour ouvrir le fichier. Si la carte mémoire flash est perdue, la phrase de passe ne suffira pas pour déchiffrer vos informations. Le fichier clé est aussi exigé, et il n'est pas sur la carte mémoire flash.
 
 <div id="when-can-i-not" />
-##When can I not use EncryptPad?
+##Quand ne puis-je pas utiliser EncryptPad ?
 
-* You need to send a file to somebody with whom you have **not prearranged a shared secret** (a passphrase or a key file). In this case, you need asymmetric encryption with public and private keys. Fortunately, there are many convenient tools suitable for the task. 
+* Vous devez envoyer un fichier à quelqu'un avec qui vous **n'avez pas prédéterminé un secret partagé** (une phrase de passe ou un fichier clé). Dans ce cas, il vous faut un chiffrement asymétrique avec des clés publique et privée. Heureusement, de nombreux outils pratiques sont adaptés à la tâche. 
 
-* You are on public transport or a common area where **somebody can see your screen**.
+* Vous êtes dans un transport en commun ou dans un espace public où **quelqu'un peut voir votre écran**.
 
-* EncryptPad is not effective on a computer infected with spyware or a virus. Do not use it on a **public, shared or compromised computer** if you do not trust its safety.
+*  EncryptPad est inefficace sur un ordinateur infecté par un logiciel espion ou un virus. Ne l'utilisez pas sur un **ordinateur public, partagé ou compromis** si vous n'avez pas confiance en sa sécurité.
 
-* **IMPORTANT**: Before using EncryptPad ensure that it is legal in your country to use encryption ciphers that EncryptPad provides. You may find useful information at [cryptolaw.org](http://www.cryptolaw.org/).
+* **IMPORTANT** : avant d'utiliser EncryptPad, vous devez vous assurer qu'il est légal d'utiliser dans votre pays les techniques de chiffrement fournies par EncryptPad. Vous trouverez des informations pertinentes sur [cryptolaw.org](http://www.cryptolaw.org/).
 
-* **IMPORTANT**: If you forgot your passphrase or lost a key file, there is nothing that can be done to open your encrypted information. There are no backdoors in the formats that EncryptPad supports. EncryptPad developers take no responsibility for corrupted or invalid files in accordance with the license.
+* **IMPORTANT** : si vous avez oublié votre phrase de passe ou si vous avez perdu un fichier clé, rien ne peut être fait pour accéder à vos informations chiffrées. Il n'y a aucune porte dérobée dans les formats qu'EncryptPad prend en charge. Les développeurs d'EncryptPad n'assument aucune responsabilité en cas de fichiers corrompus ou invalides, conformément à la licence. 
 
 <div id="file-types" />
-##File types
+##Type de fichier
 
-The format is determined by an extension of a file. Main extensions of encrypted files are GPG and EPD.
+Le format est déterminé par l'extension du fichier. Les principales extensions des fichiers chiffrés sont GPG et EPD.
 
 <div id="gpg" />
 ### GPG
 
-This file type conforms to Open PGP format and it is compatible with other OpenPGP tools. Use it if you need to open a file where EncryptPad is not available. The format does not support double protection (key file + passphrase). So you need to choose between key file or passphrase and cannot use both. In addition, it cannot store file key path in the encrypted file. It means that every time you open a file encrypted with a key file, the application will ask you which key file to use.
+Ce type de fichier se conforme au format OpenPGP et est compatible avec les autres outils OpenPGP. Utilisez-le si vous devez ouvrir un fichier où vous ne disposez pas d'EncryptPad. Le format ne prend pas en charge la protection double (fichier clé + phrase de passe). Vous devez donc choisir entre un fichier clé et une phrase de passe, mais ne pouvez pas utiliser les deux. De plus, il ne peut pas enregistrer le chemin du fichier clé dans le fichier chiffré. Cela signifie que chaque fois que vous ouvrirez un fichier chiffré avec un fichier clé, l'application vous demandera quel fichier clé utiliser.
 
 <div id="epd" />
 ### EPD
 
-EncryptPad specific format. Other OpenPGP software will not be able to open it unless the file was only protected with a passphrase. If passphrase only protection was used, the file is effectively a GPG file (see GPG section above). However, when a key file protection is involved, it is a GPG file in a [WAD](https://en.wikipedia.org/wiki/Doom_WAD) container. See the following chapter for details.
+Format spécifique à EncryptPad. Les autres logiciels OpenPGP ne pourront pas l'ouvrir à moins que le fichier n'ait été protégé que par une phrase de passe. Si seule la protection par phrase de passe a été utilisée, le fichier est en fait un fichier GPG (voir la section GPG ci-dessus). Cependant, si la protection par fichier clé est utilisée, c'est un fichier GPG dans un conteneur [WAD](https://fr.wikipedia.org/wiki/.wad).  Consulter le chapitre suivant pour plus de détails.
 
 <div id="feature-support" />
-### Feature support
+### Prise en charge des fonctions
 
 <table style="border: 1px solid black">
 <tr>
-<th>Type</th><th>Feature</th><th>Supported</th><th>Key file path\*</th><th>OpenPGP compatible</th><th>File format</th>
+<th>Type</th><th>Caractéristique</th><th>Pris en charge</th><th>Chemin du fichier clé\*</th><th>Compatible OpenPGP</th><th>Format de fichier</th>
 </tr>
-<tr><td>GPG</td><td>Passphrase</td><td>yes</td><td>n/a</td><td>yes</td><td>OpenPGP file</td></tr>
-<tr><td>GPG</td><td>Key file</td><td>yes</td><td>no</td><td>yes</td><td>OpenPGP file</td></tr>
-<tr><td>GPG</td><td>Key file and passphrase</td><td>no</td><td>n/a</td><td>n/a</td><td>n/a</td></tr>
-<tr><td>EPD</td><td>Passphrase</td><td>yes</td><td>n/a</td><td>yes</td><td>OpenPGP file</td></tr>
-<tr><td>EPD</td><td>Key file</td><td>yes</td><td>yes</td><td>no</td><td>Nested: WAD/OpenPGP</td></tr>
-<tr><td>EPD</td><td>Key file and passphrase</td><td>yes</td><td>yes</td><td>no</td><td>Nested: OpenPGP/WAD/OpenPGP</td></tr>
+<tr><td>GPG</td><td>Phrase de passe</td><td>oui</td><td>n.d.</td><td>oui</td><td>Fichier OpenPGP</td></tr>
+<tr><td>GPG</td><td>Fichier clé</td><td>oui</td><td>non</td><td>oui</td><td>Fichier OpenPGP</td></tr>
+<tr><td>GPG</td><td>Fichier clé et phrase de passe</td><td>non</td><td>n.d.</td><td>n.d.</td><td>n.d.</td></tr>
+<tr><td>EPD</td><td>Phrase de passe</td><td>oui</td><td>n.d.</td><td>oui</td><td>Fichier OpenPGP</td></tr>
+<tr><td>EPD</td><td>Fichier clé</td><td>oui</td><td>oui</td><td>non</td><td>Imbriqué : WAD/OpenPGP</td></tr>
+<tr><td>EPD</td><td>Fichier clé et phrase de passe</td><td>oui</td><td>oui</td><td>non</td><td>Imbriqué : OpenPGP/WAD/OpenPGP</td></tr>
 </table>
 
-\* Key file location is persisted in the header of an encrypted file so the user does not need to specify it when decrypting.
+\*  L'emplacement du fichier clé se trouve dans l'en-tête d'un fichier chiffré afin que l'utilisateur n'ait pas à le spécifier lors du déchiffrement.
 
 <div id="key-file" />
-##What is an EncrypPad key file?
-In symmetric encryption the same sequence is used to encrypt and decrypt data. The user or another
-application usually provides this sequence in the form of an entered passphrase or a file. In addition to
-entered passphrases, EncryptPad generates files with random sequences called "key files".
+## Qu'est-ce qu'un fichier clé EncryptPad ?
+Dans un chiffrement symétrique, la même séquence est utilisée pour chiffrer et pour déchiffrer les données. L'utilisateur ou une autre
+application fournie habituellement la séquence sous la forme d'une phrase de passe saisie ou d'un fichier. En plus des
+phrases de passe saisies, EncryptPad génère des fichiers avec des séquences aléatoires appelés « fichiers clés ».
 
-When the user creates a key file, EncryptPad generates a random sequence of bytes, asks the
-user for a passphrase, encrypts the generated sequence and saves it to a file.
+Quand l'utilisateur crée un fichier clé, EncryptPad génère une séquence  aléatoire d'octets, demande une 
+phrase de passe à l'utilisateur, chiffre la séquence générée et l'enregistre dans un fichier.
 
-The format of the file is OpenPGP. Other OpenPGP implementations can also create and 
-open EncryptPad key files as below shell commands demonstrate.
+Le format du fichier est OpenPGP. D'autres applications OpenPGP peuvent aussi créer et 
+ouvrir les fichiers clés EncryptPad comme les lignes de commande ci-dessous le démontrent.
 
-When EncryptPad generates a new key file, it is roughly equivalent to the following `gpg2` command.
+Quand EncryptPad génère un nouveau fichier clé, il est approximativement équivalent à la commande `gpg2` suivante.
 
     pwmake 1024 | gpg2 -c --armor --cipher-algo AES256 > ~/.encryptpad/foo.key
 
-`pwmake` generates a random sequence, which `gpg2` in-turn encrypts. It will ask for the
-passphrase to encrypt the sequence.
+`pwmake` génère une séquence aléatoire que « gpg2 » chiffre à son tour. Il demandera la
+phrase de passe pour chiffrer la séquence.
 
-When you use this key to encrypt `test3.txt`, the equivalent `gpg` command is below.
+Quand vous utilisez cette clé pour chiffrer `test3.txt`, la commande `gpg` équivalente est comme suit :
 
     gpg2 --decrypt ~/.encryptpad/foo.key \
     | gpg2 --passphrase-fd 0 --batch -c --cipher-algo AES256 \
@@ -162,104 +162,104 @@ When you use this key to encrypt `test3.txt`, the equivalent `gpg` command is be
 The left `gpg2` process decrypts `foo.key` and directs it to descriptor 0 of the right process
 through a pipe. `gpg2` reads the sequence from the descriptor with `--passphrase-fd 0`.
 
-When EncryptPad opens the encrypted file protected with `foo.key`, the equivalent `gpg` commands are
-these:
+Quand EncryptPad ouvre le fichier chiffré protégé avec `foo.key`, les commandes `gpg` équivalentes sont
+ :
 
     gpg2 --decrypt ~/.encryptpad/foo.key \
     | gpg2 --passphrase-fd 0 --batch --decrypt \
     -o /tmp/test4.txt /tmp/test3.txt.gpg
 
-As you see, other OpenPGP implementations can also use EncryptPad keys.
+Comme vous pouvez le voir, les autres applications OpenPGP peuvent aussi utiliser les clés EncryptPad.
 
 <div id="epd-file-format" />
-##EPD file format when encrypting with a key
+##Format EPD lors d'un chiffrement avec clé
 
-There are three different structures a saved file can have depending on protection mode:
+Un fichier enregistré peut avoir trois structures différentes selon le mode de protection :
 
-1. **Passphrase only** (passphrase is used to protect a file but no keys are specified). The file is an ordinary OpenPGP file.
+1. **Phrase de passe seulement** (une phrase de passe est utilisée pour protéger un fichier, mais aucune clé n'est spécifiée). Le fichier est un fichier OpenPGP ordinaire.
 
-2. **Key only** (passphrase is not set but a key file is used for protection). The file is a WAD file. [WAD](https://en.wikipedia.org/wiki/Doom_WAD) is a simple format for combining multiple binary files in one. You can open a WAD file in [Slade](http://slade.mancubus.net/). It contains two files internally: 
-    * OpenPGP file encrypted with the key
-    * `__X2_KEY` is a plain text file containing the path to the key if "persist key path" is enabled. Otherwise, it has zero length.
+2. **Clé seulement** (une phrase de passe n'est pas définie, mais un fichier clé est utilisé pour la protection). Le fichier est un fichier WAD. [WAD](https://fr.wikipedia.org/wiki/.wad) est un format simple qui combine plusieurs fichiers binaires en un seul. Vous pouvez ouvrir un fichier WAD avec [Slade](http://slade.mancubus.net/). Il contient deux fichiers : 
+    * Fichier OpenPGP chiffré avec la clé
+    * `__X2_KEY` est un fichier texte en clair contenant le chemin de la clé si « Emplacement de clé persistant dans le fichier chiffré » est activé. Autrement, il a une taille de zéro.
 
-3. **Protected with passphrase and key**. The resulting file is an OpenPGP file containing a WAD file as in point 2.
+3. **Protégé par phrase de passe et clé**. Le fichier produit est un fichier OpenPGP contenant un fichier WAD tel que décrit en 2.
 
 <div id="use-curl" />
-##Use CURL to automatically download keys from a remote storage
+##Utiliser CURL pour télécharger automatiquement des clés d'un stockage distant]
 
-If **[CURL](http://curl.haxx.se/)** URL is specified in **Key File Path** field in the **Set Encryption Key** dialog, EncryptPad will attempt to start a curl process to download the key from a remote host. If you want to use this feature, you need to set the path to the CURL executable in the EncryptPad settings. 
+Si une URL **[CURL](http://curl.haxx.se/) est précisée dans le champ **Chemin du fichier clé** de la boîte de dialogue **Définir la clé de chiffrement**, EncryptPad essaiera de lancer un processus curl pour télécharger la clé à partir d'un hôte distant. Si vous souhaitez utiliser cette fonction, vous devez définir le chemin de l'exécutable CURL dans les paramètres d'EncryptPad. 
 
-Consider this use case scenario: you travel with your laptop and open an encrypted file on the laptop. If you protect the file with a passphrase and a key and your laptop is lost or stolen, the perpetrator will be able to make a brute force attack on your file because the key is also stored on the laptop. To avoid it EncryptPad makes the following steps:
+Examinons un scénario d'utilisation : en voyage, vous ouvrez un fichier chiffré sur votre ordinateur portable. Si vous protégez le fichier avec une phrase de passe et une clé, et que votre portable est perdu ou volé, le malfaiteur pourra attaquer votre fichier par force brute, car la clé est aussi stockée sur l'ordinateur portable. Pour empêcher cela, EncryptPad prend les mesures suivantes :
 
-1. Encrypts the plain text file with the key
-2. Copies the encrypted file into a WAD file together with the unencrypted HTTPS or SFTP URL to the key file containing authentication parameters.
-3. Encrypts the WAD file from point 2 with the passphrase. 
+1. Chiffre le fichier texte en clair avec la clé
+2. Copie le fichier chiffré dans un fichier WAD avec l'URL HTTPS ou SFTP non chiffrée vers le fichier clé contenant les paramètres d'authentification.
+3. Chiffre le fichier WAD du point 2 avec la phrase de passe. 
 
-If this file gets into the hands of a perpetrator, he or she will need to brute force the passphrase first to be able to obtain the key URL and the authentication parameters. Since a brute force attack takes a lot of time, the user will be able to remove the key or change the authentication so the previous parameters become obsolete.
+Si le fichier tombe dans les mains d'un malfaiteur, il devra d'abord attaquer par force brute la phrase de passe afin d'obtenir l'URL de la clé et les paramètres d'authentification. Dans la mesure où une attaque par force brute prend beaucoup de temps, l'utilisateur pourra retirer la clé ou changer l'authentification afin que les paramètres précédents deviennent désuets.
 
 <div id="known-weaknesses" />
-##Known weaknesses
+##Faiblesses connues
 
-* EncryptPad stores unencrypted text in memory. If a memory dump is automatically taken after a system or application crash or some of the memory is saved to a swap file, the sensitive information will occur on the disk. Sometimes it is possible to configure an operating system not to use a dump and swap files. It is a good practice to close EncrypPad when not in use.
+* EncryptPad stocke du texte non chiffré en mémoire. Si un vidage de la mémoire est effectué automatiquement après un plantage du système ou de l'application, ou si une partie de la mémoire est enregistrée dans le fichier d'échange, les informations délicates se trouveront sur le disque. Il est parfois possible de configurer un système d'exploitation pour empêcher les vidages et l'utilisation d'un fichier d'échange. Il est recommandé de fermer EncryptPad quand il n'est pas utilisé.
 
 <div id="command-line-interface" />
-##Command line interface
+##Interface en ligne de commande
 
-There is **encryptcli** executable to encrypt / decrypt files in command line. Run without
-arguments to see available parameters. Below is an example of encrypting a file with a key.
+**encryptcli** est l'exécutable pour chiffrer ou déchiffrer des fichiers  à partir de la ligne de commande. Exécutez-le sans
+arguments pour obtenir une liste des paramètres proposés. Ci-dessous un exemple de chiffrement d'un fichier avec une clé :
 
-    # generate a new key and protect it with the passphrase "key".
-    # --key-pwd-fd 0 for reading the key passphrase from descriptor 0
-    echo -n "key" | encryptcli --generate-key --key-pwd-fd 0 my_key.key
+    # générer une nouvelle clé et la protéger avec la phrase de passe « clé ».
+    # --key-pwd-fd 0 pour lire la phrase par de la clé à partir de descripteur 0
+    echo -n "clé" | encryptcli --generate-key --key-pwd-fd 0 ma_clé.key
 
-    # encrypt plain_text.txt with my_key.key created above.
-    # The key passphrase is sent through file descriptor 3
-    cat plain_text.txt | encryptcli -e --key-file my_key.key \
-    --key-only --key-pwd-fd 3 -o plain_text.txt.gpg 3< <(echo -n "key")
+    # chiffrer texte_clair.txt avec ma_clé.key créé ci-dessus.
+    # La phrase de passe de la clé est envoyé par le descripteur de fichier 3
+    cat texte_clair.txt | encryptcli -e --key-file ma_clé.key \
+    --key-only --key-pwd-fd 3 -o texte_clair.txt.gpg 3< <(echo -n "clé")
 
 <div id="installing" />
-##Installing EncryptPad
+##Installer EncryptPad
 
 <div id="portable-exe" />
-###Portable executable
+###Exécutable portable
 
-Portable binaries are available for Windows and Apple. They can be copied on a memory stick or
-placed on a network share.
+Des fichiers binaires portables sont proposés pour Windows et Apple. Ils peuvent être copiés sur une clé USB ou
+placés sur un disque réseau.
 
 <div id="install-on-arch" />
 ###Arch Linux
 
-Use fingerprints to receive gpg keys for EncryptPad and Botan.
+Utiliser des empreintes pour recevoir des clés gpg pour EncryptPad et Botan
 
     gpg --recv-key 621DAF6411E1851C4CF9A2E16211EBF1EFBADFBC
     gpg --recv-key 634BFC0CCC426C74389D89310F1CFF71A2813E85
 
-Install the AUR packages below.
+Installer les paquets AUR ci-dessous :
 
 - [botan-stable](https://aur.archlinux.org/packages/botan-stable/)<sup><small>AUR</small></sup>
 - [encryptpad](https://aur.archlinux.org/packages/encryptpad/)<sup><small>AUR</small></sup>
 
-`pacaur` installs `botan-stable` automatically as `encryptpad` dependency.
+`pacaur` installe `botan-stable` automatiquement comme dépendance d`encryptpad`.
 
 <div id="install-on-ubuntu" />
-###Ubuntu or Linux Mint via PPA
+###Ubuntu ou Linux Mint par PPA
 
-Alin Andrei from [**webupd8.org**](http://webupd8.org) kindly created EncryptPad packages for
-several distributions. See instructions below on how to install them.
+Alin Andrei de [**webupd8.org**](http://webupd8.org) à gentillement créé des paquets EncryptPad pour
+plusieurs distributions. Voir les instructions ci-dessous sur comment les installer.
 
 #### Installation
 
-Use the commands below to install the packages.
+Utiliser les commandes ci-dessous pour installer les paquets :
 
     sudo add-apt-repository ppa:nilarimogard/webupd8
     sudo apt update
     sudo apt install encryptpad encryptcli
 
-#### Integrity verification procedure
+#### Procédure de vérification de l'intégrité
 
-Below are steps to verify the SHA1 hashes of the source files in [Launchpad webupd8 PPA](https://launchpad.net/~nilarimogard/+archive/ubuntu/webupd8/+packages) used for building the packages. Ideally, you need to be familiar with the PPA concepts.
+Ci-dessous se trouvent les étapes pour vérifier les hachages SHA-1 des fichiers source dans [Launchpad webupd8 PPA](https://launchpad.net/~nilarimogard/+archive/ubuntu/webupd8/+packages), utilisés pour construire les paquets. Vous devez idéalement être familier avec les PPA.
 
-1\. Download one of the `changes` files below depending on your distribution.
+1\. Télécharger un des fichiers `changes` ci-dessous selon votre distribution :
 
 - Yakkety
 
@@ -281,127 +281,127 @@ Below are steps to verify the SHA1 hashes of the source files in [Launchpad webu
 
         wget https://launchpadlibrarian.net/282247738/encryptpad_0.3.2.3-1~webupd8~trusty1_source.changes
 
-2\. Download the signed manifest with SHA1 hashes:
+2.\ Télécharger le manifeste signé avec les hachages SHA-1 :
 
     wget https://github.com/evpo/EncryptPad/releases/download/v0.3.2.3/encryptpad0_3_2_3_webupd8_ppa_manifest.asc
 
-3\. Receive and verify the `EncryptPad Release` key
+3.\ Recevoir et vérifier la clé `EncryptPad Release`
 
     gpg --recv-key 634BFC0CCC426C74389D89310F1CFF71A2813E85
 
-4\. Verify the signature on the manifest
+4.\ Vérifier la signature du manifeste
 
     gpg --verify encryptpad0_3_2_3_webupd8_ppa_manifest.asc
 
-5\. Open the manifest asc file in a text editor and the `changes` text file. Compare that the SHA1
-    hashes on the listed source files match.
+5.\  Ouvrir le fichier asc du manifeste et le fichier texte `changes` dans un éditeur de texte. S'assurer que
+    les hachages SHA-1 des fichiers sources listés correspondent.
 
 <div id="compile-on-windows" />
-##Compile EncryptPad on Windows
+## Compiler EncryptPad sous Windows
 
 <div id="prerequisites" />
-###Prerequisites
+###Prérequis
 
-1. [**Qt framework**](http://www.qt.io/download-open-source/) based on MingW 32 bit (the latest build has been tested with Qt 5.3.2).
-2. MSYS: you can use one bundled with [**Git For Windows**](http://git-scm.com/download/win). You probably use Git anyway.
-3. Python: any recent version will work.
+1. [**Le cadre Qt**](http://www.qt.io/download-open-source/) fondé sur MingW 32 bit (la dernière version a été testée avec Qt 5.3.2).
+2. MSYS : vous pouvez en utiliser un regroupé avec [**Git pour Windows**](http://git-scm.com/download/win). Vous utilisez probablement déjà Git.
+3. Python : toute version récente fonctionnera
 
 <div id="steps" />
-###Steps
+###Étapes
 
-1. Modify the session **PATH** environment variable to include the Qt build toolset and Python. **mingw32-make**, **g++**, **qmake**, **python.exe** should be in the global search path in your Git Bash session. I personally modify bash.bashrc and add a line like `PATH=$PATH:/c/Python35-32:...` not to polute the system wide PATH variable.
+1. Modifier la variable d'environnement de session **PATH** afin d'inclure l'ensemble d'outils Qt et Python. **mingw32-make**, **g++**, **qmake**, **python.exe** devraient se trouver dans le chemin de recherche globale de votre session bash Git. Personnellement, je modifie bash.bashrc et ajoute une ligne comme `PATH=$PATH:/c/Python35-32:...` afin de ne pas polluer la variable PATH à l'échelle du système.
 
-2. Extract the EncryptPad source files to a directory.
+2. Extraire les fichiers sources d'EncryptPad dans un répertoire.
 
-3. Run **configure.sh** script without parameters to see available options. To build everything:
+3. Exécuter le script **configure.sh** sans paramètres pour voir les options proposées. Pour tout compiler :
 
     ./configure.sh --all
 
-or for localized binaries
+ou pour des fichiers binaires localisés
 
     ./configure.sh --all-cultures
 
-The Makefiles system uses **uname** to identify the OS and platform. You may need to modify uname parameters in **./deps/makefiles/platform.mak** to make it work. See Makefiles documentation and configure.sh script if you have any problems.
+Le système Makefiles utilise **uname** pour identifier le système d'exploitation et la plate-forme. Vous pourriez avoir à modifier les paramètres uname dans **./deps/makefiles/platform.mak** pour que cela fonctionne. Consultez la documentation Makefiles et le script configure.sh si vous éprouvez des problèmes.
 
-If the build is successful, you should see the executable **./bin/release/EncryptPad.exe**
+Si la compilation a réussi vous devriez voir l'exécutable **./bin/release/EncryptPad.exe**
 
-Note that if you want EncryptPad to work as a single executable without dlls, you need to build Qt framework yourself statically. It takes a few hours. There are plenty of instructions on how to do this in the internet. The most popular article recommends using a powershell script. While it is convenient and I did it once, sometimes you don't want to upgrade your powershell and install heavy dependencies coming with it. So the next time I had to do that, I read the script and did everything manually. Luckily there are not too many steps in it.
+Prenez note que si vous voulez qu'EncryptPad fonctionne en un seul exécutable sans dll, vous devez compiler le cadre Qt vous-même de façon statique. Cela prend quelques heures. De nombreuses instructions décrivant comment accomplir cela se trouvent sur Internet.  L'article le plus populaire recommande d'utiliser un script PowerShell. Bien qu'il soit très pratique (je l'ai utilisé une fois), on ne veut pas toujours mettre à niveau son PowerShell et installer les lourdes dépendances qui viennent avec. Et donc, la fois d'après, j'ai lu le script et j'ai tout fait manuellement. Heureusement qu'il n'y avait pas trop d'étapes.
 
 <div id="compile-on-mac-linux" />
-##Compile EncryptPad on Mac/Linux
+##Compiler EncryptPad sous Mac/Linux
 
-It is easier than building on Windows. All you need is to install Qt, Python and run
+C'est plus facile que de compiler sous Windows. Tout ce que vous avez à faire est d'installer QT, Python et d'exécuter :
 
     ./configure.sh --all
 
 <div id="dynamic-build"/>
-###Dynamic build
+###Compilation dynamique
 
     ./configure.sh --all --use-system-libs
 
-Build with dynamic linking to libraries. It also uses `Botan` and `Zlib` installed on the system instead
-of compiling their source code under `deps`. On Ubuntu, install `libbotan1.10-dev` and `zlib1g-dev`
-packages before building.
+Compilation avec des liens dynamiques vers les bibliothèques. Elle utilise aussi `Botan` et `Zlib` installés sur le système plutôt
+que de compiler leur code source sous `deps`. Sous Ubuntu,  installez les
+paquets `libbotan1.10-dev` et `zlib1g-dev` avant de compiler.
 
 <div id="build-on-fedora" />
 ###Fedora###
 
-Install dependencies and tools:
+Installez les dépendances et outils :
 
     dnf install gcc make qt5-qtbase-devel gcc-c++ python libstdc++-static glibc-static
     PATH=$PATH:/usr/lib64/qt5/bin/
     export PATH
 
-Open encryptpad directory:
+Ouvrir le répertoire encryptpad :
 
     ./configure.sh --all
 
-or for dynamic build with system libraries:
+ou pour une compilation dynamique avec des bibliothèques système :
 
     dnf install botan-devel
     ./configure.sh --all --use-system-libs
 
 <div id="acknowledgements" />
-##Acknowledgements
+##Remerciements
 
-EncryptPad uses the following frameworks and libraries.
+EncryptPad utilise les cadres et bibliothèques suivantes :
 
-1. [**QT Framework**](http://www.qt.io/)
+1. [**Cadre Qt **](http://www.qt.io/)
 2. [**Botan**](http://botan.randombit.net/)
 3. [**stlplus**](http://stlplus.sourceforge.net/)
 5. [**Makefiles**](http://stlplus.sourceforge.net/makefiles/docs/)
 4. [**zlib**](http://zlib.net/)
 6. [**gtest**](http://code.google.com/p/googletest/)
-7. [**famfamfam Silk iconset 1.3**](http://www.famfamfam.com/lab/icons/silk/)
+7. [**Jeu d'icônes famfamfam Silk 1.3**](http://www.famfamfam.com/lab/icons/silk/)
 
 <div id="integrity-verification" />
-##EncryptPad integrity verification
+##Vérification de l'intégrité d'EncryptPad
 
 <div id="openpgp-signing" />
-###OpenPGP signing and certification authority
+###Signature OpenPGP et autorité de certification
 
-All EncryptPad related downloads are signed with the following OpenPGP key.
+Tous les téléchargements associés à EncryptPad sont signés avec la clé OpenPGP suivante :
 
 `EncryptPad (Releases) 2048R/A2813E85` 
 
 `software@evpo.net` 
 
-`Key fingerprint = 634B FC0C CC42 6C74 389D  8931 0F1C FF71 A281 3E85`
+`Empreinte de la clé = 634B FC0C CC42 6C74 389D  8931 0F1C FF71 A281 3E85`
 
-I also have a code signing certificate issued by a certification authority (CA). To establish a connection between my CA certificate and the above OpenPGP key, I created an executable signed with the CA certificate containing fingerprints and the OpenPGP key. You can find `ca_signed_pgp_signing_instructions` in downloads. Effectively I created a bridge of trust between my CA certificate and the OpenPGP key.
+J'ai aussi un certificat de signature de code délivré par une autorité de certification (CA). Pour établir une connexion entre mon certificat CA et la clé OpenPGP ci-dessus, j'ai créé un exécutable signé avec le certificat CA contenant les empreintes et la clé OpenPGP. Vous trouverez `ca_signed_pgp_signing_instructions` dans les téléchargements. J'ai en fait créé un pont de confiance entre mon certificat CA et la clé OpenPGP.
 
-There is a few reasons why I did not simply use the CA certificate:
+Il a quelques raisons pourquoi je n'ai pas simplement utilisé le certificat CA :
 
-1. EncryptPad is based on the OpenPGP standard and promotes it.
-2. OpenPGP signing is more flexible.
-3. It does not have the running cost that CA certification incurs.
+1. EncryptPad est fondé sur la norme OpenPGP et la promeut.
+2. La signature OpenPGP est plus souple.
+3. La certification CA a un coût, ce qui n'est pas le cas de la signature OpenPGP.
 
 <div id="verification-process" />
-### Step by step verfification process
+### Processus de vérification étape par étape
 
-1. Download packages and their detached OpenPGP signatures.
-2. Import the EncryptPad (Releases) key to your GPG keyring.
-3. Ensure that it is the valid EncryptPad (Releases) key by checking its fingerprint with `ca_signed_pgp_signing_instructions`.
+1. Téléchargez les paquets et leur signature OpenPGP.
+2. Importez la clé EncryptPad (Releases) dans votre trousseau GPG.
+3. Assurez-vous que c'est bien la clé EncryptPad (Releases) valide en vérifiant son empreinte avec `ca_signed_pgp_signing_instructions`.
 4. Verify signatures on the downloaded files with GPG.
 
 <div id="license" />
