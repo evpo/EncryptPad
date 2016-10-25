@@ -85,7 +85,7 @@ EncryptPad est une application de visualisation et d'édition de texte chiffré 
 
 * Vous devez envoyer un fichier chiffré à quelqu'un avec qui vous avez prédéterminé un secret (une phrase de passe ou un fichier clé). Dans ce cas, vous devez échanger le secret en personne (pas par un protocole Internet accessible) pour que le fichier protégé soit déchiffré par le destinataire.
 
-* Vous stockez ou recevez un fichier et vous devez vous assurez qu'il n'a pas été altéré ou corrompu pendant la transmission. EncryptPad utilise l'algorithme de hachage SHA-1 pour contrôler l'intégrité du fichier. 
+* You are on public transport or a common area where **somebody can see your screen**.
 
 * Vous devez être protégé contre une attaque par force brute au cas où votre moyen de stockage tomberait dans les mains de quelqu'un. EncryptPad permet de générer une clé et de la stocker séparément des informations chiffrées. Une personne non autorisée aurait besoin de deux secrets pour ouvrir un fichier : la phrase de passe et la clé. Examinons cet exemple : vous stockez votre fichier chiffré sur une carte mémoire flash et vous le protégez par phrase de passe. De plus, vous protégez le fichier avec un fichier clé et stockez la clé sur les ordinateurs utilisés pour ouvrir le fichier. Si la carte mémoire flash est perdue, la phrase de passe ne suffira pas pour déchiffrer vos informations. Le fichier clé est aussi exigé, et il n'est pas sur la carte mémoire flash.
 
@@ -159,11 +159,10 @@ Quand vous utilisez cette clé pour chiffrer `test3.txt`, la commande `gpg` équ
     | gpg2 --passphrase-fd 0 --batch -c --cipher-algo AES256 \
     -o /tmp/test3.txt.gpg /tmp/test3.txt
 
-The left `gpg2` process decrypts `foo.key` and directs it to descriptor 0 of the right process
+The first `gpg2` process decrypts `foo.key` and directs it to descriptor 0 of the second process
 through a pipe. `gpg2` reads the sequence from the descriptor with `--passphrase-fd 0`.
 
 Quand EncryptPad ouvre le fichier chiffré protégé avec `foo.key`, les commandes `gpg` équivalentes sont
- :
 
     gpg2 --decrypt ~/.encryptpad/foo.key \
     | gpg2 --passphrase-fd 0 --batch --decrypt \
