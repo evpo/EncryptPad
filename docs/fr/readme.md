@@ -48,7 +48,7 @@ EncryptPad est une application de visualisation et d'édition de texte chiffré 
 * **Fins de ligne configurable** Windows ou Unix
 * Un **générateur de phrases de passe** personnalisable aide à créer des phrases de passe aléatoires robustes.
 * Format de fichier compatible avec **OpenPGP**
-* **Iterated and salted S2K**
+* **S2K itérées et salée**
 * Algorithmes de chiffrement : **CAST5, TripleDES, AES128, AES256** 
 * Algorithmes de hachage : **SHA-1, SHA256**
 * Protection de l'intégrité : **SHA-1**
@@ -394,7 +394,7 @@ Il a quelques raisons pourquoi je n'ai pas simplement utilisé le certificat CA 
 
 1. EncryptPad est fondé sur la norme OpenPGP et la promeut.
 2. La signature OpenPGP est plus souple.
-3. La certification CA a un coût, ce qui n'est pas le cas de la signature OpenPGP.
+3. La certification CA a un coût de fonctionnement, ce qui n'est pas le cas de la signature OpenPGP.
 
 <div id="verification-process" />
 ### Processus de vérification étape par étape
@@ -402,28 +402,28 @@ Il a quelques raisons pourquoi je n'ai pas simplement utilisé le certificat CA 
 1. Téléchargez les paquets et leur signature OpenPGP.
 2. Importez la clé EncryptPad (Releases) dans votre trousseau GPG.
 3. Assurez-vous que c'est bien la clé EncryptPad (Releases) valide en vérifiant son empreinte avec `ca_signed_pgp_signing_instructions`.
-4. Verify signatures on the downloaded files with GPG.
+4. Vérifier avec GPG les signatures des fichiers téléchargés.
 
 <div id="license" />
-##License
+##Licence
 
-EncryptPad is free software: you can redistribute it and/or modify
-it under the terms of the [GNU General Public License](http://www.gnu.org/licenses/) as published by
-the Free Software Foundation, either version 2 of the License, or
-(at your option) any later version.
+EncryptPad est un logiciel libre et gratuit : vous pouvez le redistribuer ou le modifier
+selon les conditions de la [licence générale publique GNU](http://www.gnu.org/licenses/) telle que publiée par
+« Free Software Foundation », soit la version 2 de la licence, soit
+toute version ultérieure (à votre gré).
 
-EncryptPad is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+EncryptPad est distribué en espérant qu'elle sera utile,
+mais SANS GARANTIE ; sans même la garantie tacite de QUALITÉ
+MARCHANDE ou D'ADÉQUATION À UN BUT PARTICULIER. Voir la
+la licence générale publique GNU pour plus de détails.
 
 <div id="contact" />
-##Contact and feedback
+##Contact et rétroaction
 
-If your question is related to EncryptPad, send it to the mailing list: **encryptpad@googlegroups.com** linked to [the public discussion group](https://groups.google.com/d/forum/encryptpad).
+Si votre question concerne EncryptPad, veuillez l'envoyer à la liste de diffusion **encryptpad@googlegroups.com** reliée au [groupe public de discussion](https://groups.google.com/d/forum/encryptpad).
 
-Bug tracker and contributions: [github.com/evpo/EncryptPad/issues](https://github.com/evpo/EncryptPad/issues)
+Gestionnaire de bogues et contributions : [github.com/evpo/EncryptPad/issues](https://github.com/evpo/EncryptPad/issues)
 
-Evgeny Pokhilko **software@evpo.net** for private contacts
+Pour des contacts privés : Evgeny Pokhilko **software@evpo.net**
 
 [http://www.evpo.net/encryptpad](http://www.evpo.net/encryptpad)
