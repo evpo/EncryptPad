@@ -38,7 +38,7 @@ EncryptPad est une application de visualisation et d'édition de texte chiffré 
 * Chiffrement **symétrique**
 * Protection par **phrase de passe**
 * Protection par **fichier clé**
-* Combinaison d'un **phrase de passe et d'un fichier clé**
+* Combinaison d'une **phrase de passe et d'un fichier clé**
 * **Générateur de fichiers clés** aléatoires 
 * **Dépôt de clés** dans un dossier caché du répertoire personnel de l'utilisateur
 * Le chemin d'un fichier clé peut être stocké dans un fichier chiffré. Si cette option est activée, **vous n'avez pas à spécifier le fichier clé** chaque fois que vous ouvrez des fichiers.
@@ -81,7 +81,7 @@ EncryptPad est une application de visualisation et d'édition de texte chiffré 
 <div id="when-encryptpad" />
 ##Quand ai-je besoin d'EncryptPad ?
 
-* Vous avez un fichier contenant des informations délicates telles que des noms de compte, des phrases de passe ou des numéros d'identification. Ce fichier est stocké sur un support sans protection, ou vous ne pouvez pas contrôler qui y accède, que ce soit au travail, sur un ordinateur portable lors de déplacements, un clé USB ou un disque nuagique.
+* Vous avez un fichier contenant des informations délicates telles que des noms de compte, des phrases de passe ou des numéros d'identification. Ce fichier est stocké sur un support sans protection, ou vous ne pouvez pas contrôler qui y accède, que ce soit au travail, sur un ordinateur portable lors de déplacements, une clé USB ou un disque nuagique.
 
 * Vous devez envoyer un fichier chiffré à quelqu'un avec qui vous avez prédéterminé un secret (une phrase de passe ou un fichier clé). Dans ce cas, vous devez échanger le secret en personne (pas par un protocole Internet accessible) pour que le fichier protégé soit déchiffré par le destinataire.
 
@@ -122,7 +122,7 @@ Format spécifique à EncryptPad. Les autres logiciels OpenPGP ne pourront pas l
 
 <table style="border: 1px solid black">
 <tr>
-<th>Type</th><th>Caractéristique</th><th>Pris en charge</th><th>Chemin du fichier clé\*</th><th>Compatible OpenPGP</th><th>Format de fichier</th>
+<th>Type</th><th>Caractéristique</th><th>Prise en charge</th><th>Chemin du fichier clé\*</th><th>Compatible OpenPGP</th><th>Format de fichier</th>
 </tr>
 <tr><td>GPG</td><td>Phrase de passe</td><td>oui</td><td>n.d.</td><td>oui</td><td>Fichier OpenPGP</td></tr>
 <tr><td>GPG</td><td>Fichier clé</td><td>oui</td><td>non</td><td>oui</td><td>Fichier OpenPGP</td></tr>
@@ -159,8 +159,8 @@ Quand vous utilisez cette clé pour chiffrer `test3.txt`, la commande `gpg` équ
     | gpg2 --passphrase-fd 0 --batch -c --cipher-algo AES256 \
     -o /tmp/test3.txt.gpg /tmp/test3.txt
 
-The first `gpg2` process decrypts `foo.key` and directs it to descriptor 0 of the second process
-through a pipe. `gpg2` reads the sequence from the descriptor with `--passphrase-fd 0`.
+Le premier processus `gpg2` déchiffre `foo.key` et le dirige vers le descripteur 0 du second processus
+par un opérateur de transfert de données . `gpg2` lit la séquence du descripteur avec `--passphrase-fd 0`.
 
 Quand EncryptPad ouvre le fichier chiffré protégé avec `foo.key`, les commandes `gpg` équivalentes sont
 
@@ -184,7 +184,7 @@ Un fichier enregistré peut avoir trois structures différentes selon le mode de
 3. **Protégé par phrase de passe et clé**. Le fichier produit est un fichier OpenPGP contenant un fichier WAD tel que décrit en 2.
 
 <div id="use-curl" />
-##Utiliser CURL pour télécharger automatiquement des clés d'un stockage distant]
+##Utiliser CURL pour télécharger automatiquement des clés d'un stockage distant
 
 Si une URL **[CURL](http://curl.haxx.se/) est précisée dans le champ **Chemin du fichier clé** de la boîte de dialogue **Définir la clé de chiffrement**, EncryptPad essaiera de lancer un processus curl pour télécharger la clé à partir d'un hôte distant. Si vous souhaitez utiliser cette fonction, vous devez définir le chemin de l'exécutable CURL dans les paramètres d'EncryptPad. 
 
@@ -243,8 +243,8 @@ Installer les paquets AUR ci-dessous :
 <div id="install-on-ubuntu" />
 ###Ubuntu ou Linux Mint par PPA
 
-Alin Andrei de [**webupd8.org**](http://webupd8.org) à gentillement créé des paquets EncryptPad pour
-plusieurs distributions. Voir les instructions ci-dessous sur comment les installer.
+Alin Andrei de [**webupd8.org**](http://webupd8.org) à gentiment créé des paquets EncryptPad pour
+plusieurs distributions. Voir les instructions d'installation ci-dessous :
 
 #### Installation
 
@@ -256,7 +256,7 @@ Utiliser les commandes ci-dessous pour installer les paquets :
 
 #### Procédure de vérification de l'intégrité
 
-Ci-dessous se trouvent les étapes pour vérifier les hachages SHA-1 des fichiers source dans [Launchpad webupd8 PPA](https://launchpad.net/~nilarimogard/+archive/ubuntu/webupd8/+packages), utilisés pour construire les paquets. Vous devez idéalement être familier avec les PPA.
+Ci-dessous se trouvent les étapes pour vérifier les hachages SHA-1 des fichiers sources dans [Launchpad webupd8 PPA](https://launchpad.net/~nilarimogard/+archive/ubuntu/webupd8/+packages), utilisés pour construire les paquets. Vous devez idéalement être familier avec les PPA.
 
 1\. Télécharger un des fichiers `changes` ci-dessous selon votre distribution :
 
@@ -301,7 +301,7 @@ Ci-dessous se trouvent les étapes pour vérifier les hachages SHA-1 des fichier
 <div id="prerequisites" />
 ###Prérequis
 
-1. [**Le cadre Qt**](http://www.qt.io/download-open-source/) fondé sur MingW 32 bit (la dernière version a été testée avec Qt 5.3.2).
+1. [**Le cadre Qt**](http://www.qt.io/download-open-source/) fondé sur MingW 32 bits (la dernière version a été testée avec Qt 5.3.2).
 2. MSYS : vous pouvez en utiliser un regroupé avec [**Git pour Windows**](http://git-scm.com/download/win). Vous utilisez probablement déjà Git.
 3. Python : toute version récente fonctionnera
 
@@ -339,13 +339,13 @@ C'est plus facile que de compiler sous Windows. Tout ce que vous avez à faire e
     ./configure.sh --all --use-system-libs
 
 Compilation avec des liens dynamiques vers les bibliothèques. Elle utilise aussi `Botan` et `Zlib` installés sur le système plutôt
-que de compiler leur code source sous `deps`. Sous Ubuntu,  installez les
+que de compiler leur code source sous `deps`. Sous Ubuntu,  installer les
 paquets `libbotan1.10-dev` et `zlib1g-dev` avant de compiler.
 
 <div id="build-on-fedora" />
 ###Fedora###
 
-Installez les dépendances et outils :
+Installer les dépendances et outils :
 
     dnf install gcc make qt5-qtbase-devel gcc-c++ python libstdc++-static glibc-static
     PATH=$PATH:/usr/lib64/qt5/bin/
@@ -365,7 +365,7 @@ ou pour une compilation dynamique avec des bibliothèques système :
 
 EncryptPad utilise les cadres et bibliothèques suivantes :
 
-1. [**Cadre Qt **](http://www.qt.io/)
+1. [**Cadre Qt**](http://www.qt.io/)
 2. [**Botan**](http://botan.randombit.net/)
 3. [**stlplus**](http://stlplus.sourceforge.net/)
 5. [**Makefiles**](http://stlplus.sourceforge.net/makefiles/docs/)
@@ -398,9 +398,9 @@ Il a quelques raisons pourquoi je n'ai pas simplement utilisé le certificat CA 
 <div id="verification-process" />
 ### Processus de vérification étape par étape
 
-1. Téléchargez les paquets et leur signature OpenPGP.
-2. Importez la clé EncryptPad (Releases) dans votre trousseau GPG.
-3. Assurez-vous que c'est bien la clé EncryptPad (Releases) valide en vérifiant son empreinte avec `ca_signed_pgp_signing_instructions`.
+1. Télécharger les paquets et leur signature OpenPGP.
+2. Importer la clé EncryptPad (Releases) dans votre trousseau GPG.
+3. S'assurer que c'est bien la clé EncryptPad (Releases) valide en vérifiant son empreinte avec `ca_signed_pgp_signing_instructions`.
 4. Vérifier avec GPG les signatures des fichiers téléchargés.
 
 <div id="license" />
@@ -414,7 +414,7 @@ toute version ultérieure (à votre gré).
 EncryptPad est distribué en espérant qu'elle sera utile,
 mais SANS GARANTIE ; sans même la garantie tacite de QUALITÉ
 MARCHANDE ou D'ADÉQUATION À UN BUT PARTICULIER. Voir la
-la licence générale publique GNU pour plus de détails.
+licence générale publique GNU pour plus de détails.
 
 <div id="contact" />
 ##Contact et rétroaction
@@ -423,6 +423,6 @@ Si votre question concerne EncryptPad, veuillez l'envoyer à la liste de diffusi
 
 Gestionnaire de bogues et contributions : [github.com/evpo/EncryptPad/issues](https://github.com/evpo/EncryptPad/issues)
 
-Pour des contacts privés : Evgeny Pokhilko **software@evpo.net**
+Pour tout autre sujet, contacter Evgeny Pokhilko **software@evpo.net**
 
 [http://www.evpo.net/encryptpad](http://www.evpo.net/encryptpad)
