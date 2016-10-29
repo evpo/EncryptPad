@@ -50,7 +50,7 @@ EncryptPad est une application de visualisation et d'édition de texte chiffré 
 * Format de fichier compatible avec **OpenPGP**
 * **S2K itérées et salée**
 * Algorithmes de chiffrement : **CAST5, TripleDES, AES128, AES256** 
-* Algorithmes de hachage : **SHA-1, SHA256**
+* Algorithmes de hachage : **SHA-1, SHA-256, SHA-512**
 * Protection de l'intégrité : **SHA-1**
 * Compression : **ZLIB, ZIP**
 

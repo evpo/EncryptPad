@@ -50,7 +50,7 @@ EncryptPad это приложение для просмотра и редакт
 * File format compatible with **OpenPGP**
 * **Iterated and salted S2K**
 * Cipher algorithms: **CAST5, TripleDES, AES128, AES256**
-* Hash algorithms: **SHA-1, SHA256**
+* Hash algorithms: **SHA-1, SHA-256, SHA-512**
 * Integrity protection: **SHA-1**
 * Compression: **ZLIB, ZIP**
 
