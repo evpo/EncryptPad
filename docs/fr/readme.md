@@ -32,7 +32,7 @@ EncryptPad est une application de visualisation et d'édition de texte chiffré 
 * [Licence](#license)
 * [Contact et rétroaction](#contacts)
 
-<div id="features" />
+<div id="features"></div>
 ##Caractéristiques
 
 * Chiffrement **symétrique**
@@ -54,7 +54,7 @@ EncryptPad est une application de visualisation et d'édition de texte chiffré 
 * Protection de l'intégrité : **SHA-1**
 * Compression : **ZLIB, ZIP**
 
-<div id="supported-platforms" />
+<div id="supported-platforms"></div>
 ##Plateformes prises en charge
 
 * Windows
@@ -63,7 +63,7 @@ EncryptPad est une application de visualisation et d'édition de texte chiffré 
 
 * Mac OS
 
-<div id="why-use-encryptpad" />
+<div id="why-use-encryptpad"></div>
 ##Pourquoi utiliser EncryptPad ?
 
 * Code base **multiplateforme : EncryptPad a été compilé sur trois systèmes d'exploitation populaires et peut être adapté à d'autres.
@@ -78,7 +78,7 @@ EncryptPad est une application de visualisation et d'édition de texte chiffré 
 
 * **Protection double** : des fichiers clés générés aléatoirement en plus de phrases de passe.
 
-<div id="when-encryptpad" />
+<div id="when-encryptpad"></div>
 ##Quand ai-je besoin d'EncryptPad ?
 
 * Vous avez un fichier contenant des informations délicates telles que des noms de compte, des phrases de passe ou des numéros d'identification. Ce fichier est stocké sur un support sans protection, ou vous ne pouvez pas contrôler qui y accède, que ce soit au travail, sur un ordinateur portable lors de déplacements, une clé USB ou un disque nuagique.
@@ -89,7 +89,7 @@ EncryptPad est une application de visualisation et d'édition de texte chiffré 
 
 * Vous devez être protégé contre une attaque par force brute au cas où votre moyen de stockage tomberait dans les mains de quelqu'un. EncryptPad permet de générer une clé et de la stocker séparément des informations chiffrées. Une personne non autorisée aurait besoin de deux secrets pour ouvrir un fichier : la phrase de passe et la clé. Examinons cet exemple : vous stockez votre fichier chiffré sur une carte mémoire flash et vous le protégez par phrase de passe. De plus, vous protégez le fichier avec un fichier clé et stockez la clé sur les ordinateurs utilisés pour ouvrir le fichier. Si la carte mémoire flash est perdue, la phrase de passe ne suffira pas pour déchiffrer vos informations. Le fichier clé est aussi exigé, et il n'est pas sur la carte mémoire flash.
 
-<div id="when-can-i-not" />
+<div id="when-can-i-not"></div>
 ##Quand ne puis-je pas utiliser EncryptPad ?
 
 * Vous devez envoyer un fichier à quelqu'un avec qui vous **n'avez pas prédéterminé un secret partagé** (une phrase de passe ou un fichier clé). Dans ce cas, il vous faut un chiffrement asymétrique avec des clés publique et privée. Heureusement, de nombreux outils pratiques sont adaptés à la tâche. 
@@ -102,22 +102,22 @@ EncryptPad est une application de visualisation et d'édition de texte chiffré 
 
 * **IMPORTANT** : si vous avez oublié votre phrase de passe ou si vous avez perdu un fichier clé, rien ne peut être fait pour accéder à vos informations chiffrées. Il n'y a aucune porte dérobée dans les formats qu'EncryptPad prend en charge. Les développeurs d'EncryptPad n'assument aucune responsabilité en cas de fichiers corrompus ou invalides, conformément à la licence. 
 
-<div id="file-types" />
+<div id="file-types"></div>
 ##Type de fichier
 
 Le format est déterminé par l'extension du fichier. Les principales extensions des fichiers chiffrés sont GPG et EPD.
 
-<div id="gpg" />
+<div id="gpg"></div>
 ### GPG
 
 Ce type de fichier se conforme au format OpenPGP et est compatible avec les autres outils OpenPGP. Utilisez-le si vous devez ouvrir un fichier où vous ne disposez pas d'EncryptPad. Le format ne prend pas en charge la protection double (fichier clé + phrase de passe). Vous devez donc choisir entre un fichier clé et une phrase de passe, mais ne pouvez pas utiliser les deux. De plus, il ne peut pas enregistrer le chemin du fichier clé dans le fichier chiffré. Cela signifie que chaque fois que vous ouvrirez un fichier chiffré avec un fichier clé, l'application vous demandera quel fichier clé utiliser.
 
-<div id="epd" />
+<div id="epd"></div>
 ### EPD
 
 Format spécifique à EncryptPad. Les autres logiciels OpenPGP ne pourront pas l'ouvrir à moins que le fichier n'ait été protégé que par une phrase de passe. Si seule la protection par phrase de passe a été utilisée, le fichier est en fait un fichier GPG (voir la section GPG ci-dessus). Cependant, si la protection par fichier clé est utilisée, c'est un fichier GPG dans un conteneur [WAD](https://fr.wikipedia.org/wiki/.wad).  Consulter le chapitre suivant pour plus de détails.
 
-<div id="feature-support" />
+<div id="feature-support"></div>
 ### Prise en charge des fonctions
 
 <table style="border: 1px solid black">
@@ -134,7 +134,7 @@ Format spécifique à EncryptPad. Les autres logiciels OpenPGP ne pourront pas l
 
 \*  L'emplacement du fichier clé se trouve dans l'en-tête d'un fichier chiffré afin que l'utilisateur n'ait pas à le spécifier lors du déchiffrement.
 
-<div id="key-file" />
+<div id="key-file"></div>
 ## Qu'est-ce qu'un fichier clé EncryptPad ?
 Dans un chiffrement symétrique, la même séquence est utilisée pour chiffrer et pour déchiffrer les données. L'utilisateur ou une autre
 application fournie habituellement la séquence sous la forme d'une phrase de passe saisie ou d'un fichier. En plus des
@@ -170,7 +170,7 @@ Quand EncryptPad ouvre le fichier chiffré protégé avec `foo.key`, les command
 
 Comme vous pouvez le voir, les autres applications OpenPGP peuvent aussi utiliser les clés EncryptPad.
 
-<div id="epd-file-format" />
+<div id="epd-file-format"></div>
 ##Format EPD lors d'un chiffrement avec clé
 
 Un fichier enregistré peut avoir trois structures différentes selon le mode de protection :
@@ -183,7 +183,7 @@ Un fichier enregistré peut avoir trois structures différentes selon le mode de
 
 3. **Protégé par phrase de passe et clé**. Le fichier produit est un fichier OpenPGP contenant un fichier WAD tel que décrit en 2.
 
-<div id="use-curl" />
+<div id="use-curl"></div>
 ##Utiliser CURL pour télécharger automatiquement des clés d'un stockage distant
 
 Si une URL **[CURL](http://curl.haxx.se/) est précisée dans le champ **Chemin du fichier clé** de la boîte de dialogue **Définir la clé de chiffrement**, EncryptPad essaiera de lancer un processus curl pour télécharger la clé à partir d'un hôte distant. Si vous souhaitez utiliser cette fonction, vous devez définir le chemin de l'exécutable CURL dans les paramètres d'EncryptPad. 
@@ -196,12 +196,12 @@ Examinons un scénario d'utilisation : en voyage, vous ouvrez un fichier chiffr�
 
 Si le fichier tombe dans les mains d'un malfaiteur, il devra d'abord attaquer par force brute la phrase de passe afin d'obtenir l'URL de la clé et les paramètres d'authentification. Dans la mesure où une attaque par force brute prend beaucoup de temps, l'utilisateur pourra retirer la clé ou changer l'authentification afin que les paramètres précédents deviennent désuets.
 
-<div id="known-weaknesses" />
+<div id="known-weaknesses"></div>
 ##Faiblesses connues
 
 * EncryptPad stocke du texte non chiffré en mémoire. Si un vidage de la mémoire est effectué automatiquement après un plantage du système ou de l'application, ou si une partie de la mémoire est enregistrée dans le fichier d'échange, les informations délicates se trouveront sur le disque. Il est parfois possible de configurer un système d'exploitation pour empêcher les vidages et l'utilisation d'un fichier d'échange. Il est recommandé de fermer EncryptPad quand il n'est pas utilisé.
 
-<div id="command-line-interface" />
+<div id="command-line-interface"></div>
 ##Interface en ligne de commande
 
 **encryptcli** est l'exécutable pour chiffrer ou déchiffrer des fichiers  à partir de la ligne de commande. Exécutez-le sans
@@ -216,16 +216,16 @@ arguments pour obtenir une liste des paramètres proposés. Ci-dessous un exempl
     cat texte_clair.txt | encryptcli -e --key-file ma_clé.key \
     --key-only --key-pwd-fd 3 -o texte_clair.txt.gpg 3< <(echo -n "clé")
 
-<div id="installing" />
+<div id="installing"></div>
 ##Installer EncryptPad
 
-<div id="portable-exe" />
+<div id="portable-exe"></div>
 ###Exécutable portable
 
 Des fichiers binaires portables sont proposés pour Windows et Apple. Ils peuvent être copiés sur une clé USB ou
 placés sur un disque réseau.
 
-<div id="install-on-arch" />
+<div id="install-on-arch"></div>
 ###Arch Linux
 
 Utiliser des empreintes pour recevoir des clés gpg pour EncryptPad et Botan
@@ -240,7 +240,7 @@ Installer les paquets AUR ci-dessous :
 
 `pacaur` installe `botan-stable` automatiquement comme dépendance d`encryptpad`.
 
-<div id="install-on-ubuntu" />
+<div id="install-on-ubuntu"></div>
 ###Ubuntu ou Linux Mint par PPA
 
 Alin Andrei de [**webupd8.org**](http://webupd8.org) à gentiment créé des paquets EncryptPad pour
@@ -295,17 +295,17 @@ Ci-dessous se trouvent les étapes pour vérifier les hachages SHA-1 des fichier
 5.\  Ouvrir le fichier asc du manifeste et le fichier texte `changes` dans un éditeur de texte. S'assurer que
     les hachages SHA-1 des fichiers sources listés correspondent.
 
-<div id="compile-on-windows" />
+<div id="compile-on-windows"></div>
 ## Compiler EncryptPad sous Windows
 
-<div id="prerequisites" />
+<div id="prerequisites"></div>
 ###Prérequis
 
 1. [**Le cadre Qt**](http://www.qt.io/download-open-source/) fondé sur MingW 32 bits (la dernière version a été testée avec Qt 5.3.2).
 2. MSYS : vous pouvez en utiliser un regroupé avec [**Git pour Windows**](http://git-scm.com/download/win). Vous utilisez probablement déjà Git.
 3. Python : toute version récente fonctionnera
 
-<div id="steps" />
+<div id="steps"></div>
 ###Étapes
 
 1. Modifier la variable d'environnement de session **PATH** afin d'inclure l'ensemble d'outils Qt et Python. **mingw32-make**, **g++**, **qmake**, **python.exe** devraient se trouver dans le chemin de recherche globale de votre session bash Git. Personnellement, je modifie bash.bashrc et ajoute une ligne comme `PATH=$PATH:/c/Python35-32:...` afin de ne pas polluer la variable PATH à l'échelle du système.
@@ -326,14 +326,14 @@ Si la compilation a réussi vous devriez voir l'exécutable **./bin/release/Encr
 
 Prenez note que si vous voulez qu'EncryptPad fonctionne en un seul exécutable sans dll, vous devez compiler le cadre Qt vous-même de façon statique. Cela prend quelques heures. De nombreuses instructions décrivant comment accomplir cela se trouvent sur Internet.  L'article le plus populaire recommande d'utiliser un script PowerShell. Bien qu'il soit très pratique (je l'ai utilisé une fois), on ne veut pas toujours mettre à niveau son PowerShell et installer les lourdes dépendances qui viennent avec. Et donc, la fois d'après, j'ai lu le script et j'ai tout fait manuellement. Heureusement qu'il n'y avait pas trop d'étapes.
 
-<div id="compile-on-mac-linux" />
+<div id="compile-on-mac-linux"></div>
 ##Compiler EncryptPad sous Mac/Linux
 
 C'est plus facile que de compiler sous Windows. Tout ce que vous avez à faire est d'installer QT, Python et d'exécuter :
 
     ./configure.sh --all
 
-<div id="dynamic-build"/>
+<div id="dynamic-build"></div>
 ###Compilation dynamique
 
     ./configure.sh --all --use-system-libs
@@ -342,7 +342,7 @@ Compilation avec des liens dynamiques vers les bibliothèques. Elle utilise auss
 que de compiler leur code source sous `deps`. Sous Ubuntu,  installer les
 paquets `libbotan1.10-dev` et `zlib1g-dev` avant de compiler.
 
-<div id="build-on-fedora" />
+<div id="build-on-fedora"></div>
 ###Fedora###
 
 Installer les dépendances et outils :
@@ -360,7 +360,7 @@ ou pour une compilation dynamique avec des bibliothèques système :
     dnf install botan-devel
     ./configure.sh --all --use-system-libs
 
-<div id="acknowledgements" />
+<div id="acknowledgements"></div>
 ##Remerciements
 
 EncryptPad utilise les cadres et bibliothèques suivantes :
@@ -373,10 +373,10 @@ EncryptPad utilise les cadres et bibliothèques suivantes :
 6. [**gtest**](http://code.google.com/p/googletest/)
 7. [**Jeu d'icônes famfamfam Silk 1.3**](http://www.famfamfam.com/lab/icons/silk/)
 
-<div id="integrity-verification" />
+<div id="integrity-verification"></div>
 ##Vérification de l'intégrité d'EncryptPad
 
-<div id="openpgp-signing" />
+<div id="openpgp-signing"></div>
 ###Signature OpenPGP et autorité de certification
 
 Tous les téléchargements associés à EncryptPad sont signés avec la clé OpenPGP suivante :
@@ -395,7 +395,7 @@ Il a quelques raisons pourquoi je n'ai pas simplement utilisé le certificat CA 
 2. La signature OpenPGP est plus souple.
 3. La certification CA a un coût de fonctionnement, ce qui n'est pas le cas de la signature OpenPGP.
 
-<div id="verification-process" />
+<div id="verification-process"></div>
 ### Processus de vérification étape par étape
 
 1. Télécharger les paquets et leur signature OpenPGP.
@@ -403,7 +403,7 @@ Il a quelques raisons pourquoi je n'ai pas simplement utilisé le certificat CA 
 3. S'assurer que c'est bien la clé EncryptPad (Releases) valide en vérifiant son empreinte avec `ca_signed_pgp_signing_instructions`.
 4. Vérifier avec GPG les signatures des fichiers téléchargés.
 
-<div id="license" />
+<div id="license"></div>
 ##Licence
 
 EncryptPad est un logiciel libre et gratuit : vous pouvez le redistribuer ou le modifier
@@ -416,7 +416,7 @@ mais SANS GARANTIE ; sans même la garantie tacite de QUALITÉ
 MARCHANDE ou D'ADÉQUATION À UN BUT PARTICULIER. Voir la
 licence générale publique GNU pour plus de détails.
 
-<div id="contact" />
+<div id="contact"></div>
 ##Contact et rétroaction
 
 Si votre question concerne EncryptPad, veuillez l'envoyer à la liste de diffusion **encryptpad@googlegroups.com** reliée au [groupe public de discussion](https://groups.google.com/d/forum/encryptpad).

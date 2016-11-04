@@ -45,7 +45,7 @@
 <li><a href="#contact">Contact and feedback</a></li>
 </ul>
 
-<p><div id="features" /></p>
+<div id="features"></div>
 
 <h2>Features</h2>
 
@@ -70,7 +70,7 @@
 <li>Compression: <strong>ZLIB, ZIP</strong></li>
 </ul>
 
-<p><div id="supported-platforms" /></p>
+<div id="supported-platforms"></div>
 
 <h2>Supported platforms</h2>
 
@@ -80,7 +80,7 @@
 <li><p>Mac OS</p></li>
 </ul>
 
-<p><div id="why-use-encryptpad" /></p>
+<div id="why-use-encryptpad"></div>
 
 <h2>Why use EncryptPad?</h2>
 
@@ -93,7 +93,7 @@
 <li><p><strong>Double protection</strong>: randomly generated key files in addition to passphrases.</p></li>
 </ul>
 
-<p><div id="when-encryptpad" /></p>
+<div id="when-encryptpad"></div>
 
 <h2>When do I need EncryptPad?</h2>
 
@@ -104,7 +104,7 @@
 <li><p>You need protection against a brute force attack in case your storage gets in somebody's hands. EncryptPad allows to generate a key and store it separately from encrypted information. The unwanted person would need two secrets to open an encrypted file: the passphrase and the key. Consider this example: you store your encrypted file on a memory stick, and protect it with a passphrase. In addition to that, you protect the file with a file key and store the key on computers where you open the file. If the memory stick is lost, the passphrase is not enough to decrypt your information. The key file is also needed and it is not on the memory stick.</p></li>
 </ul>
 
-<p><div id="when-can-i-not" /></p>
+<div id="when-can-i-not"></div>
 
 <h2>When can I not use EncryptPad?</h2>
 
@@ -116,25 +116,25 @@
 <li><p><strong>IMPORTANT</strong>: If you forgot your passphrase or lost a key file, there is nothing that can be done to open your encrypted information. There are no backdoors in the formats that EncryptPad supports. EncryptPad developers take no responsibility for corrupted or invalid files in accordance with the license.</p></li>
 </ul>
 
-<p><div id="file-types" /></p>
+<div id="file-types"></div>
 
 <h2>File types</h2>
 
 <p>The format is determined by an extension of a file. Main extensions of encrypted files are GPG and EPD.</p>
 
-<p><div id="gpg" /></p>
+<div id="gpg"></div>
 
 <h3>GPG</h3>
 
 <p>This file type conforms to OpenPGP format and it is compatible with other OpenPGP tools. Use it if you need to open a file where EncryptPad is not available. The format does not support double protection (key file + passphrase). So you need to choose between key file or passphrase and cannot use both. In addition, it cannot store file key path in the encrypted file. It means that every time you open a file encrypted with a key file, the application will ask you which key file to use.</p>
 
-<p><div id="epd" /></p>
+<div id="epd"></div>
 
 <h3>EPD</h3>
 
 <p>EncryptPad specific format. Other OpenPGP software will not be able to open it unless the file was only protected with a passphrase. If passphrase only protection was used, the file is effectively a GPG file (see GPG section above). However, when a key file protection is involved, it is a GPG file in a <a href="https://en.wikipedia.org/wiki/Doom_WAD">WAD</a> container. See the following chapter for details.</p>
 
-<p><div id="feature-support" /></p>
+<div id="feature-support"></div>
 
 <h3>Feature support</h3>
 
@@ -152,7 +152,7 @@
 
 <p>* Key file location is persisted in the header of an encrypted file so the user does not need to specify it when decrypting.</p>
 
-<p><div id="key-file" /></p>
+<div id="key-file"></div>
 
 <h2>What is an EncryptPad key file?</h2>
 
@@ -193,7 +193,7 @@ through a pipe. <code>gpg2</code> reads the sequence from the descriptor with <c
 
 <p>As you see, other OpenPGP implementations can also use EncryptPad keys.</p>
 
-<p><div id="epd-file-format" /></p>
+<div id="epd-file-format"></div>
 
 <h2>EPD file format when encrypting with a key</h2>
 
@@ -210,7 +210,7 @@ through a pipe. <code>gpg2</code> reads the sequence from the descriptor with <c
 <li><p><strong>Protected with passphrase and key</strong>. The resulting file is an OpenPGP file containing a WAD file as explained in 2.</p></li>
 </ol>
 
-<p><div id="use-curl" /></p>
+<div id="use-curl"></div>
 
 <h2>Use CURL to automatically download keys from a remote storage</h2>
 
@@ -226,7 +226,7 @@ through a pipe. <code>gpg2</code> reads the sequence from the descriptor with <c
 
 <p>If this file gets into the hands of a wrongdoer, he or she will need to brute force the passphrase first to be able to obtain the key URL and the authentication parameters. Since a brute force attack takes a lot of time, the user will be able to remove the key or change the authentication so the previous parameters become obsolete.</p>
 
-<p><div id="known-weaknesses" /></p>
+<div id="known-weaknesses"></div>
 
 <h2>Known weaknesses</h2>
 
@@ -234,7 +234,7 @@ through a pipe. <code>gpg2</code> reads the sequence from the descriptor with <c
 <li>EncryptPad stores unencrypted text in memory. If a memory dump is automatically taken after a system or application crash or some of the memory is saved to a swap file, the sensitive information will be present on the disk. Sometimes it is possible to configure an operating system not to use a dump and swap files. It is a good practice to close EncryptPad when not in use.</li>
 </ul>
 
-<p><div id="command-line-interface" /></p>
+<div id="command-line-interface"></div>
 
 <h2>Command line interface</h2>
 
@@ -251,18 +251,18 @@ cat plain_text.txt | encryptcli -e --key-file my_key.key \
 --key-only --key-pwd-fd 3 -o plain_text.txt.gpg 3&lt; &lt;(echo -n "key")
 </code></pre>
 
-<p><div id="installing" /></p>
+<div id="installing"></div>
 
 <h2>Installing EncryptPad</h2>
 
-<p><div id="portable-exe" /></p>
+<div id="portable-exe"></div>
 
 <h3>Portable executable</h3>
 
 <p>Portable binaries are available for Windows and macOS. They can be copied on a memory stick or
 placed on a network share.</p>
 
-<p><div id="install-on-arch" /></p>
+<div id="install-on-arch"></div>
 
 <h3>Arch Linux</h3>
 
@@ -281,7 +281,7 @@ gpg --recv-key 634BFC0CCC426C74389D89310F1CFF71A2813E85
 
 <p><code>pacaur</code> installs <code>botan-stable</code> automatically as <code>encryptpad</code> dependency.</p>
 
-<p><div id="install-on-ubuntu" /></p>
+<div id="install-on-ubuntu"></div>
 
 <h3>Ubuntu or Linux Mint via PPA</h3>
 
@@ -344,11 +344,11 @@ sudo apt install encryptpad encryptcli
 <p>5. Open the manifest asc file in a text editor and the <code>changes</code> text file. Compare that the SHA-1
     hashes on the listed source files match.</p>
 
-<p><div id="compile-on-windows" /></p>
+<div id="compile-on-windows"></div>
 
 <h2>Compile EncryptPad on Windows</h2>
 
-<p><div id="prerequisites" /></p>
+<div id="prerequisites"></div>
 
 <h3>Prerequisites</h3>
 
@@ -358,7 +358,7 @@ sudo apt install encryptpad encryptcli
 <li>Python: any recent version will work.</li>
 </ol>
 
-<p><div id="steps" /></p>
+<div id="steps"></div>
 
 <h3>Steps</h3>
 
@@ -381,7 +381,7 @@ sudo apt install encryptpad encryptcli
 
 <p>Note that if you want EncryptPad to work as a single executable without dlls, you need to build Qt framework yourself statically. It takes a few hours. There are plenty of instructions on how to do this in the Internet. The most popular article recommends using a PowerShell script. While it is convenient and I did it once, sometimes you don't want to upgrade your PowerShell and install heavy dependencies coming with it. So the next time I had to do that, I read the script and did everything manually. Luckily there are not too many steps in it.</p>
 
-<p><div id="compile-on-mac-linux" /></p>
+<div id="compile-on-mac-linux"></div>
 
 <h2>Compile EncryptPad on Mac/Linux</h2>
 
@@ -390,7 +390,7 @@ sudo apt install encryptpad encryptcli
 <pre><code>./configure.sh --all
 </code></pre>
 
-<p><div id="dynamic-build"/></p>
+<div id="dynamic-build"></div>
 
 <h3>Dynamic build</h3>
 
@@ -401,7 +401,7 @@ sudo apt install encryptpad encryptcli
 of compiling their source code under <code>deps</code>. On Ubuntu, install <code>libbotan1.10-dev</code> and <code>zlib1g-dev</code>
 packages before building.</p>
 
-<p><div id="build-on-fedora" /></p>
+<div id="build-on-fedora"></div>
 
 <h3>Fedora</h3>
 
@@ -423,7 +423,7 @@ export PATH
 ./configure.sh --all --use-system-libs
 </code></pre>
 
-<p><div id="acknowledgements" /></p>
+<div id="acknowledgements"></div>
 
 <h2>Acknowledgements</h2>
 
@@ -439,11 +439,11 @@ export PATH
 <li><a href="http://www.famfamfam.com/lab/icons/silk/"><strong>famfamfam Silk iconset 1.3</strong></a></li>
 </ol>
 
-<p><div id="integrity-verification" /></p>
+<div id="integrity-verification"></div>
 
 <h2>EncryptPad integrity verification</h2>
 
-<p><div id="openpgp-signing" /></p>
+<div id="openpgp-signing"></div>
 
 <h3>OpenPGP signing and certification authority</h3>
 
@@ -465,7 +465,7 @@ export PATH
 <li>There is no yearly CA certification running cost.</li>
 </ol>
 
-<p><div id="verification-process" /></p>
+<div id="verification-process"></div>
 
 <h3>Step by step verification process</h3>
 
@@ -476,7 +476,7 @@ export PATH
 <li>Verify signatures on the downloaded files with GPG.</li>
 </ol>
 
-<p><div id="license" /></p>
+<div id="license"></div>
 
 <h2>License</h2>
 
@@ -490,7 +490,7 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.</p>
 
-<p><div id="contact" /></p>
+<div id="contact"></div>
 
 <h2>Contact and feedback</h2>
 
