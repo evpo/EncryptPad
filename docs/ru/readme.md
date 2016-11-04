@@ -423,6 +423,6 @@ If your question is related to EncryptPad, send it to the mailing list: **encryp
 
 Bug tracker and contributions: [github.com/evpo/EncryptPad/issues](https://github.com/evpo/EncryptPad/issues)
 
-Evgeny Pokhilko **software@evpo.net** for private contacts
+For other matters, please contact Evgeny Pokhilko **software@evpo.net**
 
 [http://www.evpo.net/encryptpad](http://www.evpo.net/encryptpad)
