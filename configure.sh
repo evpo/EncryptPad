@@ -16,6 +16,7 @@ COMMANDS:\n\
 -f, --run-func-tests run functional tests\n\
 -n, --clean-tests    clean the unit tests\n\
 --all-cultures       the same as all but builds binaries for all cultures\n\
+--appimage           build AppImage (requires AppImageKit and binaries)\n\
 --docs               build docs directory from markdown files (requres the markdown utility)\n\
 --update-htm         update htm files (README.htm and CHANGES.htm)\n\
 -h, --help           help\n\n\
@@ -123,6 +124,13 @@ case $COMMAND in
     LOCALIZATION=
     $MAKE -f Makefile.qt_ui clean RELEASE=$RELEASE 
     build_all
+    ;;
+--appimage)
+    USE_SYSTEM_LIBS=on
+    build_all
+    ../linux_deployment/prepare-appimage.sh ./qt_deployment
+    mkdir -p ../bin
+    mv ./qt_deployment/encryptpad.AppImage ../bin/
     ;;
 -c|--clean)
     $MAKE -f Makefile.qt_ui clean RELEASE=$RELEASE 

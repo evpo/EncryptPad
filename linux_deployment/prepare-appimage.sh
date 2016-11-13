@@ -14,21 +14,21 @@ then
     exit -1
 fi
 
-if ! which AppImageAssistant
+if ! which AppImageAssistant > /dev/null
 then
     echo "Cannot find AppImageAssistant"
     exit -1
 fi
 
-if ! which linuxdeployqt
+if ! which linuxdeployqt > /dev/null
 then
     echo "Cannot find linuxdeployqt"
     exit -1
 fi
 
-if ! which appimagetool
+if ! which AppImageAssistant > /dev/null
 then
-    echo "Cannot find appimagetool"
+    echo "Cannot find AppImageAssistant"
     exit -1
 fi
 
@@ -44,4 +44,4 @@ cp $QT_INSTALL_PLUGINS/platformthemes/libqgtk2.so $WORKDIR/AppDir/plugins/platfo
 
 cd $WORKDIR/
 linuxdeployqt ./AppDir/encryptpad -bundle-non-qt-libs
-appimagetool ./AppDir encryptpad.AppImage
+AppImageAssistant ./AppDir encryptpad.AppImage

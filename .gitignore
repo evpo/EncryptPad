@@ -9,6 +9,7 @@ object_script.*
 deps
 *.opensdf
 qt_build
+qt_deployment
 vim.cmd
 vim.sh
 .vimrc
