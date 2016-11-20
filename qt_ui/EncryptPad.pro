@@ -119,13 +119,8 @@ HEADERS += \
 
 QMAKE_RESOURCE_FLAGS += -no-compress
 RESOURCES += \
-    EncryptPad.qrc
-
-LOCALIZATION {
-RESOURCES += \
+    EncryptPad.qrc \
     culture.qrc
-QMAKE_CXXFLAGS += -DLOCALIZATION
-    }
 
 TRANSLATIONS = \
     encryptpad_en_gb.ts \

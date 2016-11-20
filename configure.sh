@@ -15,7 +15,7 @@ COMMANDS:\n\
 -t, --run-tests      run the unit tests\n\
 -f, --run-func-tests run functional tests\n\
 -n, --clean-tests    clean the unit tests\n\
---all-cultures       the same as all but builds binaries for all cultures\n\
+--culture-res        build qm files from ts files to update culture resources\n\h
 --appimage           build AppImage (requires AppImageKit and binaries)\n\
 --docs               build docs directory from markdown files (requres the markdown utility)\n\
 --update-htm         update htm files (README.htm and CHANGES.htm)\n\
@@ -96,10 +96,7 @@ case $COMMAND in
     mkdir -p qt_build
     build_all
     ;;
---all-cultures)
-    LOCALIZATION=on
-    $MAKE -f Makefile.qt_ui clean RELEASE=$RELEASE 
-    mkdir -p qt_build
+--culture-res)
     for TSFILE in ../qt_ui/encryptpad_*.ts
     do
         CULTUREFILE=$(echo -n "$TSFILE" | sed -n -e "s/..\/qt_ui\///" -e "s/\.ts$//p")
@@ -109,21 +106,8 @@ case $COMMAND in
         fi
 
         echo $CULTUREFILE
-        lrelease $TSFILE -qm ./qt_build/${CULTUREFILE}.qm
-        cp ../qt_ui/${CULTUREFILE}.qrc ./qt_build/culture.qrc
-        build_all
-        mkdir -p ../bin/${CONFIG_DIR}/${CULTUREFILE}/
-        if [[ $SUBDIR == *MACOS* ]]
-        then
-            mv ../bin/${CONFIG_DIR}/${OSX_APP} ../bin/${CONFIG_DIR}/${CULTUREFILE}/
-        else
-            mv ../bin/${CONFIG_DIR}/${TARGET} ../bin/${CONFIG_DIR}/${CULTUREFILE}/
-        fi
+        lrelease $TSFILE -qm ../qt_ui/${CULTUREFILE}.qm
     done
-
-    LOCALIZATION=
-    $MAKE -f Makefile.qt_ui clean RELEASE=$RELEASE 
-    build_all
     ;;
 --appimage)
     USE_SYSTEM_LIBS=on
