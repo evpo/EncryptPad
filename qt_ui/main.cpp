@@ -94,8 +94,8 @@ int main(int argc, char *argv[])
     app.setApplicationName("EncryptPad");
 
     QString fileName;
-    if(argc > 1)
-        fileName = argv[1];
+    if(app.arguments().length() > 1)
+        fileName = app.arguments()[1];
     MainWindow mainWin;
     app.setMainWindow(&mainWin);
 #if defined(Q_OS_SYMBIAN)
