@@ -69,10 +69,11 @@ int main(int argc, char *argv[])
     Application app(argc, argv);
 
     QStringList userLangs = QLocale::system().uiLanguages();
-
     QString resourcePath;
     for(QString userLang : userLangs)
     {
+        if(userLang == "en" || userLang.startsWith("en-"))
+            break;
         resourcePath = findLangResource(userLang);
         if(!resourcePath.isEmpty())
             break;
