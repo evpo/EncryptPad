@@ -125,7 +125,8 @@ RESOURCES += \
 TRANSLATIONS = \
     encryptpad_en_gb.ts \
     encryptpad_ru_ru.ts \
-    encryptpad_fr_fr.ts
+    encryptpad_fr_fr.ts \
+    encryptpad_zh_cn.ts
 
 RC_FILE = encrypt_pad.rc
 DESTDIR = ../../bin/$$CONFIG_NAME

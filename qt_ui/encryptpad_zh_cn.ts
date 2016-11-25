@@ -639,7 +639,7 @@ Do you want to replace it?</source>
     <message>
         <location filename="mainwindow.cpp" line="621"/>
         <source>&lt;b&gt;EncryptPad %1 Beta&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;Minimalist secure text editor and binary encryptor that implements &lt;br/&gt;RFC 4880 Open PGP format: symmetrically encrypted, compressed and integrity protected. The editor can protect files with passphrases, key files or both.&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;GNU General Public License v2&lt;br/&gt;&lt;br/&gt;</source>
-        <translation>&lt;b&gt;EncryptPad %1 Beta&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;极简的加密文本编辑器。&lt;br/&gt;支持RFC 4880 Open PGP格式。&lt;br/&gt;支持使用密码和/或密钥文件进行加密。&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;GNU General Public License v2&lt;br/&gt;&lt;br/&gt;<</translation>
+        <translation>&lt;b&gt;EncryptPad %1 Beta&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;极简的加密文本编辑器。&lt;br/&gt;支持RFC 4880 Open PGP格式。&lt;br/&gt;支持使用密码和/或密钥文件进行加密。&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;GNU General Public License v2&lt;br/&gt;&lt;br/&gt;</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="672"/>
@@ -927,7 +927,7 @@ Do you want to replace it?</source>
     <message>
         <location filename="mainwindow.cpp" line="815"/>
         <source>&amp;Preferences...</source>
-        <translation>首选项(&amp;P)……<translation>
+        <translation>首选项(&amp;P)……</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="816"/>

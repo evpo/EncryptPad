@@ -2,5 +2,6 @@
     <qresource prefix="cultures/">
         <file>encryptpad_fr_fr.qm</file>
         <file>encryptpad_ru_ru.qm</file>
+        <file>encryptpad_zh_cn.qm</file>
     </qresource>
 </RCC>
