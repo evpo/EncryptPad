@@ -71,7 +71,7 @@ public:
 
     FileRequestService &GetFileRequestService();
 
-    void SetDefaultIterations(int defaultIterations);
+    void SetDefaultFileParameters(const EncryptPad::PacketMetadata &default_metadata);
 
 private slots:
     void WorkDone();

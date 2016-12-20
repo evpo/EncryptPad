@@ -64,6 +64,13 @@ namespace EncryptPad
     public:
         KeyService(int key_count = kDefaultKeyCount);
 
+        int get_key_count() const
+        {
+            return key_count_;
+        }
+
+        void set_key_count(int key_count);
+
         int get_key_size() const
         {
             return key_size_;

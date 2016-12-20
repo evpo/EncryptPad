@@ -23,6 +23,8 @@
 #include <QDialog>
 #include <QFont>
 #include "file_request_service.h"
+#include "packet_composer.h"
+#include "preferences.h"
 
 namespace Ui {
 class PreferencesDialog;
@@ -38,37 +40,18 @@ public:
 private:
     QFont font;
     FileRequestService fileRequestService;
-    int recentFiles;
+    EncryptPad::PacketMetadata defaultFileProperties;
+    EncryptPad::PacketMetadata keyFileProperties;
 
     void updateFont();
 public:
-    void setFont(QFont newFont);
-
-    const QFont &getFont() const
-    {
-        return font;
-    }
-
-    void setRecentFiles(int newRecentFiles);
-    int getRecentFiles() const;
-
-    void setWordWrap(bool val);
-    bool getWordWrap() const;
-
-    bool getSaveLastUsedDirectory() const;
-    void setSaveLastUsedDirectory(bool val);
-
-    bool getEnableBakFiles() const;
-    void setEnableBakFiles(bool val);
-
-    QString getLibcurlPath() const;
-    void setLibcurlPath(const QString &path);
-
-    int getIterations() const;
-    void setIterations(int iterations);
+    void set(PersistentPreferences &value);
+    void get(PersistentPreferences &value);
 
 public slots:
     void selectFont();
+    void editDefaultFileProperties();
+    void editKeyFileProperties();
 private slots:
     void on_uiLibcurlBrowse_clicked();
 

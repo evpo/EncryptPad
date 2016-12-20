@@ -19,7 +19,6 @@
 //**********************************************************************************
 #include <QtGui>
 #include <QtWidgets>
-#include <QFontDatabase>
 
 #include <iostream>
 #include <string>
@@ -57,16 +56,10 @@ namespace
 #endif
 
     const char *kConfigFileName = "encryptpad.ini";
-    const bool kDefaultWindowsEol = false;
 
-    void SetDefaultMetadataValues(EncryptPad::PacketMetadata &metadata, int defaultIterations)
+    void SetDefaultMetadataValues(EncryptPad::PacketMetadata &metadata, const EncryptPad::PacketMetadata &defaultMetadata)
     {
-        using namespace EncryptPad;
-        metadata = {};
-        metadata.cipher_algo = kDefaultCipherAlgo;
-        metadata.hash_algo = kDefaultHashAlgo;
-        metadata.compression = kDefaultCompression;
-        metadata.iterations = defaultIterations;
+        metadata = defaultMetadata;
         metadata.file_name = "_CONSOLE";
     }
 
@@ -104,21 +97,24 @@ namespace
 const int MainWindow::maxZoomIn = 75;
 const int MainWindow::minZoomOut = 3;
 
-MainWindow::MainWindow(): encryptionKeyFile(tr("")), persistEncryptionKeyPath(false),
-    enc(), metadata(), defaultIterations(EncryptPad::kDefaultIterations), encryptionModified(false), isBusy(false),
-    saveLastUsedDirectory(false), enableBakFiles(false), takeBakFile(false), windowsEol(kDefaultWindowsEol),
-    currentZoom(0), load_state_machine_(enc),
+MainWindow::MainWindow():
+    encryptionKeyFile(tr("")),
+    persistEncryptionKeyPath(false),
+    windowsEol(false),
+    takeBakFile(false),
+    enc(),
+    metadata(),
+    encryptionModified(false),
+    isBusy(false),
+    currentZoom(0),
+    load_state_machine_(enc),
     plain_text_switch_(this), plain_text_functor_(plain_text_switch_), recent_files_service_(this),
     loadAdapter(this),
     loadHandler(this, loadAdapter, metadata),
     saveSuccess(false)
 {
-    SetDefaultMetadataValues(metadata, defaultIterations);
     setWindowIcon(QIcon(":/images/application_icon.png"));
-
     textEdit = new PlainTextEdit(this);
-    const QFont fixedFont = QFontDatabase::systemFont(QFontDatabase::FixedFont);
-    textEdit->setFont(fixedFont);
     setCentralWidget(textEdit);
     QPalette palette = textEdit->palette();
     QColor color = palette.color(QPalette::Active, QPalette::Highlight);
@@ -133,6 +129,7 @@ MainWindow::MainWindow(): encryptionKeyFile(tr("")), persistEncryptionKeyPath(fa
     createStatusBar();
 
     readSettings();
+    SetDefaultMetadataValues(metadata, preferences.defaultFileProperties);
 
     connect(textEdit->document(), SIGNAL(contentsChanged()), this, SLOT(documentWasModified()));
     connect(textEdit, SIGNAL(cursorPositionChanged()), this, SLOT(cursorPositionChanged()));
@@ -341,7 +338,7 @@ void MainWindow::AsyncOperationCompleted()
         // at this point only textEdit contains unencrypted data
         setCurrentFile(load_state_machine_.get_file_name());
 
-        if(enableBakFiles)
+        if(preferences.enableBakFiles)
         {
             takeBakFile = true;
         }
@@ -369,7 +366,7 @@ bool MainWindow::newFile()
         HashAlgo hash_algo_before = metadata.hash_algo;
         unsigned int iterations_before = metadata.iterations;
 
-        SetDefaultMetadataValues(metadata, defaultIterations);
+        SetDefaultMetadataValues(metadata, preferences.defaultFileProperties);
 
         if(algo_before != metadata.cipher_algo || hash_algo_before != metadata.hash_algo 
                 || iterations_before != metadata.iterations)
@@ -377,7 +374,7 @@ bool MainWindow::newFile()
             clearPassphrase();
         }
 
-        setWindowsEol(kDefaultWindowsEol);
+        setWindowsEol(preferences.windowsEol);
 
         return true;
     }
@@ -506,7 +503,7 @@ bool MainWindow::saveAs()
         return false;
 
     // Set the bak file flag if the file name has changed
-    if(curFile != selection.file_name && enableBakFiles)
+    if(curFile != selection.file_name && preferences.enableBakFiles)
     {
         takeBakFile = true;
     }
@@ -581,7 +578,7 @@ void MainWindow::createNewKey()
         {
             kf_encrypt_params.key_service = &enc.GetKFKeyService();
             enc.ClearKFPassphrase();
-            PacketMetadata metadata = GetDefaultKFMetadata(defaultIterations);
+            PacketMetadata metadata = preferences.keyFileProperties;
             kf_encrypt_params.key_service->ChangePassphrase(
                     kf_passphrase, metadata.hash_algo, GetAlgoSpec(metadata.cipher_algo).key_size,
                     metadata.iterations);
@@ -639,29 +636,19 @@ void MainWindow::documentWasModified()
 
 void MainWindow::openPreferences()
 {
-    bool lastEnableBakFiles = enableBakFiles;
+    bool lastEnableBakFiles = preferences.enableBakFiles;
 
     PreferencesDialog dlg(this);
-    dlg.setFont(textEdit->font());
-    dlg.setRecentFiles(recent_files_service_.GetMaxFiles());
-    dlg.setWordWrap(wordWrapAct->isChecked());
-    dlg.setSaveLastUsedDirectory(saveLastUsedDirectory);
-    dlg.setEnableBakFiles(enableBakFiles);
-    dlg.setLibcurlPath(QString::fromStdString(enc.GetLibcurlPath()));
-    dlg.setIterations(defaultIterations);
+    dlg.set(preferences);
     if(dlg.exec() == QDialog::Rejected)
         return;
 
-    recent_files_service_.SetMaxFiles(dlg.getRecentFiles());
-    resetZoom();
-    textEdit->setFont(dlg.getFont());
-    wordWrapAct->setChecked(dlg.getWordWrap());
-    saveLastUsedDirectory = dlg.getSaveLastUsedDirectory();
-    enableBakFiles = dlg.getEnableBakFiles();
-    enc.SetLibcurlPath(dlg.getLibcurlPath().toStdString());
-    defaultIterations = DecodeS2KIterations(EncodeS2KIterations(dlg.getIterations()));
+    dlg.get(preferences);
+    onUpdatedPreferences();
 
-    if(enableBakFiles && !lastEnableBakFiles)
+    //TODO: save the new preferences
+
+    if(preferences.enableBakFiles && !lastEnableBakFiles)
     {
         takeBakFile = true;
     }
@@ -1065,44 +1052,45 @@ void MainWindow::createStatusBar()
     statusBar()->addPermanentWidget(encryptionKeySet);
 }
 
+void MainWindow::onUpdatedPreferences()
+{
+    wordWrapAct->setChecked(preferences.wordWrap);
+    wordWrapToggled(preferences.wordWrap);
+    enc.SetLibcurlPath(preferences.libCurlPath.toStdString());
+    textEdit->setFont(preferences.font);
+    recent_files_service_.SetMaxFiles(preferences.recentFiles);
+    resetZoom();
+
+    if(enc.GetKeyService().get_key_count() != preferences.s2kResultsPoolSize)
+        enc.GetKeyService().set_key_count(preferences.s2kResultsPoolSize);
+}
+
 void MainWindow::readSettings()
 {
+    SetDefaultPreferences(preferences);
+
     QString configFile = accessRepositoryPath(kConfigFileName);
     if(configFile.isEmpty())
         return;
 
     QSettings settings(configFile, QSettings::IniFormat);
+
+    ReadPreferences(settings, preferences);
+    onUpdatedPreferences();
+
     QPoint pos = settings.value("pos", QPoint(200, 200)).toPoint();
-    QSize size = settings.value("size", QSize(400, 400)).toSize();
-    QString fontString = settings.value("font", QVariant(textEdit->font().toString())).toString();
-    int max_files = settings.value("recent_files", QVariant(5)).toInt();
+    QSize size = settings.value("size", QSize(640, 480)).toSize();
     bool readOnly = settings.value("read_only", QVariant(false)).toBool();
     readOnlyAct->setChecked(readOnly);
     readOnlyToggled(readOnly);
-    bool wordWrap = settings.value("word_wrap", QVariant(false)).toBool();
-    wordWrapAct->setChecked(wordWrap);
-    wordWrapToggled(wordWrap);
     recent_files_service_.Deserialize(
             settings.value("recent_file_list", QVariant().toStringList()).toStringList(),
-            max_files);
+            preferences.recentFiles);
     passphraseGenerationSettings = settings.value(
                 "passphrase_generation", QVariant().toStringList()).toStringList();
-    saveLastUsedDirectory = settings.value("save_last_used_directory", QVariant(true)).toBool();
-    enableBakFiles = settings.value("enable_bak_files", QVariant(true)).toBool();
     file_request_service_.set_current_directory(
-                saveLastUsedDirectory ? settings.value("last_used_directory", QVariant(QString())).toString()
-                                      : QString());
-    enc.SetLibcurlPath(settings.value("libcurl_path", QVariant(QString())).toString().toStdString());
-    defaultIterations = settings.value("default_iterations", QVariant(EncryptPad::kDefaultIterations)).toInt();
-    if(defaultIterations < EncryptPad::kDefaultIterations || defaultIterations > EncryptPad::kMaxIterations)
-        defaultIterations = EncryptPad::kDefaultIterations;
-
-    defaultIterations = DecodeS2KIterations(EncodeS2KIterations(defaultIterations));
-    metadata.iterations = defaultIterations;
-
-    QFont font;
-    font.fromString(fontString);
-    textEdit->setFont(font);
+                preferences.saveLastUsedDirectory ? settings.value("last_used_directory", QVariant(QString())).toString()
+                : QString());
 
     resize(size);
     move(pos);
@@ -1115,21 +1103,18 @@ void MainWindow::writeSettings()
         return;
 
     QSettings settings(configFile, QSettings::IniFormat);
+    preferences.wordWrap = wordWrapAct->isChecked();
+    WritePreferences(settings, preferences);
     settings.setValue("pos", pos());
     settings.setValue("size", size());
-    settings.setValue("recent_files", QVariant(recent_files_service_.GetMaxFiles()));
     QStringList list;
     recent_files_service_.Serialize(list);
     settings.setValue("recent_file_list", QVariant(list));
-    settings.setValue("font", QVariant(textEdit->font().toString()));
     settings.setValue("read_only", QVariant(readOnlyAct->isChecked()));
-    settings.setValue("word_wrap", QVariant(wordWrapAct->isChecked()));
     settings.setValue("passphrase_generation", QVariant(passphraseGenerationSettings));
-    settings.setValue("save_last_used_directory", QVariant(saveLastUsedDirectory));
-    settings.setValue("enable_bak_files", QVariant(enableBakFiles));
-    settings.setValue("last_used_directory", QVariant(saveLastUsedDirectory ? file_request_service_.get_current_directory() : QString()));
-    settings.setValue("libcurl_path", QVariant(QString::fromStdString(enc.GetLibcurlPath())));
-    settings.setValue("default_iterations", QVariant(defaultIterations));
+    settings.setValue("last_used_directory",
+            QVariant(preferences.saveLastUsedDirectory ? file_request_service_.get_current_directory()
+                : QString()));
 }
 
 bool MainWindow::maybeSave()
@@ -1600,6 +1585,6 @@ void MainWindow::setWindowsEol(bool flag)
 void MainWindow::openFileEncryption()
 {
     FileEncryptionDialog dlg(this, file_request_service_);
-    dlg.SetDefaultIterations(defaultIterations);
+    dlg.SetDefaultFileParameters(preferences.defaultFileProperties);
     dlg.exec();
 }

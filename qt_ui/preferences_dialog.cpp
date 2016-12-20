@@ -22,6 +22,88 @@
 #include <QFontDialog>
 #include "common_definitions.h"
 #include "file_name_helper.h"
+#include "file_properties_dialog.h"
+
+namespace
+{
+    enum class BinderDirection
+    {
+        Set,
+        Get
+    };
+
+    void BindControl(QSpinBox *cnt, int &value, BinderDirection direction)
+    {
+        if(direction == BinderDirection::Get)
+        {
+            value = cnt->value();
+        }
+        else if(direction == BinderDirection::Set)
+        {
+            cnt->setValue(value);
+        }
+    }
+
+    void BindControl(QCheckBox *cnt, bool &value, BinderDirection direction)
+    {
+        if(direction == BinderDirection::Get)
+        {
+            value = cnt->isChecked();
+        }
+        else if(direction == BinderDirection::Set)
+        {
+            cnt->setChecked(value);
+        }
+    }
+
+    void BindControl(QLineEdit *cnt, QString &value, BinderDirection direction)
+    {
+        if(direction == BinderDirection::Get)
+        {
+            value = cnt->text();
+        }
+        else if(direction == BinderDirection::Set)
+        {
+            cnt->setText(value);
+        }
+    }
+
+    void BindControl(QComboBox *cnt, int &value, BinderDirection direction)
+    {
+        if(direction == BinderDirection::Get)
+        {
+            value = cnt->currentData().toInt();
+        }
+        else if(direction == BinderDirection::Set)
+        {
+            int index = cnt->findData(value);
+            cnt->setCurrentIndex(index);
+        }
+    }
+
+    struct ControlBinder
+    {
+        BinderDirection direction;
+        template<class L, class R>
+            void Bind(L *control, R &value)
+            {
+                BindControl(control, value, direction);
+            }
+        ControlBinder(BinderDirection d):direction(d){}
+    };
+
+    void Bind(Ui::PreferencesDialog &ui, ControlBinder &binder, PersistentPreferences &value)
+    {
+        binder.Bind(ui.uiRecentFiles, value.recentFiles);
+        binder.Bind(ui.uiWordWrap, value.wordWrap);
+        binder.Bind(ui.uiLastUsedDirectory, value.saveLastUsedDirectory);
+        binder.Bind(ui.uiEnableBakFiles, value.enableBakFiles);
+        binder.Bind(ui.uiLibcurl, value.libCurlPath);
+        binder.Bind(ui.uiLibcurlParameters, value.libCurlParameters);
+        binder.Bind(ui.uiWindowsEol, value.windowsEol);
+        binder.Bind(ui.uiS2KResultsPoolSize, value.s2kResultsPoolSize);
+    }
+}
 
 PreferencesDialog::PreferencesDialog(QWidget *parent) :
     QDialog(parent, kDefaultWindowFlags),
@@ -30,6 +112,14 @@ PreferencesDialog::PreferencesDialog(QWidget *parent) :
     ui->setupUi(this);
     setMinimumSize(sizeHint());
     adjustSize();
+
+    for(int i = 0; i < ui->uiS2KResultsPoolSize->count(); i++)
+    {
+        bool ok = false;
+        int data = ui->uiS2KResultsPoolSize->itemText(i).toInt(&ok);
+        assert(ok);
+        ui->uiS2KResultsPoolSize->setItemData(i, data);
+    }
 }
 
 PreferencesDialog::~PreferencesDialog()
@@ -46,70 +136,23 @@ void PreferencesDialog::updateFont()
     ui->uiFontFamily->setText(fontText);
 }
 
-void PreferencesDialog::setFont(QFont newFont)
+void PreferencesDialog::get(PersistentPreferences &value)
 {
-    font = newFont;
+    value.defaultFileProperties = defaultFileProperties;
+    value.keyFileProperties = keyFileProperties;
+    value.font = font;
+    ControlBinder binder(BinderDirection::Get);
+    Bind(*ui, binder, value);
+}
+
+void PreferencesDialog::set(PersistentPreferences &value)
+{
+    defaultFileProperties = value.defaultFileProperties;
+    keyFileProperties = value.keyFileProperties;
+    font = value.font;
     updateFont();
-}
-
-int PreferencesDialog::getIterations() const
-{
-    return ui->uiIterations->value();
-}
-
-void PreferencesDialog::setIterations(int iterations)
-{
-    ui->uiIterations->setValue(iterations);
-}
-
-void PreferencesDialog::setRecentFiles(int newRecentFiles)
-{
-    ui->uiRecentFiles->setValue(newRecentFiles);
-}
-
-int PreferencesDialog::getRecentFiles() const
-{
-    return ui->uiRecentFiles->value();
-}
-
-void PreferencesDialog::setWordWrap(bool val)
-{
-    ui->uiWordWrap->setChecked(val);
-}
-
-bool PreferencesDialog::getWordWrap() const
-{
-    return ui->uiWordWrap->isChecked();
-}
-
-bool PreferencesDialog::getSaveLastUsedDirectory() const
-{
-    return ui->uiLastUsedDirectory->isChecked();
-}
-
-void PreferencesDialog::setSaveLastUsedDirectory(bool val)
-{
-    return ui->uiLastUsedDirectory->setChecked(val);
-}
-
-bool PreferencesDialog::getEnableBakFiles() const
-{
-    return ui->uiEnableBakFiles->isChecked();
-}
-
-void PreferencesDialog::setEnableBakFiles(bool val)
-{
-    return ui->uiEnableBakFiles->setChecked(val);
-}
-
-QString PreferencesDialog::getLibcurlPath() const
-{
-    return ui->uiLibcurl->text();
-}
-
-void PreferencesDialog::setLibcurlPath(const QString &path)
-{
-    ui->uiLibcurl->setText(path);
+    ControlBinder binder(BinderDirection::Set);
+    Bind(*ui, binder, value);
 }
 
 void PreferencesDialog::selectFont()
@@ -131,4 +174,24 @@ void PreferencesDialog::on_uiLibcurlBrowse_clicked()
         return;
 
     ui->uiLibcurl->setText(selection.file_name);
+}
+
+void PreferencesDialog::editDefaultFileProperties()
+{
+    FilePropertiesDialog dlg(this);
+    dlg.SetUiFromMetadata(defaultFileProperties);
+    if(dlg.exec() == QDialog::Rejected || !dlg.GetIsDirty())
+        return;
+
+    dlg.UpdateMetadataFromUi(defaultFileProperties);
+}
+
+void PreferencesDialog::editKeyFileProperties()
+{
+    FilePropertiesDialog dlg(this);
+    dlg.SetUiFromMetadata(keyFileProperties);
+    if(dlg.exec() == QDialog::Rejected || !dlg.GetIsDirty())
+        return;
+
+    dlg.UpdateMetadataFromUi(keyFileProperties);
 }

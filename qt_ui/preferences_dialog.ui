@@ -6,14 +6,20 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>462</width>
-    <height>434</height>
+    <width>474</width>
+    <height>489</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
     <width>462</width>
     <height>326</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>474</width>
+    <height>503</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -37,7 +43,20 @@
      <property name="spacing">
       <number>10</number>
      </property>
-     <item row="9" column="0" colspan="2">
+     <item row="9" column="0">
+      <widget class="QLabel" name="label_7">
+       <property name="toolTip">
+        <string>Libcurl command line parameters</string>
+       </property>
+       <property name="text">
+        <string>Parameters:</string>
+       </property>
+       <property name="buddy">
+        <cstring>uiLibcurlParameters</cstring>
+       </property>
+      </widget>
+     </item>
+     <item row="12" column="0" colspan="2">
       <layout class="QHBoxLayout" name="horizontalLayout_4">
        <item>
         <widget class="QLabel" name="label_6">
@@ -64,21 +83,21 @@
        </property>
       </widget>
      </item>
-     <item row="7" column="2">
+     <item row="8" column="2">
       <widget class="QPushButton" name="uiLibcurlBrowse">
        <property name="text">
         <string>Browse...</string>
        </property>
       </widget>
      </item>
-     <item row="6" column="0" colspan="3">
+     <item row="7" column="0" colspan="3">
       <widget class="Line" name="line_2">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
       </widget>
      </item>
-     <item row="5" column="1" colspan="2">
+     <item row="6" column="1" colspan="2">
       <widget class="QCheckBox" name="uiEnableBakFiles">
        <property name="text">
         <string>Enable BAK files</string>
@@ -107,7 +126,10 @@
        </property>
       </widget>
      </item>
-     <item row="4" column="1" colspan="2">
+     <item row="8" column="1">
+      <widget class="QLineEdit" name="uiLibcurl"/>
+     </item>
+     <item row="5" column="1" colspan="2">
       <widget class="QCheckBox" name="uiLastUsedDirectory">
        <property name="toolTip">
         <string>Retain last used directory between EncryptPad sessions</string>
@@ -117,7 +139,7 @@
        </property>
       </widget>
      </item>
-     <item row="3" column="1">
+     <item row="4" column="1">
       <layout class="QHBoxLayout" name="layout_2">
        <property name="spacing">
         <number>0</number>
@@ -160,17 +182,14 @@
        </property>
       </widget>
      </item>
-     <item row="7" column="1">
-      <widget class="QLineEdit" name="uiLibcurl"/>
-     </item>
-     <item row="2" column="0" colspan="3">
+     <item row="3" column="0" colspan="3">
       <widget class="Line" name="line">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
       </widget>
      </item>
-     <item row="7" column="0">
+     <item row="8" column="0">
       <widget class="QLabel" name="label_3">
        <property name="toolTip">
         <string>Path to libCURL executable</string>
@@ -183,7 +202,14 @@
        </property>
       </widget>
      </item>
-     <item row="3" column="0">
+     <item row="11" column="2">
+      <widget class="QPushButton" name="uiDefaultFileProperties">
+       <property name="text">
+        <string>Edit...</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="0">
       <widget class="QLabel" name="label_2">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
@@ -224,14 +250,14 @@
        </property>
       </widget>
      </item>
-     <item row="8" column="2">
-      <widget class="QPushButton" name="uiFileProperties">
+     <item row="12" column="2">
+      <widget class="QPushButton" name="uiEditKeyFileProperties">
        <property name="text">
         <string>Edit...</string>
        </property>
       </widget>
      </item>
-     <item row="11" column="0" colspan="3">
+     <item row="14" column="0" colspan="3">
       <widget class="QDialogButtonBox" name="buttonBox">
        <property name="minimumSize">
         <size>
@@ -250,39 +276,39 @@
        </property>
       </widget>
      </item>
-     <item row="10" column="2">
-      <widget class="QComboBox" name="uiS2KResultsPool">
+     <item row="13" column="2">
+      <widget class="QComboBox" name="uiS2KResultsPoolSize">
        <property name="currentIndex">
-        <number>2</number>
+        <number>0</number>
        </property>
        <item>
         <property name="text">
-         <string>1</string>
+         <string notr="true">1</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>2</string>
+         <string notr="true">2</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>8</string>
+         <string notr="true">8</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>32</string>
+         <string notr="true">32</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>128</string>
+         <string notr="true">128</string>
         </property>
        </item>
       </widget>
      </item>
-     <item row="8" column="0" colspan="2">
+     <item row="11" column="0" colspan="2">
       <layout class="QHBoxLayout" name="horizontalLayout_2">
        <item>
         <widget class="QLabel" name="label_4">
@@ -290,13 +316,13 @@
           <string>Default file properties:</string>
          </property>
          <property name="buddy">
-          <cstring>uiFileProperties</cstring>
+          <cstring>uiDefaultFileProperties</cstring>
          </property>
         </widget>
        </item>
       </layout>
      </item>
-     <item row="10" column="0" colspan="2">
+     <item row="13" column="0" colspan="2">
       <layout class="QHBoxLayout" name="horizontalLayout_3">
        <item>
         <widget class="QLabel" name="label_5">
@@ -304,19 +330,36 @@
           <string>This controls how many times you can save without entering a passphrase</string>
          </property>
          <property name="text">
-          <string>Passphrase to key results pool:</string>
+          <string>Passphrase to key results pool size:</string>
          </property>
          <property name="buddy">
-          <cstring>uiS2KResultsPool</cstring>
+          <cstring>uiS2KResultsPoolSize</cstring>
          </property>
         </widget>
        </item>
       </layout>
      </item>
-     <item row="9" column="2">
-      <widget class="QPushButton" name="uiEditKeyFileProperties">
+     <item row="9" column="1" colspan="2">
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <item>
+        <widget class="QLineEdit" name="uiLibcurlParameters"/>
+       </item>
+      </layout>
+     </item>
+     <item row="10" column="0" colspan="3">
+      <widget class="Line" name="line_3">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QCheckBox" name="uiWindowsEol">
+       <property name="toolTip">
+        <string>&quot;Windows&quot; end of line: CR+LF</string>
+       </property>
        <property name="text">
-        <string>Edit...</string>
+        <string>&quot;Windows&quot; end of line: CR+LF</string>
        </property>
       </widget>
      </item>
@@ -328,14 +371,16 @@
   <tabstop>uiFontFamily</tabstop>
   <tabstop>uiSelectFont</tabstop>
   <tabstop>uiWordWrap</tabstop>
+  <tabstop>uiWindowsEol</tabstop>
   <tabstop>uiRecentFiles</tabstop>
   <tabstop>uiLastUsedDirectory</tabstop>
   <tabstop>uiEnableBakFiles</tabstop>
   <tabstop>uiLibcurl</tabstop>
   <tabstop>uiLibcurlBrowse</tabstop>
-  <tabstop>uiFileProperties</tabstop>
+  <tabstop>uiLibcurlParameters</tabstop>
+  <tabstop>uiDefaultFileProperties</tabstop>
   <tabstop>uiEditKeyFileProperties</tabstop>
-  <tabstop>uiS2KResultsPool</tabstop>
+  <tabstop>uiS2KResultsPoolSize</tabstop>
  </tabstops>
  <resources/>
  <connections>
@@ -346,8 +391,8 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>286</x>
-     <y>429</y>
+     <x>305</x>
+     <y>478</y>
     </hint>
     <hint type="destinationlabel">
      <x>157</x>
@@ -362,8 +407,8 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>354</x>
-     <y>429</y>
+     <x>373</x>
+     <y>478</y>
     </hint>
     <hint type="destinationlabel">
      <x>286</x>
@@ -378,7 +423,7 @@
    <slot>selectFont()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>442</x>
+     <x>454</x>
      <y>45</y>
     </hint>
     <hint type="destinationlabel">
@@ -387,8 +432,42 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>uiEditKeyFileProperties</sender>
+   <signal>clicked()</signal>
+   <receiver>PreferencesDialog</receiver>
+   <slot>editKeyFileProperties()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>404</x>
+     <y>383</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>291</x>
+     <y>252</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>uiDefaultFileProperties</sender>
+   <signal>clicked()</signal>
+   <receiver>PreferencesDialog</receiver>
+   <slot>editDefaultFileProperties()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>404</x>
+     <y>347</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>291</x>
+     <y>252</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>selectFont()</slot>
+  <slot>editDefaultFileProperties()</slot>
+  <slot>editKeyFileProperties()</slot>
  </slots>
 </ui>

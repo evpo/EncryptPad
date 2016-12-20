@@ -87,7 +87,8 @@ SOURCES += \
     load_save_handler.cpp \
     file_request_service.cpp \
     plain_text_edit.cpp \
-    find_dialog.cpp
+    find_dialog.cpp \
+    preferences.cpp
 
 HEADERS += \
     application.h \
@@ -115,7 +116,8 @@ HEADERS += \
     file_request_service.h \
     plain_text_edit.h \
     common_definitions.h \
-    find_dialog.h
+    find_dialog.h \
+    preferences.h
 
 QMAKE_RESOURCE_FLAGS += -no-compress
 RESOURCES += \

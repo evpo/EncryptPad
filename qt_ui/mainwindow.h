@@ -34,6 +34,7 @@
 #include "file_request_service.h"
 #include "find_dialog.h"
 #include "find_and_replace.h"
+#include "preferences.h"
 
 QT_BEGIN_NAMESPACE
 class QAction;
@@ -105,10 +106,14 @@ private:
     static const int maxZoomIn;
     static const int minZoomOut;
 
+    PersistentPreferences preferences;
+
     QString curFile;
     QString encryptionKeyFile;
     ReplaceContext replaceContext;
     bool persistEncryptionKeyPath;
+    bool windowsEol;
+    bool takeBakFile;
     QDateTime lastModified;
 
     QLabel *passphraseSet;
@@ -165,13 +170,8 @@ private:
 
     EncryptPadEncryptor::Encryptor enc;
     EncryptPad::PacketMetadata metadata;
-    int defaultIterations;
     bool encryptionModified;
     bool isBusy;
-    bool saveLastUsedDirectory;
-    bool enableBakFiles;
-    bool takeBakFile;
-    bool windowsEol;
 
     void createActions();
     void createMenus();
@@ -182,6 +182,7 @@ private:
     bool maybeSave();
     void makeDirty();
     void updateLineStatus();
+    void onUpdatedPreferences();
 
     void loadFile(const QString &fileName, bool force_kf_passphrase_request = false);
     bool saveFile(const QString &fileName);

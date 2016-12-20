@@ -102,9 +102,12 @@ void FileEncryptionDialog::SetPassphrase(const char *pwd, EncryptPad::PacketMeta
     metadata.key_only = false;
 }
 
-void FileEncryptionDialog::SetDefaultIterations(int defaultIterations)
+void FileEncryptionDialog::SetDefaultFileParameters(const EncryptPad::PacketMetadata &default_metadata)
 {
-    metadata.iterations = defaultIterations;
+    metadata = default_metadata;
+    metadata.persist_key_path = false;
+    metadata.is_binary = true;
+    metadata.file_name = "_CONSOLE";
 }
 
 bool FileEncryptionDialog::IsPassphraseNotSet() const

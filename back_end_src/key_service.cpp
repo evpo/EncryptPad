@@ -31,6 +31,13 @@ namespace EncryptPad
         :key_count_(key_count)
         {}
 
+
+    void KeyService::set_key_count(int key_count)
+    {
+        key_records_.clear();
+        key_count_ = key_count;
+    }
+
     const KeyRecord &KeyService::EmptyRecord() const
     {
         return empty_record_;

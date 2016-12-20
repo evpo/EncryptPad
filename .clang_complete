@@ -8,5 +8,11 @@
 -I./deps/stlplus/subsystems
 -I./deps/stlplus/portability
 -I./deps/stlplus/containers
+-I./build/qt_build
+-I/usr/local/Qt5.3.2/5.3/gcc_64/include/QtWidgets
+-I/usr/local/Qt5.3.2/5.3/gcc_64/include/QtGui
+-I/usr/local/Qt5.3.2/5.3/gcc_64/include/QtCore
+-I/usr/local/Qt5.3.2/5.3/gcc_64/include
 -std=c++11
 -w
+-fPIC
