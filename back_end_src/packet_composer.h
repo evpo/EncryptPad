@@ -50,12 +50,14 @@ namespace EncryptPad
 
         // Path to libcurl executable, which is used to download the key file from a remote location such as SSH
         const std::string *libcurl_path;
+        const std::string *libcurl_parameters;
 
         EncryptParams():
             passphrase(nullptr),
             key_service(nullptr),
             key_file_encrypt_params(nullptr),
-            libcurl_path(nullptr)
+            libcurl_path(nullptr),
+            libcurl_parameters(nullptr)
         {}
     };
 

@@ -36,12 +36,11 @@ namespace EncryptPad
         return true;
     }
 
-    bool EncryptKeyFileContent(const std::string &key, EncryptParams *key_file_encrypt_params, std::string &out,
+    bool EncryptKeyFileContent(SecureVector<byte> &in_buffer, EncryptParams *key_file_encrypt_params, std::string &out,
             PacketMetadata &metadata)
     {
         assert(key_file_encrypt_params);
 
-        SecureVector<byte> in_buffer(reinterpret_cast<const byte*>(&key[0]), key.size());
         SecureVector<byte> out_buffer;
 
         PacketResult result = EncryptBuffer(in_buffer, *key_file_encrypt_params, out_buffer, metadata);

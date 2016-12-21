@@ -22,6 +22,7 @@
 #include "file_helper.h"
 #include "key_file_converter.h"
 #include "packet_composer.h"
+#include "algo_spec.h"
 
 using namespace EncryptPad;
 
@@ -34,32 +35,60 @@ namespace
         if(OpenFile(key_file_path, stm) != OpenFileResult::OK)
             throw IoException(exception_msg);
 
-		if(!stm.Write(reinterpret_cast<const byte*>(content.c_str()), content.length()))
-			throw IoException(exception_msg);
+        if(!stm.Write(reinterpret_cast<const byte*>(content.c_str()), content.length()))
+            throw IoException(exception_msg);
     }
+
+    // This implementation comes from Botan base64.cpp
+    /**
+     * Round up
+     * @param n an integer
+     * @param align_to the alignment boundary
+     * @return n rounded up to a multiple of align_to
+     */
+    template<typename T>
+        inline T botan_round_up(T n, T align_to)
+        {
+            if(n % align_to || n == 0)
+                n += align_to - (n % align_to);
+            return n;
+        }
 }
 
 namespace EncryptPad
 {
-	void GenerateNewKey(unsigned char buffer[], size_t length)
-	{
-		Botan::AutoSeeded_RNG rng;
-		rng.randomize(buffer, length);
-	}
+    void GenerateNewKey(unsigned char buffer[], size_t length)
+    {
+        Botan::AutoSeeded_RNG rng;
+        rng.randomize(buffer, length);
+    }
 
     void GenerateNewKey(const std::string& key_file_path, EncryptParams *kf_encrypt_params, PacketMetadata *metadata)
-	{
-		const size_t key_byte_length = 256 >> 3; // converts bits into bytes
-		Botan::byte buffer[key_byte_length]; // calculate the number of bytes to represent 256 bit
-		GenerateNewKey(buffer, key_byte_length);
+    {
+        size_t key_byte_length = GetAlgoSpec(metadata->cipher_algo).key_size >> 3U; // converts bits into bytes
+        Botan::SecureVector<Botan::byte> buffer(key_byte_length);
+        // The formula is from Botan base64.cpp implementation
+        size_t output_buffer_size = (botan_round_up<size_t>(buffer.size(), 3) / 3) * 4;
+        GenerateNewKey(buffer.begin(), buffer.size());
+        Botan::SecureVector<Botan::byte> output_buffer(output_buffer_size);
+        size_t input_consumed = 0U;
+        size_t output_size = Botan::base64_encode(
+                reinterpret_cast<char*>(output_buffer.begin()),
+                buffer.begin(),
+                buffer.size(),
+                input_consumed,
+                true);
+        assert(output_size > 0 && output_size <= output_buffer.size());
+        assert(input_consumed == buffer.size());
+        output_buffer.resize(output_size);
 
-        std::string key_string = Botan::base64_encode(buffer, key_byte_length);
+        std::string encrypted_key;
         if(kf_encrypt_params && metadata)
         {
-            EncryptKeyFileContent(key_string, kf_encrypt_params, key_string, *metadata);
+            EncryptKeyFileContent(output_buffer, kf_encrypt_params, encrypted_key, *metadata);
         }
 
-        WriteKeyFile(key_file_path, key_string);
+        WriteKeyFile(key_file_path, encrypted_key);
     }
 
     PacketMetadata GetDefaultKFMetadata(int iterations)
