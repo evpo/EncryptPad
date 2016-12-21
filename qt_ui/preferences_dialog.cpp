@@ -102,6 +102,18 @@ namespace
         binder.Bind(ui.uiLibcurlParameters, value.libCurlParameters);
         binder.Bind(ui.uiWindowsEol, value.windowsEol);
         binder.Bind(ui.uiS2KResultsPoolSize, value.s2kResultsPoolSize);
+        binder.Bind(ui.uiKeyFileLength, value.kfKeyLength);
+    }
+
+    void ParseComboBoxData(QComboBox *combo)
+    {
+        for(int i = 0; i < combo->count(); i++)
+        {
+            bool ok = false;
+            int data = combo->itemText(i).toInt(&ok);
+            assert(ok);
+            combo->setItemData(i, data);
+        }
     }
 }
 
@@ -112,14 +124,8 @@ PreferencesDialog::PreferencesDialog(QWidget *parent) :
     ui->setupUi(this);
     setMinimumSize(sizeHint());
     adjustSize();
-
-    for(int i = 0; i < ui->uiS2KResultsPoolSize->count(); i++)
-    {
-        bool ok = false;
-        int data = ui->uiS2KResultsPoolSize->itemText(i).toInt(&ok);
-        assert(ok);
-        ui->uiS2KResultsPoolSize->setItemData(i, data);
-    }
+    ParseComboBoxData(ui->uiS2KResultsPoolSize);
+    ParseComboBoxData(ui->uiKeyFileLength);
 }
 
 PreferencesDialog::~PreferencesDialog()

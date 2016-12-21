@@ -34,6 +34,7 @@
 #include "key_generation.h"
 #include "file_helper.h"
 #include "openpgp_conversions.h"
+#include "algo_spec.h"
 
 namespace EncryptPad
 {
@@ -75,6 +76,7 @@ namespace EncryptPad
             "--compress-algo <compression-algo>    compression algorithm (ZIP, ZLIB, NONE; default: ZIP)\n"
             "--s2k-digest-algo <s2k-digest-algo>   s2k digest algorithm (SHA1, SHA256; SHA512; default: SHA256)\n"
             "--s2k-count <s2k-count>               s2k iteration count\n"
+            "--key-file-length                     key file random sequence length in bytes. Use with --generate-key. default: 64\n"
             "\n"
             "Feedback: evpo.net/encryptpad\n"
             ;
@@ -169,7 +171,7 @@ namespace EncryptPad
 using namespace EncryptPad;
 using namespace stlplus;
 
-void GenerateKeyFile(const std::string &path, const std::string &passphrase, int s2k_count);
+void GenerateKeyFile(const std::string &path, size_t key_byte_size, const std::string &passphrase, PacketMetadata *kf_metadata);
 
 // end Packet read write tests
 int main(int argc, char *argv[])
@@ -317,12 +319,19 @@ int main(int argc, char *argv[])
             ""
         },
         {
+            "--key-file-length",
+            cli_kind_t::cli_value_kind,
+            cli_mode_t::cli_single_mode,
+            "",
+        },
+        {
             "",
             cli_kind_t::cli_value_kind,
             cli_mode_t::cli_single_mode,
             "input file",
             ""
         },
+
         END_CLI_DEFINITIONS,
     };
 
@@ -363,6 +372,8 @@ int main(int argc, char *argv[])
     std::string hash_algo;
     int s2k_count = kDefaultIterations;
     std::string s2k_count_str;
+    int key_file_length = kDefaultKeyFileKeyLength;
+    std::string key_file_length_str;
 
     std::string libcurl_path;
 
@@ -443,6 +454,10 @@ int main(int argc, char *argv[])
         else if(parser.name(i) == "s2k-count")
         {
             s2k_count_str = parser.string_value(i);
+        }
+        else if(parser.name(i) == "key-file-length")
+        {
+            key_file_length_str = parser.string_value(i);
         }
         else if(parser.name(i) == "help")
         {
@@ -601,6 +616,17 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
+    if(!key_file_length_str.empty())
+    {
+        std::istringstream key_file_length_stm(key_file_length_str);
+        key_file_length_stm >> key_file_length;
+        if(key_file_length_stm.fail())
+        {
+            std::cerr << "key-file-length: '" << key_file_length_str << "' is not a number" << std::endl;
+            exit(1);
+        }
+    }
+
     if(generate_kf)
     {
         passphrase_fd_str = key_file_passphrase_fd_str;
@@ -649,7 +675,8 @@ int main(int argc, char *argv[])
     {
         try
         {
-            GenerateKeyFile(out_file, passphrase, s2k_count);
+            PacketMetadata kf_metadata = GetDefaultKFMetadata(s2k_count);
+            GenerateKeyFile(out_file, key_file_length, passphrase, &kf_metadata);
         }
         catch(EncryptPad::IoException &ex)
         {
@@ -797,21 +824,21 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-void GenerateKeyFile(const std::string &path, const std::string &passphrase, int s2k_count)
+void GenerateKeyFile(const std::string &path, size_t key_byte_size, const std::string &passphrase, PacketMetadata *metadata)
 {
     if(passphrase.empty())
     {
-        GenerateNewKey(path);
+        GenerateNewKey(path, key_byte_size);
     }
     else
     {
+        assert(metadata);
         EncryptParams kf_encrypt_params;
         KeyService key_service(1);
         kf_encrypt_params.key_service = &key_service;
-        PacketMetadata metadata = GetDefaultKFMetadata(s2k_count);
         kf_encrypt_params.key_service->ChangePassphrase(
-                    passphrase, metadata.hash_algo, GetAlgoSpec(metadata.cipher_algo).key_size,
-                    metadata.iterations);
-        GenerateNewKey(path, &kf_encrypt_params, &metadata);
+                    passphrase, metadata->hash_algo, GetAlgoSpec(metadata->cipher_algo).key_size,
+                    metadata->iterations);
+        GenerateNewKey(path, key_byte_size, &kf_encrypt_params, metadata);
     }
 }

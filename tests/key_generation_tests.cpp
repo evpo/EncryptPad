@@ -22,6 +22,7 @@
 #include "gtest/gtest.h"
 #include "key_generation.h"
 #include "test_utilities.h"
+#include "algo_spec.h"
 
 using namespace EncryptPad;
 
@@ -43,8 +44,8 @@ TEST(KeyGeneration, Key_file_is_created_and_it_is_unique)
 {
     std::string tmp_file1 = "tmp_file1.key", tmp_file2 = "tmp_file2.key";
     TestCleanUp clean_up1(tmp_file1), clean_up2(tmp_file2);
-    GenerateNewKey(tmp_file1);
-    GenerateNewKey(tmp_file2);
+    GenerateNewKey(tmp_file1, kDefaultKeyFileKeyLength);
+    GenerateNewKey(tmp_file2, kDefaultKeyFileKeyLength);
 
     std::ifstream stm1(tmp_file1, std::ios_base::in);
     std::string key1;

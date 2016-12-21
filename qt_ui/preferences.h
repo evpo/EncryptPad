@@ -16,6 +16,7 @@ struct PersistentPreferences
     QFont font;
     QString libCurlPath;
     QString libCurlParameters;
+    int kfKeyLength;
 };
 
 void SetDefaultPreferences(PersistentPreferences &preferences);

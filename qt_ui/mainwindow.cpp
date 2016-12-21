@@ -578,16 +578,16 @@ void MainWindow::createNewKey()
         {
             kf_encrypt_params.key_service = &enc.GetKFKeyService();
             enc.ClearKFPassphrase();
-            PacketMetadata metadata = preferences.keyFileProperties;
+            PacketMetadata kf_metadata = preferences.keyFileProperties;
             kf_encrypt_params.key_service->ChangePassphrase(
-                    kf_passphrase, metadata.hash_algo, GetAlgoSpec(metadata.cipher_algo).key_size,
-                    metadata.iterations);
+                    kf_passphrase, kf_metadata.hash_algo, GetAlgoSpec(kf_metadata.cipher_algo).key_size,
+                    kf_metadata.iterations);
             std::fill(kf_passphrase.begin(), kf_passphrase.end(), '\0');
-            GenerateNewKey(filePath.toStdString(), &kf_encrypt_params, &metadata);
+            GenerateNewKey(filePath.toStdString(), preferences.kfKeyLength, &kf_encrypt_params, &kf_metadata);
         }
         else
         {
-            GenerateNewKey(filePath.toStdString());
+            GenerateNewKey(filePath.toStdString(), preferences.kfKeyLength);
         }
     }
     catch(EncryptPad::IoException)

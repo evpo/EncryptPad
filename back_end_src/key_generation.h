@@ -34,7 +34,7 @@ namespace EncryptPad
     };
 
     void GenerateNewKey(unsigned char buffer[], size_t length);
-    void GenerateNewKey(const std::string& key_file_path, EncryptPad::EncryptParams *encrypt_params = nullptr, PacketMetadata *metadata = nullptr);
+    void GenerateNewKey(const std::string& key_file_path, size_t key_byte_length, EncryptPad::EncryptParams *encrypt_params = nullptr, PacketMetadata *metadata = nullptr);
     EncryptPad::PacketMetadata GetDefaultKFMetadata(int iterations);
 }
 #endif // KEY_GENERATION_H

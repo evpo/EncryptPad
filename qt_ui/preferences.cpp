@@ -1,6 +1,7 @@
 #include "preferences.h"
 #include <QFontDatabase>
 #include "openpgp_conversions.h"
+#include "algo_spec.h"
 
 namespace
 {
@@ -126,6 +127,7 @@ namespace
         mapper.Map("key_file_compression", preferences.keyFileProperties.compression);
         mapper.Map("key_file_iterations", preferences.keyFileProperties.iterations);
         mapper.Map("windows_eol", preferences.windowsEol);
+        mapper.Map("key_file_key_length", preferences.kfKeyLength);
     }
 }
 
@@ -137,6 +139,7 @@ void SetDefaultPreferences(PersistentPreferences &preferences)
     preferences.windowsEol = kDefaultWindowsEol;
     preferences.s2kResultsPoolSize = kDefaultS2KResultsPoolSize;
     preferences.wordWrap = kDefaultWordWrap;
+    preferences.kfKeyLength = EncryptPad::kDefaultKeyFileKeyLength;
 
     preferences.defaultFileProperties.cipher_algo = EncryptPad::kDefaultCipherAlgo;
     preferences.defaultFileProperties.hash_algo = EncryptPad::kDefaultHashAlgo;

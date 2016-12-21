@@ -63,9 +63,8 @@ namespace EncryptPad
         rng.randomize(buffer, length);
     }
 
-    void GenerateNewKey(const std::string& key_file_path, EncryptParams *kf_encrypt_params, PacketMetadata *metadata)
+    void GenerateNewKey(const std::string& key_file_path, size_t key_byte_length, EncryptParams *kf_encrypt_params, PacketMetadata *metadata)
     {
-        size_t key_byte_length = GetAlgoSpec(metadata->cipher_algo).key_size >> 3U; // converts bits into bytes
         Botan::SecureVector<Botan::byte> buffer(key_byte_length);
         // The formula is from Botan base64.cpp implementation
         size_t output_buffer_size = (botan_round_up<size_t>(buffer.size(), 3) / 3) * 4;
@@ -82,13 +81,18 @@ namespace EncryptPad
         assert(input_consumed == buffer.size());
         output_buffer.resize(output_size);
 
-        std::string encrypted_key;
         if(kf_encrypt_params && metadata)
         {
+            std::string encrypted_key;
             EncryptKeyFileContent(output_buffer, kf_encrypt_params, encrypted_key, *metadata);
+            WriteKeyFile(key_file_path, encrypted_key);
         }
-
-        WriteKeyFile(key_file_path, encrypted_key);
+        else
+        {
+            std::string plain_key(reinterpret_cast<char*>(output_buffer.begin()), output_buffer.size());
+            WriteKeyFile(key_file_path, plain_key);
+            std::fill(plain_key.begin(), plain_key.end(), '\0');
+        }
     }
 
     PacketMetadata GetDefaultKFMetadata(int iterations)
