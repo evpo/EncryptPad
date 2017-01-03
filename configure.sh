@@ -15,7 +15,7 @@ COMMANDS:\n\
 -t, --run-tests      run the unit tests\n\
 -f, --run-func-tests run functional tests\n\
 -n, --clean-tests    clean the unit tests\n\
---culture-res        build qm files from ts files to update culture resources\n\h
+--culture-res        build qm files from ts files to update culture resources\n\
 --appimage           build AppImage (requires AppImageKit and binaries)\n\
 --docs               build docs directory from markdown files (requres the markdown utility)\n\
 --update-htm         update htm files (README.htm and CHANGES.htm)\n\
