@@ -91,6 +91,7 @@ private slots:
     void on_actionIOChange_triggered();
 
     void on_uiInputFile_editingFinished();
+    void on_uiEpdRadio_toggled(bool toggled);
 
 private:
     Ui::FileEncryptionDialog *ui;
@@ -104,7 +105,6 @@ private:
 
     bool IsEncryption() const;
     void suggestOutput();
-
 };
 
 #endif // FILE_ENCRYPTION_DIALOG_H
