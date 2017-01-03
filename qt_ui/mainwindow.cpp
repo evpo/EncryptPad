@@ -638,15 +638,27 @@ void MainWindow::openPreferences()
 {
     bool lastEnableBakFiles = preferences.enableBakFiles;
 
+    auto settings = loadSettings();
+    PersistentPreferences loadedPreferences;
+    if(settings.get() != nullptr)
+    {
+        ReadPreferences(*settings, loadedPreferences);
+    }
+    else
+    {
+        loadedPreferences = preferences;
+    }
+
     PreferencesDialog dlg(this);
-    dlg.set(preferences);
+    dlg.set(loadedPreferences);
     if(dlg.exec() == QDialog::Rejected)
         return;
 
     dlg.get(preferences);
-    onUpdatedPreferences();
 
-    //TODO: save the new preferences
+    WritePreferences(*settings, preferences);
+
+    onUpdatedPreferences();
 
     if(preferences.enableBakFiles && !lastEnableBakFiles)
     {
@@ -1057,6 +1069,7 @@ void MainWindow::onUpdatedPreferences()
     wordWrapAct->setChecked(preferences.wordWrap);
     wordWrapToggled(preferences.wordWrap);
     enc.SetLibcurlPath(preferences.libCurlPath.toStdString());
+    enc.SetLibcurlParams(preferences.libCurlParameters.toStdString());
     textEdit->setFont(preferences.font);
     recent_files_service_.SetMaxFiles(preferences.recentFiles);
     resetZoom();
@@ -1096,23 +1109,30 @@ void MainWindow::readSettings()
     move(pos);
 }
 
-void MainWindow::writeSettings()
+std::unique_ptr<QSettings> MainWindow::loadSettings()
 {
     QString configFile = accessRepositoryPath(kConfigFileName);
     if(configFile.isEmpty())
-        return;
+        return std::unique_ptr<QSettings>();
 
-    QSettings settings(configFile, QSettings::IniFormat);
-    preferences.wordWrap = wordWrapAct->isChecked();
-    WritePreferences(settings, preferences);
-    settings.setValue("pos", pos());
-    settings.setValue("size", size());
+    std::unique_ptr<QSettings> settings(new QSettings(configFile, QSettings::IniFormat));
+    return settings;
+}
+
+void MainWindow::writeSettings()
+{
+    auto settings = loadSettings();
+    if(settings.get() == nullptr)
+        return;
+    settings->setValue("word_wrap", QVariant(wordWrapAct->isChecked()));
+    settings->setValue("pos", pos());
+    settings->setValue("size", size());
     QStringList list;
     recent_files_service_.Serialize(list);
-    settings.setValue("recent_file_list", QVariant(list));
-    settings.setValue("read_only", QVariant(readOnlyAct->isChecked()));
-    settings.setValue("passphrase_generation", QVariant(passphraseGenerationSettings));
-    settings.setValue("last_used_directory",
+    settings->setValue("recent_file_list", QVariant(list));
+    settings->setValue("read_only", QVariant(readOnlyAct->isChecked()));
+    settings->setValue("passphrase_generation", QVariant(passphraseGenerationSettings));
+    settings->setValue("last_used_directory",
             QVariant(preferences.saveLastUsedDirectory ? file_request_service_.get_current_directory()
                 : QString()));
 }

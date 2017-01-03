@@ -39,7 +39,8 @@ namespace
         std::string raw_key_phrase, key_phrase;
         std::string empty_str;
         auto result = LoadKeyFromFile(metadata.key_file, 
-                encrypt_params.libcurl_path ? *encrypt_params.libcurl_path : empty_str, 
+                encrypt_params.libcurl_path ? *encrypt_params.libcurl_path : empty_str,
+                encrypt_params.libcurl_parameters ? *encrypt_params.libcurl_parameters : empty_str,
                 raw_key_phrase);
 
         if(result != PacketResult::Success)
@@ -149,7 +150,8 @@ namespace
 
         std::string empty_str;
         auto result = LoadKeyFromFile(metadata.key_file, 
-                encrypt_params.libcurl_path ? *encrypt_params.libcurl_path : empty_str, 
+                encrypt_params.libcurl_path ? *encrypt_params.libcurl_path : empty_str,
+                encrypt_params.libcurl_parameters ? *encrypt_params.libcurl_parameters : empty_str,
                 passphrase_from_key);
 
         if(result != PacketResult::Success)

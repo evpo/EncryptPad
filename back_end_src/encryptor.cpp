@@ -144,6 +144,16 @@ namespace
     }
 }
 
+void Encryptor::SetLibcurlParams(const std::string &params)
+{
+    mLibcurlParams = params;
+}
+
+const std::string &Encryptor::GetLibcurlParams() const
+{
+    return mLibcurlParams;
+}
+
 void Encryptor::SetLibcurlPath(const std::string &path)
 {
     mLibcurlPath = path;
@@ -254,6 +264,7 @@ EncryptPadEncryptor::Result Encryptor::Save(const string &fileName, const Secure
         EncryptParams enc_params = {};
         enc_params.key_service = &key_service_;
         enc_params.libcurl_path = &mLibcurlPath;
+        enc_params.libcurl_parameters = &mLibcurlParams;
 
         EncryptParams kf_encrypt_params = {};
 
@@ -280,7 +291,7 @@ EncryptPadEncryptor::Result Encryptor::Save(const string &fileName, const Secure
     std::string x2Key;
 	Result loadKeyResult = Result::OK;
 
-	if (!x2KeyLocation.empty() && (loadKeyResult = FromPacketResult(LoadKeyFromFile(x2KeyLocation, mLibcurlPath, x2Key))) != Result::OK)
+	if (!x2KeyLocation.empty() && (loadKeyResult = FromPacketResult(LoadKeyFromFile(x2KeyLocation, mLibcurlPath, mLibcurlParams, x2Key))) != Result::OK)
     {
 		return loadKeyResult;
     }
@@ -366,6 +377,7 @@ Result Encryptor::Load(const std::string &fileName, SecureVector<byte> &content,
         enc_params.passphrase = passphrase;
         enc_params.key_service = &key_service_;
         enc_params.libcurl_path = &mLibcurlPath;
+        enc_params.libcurl_parameters = &mLibcurlParams;
 
         EncryptParams kf_encrypt_params = {};
 
@@ -436,7 +448,7 @@ Result Encryptor::Load(const std::string &fileName, SecureVector<byte> &content,
     std::string x2Key;
 	Result loadKeyResult = Result::OK;
 
-	if (!mX2KeyLocation.empty() && (loadKeyResult = FromPacketResult(LoadKeyFromFile(mX2KeyLocation, mLibcurlPath, x2Key))) != Result::OK)
+	if (!mX2KeyLocation.empty() && (loadKeyResult = FromPacketResult(LoadKeyFromFile(mX2KeyLocation, mLibcurlPath, mLibcurlParams, x2Key))) != Result::OK)
 	{
 		return loadKeyResult;
 	}

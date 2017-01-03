@@ -65,6 +65,7 @@ namespace EncryptPadEncryptor
         Botan::OctetString mIV;
         std::string mX2KeyLocation;
         std::string mLibcurlPath;
+        std::string mLibcurlParams;
         Encryptor(const Encryptor &);
         Encryptor & operator=(const Encryptor &);
     public:
@@ -91,6 +92,8 @@ namespace EncryptPadEncryptor
         bool HasKFPassphrase() const;
         void SetLibcurlPath(const std::string &path);
         const std::string &GetLibcurlPath() const;
+        void SetLibcurlParams(const std::string &params);
+        const std::string &GetLibcurlParams() const;
 
 		// Saves content to fileName
 		// persists the x2 key location in fileName if persistX2KeyLocation

@@ -200,6 +200,7 @@ private:
     void ExitWaitState();
     void ConvertToWindowsEOL(QString &in, QByteArray &out);
     QString accessRepositoryPath(const QString &fileName);
+    std::unique_ptr<QSettings> loadSettings();
 
     int currentZoom;
 

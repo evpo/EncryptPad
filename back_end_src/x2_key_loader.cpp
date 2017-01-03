@@ -60,23 +60,23 @@ namespace
 
 namespace EncryptPad
 {
-	PacketResult LoadKeyFromFile(const string& file_name, const std::string &libcurl_path, std::string &key)
-	{
+    PacketResult LoadKeyFromFile(const string& file_name, const std::string &libcurl_path, const std::string &libcurl_params, std::string &key)
+    {
         if(!libcurl_path.empty() && IsUrl(file_name))
-            return LoadKeyFromFileThroughCurl(file_name, libcurl_path, key);
+            return LoadKeyFromFileThroughCurl(file_name, libcurl_path, libcurl_params, key);
 
-		std::string path = ExpandVariables(file_name);
-        
-		if (!LoadStringFromFile(path, key))
-		{
-			if (path.find(directorySeparator) == std::string::npos)
-			{
-				std::string keyStoragePath = std::string(keyStorageDirectory) + directorySeparator + path;
-				return LoadKeyFromFile(keyStoragePath, std::string(), key);
-			}
-			return PacketResult::IOErrorKeyFile;
-		}
+        std::string path = ExpandVariables(file_name);
 
-		return PacketResult::Success;
-	}
+        if (!LoadStringFromFile(path, key))
+        {
+            if (path.find(directorySeparator) == std::string::npos)
+            {
+                std::string keyStoragePath = std::string(keyStorageDirectory) + directorySeparator + path;
+                return LoadKeyFromFile(keyStoragePath, std::string(), std::string(), key);
+            }
+            return PacketResult::IOErrorKeyFile;
+        }
+
+        return PacketResult::Success;
+    }
 }

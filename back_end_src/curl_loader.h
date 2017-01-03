@@ -23,5 +23,7 @@
 
 namespace EncryptPad
 {
-    PacketResult LoadKeyFromFileThroughCurl(const std::string& fileName, const std::string &libcurl_path, std::string &key);
+    PacketResult LoadKeyFromFileThroughCurl(const std::string& fileName,
+            const std::string &libcurl_path, const std::string &libcurl_params,
+            std::string &key);
 }

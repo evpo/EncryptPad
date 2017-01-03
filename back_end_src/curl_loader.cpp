@@ -42,32 +42,31 @@ namespace {
 
 namespace EncryptPad
 {
-    PacketResult LoadKeyFromFileThroughCurl(const std::string& file_name, const std::string &libcurl_path, std::string &key)
+    PacketResult LoadKeyFromFileThroughCurl(const std::string& file_name, const std::string &libcurl_path,
+            const std::string &libcurl_params, std::string &key)
     {
-       arg_vector arg_v;
-       arg_v += std::string(libcurl_path);
-       arg_v += std::string(file_name);
-       CurlSubprocess sub_proc;
-       bool result = sub_proc.spawn(libcurl_path, arg_v, false, true, false);
-       if(!result)
-       {
-           switch(sub_proc.error_number())
-           {
-           case 2:
-           case 3:
-               return PacketResult::CurlIsNotFound;
-           default:
-               return PacketResult::IOErrorKeyFile;
-           }
-       }
+        arg_vector arg_v(libcurl_path + " " + libcurl_params + " " + file_name);
+        CurlSubprocess sub_proc;
+        bool result = sub_proc.spawn(libcurl_path, arg_v, false, true, false);
+        if(!result)
+        {
+            switch(sub_proc.error_number())
+            {
+                case 2:
+                case 3:
+                    return PacketResult::CurlIsNotFound;
+                default:
+                    return PacketResult::IOErrorKeyFile;
+            }
+        }
 
-       if(sub_proc.get_output().length() == 0)
-           return PacketResult::IOErrorKeyFile;
-       if(sub_proc.exit_status() != 0)
-           return PacketResult::CurlExitNonZero;
+        if(sub_proc.get_output().length() == 0)
+            return PacketResult::IOErrorKeyFile;
+        if(sub_proc.exit_status() != 0)
+            return PacketResult::CurlExitNonZero;
 
-       key = sub_proc.get_output();
-       // key = Botan::OctetString(Botan::base64_decode(sub_proc.get_output()));
-       return PacketResult::Success;
+        key = sub_proc.get_output();
+        // key = Botan::OctetString(Botan::base64_decode(sub_proc.get_output()));
+        return PacketResult::Success;
     }
 }
