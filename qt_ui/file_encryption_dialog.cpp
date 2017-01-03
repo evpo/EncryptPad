@@ -408,6 +408,7 @@ void FileEncryptionDialog::WorkDone()
             break;
     }
 
+
     if(!success && !rejected && !IsEncryption())
     {
         loadHandler.LoadFile(ui->uiInputFile->text(), request_kf_passphrase);
@@ -420,10 +421,12 @@ void FileEncryptionDialog::WorkDone()
                 "EncryptPad",
                 IsEncryption() ? tr("File has been encrypted successfully.") :
                     tr("File has been decrypted successfully."));
+        metadata.salt.clear();
     }
     else
     {
         keyService.Clear();
+        metadata.salt.clear();
     }
 }
 
