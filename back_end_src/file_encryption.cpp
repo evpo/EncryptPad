@@ -113,10 +113,12 @@ namespace
         if(result != PacketResult::Success)
             return result;
 
-        if(buffer_out->GetCount() < 4)
-            return PacketResult::Success;
+        std::string marker;
 
-        std::string marker(buffer.begin(), buffer.begin() + 4);
+        if(buffer.size() >= 4)
+        {
+            marker.insert(0U, reinterpret_cast<const char*>(buffer.begin()), 4U);
+        }
 
         if(marker == "IWAD" || marker == "PWAD")
         {
