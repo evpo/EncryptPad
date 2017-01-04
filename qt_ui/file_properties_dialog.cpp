@@ -65,7 +65,7 @@ FilePropertiesDialog::FilePropertiesDialog(QWidget *parent) :
     connect(ui->uiCipherAlgo, SIGNAL(currentIndexChanged(int)), this, SLOT(PropertyChanged()));
     connect(ui->uiHashAlgo, SIGNAL(currentIndexChanged(int)), this, SLOT(PropertyChanged()));
     connect(ui->uiCompressionAlgo, SIGNAL(currentIndexChanged(int)), this, SLOT(PropertyChanged()));
-    connect(ui->uiIterations, SIGNAL(valueChanged(int)), this, SLOT(PropertyChanged()));
+    connect(ui->uiIterations, SIGNAL(currentIndexChanged(int)), this, SLOT(PropertyChanged()));
 }
 
 FilePropertiesDialog::~FilePropertiesDialog()
@@ -104,6 +104,13 @@ void FilePropertiesDialog::PopulateItems()
     PopulateCombo(ui->uiCipherAlgo, ciphers);
     PopulateCombo(ui->uiHashAlgo, hashes);
     PopulateCombo(ui->uiCompressionAlgo, compressions);
+
+    for(unsigned int i = 0; i < 256; i++)
+    {
+        unsigned int iterations = DecodeS2KIterations(static_cast<unsigned char>(i));
+        ui->uiIterations->addItem(
+            QString::number(iterations), QVariant(iterations));
+    }
 }
 
 
@@ -112,7 +119,7 @@ void FilePropertiesDialog::SetUiFromMetadata(const EncryptPad::PacketMetadata &m
     SetCurrent(ui->uiCipherAlgo, metadata.cipher_algo);
     SetCurrent(ui->uiHashAlgo, metadata.hash_algo);
     SetCurrent(ui->uiCompressionAlgo, metadata.compression);
-    ui->uiIterations->setValue(metadata.iterations);
+    SetCurrent(ui->uiIterations, metadata.iterations);
 
     std::ostringstream stm;
     auto it = metadata.salt.begin();
@@ -139,7 +146,7 @@ void FilePropertiesDialog::UpdateMetadataFromUi(EncryptPad::PacketMetadata &meta
     metadata.cipher_algo = static_cast<CipherAlgo>(ui->uiCipherAlgo->currentData().toInt());
     metadata.hash_algo = static_cast<HashAlgo>(ui->uiHashAlgo->currentData().toInt());
     metadata.compression = static_cast<Compression>(ui->uiCompressionAlgo->currentData().toInt());
-    metadata.iterations = DecodeS2KIterations(EncodeS2KIterations(ui->uiIterations->value()));
+    metadata.iterations = DecodeS2KIterations(EncodeS2KIterations(ui->uiIterations->currentData().toUInt()));
 }
 
 void FilePropertiesDialog::PropertyChanged()
