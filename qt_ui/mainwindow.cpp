@@ -669,7 +669,7 @@ void MainWindow::openPreferences()
     if(dlg.getDefaultFilePropertiesChanged())
     {
         auto reply = QMessageBox::question(this, "EncryptPad",
-                tr("Do you want to apply the modified default file preferences to this file?"),
+                tr("Do you want to apply the modified default file properties to this file?"),
                 QMessageBox::Yes | QMessageBox::No);
 
         if(reply == QMessageBox::Yes)
