@@ -42,11 +42,13 @@ private:
     FileRequestService fileRequestService;
     EncryptPad::PacketMetadata defaultFileProperties;
     EncryptPad::PacketMetadata keyFileProperties;
+    bool defaultFilePropertiesChanged;
 
     void updateFont();
 public:
     void set(PersistentPreferences &value);
     void get(PersistentPreferences &value);
+    bool getDefaultFilePropertiesChanged() const;
 
 public slots:
     void selectFont();

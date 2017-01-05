@@ -22,3 +22,4 @@ struct PersistentPreferences
 void SetDefaultPreferences(PersistentPreferences &preferences);
 void ReadPreferences(QSettings &settings, PersistentPreferences &preferences);
 void WritePreferences(QSettings &settings, PersistentPreferences &preferences);
+void CopyMetadataPreferences(EncryptPad::PacketMetadata &source, EncryptPad::PacketMetadata &target);

@@ -119,6 +119,7 @@ namespace
 
 PreferencesDialog::PreferencesDialog(QWidget *parent) :
     QDialog(parent, kDefaultWindowFlags),
+    defaultFilePropertiesChanged(false),
     ui(new Ui::PreferencesDialog)
 {
     ui->setupUi(this);
@@ -131,6 +132,11 @@ PreferencesDialog::PreferencesDialog(QWidget *parent) :
 PreferencesDialog::~PreferencesDialog()
 {
     delete ui;
+}
+
+bool PreferencesDialog::getDefaultFilePropertiesChanged() const
+{
+    return defaultFilePropertiesChanged;
 }
 
 void PreferencesDialog::updateFont()
@@ -190,6 +196,8 @@ void PreferencesDialog::editDefaultFileProperties()
         return;
 
     dlg.UpdateMetadataFromUi(defaultFileProperties);
+    if(dlg.GetIsDirty())
+        defaultFilePropertiesChanged = true;
 }
 
 void PreferencesDialog::editKeyFileProperties()

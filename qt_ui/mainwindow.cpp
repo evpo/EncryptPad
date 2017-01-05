@@ -640,6 +640,7 @@ void MainWindow::openPreferences()
 
     auto settings = loadSettings();
     PersistentPreferences loadedPreferences;
+    SetDefaultPreferences(loadedPreferences);
     if(settings.get() != nullptr)
     {
         ReadPreferences(*settings, loadedPreferences);
@@ -663,6 +664,19 @@ void MainWindow::openPreferences()
     if(preferences.enableBakFiles && !lastEnableBakFiles)
     {
         takeBakFile = true;
+    }
+
+    if(dlg.getDefaultFilePropertiesChanged())
+    {
+        auto reply = QMessageBox::question(this, "EncryptPad",
+                tr("Do you want to apply the modified default file preferences to this file?"),
+                QMessageBox::Yes | QMessageBox::No);
+
+        if(reply == QMessageBox::Yes)
+        {
+            CopyMetadataPreferences(preferences.defaultFileProperties, metadata);
+            clearPassphrase();
+        }
     }
 }
 

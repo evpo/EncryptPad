@@ -179,3 +179,11 @@ void WritePreferences(QSettings &settings, PersistentPreferences &preferences)
     SettingMapper mapper(settings, MapperDirection::Write);
     Map(mapper, preferences);
 }
+
+void CopyMetadataPreferences(EncryptPad::PacketMetadata &source, EncryptPad::PacketMetadata &target)
+{
+    target.cipher_algo = source.cipher_algo;
+    target.hash_algo = source.hash_algo;
+    target.iterations = source.iterations;
+    target.compression = source.compression;
+}
