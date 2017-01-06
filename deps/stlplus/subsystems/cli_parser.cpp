@@ -339,6 +339,12 @@ namespace stlplus
           std::string name = argv[i];
           if (!name.empty() && name[0] == '-')
           {
+            //Treat -- as - to support double dash command switches
+            if(name.length() > 1 && name[1] == '-')
+            {
+                // erase first -. Now it is -parameter as the parser needs
+                name.erase(0, 1);
+            }
             // we have a command line option
             unsigned found = find_definition(name.substr(1, name.size()-1));
             if (found < m_definitions.size())
