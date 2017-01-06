@@ -45,13 +45,13 @@ namespace stlplus
     dynaload(void);
 
     // construct and load
-    dynaload(const std::string&amp; library);
+    dynaload(const std::string&amp; library, const std::string&amp; path = std::string());
 
-    // destroy and unload if loaded
+    // unload if loaded and then destroy
     ~dynaload(void);
 
     // load the library - return success or fail
-    bool load(const std::string&amp; library);
+    bool load(const std::string&amp; library, const std::string&amp; path = std::string());
 
     // unload the library if loaded
     bool unload(void);

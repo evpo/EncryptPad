@@ -193,6 +193,12 @@ namespace stlplus
     typedef digraph_arc_iterator&lt;NT,AT,AT&amp;,AT*&gt; arc_iterator;
     typedef digraph_arc_iterator&lt;NT,AT,const AT&amp;,const AT*&gt; const_arc_iterator;
 
+    // iterator ownership - can check whether the graph owns an iterator
+    bool owns(iterator) const;
+    bool owns(const_iterator) const;
+    bool owns(arc_iterator) const;
+    bool owns(const_arc_iterator) const;
+
     // supplementary types used throughout
 
     // a path is represented as a vector of arcs so the forward traversal is
@@ -365,6 +371,14 @@ namespace stlplus
       throw(wrong_object,null_dereference,end_dereference);
 
     ////////////////////////////////////////////////////////////////////////////////
+    // whole graph manipulations
+
+    // move one graph into another by moving all its nodes/arcs
+    // this leaves the source graph empty
+    // all iterators to nodes/arcs in the source graph will still work and will be owned by this
+    void move(digraph&lt;NT,AT&gt;&amp; source);
+
+    ////////////////////////////////////////////////////////////////////////////////
     // Adjacency algorithms
 
     // test whether the nodes are adjacent i.e. whether there is an arc going from from to to
@@ -402,11 +416,11 @@ namespace stlplus
     // Topographical Sort Algorithm
     // This generates a node ordering such that each node is visited after its fanin nodes.
 
-    // This only generates a valid ordering for a DAG. 
+    // This only generates a valid ordering for a Directed Acyclic Graph (DAG). 
 
     // The return value is a pair : 
     //  - the node vector which is a set of iterators to the nodes in sorted order
-    //  - the arc vector is the set of backward ards that were broken to achieve the sort
+    //  - the arc vector is the set of backward arcs that were broken to achieve the sort
     // If the arc vector is empty then the graph formed a DAG.
 
     // The arc selection callback can be used to ignore arcs that are not part

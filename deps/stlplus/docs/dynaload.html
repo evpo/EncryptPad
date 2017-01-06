@@ -89,13 +89,13 @@ namespace stlplus
     dynaload(void);
 
     // construct and load
-    dynaload(const std::string&amp; library);
+    dynaload(const std::string&amp; library, const std::string&amp; directory = std::string());
 
     // destroy and unload if loaded
     ~dynaload(void);
 
     // load the library - return success or fail
-    bool load(const std::string&amp; library);
+    bool load(const std::string&amp; library, const std::string&amp; directory = std::string());
 
     // unload the library if loaded
     bool unload(void);
@@ -119,9 +119,40 @@ calling the first constructor followed by load.</p>
 
 <p>The destructor unloads the library if it is loaded by calling the unload method, otherwise it does nothing.</p>
 
-<p>The load method tries to load the dynamic library named by the string parameter. If the dynamic
-library referred to is loaded successfully then the method returns true. If not, the error fields
-are filled in and it returns false - see later for details of error handling.</p>
+<p>The load method tries to load the dynamic library named by the
+  string parameter. The library must be the raw name of the library
+  with no prefix or extension. For example, on Unix-like operating
+  systems the library "xyz" will be mapped onto the filename libxyz.so
+  whereas on Windows it will be mapped onto xyz.dll. To keep this
+  platform independent, the dynaloader takes only the raw name,
+  i.e. "xyz".</p>
+
+<p>If the dynamic library referred to is loaded successfully then the
+method returns true. If not, the error fields are filled in and it
+  returns false - see later for details of error handling.</p>
+
+<p>The load method has an optional second argument that specifies the
+directory to load the library from (e.g. "."). If present this is the
+only place the loader looks. If absent, the loader uses the platform
+specific path lookup to find the library.</p>
+
+<p>On Gnu/Linux for example, the following is a typical search path:</p>
+
+<ul>
+  <li>the set of colon-separated directories in environment variable LD_LIBRARY_PATH</li>
+  <li>the ldconfig cache</li>
+  <li>/lib and /usr/lib</li>
+</ul>
+
+<p>On Windows, the following is a typical search path:</p>
+
+<ul>
+  <li>directory of the calling program</li>
+  <li>system directory</li>
+  <li>Windows directory</li>
+  <li>current directory</li>
+  <li>the set of colon-separated directories in environment variable PATH</li>
+</ul>
 
 <p>The unload method unloads the library if it is loaded, returning true if the unload succeeded. If
 not, the error fields are filled in and it returns false - see later for details of error

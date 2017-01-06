@@ -32,6 +32,8 @@
 namespace stlplus
 {
 
+  // the raw node data structure used in the node list
+  // does very little itself, all node manipulations are carried out at a higher level
   template<typename NT, typename AT>
   class digraph_node
   {
@@ -42,7 +44,6 @@ namespace stlplus
     digraph_node<NT,AT>* m_next;
     std::vector<digraph_arc<NT,AT>*> m_inputs;
     std::vector<digraph_arc<NT,AT>*> m_outputs;
-  public:
     digraph_node(const digraph<NT,AT>* owner, const NT& d = NT()) :
       m_master(owner,this), m_data(d), m_prev(0), m_next(0)
       {
@@ -52,6 +53,8 @@ namespace stlplus
       }
   };
 
+  // the raw arc data structure used in the arc list
+  // does very little itself, all arc manipulations are carried out at a higher level
   template<typename NT, typename AT>
   class digraph_arc
   {
@@ -108,18 +111,23 @@ namespace stlplus
   {
   }
 
+  // convert an iterator to its const form
   template<typename NT, typename AT, typename NRef, typename NPtr>
   TYPENAME digraph_iterator<NT,AT,NRef,NPtr>::const_iterator digraph_iterator<NT,AT,NRef,NPtr>::constify (void) const
   {
     return digraph_iterator<NT,AT,const NT&,const NT*>(*this);
   }
 
+  // convert an iterator to its non-const form
   template<typename NT, typename AT, typename NRef, typename NPtr>
   TYPENAME digraph_iterator<NT,AT,NRef,NPtr>::iterator digraph_iterator<NT,AT,NRef,NPtr>::deconstify (void) const
   {
     return digraph_iterator<NT,AT,NT&,NT*>(*this);
   }
 
+  // increment/decrement operators implement iteration through the list
+
+  // pre-increment operator - must be valid to be able to increment, handles incrementing off the end by becoming an end iterator
   template<typename NT, typename AT, typename NRef, typename NPtr>
   TYPENAME digraph_iterator<NT,AT,NRef,NPtr>::this_iterator& digraph_iterator<NT,AT,NRef,NPtr>::operator ++ (void)
     throw(null_dereference,end_dereference)
@@ -132,6 +140,7 @@ namespace stlplus
     return *this;
   }
 
+  // post-increment operator - based on above but returns a copy of the iterator before the increment
   template<typename NT, typename AT, typename NRef, typename NPtr>
   TYPENAME digraph_iterator<NT,AT,NRef,NPtr>::this_iterator digraph_iterator<NT,AT,NRef,NPtr>::operator ++ (int)
     throw(null_dereference,end_dereference)
@@ -142,6 +151,7 @@ namespace stlplus
     return result;
   }
 
+  // pre-decrement operator - must be valid to be able to decrement, handles stepping off the end by becoming an end iterator
   template<typename NT, typename AT, typename NRef, typename NPtr>
   TYPENAME digraph_iterator<NT,AT,NRef,NPtr>::this_iterator& digraph_iterator<NT,AT,NRef,NPtr>::operator -- (void)
     throw(null_dereference,end_dereference)
@@ -154,6 +164,7 @@ namespace stlplus
     return *this;
   }
 
+  // post-decrement operator - based on above but returns a copy of the iterator before the decrement
   template<typename NT, typename AT, typename NRef, typename NPtr>
   TYPENAME digraph_iterator<NT,AT,NRef,NPtr>::this_iterator digraph_iterator<NT,AT,NRef,NPtr>::operator -- (int)
     throw(null_dereference,end_dereference)
@@ -163,6 +174,8 @@ namespace stlplus
     --(*this);
     return result;
   }
+
+  // comparisons
 
   template<typename NT, typename AT, typename NRef, typename NPtr>
   bool digraph_iterator<NT,AT,NRef,NPtr>::operator == (const TYPENAME digraph_iterator<NT,AT,NRef,NPtr>::this_iterator& r) const
@@ -182,6 +195,8 @@ namespace stlplus
     return this->compare(r) < 0;
   }
 
+  // dereference operators
+  
   template<typename NT, typename AT, typename NRef, typename NPtr>
   TYPENAME digraph_iterator<NT,AT,NRef,NPtr>::reference digraph_iterator<NT,AT,NRef,NPtr>::operator*(void) const
     throw(null_dereference,end_dereference)
@@ -402,6 +417,33 @@ namespace stlplus
   }
 
   ////////////////////////////////////////////////////////////////////////////////
+  // iterator ownership
+
+  template<typename NT, typename AT>
+  bool digraph<NT,AT>::owns(TYPENAME digraph<NT,AT>::iterator iter) const
+  {
+    return iter.owned_by(this);
+  }
+
+  template<typename NT, typename AT>
+  bool digraph<NT,AT>::owns(TYPENAME digraph<NT,AT>::const_iterator iter) const
+  {
+    return iter.owned_by(this);
+  }
+
+  template<typename NT, typename AT>
+  bool digraph<NT,AT>::owns(TYPENAME digraph<NT,AT>::arc_iterator iter) const
+  {
+    return iter.owned_by(this);
+  }
+
+  template<typename NT, typename AT>
+  bool digraph<NT,AT>::owns(TYPENAME digraph<NT,AT>::const_arc_iterator iter) const
+  {
+    return iter.owned_by(this);
+  }
+
+  ////////////////////////////////////////////////////////////////////////////////
   // Constructors etc.
 
   template<typename NT, typename AT>
@@ -512,9 +554,28 @@ namespace stlplus
   template<typename NT, typename AT>
   void digraph<NT,AT>::clear(void)
   {
-    // clearing the nodes also clears the arcs
-    for (digraph_iterator<NT,AT,NT&,NT*> i = begin(); i != end(); )
-      i = erase(i);
+    // delete all nodes and arcs from the graph leaving it empty
+    // old solution used erase on each node but that is quite slow since each erase carefully unpicks a node from the structure
+    // since we know that the whole data structure is being deleted, can do a more efficient job
+
+    // delete all the nodes
+    for (digraph_node<NT,AT>* node = m_nodes_begin; node != 0; )
+    {
+      digraph_node<NT,AT>* next = node->m_next;
+      delete node;
+      node = next;
+    }
+    m_nodes_begin = 0;
+    m_nodes_end = 0;
+    // delete all the arcs
+    for (digraph_arc<NT,AT>* arc = m_arcs_begin; arc != 0; )
+    {
+      digraph_arc<NT,AT>* next = arc->m_next;
+      delete arc;
+      arc = next;
+    }
+    m_arcs_begin = 0;
+    m_arcs_end = 0;
   }
 
   template<typename NT, typename AT>
@@ -927,6 +988,73 @@ namespace stlplus
   }
 
   ////////////////////////////////////////////////////////////////////////////////
+  // whole graph manipulations
+
+  // move one graph into another by moving all its nodes/arcs
+  // this leaves the source graph empty
+  // all iterators to nodes/arcs in the source graph will still work and will be owned by this
+  template<typename NT, typename AT>
+  void digraph<NT,AT>::move(digraph<NT,AT>& source)
+  {
+    // disallow merging a graph with itself
+    if (&source == this) return;
+    
+    // move all the nodes/arcs from source
+    // since we're moving everything, there's no need to do any remapping, just hook the pointers into this
+
+    // change the ownership of the nodes/arcs - this will also change ownership of any iterators
+    // do this before the move so the traversal is easier to calculate
+    for (digraph_node<NT,AT>* node = source.m_nodes_begin; node != 0; node = node->m_next)
+      node->m_master.change_owner(this);
+    for (digraph_arc<NT,AT>* arc = source.m_arcs_begin; arc != 0; arc = arc->m_next)
+      arc->m_master.change_owner(this);
+    
+    // move the nodes
+    // do nothing if the source is empty
+    if (source.m_nodes_begin != 0)
+    {
+      if (m_nodes_begin == 0)
+      {
+        // inserting into an empty graph
+        m_nodes_begin = source.m_nodes_begin;
+        m_nodes_end = source.m_nodes_end;
+      }
+      else
+      {
+        // inserting into a non-empty graph
+        m_nodes_end->m_next = source.m_nodes_begin;
+        source.m_nodes_begin->m_prev = m_nodes_end;
+        m_nodes_end = source.m_nodes_end;
+      }
+    }
+    // unhook from the source
+    source.m_nodes_begin = 0;
+    source.m_nodes_end = 0;
+
+    // move the arcs
+    // do nothing if the source is empty
+    if (source.m_arcs_begin != 0)
+    {
+      if (m_arcs_begin == 0)
+      {
+        // inserting into an empty graph
+        m_arcs_begin = source.m_arcs_begin;
+        m_arcs_end = source.m_arcs_end;
+      }
+      else
+      {
+        // inserting into a non-empty graph
+        m_arcs_end->m_next = source.m_arcs_begin;
+        source.m_arcs_begin->m_prev = m_arcs_end;
+        m_arcs_end = source.m_arcs_end;
+      }
+    }
+    // unhook from the source
+    source.m_arcs_begin = 0;
+    source.m_arcs_end = 0;
+  }
+
+  ////////////////////////////////////////////////////////////////////////////////
   // Adjacency Algorithms
 
   template<typename NT, typename AT>
@@ -1179,18 +1307,22 @@ namespace stlplus
     // a set of visited nodes. The visited set is updated when a candidate is
     // found but tested before the recursion on the candidate so that the number of
     // function calls is minimised.
+
+    // if the current node is the target, we have found a path so return immediately
+    // exclude the case where we're looking for a path from a node to itself unless at least one arc has been followed
+    if ((visited.size() > 0) && (from == to)) return true;
+    // update the visited set
+    // if the insert fails, that indicates that the node has already been visited so don't recurse on the fanout
+    if (!(visited.insert(from).second)) return false;
+    // now visit all of the fanout arcs of the current node to see if any of them complete a path
     for (unsigned i = 0; i < fanout(from); i++)
     {
       digraph_arc_iterator<NT,AT, const AT&,const AT*> arc = output(from,i);
+      // allow the optional select filter to choose whether this arc should be considered as part of a path
       if (!select || select(*this, arc))
       {
-        digraph_iterator<NT,AT,const NT&,const NT*> node = arc_to(arc);
-        // if the node is the target, return immediately
-        if (node == to) return true;
-        // update the visited set and give up if the insert fails, which indicates that the node has already been visited
-        if (!(visited.insert(node).second)) return false;
         // now recurse - a path exists from from to to if a path exists from an adjacent node to to
-        if (path_exists_r(node,to,visited,select)) return true;
+        if (path_exists_r(arc_to(arc),to,visited,select)) return true;
       }
     }
     return false;
@@ -1204,7 +1336,6 @@ namespace stlplus
   {
     // set up the recursion with its initial visited set and then recurse
     std::set<digraph_iterator<NT,AT,const NT&,const NT*> > visited;
-    visited.insert(from);
     return path_exists_r(from, to, visited, select);
   }
 
@@ -1235,8 +1366,9 @@ namespace stlplus
     for (unsigned i = 0; i < fanout(from); i++)
     {
       digraph_arc_iterator<NT,AT, const AT&,const AT*> candidate = output(from,i);
-      // assert_valid that the arc is selected and then assert_valid that the candidate has not
-      // been visited on this path and only allow further recursion if it hasn't
+      // test whether the arc is selected and then check that the candidate has not
+      // been visited already on this path and only allow further recursion if it hasn't
+      // this eliminates recursion loops
       if ((!select || select(*this, candidate)) && std::find(so_far.begin(), so_far.end(), candidate) == so_far.end())
       {
         // extend the path tracing the route to this arc
@@ -1259,8 +1391,8 @@ namespace stlplus
     throw(wrong_object,null_dereference,end_dereference)
   {
     // set up the recursion with empty data fields and then recurse
-    std::vector<std::vector<digraph_arc_iterator<NT,AT,const AT&,const AT*> > > result;
-    std::vector<digraph_arc_iterator<NT,AT,const AT&,const AT*> > so_far;
+    TYPENAME digraph<NT,AT>::const_path_vector result;
+    TYPENAME digraph<NT,AT>::const_arc_vector so_far;
     all_paths_r(from, to, so_far, result, select);
     return result;
   }
@@ -1303,13 +1435,13 @@ namespace stlplus
     throw(wrong_object,null_dereference,end_dereference)
   {
     // seed the recursion, marking the starting node as already visited
-    std::set<digraph_iterator<NT,AT,const NT&,const NT*> > visited;
+    TYPENAME digraph<NT,AT>::const_iterator_set visited;
     visited.insert(from);
     reachable_nodes_r(from, visited, select);
     // convert the visited set into the required output form
     // exclude the starting node
-    std::vector<digraph_iterator<NT,AT,const NT&,const NT*> > result;
-    for (TYPENAME std::set<digraph_iterator<NT,AT,const NT&,const NT*> >::iterator i = visited.begin(); i != visited.end(); i++)
+    TYPENAME digraph<NT,AT>::const_node_vector result;
+    for (TYPENAME digraph<NT,AT>::const_iterator_set::iterator i = visited.begin(); i != visited.end(); i++)
       if (*i != from)
         result.push_back(*i);
     return result;

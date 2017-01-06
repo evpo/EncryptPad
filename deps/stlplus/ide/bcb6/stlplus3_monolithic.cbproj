@@ -349,12 +349,6 @@
 			<None Include="..\..\source\portability_fixes.hpp">
 				<BuildOrder>115</BuildOrder>
 			</None>
-			<CppCompile Include="..\..\source\print_address.cpp">
-				<BuildOrder>116</BuildOrder>
-			</CppCompile>
-			<None Include="..\..\source\print_address.hpp">
-				<BuildOrder>117</BuildOrder>
-			</None>
 			<None Include="..\..\source\print_basic.hpp">
 				<BuildOrder>118</BuildOrder>
 			</None>
@@ -492,12 +486,6 @@
 			</None>
 			<None Include="..\..\source\strings_fixes.hpp">
 				<BuildOrder>231</BuildOrder>
-			</None>
-			<CppCompile Include="..\..\source\string_address.cpp">
-				<BuildOrder>176</BuildOrder>
-			</CppCompile>
-			<None Include="..\..\source\string_address.hpp">
-				<BuildOrder>177</BuildOrder>
 			</None>
 			<None Include="..\..\source\string_basic.hpp">
 				<BuildOrder>178</BuildOrder>

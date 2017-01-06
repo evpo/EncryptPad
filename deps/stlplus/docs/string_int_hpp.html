@@ -85,6 +85,18 @@ namespace stlplus
                                       unsigned width = 0)
     throw(std::invalid_argument);
 
+  std::string longlong_to_string(long long i,
+                                 unsigned radix = 10,
+                                 radix_display_t display = radix_c_style_or_hash,
+                                 unsigned width = 0)
+    throw(std::invalid_argument);
+
+  std::string unsigned_longlong_to_string(unsigned long long i,
+                                          unsigned radix = 10,
+                                          radix_display_t display = radix_c_style_or_hash,
+                                          unsigned width = 0)
+    throw(std::invalid_argument);
+
   // address displayed as an integer
   std::string address_to_string(const void*,
                                 unsigned radix = 16,

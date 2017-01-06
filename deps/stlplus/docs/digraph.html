@@ -140,8 +140,7 @@ for (digraph&lt;string,int&gt;::arc_iterator arc = graph.arc_begin(); arc != gra
 have the arc_ prefix. In this case, dereferencing the arc_iterator returns the
 NA type, in this case an int.</p>
 
-<p>STLplus iterators are slightly different to STL iterators in that they know which container they
-belong to. When an iterator is first declared, but not assigned to, it is known as a <em>null</em>
+<p>When an iterator is first declared, but not assigned to, it is known as a <em>null</em>
 iterator. Then, when it is assigned to so that it points to a node in the tree, it is known as a
 <em>valid</em> iterator. If the iterator is made to point off the edge of the tree - for example the
 parent of the root node, then it becomes an <em>end</em> iterator.</p>
@@ -169,6 +168,17 @@ or valid.</p>
 Any attempt to dereference an end or null iterator will result in an exception being thrown. See the
 section below on <a href="#exceptions">Exceptions</a> to see which.</p>
 
+<p>STLplus iterators are slightly different to STL iterators in that
+  they know which graph object they belong to. The graph is referred
+  to as the "owner" of the iterator. An iterator can only be used with
+  it's owner. Using an iterator with the wrong graph throws an
+  exception (specifically, the stlplus::wrong_object exception).</p>
+
+<p>You can test whether a graph owns an iterator with the owns method:</p>
+
+<pre class="cpp">
+bool digraph::owns(iterator);
+</pre>
 
 <h2 id="supplementary">Supplementary Data Types</h2>
 
@@ -654,6 +664,19 @@ arc, leaving the to node untouched. Similarly the arc_move_to function only
 changes the to node and leaves the from node untouched. Finally, the arc_flip
 function swaps the from and to nodes so as to flip the arc's direction.</p>
 
+<h2 id="whole">Whole Graph Methods</h2>
+
+<p>The whole-graph operations allow large-scale manipulations of
+graphs. At present there is only one whole-graph operation:</p>
+
+<pre class="cpp">
+void move(digraph&amp; source);
+</pre>
+
+<p>This moves the source graph's nodes and arcs into the target
+graph. The source will be left empty by this move. All iterators to
+the source graph will become owned by the target graph, so the
+iterators will continue working and pointing to the same node or arc.</p>
 
 <h2 id="adjacency">Adjacency Functions</h2>
 

@@ -26,12 +26,10 @@
 #define SHUT_RDWR SD_BOTH
 #define SOCKLEN_T int
 #define SEND_FLAGS 0
-// not defined before Visual Studio 10, not defined in some Mingw combinations
-// assume if one is not defined, none of them is
+// on Windows, these options have a different prefix but the same function as on Unix
 #define INPROGRESS WSAEINPROGRESS
 #define WOULDBLOCK WSAEWOULDBLOCK
 #define CONNRESET WSAECONNRESET
-
 
 #else
 
@@ -54,16 +52,13 @@
 #define IOCTL ::ioctl
 #define CLOSE ::close
 #define SOCKLEN_T socklen_t
-#if defined(__APPLE__)
-
+#ifdef __APPLE__
+// fix from IngwiePhoenix for OSX
+// https://github.com/Deskshell-Core/PhoenixEngine
 #define SEND_FLAGS SO_NOSIGPIPE
-
 #else
-
 #define SEND_FLAGS MSG_NOSIGNAL
-
 #endif
-
 #define INPROGRESS EINPROGRESS
 #define WOULDBLOCK EWOULDBLOCK
 #define CONNRESET ECONNRESET
@@ -94,7 +89,7 @@ namespace stlplus
                   MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // "User default language"
                   (LPTSTR)&message,
                   0,0);
-    if (message) 
+    if (message)
     {
       result = message;
       LocalFree(message);
@@ -198,7 +193,7 @@ namespace stlplus
   public:
 
     ////////////////////////////////////////////////////////////////////////////
-    // PIMPL alias counting 
+    // PIMPL alias counting
 
     void increment(void)
       {
@@ -275,7 +270,7 @@ namespace stlplus
         }
         return true;
       }
-    
+
     // function for performing IP lookup (i.e. gethostbyname)
     // could be standalone but making it a member means that it can use the socket's error handler
     // - remote_address: IP name or number
@@ -367,7 +362,7 @@ namespace stlplus
         }
         return true;
       }
-    
+
     // bind the socket to a port so that it can receive from any address
     bool bind_any(unsigned short local_port)
       {
@@ -468,13 +463,14 @@ namespace stlplus
         return true;
 #else
         // Posix version needs further checking using the socket options
+        // http://linux.die.net/man/2/connect see description of EINPROGRESS
         // DJDM: socket has returned INPROGRESS on the first attempt at connection
         // it has also returned that it can be written to
         // we must now ask it if it has actually connected - using getsockopt
         int error = 0;
         socklen_t serror = sizeof(int);
-        if (::getsockopt(m_socket, SOL_SOCKET, SO_ERROR, &error, &serror)==0)
-          // handle the error value - one of them means that the socket has connected
+        if (::getsockopt(m_socket, SOL_SOCKET, SO_ERROR, &error, &serror) == 0)
+          // handle the error value - the EISCONN error actually means that the socket has connected (so no error then)
           if (!error || error == EISCONN)
             return true;
         return false;

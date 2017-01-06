@@ -87,46 +87,51 @@ namespace stlplus
   class safe_iterator
   {
   public:
-
+    // constructors
+    // an iterator has three possible states: null, valid or end
+    // null iterators are not owned, valid and end iterators are owned and can only be used on the owner data structure
+    // constructors for each of theses states
+    
     // construct a null iterator
     safe_iterator(void) throw();
 
-    // construct a valid iterator by aliasing from the owner node's master iterator
+    // construct a valid iterator from the owner node's master iterator
     safe_iterator(const master_iterator&lt;O,N&gt;&amp;) throw();
 
-    // copy constructor does aliasing
+    // construct an end iterator
+    safe_iterator(const O* owner) throw();
+
+    // copy operators
+
+    // copy constructor creates a safe iterator with the same properties as the source
     safe_iterator(const safe_iterator&lt;O,N&gt;&amp;) throw();
 
-    // alias an iterator by assignment
+    // copy an iterator by assignment
     safe_iterator&lt;O,N&gt;&amp; operator=(const safe_iterator&lt;O,N&gt;&amp;) throw();
 
     // destructor
     ~safe_iterator(void) throw();
 
-    // reassignment to another node used in increment/decrement operation
+    // changing the state of an iterator, e.g. during traversal
+
+    // reassignment to another node - used in increment/decrement operation
     void set(const master_iterator&lt;O,N&gt;&amp;) throw();
-
-    // dereference
-    N* node(void) const throw();
-    const O* owner(void) const throw();
-
-    // change to a null iterator - i.e. one that does not belong to any object
-    // this does not affect any other iterators pointing to the same node
-    void set_null(void) throw();
-
-    ////////////////////////////////////////////////////////////////////////////////
-    // operations for clients that do not have a master end iterator
-    // alternatively, have a master end iterator as part of the container
-    // and call constructor(master_end) or set(master_end)
-
-    // construct an end iterator
-    safe_iterator(const O* owner) throw();
 
     // change to an end iterator - e.g. as a result of incrementing off the end
     void set_end(void) throw();
 
+    // change to a null iterator - i.e. one that does not belong to any object
+    void set_null(void) throw();
+
+    // dereference operators to access the internal state
+
+    // get the node that this iterator points to
+    N* node(void) const throw();
+    // get the owner data structure
+    const O* owner(void) const throw();
+
     ////////////////////////////////////////////////////////////////////////////////
-    // tests
+    // status tests
 
     // comparison
     bool equal(const safe_iterator&lt;O,N&gt;&amp; right) const throw();
@@ -144,12 +149,17 @@ namespace stlplus
     // i.e. non-null and non-end
     bool valid(void) const throw();
 
-    // check the rules for a valid iterator that can be dereferenced
+    // check ownership of an iterator
+    bool owned_by(const O* owner) const;
+
+    // check the rules for an iterator
+
+    // assert the rules for a valid iterator
     // optionally also check that the iterator is owned by the owner
-    void assert_valid(void) const throw(null_dereference,end_dereference);
-    void assert_valid(const O* owner) const throw(wrong_object,null_dereference,end_dereference);
+    void assert_valid(const O* owner = 0) const throw(wrong_object,null_dereference,end_dereference);
     // assert the rules for a non-null iterator - i.e. valid or end, values that occur in increment operations
-    void assert_non_null(void) const throw(null_dereference);
+    // optionally also check that the iterator is owned by the owner
+    void assert_non_null(const O* owner = 0) const throw(wrong_object,null_dereference);
     // assert that this iterator is owned by this container
     void assert_owner(const O* owner) const throw(wrong_object);
 

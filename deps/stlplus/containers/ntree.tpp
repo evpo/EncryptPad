@@ -599,7 +599,7 @@ namespace stlplus
     throw(wrong_object,null_dereference,end_dereference,std::out_of_range)
   {
     i.assert_valid(this);
-    if (child >= children(i)) throw std::out_of_range("stlplus::ntree");
+    if (child >= children(i)) throw std::out_of_range("stlplus::ntree::child - child out of range");
     return ntree_iterator<T,const T&,const T*>(i.node()->m_children[child]);
   }
 
@@ -608,8 +608,36 @@ namespace stlplus
     throw(wrong_object,null_dereference,end_dereference,std::out_of_range)
   {
     i.assert_valid(this);
-    if (child >= children(i)) throw std::out_of_range("stlplus::ntree");
+    if (child >= children(i)) throw std::out_of_range("stlplus::ntree::child - child out of range");
     return ntree_iterator<T,T&,T*>(i.node()->m_children[child]);
+  }
+
+  template<typename T>
+  unsigned ntree<T>::child_offset(const TYPENAME ntree<T>::const_iterator& root, const TYPENAME ntree<T>::const_iterator& child) const
+    throw(wrong_object,null_dereference,end_dereference)
+  {
+    root.assert_valid(this);
+    child.assert_valid(this);
+    ntree_node<T>* root_node = root.node();
+    ntree_node<T>* child_node = child.node();
+    for (unsigned offset = 0; offset < static_cast<unsigned>(root_node->m_children.size()); ++offset)
+      if (root_node->m_children[offset] == child_node)
+        return offset;
+    return static_cast<unsigned>(-1);
+  }
+
+  template<typename T>
+  unsigned ntree<T>::child_offset(const TYPENAME ntree<T>::iterator& root, const TYPENAME ntree<T>::iterator& child)
+    throw(wrong_object,null_dereference,end_dereference)
+  {
+    root.assert_valid(this);
+    child.assert_valid(this);
+    ntree_node<T>* root_node = root.node();
+    ntree_node<T>* child_node = child.node();
+    for (unsigned offset = 0; offset < static_cast<unsigned>(root_node->m_children.size()); ++offset)
+      if (root_node->m_children[offset] == child_node)
+        return offset;
+    return static_cast<unsigned>(-1);
   }
 
   template<typename T>
@@ -738,7 +766,7 @@ namespace stlplus
     //   return insert(data);
     // otherwise, insert a new child
     i.assert_valid(this);
-    if (offset > children(i)) throw std::out_of_range("stlplus::ntree");
+    if (offset > children(i)) throw std::out_of_range("stlplus::ntree::insert - offset out of range");
     ntree_node<T>* new_node = new ntree_node<T>(this,data);
     i.node()->m_children.insert(i.node()->m_children.begin()+offset,new_node);
     new_node->m_parent = i.node();
@@ -774,7 +802,7 @@ namespace stlplus
   {
     // insert a whole tree as a child of i
     i.assert_valid(this);
-    if (offset > children(i)) throw std::out_of_range("stlplus::ntree");
+    if (offset > children(i)) throw std::out_of_range("stlplus::ntree::insert - offset out of range");
     ntree_node<T>* new_node = ntree_copy(this, tree.m_root);
     i.node()->m_children.insert(i.node()->m_children.begin()+offset,new_node);
     new_node->m_parent = i.node();
@@ -812,7 +840,7 @@ namespace stlplus
   {
     // insert a whole tree as a child of i
     i.assert_valid(this);
-    if (offset > children(i)) throw std::out_of_range("stlplus::ntree");
+    if (offset > children(i)) throw std::out_of_range("stlplus::ntree::move - offset out of range");
     ntree_node<T>* new_node = tree.m_root;
     tree.m_root = 0;
     if (new_node) new_node->change_owner(this);
@@ -865,7 +893,7 @@ namespace stlplus
     // removes the specified child of the parent node, adding its children to the parent node at the same offset
     parent.assert_valid(this);
     ntree_node<T>* node = parent.node();
-    if (offset >= node->m_children.size()) throw std::out_of_range("stlplus::ntree");
+    if (offset >= node->m_children.size()) throw std::out_of_range("stlplus::ntree::pop - offset out of range");
     // move the grandchildren first
     ntree_node<T>* child = parent.node()->m_children[offset];
     while (!child->m_children.empty())
@@ -922,7 +950,7 @@ namespace stlplus
   void ntree<T>::erase_child(const TYPENAME ntree<T>::iterator& i, unsigned offset)
     throw(wrong_object,null_dereference,end_dereference,std::out_of_range)
   {
-    if (offset >= children(i)) throw std::out_of_range("stlplus::ntree");
+    if (offset >= children(i)) throw std::out_of_range("stlplus::ntree::erase_child - offset out of range");
     // unhook from the children array
     ntree_node<T>* node = i.node()->m_children[offset];
     i.node()->m_children.erase(i.node()->m_children.begin() + offset);
@@ -1017,6 +1045,39 @@ namespace stlplus
     throw(wrong_object,null_dereference,end_dereference,std::out_of_range)
   {
     return cut(child(i, offset));
+  }
+
+  template<typename T>
+  void ntree<T>::reorder(const TYPENAME ntree<T>::iterator& node, unsigned child_offset, unsigned new_offset)
+      throw(wrong_object,null_dereference,end_dereference,std::out_of_range)
+  {
+    // check preconditions
+    node.assert_valid(this);
+    if (child_offset >= children(node)) throw std::out_of_range("stlplus::ntree::reorder - child offset out of range");
+    if (new_offset >= children(node)) throw std::out_of_range("stlplus::ntree::reorder - new offset out of range");
+    // do nothing if the offsets are the same, i.e. move to the same place
+    if (new_offset == child_offset) return;
+    // perform the move
+    // Note: this is not a swap operation, but a remove then re-insert which preserves the order of the remaining children
+    ntree_node<T>* node_node = node.node();
+    ntree_node<T>* child_node = node_node->m_children[child_offset];
+    node_node->m_children.erase(node_node->m_children.begin() + child_offset);
+    node_node->m_children.insert(node_node->m_children.begin() + new_offset, child_node);
+  }
+
+  template<typename T>
+  void ntree<T>::swap(const TYPENAME ntree<T>::iterator& node, unsigned child1, unsigned child2)
+      throw(wrong_object,null_dereference,end_dereference,std::out_of_range)
+  {
+    // check preconditions
+    node.assert_valid(this);
+    if (child1 >= children(node)) throw std::out_of_range("stlplus::ntree::reorder - child1 offset out of range");
+    if (child2 >= children(node)) throw std::out_of_range("stlplus::ntree::reorder - child2 offset out of range");
+    // do nothing if the offsets are the same, i.e. move to the same place
+    if (child1 == child2) return;
+    // perform the move
+    ntree_node<T>* node_node = node.node();
+    std::swap(node_node->m_children[child1], node_node->m_children[child2]);
   }
 
   ////////////////////////////////////////////////////////////////////////////////

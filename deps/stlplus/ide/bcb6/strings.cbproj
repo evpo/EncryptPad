@@ -66,12 +66,6 @@
 			<None Include="..\..\strings\format_types.hpp">
 				<BuildOrder>0</BuildOrder>
 			</None>
-			<CppCompile Include="..\..\strings\print_address.cpp">
-				<BuildOrder>1</BuildOrder>
-			</CppCompile>
-			<None Include="..\..\strings\print_address.hpp">
-				<BuildOrder>2</BuildOrder>
-			</None>
 			<None Include="..\..\strings\print_basic.hpp">
 				<BuildOrder>3</BuildOrder>
 			</None>
@@ -193,12 +187,6 @@
 			</None>
 			<None Include="..\..\strings\strings_fixes.hpp">
 				<BuildOrder>108</BuildOrder>
-			</None>
-			<CppCompile Include="..\..\strings\string_address.cpp">
-				<BuildOrder>53</BuildOrder>
-			</CppCompile>
-			<None Include="..\..\strings\string_address.hpp">
-				<BuildOrder>54</BuildOrder>
 			</None>
 			<None Include="..\..\strings\string_basic.hpp">
 				<BuildOrder>55</BuildOrder>

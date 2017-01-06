@@ -135,7 +135,7 @@ use STLplus as a monolithic library.</p>
   one go.</p>
 
 <p>The rest of the documentation is based on the assumption that you are using STLplus as a library
-collection, but should be easy to relate to the us of the monolithic build instead.</p>
+collection, but should be easy to relate to the use of the monolithic build instead.</p>
 
 <h2 id="makefiles">Gnu Gcc Using My Makefiles</h2>
 
@@ -382,7 +382,7 @@ LIBRARIES = ../../stlplus3/portability ../../stlplus3/containers
 include ../../makefiles/gcc.mak
 </pre>
 
-<p>This will put Cygwin binaries in ../../bin/CYGWIN and Gnu/Linux binaries into ../../bin/GNU.</p>
+<p>This will put Cygwin binaries in ../../bin/CYGWIN and Gnu/Linux binaries into ../../bin/GNULINUX.</p>
 
 <p>Furthermore, the IMAGE variable can put each different build into a different subdirectory by
 using the SUBDIR variable instead of PLATFORM. The SUBDIR variable includes a prefix for the
@@ -391,37 +391,39 @@ CYGWIN-i686-debug for the Cygwin build and GNU-i686-debug for the Linux build.</
 
 <h2 id="microsoft">Microsoft Visual Studio on Windows</h2>
 
-<p>The STLplus library collection can alternatively be built on Windows using the native Microsoft
-Visual Studio compiler. The STLplus library includes a Visual Studio workspace for Visual Studio 6 -
-which can be converted automatically into a target file for Visual Studio 7
-(.NET) or 8 (2005). It also includes a
-solution file for Visual Studio 9 (2008). Furthermore, each library in the collection has its own
-project file which can be incorporated into any other workspace or solution. So individual libraries
-can be incorporated stand-alone in this way.</p>
+<p>The STLplus library collection can alternatively be built on
+Windows using the native Microsoft Visual Studio compiler. The STLplus
+library includes a Visual Studio solution for Visual Studio 6
+(deprecated), 2010, 2012, 2013 and 2015 Each library in the collection
+has its own project file which can be incorporated into any other
+workspace or solution. So individual libraries can be incorporated
+stand-alone in this way.</p>
 
 <p>Beware that there is a terminology problem here - Microsoft call a library a project and a
-project a workspace or solution, and so on. I will try to remember to use Microsoft terminology here.</p>
+project a solution, and so on. I will try to remember to use Microsoft terminology here.</p>
 
 <h3>Building The Libraries</h3>
 
-<p>The STLplus library collection comes with a Visual Studio 6 workspace file
-(<code>stlplus3.dsw</code>) and a Visual Studio 9 solution file (<code>stlplus3.sln</code>) which
-are kept in the top-level directory. You can open either by double-clicking it.</p>
+<p>The STLplus library collection comes with a collection of Visual
+Studio Solution and Project files which are kept in a directory called
+'ide'. Select the appropriate set of solution and project files for
+the version of Visual Studio that you have.</p>
 
-<p>The workspace can now be built. This will build all of the libraries in the collection. First,
-select the configuration you wish to build - Debug or Release. Then, for each project, make it the
-current project by selecting menu item Project-&gt;Set&nbsp;Current&nbsp;Project. You can build all of
-them one at a time or use the batch build. In Visual Studio 9 you can simply build the solution and
-it builds all the projects.</p>
+<p>The solution can now be built. This will build all of the libraries
+in the collection. First, select the configuration you wish to build -
+Debug or Release - and the platform - Win32 or x64. You can build all
+of the projects by building the whole solution and it builds all the
+projects.</p>
 
-<p>The Debug configuration is for use in debug builds, the Release is for use in release builds (no
-debug information). At this stage, if you wish, you can select other configurations and build them
-too. Each configuration is stored separately so they do not overwrite each other.</p>
+<p>The Debug configuration is for use in debug builds, the Release is
+for use in release builds (no debug information). At this stage, if
+you wish, you can select other configurations and build them too. Each
+configuration is stored separately so they do not overwrite each
+other.</p>
 
 <p><strong>Note:</strong> the supplied project file will build STLplus so that
 it uses the multi-threaded DLL versions of the C runtime library (msvcrt.dll). 
-The default when you create a new project in Visual Studio 6 however is to use
-the single-threaded versions. You will need to adjust the project settings,
+You may need to adjust the project settings,
 either for STLplus or for your application so that all projects use the same
 settings. The symptom that will tell you that you have this problem is that,
 when you link your application, every symbol in the C runtime library will
@@ -430,358 +432,34 @@ defined.</p>
 
 <h3>Using The Libraries</h3>
 
-<p>Once you have built the STLplus library collection, you can then use it in other
-projects. This is done by loading the workspace or project file for your project (or create
-a new one if you haven't done so yet). Then add the STLplus project files for those
-libraries that you want to use in the new project.</p>
+<p>Once you have built the STLplus library collection, you can then
+use it in other projects. This is done by setting up compiler and
+linker dependencies. The compiler dependencies give your code access
+to the STLplus headers, then the linker dependency brings in the
+compiled object code.</p>
 
-<p>You now need to set up an include path for the C++ compiler and a project dependency for
-the linker.</p>
-
-<p><strong>Note:</strong> These instructions are for Visual Studio 6. Visual Studio 9 (2008) is similar but
+<p><strong>Note:</strong> These instructions are for Visual Studio 2015. Other versions are similar but
 all the dialogs have been redesigned - the principles however are the same.</p>
 
-<p>To set up the include path, select the project that you wish to have access to the stlplus
-libraries. Then select the menu item Project-&gt;Settings. A mind-bogglingly complicated dialog will
-pop up. Select the configuration popup menu in the top left and choose All&nbsp;Configurations. Then
-select the C++ tab from the set of tabs at the top of the right-hand pane. Then select the Category
-popup menu just below the tabs and select Preprocessor. This has a text field called
-Additional&nbsp;include&nbsp;directories. Type in the path to each of the subdirectories for each of
-the STLplus libraries that you are using, separated by commas. You have to type this because
-Microsoft didn't think to give you a directory selection dialog to help you here. However, you can
-use relative paths such as <code>..\..\stlplus3\portability</code>. Click OK to
-dismiss the mind-boggling dialog.</p>
-
-<p>To set up the linker dependency, select the menu item Project-&gt;Dependencies. The
-project you wish to set up dependencies for will be selected in the popup menu at the top
-and the other projects, including the STLplus libraries, will be listed in the list entry
-below that. Click on each of the STLplus libraries that you will be using so that a tick
-appears. This makes the selected project depend on those libraries and therefore will cause
-any program built with the selected project link with the stlplus archives. Click on OK to
-dismiss the dependencies dialog.</p>
-
-<p><strong>Note:</strong> you should only set up a dependency on an application project, not on a project that
-just creates a library. Sadly, Microsoft think a dependency on a library file should be resolved by
-copying the contents of the library into the dependent library, giving you two copies of
-the object code. This will subsequently cause a link error. The symptom is that the functions from
-STLplus will be reported as multiply defined.</p>
-
-<p>To test the configuration, try including an STLplus header in your code and calling a function
-(or creating a class) from the library. You should be able to compile and link the project
-successfully.</p>
-
-<p>The most common error is to get the include path wrong or to forget to set the include path for
-all configurations. This can be detected by the compiler giving an error on a #include line in your
-code that includes the STLplus header. If this happens, redo the include path step above.</p>
-
-<p>The second most common error is to simply forget to set up the linker dependency, since this does
-not prevent compilation from working. This will manifest itself by a series of linker errors due to
-missing symbols. If this happens, repeat the linker dependency step above.</p>
-
-<p>The final common error is to have different projects with different run-time library selections.
-This manifests itself by linker errors whereby standard library functions are multiply defined in
-different libraries. To fix this, select the menu item Project-&gt;Settings and select a specific
-Configuration (you cannot do this for All&nbsp;Configurations. For example, select the Debug
-configuration. Then select the C++ tab at the top right and then select the popup menu immediately
-below the tag, choosing the Code&nbsp;Generation option. There are four popup menus here and the top
-right of them is labelled Use&nbsp;Run-time&nbsp;Library. This should be the same for all projects -
-check this by clicking on different projects in the left hand pane whilst watching the contents of
-the run-time library popup. If there are inconsistencies, correct them. For a debug build, always
-pick a debug library, but you can then choose whether it is a single-threaded static library, a
-multi-threaded static library or a multi-threaded DLL. Choose the same for all projects. Then change
-the configuration to Release and check them too. This time, choose the non-debug versions of the
-run-time library. When you are happy that you have consistency, click OK to dismiss the dialog and
-try building again.</p>
-
-<p>In the default project file supplied with STLplus, the Debug configuration links with the Debug
-Multi-Threaded DLL and the Release configuration links with the Multi-Threaded DLL. You can either
-adopt the same conventions or change your copy of the stlplus project file.</p>
-
-<h2 id="general">General Guidelines for Building STLplus</h2>
-
-<p>The last two sections described the simplest case of building the whole collection with my
-supplied build files. This section explains how the libraries are built so you can incorporate it
-into your own build system should you choose to. If you are happy with my build system, then there
-is no need to read any more of this document.</p>
-
-<h3>Building The Libraries</h3>
-
-<p>The first and most important thing that you need to know about STLplus is that it is just source
-code. There is no magic to it - all you need to do is to compile the .cpp files for each library
-with a compiler that is up to the job and the library is ready to use.</p>
-
-<p>Then, once all of the library collection is built, you can include any of the headers by putting
-the library directories in your compiler's include path.</p>
-
-<p>Similarly, when you link your application (or library), make sure the object files created from
-compiling STLplus are linked into your application.</p>
-
-<p>To make life easier, bundle the compiled object files for each library into an archive (using the
-'ar' command on Unix for example). Then you only have to make sure the archive is linked into your
-application. You could even bundle together all the object files for all the libraries in the
-collection to make a single big archive.</p>
-
-<p>You can even drop all the source files into one directory and compile them all into a monolithic
-library - it will work just the same.</p>
-
-<p>That is all. There really is nothing to it. The reason I keep on about this ease of use is that
-I've had nightmare scenes with other code libraries which require mind-bogglingly complicated
-procedures to build and use them which tend to fail on unconventional systems such as the Cygwin
-Unix-emulator on Windows which I use a lot. So I want to let you know
-that STLplus is not like this - it is trivially easy to build.</p>
-
-<p>The STLplus library collecion is designed to be built in either debug or release
-variants. If you use the make utilities provided, these are set up with the
-two variants already. However, if you want to do it yourself, here are
-examples of the options to use. The examples are for the Gnu gcc compiler, but
-the same principles can be applied to any other compiler.</p>
-
-<pre class="script">
-release build: gcc -I. -D&lt;platform&gt; -funsigned-char -DNDEBUG -O3 -c &lt;source file&gt; -o &lt;object file&gt;
-debug build:   gcc -I. -D&lt;platform&gt; -funsigned-char -g           -c &lt;source file&gt; -o &lt;object file&gt;
-</pre>
-
-<p>In this description, the following are specific to the recommended way of
-building STLplus:</p>
-
-<dl>
-
-<dt>-D&lt;platform&gt;</dt>
-
-<dd>The name of the platform (i.e. operating system) that you are building on. The word
-&lt;platform&gt; should be replaced by the actual platform, e.g. -DGNU or -DCYGWIN. This defines a
-macro which is then used within the code as a compiler directive to control platform-specific
-features. If this is missing then you get a generic Unix build - which will be correct for any
-Posix-compliant variant of Unix. A native Windows build should define _WIN32 (Note: the Visual
-Studio compiler and the Borland compiler do this for you, as does the Gnu gcc compiler when run in
-Windows native mode). The required values for these directives are listed on the page
-on <a href="porting.html#progress">porting</a> in the column labelled <code>-D</code>.</dd>
-
-<dt>-funsigned-char</dt>
-
-<dd>
-There is an ambiguity in C++ and C in that type <code>char</code> can be either
-<code>unsigned</code> or <code>signed</code> and this is compiler and platform
-dependent. This has caused problems in the past, so I have decided to force the
-signedness of <code>char</code> to <code>unsigned</code> for all platforms.
-</dd>
-
-<dt>-DNDEBUG</dt>
-
-<dd>In release builds, this removes debug code such as assertions, making the
-code faster and smaller. It is the switch used by the ANSI C standard for the
-assert() macro but is also used for the STLplus debug code.</dd>
-
-<dt>-O3</dt>
-
-<dd>In release builds, switch compiler optimisations on to get small, fast
-code. In debug mode, optimisations should be switched off so the program has
-all the original code present and can be stepped through in a debugger.</dd>
-
-<dt>-g</dt>
-
-<dd>In debug builds, the -g option includes symbolic information so that the
-program can be run in a debugger. In release mode, omit this switch to make
-the code harder to reverse engineer as well as a lot smaller and faster.</dd>
-
-</dl>
-
-<p>Again let me reiterate that these compiler switches are specific to the gcc
-compiler used in this example. However, the <em>principles</em> explained here
-should be used to build the library for any compiler. You just need to find
-the correct compiler switches that will achieve these principles for your
-compiler of choice.</p>
-
-<p><strong>Note:</strong> if you are building an application in <em>debug</em> mode, you should link with
-<em>debug</em> builds of the libraries. Similarly, if you are building an application in
-<em>release</em> mode, you should link with <em>release</em> builds of the libraries. This is because
-both the application and STLplus itself include the STLplus headers and there can be subtle
-differences in implementation between release and debug builds.</p>
-
-<h3>Platform Directives</h3>
-
-<p>As stated above, different platforms are identified by the -D directive so that differences
-between operating systems can be handled. The following table shows the different platform values
-currently used and which ones are actually used to make a difference.</p>
-
-<table border="1" cellpadding="1" align="center" rules="cols,groups" frame="border">
-<caption>Platform Directives</caption>
-
-<thead valign="top">
-
-<tr>
-<th>Directive</th>
-<th>Used</th>
-<th>Comment</th>
-</tr>
-
-</thead>
-
-<tbody>
-
-<tr>
-<td align="center">_WIN32</td>
-<td align="center">yes</td>
-<td align="left">All native Windows builds using Visual Studio and MinGW</td>
-</tr>
-
-<tr>
-<td align="center">CYGWIN</td>
-<td align="center">yes</td>
-<td align="left">Near-Posix-compliant Unix-emulation build on Windows using Cygwin version of gcc compiler</td>
-</tr>
-
-<tr>
-<td align="center">MINGW</td>
-<td align="center">no</td>
-<td align="left">Native Windows build using MinGW version of gcc compiler</td>
-</tr>
-
-<tr>
-  <td align="center">GNU</td>
-<td align="center">no</td>
-<td align="left">Posix-compliant Unix build on Gnu/Linux with gcc</td>
-</tr>
-
-<tr>
-<td align="center">SOLARIS</td>
-<td align="center">yes</td>
-<td align="left">Near-Posix-compliant Unix build on Solaris with gcc</td>
-</tr>
-
-<tr>
-<td align="center">FREEBSD</td>
-<td align="center">no</td>
-<td align="left">Posix-compliant Unix build on FreeBSD using gcc</td>
-</tr>
-
-<tr>
-<td align="center">OPENBSD</td>
-<td align="center">no</td>
-<td align="left">Posix-compliant Unix build on OpenBSD using gcc</td>
-</tr>
-
-<tr>
-<td align="center">NETBSD</td>
-<td align="center">no</td>
-<td align="left">Posix-compliant Unix build on NetBSD using gcc</td>
-</tr>
-
-<tr>
-<td align="center">MACOS</td>
-<td align="center">no</td>
-<td align="left">Posix-compliant Unix build on MacOS-X (Darwin) using gcc</td>
-</tr>
-
-</tbody>
-
-</table>
-
-<p>Where it says "yes" in the Used column, the directive must be provided to build correctly. Where
-it says "no", there is no need to provide the directive and you will get a Posix-compliant build.</p>
-
-<h3>Using The Libraries</h3>
-
-<p>To use the STLplus libraries for compilation, simply make sure that the directory containing the
-STLplus source files for each of the libraries you are using are in your include path. For example
-the following would include the containers and portability libraries:</p>
-
-<pre class="script">
-gcc -I$STLPLUS3/containers  -I$STLPLUS3/portability ...
-</pre>
-
-<p>This assumes that the environment variable STLPLUS3 points to the STLplus directory. You
-will have to define the variable with the correct path if you want to do it this way.
-Alternatively, just give the full path in the -I option.</p>
-
-<p>For linking, you need to simply include the lib&lt;library&gt;.a archives in the
-link. For a debug build of your program, link with the debug build of the
-STLplus library. For a release build, link with the release build of STLplus.
-For example:</p>
-
-<pre class="script">
-ld ... $STLPLUS3/portability/&lt;target_dir&gt;/libportability.a $STLPLUS3/containers/&lt;target_dir&gt;/libcontainers.a ...
-</pre>
-
-<p>In this case, &lt;target_dir&gt; will be something like <code>GNU-alpha-debug</code> for a
-debug build and <code>GNU-alpha-release</code> for a release build.</p>
-
-<p><strong>Note:</strong> when linking, you should list the libraries in their dependency order (see the <a
-href="#dependencies">section on dependencies</a>) with the higher-level libraries first
-and their required libraries after them. For example, the subsystems library should be listed before
-the portability library.</p>
-
-<h2 id="cygwin">Unix-emulation build on Windows using Cygwin and Gnu gcc</h2>
-
-<p>You can build Unix command-line tools and libraries on Windows using the Gnu gcc compiler if you
-first install the <a href="http://www.cygwin.com/">Cygwin</a> system. This system is a
-Unix-emulation layer which provides a Unix-like systems interface to the Windows operating system.
-For example, you access the file system as if it was a Unix file-system, create subprocesses using
-the Unix functions fork and exec, create pipes using Unix pipe and so on. This is a great way of
-porting Unix utilities to Windows, but has the disadvantage that you have to use Unix-like paths
-instead of Windows-like paths. I use Cygwin to develop the Unix version of STLplus whilst actually
-sitting at a Windows-based PC. For a native Windows version, see the next section.</p>
-
-<p>You need to install Cygwin before you can build the Cygwin version of the STLplus library. Then
-simply follow the instructions for building STLplus with Gnu tools.</p>
-
-<h2 id="cygming">Native build on Windows using Cygwin and Gnu gcc</h2>
-
-<p>The Cygwin development environment introduced in the last section also allows <em>native</em>
-Windows applications to be built using the Gnu compiler. Unlike Unix-emulation builds, this does not
-use the Unix emulation layer and you therefore access operating services through the Windows system
-calls directly. This kind of build is known as a CygMing build.</p>
-
-<p><strong>Note:</strong> version 3.2 and later of gcc works very well in this mode. Prior
-versions were incomplete and I don't support them. Version 4 no longer
-supports this mode as far as I can tell, so use the MinGW compiler instead.</p>
-
-<p>You build native applications with the Cygwin gcc compiler by specifying a
-special compiler switch (-mno-cygwin) for both compilation and linking. </p>
-
-<p>The compiler is pre-configured with _WIN32 enabled when used in CygMing mode, so programs and
-libraries (such as STLplus) that use this switch will automatically build correctly.</p>
-
-<p>The following settings are used
-in addition to the standard rules for the Cygwin builds:</p>
-
-<pre class="script">
-compile   : same as Cygwin plus: -mno-cygwin
-link      : same as Cygwin plus: -mno-cygwin
-</pre>
-
-<p>The standard Makefile system I supply can be switched into native compilation mode when compiling
-on Cygwin (and only then) by setting the environment variable CYGMING to the value "on". This name
-is a reflection of the fact that the ability to compile native Windows applications comes from a
-combination of the Cygwin project and the Mingw project (Mingw standas for "minimum Gnu on
-Windows"). The CYGMING variable can be set in the command line to make:</p>
-
-<pre class="script">
-make CYGMING=on
-</pre>
-
-<p>This is a one-off setting. To make the setting more permanent, change the
-environment of the shell you're running:</p>
-
-<pre class="script">
-export CYGMING=on
-make
-</pre>
+<p>To set up these dependencies, select the project that you wish to
+have access to the stlplus libraries. Then select the right-click menu
+item Properties. A mind-bogglingly complicated dialog will pop up. It
+is possible to configure all Configuyrations and Platforms on one
+go. To do this, select the Configuration drop-down menu in the top
+left and choose All&nbsp;Configurations. Also select the Platform
+  dropdown menu and select All&nbsp;Platforms.</p>
 
 <h2 id="mingw">Native build on Windows using MinGW Gnu gcc</h2>
 
 <p>The <a href="http://www.mingw.org/">MinGW</a> development environment also allows <em>native</em>
 Windows applications to be built using the Gnu compiler. This accesses operating services through
-the Windows system calls directly. It is also simpler to install and use than Cygwin.</p>
+the Windows system calls directly.</p>
 
 <p>The compiler is pre-configured with _WIN32 enabled, so programs and libraries (such as STLplus)
 that use this switch will automatically build correctly.</p>
 
 <p>The standard Makefile system I supply will compile out of the box with MinGW if it is run in the MSys
 environment.</p>
-
-<p><strong>Note:</strong>The makefile system will mis-identify the compiler as a Cygwin build if you run the
-MinGW compilers in the Cygwin shell, but it will in fact build correctly as a MinGW build.</p>
 
 <h2 id="unix-other">Other Unix builds using Gnu gcc</h2>
 
@@ -817,7 +495,7 @@ by one variant:</p>
 <pre class="script">
 # Build on Gnu/Linux
 ifneq ($(findstring GNU,$(UNAME)),)
-PLATFORM  := GNU
+PLATFORM  := GNULINUX
 endif
 </pre>
 

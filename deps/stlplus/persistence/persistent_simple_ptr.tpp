@@ -62,7 +62,8 @@ void stlplus::restore_simple_ptr(stlplus::restore_context& context, stlplus::sim
     T* value = 0;
     stlplus::restore_pointer(context,value,restore_element);
     // dealias the existing holder and replace it with the seen-before holder to make this object an alias of it
-    data._make_alias(value, (unsigned*)mapping.second);
+    unsigned* holder = (unsigned*)mapping.second;
+    data._make_alias(value, holder);
   }
 }
 

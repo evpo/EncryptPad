@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -19,33 +19,33 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{9B879D20-056C-4BBE-8FBF-4D6F052F0190}</ProjectGuid>
-    <RootNamespace>persistence</RootNamespace>
+    <ProjectGuid>{44975BC8-F176-42D7-8119-F203D23AE6D1}</ProjectGuid>
+    <RootNamespace>containers</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
@@ -89,8 +89,6 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\portability;..\..\containers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -103,7 +101,6 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\portability;..\..\containers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -115,7 +112,6 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>..\..\portability;..\..\containers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -132,7 +128,6 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>..\..\portability;..\..\containers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -141,85 +136,30 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\persistence\persistence.hpp" />
-    <ClInclude Include="..\..\persistence\persistence_fixes.hpp" />
-    <ClInclude Include="..\..\persistence\persistent.hpp" />
-    <ClInclude Include="..\..\persistence\persistent_basic.hpp" />
-    <ClInclude Include="..\..\persistence\persistent_bitset.hpp" />
-    <ClInclude Include="..\..\persistence\persistent_bool.hpp" />
-    <ClInclude Include="..\..\persistence\persistent_callback.hpp" />
-    <ClInclude Include="..\..\persistence\persistent_complex.hpp" />
-    <ClInclude Include="..\..\persistence\persistent_contexts.hpp" />
-    <ClInclude Include="..\..\persistence\persistent_cstring.hpp" />
-    <ClInclude Include="..\..\persistence\persistent_deque.hpp" />
-    <ClInclude Include="..\..\persistence\persistent_digraph.hpp" />
-    <ClInclude Include="..\..\persistence\persistent_enum.hpp" />
-    <ClInclude Include="..\..\persistence\persistent_exceptions.hpp" />
-    <ClInclude Include="..\..\persistence\persistent_float.hpp" />
-    <ClInclude Include="..\..\persistence\persistent_foursome.hpp" />
-    <ClInclude Include="..\..\persistence\persistent_hash.hpp" />
-    <ClInclude Include="..\..\persistence\persistent_inf.hpp" />
-    <ClInclude Include="..\..\persistence\persistent_int.hpp" />
-    <ClInclude Include="..\..\persistence\persistent_interface.hpp" />
-    <ClInclude Include="..\..\persistence\persistent_list.hpp" />
-    <ClInclude Include="..\..\persistence\persistent_map.hpp" />
-    <ClInclude Include="..\..\persistence\persistent_matrix.hpp" />
-    <ClInclude Include="..\..\persistence\persistent_multimap.hpp" />
-    <ClInclude Include="..\..\persistence\persistent_multiset.hpp" />
-    <ClInclude Include="..\..\persistence\persistent_ntree.hpp" />
-    <ClInclude Include="..\..\persistence\persistent_pair.hpp" />
-    <ClInclude Include="..\..\persistence\persistent_pointer.hpp" />
-    <ClInclude Include="..\..\persistence\persistent_pointers.hpp" />
-    <ClInclude Include="..\..\persistence\persistent_set.hpp" />
-    <ClInclude Include="..\..\persistence\persistent_shared_ptr.hpp" />
-    <ClInclude Include="..\..\persistence\persistent_shortcuts.hpp" />
-    <ClInclude Include="..\..\persistence\persistent_simple_ptr.hpp" />
-    <ClInclude Include="..\..\persistence\persistent_smart_ptr.hpp" />
-    <ClInclude Include="..\..\persistence\persistent_stl.hpp" />
-    <ClInclude Include="..\..\persistence\persistent_stlplus.hpp" />
-    <ClInclude Include="..\..\persistence\persistent_string.hpp" />
-    <ClInclude Include="..\..\persistence\persistent_triple.hpp" />
-    <ClInclude Include="..\..\persistence\persistent_vector.hpp" />
-    <ClInclude Include="..\..\persistence\persistent_xref.hpp" />
+    <ClInclude Include="..\..\containers\containers.hpp" />
+    <ClInclude Include="..\..\containers\containers_fixes.hpp" />
+    <ClInclude Include="..\..\containers\copy_functors.hpp" />
+    <ClInclude Include="..\..\containers\digraph.hpp" />
+    <ClInclude Include="..\..\containers\exceptions.hpp" />
+    <ClInclude Include="..\..\containers\foursome.hpp" />
+    <ClInclude Include="..\..\containers\hash.hpp" />
+    <ClInclude Include="..\..\containers\matrix.hpp" />
+    <ClInclude Include="..\..\containers\ntree.hpp" />
+    <ClInclude Include="..\..\containers\safe_iterator.hpp" />
+    <ClInclude Include="..\..\containers\simple_ptr.hpp" />
+    <ClInclude Include="..\..\containers\smart_ptr.hpp" />
+    <ClInclude Include="..\..\containers\triple.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\persistence\persistent_bitset.tpp" />
-    <None Include="..\..\persistence\persistent_callback.tpp" />
-    <None Include="..\..\persistence\persistent_complex.tpp" />
-    <None Include="..\..\persistence\persistent_deque.tpp" />
-    <None Include="..\..\persistence\persistent_digraph.tpp" />
-    <None Include="..\..\persistence\persistent_enum.tpp" />
-    <None Include="..\..\persistence\persistent_foursome.tpp" />
-    <None Include="..\..\persistence\persistent_hash.tpp" />
-    <None Include="..\..\persistence\persistent_interface.tpp" />
-    <None Include="..\..\persistence\persistent_list.tpp" />
-    <None Include="..\..\persistence\persistent_map.tpp" />
-    <None Include="..\..\persistence\persistent_matrix.tpp" />
-    <None Include="..\..\persistence\persistent_multimap.tpp" />
-    <None Include="..\..\persistence\persistent_multiset.tpp" />
-    <None Include="..\..\persistence\persistent_ntree.tpp" />
-    <None Include="..\..\persistence\persistent_pair.tpp" />
-    <None Include="..\..\persistence\persistent_pointer.tpp" />
-    <None Include="..\..\persistence\persistent_set.tpp" />
-    <None Include="..\..\persistence\persistent_shared_ptr.tpp" />
-    <None Include="..\..\persistence\persistent_shortcuts.tpp" />
-    <None Include="..\..\persistence\persistent_simple_ptr.tpp" />
-    <None Include="..\..\persistence\persistent_smart_ptr.tpp" />
-    <None Include="..\..\persistence\persistent_string.tpp" />
-    <None Include="..\..\persistence\persistent_triple.tpp" />
-    <None Include="..\..\persistence\persistent_vector.tpp" />
-    <None Include="..\..\persistence\persistent_xref.tpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\..\persistence\persistent_bool.cpp" />
-    <ClCompile Include="..\..\persistence\persistent_contexts.cpp" />
-    <ClCompile Include="..\..\persistence\persistent_cstring.cpp" />
-    <ClCompile Include="..\..\persistence\persistent_exceptions.cpp" />
-    <ClCompile Include="..\..\persistence\persistent_float.cpp" />
-    <ClCompile Include="..\..\persistence\persistent_inf.cpp" />
-    <ClCompile Include="..\..\persistence\persistent_int.cpp" />
-    <ClCompile Include="..\..\persistence\persistent_string.cpp" />
-    <ClCompile Include="..\..\persistence\persistent_vector.cpp" />
+    <None Include="..\..\containers\digraph.tpp" />
+    <None Include="..\..\containers\foursome.tpp" />
+    <None Include="..\..\containers\hash.tpp" />
+    <None Include="..\..\containers\matrix.tpp" />
+    <None Include="..\..\containers\ntree.tpp" />
+    <None Include="..\..\containers\safe_iterator.tpp" />
+    <None Include="..\..\containers\simple_ptr.tpp" />
+    <None Include="..\..\containers\smart_ptr.tpp" />
+    <None Include="..\..\containers\triple.tpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

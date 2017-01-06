@@ -37,6 +37,8 @@ C++ Library Collection</h1>
 <div id="documentNavigation">
 <ul>
 <li class="internal"><a href="#introduction">Introduction</a></li>
+<li class="internal"><a href="#v3.13">Changes from Version 3.12 to 3.13</a></li>
+<li class="internal"><a href="#v3.12">Changes from Version 3.11 to 3.12</a></li>
 <li class="internal"><a href="#v3.11">Changes from Version 3.10 to 3.11</a></li>
 <li class="internal"><a href="#v3.10">Changes from Version 3.9 to 3.10</a></li>
 <li class="internal"><a href="#v3.9">Changes from Version 3.8 to 3.9</a></li>
@@ -61,6 +63,85 @@ for this version are huge. Therefore only the changes since then have been docum
 <p>The official open-source version of STLplus starts at version 2.0 and you can access the change
 log for all version 2 releases by looking at the 
 <a href="http://stlplus.sourceforge.net/stlplus/docs/changes.html">version 2 documentation</a>.</p>
+
+<h2 id="v3.13">Changes from Version 3.12 to 3.13</h2>
+
+<h3>Reworked containers-&gt;digraph::path_exists algorithm</h3>
+
+<p>Bug reported by Simone D: The old digraph::path_exists algorithm
+was incorrect - it would stop searching for a path if an arc pointed
+to an already-visited node but before visiting any sibling arcs which
+might have been candidate paths.</p>
+
+<p>I have rewritten the path_exists algorithm using a simpler method.</p>
+
+<h3>Reworked portability-&gt;file_system</h3>
+
+<p>This is a minor bug-fix so that paths are simplified more consistently. For example "/.." can be simplified to "/".</p>
+
+<p>Note: The simplification of paths used in file_system is a naive algorithm, it removes ".." elements on the assumption that none of the path is made of links, so that "/root/element/.." always maps onto "/root". This is not necessarily true.</p>
+
+<h3>Fixed bug in IDE files</h3>
+
+<p>Some of the IDE project files still contained references to source
+files strings/print_address.hpp/cpp and strings/string_address.hpp/cpp
+which are obsolete - these functions were merged into other source
+files at the last release. These references have been removed.</p>
+
+<h2 id="v3.12">Changes from Version 3.11 to 3.12</h2>
+
+<h3>Added IDE files for Visual Studio 2013</h3>
+
+<p>These are a simple conversion of the VS 2012 project files, but
+have their own IDE folder so that they can be kept separate for users
+  running more than one version of Visual Studio</p>
+
+<h3>Added string formatting for long long types</h3>
+
+<p>Patch submitted by DJDM - extend the string formatting functions to support long long types.</p>
+
+<h3>Fixed macro declaration in subprocesses</h3>
+
+<p>On OS-X the option for preventing a subprocess read from triggering
+a signal has a different name from other Unix-like OSs. Fix supplied
+by Ingwie.</p>
+
+<h3>Added more methods to ntree</h3>
+
+<p>The ntree class is an ordered tree, but feedback has indicated that
+it is lacking in some methods for interchanging integer offsets of
+children with their iterators and manipulating the order of the tree
+once it has been built. These operations are possible, but difficult
+and should be built-in.</p>
+
+<p>So, the following methods have been added:</p>
+
+<ul>
+  <li>child_offset - find the integer offset of a child given its iterator</li>
+  <li>reorder - move a child to a new position in the node's child list</li>
+  <li>swap - swap two children in the node's child list</li>
+</ul>
+
+<p>See the <a href="ntree.html">documentation for ntree</a> to see how these are used.</p>
+
+<h3>Added move operation to digraph</h3>
+
+<p>There is now a method called move in the digraph class which allows
+a whole graph to be moved into another graph, merging the two
+graphs. All arc connectivity is preserved in the move and all
+iterators to any nodes or arcs in the moved graph will continue to be
+valid and work.</p>
+
+<h3>Added owns operation to digraph</h3>
+
+<p>You can now test whether an iterator is owned by a graph and therefore can be used with it by using the owns method. The method declaration is:</p>
+
+<pre class="cpp">
+bool digraph::owns(iterator);
+</pre>
+
+<p>Note that a null iterator is not owned by any object. Valid or end
+iterators are owned and may only be used with their owner object.</p>
 
 <h2 id="v3.11">Changes from Version 3.10 to 3.11</h2>
 
@@ -139,14 +220,14 @@ mode or x64 mode.</p>
 which showed up when converting them to 2012 project files. So I have
 regenerated the project files from scratch.</p>
 
-<h3>Changed Linux to GNU</h3>
+<h3>Changed Linux to GNU/Linux</h3>
 
 <p>It is technically incorrect to label GNU/Linux as Linux. Linux is
-the Kernel, whereas GNU is the OS. So I have changed the
-documentation, code and build tools to use the correct OS name of GNU.</p>
+the Kernel, whereas GNU is the OS and both deserve credit. So I have changed the
+documentation, code and build tools to use the correct OS name of GNU/Linux.</p>
 
 <p>This also means that the build subdirectory is now
-e.g. GNU-i686-debug rather than LINUX-i686-debug.</p>
+e.g. GNULINUX-i686-debug rather than LINUX-i686-debug.</p>
 
 <h3>Ported to gNewSense</h3>
 

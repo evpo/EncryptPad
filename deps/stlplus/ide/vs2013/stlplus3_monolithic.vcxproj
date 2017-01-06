@@ -168,7 +168,6 @@
     <ClCompile Include="..\..\source\persistent_string.cpp" />
     <ClCompile Include="..\..\source\persistent_vector.cpp" />
     <ClCompile Include="..\..\source\portability_fixes.cpp" />
-    <ClCompile Include="..\..\source\print_address.cpp" />
     <ClCompile Include="..\..\source\print_bool.cpp" />
     <ClCompile Include="..\..\source\print_cstring.cpp" />
     <ClCompile Include="..\..\source\print_float.cpp" />
@@ -176,7 +175,6 @@
     <ClCompile Include="..\..\source\print_int.cpp" />
     <ClCompile Include="..\..\source\print_string.cpp" />
     <ClCompile Include="..\..\source\print_vector.cpp" />
-    <ClCompile Include="..\..\source\string_address.cpp" />
     <ClCompile Include="..\..\source\string_bool.cpp" />
     <ClCompile Include="..\..\source\string_cstring.cpp" />
     <ClCompile Include="..\..\source\string_float.cpp" />
@@ -259,7 +257,6 @@
     <ClInclude Include="..\..\source\portability.hpp" />
     <ClInclude Include="..\..\source\portability_exceptions.hpp" />
     <ClInclude Include="..\..\source\portability_fixes.hpp" />
-    <ClInclude Include="..\..\source\print_address.hpp" />
     <ClInclude Include="..\..\source\print_basic.hpp" />
     <ClInclude Include="..\..\source\print_bitset.hpp" />
     <ClInclude Include="..\..\source\print_bool.hpp" />
@@ -292,7 +289,6 @@
     <ClInclude Include="..\..\source\stlplus3.hpp" />
     <ClInclude Include="..\..\source\strings.hpp" />
     <ClInclude Include="..\..\source\strings_fixes.hpp" />
-    <ClInclude Include="..\..\source\string_address.hpp" />
     <ClInclude Include="..\..\source\string_basic.hpp" />
     <ClInclude Include="..\..\source\string_bitset.hpp" />
     <ClInclude Include="..\..\source\string_bool.hpp" />

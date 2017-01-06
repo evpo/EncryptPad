@@ -290,10 +290,16 @@ namespace stlplus
       // the representation is:
       // [radix#][sign]magnitude
       bool negative = i < t_zero;
+      // DJDM ensure that the initial value is positive, so that we don't have to use abs()
+      // the reason I need to do this is that abs doesn't exist for 64-bit numbers (it's called something different)
+      // and I've recently added support for long long (which is minimally 64 bit)
+      if (negative)
+        i = t_zero - i;
       // create a representation of the magnitude by successive division
       do
       {
-        T ch = abs(i % t_radix);
+//        T ch = abs(i % t_radix);
+        T ch = i % t_radix;
         i /= t_radix;
         result.insert((std::string::size_type)0, 1, to_char[ch]);
       }
@@ -606,6 +612,18 @@ namespace stlplus
   }
 
   std::string unsigned_long_to_string(unsigned long i, unsigned radix, radix_display_t display, unsigned width)
+    throw(std::invalid_argument)
+  {
+    return uimage(i, radix, display, width);
+  }
+
+  std::string longlong_to_string(long long i, unsigned radix, radix_display_t display, unsigned width)
+    throw(std::invalid_argument)
+  {
+    return simage(i, radix, display, width);
+  }
+
+  std::string unsigned_longlong_to_string(unsigned long long i, unsigned radix, radix_display_t display, unsigned width)
     throw(std::invalid_argument)
   {
     return uimage(i, radix, display, width);

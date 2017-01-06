@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -19,33 +19,33 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{44975BC8-F176-42D7-8119-F203D23AE6D1}</ProjectGuid>
-    <RootNamespace>containers</RootNamespace>
+    <ProjectGuid>{37429D5A-837F-418D-BC9D-5FBE93C259D5}</ProjectGuid>
+    <RootNamespace>subsystems</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
@@ -89,6 +89,8 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..\portability;..\..\containers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -101,6 +103,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..\portability;..\..\containers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -112,6 +115,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>..\..\portability;..\..\containers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -128,6 +132,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>..\..\portability;..\..\containers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -136,30 +141,20 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\containers\containers.hpp" />
-    <ClInclude Include="..\..\containers\containers_fixes.hpp" />
-    <ClInclude Include="..\..\containers\copy_functors.hpp" />
-    <ClInclude Include="..\..\containers\digraph.hpp" />
-    <ClInclude Include="..\..\containers\exceptions.hpp" />
-    <ClInclude Include="..\..\containers\foursome.hpp" />
-    <ClInclude Include="..\..\containers\hash.hpp" />
-    <ClInclude Include="..\..\containers\matrix.hpp" />
-    <ClInclude Include="..\..\containers\ntree.hpp" />
-    <ClInclude Include="..\..\containers\safe_iterator.hpp" />
-    <ClInclude Include="..\..\containers\simple_ptr.hpp" />
-    <ClInclude Include="..\..\containers\smart_ptr.hpp" />
-    <ClInclude Include="..\..\containers\triple.hpp" />
+    <ClCompile Include="..\..\subsystems\cli_parser.cpp" />
+    <ClCompile Include="..\..\subsystems\ini_manager.cpp" />
+    <ClCompile Include="..\..\subsystems\library_manager.cpp" />
+    <ClCompile Include="..\..\subsystems\message_handler.cpp" />
+    <ClCompile Include="..\..\subsystems\timer.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\containers\digraph.tpp" />
-    <None Include="..\..\containers\foursome.tpp" />
-    <None Include="..\..\containers\hash.tpp" />
-    <None Include="..\..\containers\matrix.tpp" />
-    <None Include="..\..\containers\ntree.tpp" />
-    <None Include="..\..\containers\safe_iterator.tpp" />
-    <None Include="..\..\containers\simple_ptr.tpp" />
-    <None Include="..\..\containers\smart_ptr.tpp" />
-    <None Include="..\..\containers\triple.tpp" />
+    <ClInclude Include="..\..\subsystems\cli_parser.hpp" />
+    <ClInclude Include="..\..\subsystems\ini_manager.hpp" />
+    <ClInclude Include="..\..\subsystems\library_manager.hpp" />
+    <ClInclude Include="..\..\subsystems\message_handler.hpp" />
+    <ClInclude Include="..\..\subsystems\subsystems.hpp" />
+    <ClInclude Include="..\..\subsystems\subsystems_fixes.hpp" />
+    <ClInclude Include="..\..\subsystems\timer.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

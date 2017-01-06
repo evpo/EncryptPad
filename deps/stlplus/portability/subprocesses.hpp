@@ -102,19 +102,16 @@ namespace stlplus
 #else
 #define ENVIRON_TYPE char**
 #endif
-  class subprocess;
-  class async_subprocess;
 
   class env_vector
   {
   private:
     ENVIRON_TYPE m_env;
-    friend class subprocess;
-    friend class async_subprocess;
+
+  public:
     // access the env_vector as an envp type - used for passing to subprocesses
     ENVIRON_TYPE envp (void) const;
 
-  public:
     // create an env_vector vector from the current process
     env_vector (void);
     env_vector (const env_vector&);

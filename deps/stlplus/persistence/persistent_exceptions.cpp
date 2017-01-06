@@ -18,7 +18,7 @@ static std::string to_string(int number)
   char* buffer = new char[50];
   sprintf(buffer, "%i", number);
   std::string result = buffer;
-  delete buffer;
+  delete[] buffer;
   return result;
 }
 

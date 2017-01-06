@@ -74,6 +74,18 @@ namespace stlplus
                            unsigned width = 0)
     throw(std::invalid_argument);
 
+  void print_longlong(std::ostream& device, long long i,
+                      unsigned radix = 10,
+                      radix_display_t display = radix_c_style_or_hash,
+                      unsigned width = 0)
+    throw(std::invalid_argument);
+
+  void print_unsigned_longlong(std::ostream& device, unsigned long long i,
+                               unsigned radix = 10,
+                               radix_display_t display = radix_c_style_or_hash,
+                               unsigned width = 0)
+    throw(std::invalid_argument);
+
   ////////////////////////////////////////////////////////////////////////////////
 
   void print_address(std::ostream& device, const void*,

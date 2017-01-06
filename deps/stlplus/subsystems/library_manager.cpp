@@ -2279,14 +2279,14 @@ bool stlplus::library_manager::print(std::ostream& str) const
 {
   for (std::list<lm_library>::const_iterator l = m_libraries.begin(); l != m_libraries.end(); l++)
     l->print(str);
-  return str;
+  return !str.good();
 }
 
 bool stlplus::library_manager::print_long(std::ostream& str) const
 {
   for (std::list<lm_library>::const_iterator l = m_libraries.begin(); l != m_libraries.end(); l++)
     l->print_long(str);
-  return str;
+  return !str.good();
 }
 
 // find a library by name

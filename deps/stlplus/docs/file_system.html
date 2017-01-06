@@ -536,6 +536,14 @@ other code that this reaslly represents a folder and not a file. For example,
 "fred/has/germs" could refer to a file or a folder called germs, but
 "fred/has/germs/" unambiguously represents a folder.</p>
 
+<pre class="cpp">
+std::string stlplus::folder_remove_end_separator(const std::string&amp; folder);
+</pre>
+
+<p>removes a separator at the end of a folder path to give a cleaner,
+  more common representation - the reverse of the above function.  For
+  example "fred/has/germs/" becomes "fred/has/germs".</p>
+
 
 <h2 id="dissection">Dissection Functions</h2>
 

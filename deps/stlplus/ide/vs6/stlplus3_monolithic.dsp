@@ -337,10 +337,6 @@ SOURCE=..\..\source\portability_fixes.hpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\source\print_address.hpp
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\source\print_basic.hpp
 # End Source File
 # Begin Source File
@@ -454,10 +450,6 @@ SOURCE=..\..\source\smart_ptr.hpp
 # Begin Source File
 
 SOURCE=..\..\source\stlplus3.hpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\source\string_address.hpp
 # End Source File
 # Begin Source File
 
@@ -855,16 +847,6 @@ DEP_CPP_PORTA=\
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\source\print_address.cpp
-DEP_CPP_PRINT=\
-	"..\..\source\format_types.hpp"\
-	"..\..\source\print_address.hpp"\
-	"..\..\source\print_int.hpp"\
-	"..\..\source\strings_fixes.hpp"\
-	
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\source\print_bool.cpp
 DEP_CPP_PRINT_=\
 	"..\..\source\format_types.hpp"\
@@ -943,16 +925,6 @@ DEP_CPP_PRINT_V=\
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\source\string_address.cpp
-DEP_CPP_STRIN=\
-	"..\..\source\format_types.hpp"\
-	"..\..\source\string_address.hpp"\
-	"..\..\source\string_int.hpp"\
-	"..\..\source\strings_fixes.hpp"\
-	
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\source\string_bool.cpp
 DEP_CPP_STRING=\
 	"..\..\source\format_types.hpp"\
@@ -986,7 +958,6 @@ DEP_CPP_STRING_I=\
 	"..\..\source\inf.hpp"\
 	"..\..\source\portability_exceptions.hpp"\
 	"..\..\source\portability_fixes.hpp"\
-	"..\..\source\string_address.hpp"\
 	"..\..\source\string_basic.hpp"\
 	"..\..\source\string_bool.hpp"\
 	"..\..\source\string_cstring.hpp"\
@@ -1020,7 +991,6 @@ DEP_CPP_STRING_S=\
 SOURCE=..\..\source\string_utilities.cpp
 DEP_CPP_STRING_U=\
 	"..\..\source\format_types.hpp"\
-	"..\..\source\string_address.hpp"\
 	"..\..\source\string_basic.hpp"\
 	"..\..\source\string_bool.hpp"\
 	"..\..\source\string_cstring.hpp"\

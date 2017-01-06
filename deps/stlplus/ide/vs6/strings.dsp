@@ -89,10 +89,6 @@ SOURCE=..\..\strings\format_types.hpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\strings\print_address.hpp
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\strings\print_basic.hpp
 # End Source File
 # Begin Source File
@@ -190,10 +186,6 @@ SOURCE=..\..\strings\print_triple.hpp
 # Begin Source File
 
 SOURCE=..\..\strings\print_vector.hpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\strings\string_address.hpp
 # End Source File
 # Begin Source File
 
@@ -313,10 +305,6 @@ SOURCE=..\..\strings\strings_fixes.hpp
 # PROP Default_Filter "c;cpp;cxx"
 # Begin Source File
 
-SOURCE=..\..\strings\print_address.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\strings\print_bool.cpp
 # End Source File
 # Begin Source File
@@ -342,10 +330,6 @@ SOURCE=..\..\strings\print_string.cpp
 # Begin Source File
 
 SOURCE=..\..\strings\print_vector.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\strings\string_address.cpp
 # End Source File
 # Begin Source File
 

@@ -7,6 +7,8 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 #include "dynaload.hpp"
+#include "file_system.hpp"
+#include <iostream>
 
 #ifdef MSWINDOWS
 #include <windows.h>
@@ -59,14 +61,14 @@ namespace stlplus
   // library management
 
   // construct the object but do not load
-  dynaload::dynaload(void) : m_handle(0) 
+  dynaload::dynaload(void) : m_handle(0), m_error(no_error)
   {
   }
 
   // construct and load
-  dynaload::dynaload(const std::string& library) : m_handle(0)
+  dynaload::dynaload(const std::string& library, const std::string& path) : m_handle(0)
   {
-    load(library);
+    load(library, path);
   }
 
   // destroy and unload if loaded
@@ -76,20 +78,29 @@ namespace stlplus
   }
 
   // load the library - return success or fail
-  bool dynaload::load(const std::string& library)
+  bool dynaload::load(const std::string& library, const std::string& path)
   {
 #ifdef MSWINDOWS
-    m_handle = (void*)LoadLibraryA(library.c_str());
-#elif defined(CYGWIN)
-    m_handle = dlopen(library.c_str(),RTLD_NOW);
+    // naming convention is <name>.dll
+    std::string library_name = library;
 #else
-    std::string full_library = std::string("lib") + library + std::string(".so");
-    m_handle = dlopen(full_library.c_str(),RTLD_NOW);
+    // naming convention is lib<name>.so
+    // TODO - does this work with versioned libraries?
+    std::string library_name = std::string("lib") + library + std::string(".so");
+#endif
+    std::string library_filespec = stlplus::create_filespec(path, library_name);
+    std::cerr << "library name " << library_filespec << std::endl;
+#ifdef MSWINDOWS
+    // load a Windows DLL
+    m_handle = (void*)LoadLibraryA(library_filespec.c_str());
+#else
+    // load a Posix shared library
+    m_handle = dlopen(library_filespec.c_str(),RTLD_NOW);
 #endif
     if (!m_handle)
     {
       m_error = load_error;
-      m_text = last_error();
+      m_text = library_filespec + " - " + last_error();
     }
     return loaded();
   }
@@ -145,7 +156,7 @@ namespace stlplus
     if (!fn)
     {
       m_error = symbol_error;
-      m_text = last_error();
+      m_text = name + ": " + last_error();
     }
     return fn;
   }

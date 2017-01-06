@@ -109,10 +109,15 @@ namespace stlplus
 
     void assert_owner(const O* owner) const throw(wrong_object)
       {
-        if (owner != m_owner)
+        if (!owned_by(owner))
           throw wrong_object("stlplus::safe_iterator: using iterator with wrong object");
       }
-  };
+
+    bool owned_by(const O* owner) const
+      {
+        return (owner == m_owner);
+      }
+};
 
 
   ////////////////////////////////////////////////////////////////////////////////
@@ -328,24 +333,25 @@ namespace stlplus
     return m_body->valid();
   }
 
-  // check the rules for a valid iterator that can be dereferenced
   template<typename O, typename N>
-  void safe_iterator<O,N>::assert_valid(void) const throw(null_dereference,end_dereference)
+  bool safe_iterator<O,N>::owned_by(const O* owner) const
   {
-    m_body->assert_valid();
+    return m_body->owned_by(owner);
   }
 
+  // check the rules for a valid iterator
   template<typename O, typename N>
   void safe_iterator<O,N>::assert_valid(const O* owner) const throw(wrong_object,null_dereference,end_dereference)
   {
     m_body->assert_valid();
-    m_body->assert_owner(owner);
+    if (owner) m_body->assert_owner(owner);
   }
 
   template<typename O, typename N>
-  void safe_iterator<O,N>::assert_non_null(void) const throw(null_dereference)
+  void safe_iterator<O,N>::assert_non_null(const O* owner) const throw(wrong_object,null_dereference)
   {
     m_body->assert_non_null();
+    if (owner) m_body->assert_owner(owner);
   }
 
   template<typename O, typename N>
