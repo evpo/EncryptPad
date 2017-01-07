@@ -98,6 +98,7 @@ private slots:
     void openFileEncryption();
     void cursorPositionChanged();
     void onUrlDrop(QUrl url);
+    void onTextEditLeave();
     void findNext(QString text, bool down, bool matchCase, bool wholeWord);
     void replaceAll(QString text, QString replaceWith, bool matchCase, bool wholeWord);
     void replaceOne(QString text, QString replaceWith, bool matchCase, bool wholeWord);

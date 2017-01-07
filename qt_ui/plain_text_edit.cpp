@@ -1,6 +1,7 @@
 #include "plain_text_edit.h"
 #include <QDebug>
 #include <QMimeData>
+#include <QApplication>
 
 PlainTextEdit::PlainTextEdit(QWidget *parent) :
     QPlainTextEdit(parent)
@@ -39,4 +40,15 @@ void PlainTextEdit::dropEvent(QDropEvent *event)
 
     QUrl url = event->mimeData()->urls().at(0);
     urlDropped(url);
+}
+
+void PlainTextEdit::leaveEvent(QEvent *event)
+{
+    leaveControl();
+    super::leaveEvent(event);
+}
+void PlainTextEdit::enterEvent(QEvent *event)
+{
+    enterControl();
+    super::enterEvent(event);
 }

@@ -134,6 +134,7 @@ MainWindow::MainWindow():
     connect(textEdit->document(), SIGNAL(contentsChanged()), this, SLOT(documentWasModified()));
     connect(textEdit, SIGNAL(cursorPositionChanged()), this, SLOT(cursorPositionChanged()));
     connect(textEdit, SIGNAL(urlDropped(QUrl)), this, SLOT(onUrlDrop(QUrl)));
+    connect(textEdit, SIGNAL(leaveControl()), this, SLOT(onTextEditLeave()));
     connect(&load_state_machine_, SIGNAL(AsyncOperationCompleted()), this, SLOT(AsyncOperationCompleted()));
     connect(&load_state_machine_, SIGNAL(UpdateStatus(const QString&)), this, SLOT(UpdateStatus(const QString &)));
     connect(&plain_text_switch_, SIGNAL(UpdateSwitch(bool)), this, SLOT(UpdateEncryptedPlainSwitch(bool)));
@@ -147,6 +148,12 @@ MainWindow::MainWindow():
 
     setUnifiedTitleAndToolBarOnMac(true);
     updateEncryptionKeyStatus();
+}
+
+void MainWindow::onTextEditLeave()
+{
+    if(QApplication::overrideCursor() != nullptr && QApplication::overrideCursor()->shape() == Qt::IBeamCursor)
+        QApplication::restoreOverrideCursor();
 }
 
 void MainWindow::updateLineStatus()
@@ -1194,7 +1201,17 @@ void MainWindow::EnterWaitState()
 void MainWindow::ExitWaitState()
 {
     #ifndef QT_NO_CURSOR
-    QApplication::restoreOverrideCursor();
+    // There is probably a bug in Qt. When the mouse cursor is over textEdit
+    // and the restored cursor is an arrow. Therefore, we set the beam cursor explicitely here.
+    // We also handle textEdit leaveEvent in onTextEditLeave and restore the cursor there.
+    if(textEdit->underMouse())
+    {
+        QApplication::changeOverrideCursor(Qt::IBeamCursor);
+    }
+    else
+    {
+        QApplication::restoreOverrideCursor();
+    }
     QApplication::processEvents();
     #endif
     this->setEnabled(true);
