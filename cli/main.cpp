@@ -322,7 +322,8 @@ int main(int argc, char *argv[])
             "--key-file-length",
             cli_kind_t::cli_value_kind,
             cli_mode_t::cli_single_mode,
-            "",
+            "key file length",
+            ""
         },
         {
             "",

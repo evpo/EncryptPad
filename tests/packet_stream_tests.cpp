@@ -213,7 +213,7 @@ TEST_F(InPacketStreamFixture, When_writing_to_OutPacketStreamCont_It_populates_a
 
     //Assert
     ASSERT_EQ(20, out.GetCount());
-    ASSERT_GE(buffer.size(), 20);
+    ASSERT_GE(buffer.size(), 20U);
     ASSERT_STREQ("Hello Array 1234567", reinterpret_cast<const char*>(buffer.begin()));
 }
 

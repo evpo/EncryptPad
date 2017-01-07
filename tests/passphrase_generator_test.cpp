@@ -39,7 +39,7 @@ TEST(PassphraseGenerator, It_generates_correct_number_of_passphrases)
     vector<string> passphrases = GeneratePassphrases(GetCharSets(), 12, pwd_count);
 
     //Assert
-    ASSERT_EQ(5, passphrases.size());
+    ASSERT_EQ(5U, passphrases.size());
 
 }
 
@@ -67,16 +67,16 @@ TEST(PassphraseGenerator, When_max_char_count_is_less_than_passphrase_length_Gen
     vector<string> passphrases = GeneratePassphrases(sets, pwd_length, 3);
 
     //Assert
-    ASSERT_EQ(3, passphrases.size());
-    ASSERT_EQ(5, passphrases[0].size());
-    ASSERT_EQ(5, passphrases[1].size());
-    ASSERT_EQ(5, passphrases[2].size());
+    ASSERT_EQ(3U, passphrases.size());
+    ASSERT_EQ(5U, passphrases[0].size());
+    ASSERT_EQ(5U, passphrases[1].size());
+    ASSERT_EQ(5U, passphrases[2].size());
 }
 
 TEST(PassphraseGenerator, Boundary_case_in_which_max_char_count_is_passphrase_length)
 {
     //Arrange
-    int pwd_length = 12;
+    unsigned int pwd_length = 12;
     vector<CharSet> sets;
     sets.push_back(CharSet(GetLowerAtoZ(), CharRange::LowerAtoZ, 1, pwd_length));
 
@@ -84,7 +84,7 @@ TEST(PassphraseGenerator, Boundary_case_in_which_max_char_count_is_passphrase_le
     vector<string> passphrases = GeneratePassphrases(sets, pwd_length, 3);
 
     //Assert
-    ASSERT_EQ(3, passphrases.size());
+    ASSERT_EQ(3U, passphrases.size());
     ASSERT_EQ(pwd_length, passphrases[0].size());
     ASSERT_EQ(pwd_length, passphrases[1].size());
     ASSERT_EQ(pwd_length, passphrases[2].size());
@@ -93,13 +93,13 @@ TEST(PassphraseGenerator, Boundary_case_in_which_max_char_count_is_passphrase_le
 TEST(PassphraseGenerator, It_generates_passphrases_of_correct_length)
 {
     //Arrange
-    int pwd_length = 12;
+    unsigned int pwd_length = 12;
 
     //Act
     vector<string> passphrases = GeneratePassphrases(GetCharSets(), pwd_length, 3);
 
     //Assert
-    ASSERT_EQ(3, passphrases.size());
+    ASSERT_EQ(3U, passphrases.size());
     ASSERT_EQ(pwd_length, passphrases[0].size());
     ASSERT_EQ(pwd_length, passphrases[1].size());
     ASSERT_EQ(pwd_length, passphrases[2].size());
@@ -116,9 +116,9 @@ TEST(PassphraseGenerator, Boundary_test_in_which_min_char_count_takes_all_chars)
     vector<string> passphrases = GeneratePassphrases(sets, 2, 1);
 
     //Assert
-    ASSERT_EQ(1, passphrases.size());
+    ASSERT_EQ(1U, passphrases.size());
     string &pwd = passphrases[0];
-    ASSERT_EQ(2, pwd.size());
+    ASSERT_EQ(2U, pwd.size());
     bool lower1 = GetLowerAtoZ().find(pwd[0]) != string::npos; 
     bool lower2 = GetLowerAtoZ().find(pwd[1]) != string::npos; 
     bool upper1 = GetUpperAtoZ().find(pwd[0]) != string::npos; 
@@ -139,10 +139,10 @@ TEST(PassphraseGenerator, Boundary_test_in_which_max_char_count_is_one)
     vector<string> passphrases = GeneratePassphrases(sets, 100, 1);
 
     //Assert
-    ASSERT_EQ(1, passphrases.size());
+    ASSERT_EQ(1U, passphrases.size());
     string &pwd = passphrases[0];
 
-    ASSERT_EQ(100, pwd.size());
+    ASSERT_EQ(100U, pwd.size());
 
     std::sort(pwd.begin(), pwd.end());
 
@@ -165,7 +165,7 @@ TEST(PassphraseGenerator, Passphrases_do_not_exceed_char_set_maximum_and_reach_c
     vector<string> passphrases = GeneratePassphrases(sets, 100, 1000);
     
     //Assert
-    ASSERT_EQ(1000, passphrases.size());
+    ASSERT_EQ(1000U, passphrases.size());
 
     const string &upperChars = GetUpperAtoZ();
     string buf;
@@ -174,7 +174,7 @@ TEST(PassphraseGenerator, Passphrases_do_not_exceed_char_set_maximum_and_reach_c
     auto pwd_it = passphrases.begin();
     for(; pwd_it != passphrases.end(); pwd_it ++)
     {
-        ASSERT_EQ(100, pwd_it->size());
+        ASSERT_EQ(100U, pwd_it->size());
         std::sort(pwd_it->begin(), pwd_it->end());
         auto out_it = std::set_intersection(
                 pwd_it->begin(), pwd_it->end(), upperChars.begin(), upperChars.end(), buf.begin());
@@ -195,7 +195,7 @@ TEST(PassphraseGenerator, Passphrases_contain_all_sets)
     vector<string>::iterator pwd_it = passphrases.begin();
     vector<char> buf;
 
-    ASSERT_EQ(1000, passphrases.size());
+    ASSERT_EQ(1000U, passphrases.size());
 
     for(;pwd_it != passphrases.end(); pwd_it++)
     {
