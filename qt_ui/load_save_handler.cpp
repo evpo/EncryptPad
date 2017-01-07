@@ -132,7 +132,8 @@ namespace EncryptPad
         isKey = !client.EncryptionKeyFile().isEmpty();
 
         std::string kf_passphrase;
-        if((isKey && !client.HasKeyFilePassphrase()) || force_kf_passphrase_request)
+        if((isKey && !client.HasKeyFilePassphrase() && CheckIfKeyFileMayRequirePassphrase(client.EncryptionKeyFile().toStdString()))
+                || force_kf_passphrase_request)
         {
             if(!OpenPassphraseDialog(false, &kf_passphrase, false, qApp->translate("LoadSaveHandler", kKeyFilePassphraseWindowTitle)))
                 return false;
@@ -217,6 +218,7 @@ namespace EncryptPad
         std::string kf_passphrase;
 
         if(!client.EncryptionKeyFile().isEmpty() && !client.HasKeyFilePassphrase() &&
+                CheckIfKeyFileMayRequirePassphrase(client.EncryptionKeyFile().toStdString()) &&
                 !OpenPassphraseDialog(false, &kf_passphrase, false, qApp->translate("LoadSaveHandler", kKeyFilePassphraseWindowTitle)))
         {
             return false;

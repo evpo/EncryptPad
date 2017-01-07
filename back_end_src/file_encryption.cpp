@@ -393,4 +393,18 @@ namespace EncryptPad
         wad_file = true;
         return false;
     }
+
+    bool CheckIfKeyFileMayRequirePassphrase(const std::string &key_file)
+    {
+        std::string empty;
+        std::string key_content;
+        if(IsUrl(key_file))
+            return true;
+
+        auto result = LoadKeyFromFile(key_file, empty, empty, key_content);
+        if(result != PacketResult::Success || IsKeyFileEncrypted(key_content))
+            return true;
+
+        return false;
+    }
 }

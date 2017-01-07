@@ -42,5 +42,6 @@ namespace EncryptPad
             EncryptParams &encrypt_params, PacketMetadata &metadata);
 
     bool CheckIfPassphraseProtected(const std::string &file_name, bool &wad_file, std::string &key_file);
+    bool CheckIfKeyFileMayRequirePassphrase(const std::string &key_file);
 
 }

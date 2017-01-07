@@ -8,9 +8,7 @@ namespace EncryptPad
 {
     bool DecryptKeyFileContent(const std::string &key, EncryptParams *key_file_encrypt_params, std::string &out)
     {
-        static std::string ascii_prefix("-----BEGIN PGP MESSAGE-----");
-
-        if(key.size() < ascii_prefix.size() || !std::equal(ascii_prefix.begin(), ascii_prefix.end(), key.begin()))
+        if(!IsKeyFileEncrypted(key))
         {
             out = key;
             return true;
@@ -49,5 +47,12 @@ namespace EncryptPad
 
         out = PGP_encode(out_buffer.begin(), out_buffer.size(), "MESSAGE");
         return true;
+    }
+
+    bool IsKeyFileEncrypted(const std::string &key)
+    {
+        static std::string ascii_prefix("-----BEGIN PGP MESSAGE-----");
+        return key.size() > ascii_prefix.size()
+            && std::equal(ascii_prefix.begin(), ascii_prefix.end(), key.begin());
     }
 }

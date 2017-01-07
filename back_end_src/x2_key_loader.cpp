@@ -36,7 +36,10 @@ namespace
     const char *keyStorageDirectory = "%USERPROFILE%\\_encryptpad";
     const char *directorySeparator = "\\";
 #endif
+}
 
+namespace EncryptPad
+{
     bool IsUrl(const string& path)
     {
         auto pos = path.find(':');
@@ -56,10 +59,7 @@ namespace
 
         return true;
     }
-}
 
-namespace EncryptPad
-{
     PacketResult LoadKeyFromFile(const string& file_name, const std::string &libcurl_path, const std::string &libcurl_params, std::string &key)
     {
         if(!libcurl_path.empty() && IsUrl(file_name))

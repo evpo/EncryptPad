@@ -4,6 +4,8 @@
 
 namespace EncryptPad
 {
+    bool IsKeyFileEncrypted(const std::string &key);
+
     // Decrypt encrypted key file content
     // key is just copied to out if it is not encrypted
     // returns true if the decryption is successful
