@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="fr">
+<?xml version="1.0" ?><!DOCTYPE TS><TS language="zh" version="2.1">
 <context>
     <name>ConfirmPassphraseDialog</name>
     <message>
@@ -66,7 +64,7 @@
     <message>
         <location filename="file_encryption_dialog.ui" line="89"/>
         <source>Format:</source>
-        <translation type="unfinished"></translation>
+        <translation>格式：</translation>
     </message>
     <message>
         <location filename="file_encryption_dialog.ui" line="99"/>
@@ -87,22 +85,22 @@
     <message>
         <location filename="file_encryption_dialog.ui" line="159"/>
         <source>EncryptPad format</source>
-        <translation type="unfinished"></translation>
+        <translation>EncryptPad 格式</translation>
     </message>
     <message>
         <location filename="file_encryption_dialog.ui" line="162"/>
         <source>EPD</source>
-        <translation type="unfinished"></translation>
+        <translation>EPD</translation>
     </message>
     <message>
         <location filename="file_encryption_dialog.ui" line="172"/>
         <source>OpenPGP</source>
-        <translation type="unfinished"></translation>
+        <translation>OpenPGP</translation>
     </message>
     <message>
         <location filename="file_encryption_dialog.ui" line="175"/>
         <source>GPG</source>
-        <translation type="unfinished"></translation>
+        <translation>GPG</translation>
     </message>
     <message>
         <location filename="file_encryption_dialog.ui" line="190"/>
@@ -671,7 +669,7 @@ Do you want to replace it?</source>
     <message>
         <location filename="mainwindow.cpp" line="679"/>
         <source>Do you want to apply the modified default file properties to this file?</source>
-        <translation type="unfinished"></translation>
+        <translation>你想要应用已修改的默认文件属性到这个文件吗？</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="692"/>
@@ -1319,17 +1317,17 @@ Do you want to replace it?</source>
     <message>
         <location filename="preferences_dialog.ui" line="49"/>
         <source>Libcurl command line parameters</source>
-        <translation type="unfinished"></translation>
+        <translation>Libcurl 命令行参数</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="52"/>
         <source>Parameters:</source>
-        <translation type="unfinished"></translation>
+        <translation>参数：</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="64"/>
         <source>Key file encryption properties:</source>
-        <translation type="unfinished"></translation>
+        <translation>密钥文件加密属性：</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="82"/>
@@ -1344,83 +1342,79 @@ Do you want to replace it?</source>
     <message>
         <location filename="preferences_dialog.ui" line="103"/>
         <source>Enable BAK files</source>
-        <translation type="unfinished"></translation>
+        <translation>启用备份文件(.bak)</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="138"/>
         <source>Save last used directory</source>
-        <translation type="unfinished"></translation>
+        <translation>保存最近使用的目录</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="181"/>
         <source>Word wrap</source>
-        <translation type="unfinished"></translation>
+        <translation>自动换行</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="188"/>
         <location filename="preferences_dialog.ui" line="256"/>
         <source>Edit...</source>
-        <translation type="unfinished"></translation>
+        <translation>编辑</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="205"/>
         <source>Libcurl path:</source>
-        <translation type="unfinished"></translation>
+        <translation>libcurl路径：</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="246"/>
         <source>Recent files:</source>
-        <translation type="unfinished"></translation>
+        <translation>最近使用的文件：</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="323"/>
         <source>Default file properties:</source>
-        <translation type="unfinished"></translation>
+        <translation>默认文件属性：</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="337"/>
         <source>This controls how many times you can save without entering a passphrase</source>
-        <translation type="unfinished"></translation>
+        <translation>这决定了你在不输入密码的情况下可以保存多少次</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="340"/>
         <source>Passphrase to key results pool size:</source>
-        <translation type="unfinished"></translation>
+        <translation>密码到密钥结果缓冲区大小：</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="359"/>
         <source>Key file random sequence length (bytes):</source>
-        <translation type="unfinished"></translation>
+        <translation>密钥文件随机序列长度（字节数）：</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="370"/>
         <source>32</source>
-        <translation type="unfinished">32</translation>
+        <translation>32</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="375"/>
         <source>64</source>
-        <translation type="unfinished">64</translation>
+        <translation>64</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="380"/>
         <source>128</source>
-        <translation type="unfinished">128</translation>
+        <translation>128</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="385"/>
         <source>256</source>
-        <translation type="unfinished">256</translation>
+        <translation>256</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="393"/>
         <location filename="preferences_dialog.ui" line="396"/>
         <source>&quot;Windows&quot; end of line: CR+LF</source>
-        <translation type="unfinished">Windows换行风格：CRLF</translation>
-    </message>
-    <message>
-        <source>Enable BAK Files</source>
-        <translation type="vanished">启用备份文件(.bak)</translation>
+        <translation>Windows换行风格：CR+LF</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="135"/>
@@ -1428,34 +1422,14 @@ Do you want to replace it?</source>
         <translation>在进程间保留最近使用的目录</translation>
     </message>
     <message>
-        <source>Save Last Used Directory</source>
-        <translation type="vanished">保存最近使用的目录</translation>
-    </message>
-    <message>
-        <source>Word Wrap</source>
-        <translation type="vanished">自动换行</translation>
-    </message>
-    <message>
         <location filename="preferences_dialog.ui" line="202"/>
         <source>Path to libCURL executable</source>
         <translation>libCURL可执行文件路径</translation>
     </message>
     <message>
-        <source>Libcurl Path:</source>
-        <translation type="vanished">libcurl路径：</translation>
-    </message>
-    <message>
-        <source>Recent Files:</source>
-        <translation type="vanished">最近使用的文件：</translation>
-    </message>
-    <message>
         <location filename="preferences_dialog.ui" line="233"/>
         <source>Font...</source>
         <translation>字体……</translation>
-    </message>
-    <message>
-        <source>Default Iterations:</source>
-        <translation type="vanished">默认迭代数：</translation>
     </message>
     <message>
         <location filename="preferences_dialog.cpp" line="145"/>
@@ -1508,7 +1482,7 @@ Do you want to replace it?</source>
     <message>
         <location filename="set_key_dialog.ui" line="167"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The key repository is &lt;span style=&quot; font-weight:600;&quot;&gt;.encryptpad&lt;/span&gt; (&lt;b&gt;_encryptpad&lt;/b&gt; on Windows) directory in the user&apos;s profile. Select a key or specify a file name without path for the repository keys.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;密钥仓库存在于 &lt;span style=&quot; font-weight:600;&quot;&gt;.encryptpad&lt;/span&gt; (&lt;b&gt;_encryptpad&lt;/b&gt; on Windows) 处于用户文件夹的目录里. 选择一个密钥，或者输入一个不含路径的文件名来指定一个仓库中的密钥。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;密钥仓库存在于 &lt;span style=&quot; font-weight:600;&quot;&gt;.encryptpad&lt;/span&gt; (&lt;b&gt;_encryptpad&lt;/b&gt; on Windows) 处于用户文件夹的目录里。选择一个密钥，或者输入一个不含路径的文件名来指定一个仓库中的密钥。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="set_key_dialog.cpp" line="90"/>

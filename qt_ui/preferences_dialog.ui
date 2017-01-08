@@ -12,8 +12,8 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>462</width>
-    <height>326</height>
+    <width>474</width>
+    <height>503</height>
    </size>
   </property>
   <property name="maximumSize">
@@ -122,7 +122,7 @@
         <enum>Qt::LeftToRight</enum>
        </property>
        <property name="text">
-        <string/>
+        <string>[example: Monospace (Size: 12)]</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>

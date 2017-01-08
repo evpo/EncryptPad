@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="fr">
+<?xml version="1.0" ?><!DOCTYPE TS><TS language="fr" version="2.1">
 <context>
     <name>ConfirmPassphraseDialog</name>
     <message>
@@ -66,7 +64,7 @@
     <message>
         <location filename="file_encryption_dialog.ui" line="89"/>
         <source>Format:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="file_encryption_dialog.ui" line="99"/>
@@ -87,22 +85,22 @@
     <message>
         <location filename="file_encryption_dialog.ui" line="159"/>
         <source>EncryptPad format</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="file_encryption_dialog.ui" line="162"/>
         <source>EPD</source>
-        <translation type="unfinished"></translation>
+        <translation>EPD</translation>
     </message>
     <message>
         <location filename="file_encryption_dialog.ui" line="172"/>
         <source>OpenPGP</source>
-        <translation type="unfinished"></translation>
+        <translation>OpenPGP</translation>
     </message>
     <message>
         <location filename="file_encryption_dialog.ui" line="175"/>
         <source>GPG</source>
-        <translation type="unfinished"></translation>
+        <translation>GPG</translation>
     </message>
     <message>
         <location filename="file_encryption_dialog.ui" line="190"/>
@@ -671,7 +669,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="mainwindow.cpp" line="679"/>
         <source>Do you want to apply the modified default file properties to this file?</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="692"/>
@@ -1319,17 +1317,17 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="preferences_dialog.ui" line="49"/>
         <source>Libcurl command line parameters</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="52"/>
         <source>Parameters:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="64"/>
         <source>Key file encryption properties:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="82"/>
@@ -1344,83 +1342,79 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="preferences_dialog.ui" line="103"/>
         <source>Enable BAK files</source>
-        <translation type="unfinished"></translation>
+        <translation>Activer les fichiers BAK</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="138"/>
         <source>Save last used directory</source>
-        <translation type="unfinished"></translation>
+        <translation>Mémoriser le dernier répertoire utilisé </translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="181"/>
         <source>Word wrap</source>
-        <translation type="unfinished"></translation>
+        <translation>Retour à la ligne automatique </translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="188"/>
         <location filename="preferences_dialog.ui" line="256"/>
         <source>Edit...</source>
-        <translation type="unfinished"></translation>
+        <translation>Modifier...</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="205"/>
         <source>Libcurl path:</source>
-        <translation type="unfinished"></translation>
+        <translation>Chemin de libcurl :</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="246"/>
         <source>Recent files:</source>
-        <translation type="unfinished"></translation>
+        <translation>Fichiers récents :</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="323"/>
         <source>Default file properties:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="337"/>
         <source>This controls how many times you can save without entering a passphrase</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="340"/>
         <source>Passphrase to key results pool size:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="359"/>
         <source>Key file random sequence length (bytes):</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="370"/>
         <source>32</source>
-        <translation type="unfinished">32</translation>
+        <translation>32</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="375"/>
         <source>64</source>
-        <translation type="unfinished">64</translation>
+        <translation>64</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="380"/>
         <source>128</source>
-        <translation type="unfinished">128</translation>
+        <translation>128</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="385"/>
         <source>256</source>
-        <translation type="unfinished">256</translation>
+        <translation>256</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="393"/>
         <location filename="preferences_dialog.ui" line="396"/>
         <source>&quot;Windows&quot; end of line: CR+LF</source>
-        <translation type="unfinished">Fin de ligne « Windows » : CR+LF</translation>
-    </message>
-    <message>
-        <source>Enable BAK Files</source>
-        <translation type="vanished">Activer les fichiers BAK</translation>
+        <translation>Fin de ligne « Windows » : CR+LF</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="135"/>
@@ -1428,34 +1422,14 @@ Souhaitez-vous le remplacer ?</translation>
         <translation>Mémoriser le dernier répertoire utilisé d&apos;une session d&apos;EncryptPad à l&apos;autre</translation>
     </message>
     <message>
-        <source>Save Last Used Directory</source>
-        <translation type="vanished">Mémoriser le dernier répertoire utilisé </translation>
-    </message>
-    <message>
-        <source>Word Wrap</source>
-        <translation type="vanished">Retour à la ligne automatique </translation>
-    </message>
-    <message>
         <location filename="preferences_dialog.ui" line="202"/>
         <source>Path to libCURL executable</source>
         <translation>Chemin de l&apos;exécutable libCURL</translation>
     </message>
     <message>
-        <source>Libcurl Path:</source>
-        <translation type="vanished">Chemin de libcurl :</translation>
-    </message>
-    <message>
-        <source>Recent Files:</source>
-        <translation type="vanished">Fichiers récents :</translation>
-    </message>
-    <message>
         <location filename="preferences_dialog.ui" line="233"/>
         <source>Font...</source>
         <translation>Police...</translation>
-    </message>
-    <message>
-        <source>Default Iterations:</source>
-        <translation type="vanished">Itérations par défaut :</translation>
     </message>
     <message>
         <location filename="preferences_dialog.cpp" line="145"/>

@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="ru">
+<?xml version="1.0" ?><!DOCTYPE TS><TS language="ru" version="2.1">
 <context>
     <name>ConfirmPassphraseDialog</name>
     <message>
@@ -66,7 +64,7 @@
     <message>
         <location filename="file_encryption_dialog.ui" line="89"/>
         <source>Format:</source>
-        <translation type="unfinished"></translation>
+        <translation>Формат:</translation>
     </message>
     <message>
         <location filename="file_encryption_dialog.ui" line="99"/>
@@ -87,22 +85,22 @@
     <message>
         <location filename="file_encryption_dialog.ui" line="159"/>
         <source>EncryptPad format</source>
-        <translation type="unfinished"></translation>
+        <translation>EncryptPad формат</translation>
     </message>
     <message>
         <location filename="file_encryption_dialog.ui" line="162"/>
         <source>EPD</source>
-        <translation type="unfinished"></translation>
+        <translation>EPD</translation>
     </message>
     <message>
         <location filename="file_encryption_dialog.ui" line="172"/>
         <source>OpenPGP</source>
-        <translation type="unfinished"></translation>
+        <translation>OpenPGP</translation>
     </message>
     <message>
         <location filename="file_encryption_dialog.ui" line="175"/>
         <source>GPG</source>
-        <translation type="unfinished"></translation>
+        <translation>GPG</translation>
     </message>
     <message>
         <location filename="file_encryption_dialog.ui" line="190"/>
@@ -670,7 +668,7 @@ Do you want to replace it?</source>
     <message>
         <location filename="mainwindow.cpp" line="679"/>
         <source>Do you want to apply the modified default file properties to this file?</source>
-        <translation type="unfinished"></translation>
+        <translation>Хотите применить измененные настройки по умолчанию к этому файлу?</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="692"/>
@@ -1318,17 +1316,17 @@ Do you want to replace it?</source>
     <message>
         <location filename="preferences_dialog.ui" line="49"/>
         <source>Libcurl command line parameters</source>
-        <translation type="unfinished"></translation>
+        <translation>Параметры командной строки для Libcurl</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="52"/>
         <source>Parameters:</source>
-        <translation type="unfinished"></translation>
+        <translation>Параметры:</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="64"/>
         <source>Key file encryption properties:</source>
-        <translation type="unfinished"></translation>
+        <translation>Параметры шифрования для файла ключа:</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="82"/>
@@ -1343,83 +1341,79 @@ Do you want to replace it?</source>
     <message>
         <location filename="preferences_dialog.ui" line="103"/>
         <source>Enable BAK files</source>
-        <translation type="unfinished"></translation>
+        <translation>Включить BAK файлы</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="138"/>
         <source>Save last used directory</source>
-        <translation type="unfinished"></translation>
+        <translation>Сохранить последнюю директорию</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="181"/>
         <source>Word wrap</source>
-        <translation type="unfinished"></translation>
+        <translation>Переносить слова</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="188"/>
         <location filename="preferences_dialog.ui" line="256"/>
         <source>Edit...</source>
-        <translation type="unfinished"></translation>
+        <translation>Редактировать...</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="205"/>
         <source>Libcurl path:</source>
-        <translation type="unfinished"></translation>
+        <translation>Путь к Libcurl:</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="246"/>
         <source>Recent files:</source>
-        <translation type="unfinished"></translation>
+        <translation>Последние файлы:</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="323"/>
         <source>Default file properties:</source>
-        <translation type="unfinished"></translation>
+        <translation>Свойства файла по умолчанию:</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="337"/>
         <source>This controls how many times you can save without entering a passphrase</source>
-        <translation type="unfinished"></translation>
+        <translation>Данное свойство влияет на количество раз Вы можете сохранить файл не вводя пароль</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="340"/>
         <source>Passphrase to key results pool size:</source>
-        <translation type="unfinished"></translation>
+        <translation>Количество результатов преобразования пароль-ключ:</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="359"/>
         <source>Key file random sequence length (bytes):</source>
-        <translation type="unfinished"></translation>
+        <translation>Длина случайной последовательности для файла ключа (байты):</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="370"/>
         <source>32</source>
-        <translation type="unfinished">32</translation>
+        <translation>32</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="375"/>
         <source>64</source>
-        <translation type="unfinished">64</translation>
+        <translation>64</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="380"/>
         <source>128</source>
-        <translation type="unfinished">128</translation>
+        <translation>128</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="385"/>
         <source>256</source>
-        <translation type="unfinished">256</translation>
+        <translation>256</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="393"/>
         <location filename="preferences_dialog.ui" line="396"/>
         <source>&quot;Windows&quot; end of line: CR+LF</source>
-        <translation type="unfinished">Окончания строк &quot;Windows&quot;: CR+LF</translation>
-    </message>
-    <message>
-        <source>Enable BAK Files</source>
-        <translation type="vanished">Включить BAK Файлы</translation>
+        <translation>Окончания строк &quot;Windows&quot;: CR+LF</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="135"/>
@@ -1427,34 +1421,14 @@ Do you want to replace it?</source>
         <translation>Сохранить последнюю использованную директорию между запусками</translation>
     </message>
     <message>
-        <source>Save Last Used Directory</source>
-        <translation type="vanished">Сохранить Последнюю Директорию</translation>
-    </message>
-    <message>
-        <source>Word Wrap</source>
-        <translation type="vanished">Переносить Слова</translation>
-    </message>
-    <message>
         <location filename="preferences_dialog.ui" line="202"/>
         <source>Path to libCURL executable</source>
         <translation>Путь к libCURL утилите</translation>
     </message>
     <message>
-        <source>Libcurl Path:</source>
-        <translation type="vanished">Путь к Libcurl:</translation>
-    </message>
-    <message>
-        <source>Recent Files:</source>
-        <translation type="vanished">Последние Файлы:</translation>
-    </message>
-    <message>
         <location filename="preferences_dialog.ui" line="233"/>
         <source>Font...</source>
         <translation>Шрифт...</translation>
-    </message>
-    <message>
-        <source>Default Iterations:</source>
-        <translation type="vanished">Итерации По Умолчанию:</translation>
     </message>
     <message>
         <location filename="preferences_dialog.cpp" line="145"/>
