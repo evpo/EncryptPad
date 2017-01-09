@@ -350,6 +350,12 @@ void MainWindow::AsyncOperationCompleted()
             takeBakFile = true;
         }
 
+        // Apply default settings for a just loaded plain-text file
+        if(getEncryptionKeyFile().length() == 0 && enc.GetIsPlainText())
+        {
+            SetDefaultMetadataValues(metadata, preferences.defaultFileProperties);
+        }
+
         statusBar()->showMessage(tr("File loaded"), 2000);
 
         recent_files_service_.PushFile(load_state_machine_.get_file_name());
