@@ -64,7 +64,7 @@
     <message>
         <location filename="file_encryption_dialog.ui" line="89"/>
         <source>Format:</source>
-        <translation type="unfinished"/>
+        <translation>Format :</translation>
     </message>
     <message>
         <location filename="file_encryption_dialog.ui" line="99"/>
@@ -85,7 +85,7 @@
     <message>
         <location filename="file_encryption_dialog.ui" line="159"/>
         <source>EncryptPad format</source>
-        <translation type="unfinished"/>
+        <translation>Format EncryptPad</translation>
     </message>
     <message>
         <location filename="file_encryption_dialog.ui" line="162"/>
@@ -669,7 +669,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="mainwindow.cpp" line="679"/>
         <source>Do you want to apply the modified default file properties to this file?</source>
-        <translation type="unfinished"/>
+        <translation>Souhaitez-vous appliquer à ce fichier les propriétés par défaut modifiées ?</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="692"/>
@@ -1317,17 +1317,17 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="preferences_dialog.ui" line="49"/>
         <source>Libcurl command line parameters</source>
-        <translation type="unfinished"/>
+        <translation>Paramètres de ligne de commande libcurl</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="52"/>
         <source>Parameters:</source>
-        <translation type="unfinished"/>
+        <translation>Paramètres :</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="64"/>
         <source>Key file encryption properties:</source>
-        <translation type="unfinished"/>
+        <translation>Propriétés de chiffrement du fichier clé :</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="82"/>
@@ -1347,12 +1347,12 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="preferences_dialog.ui" line="138"/>
         <source>Save last used directory</source>
-        <translation>Mémoriser le dernier répertoire utilisé </translation>
+        <translation>Mémoriser le dernier répertoire utilisé</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="181"/>
         <source>Word wrap</source>
-        <translation>Retour à la ligne automatique </translation>
+        <translation>Retour à la ligne automatique</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="188"/>
@@ -1373,12 +1373,12 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="preferences_dialog.ui" line="323"/>
         <source>Default file properties:</source>
-        <translation type="unfinished"/>
+        <translation>Propriétés par défaut des fichiers :</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="337"/>
         <source>This controls how many times you can save without entering a passphrase</source>
-        <translation type="unfinished"/>
+        <translation>Cette option contrôle le nombre d&apos;enregistrement sans saisir une phrase de passe</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="340"/>
@@ -1388,7 +1388,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="preferences_dialog.ui" line="359"/>
         <source>Key file random sequence length (bytes):</source>
-        <translation type="unfinished"/>
+        <translation>Longueur de la séquence aléatoire du fichier clé (octets) :</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="370"/>
