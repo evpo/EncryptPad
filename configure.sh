@@ -182,7 +182,8 @@ case $COMMAND in
     exit $RESULT
     ;;
 --docs)
-    mkdir -p ./bin
+    mkdir -p ../bin
+    mkdir -p ../bin/docs
     ../contrib/markdown2web ../docs ../bin/docs
     ;;
 --update-htm)
