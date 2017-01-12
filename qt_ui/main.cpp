@@ -74,8 +74,8 @@ namespace
 
     CommandArguments parseArguments(const Application &app)
     {
-        CommandArguments empty = {};
-        CommandArguments retVal = {};
+        CommandArguments empty;
+        CommandArguments retVal;
         int argCount = app.arguments().length();
         if(argCount == 0)
             return retVal;
