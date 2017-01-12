@@ -6,7 +6,7 @@ h2
 </style>
 ##Release Notes##
 
-###Versions 0.3.2.3-0.3.2.5
+###Version 0.3.2.5
 
 * Bug fixed: if a decrypted passphrase-only EPD file contained less than 4 characters, the content was ignored and EncryptPad produced an empty file. It happened because EncryptPad expected to find IWAD marker, which was 4 character long. Such files will now open correctly.
 * Bug fixed: when opening a plain-text file and saving it as encrypted, the encryption parameters did not reset to the default values but used the parameters of the last encrypted file.
@@ -29,12 +29,12 @@ h2
 
 * Configurable s2k iteration count. It can be set per file and the default value for new files. That value is also used for protecting file keys.
 * Support for the timestamp bytes in GPG files.
-* Renamed the executable to low case `encryptpad` except on Mac OS.
+* Renamed the executable to low case `encryptpad` except on macOS.
 * Improved English interface consistency in GUI. All `password`s became `passphrase`s.
 * Translation to Russian.
 * Translation to French.
 * Added the `SHA-512` hashing algorithm.
-* CLI: resilience in edge cases when TTY is not available for input / output.
+* CLI: encryptcli crashed with a segfault when TTY was not available. Now it exits gracefully with an error code.
 * Bug fixed: In the file encryption dialogue, when clearing the passphrase and setting it again, the passphrase is ignored and the file is saved as "key only".
 * Bug fixed: In the file encryption, gpg files were encrypted with 't' flag. It lead to removal of 0x0D bytes when GPG decrypted the files because it thought that the files were textual. The problem did not manifest on Windows and when EncryptPad was used for decryption. It was only in the direction from EncryptPad to Linux/Unix GPG.
 
