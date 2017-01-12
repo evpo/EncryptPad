@@ -59,7 +59,7 @@ EncryptPad is an application for viewing and editing symmetrically encrypted tex
 * Customisable **passphrase generator** helps create strong random passphrases.
 * File format compatible with **OpenPGP**
 * **Iterated and salted S2K**
-* **Passphrases are not kept in the memory** for reuse, only S2K results. ([more ...](#passphrases-in-memory))
+* **Passphrases are not kept in the memory** for reuse, only S2K results ([more ...](#passphrases-in-memory))
 * Cipher algorithms: **CAST5, TripleDES, AES128, AES256**
 * Hash algorithms: **SHA-1, SHA-256, SHA-512**
 * Integrity protection: **SHA-1**
