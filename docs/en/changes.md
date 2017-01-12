@@ -6,6 +6,25 @@ h2
 </style>
 ##Release Notes##
 
+###Versions 0.3.2.3-0.3.2.5
+
+* Bug fixed: if a decrypted passphrase-only EPD file contained less than 4 characters, the content was ignored and EncryptPad produced an empty file. It happened because EncryptPad expected to find IWAD marker, which was 4 character long. Such files will now open correctly.
+* Bug fixed: when opening a plain-text file and saving it as encrypted, the encryption parameters did not reset to the default values but used the parameters of the last encrypted file.
+* Bug fixed: the `encryptpad` `file` command line parameter did not support non ASCII characters. As result it was not possible to open a file directly from Explorer by double clicking on it if the file was in a directory which name contained non ASCII characters.
+* More properties in the preferences to control default encryption parameters: key file random sequence length, key file encryption properties, default file encryption properties (cipher, s2k, iterations, compression), the number of encryption keys to save or load without prompting the passphrase again.
+* Bug fixed: when multiple EncryptPad instances were opened and preferences updated, the last instance overwrote the preferences changed in other instances on closing.
+* In File Encryption dialogue added a radio button to select between EPD and GPG. Previously the user had to edit the extension manually to output to the GPG format.
+* Bug fixed: salt was displayed in File Encryption dialogue after encrypting or decrypting a file, which did not make sense as it was not related to the next encryption.
+* There are only 256 numbers of possible S2K iterations. The file properties dialogue now has a combo box to list all of them. It is easier to select the maximum or minimum possible number of iterations.
+* Prevented the unnecessary prompt for a key file passphrase if the key file is local and not encrypted.
+* Bug fixed: after opening a file the mouse cursor changed to arrow shape when it was over the text edit area. It is now `I` shaped as it should.
+* Use one EncryptPad binary for all languages. EncryptPad will recognize the OS preferred language for localization. It will simplify the release management especially for packagers.
+* `--lang` switch to enforce a specific culture instead of taking the culture from the OS. Example: `encryptpad --lang FR` to load the French localization strings.
+* EncryptPad GUI was translated to Chinese.
+* README.md translated to French.
+* stlplus was updated from upstream. It is now 3.13.
+
+
 ###Version 0.3.2.3
 
 * Configurable s2k iteration count. It can be set per file and the default value for new files. That value is also used for protecting file keys.
