@@ -34,6 +34,7 @@ EncryptPad is an application for viewing and editing symmetrically encrypted tex
 * [Compile EncryptPad on Mac/Linux](#compile-on-mac-linux)
     - [Dynamic build](#dynamic-build)
     - [Fedora](#build-on-fedora)
+* [Does EncryptPad store passphrases in the memory to reopen files?](#passphrases-in-memory)
 * [Acknowledgements](#acknowledgements)
 * [EncryptPad integrity verification](#integrity-verification)
     - [OpenPGP signing and certification authority](#openpgp-signing)
@@ -58,6 +59,7 @@ EncryptPad is an application for viewing and editing symmetrically encrypted tex
 * Customisable **passphrase generator** helps create strong random passphrases.
 * File format compatible with **OpenPGP**
 * **Iterated and salted S2K**
+* **Passphrases are not kept in the memory** for reuse, only S2K results. ([more ...](#passphrases-in-memory))
 * Cipher algorithms: **CAST5, TripleDES, AES128, AES256**
 * Hash algorithms: **SHA-1, SHA-256, SHA-512**
 * Integrity protection: **SHA-1**
@@ -368,6 +370,10 @@ For a dynamic build with using the system libraries:
 
     dnf install botan-devel
     ./configure.sh --all --use-system-libs
+
+<div id="passphrases-in-memory"></div>
+##Does EncryptPad store passphrases in the memory to reopen files?
+No, it does not. After being entered, a passphrase and random salt are hashed with an S2K algorithm. The result is used as the encryption key to encrypt or decrypt the file. A pool of these S2K results is generated every time the user enters a new passphrase. It allows to save and load files protected with this passphrase multiple times without having the passphrase. The size of the pool can be changed in the Preferences dialogue. The latest version at the moment of writing has this number set to 8 by default. It means that you can save a file 8 times before EncryptPad will ask you to enter the passphrase again. You can increase this number but it will have an impact on the performance because S2K algorithms with many iterations are slow by design.
 
 <div id="acknowledgements"></div>
 ##Acknowledgements

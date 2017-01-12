@@ -35,6 +35,7 @@
 <li><a href="#dynamic-build">Dynamic build</a></li>
 <li><a href="#build-on-fedora">Fedora</a></li>
 </ul></li>
+<li><a href="#passphrases-in-memory">Does EncryptPad store passphrases in the memory to reopen files?</a></li>
 <li><a href="#acknowledgements">Acknowledgements</a></li>
 <li><a href="#integrity-verification">EncryptPad integrity verification</a>
 <ul>
@@ -64,6 +65,7 @@
 <li>Customisable <strong>passphrase generator</strong> helps create strong random passphrases.</li>
 <li>File format compatible with <strong>OpenPGP</strong></li>
 <li><strong>Iterated and salted S2K</strong></li>
+<li><strong>Passphrases are not kept in the memory</strong> for reuse, only S2K results. (<a href="#passphrases-in-memory">more ...</a>)</li>
 <li>Cipher algorithms: <strong>CAST5, TripleDES, AES128, AES256</strong></li>
 <li>Hash algorithms: <strong>SHA-1, SHA-256, SHA-512</strong></li>
 <li>Integrity protection: <strong>SHA-1</strong></li>
@@ -422,6 +424,12 @@ export PATH
 <pre><code>dnf install botan-devel
 ./configure.sh --all --use-system-libs
 </code></pre>
+
+<div id="passphrases-in-memory"></div>
+
+<h2>Does EncryptPad store passphrases in the memory to reopen files?</h2>
+
+<p>No, it does not. After being entered, a passphrase and random salt are hashed with an S2K algorithm. The result is used as the encryption key to encrypt or decrypt the file. A pool of these S2K results is generated every time the user enters a new passphrase. It allows to save and load files protected with this passphrase multiple times without having the passphrase. The size of the pool can be changed in the Preferences dialogue. The latest version at the moment of writing has this number set to 8 by default. It means that you can save a file 8 times before EncryptPad will ask you to enter the passphrase again. You can increase this number but it will have an impact on the performance because S2K algorithms with many iterations are slow by design.</p>
 
 <div id="acknowledgements"></div>
 
