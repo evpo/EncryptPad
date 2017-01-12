@@ -363,7 +363,7 @@ Do you want to replace it?</source>
     <message>
         <location filename="file_properties_dialog.cpp" line="98"/>
         <source>Uncompressed</source>
-        <translation>未被压缩的</translation>
+        <translation>不压缩</translation>
     </message>
 </context>
 <context>
@@ -392,7 +392,7 @@ Do you want to replace it?</source>
     <message>
         <location filename="find_and_replace.ui" line="67"/>
         <source>Match whole word only</source>
-        <translation>仅全字匹配</translation>
+        <translation>全字匹配</translation>
     </message>
     <message>
         <location filename="find_and_replace.ui" line="79"/>
@@ -425,7 +425,7 @@ Do you want to replace it?</source>
     <message>
         <location filename="find_dialog.ui" line="44"/>
         <source>Match whole &amp;word only</source>
-        <translation>仅全字匹配（&amp;W)</translation>
+        <translation>全字匹配(&amp;W)</translation>
     </message>
     <message>
         <location filename="find_dialog.ui" line="51"/>
@@ -525,7 +525,7 @@ Do you want to replace it?</source>
     <message>
         <location filename="load_save_handler.cpp" line="166"/>
         <source>GPG format does not support persistent key path.</source>
-        <translation>GPG格式不支持永久密钥。</translation>
+        <translation>GPG格式不支持记住密钥文件路径。</translation>
     </message>
     <message>
         <location filename="load_save_handler.cpp" line="168"/>
@@ -639,7 +639,7 @@ Do you want to replace it?</source>
     <message>
         <location filename="mainwindow.cpp" line="573"/>
         <source>You left the passphrase blank. The key file is going to be UNENCRYPTED. Do you want to continue?</source>
-        <translation>你还没有设置密码。文件将会不被加密的存储。确认要继续吗？</translation>
+        <translation>你还没有设置密码。密钥文件将会不被加密的存储。确认要继续吗？</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="605"/>
@@ -769,7 +769,7 @@ Do you want to replace it?</source>
     <message>
         <location filename="mainwindow.cpp" line="734"/>
         <source>Clear encryption key file. Passphrase only (if set).</source>
-        <translation>清除用于加密的密钥文件。仅限密码（如果设置的话）。</translation>
+        <translation>清除用于加密的密钥文件。这将只使用密码保护（如果设置的话）。</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="737"/>
@@ -977,12 +977,12 @@ Do you want to replace it?</source>
     <message>
         <location filename="mainwindow.cpp" line="843"/>
         <source>Windows EOL</source>
-        <translation>Windows换行风格</translation>
+        <translation>使用Windows换行风格</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="844"/>
         <source>&quot;Windows&quot; end of line: CR+LF</source>
-        <translation>Windows换行风格：CRLF</translation>
+        <translation>使用Windows换行风格：CR+LF</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="939"/>
@@ -1143,12 +1143,12 @@ Do you want to replace it?</source>
     <message>
         <location filename="mainwindow.cpp" line="1607"/>
         <source>Key protected</source>
-        <translation>密码保护的</translation>
+        <translation>密钥保护的</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="1608"/>
         <source>Key not set</source>
-        <translation>未设置密码</translation>
+        <translation>未设置密钥</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="1609"/>
@@ -1414,7 +1414,7 @@ Do you want to replace it?</source>
         <location filename="preferences_dialog.ui" line="393"/>
         <location filename="preferences_dialog.ui" line="396"/>
         <source>&quot;Windows&quot; end of line: CR+LF</source>
-        <translation>Windows换行风格：CR+LF</translation>
+        <translation>使用Windows换行风格：CR+LF</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="135"/>
@@ -1477,12 +1477,12 @@ Do you want to replace it?</source>
     <message>
         <location filename="set_key_dialog.ui" line="160"/>
         <source>&amp;Persistent key location in the encrypted file</source>
-        <translation>用于该文件的持久密钥路径(&amp;P)</translation>
+        <translation>记住密钥位置(&amp;P)</translation>
     </message>
     <message>
         <location filename="set_key_dialog.ui" line="167"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The key repository is &lt;span style=&quot; font-weight:600;&quot;&gt;.encryptpad&lt;/span&gt; (&lt;b&gt;_encryptpad&lt;/b&gt; on Windows) directory in the user&apos;s profile. Select a key or specify a file name without path for the repository keys.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;密钥仓库存在于 &lt;span style=&quot; font-weight:600;&quot;&gt;.encryptpad&lt;/span&gt; (&lt;b&gt;_encryptpad&lt;/b&gt; on Windows) 处于用户文件夹的目录里。选择一个密钥，或者输入一个不含路径的文件名来指定一个仓库中的密钥。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;密钥仓库是用户文件夹里的&lt;span style=&quot; font-weight:600;&quot;&gt;.encryptpad&lt;/span&gt; （在Windows上是&lt;b&gt;_encryptpad&lt;/b&gt; ）文件夹。请选择一个密钥，或者输入一个不含路径的文件名来指定一个仓库中的密钥。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="set_key_dialog.cpp" line="90"/>

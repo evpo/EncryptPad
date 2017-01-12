@@ -1327,7 +1327,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="preferences_dialog.ui" line="64"/>
         <source>Key file encryption properties:</source>
-        <translation>Propriétés de chiffrement du fichier clé :</translation>
+        <translation>Propriétés de chiffrement des fichiers clés :</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="82"/>

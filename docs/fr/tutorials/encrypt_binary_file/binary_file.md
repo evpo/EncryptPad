@@ -1,32 +1,32 @@
-#Encrypt a binary file such as a picture or an archive
+#Chiffrer un fichier binaire tel qu'une image ou un fichier compressé
 
-## Generate a new key file if you want to use a key file for encryption.
+## Générer un nouveau fichier clé si vous souhaitez utiliser un fichier clé pour le chiffrement.
 
-1\. Click the Generate Key tool button.
+1\. Cliquer sur le bouton « Générer une clé ».
 
-![Generate Key tool button](images/generate_key_tool_button.png)
+![Bouton « Générer une clé »](images/generate_key_tool_button.png) 
 
-2\. Select the Key In Repository radio button and enter `my_new_key` in the corresponding text box and click OK.
+2\. Sélectionner le bouton radio « Clé dans le dépôt » et saisir `ma_nouvelle_clé` dans la boîte de texte correspondante et cliquer sur OK.
 
-![Generate Key dialogue](images/generate_key_dialog.png)
+![Boîte de dialogue « Générer une clé »](images/generate_key_dialog.png)
 
-3\. You will be asked to enter a passphrase to protect the key file on the disk.
+3\. Il vous sera demandé de saisir une phrase de passe pour protéger le fichier clé sur le disque.
 
-![Key File passphrase](images/set_passphrase_for_key.png)
+![Phrase de passe du fichier](images/set_passphrase_for_key.png)
 
-4\. Click **No** as it applies to the edited text and we are encrypting binary files.
+4\. Cliquer sur **Non**, car cela s'applique à un texte et que nous chiffrons des fichiers binaires.
 
-![Use new key dialogue](images/use_new_key_dialog.png)
+![Fenêtre de dialogue d'utilisation d'une nouvelle clé](images/use_new_key_dialog.png)
 
-## Encrypting a binary file
+## Chiffrer un fichier binaire
 
-5\. Click the File Encryption tool button.
+5\. Cliquer sur le bouton « Chiffrement de fichier »
 
-![File Encryption tool button](images/file_encryption_tool_button.png)
+![Bouton « Chiffrement de fichier »](images/file_encryption_tool_button.png)
 
-6\. Click Browse... to select an input file.
+6\. Cliquer sur « Parcourir... »  pour sélectionner un fichier d'entrée.
 
-![Browse for input file](images/select_input_file.png) 
+![Sélectionner un fichier d'entrée](images/select_input_file.png) 
 
 7\. Select an input file and click OK. The output file name and location will be suggested by adding `.epd` extension to your input file path (see the first image below). **IMPORTANT: to ensure that your output file is compatible with OpenGPG, change the extension from `.epd` to `.gpg` (see the second image below). Note that only `.epd` file with passphrase protection is compatible with OpenPGP.**
 

@@ -8,35 +8,35 @@ h2
 
 ###Version 0.3.2.3
 
-* Configurable s2k iteration count. It can be set per file and the default value for new files. That value is also used for protecting file keys.
-* Support for the timestamp bytes in GPG files.
-* Renamed the executable to low case `encryptpad` except on Mac OS.
-* Improved English interface consistency in GUI. All `password`s became `passphrase`s.
-* Translation to Russian.
-* Translation to French.
-* Added the `SHA-512` hashing algorithm.
+* Nombre configurable d'itérations s2k. Il peut être été fini par fichier, et comme valeur par défaut pour les nouveaux fichiers. Cette valeur est aussi utilisée pour la protection des fichiers.
+* Prise en charge des octets d'estampille temporelle dans les fichiers GPG.
+* l'exécutable a été renommer en « encryptpad » (minuscules) sauf sur macOS.
+* Amélioration de la cohérence de l'anglais dans l'IUG. Tous les « mot de passe » sont devenus des « phrase de passe ».
+* Traduction en russe.
+* Traduction en français.
+* Ajout de l'algorithme de hachage SHA-512.
 * CLI: resilience in edge cases when TTY is not available for input / output.
-* Bug fixed: In the file encryption dialogue, when clearing the passphrase and setting it again, the passphrase is ignored and the file is saved as "key only".
-* Bug fixed: In the file encryption, gpg files were encrypted with 't' flag. It lead to removal of 0x0D bytes when GPG decrypted the files because it thought that the files were textual. The problem did not manifest on Windows and when EncryptPad was used for decryption. It was only in the direction from EncryptPad to Linux/Unix GPG.
+* Correctif de bogue : dans la boîte de dialogue du chiffrement de fichiers, quand la phrase de passe était effacée puis redéfinie, la phrase de passe était ignorée et le fichier était enregistré comme « clé seulement ».
+* Correctif de bogue : dans le chiffrement des fichiers, les fichiers gpg étaient chiffrés avec le drapeau « t », ce qui entraînait la suppression de 0x0D octets quand GPG déchiffrait les fichiers, car il croyait que les fichiers étaient textuels. Le problème ne se produisait pas sous Windows ni quand EncryptPad était utilisé pour le déchiffrement. Cela ne se produisait que dans la direction EncryptPad vers GPG pour Linux/Unix.
 
 ###Version 0.3.2.2
 
-* Bug fixed: In file encryption dialogue, when the key file password was wrong, a message box did
-    not inform the user.
-* Support BAK files. It only creates a bak file at first save of an editing sessions.
-* Changed the order of sections in new wad files. It is now Directory, key, payload. It does not
-    affect existing wad files.
-* encryptcli can read passphrases from file descriptors
-* encryptcli can read from stdin and write to stdout
-* encryptcli arguments cleaned up and improved
-* Updated Botan version to 1.10.12
-* 64 bit build
-* Fixed build permissions
-* Changed build to work with g++ on Linux
-* Build can now use system libraries on Linux including Zlib and Botan
-* Fixed build on Fedora 23
-* Fixed warnings
+* Correctif de bogue : dans la boîte de dialogue du chiffrement, lorsque la phrase de passe du fichier clé était erronée, un message
+    n'en informait pas l'utilisateur.
+* Prise en charge des fichiers BAK. Lors d'une modification, un fichier bak n'est crée que lors du premier enregistrement.
+* L'ordre des sections a été changé dans les nouveaux fichiers wad. Il est maintenant répertoire, clé, contenu. Cela n'affecte pas
+    les fichiers wad existants.
+* encryptcli peut lire les phrases de passe des descripteurs de fichier
+* encryptcli peut lire de stdin et écrire vers stdout
+* Les arguments d'encryptcli ont été revus et améliorés
+* Botan a été mis à jour vers la version 1.10.12 
+* Version 64 bits
+* Correctif des droits de compilation
+* La compilation peut maintenant fonctionner avec g++ sous Linux
+* La compilation peut maintenant utiliser les bibliothèques système sous Linux incluant Zlib et Botan
+* Correctif de la compilation sous Fedora 23
+* Correctif des avertissements
 
 ###Version 0.3.2.1
 
-* Initial open source release
+* Première version à code source ouvert
