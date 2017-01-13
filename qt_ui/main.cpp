@@ -28,9 +28,9 @@
 #include "mainwindow.h"
 #include "application.h"
 
-namespace 
+namespace
 {
-    QString findLangResource(const QString &userLang)
+    QString findLangResource(const QString &prefix, const QString &userLang)
     {
         QString empty;
         QString lowerUserLang = userLang.toLower();
@@ -38,25 +38,26 @@ namespace
         {
             lowerUserLang = lowerUserLang.left(lowerUserLang.indexOf('-'));
         }
+
         if(lowerUserLang.length() != 2)
             return empty;
 
-        QString prefix = "encryptpad_";
         QDirIterator it(":/cultures/");
         while(it.hasNext())
         {
             QString fullPath = it.next();
             QString lang = it.fileName();
-            if(lang.length() < prefix.length())
-                return empty;
+
+            if(!lang.startsWith(prefix))
+                continue;
 
             lang = lang.right(lang.length() - prefix.length());
             if(lang.indexOf('_') == -1)
-                return empty;
+                continue;
 
             lang = lang.left(lang.indexOf('_'));
             if(lang.length() != 2)
-                return empty;
+                continue;
 
             if(lang == lowerUserLang)
                 return fullPath;
@@ -70,7 +71,6 @@ namespace
         QString fileName;
         QString language;
     };
-
 
     CommandArguments parseArguments(const Application &app)
     {
@@ -106,6 +106,20 @@ namespace
     }
 }
 
+bool loadTranslatorResource(Application &app, QTranslator &translator, QResource &resource)
+{
+    bool result = translator.load(resource.data(), resource.size());
+    assert(result);
+    result |= app.installTranslator(&translator);
+    return result;
+}
+
+bool loadTranslatorResource(Application &app, QTranslator &translator, const QString &path)
+{
+    QResource resource(path);
+    return loadTranslatorResource(app, translator, resource);
+}
+
 int main(int argc, char *argv[])
 {
     Q_INIT_RESOURCE(EncryptPad);
@@ -123,24 +137,35 @@ int main(int argc, char *argv[])
         userLangs.append(arguments.language);
     }
     QString resourcePath;
+    QString qtExcerptPath;
     for(QString userLang : userLangs)
     {
         if(userLang == "en" || userLang.startsWith("en-"))
             break;
-        resourcePath = findLangResource(userLang);
-        if(!resourcePath.isEmpty())
-            break;
+        resourcePath = findLangResource("encryptpad_", userLang);
+        if(resourcePath.isEmpty())
+            continue;
+
+        qtExcerptPath = findLangResource("qt_excerpt_", userLang);
+        assert(!qtExcerptPath.isEmpty());
+        break;
     }
 
     QTranslator translator;
+    QTranslator excerptTranslator;
 
     if(!resourcePath.isEmpty())
     {
-        QResource translator_res(resourcePath);
-        bool result = translator.load(translator_res.data(), translator_res.size());
+        bool result = loadTranslatorResource(app, translator, resourcePath);
         assert(result);
-        result = app.installTranslator(&translator);
+        (void)result;
+    }
+
+    if(!qtExcerptPath.isEmpty())
+    {
+        bool result = loadTranslatorResource(app, excerptTranslator, qtExcerptPath);
         assert(result);
+        (void)result;
     }
 
     app.setOrganizationName("Evpo"); //

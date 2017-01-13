@@ -97,7 +97,7 @@ case $COMMAND in
     build_all
     ;;
 --culture-res)
-    for TSFILE in ../qt_ui/encryptpad_*.ts
+    for TSFILE in ../qt_ui/encryptpad_*.ts ../qt_ui/qt_excerpt_*.ts
     do
         CULTUREFILE=$(echo -n "$TSFILE" | sed -n -e "s/..\/qt_ui\///" -e "s/\.ts$//p")
         if [[ $CULTUREFILE == encryptpad_en_gb ]]
