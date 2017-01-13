@@ -337,7 +337,7 @@
           <string>This controls how many times you can save without entering a passphrase</string>
          </property>
          <property name="text">
-          <string>Passphrase to key results pool size:</string>
+          <string>S2K derivations from a passphrase:</string>
          </property>
          <property name="buddy">
           <cstring>uiS2KResultsPoolSize</cstring>
