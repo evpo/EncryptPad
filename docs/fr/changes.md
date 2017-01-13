@@ -48,7 +48,7 @@ h2
 * encryptcli peut lire les phrases de passe des descripteurs de fichier
 * encryptcli peut lire de stdin et écrire vers stdout
 * Les arguments d'encryptcli ont été revus et améliorés
-* Botan a été mis à jour vers la version 1.10.12 
+* Botan a été mis à jour vers la version 1.10.12
 * Version 64 bits
 * Correctif des droits de compilation
 * La compilation peut maintenant fonctionner avec g++ sous Linux

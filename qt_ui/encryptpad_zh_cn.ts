@@ -1390,8 +1390,7 @@ Do you want to replace it?</source>
     <message>
         <location filename="preferences_dialog.ui" line="340"/>
         <source>S2K derivations from a passphrase:</source>
-        <oldsource>Passphrase to key results pool size:</oldsource>
-        <translation type="unfinished">密码到密钥结果缓冲区大小：</translation>
+        <translation>密码到密钥结果缓冲区大小：</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="359"/>

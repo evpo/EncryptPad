@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="fr">
+<?xml version="1.0" ?><!DOCTYPE TS><TS language="fr" version="2.1">
 <context>
     <name>ConfirmPassphraseDialog</name>
     <message>
@@ -631,7 +629,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="mainwindow.cpp" line="537"/>
         <source>Cannot create the repository directory in HOME</source>
-        <translation>Impossible de créer le répertoire dépôt dans HOME</translation>
+        <translation>Impossible de créer le répertoire dépôt dans le dossier personnel</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="571"/>
@@ -1349,7 +1347,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="preferences_dialog.ui" line="125"/>
         <source>[example: Monospace (Size: 12)]</source>
-        <translation type="unfinished"></translation>
+        <translation>[example: Monospace (Size: 12)]</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="138"/>
@@ -1391,7 +1389,7 @@ Souhaitez-vous le remplacer ?</translation>
         <location filename="preferences_dialog.ui" line="340"/>
         <source>S2K derivations from a passphrase:</source>
         <oldsource>Passphrase to key results pool size:</oldsource>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="359"/>

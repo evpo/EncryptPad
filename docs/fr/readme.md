@@ -51,7 +51,7 @@ EncryptPad est une application de visualisation et d'édition de texte chiffré 
 * Format de fichier compatible avec **OpenPGP**
 * **S2K itérées et salée**
 * **Les phrases de passe ne sont pas conservées en mémoire** pour être réutilisées, seulement les résultats s2k ([plus...](#passphrases-in-memory))
-* Algorithmes de chiffrement : **CAST5, TripleDES, AES128, AES256** 
+* Algorithmes de chiffrement : **CAST5, TripleDES, AES128, AES256**
 * Algorithmes de hachage : **SHA-1, SHA-256, SHA-512**
 * Protection de l'intégrité : **SHA-1**
 * Compression : **ZLIB, ZIP**
@@ -102,7 +102,7 @@ EncryptPad est une application de visualisation et d'édition de texte chiffré 
 
 * **IMPORTANT** : avant d'utiliser EncryptPad, vous devez vous assurer qu'il est légal d'utiliser dans votre pays les techniques de chiffrement fournies par EncryptPad. Vous trouverez des informations pertinentes sur [cryptolaw.org](http://www.cryptolaw.org/).
 
-* **IMPORTANT** : si vous avez oublié votre phrase de passe ou si vous avez perdu un fichier clé, rien ne peut être fait pour accéder à vos informations chiffrées. Il n'y a aucune porte dérobée dans les formats qu'EncryptPad prend en charge. Les développeurs d'EncryptPad n'assument aucune responsabilité en cas de fichiers corrompus ou invalides, conformément à la licence. 
+* **IMPORTANT** : si vous avez oublié votre phrase de passe ou si vous avez perdu un fichier clé, rien ne peut être fait pour accéder à vos informations chiffrées. Il n'y a aucune porte dérobée dans les formats qu'EncryptPad prend en charge. Les développeurs d'EncryptPad n'assument aucune responsabilité en cas de fichiers corrompus ou invalides, conformément à la licence.
 
 <div id="file-types"></div>
 ##Type de fichier
@@ -142,7 +142,7 @@ Dans un chiffrement symétrique, la même séquence est utilisée pour chiffrer 
 application fournie habituellement la séquence sous la forme d'une phrase de passe saisie ou d'un fichier. En plus des
 phrases de passe saisies, EncryptPad génère des fichiers avec des séquences aléatoires appelés « fichiers clés ».
 
-Quand l'utilisateur crée un fichier clé, EncryptPad génère une séquence  aléatoire d'octets, demande une 
+Quand l'utilisateur crée un fichier clé, EncryptPad génère une séquence  aléatoire d'octets, demande une
 phrase de passe à l'utilisateur, chiffre la séquence générée et l'enregistre dans un fichier.
 
 Le format du fichier est OpenPGP. D'autres applications OpenPGP peuvent aussi créer et 

@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="ru">
+<?xml version="1.0" ?><!DOCTYPE TS><TS language="ru" version="2.1">
 <context>
     <name>ConfirmPassphraseDialog</name>
     <message>
@@ -1348,7 +1346,7 @@ Do you want to replace it?</source>
     <message>
         <location filename="preferences_dialog.ui" line="125"/>
         <source>[example: Monospace (Size: 12)]</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="138"/>
@@ -1390,7 +1388,7 @@ Do you want to replace it?</source>
         <location filename="preferences_dialog.ui" line="340"/>
         <source>S2K derivations from a passphrase:</source>
         <oldsource>Passphrase to key results pool size:</oldsource>
-        <translation type="unfinished">Количество результатов преобразования пароль-ключ:</translation>
+        <translation>S2K формирований из одного пароля:</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="359"/>

@@ -4,7 +4,7 @@
 
 1\. Cliquez sur le bouton « Générer une clé ».
 
-![Bouton « Générer une clé »](images/generate_key_tool_button.png) 
+![Bouton « Générer une clé »](images/generate_key_tool_button.png)
 
 2\. Sélectionnez le bouton radio « Clé dans le dépôt » et saisir « ma_nouvelle_clé » dans la boîte de texte correspondante et cliquer sur OK.
 
