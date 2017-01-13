@@ -10,16 +10,16 @@ h2
 
 * Bug fixed: if a decrypted passphrase-only EPD file contained less than 4 characters, the content was ignored and EncryptPad produced an empty file. It happened because EncryptPad expected to find IWAD marker, which was 4 character long. Such files will now open correctly.
 * Bug fixed: when opening a plain-text file and saving it as encrypted, the encryption parameters did not reset to the default values but used the parameters of the last encrypted file.
-* Bug fixed: the `encryptpad` `file` command line parameter did not support non ASCII characters. As result it was not possible to open a file directly from Explorer by double clicking on it if the file was in a directory which name contained non ASCII characters.
+* Bug fixed: the `encryptpad` `file` command line parameter did not support non ASCII characters. As result it was not possible to open a file directly from Windows Explorer by double clicking on it if the file was in a directory which name contained non ASCII characters.
 * More properties in the preferences to control default encryption parameters: key file random sequence length, key file encryption properties, default file encryption properties (cipher, s2k, iterations, compression), the number of encryption keys to save or load without prompting the passphrase again.
 * Bug fixed: when multiple EncryptPad instances were opened and preferences updated, the last instance overwrote the preferences changed in other instances on closing.
-* In File Encryption dialogue added a radio button to select between EPD and GPG. Previously the user had to edit the extension manually to output to the GPG format.
+* In File Encryption dialogue, a radio button was added to select between EPD and GPG. Previously the user had to edit the extension manually to output to the GPG format.
 * Bug fixed: salt was displayed in File Encryption dialogue after encrypting or decrypting a file, which did not make sense as it was not related to the next encryption.
 * There are only 256 numbers of possible S2K iterations. The file properties dialogue now has a combo box to list all of them. It is easier to select the maximum or minimum possible number of iterations.
 * Prevented the unnecessary prompt for a key file passphrase if the key file is local and not encrypted.
 * Bug fixed: after opening a file the mouse cursor changed to arrow shape when it was over the text edit area. It is now `I` shaped as it should.
 * Use one EncryptPad binary for all languages. EncryptPad will recognize the OS preferred language for localization. It will simplify the release management especially for packagers.
-* `--lang` switch to enforce a specific culture instead of taking the culture from the OS. Example: `encryptpad --lang FR` to load the French localization strings.
+* `--lang` switch to force a specific language instead of taking the OS's locale. Example: `encryptpad --lang FR` to load the French localization strings. Example: `encryptpad --lang FR` to load the French localization strings.
 * EncryptPad GUI was translated to Chinese.
 * README.md translated to French.
 * stlplus was updated from upstream. It is now 3.13.
@@ -35,16 +35,14 @@ h2
 * Translation to French.
 * Added the `SHA-512` hashing algorithm.
 * CLI: encryptcli crashed with a segfault when TTY was not available. Now it exits gracefully with an error code.
-* Bug fixed: In the file encryption dialogue, when clearing the passphrase and setting it again, the passphrase is ignored and the file is saved as "key only".
+* Bug fixed: In the file encryption dialogue, when clearing the passphrase and setting it again, the passphrase was ignored and the file was saved as "key only".
 * Bug fixed: In the file encryption, gpg files were encrypted with 't' flag. It lead to removal of 0x0D bytes when GPG decrypted the files because it thought that the files were textual. The problem did not manifest on Windows and when EncryptPad was used for decryption. It was only in the direction from EncryptPad to Linux/Unix GPG.
 
 ###Version 0.3.2.2
 
-* Bug fixed: In file encryption dialogue, when the key file password was wrong, a message box did
-    not inform the user.
-* Support BAK files. It only creates a bak file at first save of an editing sessions.
-* Changed the order of sections in new wad files. It is now Directory, key, payload. It does not
-    affect existing wad files.
+* Bug fixed: In file encryption dialogue, when the key file passphrase was wrong, a message box did not inform the user.
+* BAK files support. When editing, a bak file is only created when saving for the first time.
+* Changed the order of sections in new wad files. It is now the directory, key, payload. It does not affect existing wad files.
 * encryptcli can read passphrases from file descriptors
 * encryptcli can read from stdin and write to stdout
 * encryptcli arguments cleaned up and improved
