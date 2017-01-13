@@ -25,6 +25,7 @@ EncryptPad est une application de visualisation et d'édition de texte chiffré 
 * [Compiler EncryptPad sous Mac/Linux](#compile-on-mac-linux)
     - [Compilation dynamique](#dynamic-build)
     - [Fedora](#build-on-fedora)
+* [EncryptPad stocke-t-il les phrases de passe en mémoire pour rouvrir les fichiers ?](#passphrases-in-memory)
 * [Remerciements](#acknowledgements)
 * [Vérification de l'intégrité par EncryptPad](#integrity-verification)
     - [Signature OpenPGP et autorité de certification](#openpgp-signing)
@@ -40,7 +41,7 @@ EncryptPad est une application de visualisation et d'édition de texte chiffré 
 * Protection par **fichier clé**
 * Combinaison d'une **phrase de passe et d'un fichier clé**
 * **Générateur de fichiers clés** aléatoires 
-* **Dépôt de clés** dans un dossier caché du répertoire personnel de l'utilisateur
+* **Dépôt de clés** dans un répertoire caché du dossier personnel de l'utilisateur
 * Le chemin d'un fichier clé peut être stocké dans un fichier chiffré. Si cette option est activée, **vous n'avez pas à spécifier le fichier clé** chaque fois que vous ouvrez des fichiers.
 * Chiffrement de **fichiers binaires** (images, vidéos, fichiers compressés, etc.)
 * Mode **lecture seulement** pour empêcher les modifications accidentelles de fichiers
@@ -49,6 +50,7 @@ EncryptPad est une application de visualisation et d'édition de texte chiffré 
 * Un **générateur de phrases de passe** personnalisable aide à créer des phrases de passe aléatoires robustes.
 * Format de fichier compatible avec **OpenPGP**
 * **S2K itérées et salée**
+* **Les phrases de passe ne sont pas conservées en mémoire** pour être réutilisées, seulement les résultats s2k ([plus...](#passphrases-in-memory))
 * Algorithmes de chiffrement : **CAST5, TripleDES, AES128, AES256** 
 * Algorithmes de hachage : **SHA-1, SHA-256, SHA-512**
 * Protection de l'intégrité : **SHA-1**
@@ -146,21 +148,21 @@ phrase de passe à l'utilisateur, chiffre la séquence générée et l'enregistr
 Le format du fichier est OpenPGP. D'autres applications OpenPGP peuvent aussi créer et 
 ouvrir les fichiers clés EncryptPad comme les lignes de commande ci-dessous le démontrent.
 
-Quand EncryptPad génère un nouveau fichier clé, il est approximativement équivalent à la commande `gpg2` suivante.
+Quand EncryptPad génère un nouveau fichier clé, il est approximativement équivalent à la commande « gpg2 » suivante.
 
     pwmake 1024 | gpg2 -c --armor --cipher-algo AES256 > ~/.encryptpad/foo.key
 
 `pwmake` génère une séquence aléatoire que « gpg2 » chiffre à son tour. Il demandera la
 phrase de passe pour chiffrer la séquence.
 
-Quand vous utilisez cette clé pour chiffrer `test3.txt`, la commande `gpg` équivalente est comme suit :
+Quand vous utilisez cette clé pour chiffrer « test3.txt », la commande « gpg » équivalente est comme suit :
 
     gpg2 --decrypt ~/.encryptpad/foo.key \
     | gpg2 --passphrase-fd 0 --batch -c --cipher-algo AES256 \
     -o /tmp/test3.txt.gpg /tmp/test3.txt
 
-Le premier processus `gpg2` déchiffre `foo.key` et le dirige vers le descripteur 0 du second processus
-par un opérateur de transfert de données . `gpg2` lit la séquence du descripteur avec `--passphrase-fd 0`.
+Le premier processus « gpg2 » déchiffre « foo.key » et le dirige vers le descripteur 0 du second processus
+par un opérateur de transfert de données . « gpg2 » lit la séquence du descripteur avec « --passphrase-fd 0 ».
 
 Quand EncryptPad ouvre le fichier chiffré protégé avec `foo.key`, les commandes `gpg` équivalentes sont
 
@@ -359,6 +361,10 @@ ou pour une compilation dynamique avec des bibliothèques système :
 
     dnf install botan-devel
     ./configure.sh --all --use-system-libs
+
+<div id="passphrases-in-memory"></div>
+##EncryptPad stocke-t-il les phrases de passe en mémoire pour rouvrir les fichiers ?
+Après avoir été saisis, une phrase de passe et un sel aléatoire sont hachés avec un algorithme s2k. Le résultat est utilisé comme clé de chiffrement pour chiffrer ou déchiffrer le fichier. Une réserve de ces résultats s2k est générée chaque fois que l'utilisateur saisit une nouvelle phrase de passe. Cela permet d'enregistrer ou de charger plusieurs fois les fichiers protégés par cette phrase de passe sans l'avoir. La taille de la réserve peut-être changée dans la boîte de dialogue Préférences. Au moment d'écrire, la dernière version a une valeur par défaut de 8. Cela signifie que vous pouvez enregistrer un fichier 8 fois avant qu'EncryptPad ne vous demande de saisir la phrase de passe de nouveau. Vous pouvez augmenter ce chiffre, mais cela aura un impact sur les performances, car les algorithmes s2k comprenant de nombreuses itérations sont lents par nature.
 
 <div id="acknowledgements"></div>
 ##Remerciements

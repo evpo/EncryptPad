@@ -2,11 +2,11 @@
 
 ## Générer un nouveau fichier clé si vous souhaitez utiliser un fichier clé pour le chiffrement.
 
-1\. Cliquer sur le bouton « Générer une clé ».
+1\. Cliquez sur le bouton « Générer une clé ».
 
 ![Bouton « Générer une clé »](images/generate_key_tool_button.png) 
 
-2\. Sélectionner le bouton radio « Clé dans le dépôt » et saisir `ma_nouvelle_clé` dans la boîte de texte correspondante et cliquer sur OK.
+2\. Sélectionnez le bouton radio « Clé dans le dépôt » et saisir « ma_nouvelle_clé » dans la boîte de texte correspondante et cliquer sur OK.
 
 ![Boîte de dialogue « Générer une clé »](images/generate_key_dialog.png)
 
@@ -14,40 +14,40 @@
 
 ![Phrase de passe du fichier](images/set_passphrase_for_key.png)
 
-4\. Cliquer sur **Non**, car cela s'applique à un texte et que nous chiffrons des fichiers binaires.
+4\. Cliquez sur **Non**, car cela s'applique à un texte et que nous chiffrons des fichiers binaires.
 
-![Fenêtre de dialogue d'utilisation d'une nouvelle clé](images/use_new_key_dialog.png)
+![Boîte de dialogue « Utiliser une nouvelle clé »](images/use_new_key_dialog.png)
 
 ## Chiffrer un fichier binaire
 
-5\. Cliquer sur le bouton « Chiffrement de fichier »
+5\. Cliquez sur le bouton « Chiffrement de fichier »
 
 ![Bouton « Chiffrement de fichier »](images/file_encryption_tool_button.png)
 
-6\. Cliquer sur « Parcourir... »  pour sélectionner un fichier d'entrée.
+6\. Cliquez sur « Parcourir... » pour sélectionner un fichier d'entrée.
 
 ![Sélectionner un fichier d'entrée](images/select_input_file.png) 
 
-7\. Select an input file and click OK. The output file name and location will be suggested by adding `.epd` extension to your input file path (see the first image below). **IMPORTANT: to ensure that your output file is compatible with OpenGPG, change the extension from `.epd` to `.gpg` (see the second image below). Note that only `.epd` file with passphrase protection is compatible with OpenPGP.**
+7\. Sélectionnez un fichier d'entrée et cliquez sur OK. Le nom et l'emplacement du fichier de sortie seront suggérés en ajoutant l'extension « .epd » au chemin de votre fichier d'entrée (voir la première image ci-dessous). **IMPORTANT : pour garantir que le fichier de sortie est compatible avec OpenGPG, l'extension doit être changée de « .epd » à « .gpg » (voir la seconde image ci-dessous). Notez que seuls les fichiers « .epd » avec une protection par phrase de passe sont compatibles avec OpenPGP.**
 
-![Suggested output file name](images/input_file_selected.png)
+![Nom de fichier de sortie suggéré](images/input_file_selected.png)
 
-![Renamed to gpg](images/renamed_to_gpg.png)
+![Renommé en gpg](images/renamed_to_gpg.png)
 
-8\. If you want to use a key file, specify it in the Key File Path text box by clicking Select Key... button. Note that either a passphrase or key file should be used for GPG type and not both.
+8\. Si vous souhaitez utiliser un fichier clé, indiquez-le dans la zone de texte « Chemin du fichier clé » en cliquant sur le bouton « Sélectionner un fichier clé ». Notez qu'une phrase de passe ou un fichier clé doit être utilisé pour le type GPG, mais pas les deux.
 
-![Set Key dialogue](images/set_key_dialog.png)
+![Boîte de dialogue « Définir une clé »](images/set_key_dialog.png)
 
-File without path is looked for in the EncryptPad directory first and then in the repository in HOME (see the text in the picture above). If your key is not in the repository, you can specify a full path to your key. 
+Les fichiers sans chemin sont d'abord cherchés dans le répertoire d'EncryptPad, puis dans le dépôt du dossier personnel (voir le texte de l'image ci-dessus). Si votre clé ne se trouve pas dans le dépôt, vous pouvez indiquer le chemin complet vers votre clé. 
 
-`Persist key location in encrypted file` is not supported for GPG files (see README.md). Leave it blank for now. TODO:add the link to the EPD double encryption manual.
+L'« emplacement de clé persistant dans le fichier chiffré » n'est pas pris en charge pour les fichiers GPG (voir README.md). Laissez vide pour l'instant. À FAIRE : ajouter le lien vers le guide sur le double chiffrement  EPD.
 
-9\. Click Start
+9\. Cliquez sur Lancer
 
-![Start button](images/start_button.png)
+![Bouton Lancer](images/start_button.png)
 
-If you have not set a passphrase and key file, EncryptPad will ask you to enter one.
+Si vous n'avez pas défini une phrase de passe ou un fichier clé, EncryptPad vous demandera dans saisir un.
 
-10\. If encryption succeeds, you will see the following message.
+10\. Si le chiffrement réussi, le message suivant apparaît :
 
-![Encryption success](images/encryption_success.png)
+![Chiffrement réussi](images/encryption_success.png)

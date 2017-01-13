@@ -26,7 +26,7 @@ Now EncryptPad is in unprotected plain text mode. It works as an ordinary text e
 
 5\. Select the Key In Repository radio button and enter `my_new_key` in the corresponding text box and click OK.
 
-![Generate Key dialogue](images/generate_key_dialog.png)
+![Boîte de dialogue « Générer une clé »](images/generate_key_dialog.png)
 
 6\. You will be asked to enter a passphrase to protect the key file on the disk.
 
@@ -36,7 +36,7 @@ Enter `KeyPwd`
 
 7\. Click Yes to use the new key file to encrypt our text.
 
-![Use new key dialogue](images/use_new_key_dialog.png)
+![Boîte de dialogue « Utiliser une nouvelle clé »](images/use_new_key_dialog.png)
 
 8\. You can look at the key file in your user profile directory under `_encryptpad`
 
@@ -56,7 +56,7 @@ This is a random sequence in Base64, from which the encryption key is derived.
 
 10\. Select EncryptPad (\*.epd) file type and click Save button
 
-![Save As dialogue](images/select_epd_in_save_as.png)
+![Boîte de dialogue « Enregistrer sous »](images/select_epd_in_save_as.png)
 
 Please note that the file name has changed to `war and peace.epd` in the Save As dialogue.
 

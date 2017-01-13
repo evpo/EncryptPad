@@ -28,7 +28,7 @@ Now EncryptPad is in unprotected plain text mode. It works as an ordinary text e
 
 5\. Select GnuPG file type and click Save button
 
-![Save As dialogue](images/save_as_dialog.png)
+![Boîte de dialogue « Enregistrer sous »](images/save_as_dialog.png)
 
 Please note that the file name has changed to "war and peace.gpg" in the Save As dialogue.
 

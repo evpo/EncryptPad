@@ -26,7 +26,7 @@ Now EncryptPad is in unprotected plain text mode. It works as an ordinary text e
 
 5\. Select the Key In Repository radio button and enter `my_new_key` in the corresponding text box and click OK.
 
-![Generate Key dialogue](images/generate_key_dialog.png)
+![Boîte de dialogue « Générer une clé »](images/generate_key_dialog.png)
 
 6\. You will be asked to enter a passphrase to protect the key file on the disk.
 
@@ -36,7 +36,7 @@ Enter `KeyPwd`
 
 7\. Click Yes to use the new key file to encrypt our text.
 
-![Use new key dialogue](images/use_new_key_dialog.png)
+![Boîte de dialogue « Utiliser une nouvelle clé »](images/use_new_key_dialog.png)
 
 8\. You can look at the key file in your user profile directory under `_encryptpad`
 
@@ -64,7 +64,7 @@ This is a random sequence in Base64, from which the encryption key is derived. I
 
 10\. Select GnuPG file type and click Save button
 
-![Save As dialogue](images/save_as_dialog.png)
+![Boîte de dialogue « Enregistrer sous »](images/save_as_dialog.png)
 
 Please note that the file name has changed to `war and peace.gpg` in the Save As dialogue.
 
@@ -102,7 +102,7 @@ GPG packet --list-packets command output:
 
 13\. View the selected key file in Set Key dialogue
 
-![Set Key dialogue](images/set_key_dialog.png)
+![Boîte de dialogue « Définir une clé »](images/set_key_dialog.png)
 
 File without path is looked for in the EncryptPad directory first and then in the repository in HOME (see the text in the picture above). If your key is not in the repository, you can specify a full path to your key. 
 
