@@ -1,4 +1,6 @@
-<?xml version="1.0" ?><!DOCTYPE TS><TS language="zh" version="2.1">
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="zh">
 <context>
     <name>ConfirmPassphraseDialog</name>
     <message>
@@ -602,556 +604,556 @@ Do you want to replace it?</source>
         <translation>无法加载文件</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="353"/>
+        <location filename="mainwindow.cpp" line="359"/>
         <source>File loaded</source>
         <translation>文件已加载</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="418"/>
+        <location filename="mainwindow.cpp" line="424"/>
         <source>The file has been modified by another program. Do you want to reload it?</source>
         <translation>文件已在其他程序中被更改。你想要重新加载它吗？</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="421"/>
+        <location filename="mainwindow.cpp" line="427"/>
         <source>The file has been modified by another program. Do you want to reload it and lose the changes made in this application?</source>
         <translation>文件已在其他程序中被更改。你想要重新加载它并丢弃所做的更改吗？</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="460"/>
+        <location filename="mainwindow.cpp" line="466"/>
         <source>Open File</source>
         <translation>打开</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="504"/>
+        <location filename="mainwindow.cpp" line="510"/>
         <source>Save File As</source>
         <translation>另存为</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="531"/>
+        <location filename="mainwindow.cpp" line="537"/>
         <source>Cannot create the repository directory in HOME</source>
         <translation>无法在HOME中创建仓库目录</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="565"/>
+        <location filename="mainwindow.cpp" line="571"/>
         <source>Passphrase for Key File</source>
         <translation>密钥文件的密码</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="573"/>
+        <location filename="mainwindow.cpp" line="579"/>
         <source>You left the passphrase blank. The key file is going to be UNENCRYPTED. Do you want to continue?</source>
         <translation>你还没有设置密码。密钥文件将会不被加密的存储。确认要继续吗？</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="605"/>
+        <location filename="mainwindow.cpp" line="611"/>
         <source>Cannot generate the key &apos;%1&apos; Check the path and permissions.</source>
         <translation>无法生成密钥%1；请检查路径是否正确与是否有权访问该路径。</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="607"/>
+        <location filename="mainwindow.cpp" line="613"/>
         <source>Cannot generate key</source>
         <translation>无法生成密钥</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="611"/>
+        <location filename="mainwindow.cpp" line="617"/>
         <source>Do you want to use the generated key for this file?</source>
         <translation>你想要为这个文件使用生成的密钥吗？</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="624"/>
+        <location filename="mainwindow.cpp" line="630"/>
         <source>About EncryptPad</source>
         <translation>关于EncryptPad</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="625"/>
+        <location filename="mainwindow.cpp" line="631"/>
         <source>&lt;b&gt;EncryptPad %1 Beta&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;Minimalist secure text editor and binary encryptor that implements &lt;br/&gt;RFC 4880 Open PGP format: symmetrically encrypted, compressed and integrity protected. The editor can protect files with passphrases, key files or both.&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;GNU General Public License v2&lt;br/&gt;&lt;br/&gt;</source>
         <translation>&lt;b&gt;EncryptPad %1 Beta&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;极简的加密文本编辑器。&lt;br/&gt;支持RFC 4880 Open PGP格式。&lt;br/&gt;支持使用密码和/或密钥文件进行加密。&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;GNU General Public License v2&lt;br/&gt;&lt;br/&gt;</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="679"/>
+        <location filename="mainwindow.cpp" line="685"/>
         <source>Do you want to apply the modified default file properties to this file?</source>
         <translation>你想要应用已修改的默认文件属性到这个文件吗？</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="692"/>
+        <location filename="mainwindow.cpp" line="698"/>
         <source>&amp;New</source>
         <translation>新建(&amp;N)</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="694"/>
+        <location filename="mainwindow.cpp" line="700"/>
         <source>Create a new file</source>
         <translation>创建一个新的文件</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="697"/>
+        <location filename="mainwindow.cpp" line="703"/>
         <source>&amp;Open...</source>
         <translation>打开(&amp;O)……</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="699"/>
+        <location filename="mainwindow.cpp" line="705"/>
         <source>Open an existing file</source>
         <translation>打开一个存在的文件</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="702"/>
+        <location filename="mainwindow.cpp" line="708"/>
         <source>&amp;Save</source>
         <translation>保存(&amp;S)</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="704"/>
+        <location filename="mainwindow.cpp" line="710"/>
         <source>Save the document to disk</source>
         <translation>将文件保存到磁盘</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="707"/>
+        <location filename="mainwindow.cpp" line="713"/>
         <source>Save &amp;As...</source>
         <translation>另存为(&amp;A)</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="709"/>
+        <location filename="mainwindow.cpp" line="715"/>
         <source>Save the document under a new name</source>
         <translation>将文件保存到另一个地方</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="712"/>
+        <location filename="mainwindow.cpp" line="718"/>
         <source>File &amp;Properties...</source>
         <translation>文件属性(&amp;P)……</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="713"/>
+        <location filename="mainwindow.cpp" line="719"/>
         <source>Set file properties</source>
         <translation>更改文件的属性</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="716"/>
+        <location filename="mainwindow.cpp" line="722"/>
         <source>&amp;Close and Reset</source>
         <translation>关闭并重置(&amp;C)</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="718"/>
+        <location filename="mainwindow.cpp" line="724"/>
         <source>Close and reset security settings</source>
         <translation>关闭并重置安全设置</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="721"/>
+        <location filename="mainwindow.cpp" line="727"/>
         <source>Generate Key...</source>
         <translation>生成密钥……</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="722"/>
+        <location filename="mainwindow.cpp" line="728"/>
         <source>Generate a new key file</source>
         <translation>生成一个新的密钥文件</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="725"/>
+        <location filename="mainwindow.cpp" line="731"/>
         <source>Set &amp;Passphrase...</source>
         <translation>设置密码(&amp;P)……</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="726"/>
+        <location filename="mainwindow.cpp" line="732"/>
         <source>Set passphrase for encryption and decryption</source>
         <translation>为加密与解密用途设置密码</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="729"/>
+        <location filename="mainwindow.cpp" line="735"/>
         <source>Set &amp;Encryption Key...</source>
         <translation>设置密钥文件(&amp;E)……</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="730"/>
+        <location filename="mainwindow.cpp" line="736"/>
         <source>Set encryption key file</source>
         <translation>就是设置密钥文件</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="733"/>
+        <location filename="mainwindow.cpp" line="739"/>
         <source>Clear &amp;Encryption Key</source>
         <translation>清除密钥(&amp;E)</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="734"/>
+        <location filename="mainwindow.cpp" line="740"/>
         <source>Clear encryption key file. Passphrase only (if set).</source>
         <translation>清除用于加密的密钥文件。这将只使用密码保护（如果设置的话）。</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="737"/>
+        <location filename="mainwindow.cpp" line="743"/>
         <source>&amp;Clear Passphrase</source>
         <translation>清除密码(&amp;C)</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="738"/>
+        <location filename="mainwindow.cpp" line="744"/>
         <source>Save without passphrase protected encryption. Encryption with file key only (if enabled).</source>
         <translation>停用密码保护。这将仅使用密钥文件来加密（如果启用的话）。</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="741"/>
+        <location filename="mainwindow.cpp" line="747"/>
         <source>E&amp;xit</source>
         <translation>退出(&amp;X)</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="744"/>
+        <location filename="mainwindow.cpp" line="750"/>
         <source>Exit the application</source>
         <translation>关闭程序</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="747"/>
-        <location filename="mainwindow.cpp" line="749"/>
+        <location filename="mainwindow.cpp" line="753"/>
+        <location filename="mainwindow.cpp" line="755"/>
         <source>Undo</source>
         <translation>撤销</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="752"/>
-        <location filename="mainwindow.cpp" line="754"/>
+        <location filename="mainwindow.cpp" line="758"/>
+        <location filename="mainwindow.cpp" line="760"/>
         <source>Redo</source>
         <translation>还原</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="757"/>
+        <location filename="mainwindow.cpp" line="763"/>
         <source>Cu&amp;t</source>
         <translation>剪切(&amp;U)</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="759"/>
+        <location filename="mainwindow.cpp" line="765"/>
         <source>Cut the current selection&apos;s contents to the clipboard</source>
         <translation>将选定内容剪切到剪贴板</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="763"/>
+        <location filename="mainwindow.cpp" line="769"/>
         <source>&amp;Copy</source>
         <translation>复制(&amp;C)</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="765"/>
+        <location filename="mainwindow.cpp" line="771"/>
         <source>Copy the current selection&apos;s contents to the clipboard</source>
         <translation>将选定内容复制到剪贴板</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="769"/>
+        <location filename="mainwindow.cpp" line="775"/>
         <source>&amp;Paste</source>
         <translation>粘贴(&amp;P)</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="771"/>
+        <location filename="mainwindow.cpp" line="777"/>
         <source>Paste the clipboard&apos;s contents into the current selection</source>
         <translation>将剪贴板内容粘贴到当前选定范围</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="775"/>
+        <location filename="mainwindow.cpp" line="781"/>
         <source>&amp;Select All</source>
         <translation>全选(&amp;S)</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="777"/>
+        <location filename="mainwindow.cpp" line="783"/>
         <source>Select all text</source>
         <translation>选中所有文字</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="780"/>
+        <location filename="mainwindow.cpp" line="786"/>
         <source>&amp;Find...</source>
         <translation>查找(&amp;F)</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="782"/>
+        <location filename="mainwindow.cpp" line="788"/>
         <source>Find in text</source>
         <translation>在文件内查找</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="785"/>
+        <location filename="mainwindow.cpp" line="791"/>
         <source>&amp;Go to...</source>
         <translation>跳转到(&amp;G)……</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="786"/>
-        <location filename="mainwindow.cpp" line="1517"/>
+        <location filename="mainwindow.cpp" line="792"/>
+        <location filename="mainwindow.cpp" line="1523"/>
         <source>Go to</source>
         <translation>跳转到</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="790"/>
+        <location filename="mainwindow.cpp" line="796"/>
         <source>&amp;Generate Passphrase...</source>
         <translation>生成密码(&amp;G)……</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="791"/>
+        <location filename="mainwindow.cpp" line="797"/>
         <source>Generate passphrase</source>
         <translation>生成随机密码</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="794"/>
+        <location filename="mainwindow.cpp" line="800"/>
         <source>&amp;Replace...</source>
         <translation>替换(&amp;R)……</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="796"/>
+        <location filename="mainwindow.cpp" line="802"/>
         <source>Find and replace text</source>
         <translation>查找并替换文本</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="799"/>
+        <location filename="mainwindow.cpp" line="805"/>
         <source>Read Only</source>
         <translation>只读</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="801"/>
+        <location filename="mainwindow.cpp" line="807"/>
         <source>Enable Read Only mode</source>
         <translation>启用只读模式</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="806"/>
+        <location filename="mainwindow.cpp" line="812"/>
         <source>Word Wrap</source>
         <translation>自动换行</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="808"/>
+        <location filename="mainwindow.cpp" line="814"/>
         <source>Enable Word Wrap</source>
         <translation>启用自动换行</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="811"/>
+        <location filename="mainwindow.cpp" line="817"/>
         <source>&amp;Zoom In</source>
         <translation>放大(&amp;Z)</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="813"/>
+        <location filename="mainwindow.cpp" line="819"/>
         <source>Zoom In</source>
         <translation>放大</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="816"/>
+        <location filename="mainwindow.cpp" line="822"/>
         <source>&amp;Zoom Out</source>
         <translation>缩小(&amp;Z)</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="818"/>
+        <location filename="mainwindow.cpp" line="824"/>
         <source>Zoom Out</source>
         <translation>缩小</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="821"/>
+        <location filename="mainwindow.cpp" line="827"/>
         <source>&amp;Reset Zoom</source>
         <translation>重置缩放(&amp;R)</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="823"/>
+        <location filename="mainwindow.cpp" line="829"/>
         <source>Reset Zoom</source>
         <translation>重置缩放</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="826"/>
+        <location filename="mainwindow.cpp" line="832"/>
         <source>&amp;About...</source>
         <translation>关于(&amp;A)……</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="827"/>
+        <location filename="mainwindow.cpp" line="833"/>
         <source>Show the application&apos;s About box</source>
         <translation>显示程序的「关于」对话框</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="831"/>
+        <location filename="mainwindow.cpp" line="837"/>
         <source>About &amp;Qt</source>
         <translation>关于Qt(&amp;Q)</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="832"/>
+        <location filename="mainwindow.cpp" line="838"/>
         <source>Show the Qt library&apos;s About box</source>
         <translation>显示Qt的「关于」对话框</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="835"/>
+        <location filename="mainwindow.cpp" line="841"/>
         <source>&amp;Preferences...</source>
         <translation>首选项(&amp;P)……</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="836"/>
+        <location filename="mainwindow.cpp" line="842"/>
         <source>Application preferences</source>
         <translation>程序首选项</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="839"/>
+        <location filename="mainwindow.cpp" line="845"/>
         <source>File Encryption...</source>
         <translation>文件加密...</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="840"/>
+        <location filename="mainwindow.cpp" line="846"/>
         <source>File encryption</source>
         <translation>文件加密</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="843"/>
+        <location filename="mainwindow.cpp" line="849"/>
         <source>Windows EOL</source>
         <translation>使用Windows换行风格</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="844"/>
+        <location filename="mainwindow.cpp" line="850"/>
         <source>&quot;Windows&quot; end of line: CR+LF</source>
         <translation>使用Windows换行风格：CR+LF</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="939"/>
+        <location filename="mainwindow.cpp" line="945"/>
         <source>End of file reached. Started from the top.</source>
         <translation>已经到达了文件末尾。将会从头开始。</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="955"/>
+        <location filename="mainwindow.cpp" line="961"/>
         <source>Text not found.</source>
         <translation>没有找到文本。</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="969"/>
+        <location filename="mainwindow.cpp" line="975"/>
         <source>Text found.</source>
         <translation>发现了文本。</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="976"/>
+        <location filename="mainwindow.cpp" line="982"/>
         <source>&amp;File</source>
         <translation>文件(&amp;F)</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="993"/>
+        <location filename="mainwindow.cpp" line="999"/>
         <source>&amp;Edit</source>
         <translation>编辑(&amp;E)</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1011"/>
+        <location filename="mainwindow.cpp" line="1017"/>
         <source>&amp;View</source>
         <translation>视图(&amp;V)</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1020"/>
+        <location filename="mainwindow.cpp" line="1026"/>
         <source>En&amp;cryption</source>
         <translation>加密(&amp;C)</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1028"/>
+        <location filename="mainwindow.cpp" line="1034"/>
         <source>&amp;Settings</source>
         <translation>设置(&amp;S)</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1031"/>
+        <location filename="mainwindow.cpp" line="1037"/>
         <source>&amp;Help</source>
         <translation>帮助(&amp;H)</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1037"/>
+        <location filename="mainwindow.cpp" line="1043"/>
         <source>File</source>
         <translation>文件</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1048"/>
+        <location filename="mainwindow.cpp" line="1054"/>
         <source>Edit</source>
         <translation>编辑</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1056"/>
+        <location filename="mainwindow.cpp" line="1062"/>
         <source>Encryption</source>
         <translation>加密</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1063"/>
+        <location filename="mainwindow.cpp" line="1069"/>
         <source>View</source>
         <translation>视图</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1073"/>
+        <location filename="mainwindow.cpp" line="1079"/>
         <source>Ready</source>
         <translation>就绪</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1166"/>
+        <location filename="mainwindow.cpp" line="1172"/>
         <source>The document has been modified.</source>
         <translation>文件已被更改。</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1167"/>
+        <location filename="mainwindow.cpp" line="1173"/>
         <source>Do you want to save your changes?</source>
         <translation>你想要保存文件吗？</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1306"/>
+        <location filename="mainwindow.cpp" line="1312"/>
         <source>Cannot save &apos;%1&apos;</source>
         <translation>无法保存%1</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1309"/>
+        <location filename="mainwindow.cpp" line="1315"/>
         <source>Cannot open the specified encryption key</source>
         <translation>无法打开指定的密钥文件</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1312"/>
+        <location filename="mainwindow.cpp" line="1318"/>
         <source>The specified encryption key is invalid</source>
         <translation>指定的密钥文件不合法</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1315"/>
+        <location filename="mainwindow.cpp" line="1321"/>
         <source>Cannot download the encryption key. CURL tool is not found</source>
         <translation>无法读取密钥文件。没有找到CURL工具。</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1318"/>
+        <location filename="mainwindow.cpp" line="1324"/>
         <source>Cannot download the encryption key. CURL returned non zero exit code</source>
         <translation>无法读取密钥文件。CURL的返回值不为0（发生异常）</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1321"/>
+        <location filename="mainwindow.cpp" line="1327"/>
         <source>Unknown encryption error</source>
         <translation>未知加密错误</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1324"/>
+        <location filename="mainwindow.cpp" line="1330"/>
         <source>Cannot create bak file</source>
         <translation>无法创建备份文件</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1332"/>
+        <location filename="mainwindow.cpp" line="1338"/>
         <source>Unknown error</source>
         <translation>未知错误</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1343"/>
+        <location filename="mainwindow.cpp" line="1349"/>
         <source>Cannot save file</source>
         <translation>无法保存文件</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1349"/>
+        <location filename="mainwindow.cpp" line="1355"/>
         <source>File saved</source>
         <translation>文件已保存</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1517"/>
+        <location filename="mainwindow.cpp" line="1523"/>
         <source>Line number:</source>
         <translation>行号：</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1537"/>
+        <location filename="mainwindow.cpp" line="1543"/>
         <source>Maximum zoom</source>
         <translation>最大缩放</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1543"/>
+        <location filename="mainwindow.cpp" line="1549"/>
         <source>Font size: %1</source>
         <translation>文本大小：%1</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1551"/>
+        <location filename="mainwindow.cpp" line="1557"/>
         <source>Minimum zoom</source>
         <translation>最小缩放</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1557"/>
-        <location filename="mainwindow.cpp" line="1572"/>
+        <location filename="mainwindow.cpp" line="1563"/>
+        <location filename="mainwindow.cpp" line="1578"/>
         <source>Font size: </source>
         <translation>字号：</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1607"/>
+        <location filename="mainwindow.cpp" line="1613"/>
         <source>Key protected</source>
         <translation>密钥保护的</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1608"/>
+        <location filename="mainwindow.cpp" line="1614"/>
         <source>Key not set</source>
         <translation>未设置密钥</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1609"/>
+        <location filename="mainwindow.cpp" line="1615"/>
         <source>persistent</source>
         <translation>持久的</translation>
     </message>
@@ -1345,6 +1347,11 @@ Do you want to replace it?</source>
         <translation>启用备份文件(.bak)</translation>
     </message>
     <message>
+        <location filename="preferences_dialog.ui" line="125"/>
+        <source>[example: Monospace (Size: 12)]</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="preferences_dialog.ui" line="138"/>
         <source>Save last used directory</source>
         <translation>保存最近使用的目录</translation>
@@ -1382,8 +1389,9 @@ Do you want to replace it?</source>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="340"/>
-        <source>Passphrase to key results pool size:</source>
-        <translation>密码到密钥结果缓冲区大小：</translation>
+        <source>S2K derivations from a passphrase:</source>
+        <oldsource>Passphrase to key results pool size:</oldsource>
+        <translation type="unfinished">密码到密钥结果缓冲区大小：</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="359"/>
