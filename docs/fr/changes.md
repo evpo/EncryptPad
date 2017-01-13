@@ -40,11 +40,9 @@ h2
 
 ###Version 0.3.2.2
 
-* Correctif de bogue : dans la boîte de dialogue du chiffrement, lorsque la phrase de passe du fichier clé était erronée, un message
-    n'en informait pas l'utilisateur.
+* Correctif de bogue : dans la boîte de dialogue du chiffrement, lorsque la phrase de passe du fichier clé était erronée, un message n'en informait pas l'utilisateur.
 * Prise en charge des fichiers BAK. Lors d'une modification, un fichier bak n'est crée que lors du premier enregistrement.
-* L'ordre des sections a été changé dans les nouveaux fichiers wad. Il est maintenant répertoire, clé, contenu. Cela n'affecte pas
-    les fichiers wad existants.
+* L'ordre des sections a été changé dans les nouveaux fichiers wad. Il est maintenant répertoire, clé, contenu. Cela n'affecte pas les fichiers wad existants.
 * encryptcli peut lire les phrases de passe des descripteurs de fichier
 * encryptcli peut lire de stdin et écrire vers stdout
 * Les arguments d'encryptcli ont été revus et améliorés

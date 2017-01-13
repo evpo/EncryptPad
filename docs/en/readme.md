@@ -188,7 +188,7 @@ There are three different structures a saved file can have depending on protecti
 <div id="use-curl"></div>
 ##Use CURL to automatically download keys from a remote storage
 
-If **[CURL](http://curl.haxx.se/)** URL is specified in **Key File Path** field in the **Set Encryption Key** dialog, EncryptPad will attempt to start a curl process to download the key from a remote host. If you want to use this feature, you need to set the path to the CURL executable in the EncryptPad settings. 
+If **[CURL](http://curl.haxx.se/)** URL is specified in **Key File Path** field in the **Set Encryption Key** dialogue, EncryptPad will attempt to start a curl process to download the key from a remote host. If you want to use this feature, you need to set the path to the CURL executable in the EncryptPad settings. 
 
 Consider this use case scenario: you travel with your laptop and open an encrypted file on the laptop. If you protect the file with a passphrase and a key and your laptop is lost or stolen, the perpetrator will be able to make a brute force attack on your file because the key is also stored on the laptop. To avoid this, EncryptPad takes the following steps:
 
