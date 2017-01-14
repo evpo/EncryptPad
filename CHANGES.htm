@@ -18,6 +18,7 @@ h2
 <li>In File Encryption dialogue, a radio button was added to select between EPD and GPG. Previously the user had to edit the extension manually to output to the GPG format.</li>
 <li>Bug fixed: salt was displayed in File Encryption dialogue after encrypting or decrypting a file, which did not make sense as it was not related to the next encryption.</li>
 <li>There are only 256 possible S2K iterations sets. The file properties dialogue now has a combo box to list all of them. It is easier to select the maximum or minimum possible number of iterations.</li>
+<li>The default number of iterations has been changed to 1015808.</li>
 <li>Prevented the unnecessary prompt for a key file passphrase if the key file is local and not encrypted.</li>
 <li>Bug fixed: after opening a file the mouse cursor changed to arrow shape when it was over the text edit area. It is now <code>I</code> shaped as it should.</li>
 <li>Use one EncryptPad binary for all languages. EncryptPad will recognize the OS preferred language for localization. It will simplify the release management especially for packagers.</li>
