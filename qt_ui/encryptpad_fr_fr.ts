@@ -1389,7 +1389,7 @@ Souhaitez-vous le remplacer ?</translation>
         <location filename="preferences_dialog.ui" line="340"/>
         <source>S2K derivations from a passphrase:</source>
         <oldsource>Passphrase to key results pool size:</oldsource>
-        <translation type="unfinished"/>
+        <translation>Dérivations S2K à partir d&apos;une phrase de passe :</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="359"/>

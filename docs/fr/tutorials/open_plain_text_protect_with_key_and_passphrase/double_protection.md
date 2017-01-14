@@ -1,135 +1,135 @@
-# Open a plain text file, protect it with both a key file and passphrase then save it as an EPD file
+# Ouvrir un fichier texte en clair, le protéger à la fois par phrase de passe et fichier clé et l'enregistrer comme fichier EPD]
 
-## Open a plain text file
+## Ouvrir un fichier texte en clair
 
-1\. Click the Open File tool button
+1\. Cliquez sur le bouton « Ouvrir un fichier »
 
-![Open File tool button](images/open_text_file.png)
+![Bouton « Ouvrir un fichier »](images/open_text_file.png)
 
-2\. Select Plain Text file type and click Save button
+2\. Sélectionner le type de fichier « Texte en clair » et cliquez sur  Enregistrer
 
-![Plain Text file type](images/open_file_dialog_text_file.png)
+![Type de fichier « Texte en clair »](images/open_file_dialog_text_file.png)
 
-3\. The plain text file opened
+3\. Le fichier texte en clair s'ouvre
 
-![Text file opened](images/text_file_opened.png)
+![Fichier texte ouvert](images/text_file_opened.png)
 
-Now EncryptPad is in unprotected plain text mode. It works as an ordinary text editor.
+EncryptPad est maintenant en mode texte en clair non protégé. Il fonctionne comme un éditeur de texte ordinaire.
 
-![Unprotected mode](images/unprotected_status.png)
+![Mode non protégé](images/unprotected_status.png)
 
-## Generate a new key file
+## Générer un nouveau fichier
 
-4\. Click the Generate Key tool button.
+4\. Cliquez sur le bouton « Générer une clé »
 
-![Generate Key tool button](images/generate_key_tool_button.png)
+![Bouton « Générer une clé »](images/generate_key_tool_button.png)
 
-5\. Select the Key In Repository radio button and enter `my_new_key` in the corresponding text box and click OK.
+5\. Sélectionnez le bouton radio « Clé dans le dépôt », saisissez « ma_nouvelle_clé » dans la boîte de texte correspondante et cliquez sur OK.
 
 ![Boîte de dialogue « Générer une clé »](images/generate_key_dialog.png)
 
-6\. You will be asked to enter a passphrase to protect the key file on the disk.
+6\. Il vous sera demandé de saisir une phrase de passe pour protéger le fichier clé sur le disque.
 
-![Key File passphrase](images/set_passphrase_for_key.png)
+![Phrase de passe du fichier clé](images/set_passphrase_for_key.png)
 
-Enter `KeyPwd`
+Saisir « MdpClé »
 
-7\. Click Yes to use the new key file to encrypt our text.
+7\. Cliquez sur Oui pour utiliser le nouveau fichier clé pour chiffrer votre texte.
 
 ![Boîte de dialogue « Utiliser une nouvelle clé »](images/use_new_key_dialog.png)
 
-8\. You can look at the key file in your user profile directory under `_encryptpad`
+8\. Vous trouverez le fichier clé dans votre répertoire personnel sous « _encryptpad »
 
-![Key in Windows Explorer](images/key_in_explorer.png)
+![Clé dans l'explorateur Windows](images/key_in_explorer.png)
 
-Here is the content of the file (it will be different for you as the key is random):<br/> 
+Voici le contenu du fichier (il sera différent pour vous, car la clé est aléatoire) :<br/> 
 
-`91Oamyib4o+Tbry/4NzoFOWhWpIfQE0TyMHiYtnOK9w=`
+« 91Oamyib4o+Tbry/4NzoFOWhWpIfQE0TyMHiYtnOK9w= »
 
-This is a random sequence in Base64, from which the encryption key is derived.
+C'est une séquence aléatoire en Base64 à partir de laquelle la clé de chiffrement est dérivée.
 
-## Protect with the key file and save as a GPG file
+## Protéger le fichier clé et l'enregistrer comme fichier GPG
 
-9\. Click the Save As tool button.
+9\. Cliquez sur le bouton « Enregistrer sous ».
 
-![Save As tool button](images/save_as_tool_button.png)
+![Bouton « Enregistrer sous »](images/save_as_tool_button.png)
 
-10\. Select EncryptPad (\*.epd) file type and click Save button
+10\. Sélectionnez le type de fichier EncryptPad (\*.epd) et cliquez sur le bouton Enregistrer.
 
 ![Boîte de dialogue « Enregistrer sous »](images/select_epd_in_save_as.png)
 
-Please note that the file name has changed to `war and peace.epd` in the Save As dialogue.
+Veuillez prendre note que le nom de fichier à changé en « guerre et paix.epd »dans la boîte de dialogue « Enregistrer sous ».
 
-11\. You will be asked to enter a passphrase twice. Enter `DemoPwd` for this example and click OK.
+11\. Il vous sera demandé de saisir une phrase de passer deux fois. Saisissez « MdpDémo » pour cet exemple et cliquez sur OK.
 
-![Set passphrase](images/set_passphrase.png)
+![Définir une phrase de passe](images/set_passphrase.png)
 
-Note that if you leave the passphrase blank and click OK, the file will be only protected with the key file and you will not have the double protection. 
+Veuillez prendre note que si vous laissez la phrase de passe vide et cliquez sur OK, le fichier ne sera protégé que par le fichier clé et vous ne bénéficierez pas de la double protection. 
 
-12\. Now the file has been saved on the disk and it is encrypted with the generated key file and then the passphrase. See the status in the picture below.
+12\. Le fichier a maintenant été enregistré sur le disque, chiffré avec le fichier clé généré et la phrase de passe. Voir l'état dans l'image ci-dessous.
 
-![GPG file saved](images/double_protection_status.png)
+![Fichier GPG enregistré](images/double_protection_status.png)
 
-## Persist the key file location in the encrypted file
+## Emplacement de clé persistant dans le fichier chiffré
 
-Now if you clear protection, close the file and open it again, you will be asked for both the passphrase and key file. It may be cumbersome to enter the path to the key file every time, especially if it is not in the repository. To make it easier you can enable `Persist key location in encrypted file` (this feature is only supported in the EPD file type).
+Maintenant, si vous effacez la protection, fermez le fichier et rouvrez-le. La phrase de passe et le fichier clé vous seront demandés. Il pourrait être fastidieux de saisir le chemin du fichier clé chaque fois, particulièrement s'il n'est pas dans le dépôt. Pour faciliter le tout, vous pouvez activer « Emplacement de clé persistant dans le fichier chiffré ». (cette fonction n'est prise en charge que pour le type de fichier EPD).
 
-13\. Click Set Key tool button.
+13\. Cliquez sur le bouton « Définir la clé ».
 
-![Set Key tool button](images/set_key_tool_button.png)
+![Bouton « Définir la clé »](images/set_key_tool_button.png)
 
-14\. Enable `Persist key location in encrypted file` in the Set Key dialogue and click OK.
+14\. Activez « Emplacement de clé persistant dans le fichier chiffré » dans la boîte de dialogue « Définir la clé » et cliquez sur OK.
 
 ![Enable Persist Key](images/enable_persist_key.png)
 
-15\. The status bar has changed (see the picture below).
+15\. La barre d'état a changé (voir l'image ci-dessous).
 
-![Persisted in status bar](images/persisted_in_status_bar.png)
+![A persisté dans la barre d'état](images/persisted_in_status_bar.png)
 
-If you clear protection and open this file again, you will not be asked for the key file location as it is persisted in the encrypted file itself. It is also hidden from unwanted view because the location is encrypted with the passphrase.
+Si vous effacez la protection et rouvrez ce fichier, l'emplacement du fichier clé ne vous sera pas demandé, car il persiste à même le fichier chiffré. L'emplacement est aussi à l'abri des regards indiscrets, car il est chiffré avec la phrase de passe.
 
-16\. Click the Save tool button to save the file.
+16\. Cliquez sur le bouton Enregistrer pour enregistrer le fichier.
 
-## Open another plain text file
+## Ouvrir un autre fichier texte en clair
 
-If you try to open a plain text file now, it will fail with the following message.
+Si vous tentez d'ouvrir un fichier texte en clair maintenant, cela échouera avec le message suivant :
 
-![Cannot open plain text](images/open_another_plain_text.png)
+![Impossible d'ouvrir le texte en clair](images/open_another_plain_text.png)
 
-EncryptPad "thinks" that the file is encrypted with a passphrase and key file because its mode is `Key protected` and `passphrase protected` as you can see in the status bar. It tried to decrypt the plain text and failed. To proceed with opening the file, clear passphrase and key protection by clicking the Clear Key and Clear passphrase tool buttons or even better click Close and Reset. The latter will close the text file and reset both parts of the protection.
+EncryptPad pense que le fichier est chiffré avec une phrase de passe et un fichier clé, car son mode est « Protégé par une clé » et « Protégé par phrase de passe », comme vous pouvez le voir dans la barre d'état. Il a tenté de déchiffrer le texte en clair et a échoué. Pour poursuivre l'ouverture du fichier, effacez la protection par phrase de passe et fichiers clé en cliquant sur les boutons « Effacer la clé de chiffrement » et « Effacer la phrase de passe », ou mieux encore, en cliquant sur « Fermer et réinitialiser » ce qui fermera le fichier texte et réinitialisera les deux parties de la protection.
 
-![Clear Key or Close and Reset](images/clear_key_and_pwd_or_close_and_reset.png)
+![Effacer la clé ou Fermer et réinitialiser](images/clear_key_and_pwd_or_close_and_reset.png)
 
-Now you can open your plain text file.
+Vous pouvez maintenant ouvrir votre fichier texte en clair.
 
-## The internals of the EPD file
+## Le fonctionnement interne du fichier EPD
 
-The EPD file is an OpenPGP file containing a [WAD](https://en.wikipedia.org/wiki/Doom_WAD) file, which contains another OpenPGP file. There is three levels of nesting. To demonstrate, we can extract the encrypted text without using EncryptPad.
+Le fichier EPD est un fichier OpenPGP contenant un fichier [WAD](https://fr.wikipedia.org/wiki/.wad) qui contient un autre fichier OpenPGP.  Il y a trois niveaux d'imbrication. Pour le démontrer, nous pouvons extraire le fichier chiffré sans utiliser EncryptPad.
 
-17\. Rename the file from `war and peace.epd` to `war and peace.gpg`.
+17\. Renommez le fichier « guerre et paix.epd » en « guerre et paix.gpg ».
 
-18\. Decrypt the file with [Gpg4Win](https://www.gpg4win.org/). Use `DemoPwd` as a passphrase.
+18\. Déchiffrez le fichier avec [Gpg4Win](https://www.gpg4win.org/). Utilisez « MdpDémo » comme phrase de passe.
 
-![Kleopatra decrypted our file](images/kleopatra_decrypted.png)
+![Kleopatra a déchiffré notre fichier](images/kleopatra_decrypted.png)
 
-19\. Rename the file produced by Kleopatra from `war and peace` to `war_and_peace.wad`.
+19\. Renommez le fichier produit par Kleopatra de « guerre et paix » en « guerre_et_paix.wad ».
 
-20\. You need to get a tool for working with WAD files for the next step. I recommend [Slade](https://github.com/sirjuddington/SLADE).
+20\. Pour la prochaine étape, il vous faut obtenir un outil pour travailler avec les fichiers WAD. Je recommande [Slade](https://github.com/sirjuddington/SLADE).
 
-21\. Extract the content of the wad file with Slade. See the window below for details.
+21\. Extrayez le contenu du fichier WAD avec Slade. Voir la fenêtre ci-dessous pour plus de détails.
 
-![Slade Window](images/slade_window.png)
+![Fenêtre de Slade](images/slade_window.png)
 
-Note that the `__X2_KEY` file contains the name of our key file `my_new_key.key`. `_PAYLOAD` is the OpenPGP file encrypted with the key file. 
+Notez que le fichier « __X2_KEY » contient le nom de notre fichier clé « ma_nouvelle_clé.key ». « _PAYLOAD » est le fichier OpenPGP chiffré avec le fichier clé. 
 
-22\. Save `_PAYLOAD` to the disk. Click Entry->Export and save the file as **war and peace.gpg**. Overwrite the existing file we used at previous steps.
+22\. Enregistrez « _PAYLOAD » sur le disque. Cliquez sur Entrée->Exporter et enregistrez le fichier sous **guerre et paix.gpg**. Écrasez les fichiers existants que nous avons utilisés dans les étapes précédentes.
 
-![Slade Export](images/slade_export.png)
+![Exportation Slade](images/slade_export.png)
 
-23\. Decrypt the key file `my_new_key.key` with [Gpg4Win](https://www.gpg4win.org/). Use `KeyPwd` as a passphrase.
+23\. Déchiffrez le fichier clé « ma_nouvelle_clé » avec [Gpg4Win](https://www.gpg4win.org/). Utilisez « MdpClé » comme phrase de passe.
 
 24\. Now that we have the unencrypted key file, decrypt the file from step 22 with [Gpg4Win](https://www.gpg4win.org/). Use the content of the key file from step 23 as a passphrase.
 
-![Kleopatra decrypted our file](images/kleopatra_decrypted.png)
+![Kleopatra a déchiffré notre fichier](images/kleopatra_decrypted.png)
 
 25\. The result of this decryption will be your original plain text file.

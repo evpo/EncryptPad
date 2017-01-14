@@ -11,11 +11,11 @@ h2
 * Correctif de bogue : si un fichier EPD « phrase de passe seulement » déchiffré comprenait moins de 4 caractères, le contenu était ignoré et EncryptPad produisait un fichier vide. Cela se produisait, car EncryptPad  s'attendait à trouver un marqueur IWAD de 4 caractères. Ces fichiers seront maintenant ouverts correctement.
 * Correctif de bogue : si un fichier texte en clair était ouvert puis enregistré chiffré, les paramètres de chiffrement n'étaient pas réinitialisés aux valeurs par défaut, mais utilisaient les paramètres du dernier fichier chiffré.
 * Correctif de bogue : le paramètre de ligne de commande « encryptpad » « file » ne prenait pas en charge les caractères non ASCII. C'est pourquoi il était impossible d'ouvrir un fichier directement à partir de  l'explorateur Windows par un double-clic si le fichier était dans un répertoire dont le nom comprenait des caractères non ASCII.
-* Plus de propriétés dans les préférences afin de contrôler les paramètres de chiffrement par défaut : longueur de la séquence aléatoire du fichier clé, propriétés de chiffrement des fichiers clés, propriétés par défaut de chiffrement des fichiers (chiffre, s2k, itérations, compression), le nombre de clés de chiffrement à enregistrer ou à charger sans redemander la phrase de passe.
+* Plus de propriétés dans les préférences afin de contrôler les paramètres de chiffrement par défaut : longueur de la séquence aléatoire du fichier clé, propriétés de chiffrement des fichiers clés, propriétés par défaut de chiffrement des fichiers (chiffre, S2K, itérations, compression), le nombre de clés de chiffrement à enregistrer ou à charger sans redemander la phrase de passe.
 * Correctif de bogue : si plusieurs EncryptPad étaient ouverts et que les préférences étaient mises à jour, lors de la fermeture le dernier EncryptPad écrasait les préférences modifiées dans les autres EncryptPad.
 * Dans la boîte de dialogue « Chiffrement de fichier », un bouton radio a été ajouté afin de choisir entre EPD et GPG. L'utilisateur devait précédemment modifier l'extension manuellement pour obtenir une sortie au format GPG.
 * Correctif de bogue : « Sel » était affiché dans la boîte de dialogue « Chiffrement de fichier » après le chiffrement ou le déchiffrement d'un fichier, ce qui n'était pas logique, car cela n'était pas relié au prochain chiffrement.
-* Il n'y a que 256 itérations s2k possibles. La boîte de dialogue des propriétés de fichier propose maintenant une zone combinée pour les lister toutes. Il est plus simple de choisir soit le nombre maximal, soit le nombre minimal d'itérations.
+* Il n'y a que 256 itérations S2K possibles. La boîte de dialogue des propriétés de fichier propose maintenant une zone combinée pour les lister toutes. Il est plus simple de choisir soit le nombre maximal, soit le nombre minimal d'itérations.
 * La phrase de passe d'un fichier clé n'est plus demandée si le fichier clé est local et non chiffré, car cela était inutile.
 * Correctif de bogue : après ouverture d'un fichier, le curseur représentait une flèche quand il survolait la zone de saisie de texte. Il représente maintenant « I » comme il se doit.
 * Utilisation d'un seul exécutable EncryptPad pour toutes les langues. EncryptPad reconnaîtra la langue préférée du SE et l'utilisera pour la localisation. La gestion des versions en sera simplifiée, particulièrement pour les empaqueteurs.
@@ -27,7 +27,7 @@ h2
 
 ###Version 0.3.2.3
 
-* Nombre configurable d'itérations s2k. Il peut être été fini par fichier, et comme valeur par défaut pour les nouveaux fichiers. Cette valeur est aussi utilisée pour la protection des fichiers.
+* Nombre configurable d'itérations S2K. Il peut être été fini par fichier, et comme valeur par défaut pour les nouveaux fichiers. Cette valeur est aussi utilisée pour la protection des fichiers.
 * Prise en charge des octets d'estampille temporelle dans les fichiers GPG.
 * L'exécutable a été renommer en « encryptpad » (minuscules) sauf sur macOS.
 * Amélioration de la cohérence de l'anglais dans l'IUG. Tous les « mot de passe » sont devenus des « phrase de passe ».

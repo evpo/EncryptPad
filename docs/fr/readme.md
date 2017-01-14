@@ -49,8 +49,8 @@ EncryptPad est une application de visualisation et d'édition de texte chiffré 
 * **Fins de ligne configurable** Windows ou Unix
 * Un **générateur de phrases de passe** personnalisable aide à créer des phrases de passe aléatoires robustes.
 * Format de fichier compatible avec **OpenPGP**
-* **S2K itérées et salée**
-* **Les phrases de passe ne sont pas conservées en mémoire** pour être réutilisées, seulement les résultats s2k ([plus...](#passphrases-in-memory))
+* **S2K itéré et salé**
+* **Les phrases de passe ne sont pas conservées en mémoire** pour être réutilisées, seulement les résultats S2K ([plus...](#passphrases-in-memory))
 * Algorithmes de chiffrement : **CAST5, TripleDES, AES128, AES256**
 * Algorithmes de hachage : **SHA-1, SHA-256, SHA-512**
 * Protection de l'intégrité : **SHA-1**
@@ -364,7 +364,7 @@ ou pour une compilation dynamique avec des bibliothèques système :
 
 <div id="passphrases-in-memory"></div>
 ##EncryptPad stocke-t-il les phrases de passe en mémoire pour rouvrir les fichiers ?
-Après avoir été saisis, une phrase de passe et un sel aléatoire sont hachés avec un algorithme s2k. Le résultat est utilisé comme clé de chiffrement pour chiffrer ou déchiffrer le fichier. Une réserve de ces résultats s2k est générée chaque fois que l'utilisateur saisit une nouvelle phrase de passe. Cela permet d'enregistrer ou de charger plusieurs fois les fichiers protégés par cette phrase de passe sans l'avoir. La taille de la réserve peut-être changée dans la boîte de dialogue Préférences. Au moment d'écrire, la dernière version a une valeur par défaut de 8. Cela signifie que vous pouvez enregistrer un fichier 8 fois avant qu'EncryptPad ne vous demande de saisir la phrase de passe de nouveau. Vous pouvez augmenter ce chiffre, mais cela aura un impact sur les performances, car les algorithmes s2k comprenant de nombreuses itérations sont lents par nature.
+Après avoir été saisis, une phrase de passe et un sel aléatoire sont hachés avec un algorithme S2K. Le résultat est utilisé comme clé de chiffrement pour chiffrer ou déchiffrer le fichier. Une réserve de ces résultats S2K est générée chaque fois que l'utilisateur saisit une nouvelle phrase de passe. Cela permet d'enregistrer ou de charger plusieurs fois les fichiers protégés par cette phrase de passe sans l'avoir. La taille de la réserve peut-être changée dans la boîte de dialogue Préférences. Au moment d'écrire, la dernière version a une valeur par défaut de 8. Cela signifie que vous pouvez enregistrer un fichier 8 fois avant qu'EncryptPad ne vous demande de saisir la phrase de passe de nouveau. Vous pouvez augmenter ce chiffre, mais cela aura un impact sur les performances, car les algorithmes S2K comprenant de nombreuses itérations sont lents par nature.
 
 <div id="acknowledgements"></div>
 ##Remerciements
