@@ -397,7 +397,7 @@ J'ai aussi un certificat de signature de code délivré par une autorité de cer
 
 Il a quelques raisons pourquoi je n'ai pas simplement utilisé le certificat CA :
 
-1. EncryptPad est fondé sur la norme OpenPGP et la promeut.
+1. EncryptPad est fondée sur la norme OpenPGP et la promeut.
 2. La signature OpenPGP est plus souple.
 3. La certification CA a un coût de fonctionnement, ce qui n'est pas le cas de la signature OpenPGP.
 
@@ -417,7 +417,7 @@ selon les conditions de la [licence générale publique GNU](http://www.gnu.org/
 « Free Software Foundation », soit la version 2 de la licence, soit
 toute version ultérieure (à votre gré).
 
-EncryptPad est distribué en espérant qu'elle sera utile,
+EncryptPad est distribuée en espérant qu'elle sera utile,
 mais SANS GARANTIE ; sans même la garantie tacite de QUALITÉ
 MARCHANDE ou D'ADÉQUATION À UN BUT PARTICULIER. Voir la
 licence générale publique GNU pour plus de détails.

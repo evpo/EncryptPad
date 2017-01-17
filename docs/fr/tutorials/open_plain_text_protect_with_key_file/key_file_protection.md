@@ -1,48 +1,48 @@
 # Ouvrir un fichier texte en clair, le protéger par fichier clé et l'enregistrer comme fichier GPG
 
-## Open a plain text file
+## Ouvrir un fichier texte en clair
 
-1\. Click the Open File tool button
+1\. Cliquez sur le bouton « Ouvrir un fichier »
 
 ![Bouton « Ouvrir un fichier »](images/open_text_file.png)
 
-2\. Select Plain Text file type and click Save button
+2\. Sélectionnez le type de fichier texte en clair et cliquez sur le bouton Enregistrer
 
 ![Type de fichier « Texte en clair »](images/open_file_dialog_text_file.png)
 
-3\. The plain text file opened
+3\. Le fichier texte en clair ouvert
 
 ![Fichier texte ouvert](images/text_file_opened.png
 
-Now EncryptPad is in unprotected plain text mode. It works as an ordinary text editor.
+EncryptPad est maintenant en mode texte en clair non protégé. Elle fonctionne comme un éditeur de texte ordinaire.
 
 ![Mode non protégé](images/unprotected_status.png)
 
-## Generate a new key file
+## Générer un nouveau fichier
 
-4\. Click the Generate Key tool button.
+4\. Cliquez sur le bouton « Générer une clé »
 
 ![Bouton « Générer une clé »](images/generate_key_tool_button.png)
 
-5\. Select the Key In Repository radio button and enter `my_new_key` in the corresponding text box and click OK.
+5\. Sélectionnez le bouton radio « Clé dans le dépôt », saisissez « ma_nouvelle_clé » dans la boîte de texte correspondante et cliquez sur OK.
 
 ![Boîte de dialogue « Générer une clé »](images/generate_key_dialog.png)
 
-6\. You will be asked to enter a passphrase to protect the key file on the disk.
+6\. Il vous sera demandé de saisir une phrase de passe pour protéger le fichier clé sur le disque.
 
 ![Phrase de passe du fichier](images/set_passphrase_for_key.png)
 
 Saisir « MdpClé »
 
-7\. Click Yes to use the new key file to encrypt our text.
+7\. Cliquez sur Oui pour utiliser le nouveau fichier clé pour chiffrer votre texte.
 
 ![Boîte de dialogue « Utiliser une nouvelle clé »](images/use_new_key_dialog.png)
 
-8\. You can look at the key file in your user profile directory under `_encryptpad`
+8\. Vous trouverez le fichier clé dans votre répertoire personnel sous « _encryptpad »
 
 ![Clé dans l'explorateur Windows](images/key_in_explorer.png)
 
-Here is the content of the file (it will be different for you as the key is random):<br/> 
+Voici le contenu du fichier (il sera différent pour vous, car la clé est aléatoire) :<br/> 
 
     -----BEGIN PGP MESSAGE-----
     
@@ -56,66 +56,66 @@ C'est une séquence aléatoire en Base64 à partir de laquelle la clé de chiffr
 
     T6/vlnb0aysdr+xUriwwwrC844iVImiG4T/sCgF+ETQ=
 
-## Protect with the key file and save as a GPG file
+## Protéger avec le fichier clé et enregistrer comme fichier GPG
 
-9\. Click the Save As tool button.
+9\. Cliquez sur le bouton « Enregistrer sous ».
 
 ![Bouton « Enregistrer sous »](images/save_as_tool_button.png)
 
-10\. Select GnuPG file type and click Save button
+10\. Sélectionnez le type de fichier GnuPG et cliquez sur Enregistrer
 
 ![Boîte de dialogue « Enregistrer sous »](images/save_as_dialog.png)
 
-Please note that the file name has changed to `war and peace.gpg` in the Save As dialogue.
+Veuillez prendre note que le nom de fichier a changé en « guerre et paix.gpg » dans la boîte de dialogue « Enregistrer sous ».
 
-11\. Now the file has been saved on the disk and it is encrypted with the generated key file. See the status in the picture below.
+11\. Le fichier a maintenant été enregistré sur le disque, chiffré avec le fichier clé généré. Voir l'état dans l'image ci-dessous.
 
 ![Fichier GPG enregistré](images/key_protected_status.png)
 
-## The GPG file on disk
+## Le fichier GPG sur le disque
 
-It is an Open PGP file. You can send it to someone who does not have EncryptPad. It is easily decrypted with [Gpg4Win](https://www.gpg4win.org/). Use the content of the key file as a passphrase `T6/vlnb0aysdr+xUriwwwrC844iVImiG4T/sCgF+ETQ=` (see step 8).
+C'est un fichier OpenPGP. Vous pouvez l'envoyer à quelqu'un qui n'a pas EncryptPad. On peut le déchiffrer facilement avec [Gpg4Win](https://www.gpg4win.org/). Utilisez le contenu de ce fichier clé comme phrase de passe « T6/vlnb0aysdr+xUriwwwrC844iVImiG4T/sCgF+ETQ= » (voir étape 8).   
 
 ![Kleopatra a déchiffré notre fichier](images/kleopatra_decrypted.png)
 
-GPG packet --list-packets command output:
+Sortie de la commande --list-packets du paquet GPG :
 
-    gpg --list-packets "war and peace.gpg"
+    gpg --list-packets "guerre et paix.gpg"
     
     :symkey enc packet: version 4, cipher 9, s2k 3, hash 8
             salt 1c73cc8df90a54d5, count 65536 (96)
-    gpg: AES256 encrypted data
+    gpg: données chiffrées avec AES256
     :encrypted data packet:
             length: 1201175
             mdc_method: 2
-    gpg: encrypted with 1 passphrase
+    gpg: chiffré avec 1 phrase secrète
     :compressed packet: algo=2
     :literal data packet:
             mode t (74), created 0, name="CONSOLE",
             raw data: unknown length
 
-## View or change the key file used for protection
+## Visualiser ou changer le fichier clé utilisé comme protection
 
-12\. Click Set Key tool button.
+12\. Cliquez sur le bouton « Définir la clé ».
 
 ![Bouton « Définir la clé »](images/set_key_tool_button.png)
 
-13\. View the selected key file in Set Key dialogue
+13\. Visualisez le fichier clé sélectionné dans la boîte de dialogue « Définir la clé ».
 
 ![Boîte de dialogue « Définir une clé »](images/set_key_dialog.png)
 
-File without path is looked for in the EncryptPad directory first and then in the repository in HOME (see the text in the picture above). If your key is not in the repository, you can specify a full path to your key. 
+Les fichiers sans chemin sont d'abord cherchés dans le répertoire d'EncryptPad, puis dans le dépôt du dossier personnel (voir le texte de l'image ci-dessus). Si votre clé ne se trouve pas dans le dépôt, vous pouvez indiquer le chemin complet vers votre clé. 
 
 L'« emplacement de clé persistant dans le fichier chiffré » n'est pas pris en charge pour les fichiers GPG (voir README.md). Laissez vide pour l'instant. À FAIRE : ajouter le lien vers le guide sur le double chiffrement  EPD.
 
-## Open another plain text file
+## Ouvrir un autre fichier texte en clair
 
-If you try to open a plain text file now, it will fail with the following message.
+Si vous tentez d'ouvrir un fichier texte en clair maintenant, cela échouera avec le message suivant :
 
 ![Impossible d'ouvrir le texte en clair](images/open_another_plain_text.png)
 
-EncryptPad "thinks" that the file is encrypted with a key file because its mode is "Key protected" as you can see in the status bar. It tried to decrypt the plain text and failed. To proceed with opening the file, clear key protection by clicking the Clear Key tool button or even better click Close and Reset. The latter will close the text file and reset both parts of the protection.
+EncryptPad pense que le fichier est chiffré avec un fichier clé, car son mode est « Protégé par une clé », comme vous pouvez le voir dans la barre d'état. Elle a tenté de déchiffrer le texte en clair et a échoué. Pour poursuivre l'ouverture du fichier, effacez la protection par fichier clé en cliquant sur le bouton « Effacer la clé de chiffrement », ou mieux encore, en cliquant sur « Fermer et réinitialiser » ce qui fermera le fichier texte et réinitialisera la protection.
 
 ![Effacer la clé ou Fermer et réinitialiser](images/clear_key_or_close_and_reset.png)
 
-Now you can open your plain text file.
+Vous pouvez maintenant ouvrir votre fichier texte en clair.

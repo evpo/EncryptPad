@@ -6,15 +6,15 @@
 
 ![Bouton « Ouvrir un fichier »](images/open_text_file.png)
 
-2\. Sélectionner le type de fichier « Texte en clair » et cliquez sur  Enregistrer
+2\. Sélectionnez le type de fichier « Texte en clair » et cliquez sur Enregistrer
 
 ![Type de fichier « Texte en clair »](images/open_file_dialog_text_file.png)
 
-3\. Le fichier texte en clair s'ouvre
+3\. Le fichier texte en clair ouvert
 
 ![Fichier texte ouvert](images/text_file_opened.png)
 
-EncryptPad est maintenant en mode texte en clair non protégé. Il fonctionne comme un éditeur de texte ordinaire.
+EncryptPad est maintenant en mode texte en clair non protégé. Elle fonctionne comme un éditeur de texte ordinaire.
 
 ![Mode non protégé](images/unprotected_status.png)
 
@@ -48,7 +48,7 @@ Voici le contenu du fichier (il sera différent pour vous, car la clé est aléa
 
 C'est une séquence aléatoire en Base64 à partir de laquelle la clé de chiffrement est dérivée.
 
-## Protéger le fichier clé et l'enregistrer comme fichier GPG
+## Protéger avec le fichier clé et enregistrer comme fichier GPG
 
 9\. Cliquez sur le bouton « Enregistrer sous ».
 
@@ -58,7 +58,7 @@ C'est une séquence aléatoire en Base64 à partir de laquelle la clé de chiffr
 
 ![Boîte de dialogue « Enregistrer sous »](images/select_epd_in_save_as.png)
 
-Veuillez prendre note que le nom de fichier à changé en « guerre et paix.epd »dans la boîte de dialogue « Enregistrer sous ».
+Veuillez prendre note que le nom de fichier a changé en « guerre et paix.epd » dans la boîte de dialogue « Enregistrer sous ».
 
 11\. Il vous sera demandé de saisir une phrase de passer deux fois. Saisissez « MdpDémo » pour cet exemple et cliquez sur OK.
 
@@ -80,7 +80,7 @@ Maintenant, si vous effacez la protection, fermez le fichier et rouvrez-le. La p
 
 14\. Activez « Emplacement de clé persistant dans le fichier chiffré » dans la boîte de dialogue « Définir la clé » et cliquez sur OK.
 
-![Enable Persist Key](images/enable_persist_key.png)
+![Activer la clé persistente](images/enable_persist_key.png)
 
 15\. La barre d'état a changé (voir l'image ci-dessous).
 
@@ -96,7 +96,7 @@ Si vous tentez d'ouvrir un fichier texte en clair maintenant, cela échouera ave
 
 ![Impossible d'ouvrir le texte en clair](images/open_another_plain_text.png)
 
-EncryptPad pense que le fichier est chiffré avec une phrase de passe et un fichier clé, car son mode est « Protégé par une clé » et « Protégé par phrase de passe », comme vous pouvez le voir dans la barre d'état. Il a tenté de déchiffrer le texte en clair et a échoué. Pour poursuivre l'ouverture du fichier, effacez la protection par phrase de passe et fichiers clé en cliquant sur les boutons « Effacer la clé de chiffrement » et « Effacer la phrase de passe », ou mieux encore, en cliquant sur « Fermer et réinitialiser » ce qui fermera le fichier texte et réinitialisera les deux parties de la protection.
+EncryptPad pense que le fichier est chiffré avec une phrase de passe et un fichier clé, car son mode est « Protégé par une clé » et « Protégé par phrase de passe », comme vous pouvez le voir dans la barre d'état. Elle a tenté de déchiffrer le texte en clair et a échoué. Pour poursuivre l'ouverture du fichier, effacez la protection par phrase de passe et fichier clé en cliquant sur les boutons « Effacer la clé de chiffrement » et « Effacer la phrase de passe », ou mieux encore, en cliquant sur « Fermer et réinitialiser » ce qui fermera le fichier texte et réinitialisera les deux parties de la protection.
 
 ![Effacer la clé ou Fermer et réinitialiser](images/clear_key_and_pwd_or_close_and_reset.png)
 
@@ -104,7 +104,7 @@ Vous pouvez maintenant ouvrir votre fichier texte en clair.
 
 ## Le fonctionnement interne du fichier EPD
 
-Le fichier EPD est un fichier OpenPGP contenant un fichier [WAD](https://fr.wikipedia.org/wiki/.wad) qui contient un autre fichier OpenPGP.  Il y a trois niveaux d'imbrication. Pour le démontrer, nous pouvons extraire le fichier chiffré sans utiliser EncryptPad.
+Le fichier EPD est un fichier OpenPGP contenant un fichier [WAD](https://fr.wikipedia.org/wiki/.wad) qui contient un autre fichier OpenPGP. Il y a trois niveaux d'imbrication. Pour le démontrer, nous pouvons extraire le fichier chiffré sans utiliser EncryptPad.
 
 17\. Renommez le fichier « guerre et paix.epd » en « guerre et paix.gpg ».
 
@@ -128,8 +128,8 @@ Notez que le fichier « __X2_KEY » contient le nom de notre fichier clé « ma_
 
 23\. Déchiffrez le fichier clé « ma_nouvelle_clé » avec [Gpg4Win](https://www.gpg4win.org/). Utilisez « MdpClé » comme phrase de passe.
 
-24\. Now that we have the unencrypted key file, decrypt the file from step 22 with [Gpg4Win](https://www.gpg4win.org/). Use the content of the key file from step 23 as a passphrase.
+24\. Maintenant que nous avons la clé non chiffrée, déchiffrez le fichier de l'étape 22 avec [Gpg4Win](https://www.gpg4win.org/). Utilisez le contenu du fichier clé de l'étape 23 comme phrase de passe.
 
 ![Kleopatra a déchiffré notre fichier](images/kleopatra_decrypted.png)
 
-25\. The result of this decryption will be your original plain text file.
+25\. Le résultat de ce déchiffrement sera votre fichier texte en clair original.

@@ -1,79 +1,79 @@
 # Ouvrir un fichier texte en clair, le protéger par phrase de passe et l'enregistrer comme fichier GPG
 
-We are going to open a plain text file, protect it with a passphrase and save as a GPG file.
+Nous allons ouvrir un fichier texte en clair, le protéger par phrase de passe et l'enregistrer comme fichier GPG.
 
-## Open a plain text file
+## Ouvrir un fichier texte en clair
 
-1\. Click the Open File tool button
+1\. Cliquez sur le bouton « Ouvrir un fichier »
 
 ![Bouton « Ouvrir un fichier »](images/open_text_file.png)
 
-2\. Select Plain Text file type and click Save button
+2\. Sélectionnez le type de fichier « Texte en clair » et cliquez sur Enregistrer
 
 ![Type de fichier « Texte en clair »](images/open_file_dialog_text_file.png)
 
-3\. The plain text file opened
+3\. Le fichier texte en clair ouvert
 
 ![Fichier texte ouvert](images/text_file_opened.png
 
-Now EncryptPad is in unprotected plain text mode. It works as an ordinary text editor.
+EncryptPad est maintenant en mode texte en clair non protégé. Elle fonctionne comme un éditeur de texte ordinaire.
 
 ![Mode non protégé](images/unprotected_status.png)
 
-## Protect with a passphrase and save as a GPG file
+## Protéger avec une phrase de passe et enregistrer comme fichier GPG
 
-4\. Click the Save As tool button.
+4\. Cliquez sur le bouton « Enregistrer sous ».
 
 ![Bouton « Enregistrer sous »](images/save_as_tool_button.png)
 
-5\. Select GnuPG file type and click Save button
+5\. Sélectionnez le type de fichier GnuPG et cliquez sur Enregistrer
 
 ![Boîte de dialogue « Enregistrer sous »](images/save_as_dialog.png)
 
-Please note that the file name has changed to "war and peace.gpg" in the Save As dialogue.
+Veuillez prendre note que le nom de fichier a changé en « guerre et paix.gpg » dans la boîte de dialogue « Enregistrer sous ».
 
 6\. Il vous sera demandé de saisir deux fois une phrase de passe. Saisir « MdpDémo » et cliquez sur OK.
 
 ![Définir une phrase de passe](images/set_passphrase.png)
 
-7\. Now the file has been saved on the disk and it is encrypted with our passphrase. See the file extension and the status on the picture below.
+7\. Le fichier a maintenant été enregistré sur le disque, chiffré avec notre phrase de passe. Voir l'extension du fichier et l'état dans l'image ci-dessous.
 
 ![Fichier GPG enregistré](images/gpg_file_saved.png)
 
-## The GPG file on disk
+## Le fichier GPG sur le disque
 
-It is an Open PGP file. You can send it to someone who does not have EncryptPad. It is easily decrypted with [Gpg4Win](https://www.gpg4win.org/) for example.
+C'est un fichier OpenPGP. Vous pouvez l'envoyer à quelqu'un qui n'a pas EncryptPad. On peut par exemple le déchiffrer facilement avec [Gpg4Win](https://www.gpg4win.org/).
 
 ![Kleopatra a déchiffré notre fichier](images/kleopatra_decrypted.png)
 
-GPG packet --list-packets command output:
+Sortie de la commande --list-packets du paquet GPG :
 
-`gpg --list-packets "war and peace.gpg"`<br/>
+gpg --list-packets "war and peace.gpg"<br/>
 
-`:symkey enc packet: version 4, cipher 9, s2k 3, hash 8`<br/>
-`        salt 9cd701f1d2e0aca8, count 65536 (96)`<br/>
-`gpg: AES256 encrypted data`<br/>
-`:encrypted data packet:`<br/>
-`        length: 1201175`<br/>
-`        mdc_method: 2`<br/>
-`gpg: encrypted with 1 passphrase`<br/>
-`:compressed packet: algo=2`<br/>
-`:literal data packet:`<br/>
-`        mode t (74), created 0, name="CONSOLE",`<br/>
-`        raw data: unknown length`<br/>
+:symkey enc packet: version 4, cipher 9, s2k 3, hash 8<br/>
+salt 9cd701f1d2e0aca8, count 65536 (96)<br/>
+gpg: données chiffrées avec AES256<br/>
+:encrypted data packet:<br/>
+length: 1201175<br/>
+mdc_method: 2<br/>
+gpg: chiffré avec 1 phrase secrète<br/>
+:compressed packet: algo=2<br/>
+:literal data packet:<br/>
+mode t (74), created 0, name="CONSOLE",<br/>
+raw data: unknown length<br/>
 
-## Update the file
+## Mettre le fichier à jour
 
-If you modify the text now and click Save tool button, EncryptPad will not ask you to enter the passphrase again because it stores several salted hashes of your passphrase.
+Si vous modifiez maintenant le texte et cliquez sur le bouton Enregistrer, EncryptPad ne vous demandera pas de saisir la phrase de passe de nouveau, car elle stocke plusieurs hachages salés de votre phrase de passe.
 
-## Open another plain text file
+## Ouvrir un autre fichier texte en clair
 
-If you try to open a plain text file now, it will fail with the following message.
+Si vous tentez d'ouvrir un fichier texte en clair maintenant, cela échouera avec le message suivant :
 
 ![Impossible d'ouvrir le texte en clair](images/open_another_plain_text.png)
 
-EncryptPad "thinks" that the file is encrypted with a passphrase because its mode is "passphrase protected" as you can see in the status bar. It tried to decrypt the plain text and failed. To proceed with opening the file, clear passphrase protection by clicking the Clear passphrase tool button or even better click Close and Reset. The latter will close the text file and reset both parts of the protection.
+EncryptPad pense que le fichier est chiffré avec une phrase de passe, car son mode est « Protégé par phrase de passe », comme vous pouvez le voir dans la barre d'état. Elle a tenté de déchiffrer le texte en clair et a échoué. Pour poursuivre l'ouverture du fichier, effacez la protection par phrase de passe en cliquant sur le bouton « Effacer la phrase de passe », ou mieux encore, en cliquant sur « Fermer et réinitialiser » ce qui fermera le fichier texte et réinitialisera la protection.
 
 ![Effacer la phrase de passe ou Fermer et réinitialiser](images/clear_pwd_or_close_and_reset.png)
 
-Now you can open your plain text file.
+Vous pouvez maintenant ouvrir votre fichier texte en clair.

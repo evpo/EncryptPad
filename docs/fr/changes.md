@@ -15,7 +15,8 @@ h2
 * Correctif de bogue : si plusieurs EncryptPad étaient ouverts et que les préférences étaient mises à jour, lors de la fermeture le dernier EncryptPad écrasait les préférences modifiées dans les autres EncryptPad.
 * Dans la boîte de dialogue « Chiffrement de fichier », un bouton radio a été ajouté afin de choisir entre EPD et GPG. L'utilisateur devait précédemment modifier l'extension manuellement pour obtenir une sortie au format GPG.
 * Correctif de bogue : « Sel » était affiché dans la boîte de dialogue « Chiffrement de fichier » après le chiffrement ou le déchiffrement d'un fichier, ce qui n'était pas logique, car cela n'était pas relié au prochain chiffrement.
-* Il n'y a que 256 itérations S2K possibles. La boîte de dialogue des propriétés de fichier propose maintenant une zone combinée pour les lister toutes. Il est plus simple de choisir soit le nombre maximal, soit le nombre minimal d'itérations.
+* Il n'y a que 256 ensembles d'itérations S2K possibles. La boîte de dialogue des propriétés de fichier propose maintenant une zone combinée pour les lister tous. Il est plus simple de choisir soit le nombre maximal, soit le nombre minimal d'itérations.
+* The default number of iterations has been changed to 1015808.
 * La phrase de passe d'un fichier clé n'est plus demandée si le fichier clé est local et non chiffré, car cela était inutile.
 * Correctif de bogue : après ouverture d'un fichier, le curseur représentait une flèche quand il survolait la zone de saisie de texte. Il représente maintenant « I » comme il se doit.
 * Utilisation d'un seul exécutable EncryptPad pour toutes les langues. EncryptPad reconnaîtra la langue préférée du SE et l'utilisera pour la localisation. La gestion des versions en sera simplifiée, particulièrement pour les empaqueteurs.
