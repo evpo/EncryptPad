@@ -260,42 +260,44 @@ Use the commands below to install the packages.
 
 Below are steps to verify the SHA-1 hashes of the source files in [Launchpad webupd8 PPA](https://launchpad.net/~nilarimogard/+archive/ubuntu/webupd8/+packages) used for building the packages. Ideally, you need to be familiar with the PPA concepts.
 
-1\. Download one of the `changes` files below depending on your distribution.
+1\. Download one of the `changes` files below depending on your distribution. The package version was 0.3.2.5 at the moment of writing. Please replace it with the latest version you are installing.
 
 - Yakkety
 
-        wget https://launchpadlibrarian.net/282249531/encryptpad_0.3.2.3-1~webupd8~yakkety1_source.changes
+        wget https://launchpadlibrarian.net/282249531/encryptpad_0.3.2.5-1~webupd8~yakkety1_source.changes
 
 - Xenial
 
-        wget https://launchpadlibrarian.net/282249418/encryptpad_0.3.2.3-1~webupd8~xenial1_source.changes
-
-- Wily
-
-        wget https://launchpadlibrarian.net/282249155/encryptpad_0.3.2.3-1~webupd8~wily1_source.changes
+        wget https://launchpadlibrarian.net/282249418/encryptpad_0.3.2.5-1~webupd8~xenial1_source.changes
 
 - Vivid
 
-        wget https://launchpadlibrarian.net/282249098/encryptpad_0.3.2.3-1~webupd8~vivid1_source.changes
+        wget https://launchpadlibrarian.net/282249098/encryptpad_0.3.2.5-1~webupd8~vivid1_source.changes
 
 - Trusty
 
-        wget https://launchpadlibrarian.net/282247738/encryptpad_0.3.2.3-1~webupd8~trusty1_source.changes
+        wget https://launchpadlibrarian.net/282247738/encryptpad_0.3.2.5-1~webupd8~trusty1_source.changes
 
-2\. Download the signed manifest with SHA-1 hashes:
+2\. Download the tarball with the verified "changes" files and its signature:
 
-    wget https://github.com/evpo/EncryptPad/releases/download/v0.3.2.3/encryptpad0_3_2_3_webupd8_ppa_manifest.asc
+    wget https://github.com/evpo/EncryptPad/releases/download/v0.3.2.5/encryptpad0_3_2_5_webupd8_ppa_changes.tar.gz
+    wget https://github.com/evpo/EncryptPad/releases/download/v0.3.2.5/encryptpad0_3_2_5_webupd8_ppa_changes.tar.gz.asc
 
-3\. Receive and verify the `EncryptPad Release` key
+3\. Receive and verify the `EncryptPad Release` key:
 
     gpg --recv-key 634BFC0CCC426C74389D89310F1CFF71A2813E85
 
-4\. Verify the signature on the manifest
+4\. Verify the signature on the tarball:
 
-    gpg --verify encryptpad0_3_2_3_webupd8_ppa_manifest.asc
+    gpg --verify encryptpad0_3_2_5_webupd8_ppa_changes.tar.gz.asc
 
-5\. Open the manifest asc file in a text editor and the `changes` text file. Compare that the SHA-1
-    hashes on the listed source files match.
+5\. Extract the content:
+
+    tar -xf encryptpad0_3_2_5_webupd8_ppa_changes.tar.gz
+
+6\. Compare the "changes" file for your distribution with the file from step 1. The SHA hashes should match.
+
+    diff encryptpad_0.3.2.5-1~webupd8~yakkety1_source.changes encryptpad0_3_2_5_webupd8_ppa_changes/encryptpad_0.3.2.5-1~webupd8~yakkety1_source.changes
 
 <div id="compile-on-windows"></div>
 ##Compile EncryptPad on Windows

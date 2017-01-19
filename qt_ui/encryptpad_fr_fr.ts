@@ -44,7 +44,7 @@
     <message>
         <location filename="file_encryption_dialog.ui" line="14"/>
         <source>File Encryption</source>
-        <translation>Chiffrement de fichier</translation>
+        <translation>Chiffrement du fichier</translation>
     </message>
     <message>
         <location filename="file_encryption_dialog.ui" line="32"/>
@@ -270,7 +270,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="file_properties_dialog.ui" line="29"/>
         <source>File Properties</source>
-        <translation>Propriétés du fichier</translation>
+        <translation>Propriétés des fichiers</translation>
     </message>
     <message>
         <location filename="file_properties_dialog.ui" line="55"/>
@@ -714,12 +714,12 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="mainwindow.cpp" line="718"/>
         <source>File &amp;Properties...</source>
-        <translation>&amp;Propriétés du fichier...</translation>
+        <translation>&amp;Propriétés des fichiers...</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="719"/>
         <source>Set file properties</source>
-        <translation>Définir les propriétés du fichier</translation>
+        <translation>Définir les propriétés des fichiers</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="722"/>
@@ -1012,7 +1012,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="mainwindow.cpp" line="1017"/>
         <source>&amp;View</source>
-        <translation>&amp;Visualiser</translation>
+        <translation>&amp;Affichage</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="1026"/>
@@ -1047,7 +1047,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="mainwindow.cpp" line="1069"/>
         <source>View</source>
-        <translation>Visualiser</translation>
+        <translation>Affichage</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="1079"/>
