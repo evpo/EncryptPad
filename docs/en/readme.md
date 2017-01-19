@@ -280,8 +280,11 @@ Below are steps to verify the SHA-1 hashes of the source files in [Launchpad web
 
 2\. Download the tarball with the verified "changes" files and its signature:
 
-    wget https://github.com/evpo/EncryptPad/releases/download/v0.3.2.5/encryptpad0_3_2_5_webupd8_ppa_changes.tar.gz
-    wget https://github.com/evpo/EncryptPad/releases/download/v0.3.2.5/encryptpad0_3_2_5_webupd8_ppa_changes.tar.gz.asc
+    wget https://github.com/evpo/EncryptPad/releases/download/v0.3.2.5\
+    /encryptpad0_3_2_5_webupd8_ppa_changes.tar.gz
+
+    wget https://github.com/evpo/EncryptPad/releases/download/v0.3.2.5\
+    /encryptpad0_3_2_5_webupd8_ppa_changes.tar.gz.asc
 
 3\. Receive and verify the `EncryptPad Release` key:
 
@@ -297,7 +300,8 @@ Below are steps to verify the SHA-1 hashes of the source files in [Launchpad web
 
 6\. Compare the "changes" file for your distribution with the file from step 1. The SHA hashes should match.
 
-    diff encryptpad_0.3.2.5-1~webupd8~yakkety1_source.changes encryptpad0_3_2_5_webupd8_ppa_changes/encryptpad_0.3.2.5-1~webupd8~yakkety1_source.changes
+    diff encryptpad_0.3.2.5-1~webupd8~yakkety1_source.changes \
+    encryptpad0_3_2_5_webupd8_ppa_changes/encryptpad_0.3.2.5-1~webupd8~yakkety1_source.changes
 
 <div id="compile-on-windows"></div>
 ##Compile EncryptPad on Windows

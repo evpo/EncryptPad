@@ -326,8 +326,11 @@ sudo apt install encryptpad encryptcli
 
 <p>2. Download the tarball with the verified "changes" files and its signature:</p>
 
-<pre><code>wget https://github.com/evpo/EncryptPad/releases/download/v0.3.2.5/encryptpad0_3_2_5_webupd8_ppa_changes.tar.gz
-wget https://github.com/evpo/EncryptPad/releases/download/v0.3.2.5/encryptpad0_3_2_5_webupd8_ppa_changes.tar.gz.asc
+<pre><code>wget https://github.com/evpo/EncryptPad/releases/download/v0.3.2.5\
+/encryptpad0_3_2_5_webupd8_ppa_changes.tar.gz
+
+wget https://github.com/evpo/EncryptPad/releases/download/v0.3.2.5\
+/encryptpad0_3_2_5_webupd8_ppa_changes.tar.gz.asc
 </code></pre>
 
 <p>3. Receive and verify the <code>EncryptPad Release</code> key:</p>
@@ -347,7 +350,8 @@ wget https://github.com/evpo/EncryptPad/releases/download/v0.3.2.5/encryptpad0_3
 
 <p>6. Compare the "changes" file for your distribution with the file from step 1. The SHA hashes should match.</p>
 
-<pre><code>diff encryptpad_0.3.2.5-1~webupd8~yakkety1_source.changes encryptpad0_3_2_5_webupd8_ppa_changes/encryptpad_0.3.2.5-1~webupd8~yakkety1_source.changes
+<pre><code>diff encryptpad_0.3.2.5-1~webupd8~yakkety1_source.changes \
+encryptpad0_3_2_5_webupd8_ppa_changes/encryptpad_0.3.2.5-1~webupd8~yakkety1_source.changes
 </code></pre>
 
 <div id="compile-on-windows"></div>
