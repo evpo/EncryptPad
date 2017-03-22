@@ -386,7 +386,7 @@ packages before building.
 
 <div id="build-on-fedora"></div>
 
-### Fedora###
+### Fedora
 
 Install dependencies and tools:
 
