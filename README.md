@@ -10,6 +10,7 @@ Screenshots and tutorials are at [evpo.net/encryptpad/](http://evpo.net/encryptp
 EncryptPad is an application for viewing and editing symmetrically encrypted text. Using a simple and convenient graphical and command line interface, EncryptPad provides a tool for encrypting and decrypting binary files on disk while offering effective measures for protecting information, and it uses the most widely chosen quality file format **OpenPGP** [RFC 4880](https://tools.ietf.org/html/rfc4880). Unlike other OpenPGP software which main purpose is asymmetric encryption, the primary focus of EncryptPad is symmetric encryption.
 
 ## Table of Contents
+
 * [Features](#features)
 * [Supported platforms](#supported-platforms)
 * [Why use EncryptPad?](#why-use-encryptpad)
@@ -42,7 +43,9 @@ EncryptPad is an application for viewing and editing symmetrically encrypted tex
 * [License](#license)
 * [Contact and feedback](#contact)
 
+
 <div id="features"></div>
+
 ## Features
 
 * **Symmetric** encryption
