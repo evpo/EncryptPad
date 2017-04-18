@@ -4,9 +4,9 @@ h2
     text-align: center;
 }
 </style>
-##Notes de version##
+## Notes de version ##
 
-###Version 0.3.2.5
+### Version 0.3.2.5
 
 * Correctif de bogue : si un fichier EPD «&nbsp;phrase de passe seulement&nbsp&nbsp;» déchiffré comprenait moins de 4 caractères, le contenu était ignoré et EncryptPad produisait un fichier vide. Cela se produisait, car EncryptPad  s'attendait à trouver un marqueur IWAD de 4 caractères. Ces fichiers seront maintenant ouverts correctement.
 * Correctif de bogue : si un fichier texte en clair était ouvert puis enregistré chiffré, les paramètres de chiffrement n'étaient pas réinitialisés aux valeurs par défaut, mais utilisaient les paramètres du dernier fichier chiffré.
@@ -26,7 +26,7 @@ h2
 * stlplus a été mise à jour vers 3.13.
 
 
-###Version 0.3.2.3
+### Version 0.3.2.3
 
 * Nombre configurable d'itérations S2K. Il peut être été fini par fichier, et comme valeur par défaut pour les nouveaux fichiers. Cette valeur est aussi utilisée pour la protection des fichiers.
 * Prise en charge des octets d'estampille temporelle dans les fichiers GPG.
@@ -39,7 +39,7 @@ h2
 * Correctif de bogue : dans la boîte de dialogue «&nbsp;Chiffrement du fichier&nbsp;», quand la phrase de passe était effacée puis redéfinie, la phrase de passe était ignorée et le fichier était enregistré comme «&nbsp;clé seulement&nbsp;».
 * Correctif de bogue : dans le chiffrement des fichiers, les fichiers gpg étaient chiffrés avec le drapeau «&nbsp;t&nbsp;», ce qui entraînait la suppression de 0x0D octets quand GPG déchiffrait les fichiers, car il croyait que les fichiers étaient textuels. Le problème ne se produisait pas sous Windows ni quand EncryptPad était utilisé pour le déchiffrement. Cela ne se produisait que dans la direction EncryptPad vers GPG pour Linux/Unix.
 
-###Version 0.3.2.2
+### Version 0.3.2.2
 
 * Correctif de bogue : dans la boîte de dialogue «&nbsp;Chiffrement du fichier&nbsp;», lorsque la phrase de passe du fichier clé était erronée, un message n'en informait pas l'utilisateur.
 * Prise en charge des fichiers BAK. Lors d'une modification, un fichier bak n'est crée que lors du premier enregistrement.
@@ -55,6 +55,6 @@ h2
 * Correctif de la compilation sous Fedora 23
 * Correctif des avertissements
 
-###Version 0.3.2.1
+### Version 0.3.2.1
 
 * Première version à code source ouvert

@@ -1,4 +1,4 @@
-#Encrypt a binary file such as a picture or an archive
+# Encrypt a binary file such as a picture or an archive
 
 ## Generate a new key file if you want to use a key file for encryption.
 
