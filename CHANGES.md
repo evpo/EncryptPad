@@ -4,9 +4,9 @@ h2
     text-align: center;
 }
 </style>
-##Release Notes##
+## Release Notes ##
 
-###Version 0.3.2.5
+### Version 0.3.2.5
 
 * Bug fixed: if a decrypted passphrase-only EPD file contained less than 4 characters, the content was ignored and EncryptPad produced an empty file. It happened because EncryptPad expected to find IWAD marker, which was 4 character long. Such files will now open correctly.
 * Bug fixed: when opening a plain-text file and saving it as encrypted, the encryption parameters did not reset to the default values but used the parameters of the last encrypted file.
@@ -26,7 +26,7 @@ h2
 * stlplus was updated from upstream. It is now 3.13.
 
 
-###Version 0.3.2.3
+### Version 0.3.2.3
 
 * Configurable s2k iteration count. It can be set per file and the default value for new files. That value is also used for protecting file keys.
 * Support for the timestamp bytes in GPG files.
@@ -39,7 +39,7 @@ h2
 * Bug fixed: In the file encryption dialogue, when clearing the passphrase and setting it again, the passphrase was ignored and the file was saved as "key only".
 * Bug fixed: In the file encryption, gpg files were encrypted with 't' flag. It lead to removal of 0x0D bytes when GPG decrypted the files because it thought that the files were textual. The problem did not manifest on Windows and when EncryptPad was used for decryption. It was only in the direction from EncryptPad to Linux/Unix GPG.
 
-###Version 0.3.2.2
+### Version 0.3.2.2
 
 * Bug fixed: In file encryption dialogue, when the key file passphrase was wrong, a message box did not inform the user.
 * BAK files support. When editing, a bak file is only created when saving for the first time.
@@ -55,7 +55,7 @@ h2
 * Fixed build on Fedora 23
 * Fixed warnings
 
-###Version 0.3.2.1
+### Version 0.3.2.1
 
 * Initial open source release
 

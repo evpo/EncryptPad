@@ -1,4 +1,4 @@
-#Chiffrer un fichier binaire tel qu'une image ou un fichier compressé
+# Chiffrer un fichier binaire tel qu'une image ou un fichier compressé
 
 ## Générer un nouveau fichier clé si vous souhaitez utiliser un fichier clé pour le chiffrement.
 
