@@ -142,7 +142,7 @@ bool PreferencesDialog::getDefaultFilePropertiesChanged() const
 void PreferencesDialog::updateFont()
 {
     QString fontText = font.family();
-    fontText += tr(" (Size: ");
+    fontText += " " + tr("(Size: ");
     fontText += QString::number(font.pointSize());
     fontText += tr(")");
     ui->uiFontFamily->setText(fontText);
