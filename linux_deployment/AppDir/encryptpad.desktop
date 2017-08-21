@@ -8,4 +8,4 @@ Exec=encryptpad.wrapper %f
 Categories=Utility;TextEditor;
 StartupNotify=false
 Terminal=false
-MimeType=application/x-encryptpad
+MimeType=application/x-encryptpad;
