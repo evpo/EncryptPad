@@ -6,7 +6,6 @@ debug
 object_script.*
 *.user
 *.cpad
-deps
 *.opensdf
 qt_build
 qt_deployment
@@ -26,3 +25,9 @@ compile_commands.json
 cscope.files
 cscope.out
 bin
+deps/botan
+deps/famfamfam_icons
+deps/gtest
+deps/makefiles
+deps/stlplus
+deps/zlib
