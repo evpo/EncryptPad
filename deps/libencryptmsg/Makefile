@@ -10,7 +10,7 @@ tests:: gtest src
 cli:: src
 	$(MAKE) -C cli RELEASE=$(RELEASE)
 
-src::
+src:: symlinks
 	$(MAKE) -C src RELEASE=$(RELEASE)
 
 clean::
@@ -19,3 +19,8 @@ clean::
 	$(MAKE) -C cli clean RELEASE=$(RELEASE)
 	$(MAKE) -C src clean RELEASE=$(RELEASE)
 	$(MAKE) -C test_assets clean RELEASE=$(RELEASE)
+
+symlinks::
+	ln -s ../../makefiles deps/
+	ln -s ../../stlplus deps/
+	ln -s ../../gtest deps/
