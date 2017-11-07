@@ -70,11 +70,11 @@ namespace LibEncryptMsg
         stm.Read(buf.data(), stm.GetCount());
     }
 
-    SecureVector::const_iterator InBufferStream::ReadLength(SecureVector::const_iterator it, SecureVector::const_iterator end)
+    SafeVector::const_iterator InBufferStream::ReadLength(SafeVector::const_iterator it, SafeVector::const_iterator end)
     {
         assert(static_cast<size_t>(end - it) >= 5U);
         // TODO: Add ReadLength overload to read from iterators so we don't need to make a temp buffer
-        SecureVector buf(it, it + 5U);
+        SafeVector buf(it, it + 5U);
         InBufferStream stm;
         stm.Push(buf);
         bool is_partial = false;

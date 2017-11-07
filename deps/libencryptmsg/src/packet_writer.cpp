@@ -8,7 +8,7 @@
 #include "openpgp_conversions.h"
 
 using namespace std;
-using SecureVector = Botan::secure_vector<uint8_t>;
+using SafeVector = Botan::secure_vector<uint8_t>;
 
 namespace LibEncryptMsg
 {
@@ -69,7 +69,7 @@ namespace LibEncryptMsg
         // partialBodyLen = 1 << (1st_octet & 0x1F)
         assert(partial_length_power == (partial_length_power & 0x1F));
         size_t length = 1 << partial_length_power;
-        SecureVector buf(length);
+        SafeVector buf(length);
         uint8_t header = partial_length_power | 0xE0;
         while(in.GetCount() >= length)
         {
@@ -187,7 +187,7 @@ namespace LibEncryptMsg
     void PacketWriter::Write(OutStream &out)
     {
         WriteHeader(out);
-        SecureVector buf;
+        SafeVector buf;
         auto buf_stm = MakeOutStream(buf);
         DoWrite(*buf_stm);
         out_.Push(buf);
@@ -197,7 +197,7 @@ namespace LibEncryptMsg
     void PacketWriter::Finish(OutStream &out)
     {
         Write(out);
-        SecureVector buf;
+        SafeVector buf;
         auto buf_stm = MakeOutStream(buf);
         DoFinish(*buf_stm);
         out_.Push(buf);
@@ -244,7 +244,7 @@ namespace LibEncryptMsg
     void LiteralWriter::DoWrite(OutStream &out)
     {
         WritePrefix(out);
-        SecureVector buf(in_.GetCount());
+        SafeVector buf(in_.GetCount());
         in_.Read(buf.data(), buf.size());
         out.Write(buf.data(), buf.size());
     }
@@ -286,7 +286,7 @@ namespace LibEncryptMsg
             write_compression_ = false;
         }
 
-        SecureVector buf(in_.GetCount());
+        SafeVector buf(in_.GetCount());
         in_.Read(buf.data(), buf.size());
 
         if(finish_)
@@ -311,10 +311,10 @@ namespace LibEncryptMsg
         auto &algo_spec = GetAlgoSpec(config_.GetCipherAlgo());
         cipher_mode_.reset(Botan::get_cipher_mode(algo_spec.botan_name, Botan::ENCRYPTION));
         cipher_mode_->set_key(encryption_key_.begin(), encryption_key_.size());
-        SecureVector iv(algo_spec.block_size, 0);
+        SafeVector iv(algo_spec.block_size, 0);
         cipher_mode_->start(iv.data(), iv.size());
 
-        SecureVector prefix;
+        SafeVector prefix;
         prefix.resize(algo_spec.block_size);
         Botan::AutoSeeded_RNG rng;
         rng.randomize(prefix.data(), prefix.size());
@@ -355,7 +355,7 @@ namespace LibEncryptMsg
             assert(bytes2update + kMDCLength >= cipher_mode_->minimum_final_size());
         }
 
-        SecureVector buf(bytes2update);
+        SafeVector buf(bytes2update);
         in_.Read(buf.data(), bytes2update);
         hash_.update(buf.data(), bytes2update);
 
@@ -370,7 +370,7 @@ namespace LibEncryptMsg
             buf.push_back(0xD3);
             buf.push_back(0x14);
 
-            SecureVector sha1 = hash_.final();
+            SafeVector sha1 = hash_.final();
             buf.insert(buf.end(), sha1.begin(), sha1.begin() + sha1.size());
             assert(buf.size() == bytes2update + kMDCLength);
             cipher_mode_->finish(buf);

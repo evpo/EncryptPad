@@ -2,7 +2,7 @@
 
 namespace LibEncryptMsg
 {
-    Passphrase::Passphrase(const SecureVector &data_p)
+    Passphrase::Passphrase(const SafeVector &data_p)
         :data(data_p)
     {
     }

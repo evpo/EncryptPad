@@ -3,5 +3,5 @@
 
 namespace LibEncryptMsg
 {
-    using SecureVector = Botan::secure_vector<uint8_t>;
+    using SafeVector = Botan::secure_vector<uint8_t>;
 }

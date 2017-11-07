@@ -17,9 +17,9 @@ namespace
         return reinterpret_cast<fstream::char_type*>(p);
     }
 
-    SecureVector ReadFile(const std::string &file_name)
+    SafeVector ReadFile(const std::string &file_name)
     {
-        SecureVector buf;
+        SafeVector buf;
         ifstream pwd_stm(file_name, ios_base::binary);
         if(!pwd_stm)
             return buf;
@@ -41,11 +41,11 @@ namespace
             {
             }
 
-            std::unique_ptr<SecureVector> GetPassphrase(std::string description, bool &canceled) override
+            std::unique_ptr<SafeVector> GetPassphrase(std::string description, bool &canceled) override
             {
                 (void)description;
                 canceled = false;
-                return std::unique_ptr<SecureVector>(new SecureVector(ReadFile(pwd_file_)));
+                return std::unique_ptr<SafeVector>(new SafeVector(ReadFile(pwd_file_)));
             }
     };
 }
@@ -92,7 +92,7 @@ namespace LibEncryptMsg
                 return;
 
             const size_t kBufSize = 16;
-            SecureVector buf(kBufSize);
+            SafeVector buf(kBufSize);
             while(in_file && !in_file.eof())
             {
                 buf.resize(kBufSize);
@@ -123,7 +123,7 @@ namespace LibEncryptMsg
                 return;
 
             const size_t kBufSize = 16;
-            SecureVector buf(kBufSize);
+            SafeVector buf(kBufSize);
             while(in_file && !in_file.eof())
             {
                 buf.resize(kBufSize);

@@ -29,13 +29,13 @@ namespace LibEncryptMsg
 
             void WriteESK(OutStream &out);
         public:
-            void Start(const SecureVector &passphrase, MessageConfig message_config, Salt salt);
-            void Start(std::unique_ptr<SecureVector> passphrase, MessageConfig message_config, Salt salt);
+            void Start(const SafeVector &passphrase, MessageConfig message_config, Salt salt);
+            void Start(std::unique_ptr<SafeVector> passphrase, MessageConfig message_config, Salt salt);
 
             void Start(EncryptionKey encryption_key, MessageConfig message_config, Salt salt);
             void Start(std::unique_ptr<EncryptionKey> encryption_key, MessageConfig message_config, Salt salt);
 
-            void Update(SecureVector& buf, bool finish);
+            void Update(SafeVector& buf, bool finish);
 
             const EncryptionKey &GetEncryptionKey() const;
             const Salt &GetSalt() const;
@@ -44,7 +44,7 @@ namespace LibEncryptMsg
             MessageWriterImpl();
     };
 
-    void MessageWriterImpl::Start(const SecureVector &passphrase, MessageConfig message_config, Salt salt)
+    void MessageWriterImpl::Start(const SafeVector &passphrase, MessageConfig message_config, Salt salt)
     {
         if(salt.empty())
             salt = GenerateRandomSalt();
@@ -58,7 +58,7 @@ namespace LibEncryptMsg
         Start(std::move(encryption_key), message_config, salt);
     }
 
-    void MessageWriterImpl::Start(std::unique_ptr<SecureVector> passphrase, MessageConfig message_config, Salt salt)
+    void MessageWriterImpl::Start(std::unique_ptr<SafeVector> passphrase, MessageConfig message_config, Salt salt)
     {
         // Passphrase will be deleted after this method
         Start(*passphrase, message_config, salt);
@@ -107,14 +107,14 @@ namespace LibEncryptMsg
         write_esk_ = false;
     }
 
-    void MessageWriterImpl::Update(SecureVector& buf, bool finish)
+    void MessageWriterImpl::Update(SafeVector& buf, bool finish)
     {
         assert(encryption_key_);
-        SecureVector target_buf;
+        SafeVector target_buf;
         auto target_stm = MakeOutStream(target_buf);
         WriteESK(*target_stm);
 
-        SecureVector temp_buf;
+        SafeVector temp_buf;
         temp_buf.swap(buf);
         auto temp_out = MakeOutStream(temp_buf);
         auto it = packet_chain_.begin();
@@ -140,12 +140,12 @@ namespace LibEncryptMsg
     }
 
     // MessageWriter
-    void MessageWriter::Start(const SecureVector &passphrase, MessageConfig message_config, Salt salt)
+    void MessageWriter::Start(const SafeVector &passphrase, MessageConfig message_config, Salt salt)
     {
         impl_->Start(passphrase, message_config, salt);
     }
 
-    void MessageWriter::Start(std::unique_ptr<SecureVector> passphrase, MessageConfig message_config,
+    void MessageWriter::Start(std::unique_ptr<SafeVector> passphrase, MessageConfig message_config,
             Salt salt)
     {
         impl_->Start(std::move(passphrase), message_config, salt);
@@ -161,12 +161,12 @@ namespace LibEncryptMsg
         impl_->Start(std::move(encryption_key), message_config, salt);
     }
 
-    void MessageWriter::Update(SecureVector& buf)
+    void MessageWriter::Update(SafeVector& buf)
     {
         impl_->Update(buf, false); //finish = false
     }
 
-    void MessageWriter::Finish(SecureVector& buf)
+    void MessageWriter::Finish(SafeVector& buf)
     {
         impl_->Update(buf, true); //finish = true
     }

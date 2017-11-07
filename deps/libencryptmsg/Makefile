@@ -1,5 +1,4 @@
 .PHONY: src tests cli gtest symlinks clean-symlinks
-SHELL:=/bin/bash
 all: src cli
 gtest:
 	$(MAKE) -C tests -f Makefile.gtest RELEASE=$(RELEASE)

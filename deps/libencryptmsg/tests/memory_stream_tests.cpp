@@ -10,7 +10,7 @@ namespace LibEncryptMsg
 {
     namespace UnitTests
     {
-        using SecureVector = Botan::secure_vector<uint8_t>;
+        using SafeVector = Botan::secure_vector<uint8_t>;
         const uint8_t kLen16 = 0xE4;
 
         class InputMemoryStreamFixture : public ::testing::Test // Param is buffer size
@@ -23,7 +23,7 @@ namespace LibEncryptMsg
         {
             // Arrange
             array<uint8_t, 5> long_length = {0xFF,0x00,0x00,0x20,0xC0}; // 8384
-            SecureVector buf;
+            SafeVector buf;
             buf.push_back(kLen16); // 16 bytes
             buf.insert(buf.end(), 16, 0x01);
             InBufferStream stm;
@@ -32,7 +32,7 @@ namespace LibEncryptMsg
             //Act
             stm.Push(buf);
             buf.clear();
-            SecureVector out_buf_1(stm.GetCount());
+            SafeVector out_buf_1(stm.GetCount());
             stm.Read(out_buf_1.data(), out_buf_1.size());
             // The stream has emptied the buffer and it is waiting for the next block length
             auto length_1 = stm.GetCount();
@@ -50,7 +50,7 @@ namespace LibEncryptMsg
             buf.insert(buf.end(), 8, 0x02);
             stm.Push(buf);
             buf.clear();
-            SecureVector out_buf_2(stm.GetCount());
+            SafeVector out_buf_2(stm.GetCount());
             stm.Read(out_buf_2.data(), out_buf_2.size());
 
             //Assert
@@ -66,7 +66,7 @@ namespace LibEncryptMsg
         TEST_F(InputMemoryStreamFixture, When_reading_buffer_Then_stream_just_works)
         {
             // Arrange
-            SecureVector buf;
+            SafeVector buf;
             buf.push_back(kLen16); // 16 bytes
             buf.insert(buf.end(), 16, 0x01);
             buf.push_back(kLen16); // 16 bytes
@@ -96,7 +96,7 @@ namespace LibEncryptMsg
         TEST_F(InputMemoryStreamFixture, When_reading_without_partial_length_Then_it_just_works)
         {
             // Arrange
-            SecureVector buf;
+            SafeVector buf;
             buf.insert(buf.end(), 16, 0x01);
             InBufferStream stm;
             stm.Push(buf);
@@ -104,14 +104,14 @@ namespace LibEncryptMsg
             // Act
             size_t first_count = stm.GetCount();
             buf.clear();
-            SecureVector out_buf_1(stm.GetCount());
+            SafeVector out_buf_1(stm.GetCount());
             stm.Read(out_buf_1.data(), out_buf_1.size());
 
             buf.insert(buf.end(), 5, 0x02);
             stm.Push(buf);
             buf.clear();
             size_t second_count = stm.GetCount();
-            SecureVector out_buf_2(stm.GetCount());
+            SafeVector out_buf_2(stm.GetCount());
             stm.Read(out_buf_2.data(), out_buf_2.size());
 
 

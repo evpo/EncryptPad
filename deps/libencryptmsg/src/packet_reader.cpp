@@ -14,7 +14,7 @@
 using namespace std;
 namespace LibEncryptMsg
 {
-    using SecureVector = Botan::secure_vector<uint8_t>;
+    using SafeVector = Botan::secure_vector<uint8_t>;
 
     class SymmetricKeyESKRW : public PacketRWBase
     {
@@ -185,7 +185,7 @@ namespace LibEncryptMsg
     SymmetricIntegProtectedRW::SymmetricIntegProtectedRW(SessionState &state)
         : SymmetricRWBase(state), version_read_(false){}
 
-    PacketResult CheckPrefix(const SecureVector &prefix)
+    PacketResult CheckPrefix(const SafeVector &prefix)
     {
         // check the last two bytes for integrity of the message
         const uint8_t *ptr = prefix.data();
@@ -214,9 +214,9 @@ namespace LibEncryptMsg
             if(in_.GetCount() < prefix_len)
                 return PacketResult::Pending;
 
-            SecureVector enc_prefix(prefix_len);
+            SafeVector enc_prefix(prefix_len);
             in_.Read(enc_prefix.data(), enc_prefix.size());
-            SecureVector prefix(enc_prefix);
+            SafeVector prefix(enc_prefix);
             this->cipher_mode_->finish(prefix);
             PacketResult result = CheckPrefix(prefix);
             if(result != PacketResult::Success)

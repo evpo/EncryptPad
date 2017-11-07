@@ -11,7 +11,7 @@ namespace LibEncryptMsg
     {
         public:
             virtual ~PassphraseProvider() {}
-            virtual std::unique_ptr<SecureVector> GetPassphrase(std::string description, bool &canceled) = 0;
+            virtual std::unique_ptr<SafeVector> GetPassphrase(std::string description, bool &canceled) = 0;
     };
 
     class SymmetricKeyProvider
@@ -24,8 +24,8 @@ namespace LibEncryptMsg
 
     struct Passphrase
     {
-        const SecureVector data;
-        Passphrase(const SecureVector &data_p);
+        const SafeVector data;
+        Passphrase(const SafeVector &data_p);
     };
 
 }

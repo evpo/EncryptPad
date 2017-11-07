@@ -68,7 +68,7 @@ namespace
             {
             }
 
-            std::unique_ptr<SecureVector> GetPassphrase(std::string description, bool &canceled) override
+            std::unique_ptr<SafeVector> GetPassphrase(std::string description, bool &canceled) override
             {
                 return passphrase_provider_.GetPassphrase(description, canceled);
             }
@@ -77,10 +77,10 @@ namespace
     class KnownPassphraseProvider : public PassphraseProvider
     {
         private:
-            std::unique_ptr<SecureVector> passphrase_data_;
+            std::unique_ptr<SafeVector> passphrase_data_;
         public:
-            KnownPassphraseProvider(std::unique_ptr<SecureVector> passphrase_data);
-            std::unique_ptr<SecureVector> GetPassphrase(std::string description, bool &canceled) override;
+            KnownPassphraseProvider(std::unique_ptr<SafeVector> passphrase_data);
+            std::unique_ptr<SafeVector> GetPassphrase(std::string description, bool &canceled) override;
     };
 
 }
@@ -101,8 +101,8 @@ namespace LibEncryptMsg
             std::unique_ptr<PassphraseProvider> passphrase_provider_;
         public:
             void Start();
-            void Start(const SecureVector &passphrase);
-            void Start(std::unique_ptr<SecureVector> passphrase);
+            void Start(const SafeVector &passphrase);
+            void Start(std::unique_ptr<SafeVector> passphrase);
             void Start(PassphraseProvider &passphrase_provider);
 
             // For known keys
@@ -111,12 +111,12 @@ namespace LibEncryptMsg
             void Start(std::unique_ptr<EncryptionKey> encryption_key);
 
             // Fo reader
-            void Update(SecureVector &buf);
-            void Finish(SecureVector &buf);
+            void Update(SafeVector &buf);
+            void Finish(SafeVector &buf);
 
             // For analyzer
-            bool Update(const SecureVector &buf);
-            bool Finish(const SecureVector &buf);
+            bool Update(const SafeVector &buf);
+            bool Finish(const SafeVector &buf);
 
             const MessageConfig &GetMessageConfig() const;
             const EncryptionKey &GetEncryptionKey() const;
@@ -135,18 +135,18 @@ namespace LibEncryptMsg
 
     void MessageReaderImpl::Start()
     {
-        Start(SecureVector());
+        Start(SafeVector());
     }
 
-    void MessageReaderImpl::Start(const SecureVector &passphrase)
+    void MessageReaderImpl::Start(const SafeVector &passphrase)
     {
-        std::unique_ptr<SecureVector> data_uptr(new SecureVector(passphrase));
+        std::unique_ptr<SafeVector> data_uptr(new SafeVector(passphrase));
         passphrase_provider_.reset(new KnownPassphraseProvider(std::move(data_uptr)));
         key_provider_.reset(new KeyFromPassphraseProvider(*passphrase_provider_));
         session_state_.key_provider = key_provider_.get();
     }
 
-    void MessageReaderImpl::Start(std::unique_ptr<SecureVector> passphrase)
+    void MessageReaderImpl::Start(std::unique_ptr<SafeVector> passphrase)
     {
         passphrase_provider_.reset(new KnownPassphraseProvider(std::move(passphrase)));
         key_provider_.reset(new KeyFromPassphraseProvider(*passphrase_provider_));
@@ -180,7 +180,7 @@ namespace LibEncryptMsg
         session_state_.key_provider = key_provider_.get();
     }
 
-    void MessageReaderImpl::Update(SecureVector &buf)
+    void MessageReaderImpl::Update(SafeVector &buf)
     {
         if(buf.empty())
             return;
@@ -197,14 +197,14 @@ namespace LibEncryptMsg
         session_state_.output.clear();
     }
 
-    bool MessageReaderImpl::Update(const SecureVector &buf)
+    bool MessageReaderImpl::Update(const SafeVector &buf)
     {
-        SecureVector buf2(buf);
+        SafeVector buf2(buf);
         Update(buf2);
         return session_state_.is_message_analyzed;
     }
 
-    void MessageReaderImpl::Finish(SecureVector &buf)
+    void MessageReaderImpl::Finish(SafeVector &buf)
     {
         Update(buf);
         session_state_.finish_packets = true;
@@ -218,9 +218,9 @@ namespace LibEncryptMsg
         session_state_.output.clear();
     }
 
-    bool MessageReaderImpl::Finish(const SecureVector &buf)
+    bool MessageReaderImpl::Finish(const SafeVector &buf)
     {
-        SecureVector buf2(buf);
+        SafeVector buf2(buf);
         Finish(buf2);
         return session_state_.is_message_analyzed;
     }
@@ -256,12 +256,12 @@ namespace LibEncryptMsg
         impl_->Start();
     }
 
-    void PacketAnalyzer::Start(SecureVector passphrase)
+    void PacketAnalyzer::Start(SafeVector passphrase)
     {
         impl_->Start(passphrase);
     }
 
-    void PacketAnalyzer::Start(std::unique_ptr<SecureVector> passphrase)
+    void PacketAnalyzer::Start(std::unique_ptr<SafeVector> passphrase)
     {
         impl_->Start(std::move(passphrase));
     }
@@ -287,12 +287,12 @@ namespace LibEncryptMsg
         impl_->Start(std::move(encryption_key));
     }
 
-    bool PacketAnalyzer::Update(const SecureVector &buf)
+    bool PacketAnalyzer::Update(const SafeVector &buf)
     {
         return impl_->Update(buf);
     }
 
-    bool PacketAnalyzer::Finish(const SecureVector &buf)
+    bool PacketAnalyzer::Finish(const SafeVector &buf)
     {
         return impl_->Finish(buf);
     }
@@ -323,12 +323,12 @@ namespace LibEncryptMsg
         delete impl_;
     }
 
-    void MessageReader::Start(SecureVector passphrase)
+    void MessageReader::Start(SafeVector passphrase)
     {
         impl_->Start(passphrase);
     }
 
-    void MessageReader::Start(std::unique_ptr<SecureVector> passphrase)
+    void MessageReader::Start(std::unique_ptr<SafeVector> passphrase)
     {
         impl_->Start(std::move(passphrase));
     }
@@ -354,12 +354,12 @@ namespace LibEncryptMsg
         impl_->Start(std::move(encryption_key));
     }
 
-    void MessageReader::Update(SecureVector &buf)
+    void MessageReader::Update(SafeVector &buf)
     {
         impl_->Update(buf);
     }
 
-    void MessageReader::Finish(SecureVector &buf)
+    void MessageReader::Finish(SafeVector &buf)
     {
         impl_->Finish(buf);
     }
@@ -402,20 +402,20 @@ namespace
         return GenerateEncryptionKey(pwd, cipher_algo, hash_algo, iterations, salt);
     }
 
-    KnownPassphraseProvider::KnownPassphraseProvider(std::unique_ptr<SecureVector> passphrase_data)
+    KnownPassphraseProvider::KnownPassphraseProvider(std::unique_ptr<SafeVector> passphrase_data)
         :passphrase_data_(std::move(passphrase_data))
     {
     }
 
-    std::unique_ptr<SecureVector> KnownPassphraseProvider::GetPassphrase(std::string description, bool &canceled)
+    std::unique_ptr<SafeVector> KnownPassphraseProvider::GetPassphrase(std::string description, bool &canceled)
     {
         (void)description;
         canceled = false;
-        std::unique_ptr<SecureVector> ret_val;
+        std::unique_ptr<SafeVector> ret_val;
         if(passphrase_data_->size() == 0)
             return ret_val;
 
-        ret_val.reset(new SecureVector(*passphrase_data_));
+        ret_val.reset(new SafeVector(*passphrase_data_));
         return ret_val;
     }
 

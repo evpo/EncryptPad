@@ -16,16 +16,16 @@ namespace LibEncryptMsg
             MessageWriter();
             ~MessageWriter();
 
-            void Start(const SecureVector &passphrase, MessageConfig message_config = MessageConfig(),
+            void Start(const SafeVector &passphrase, MessageConfig message_config = MessageConfig(),
                     Salt salt = Salt());
-            void Start(std::unique_ptr<SecureVector> passphrase, MessageConfig message_config = MessageConfig(),
+            void Start(std::unique_ptr<SafeVector> passphrase, MessageConfig message_config = MessageConfig(),
                     Salt salt = Salt());
 
             void Start(EncryptionKey encryption_key, MessageConfig message_config, Salt salt);
             void Start(std::unique_ptr<EncryptionKey> encryption_key, MessageConfig message_config, Salt salt);
 
-            void Update(SecureVector& buf);
-            void Finish(SecureVector& buf);
+            void Update(SafeVector& buf);
+            void Finish(SafeVector& buf);
 
             const EncryptionKey &GetEncryptionKey() const;
             const Salt &GetSalt() const;
