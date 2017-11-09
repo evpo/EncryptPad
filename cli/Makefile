@@ -1,6 +1,6 @@
 include ../deps/makefiles/platform.mak
 
-LIBRARIES += ../back_end_src ../deps/stlplus/subsystems ../deps/stlplus/containers ../deps/stlplus/portability
+LIBRARIES += ../deps/libencryptmsg/src ../back_end_src ../deps/stlplus/subsystems ../deps/stlplus/containers ../deps/stlplus/portability
 
 ifneq ($(RELEASE),on)
 CXXFLAGS += -ggdb
@@ -23,8 +23,8 @@ ifneq ($(USE_SYSTEM_LIBS),on)
 LOADLIBES += ../deps/botan/libbotan-1.10.a ../deps/zlib/libz.a -lpthread
 CXXFLAGS += -I../deps/botan/build/include -I../deps/zlib -pthread -std=c++11
 else
-BOTANLIB := $(shell pkg-config --libs botan-1.10)
-BOTANCXX := $(shell pkg-config --cflags botan-1.10)
+BOTANLIB := $(shell pkg-config --libs botan-2)
+BOTANCXX := $(shell pkg-config --cflags botan-2)
 LOADLIBES += $(BOTANLIB) -lz -lpthread
 CXXFLAGS += $(BOTANCXX) -pthread -std=c++11
 endif
