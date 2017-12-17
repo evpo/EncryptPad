@@ -14,7 +14,7 @@ src: symlinks
 	$(MAKE) -C src RELEASE=$(RELEASE)
 
 clean: clean-children | clean-symlinks
-clean-children:
+clean-children: symlinks
 	$(MAKE) -C tests -f Makefile.gtest clean RELEASE=$(RELEASE)
 	$(MAKE) -C tests clean RELEASE=$(RELEASE)
 	$(MAKE) -C cli clean RELEASE=$(RELEASE)
