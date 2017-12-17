@@ -18,7 +18,6 @@
 //along with EncryptPad.  If not, see <http://www.gnu.org/licenses/>.
 //**********************************************************************************
 #include "key_generation.h"
-#include "botan.h"
 #include "file_helper.h"
 #include "key_file_converter.h"
 #include "packet_composer.h"

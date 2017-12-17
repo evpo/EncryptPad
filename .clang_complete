@@ -4,10 +4,12 @@
 -I./qt_ui
 -I./tests
 -I./deps
+-I/usr/local/include/botan-2
 -I./deps/botan/build/include
 -I./deps/stlplus/subsystems
 -I./deps/stlplus/portability
 -I./deps/stlplus/containers
+-I./deps/libencryptmsg/include
 -I./build/qt_build
 -I/usr/include/qt5
 -I/usr/include/qt5/QtWidgets
