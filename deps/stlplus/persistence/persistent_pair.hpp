@@ -19,13 +19,13 @@
 namespace stlplus
 {
 
+  // exceptions: persistent_dump_failed
   template<typename V1, typename V2, typename D1, typename D2>
-  void dump_pair(dump_context&, const std::pair<V1,V2>& data, D1 dump_fn1, D2 dump_fn2)
-    throw(persistent_dump_failed);
+  void dump_pair(dump_context&, const std::pair<V1,V2>& data, D1 dump_fn1, D2 dump_fn2);
 
+  // exceptions: persistent_restore_failed
   template<typename V1, typename V2, typename R1, typename R2>
-  void restore_pair(restore_context&, std::pair<V1,V2>& data, R1 restore_fn1, R2 restore_fn2)
-    throw(persistent_restore_failed);
+  void restore_pair(restore_context&, std::pair<V1,V2>& data, R1 restore_fn1, R2 restore_fn2);
 
 } // end namespace stlplus
 

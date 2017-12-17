@@ -95,7 +95,7 @@ namespace stlplus
     std::list<ini_entry> m_entries;
 
   public:
-    ini_section(const std::string& title) : 
+    ini_section(const std::string& title) :
       m_title(title)
       {
       }
@@ -1119,22 +1119,22 @@ namespace stlplus
 
   bool ini_manager::add_section(const std::string& section, unsigned depth)
   {
-    return m_body->add_section(section, depth);  
+    return m_body->add_section(section, depth);
   }
 
   bool ini_manager::empty_section(const std::string& section, unsigned depth)
   {
-    return m_body->empty_section(section, depth);  
+    return m_body->empty_section(section, depth);
   }
 
   bool ini_manager::erase_section(const std::string& section, unsigned depth)
   {
-    return m_body->erase_section(section, depth);  
+    return m_body->erase_section(section, depth);
   }
 
   bool ini_manager::clear_section(const std::string& section, unsigned depth)
   {
-    return m_body->clear_section(section, depth);  
+    return m_body->clear_section(section, depth);
   }
 
   ////////////////////////////////////////////////////////////////////////////////
@@ -1142,57 +1142,57 @@ namespace stlplus
 
   bool ini_manager::variable_exists(const std::string& section, const std::string variable) const
   {
-    return m_body->variable_exists(section, variable);  
+    return m_body->variable_exists(section, variable);
   }
 
   bool ini_manager::variable_exists(const std::string& section, const std::string variable, unsigned depth) const
   {
-    return m_body->variable_exists(section, variable, depth);  
+    return m_body->variable_exists(section, variable, depth);
   }
 
   std::vector<std::string> ini_manager::variable_names(const std::string& section) const
   {
-    return m_body->variable_names(section);  
+    return m_body->variable_names(section);
   }
 
   std::vector<std::string> ini_manager::variable_names(const std::string& section, unsigned depth) const
   {
-    return m_body->variable_names(section, depth);  
+    return m_body->variable_names(section, depth);
   }
 
   unsigned ini_manager::variable_depth(const std::string& section, const std::string variable) const
   {
-    return m_body->variable_depth(section, variable);  
+    return m_body->variable_depth(section, variable);
   }
 
   std::string ini_manager::variable_filename(const std::string& section, const std::string variable) const
   {
-    return m_body->variable_filename(section, variable);  
+    return m_body->variable_filename(section, variable);
   }
 
   unsigned ini_manager::variable_linenumber(const std::string& section, const std::string variable) const
   {
-    return m_body->variable_linenumber(section, variable);  
+    return m_body->variable_linenumber(section, variable);
   }
 
   std::string ini_manager::variable_value(const std::string& section, const std::string variable) const
   {
-    return m_body->variable_value(section, variable);  
+    return m_body->variable_value(section, variable);
   }
 
   std::string ini_manager::variable_value(const std::string& section, const std::string variable, unsigned depth) const
   {
-    return m_body->variable_value(section, variable, depth);  
+    return m_body->variable_value(section, variable, depth);
   }
 
   std::vector<std::string> ini_manager::variable_values(const std::string& section, const std::string variable) const
   {
-    return m_body->variable_values(section, variable);  
+    return m_body->variable_values(section, variable);
   }
 
   std::vector<std::string> ini_manager::variable_values(const std::string& section, const std::string variable, unsigned depth) const
   {
-    return m_body->variable_values(section, variable, depth);  
+    return m_body->variable_values(section, variable, depth);
   }
 
   bool ini_manager::add_variable(const std::string& section, const std::string& variable, const std::string& value, unsigned depth)

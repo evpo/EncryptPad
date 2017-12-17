@@ -15,12 +15,12 @@
 
 ifeq ($(PLATFORM),SOLARIS)
 # have to explicitly pull in the socket library
-LOADLIBES += -lsocket
+LDLIBS += -lsocket
 endif
 
 ifeq ($(PLATFORM),NETBSD)
 # have to explicitly state that the maths library should be included
-LOADLIBES += -lm
+LDLIBS += -lm
 endif
 
 ifeq ($(BUILD),LINUX-alpha)
@@ -35,21 +35,37 @@ endif
 
 ifeq ($(PLATFORM),MINGW)
 # need to explicitly add the Windows sockets 2 library
-LOADLIBES += -lWs2_32
+LDLIBS += -lWs2_32
 # gcc handling of DLLs on Windows
 LDFLAGS += -Wl,--enable-auto-import
+# $(CC) is used for C compiles and link operations. This defaults to cc which on most platforms then maps to gcc
+# However, MinGW platforms do not have a mapping from cc to gcc so builds fail. This is a work-round of this problem
+CC := gcc
 endif
 
+# need to build PIC on some platforms in order to use code in shared libraries
+# Note: I use PIC in all compiles on these platforms assuming that the historic lower performance of PIC is now negligible
+ifeq ($(PLATFORM),GNULINUX)
+CFLAGS += -fPIC
+CXXFLAGS += -fPIC
+else ifeq ($(PLATFORM),FREEBSD)
+CFLAGS += -fPIC
+CXXFLAGS += -fPIC
+else ifeq ($(PLATFORM),NETBSD)
+CFLAGS += -fPIC
+CXXFLAGS += -fPIC
+else ifeq ($(PLATFORM),OPENBSD)
+CFLAGS += -fPIC
+CXXFLAGS += -fPIC
+endif
+
+# manage switch between static and dynamic linking of runtime library
 ifeq ($(STATIC),on)
 # switch on static linking with C/C++ runtimes
 LDFLAGS += -static-libgcc -static-libstdc++
 else
-LOADLIBES += -lstdc++
-endif
-
-ifeq ($(PLATFORM),GNULINUX)
-# Issue found on Fedora. All other components used fPIC.
-CPPFLAGS += -fPIC
+# dynamic linking options - create a linker dependency on C++ runtime
+LDLAST += -lstdc++
 endif
 
 ################################################################################
@@ -66,17 +82,12 @@ CFLAGS    += -funsigned-char
 CXXFLAGS  += -ftemplate-depth-50 -funsigned-char
 LDFLAGS   +=
 
-
 ifeq ($(RELEASE),on)
 # release variant
 CPPFLAGS += -DNDEBUG
 CFLAGS   += -O3
 CXXFLAGS += -O3
-ifneq ($(PLATFORM),MACOS)
-# the condition was added by evpo. -s is deprecated but is still used on clang. It causes an internal ld error "atom not found in symbolIndex"
-# TODO: temporary to enable debug symbols
-# LDFLAGS  += -s
-endif
+LDFLAGS  += -s
 else # RELEASE off
 ifeq ($(GPROF),on)
 # gprof variant
@@ -104,6 +115,16 @@ endif # RELEASE
 BUILD_TYPE=dynamic
 ifeq ($(STATIC),on)
 BUILD_TYPE=static
+endif
+
+# set up shared library name as the actual target
+SHARED_SO :=
+ifneq ($(SHARED),)
+ifeq ($(WINDOWS),on)
+SHARED_SO := $(SUBDIR)/$(SHARED).dll
+else
+SHARED_SO := $(SUBDIR)/lib$(SHARED).so
+endif
 endif
 
 ################################################################################
@@ -179,8 +200,9 @@ ARCHIVES := $(foreach lib,$(ARCHIVE_LIBRARIES),$(call archive_path,$(lib)))
 
 all:: build
 
-build:: $(LIBRARY) $(ARCHIVE_LIBRARIES) $(IMAGE)
+build:: $(LIBRARY) $(ARCHIVE_LIBRARIES) $(IMAGE) $(SHARED_SO)
 
+########################################
 # Compilation Rules
 # Also generate a dependency (.d) file. Dependency files are included in the make to detect out of date object files
 # Note: gcc version 2.96 onwards put the .d files in the same place as the object files (correct)
@@ -188,18 +210,16 @@ build:: $(LIBRARY) $(ARCHIVE_LIBRARIES) $(IMAGE)
 #       I no longer support those older versions
 
 # the rule for compiling a C++ source file
-
 $(SUBDIR)/%.o: %.cpp
 	@echo "$(LIBNAME):$(SUBDIR): C++ compiling $<"
 	@mkdir -p $(SUBDIR)
-	$(CXX) -x c++ -c -MMD $(CPPFLAGS) $(CXXFLAGS) $(INCLUDES) $< -o $@
+	@$(CXX) -x c++ -c -MMD $(CPPFLAGS) $(CXXFLAGS) $(INCLUDES) $< -o $@
 
 # the rule for compiling a C source file
-
 $(SUBDIR)/%.o: %.c
 	@echo "$(LIBNAME):$(SUBDIR): C compiling $<"
 	@mkdir -p $(SUBDIR)
-	$(CC) -x c -c -MMD $(CPPFLAGS) $(CFLAGS) $(INCLUDES) $< -o $@
+	@$(CC) -x c -c -MMD $(CPPFLAGS) $(CFLAGS) $(INCLUDES) $< -o $@
 
 ifeq ($(WINDOWS),on)
 # the rule for compiling a resource file
@@ -207,7 +227,7 @@ ifeq ($(WINDOWS),on)
 $(SUBDIR)/%_rc.o: %.rc
 	@echo "$(LIBNAME):$(SUBDIR): RC compiling $<"
 	@mkdir -p $(SUBDIR)
-	$(RC) $(RCFLAGS) $< -o $@
+	@$(RC) $(RCFLAGS) $< -o $@
 endif
 
 # Detect that a file is out of date with respect to its headers by including
@@ -217,32 +237,60 @@ endif
 # the object library subdirectory (make clean) and do a clean build
 -include $(SUBDIR)/*.d
 
+########################################
 # the rule for making an object library out of object files
 
 $(LIBRARY): $(OBJECTS)
 	@echo "$(LIBNAME):$(SUBDIR): Updating library $@"
-	$(AR) crus $(LIBRARY) $(OBJECTS)
+	@$(AR) crs $(LIBRARY) $(OBJECTS)
 
+
+########################################
+# building a shared library
+# This set of rules is only applied if the SHARED variable is defined
+ifneq ($(SHARED_SO),)
+
+# the rule for building the library dependencies unconditionally runs a recursive Make
+$(ARCHIVE_LIBRARIES): FORCE
+	@$(MAKE) -C $@
+
+# the rule for linking a shared library
+# This is complicated - gcc exports all symbols from a .o file but no symbols from a .a file
+# The solution is hinted at in https://cygwin.com/cygwin-ug-net/dll.html
+# This is to pass the whole-archive option to the linker for the local archive only, then disable it
+# The disabling prevents the linker from trying to export symbols from
+# other libraries as well which leads to multiply defined symbols in
+# the link
+$(SHARED_SO): $(LIBRARY) $(ARCHIVES)
+	@echo "$(LIBNAME):$(SUBDIR): $(BUILD_TYPE) Linking Shared Library $(SHARED_SO)"
+	@echo "$(LIBNAME):$(SUBDIR):   flags: $(LDFLAGS)"
+	@for l in $(LIBRARY) $(ARCHIVES); do echo "$(LIBNAME):$(SUBDIR):   using: $$l"; done
+	@echo "$(LIBNAME):$(SUBDIR):   libs: $(LDLIBS) $(LDLAST)"
+	@$(CC) -shared -o $(SHARED_SO) $(LDFLAGS) $(RC_OBJECTS) -Wl,--whole-archive $(LIBRARY) -Wl,--no-whole-archive $(ARCHIVES) $(LDLIBS) $(LDLAST)
+
+endif
+
+########################################
+# building a program
 # The library dependencies are only built and the image is only linked if the IMAGE variable is defined
 # only update other libraries if we are linking since just building an object library doesn't need the
 # dependency libraries to be up to date
-
 ifneq ($(IMAGE),)
 
 # the rule for building the library dependencies unconditionally runs a recursive Make
-
 $(ARCHIVE_LIBRARIES): FORCE
-	$(MAKE) -C $@
+	@$(MAKE) -C $@
 
 # the rule for linking an image
-
+# Note: I used to link with $(CXX) which maps onto g++ but there's a bug see: http://sourceforge.net/p/tdm-gcc/bugs/291/
+#       I now link with $(CC) which maps onto cc by default but should then map onto gcc
 $(IMAGE): $(LIBRARY) $(ARCHIVES)
 	@echo "$(LIBNAME):$(SUBDIR): $(BUILD_TYPE) Linking $(IMAGE)"
 	@echo "$(LIBNAME):$(SUBDIR):   flags: $(LDFLAGS)"
 	@for l in $(LIBRARY) $(ARCHIVES); do echo "$(LIBNAME):$(SUBDIR):   using: $$l"; done
-	@echo "$(LIBNAME):$(SUBDIR):   libs: $(LOADLIBES)"
+	@echo "$(LIBNAME):$(SUBDIR):   libs: $(LDLIBS) $(LDLAST)"
 	@mkdir -p $(dir $(IMAGE))
-	$(CXX) $(LDFLAGS) $(RC_OBJECTS) $^ $(LOADLIBES) -o $(IMAGE)
+	@$(CC) -o $(IMAGE) $(LDFLAGS) $(RC_OBJECTS) $^ $(LDLIBS) $(LDLAST)
 
 endif
 
@@ -260,6 +308,10 @@ endif
 
 endif
 
+################################################################################
+# rules for other cleaning-up targets
+
+# tidy target deletes intermediate files but leaves the program/library in a usable state
 tidy::
 	@if [ -d "$(SUBDIR)" ]; then echo "$(LIBNAME): Tidy: deleting $(SUBDIR)"; rm -rf "$(SUBDIR)"; fi
 	@/usr/bin/find . -name '*.tmp' -exec echo "$(LIBNAME): Tidy: deleting " {} \; -exec rm {} \;
@@ -267,8 +319,13 @@ ifeq ($(GCOV),on)
 	@/usr/bin/find . -name '*.gcov' -exec echo "$(LIBNAME): Tidy: deleting " {} \; -exec rm {} \;
 endif
 
+# clean target deletes all files generated by the make process
+# TODO: shared library
 clean:: tidy
 ifneq ($(IMAGE),)
 	@if [ -f "$(IMAGE).exe" ]; then echo "$(LIBNAME): Clean: deleting $(IMAGE).exe"; rm -f "$(IMAGE).exe"; fi
 	@if [ -f "$(IMAGE)" ]; then echo "$(LIBNAME): Clean: deleting $(IMAGE)"; rm -f "$(IMAGE)"; fi
+endif
+ifneq ($(SHARED_SO),)
+	@if [ -f "$(SHARED_SO)" ]; then echo "$(LIBNAME): Clean: deleting $(SHARED_SO)"; rm -f "$(SHARED_SO)"; fi
 endif

@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-<title>STLplus Library Collection - portability/portability_fixes.hpp - Macros for Fixing Compiler Differences</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STLplus C++ Library Collection - portability/portability_fixes.hpp - Macros for Fixing Compiler Differences</title>
 <link rel="icon" href="plus.png" type="image/png"/>
 <meta name="Author" content="Andy Rushton"/>
 <link rel="stylesheet" media="screen" type="text/css" href="screen.css"/>
@@ -13,11 +14,7 @@
 <div id="header">
 
 <div id="headerBanner">
-<h1>
-The
-<span style="color:red">S</span><span style="color:blue">T</span><span style="color:green">L</span><span style="color:#ecec80">plus</span>
-C++ Library Collection
-</h1>
+<h1>STLplus C++ Library Collection</h1>
 </div>
 
 <div id="headerNavigation">
@@ -73,10 +70,10 @@ MSWINDOWS which is defined if either of the above macros is defined.</p>
 ...
 #ifdef MSWINDOWS
   // Windows-specific bits
-  ... 
+  ...
 #else
   // Generic Unix bits
-  ... 
+  ...
 #endif
 </pre>
 
@@ -150,7 +147,7 @@ minimum and maxuimum of two values respectively.</p>
 <p>However, the Windows headers up to and including Visual Studio v6 define <em>macros</em>
 called max/min which conflict with the templates std::max and std::min. To avoid conflicts,
 Microsoft removed the std::max/min from their version of the STL rather than fixing the
-problem!</p> 
+problem!</p>
 
 <p>Fortunately, from Visual Studio .NET (version 7) the STL templates have
 been added correctly.</p>

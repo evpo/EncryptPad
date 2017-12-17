@@ -19,7 +19,6 @@ namespace stlplus
 
   template<typename T>
   void dump_interface(dump_context& context, const T* const data)
-    throw(persistent_dump_failed)
   {
     try
     {
@@ -51,7 +50,6 @@ namespace stlplus
 
   template<typename T>
   void restore_interface(restore_context& context, T*& data)
-    throw(persistent_restore_failed)
   {
     try
     {

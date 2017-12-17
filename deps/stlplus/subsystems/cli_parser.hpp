@@ -77,8 +77,8 @@ namespace stlplus
   {
   public:
     // constructor that allows a definition to be created in one line
-    cli_definition(const std::string& name, cli_kind_t kind, cli_mode_t mode, 
-                   const std::string& message, const std::string& default_value = std::string()) : 
+    cli_definition(const std::string& name, cli_kind_t kind, cli_mode_t mode,
+                   const std::string& message, const std::string& default_value = std::string()) :
       m_name(name), m_kind(kind), m_mode(mode), m_message(message), m_default(default_value) {}
 
     // the name of the option, e.g. "help"
@@ -162,54 +162,52 @@ namespace stlplus
 
     // set up the parser with its error handler
     // defer everything else
-    cli_parser(message_handler& errors)
-      throw();
+    cli_parser(message_handler& errors);
 
     // constructors using the C definitions_t structure
 
     // set up the parser with the error handler and define all the command-line options
     // defer default values and parameter parsing
-    cli_parser(cli_definitions_t, message_handler& errors)
-      throw(cli_mode_error);
+    // exceptions: cli_mode_error
+    cli_parser(cli_definitions_t, message_handler& errors);
     // set up the parser with the error handler and define all the command-line
     // options and their default from the ini files
     // defer parameter parsing
-    cli_parser(cli_definitions_t, const ini_manager& defaults, const std::string& ini_section, message_handler& errors)
-      throw(cli_mode_error);
+    // exceptions: cli_mode_error
+    cli_parser(cli_definitions_t, const ini_manager& defaults, const std::string& ini_section, message_handler& errors);
     // set up the parser with the error handler and define all the command-line
     // options no ini files used for default values, so only built-in defaults
     // supported then parse the command line
-    cli_parser(char* argv[], cli_definitions_t, message_handler& errors)
-      throw(cli_mode_error,message_handler_id_error,message_handler_format_error);
+    // exceptions: cli_mode_error,message_handler_id_error,message_handler_format_error
+    cli_parser(char* argv[], cli_definitions_t, message_handler& errors);
     // set up the parser with the error handler and define all the command-line
     // options and their default from the ini files then parse the command line
-    cli_parser(char* argv[], cli_definitions_t, const ini_manager& defaults, const std::string& ini_section, message_handler& errors)
-      throw(cli_mode_error,message_handler_id_error,message_handler_format_error);
+    // exceptions: cli_mode_error,message_handler_id_error,message_handler_format_error
+    cli_parser(char* argv[], cli_definitions_t, const ini_manager& defaults, const std::string& ini_section, message_handler& errors);
 
     // constructors using the C++ definitions structure
 
     // set up the parser with the error handler and define all the command-line
     // options from a C array of structs
     // defer default values and parameter parsing
-    cli_parser(cli_definitions, message_handler& errors)
-      throw(cli_mode_error);
+    // exceptions: cli_mode_error
+    cli_parser(cli_definitions, message_handler& errors);
     // set up the parser with the error handler and define all the command-line
     // options and their default from the ini files
     // defer parameter parsing
-    cli_parser(cli_definitions, const ini_manager& defaults, const std::string& ini_section, message_handler& errors)
-      throw(cli_mode_error);
+    // exceptions: cli_mode_error
+    cli_parser(cli_definitions, const ini_manager& defaults, const std::string& ini_section, message_handler& errors);
     // set up the parser with the error handler and define all the command-line
     // options no ini files used for default values, so only built-in defaults
     // supported then parse the command line
-    cli_parser(char* argv[], cli_definitions, message_handler& errors)
-      throw(cli_mode_error,message_handler_id_error,message_handler_format_error);
+    // exceptions: cli_mode_error,message_handler_id_error,message_handler_format_error
+    cli_parser(char* argv[], cli_definitions, message_handler& errors);
     // set up the parser with the error handler and define all the command-line
     // options and their default from the ini files then parse the command line
-    cli_parser(char* argv[], cli_definitions, const ini_manager& defaults, const std::string& ini_section, message_handler& errors)
-      throw(cli_mode_error,message_handler_id_error,message_handler_format_error);
+    // exceptions: cli_mode_error,message_handler_id_error,message_handler_format_error
+    cli_parser(char* argv[], cli_definitions, const ini_manager& defaults, const std::string& ini_section, message_handler& errors);
 
-    ~cli_parser(void)
-      throw();
+    ~cli_parser(void);
 
     // the separate functions for initialising the parser in steps. These are
     // declared in the order of use. Firts, add definitions of command-line
@@ -218,18 +216,18 @@ namespace stlplus
 
     // add a set of C definitions. The definitions will be given ID codes from 0
     // to the number of elements - 1 in the array
-    void add_definitions(cli_definitions_t)
-      throw(cli_mode_error);
+    // exceptions: cli_mode_error
+    void add_definitions(cli_definitions_t);
     // add a single C definition, returning the ID code for it
-    unsigned add_definition(const definition_t&)
-      throw(cli_mode_error,cli_argument_error);
+    // exceptions: cli_mode_error,cli_argument_error
+    unsigned add_definition(const definition_t&);
     // add a set of C++ definitions. The definitions will be given ID codes from
     // 0 to the number of elements - 1 in the array
-    void add_definitions(cli_definitions)
-      throw(cli_mode_error);
+    // exceptions: cli_mode_error
+    void add_definitions(cli_definitions);
     // add a single C++ definition, returning the ID code for it
-    unsigned add_definition(const definition&)
-      throw(cli_mode_error);
+    // exceptions: cli_mode_error
+    unsigned add_definition(const definition&);
 
     // All definitions have an optional built-in default value which is stored
     // in the definition types above. However, these can optionally be
@@ -238,66 +236,63 @@ namespace stlplus
     // call it. The values will be searched for only in the named section of the
     // ini file (sections are labelled by e.g. [vassemble]), so in this case you
     // would specify the section name as "vassemble" (exclude the brackets).
-    void set_defaults(const ini_manager& defaults, const std::string& ini_section)
-      throw();
+    void set_defaults(const ini_manager& defaults, const std::string& ini_section);
 
     // the final stage of initialisation is to read the command-line and extract
     // the values from it. If parse errors are found, this will report the
     // errors using the error handler and return false.
-    bool parse(char* argv[])
-      throw(cli_argument_error,message_handler_id_error,message_handler_format_error);
+    // exceptions: cli_argument_error,message_handler_id_error,message_handler_format_error
+    bool parse(char* argv[]);
 
     // test for whether the CLI parser is still valid (no errors have happened)
     // after the initialisation phase
-    bool valid(void)
-      throw();
+    bool valid(void);
 
     // iteration functions avoiding the use of iterators. Just loop through the
     // arguments from 0 to size()-1 and use the index of the loop to interrogate
     // the command-line for the value at that position.
 
     // the number of values to read, indexed 0 to size()-1
-    unsigned size(void) const
-      throw();
+    unsigned size(void) const;
 
     // the argument name
-    std::string name(unsigned i) const
-      throw(cli_index_error);
+    // exceptions: cli_index_error
+    std::string name(unsigned i) const;
     // the argument ID, that is, the offset into the original definitions
-    unsigned id(unsigned i) const
-      throw(cli_index_error);
+    // exceptions: cli_index_error
+    unsigned id(unsigned i) const;
 
     // the kind (switch or value) and short-cut tests for the different kinds
-    cli_kind_t kind(unsigned i) const
-      throw(cli_index_error);
-    bool switch_kind(unsigned i) const
-      throw(cli_index_error);
-    bool value_kind(unsigned i) const
-      throw(cli_index_error);
+    // exceptions: cli_index_error
+    cli_kind_t kind(unsigned i) const;
+    // exceptions: cli_index_error
+    bool switch_kind(unsigned i) const;
+    // exceptions: cli_index_error
+    bool value_kind(unsigned i) const;
 
     // the mode (single, multiple, cumulative) and short-cut tests for the
     // different modes - you rarely need to know this since it mainly controls
     // the parsing
-    cli_mode_t mode(unsigned i) const 
-      throw(cli_index_error);
-    bool single_mode(unsigned i) const
-      throw(cli_index_error);
-    bool multiple_mode(unsigned i) const
-      throw(cli_index_error);
-    bool cumulative_mode(unsigned i) const
-      throw(cli_index_error);
+    // exceptions: cli_index_error
+    cli_mode_t mode(unsigned i) const;
+    // exceptions: cli_index_error
+    bool single_mode(unsigned i) const;
+    // exceptions: cli_index_error
+    bool multiple_mode(unsigned i) const;
+    // exceptions: cli_index_error
+    bool cumulative_mode(unsigned i) const;
 
     // get the switch's value, but only if the value is of switch kind
-    bool switch_value(unsigned i) const
-      throw(cli_mode_error,cli_index_error);
+    // exceptions: cli_mode_error,cli_index_error
+    bool switch_value(unsigned i) const;
 
     // get the option's value, but only if it is of value kind
-    std::string string_value(unsigned i) const
-      throw(cli_mode_error,cli_index_error);
+    // exceptions: cli_mode_error,cli_index_error
+    std::string string_value(unsigned i) const;
 
     // print the usage report - typically in response to the -help switch being on
-    void usage(void) const
-      throw(std::runtime_error);
+    // exceptions: std::runtime_error
+    void usage(void) const;
 
   private:
     friend class cli_parser_data;

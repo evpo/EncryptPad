@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-<title>STLplus Library Collection - portability/inf.hpp - An Infinite-Precision Integer Type</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STLplus C++ Library Collection - portability/inf.hpp - An Infinite-Precision Integer Type</title>
 <link rel="icon" href="plus.png" type="image/png"/>
 <meta name="Author" content="Andy Rushton"/>
 <link rel="stylesheet" media="screen" type="text/css" href="screen.css"/>
@@ -14,9 +15,7 @@
 <div id="header">
 
 <div id="headerBanner">
-<h1>The
-<span style="color:red">S</span><span style="color:blue">T</span><span style="color:green">L</span><span style="color:#ecec80">plus</span>
-C++ Library Collection</h1>
+<h1>STLplus C++ Library Collection</h1>
 </div>
 
 <div id="headerNavigation">
@@ -195,7 +194,7 @@ their unsigned variants):</p>
 <li>to_ulong - converts to unsigned long</li>
 </ul>
 
-<p>Note that the names to_unsigned and to_uint are synonyms - 
+<p>Note that the names to_unsigned and to_uint are synonyms -
 my preference is to think of unsigned as a type rather than
 as a variant of int (I write "unsigned" not "unsigned int"). I provided the to_uint for those who
 think of unsigned as a modifier to int.</p>
@@ -208,7 +207,7 @@ truncates the value to fit the type, changing its value. The default is for chec
 method actually looks like:</p>
 
 <pre class="cpp">
-short inf::to_short(bool check = false) const throw(std::overflow_error)
+short inf::to_short(bool check = false) const
 </pre>
 
 
@@ -402,11 +401,9 @@ hash format ("12#12345") which allows the use of any base from base 2 to base
 std::string to_string(const inf&amp; i,
                       unsigned radix = 10,
                       radix_display_t display = radix_c_style_or_hash,
-                      unsigned width = 0)
-  throw(std::invalid_argument);
+                      unsigned width = 0);
 
-inf to_inf(const std::string&amp;, unsigned radix = 0)
-  throw(std::invalid_argument);
+inf to_inf(const std::string&amp;, unsigned radix = 0);
 </pre>
 
 <p>Note that these are non-member functions. See the string_utilities

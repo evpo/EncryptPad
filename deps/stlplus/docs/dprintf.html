@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-<title>STLplus Library Collection - portability/dprintf.hpp - Printf-like Functions for Dynamic Strings</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STLplus C++ Library Collection - portability/dprintf.hpp - Printf-like Functions for Dynamic Strings</title>
 <link rel="icon" href="plus.png" type="image/png"/>
 <meta name="Author" content="Andy Rushton"/>
 <link rel="stylesheet" media="screen" type="text/css" href="screen.css"/>
@@ -14,9 +15,7 @@
 <div id="header">
 
 <div id="headerBanner">
-<h1>The
-<span style="color:red">S</span><span style="color:blue">T</span><span style="color:green">L</span><span style="color:#ecec80">plus</span>
-C++ Library Collection</h1>
+<h1>STLplus C++ Library Collection</h1>
 </div>
 
 <div id="headerNavigation">
@@ -73,14 +72,6 @@ string without any check on the string length. It can therefore overflow and
 crash the program. This kind of function just isn't worth using.</p>
 
 <pre class="cpp">
-int vdprintf (string&amp; formatted, const char* format, va_list args);
-</pre>
-
-<p>As above, but using a pre-initialised va_args argument list and therefore
-like the vsprintf() function. Useful for nesting printf-style calls within
-variable argument functions.</p>
-
-<pre class="cpp">
 string dformat (const char* format, ...);
 </pre>
 
@@ -96,14 +87,6 @@ std::cout &lt;&lt; "Total: " &lt;&lt; dformat("%6i",t) &lt;&lt; std::endl;
 
 <p>This produces an integer formatted into a 6-character wide field. See the
 next section for the full set of formats provided.</p>
-
-<pre class="cpp">
-string vdformat (const char* format, va_list);
-</pre>
-
-<p>As above, but using a pre-initialised va_args argument list. Useful for
-nesting dformat calls within variable argument functions. </p>
-
 
 <h2 id="formats">Formats</h2>
 

@@ -15,7 +15,6 @@ namespace stlplus
 
   template<typename K, typename T, typename H, typename E, typename DK, typename DT>
   void dump_hash(dump_context& context, const hash<K,T,H,E>& data, DK key_fn, DT val_fn)
-    throw(persistent_dump_failed)
   {
     dump_unsigned(context,data.size());
     for (typename hash<K,T,H,E>::const_iterator i = data.begin(); i != data.end(); i++)
@@ -27,7 +26,6 @@ namespace stlplus
 
   template<typename K, typename T, typename H, typename E, typename RK, typename RT>
   void restore_hash(restore_context& context, hash<K,T,H,E>& data, RK key_fn, RT val_fn)
-    throw(persistent_restore_failed)
   {
     data.erase();
     unsigned size = 0;

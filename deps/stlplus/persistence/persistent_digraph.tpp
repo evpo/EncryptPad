@@ -16,7 +16,6 @@ namespace stlplus
   template<typename NT, typename AT, typename DN, typename DA>
   void dump_digraph(dump_context& context, const digraph<NT,AT>& data,
                     DN dump_node, DA dump_arc)
-    throw(persistent_dump_failed)
   {
     // dump a magic key to the address of the graph for use in persistence of iterators
     // and register it as a dumped address
@@ -57,7 +56,6 @@ namespace stlplus
   template<typename NT, typename AT, typename RN, typename RA>
   void restore_digraph(restore_context& context, digraph<NT,AT>& data,
                        RN restore_node, RA restore_arc)
-    throw(persistent_restore_failed)
   {
     data.clear();
     // restore the graph's magic key and map it onto the graph's address
@@ -91,8 +89,8 @@ namespace stlplus
       restore_xref(context,from);
       restore_xref(context,to);
       // create an arc with these from/to pointers
-      digraph_arc_iterator<NT,AT,AT&,AT*> arc = 
-        data.arc_insert(digraph_iterator<NT,AT,NT&,NT*>(from), 
+      digraph_arc_iterator<NT,AT,AT&,AT*> arc =
+        data.arc_insert(digraph_iterator<NT,AT,NT&,NT*>(from),
                         digraph_iterator<NT,AT,NT&,NT*>(to));
       context.pointer_add(arc_magic,arc.node());
       // restore the user data
@@ -103,18 +101,16 @@ namespace stlplus
   ////////////////////////////////////////////////////////////////////////////////
 
   template<typename NT, typename AT, typename NRef, typename NPtr>
-  void dump_digraph_iterator(dump_context& context, 
+  void dump_digraph_iterator(dump_context& context,
                              const digraph_iterator<NT,AT,NRef,NPtr>& data)
-    throw(persistent_dump_failed)
   {
     dump_object_xref(context,data.owner());
     dump_xref(context,data.node());
   }
 
   template<typename NT, typename AT, typename NRef, typename NPtr>
-  void restore_digraph_iterator(restore_context& context, 
+  void restore_digraph_iterator(restore_context& context,
                                 digraph_iterator<NT,AT,NRef,NPtr>& data)
-    throw(persistent_restore_failed)
   {
     digraph<NT,AT>* owner = 0;
     digraph_node<NT,AT>* node = 0;
@@ -129,16 +125,14 @@ namespace stlplus
   template<typename NT, typename AT, typename NRef, typename NPtr>
   void dump_digraph_arc_iterator(dump_context& context,
                                  const digraph_arc_iterator<NT,AT,NRef,NPtr>& data)
-    throw(persistent_dump_failed)
   {
     dump_object_xref(context,data.owner());
     dump_xref(context,data.node());
   }
 
   template<typename NT, typename AT, typename NRef, typename NPtr>
-  void restore_digraph_arc_iterator(restore_context& context, 
+  void restore_digraph_arc_iterator(restore_context& context,
                                     digraph_arc_iterator<NT,AT,NRef,NPtr>& data)
-    throw(persistent_restore_failed)
   {
     digraph<NT,AT>* owner = 0;
     digraph_arc<NT,AT>* arc = 0;

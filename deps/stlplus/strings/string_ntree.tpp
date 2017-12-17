@@ -17,7 +17,7 @@ namespace stlplus
                               const std::string& indent_string)
   {
     std::string result;
-    for (TYPENAME ntree<T>::const_prefix_iterator i = values.prefix_begin(); i != values.prefix_end(); i++)
+    for (typename ntree<T>::const_prefix_iterator i = values.prefix_begin(); i != values.prefix_end(); i++)
     {
       if (i != values.prefix_begin()) result += separator;
       for (unsigned indent = values.depth(i.simplify()); --indent; )
@@ -28,4 +28,3 @@ namespace stlplus
   }
 
 } // end namespace stlplus
-

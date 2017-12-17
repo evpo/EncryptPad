@@ -244,7 +244,7 @@ namespace stlplus
     return *this;
   }
 
-  void arg_vector::insert (unsigned index, const std::string& str) throw(std::out_of_range)
+  void arg_vector::insert (unsigned index, const std::string& str)
   {
     if (index > size()) throw std::out_of_range("arg_vector::insert");
     // copy up to but not including index, then add the new argument, then copy the rest
@@ -260,7 +260,7 @@ namespace stlplus
     m_argv = new_argv;
   }
 
-  void arg_vector::clear (unsigned index) throw(std::out_of_range)
+  void arg_vector::clear (unsigned index)
   {
     if (index >= size()) throw std::out_of_range("arg_vector::clear");
     // copy up to index, skip it, then copy the rest
@@ -306,13 +306,13 @@ namespace stlplus
     return m_argv;
   }
 
-  char* arg_vector::operator [] (unsigned index) const throw(std::out_of_range)
+  char* arg_vector::operator [] (unsigned index) const
   {
     if (index >= size()) throw std::out_of_range("arg_vector::operator[]");
     return m_argv[index];
   }
 
-  char* arg_vector::argv0 (void) const throw(std::out_of_range)
+  char* arg_vector::argv0 (void) const
   {
     return operator [] (0);
   }
@@ -659,12 +659,12 @@ namespace stlplus
     return i;
   }
 
-  std::pair<std::string,std::string> env_vector::operator [] (unsigned index) const throw(std::out_of_range)
+  std::pair<std::string,std::string> env_vector::operator [] (unsigned index) const
   {
     return get(index);
   }
 
-  std::pair<std::string,std::string> env_vector::get (unsigned index) const throw(std::out_of_range)
+  std::pair<std::string,std::string> env_vector::get (unsigned index) const
   {
     if (index >= size()) throw std::out_of_range("arg_vector::get");
     unsigned j = 0;

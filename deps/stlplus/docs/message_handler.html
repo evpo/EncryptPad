@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-<title>STLplus Library Collection - subsystems/message_handler.hpp - A General-Purpose Error Handler</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STLplus C++ Library Collection - subsystems/message_handler.hpp - A General-Purpose Error Handler</title>
 <link rel="icon" href="plus.png" type="image/png"/>
 <meta name="Author" content="Andy Rushton"/>
 <link rel="stylesheet" media="screen" type="text/css" href="screen.css"/>
@@ -14,9 +15,7 @@
 <div id="header">
 
 <div id="headerBanner">
-<h1>The
-<span style="color:red">S</span><span style="color:blue">T</span><span style="color:green">L</span><span style="color:#ecec80">plus</span>
-C++ Library Collection</h1>
+<h1>STLplus C++ Library Collection</h1>
 </div>
 
 <div id="headerNavigation">
@@ -110,8 +109,7 @@ Start with the simplest constructor:</p>
 <pre class="cpp">
 message_handler::message_handler(std::ostream&amp; device,
                                  unsigned limit = 0,
-                                 bool show = true)
-  throw();
+                                 bool show = true);
 </pre>
 
 <p>The <em>device</em> argument is an IOStream output device which is used as the
@@ -154,15 +152,14 @@ next section. The modified constructor looks like this:</p>
 message_handler::message_handler(std::ostream&amp; device,
                                  const std::string&amp; message_file,
                                  unsigned limit = 0,
-                                 bool show = true)
-  throw(stlplus::message_handler_read_error);
+                                 bool show = true);
 </pre>
 
 <p>The only difference is that this constructor takes the name of a message file as its second
 argument. Note also that the constructor can throw an stlplus::message_handler_read_error exception
 in the case where reading the message file fails, either because the file doesn't exist or because
 there was a format error in the file. This will be dealt with in more detail in the section on <a
-href="#message_files">Handling Message Files</a>.</p>
+                                                                                                 href="#message_files">Handling Message Files</a>.</p>
 
 
 <h2 id="message_files">Handling Message Files</h2>
@@ -171,8 +168,7 @@ href="#message_files">Handling Message Files</a>.</p>
 Each file is added to the message handler by the add_message_file function:</p>
 
 <pre class="cpp">
-void message_handler::add_message_file(const std::string&amp; message_file)
-  throw(stlplus::message_handler_read_error);
+void message_handler::add_message_file(const std::string&amp; message_file);
 </pre>
 
 <p>The message file will be read into the message handler and the messages stored ready for use. If
@@ -218,7 +214,7 @@ World!".</p>
 them. Arguments are specified in the message file by the substitution strings "@0", "@1" etc. The
 index number (0, 1 etc.) refers to the order in which the arguments are passed to the message
 printing functions. Note that they are numbered from zero, not from one. There is no limit to the
-number of arguments that can be substituted and the index number can have more than one digit (e.g. 
+number of arguments that can be substituted and the index number can have more than one digit (e.g.
 "@10"). The use of numbered arguments was chosen in preference to C-style substitutions because it
 allows a message to be reworded in a different order without changing the source code. This becomes
 particularly useful for multi-lingual support since different human languages will be worded with
@@ -280,13 +276,13 @@ apart from the column number.</p>
 <p>The default formats can be overridden by the set_****_format functions:</p>
 
 <pre class="cpp">
-void message_handler::set_information_format(const std::string&amp; format) throw();
-void message_handler::set_context_format(const std::string&amp; format) throw();
-void message_handler::set_supplement_format(const std::string&amp; format) throw();
-void message_handler::set_warning_format(const std::string&amp; format) throw();
-void message_handler::set_error_format(const std::string&amp; format) throw();
-void message_handler::set_fatal_format(const std::string&amp; format) throw();
-void message_handler::set_position_format(const std::string&amp; format) throw();
+void message_handler::set_information_format(const std::string&amp; format);
+void message_handler::set_context_format(const std::string&amp; format);
+void message_handler::set_supplement_format(const std::string&amp; format);
+void message_handler::set_warning_format(const std::string&amp; format);
+void message_handler::set_error_format(const std::string&amp; format);
+void message_handler::set_fatal_format(const std::string&amp; format);
+void message_handler::set_position_format(const std::string&amp; format);
 </pre>
 
 <p><strong>Note:</strong> at present there is no sanity check on the format strings. It is up to you to get
@@ -390,9 +386,8 @@ is used as the arguments to substitute into the message. For example, here's the
 general form of the simple informational message handler:</p>
 
 <pre class="cpp">
-bool message_handler::information(const std::string&amp; id, 
-                                  const std::vector&lt;std::string&gt;&amp; args)
-  throw(stlplus::message_handler_id_error,stlplus::message_handler_format_error);
+bool message_handler::information(const std::string&amp; id,
+                                  const std::vector&lt;std::string&gt;&amp; args);
 </pre>
 
 <p>The first field is the ID of the message to print and the second is the set
@@ -405,23 +400,19 @@ make life easier in the majority of cases, short-cut forms are provided for 0
 to 3 argument messages. For informational messages these are:</p>
 
 <pre class="cpp">
-bool message_handler::information(const std::string&amp; id)
-  throw(stlplus::message_handler_id_error,stlplus::message_handler_format_error);
+bool message_handler::information(const std::string&amp; id);
 
 bool message_handler::information(const std::string&amp; id,
-                                  const std::string&amp; arg1)
-  throw(stlplus::message_handler_id_error,stlplus::message_handler_format_error);
+                                  const std::string&amp; arg1);
 
 bool message_handler::information(const std::string&amp; id,
                                   const std::string&amp; arg1,
-                                  const std::string&amp; arg2)
-  throw(stlplus::message_handler_id_error,stlplus::message_handler_format_error);
+                                  const std::string&amp; arg2);
 
 bool message_handler::information(const std::string&amp; id,
                                   const std::string&amp; arg1,
                                   const std::string&amp; arg2,
-                                  const std::string&amp; arg3)
-  throw(stlplus::message_handler_id_error,stlplus::message_handler_format_error);
+                                  const std::string&amp; arg3);
 </pre>
 
 <p>Each of these functions also has a positional equivalent. The position is
@@ -432,8 +423,7 @@ placed before the id parameter.</p>
 <pre class="cpp">
 bool message_handler::information(const position&amp;,
                                   const std::string&amp; id,
-                                  const std::vector&lt;std::string&gt;&amp; args)
-  throw(stlplus::message_handler_id_error,stlplus::message_handler_format_error);
+                                  const std::vector&lt;std::string&gt;&amp; args);
 </pre>
 
 <p>There are similar methods for 0, 1, 2 and 3 arguments as above.</p>
@@ -443,7 +433,7 @@ message handlers.</p>
 
 <p>The error functions can throw an extra stlplus::message_handler_limit_error
 exception if the error limit is reached. The fatal functions always throw a
-stlplus::message_handler_fatal_error exception.</p> 
+stlplus::message_handler_fatal_error exception.</p>
 
 
 <h2 id="plaintext">Printing Plain Text</h2>
@@ -519,8 +509,7 @@ permutations.</p>
 
 <pre class="cpp">
 void message_handler::push_context (const std::string&amp; id,
-                                    const std::vector&lt;std::string&gt;&amp; args)
-  throw(stlplus::message_handler_id_error,stlplus::message_handler_format_error);
+                                    const std::vector&lt;std::string&gt;&amp; args);
 </pre>
 
 <p>This is the general form for simple messages.</p>
@@ -543,8 +532,7 @@ when it goes out of scope. An example of the auto_push_context method is:</p>
 
 <pre class="cpp">
 stlplus::message_context message_handler::auto_push_context(const std::string&amp; id,
-                                                            const std::vector&lt;std::string&gt;&amp; args)
-  throw(stlplus::message_handler_id_error,stlplus::message_handler_format_error);
+                                                            const std::vector&lt;std::string&gt;&amp; args);
 </pre>
 
 <p>In use the return object should be assigned to a local variable. When that

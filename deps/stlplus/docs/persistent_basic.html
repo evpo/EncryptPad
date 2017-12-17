@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-<title>STLplus Library Collection - persistence/persistent_basic.hpp - Persistence of Basic Types</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STLplus C++ Library Collection - persistence/persistent_basic.hpp - Persistence of Basic Types</title>
 <link rel="icon" href="plus.png" type="image/png"/>
 <meta name="Author" content="Andy Rushton"/>
 <link rel="stylesheet" media="screen" type="text/css" href="screen.css"/>
@@ -13,9 +14,7 @@
 <div id="header">
 
 <div id="headerBanner">
-<h1>The
-<span style="color:red">S</span><span style="color:blue">T</span><span style="color:green">L</span><span style="color:#ecec80">plus</span>
-C++ Library Collection</h1>
+<h1>STLplus C++ Library Collection</h1>
 </div>
 
 <div id="headerNavigation">
@@ -75,8 +74,8 @@ minimises the number of headers that get included indirectly.</p>
 <p>The bool type is dumped and restored as a small unsigned integer. The format is platform-independent.</p>
 
 <pre class="cpp">
-void stlplus::dump_bool(dump_context&amp;, const bool&amp; data) throw(stlplus::persistent_dump_failed);
-void stlplus::restore_bool(restore_context&amp;, bool&amp; data) throw(stlplus::persistent_restore_failed);
+void stlplus::dump_bool(dump_context&amp;, const bool&amp; data);
+void stlplus::restore_bool(restore_context&amp;, bool&amp; data);
 </pre>
 
 <h2 id="integer">Persistence of Integer Types</h2>
@@ -89,32 +88,32 @@ void stlplus::restore_bool(restore_context&amp;, bool&amp; data) throw(stlplus::
 following family of functions:</p>
 
 <pre class="cpp">
-void stlplus::dump_char(dump_context&amp;, const char&amp; data) throw(stlplus::persistent_dump_failed);
-void stlplus::restore_char(restore_context&amp;, char&amp; data) throw(stlplus::persistent_restore_failed);
+void stlplus::dump_char(dump_context&amp;, const char&amp; data);
+void stlplus::restore_char(restore_context&amp;, char&amp; data);
 
-void stlplus::dump_signed_char(dump_context&amp;, const signed char&amp; data) throw(stlplus::persistent_dump_failed);
-void stlplus::restore_signed_char(restore_context&amp;, signed char&amp; data) throw(stlplus::persistent_restore_failed);
+void stlplus::dump_signed_char(dump_context&amp;, const signed char&amp; data);
+void stlplus::restore_signed_char(restore_context&amp;, signed char&amp; data);
 
-void stlplus::dump_unsigned_char(dump_context&amp;, const unsigned char&amp; data) throw(stlplus::persistent_dump_failed);
-void stlplus::restore_unsigned_char(restore_context&amp;, unsigned char&amp; data) throw(stlplus::persistent_restore_failed);
+void stlplus::dump_unsigned_char(dump_context&amp;, const unsigned char&amp; data);
+void stlplus::restore_unsigned_char(restore_context&amp;, unsigned char&amp; data);
 
-void stlplus::dump_short(dump_context&amp;, const short&amp; data) throw(stlplus::persistent_dump_failed);
-void stlplus::restore_short(restore_context&amp;, short&amp; data) throw(stlplus::persistent_restore_failed);
+void stlplus::dump_short(dump_context&amp;, const short&amp; data);
+void stlplus::restore_short(restore_context&amp;, short&amp; data);
 
-void stlplus::dump_unsigned_short(dump_context&amp;, const unsigned short&amp; data) throw(stlplus::persistent_dump_failed);
-void stlplus::restore_unsigned_short(restore_context&amp;, unsigned short&amp; data) throw(stlplus::persistent_restore_failed);
+void stlplus::dump_unsigned_short(dump_context&amp;, const unsigned short&amp; data);
+void stlplus::restore_unsigned_short(restore_context&amp;, unsigned short&amp; data);
 
-void stlplus::dump_int(dump_context&amp;, const int&amp; data) throw(stlplus::persistent_dump_failed);
-void stlplus::restore_int(restore_context&amp;, int&amp; data) throw(stlplus::persistent_restore_failed);
+void stlplus::dump_int(dump_context&amp;, const int&amp; data);
+void stlplus::restore_int(restore_context&amp;, int&amp; data);
 
-void stlplus::dump_unsigned(dump_context&amp;, const unsigned&amp; data) throw(stlplus::persistent_dump_failed);
-void stlplus::restore_unsigned(restore_context&amp;, unsigned&amp; data) throw(stlplus::persistent_restore_failed);
+void stlplus::dump_unsigned(dump_context&amp;, const unsigned&amp; data);
+void stlplus::restore_unsigned(restore_context&amp;, unsigned&amp; data);
 
-void stlplus::dump_long(dump_context&amp;, const long&amp; data) throw(stlplus::persistent_dump_failed);
-void stlplus::restore_long(restore_context&amp;, long&amp; data) throw(stlplus::persistent_restore_failed);
+void stlplus::dump_long(dump_context&amp;, const long&amp; data);
+void stlplus::restore_long(restore_context&amp;, long&amp; data);
 
-void stlplus::dump_unsigned_long(dump_context&amp;, const unsigned long&amp; data) throw(stlplus::persistent_dump_failed);
-void stlplus::restore_unsigned_long(restore_context&amp;, unsigned long&amp; data) throw(stlplus::persistent_restore_failed);
+void stlplus::dump_unsigned_long(dump_context&amp;, const unsigned long&amp; data);
+void stlplus::restore_unsigned_long(restore_context&amp;, unsigned long&amp; data);
 </pre>
 
 <p>It is important to use the right dump or restore function for the type being saved.</p>
@@ -142,10 +141,10 @@ to the type of the enum being made persistent. The functions are:</p>
 
 <pre class="cpp">
 template&lt;typename T&gt;
-void stlplus::dump_enum(dump_context&amp;, const T&amp; data) throw(stlplus::persistent_dump_failed);
+void stlplus::dump_enum(dump_context&amp;, const T&amp; data);
 
 template&lt;typename T&gt;
-void stlplus::restore_enum(restore_context&amp;, T&amp; data) throw(stlplus::persistent_restore_failed);
+void stlplus::restore_enum(restore_context&amp;, T&amp; data);
 </pre>
 
 <p>Consider the following example. The enum defines a traffic light
@@ -188,11 +187,11 @@ more efficient and are provided for those cases where there are no portability p
 performance is an issue.</p>
 
 <pre class="cpp">
-void stlplus::dump_float(dump_context&amp;, const float&amp; data) throw(stlplus::persistent_dump_failed);
-void stlplus::restore_float(restore_context&amp;, float&amp; data) throw(stlplus::persistent_restore_failed);
+void stlplus::dump_float(dump_context&amp;, const float&amp; data);
+void stlplus::restore_float(restore_context&amp;, float&amp; data);
 
-void stlplus::dump_double(dump_context&amp;, const double&amp; data) throw(stlplus::persistent_dump_failed);
-void stlplus::restore_double(restore_context&amp;, double&amp; data) throw(stlplus::persistent_restore_failed);
+void stlplus::dump_double(dump_context&amp;, const double&amp; data);
+void stlplus::restore_double(restore_context&amp;, double&amp; data);
 </pre>
 
 <h2 id="cstring">Persistence of C-Style Strings (char*)</h2>
@@ -202,7 +201,7 @@ void stlplus::restore_double(restore_context&amp;, double&amp; data) throw(stlpl
 </ul>
 
 <p>Usually, pointers are treated specially by the persistence functions - see the page for <a
-href="persistent_pointers.html">persistent pointers</a> for an explanation. The one exception is
+                                                                                             href="persistent_pointers.html">persistent pointers</a> for an explanation. The one exception is
 <code>char*</code> which is treated as a null terminated array and not a pointer to a single
 <code>char</code>. Multiple pointers to the same <code>char*</code> string will be dumped once and
 the same magic key method used as for pointers to other pointer types.</p>
@@ -211,8 +210,8 @@ the same magic key method used as for pointers to other pointer types.</p>
 difference between a pointer to char and a C-style array of char.</p>
 
 <pre class="cpp">
-void stlplus::dump_cstring(dump_context&amp;, const char* data) throw(stlplus::persistent_dump_failed);
-void stlplus::restore_cstring(restore_context&amp;, char*&amp; data) throw(stlplus::persistent_restore_failed);
+void stlplus::dump_cstring(dump_context&amp;, const char* data);
+void stlplus::restore_cstring(restore_context&amp;, char*&amp; data);
 </pre>
 
 <p><strong>Warning!</strong> The restore deletes any old value of the data parameter and allocates a new char*

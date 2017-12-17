@@ -32,11 +32,13 @@
 namespace stlplus
 {
 
+  // exceptions: persistent_dump_failed
   template&lt;typename T, typename D&gt;
-  void dump_list(dump_context&amp;, const std::list&lt;T&gt;&amp; data, D dump_fn) throw(persistent_dump_failed);
+  void dump_list(dump_context&amp;, const std::list&lt;T&gt;&amp; data, D dump_fn) ;
 
+  // exceptions: persistent_restore_failed
   template&lt;typename T, typename R&gt;
-  void restore_list(restore_context&amp;, std::list&lt;T&gt;&amp; data, R restore_fn) throw(persistent_restore_failed);
+  void restore_list(restore_context&amp;, std::list&lt;T&gt;&amp; data, R restore_fn) ;
 
 } // end namespace stlplus
 

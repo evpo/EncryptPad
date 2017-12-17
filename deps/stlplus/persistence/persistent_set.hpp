@@ -19,13 +19,13 @@
 namespace stlplus
 {
 
+  // exceptions: persistent_dump_failed
   template<typename K, typename P, typename D>
-  void dump_set(dump_context&, const std::set<K,P>& data, D dump_fn)
-    throw(persistent_dump_failed);
+  void dump_set(dump_context&, const std::set<K,P>& data, D dump_fn);
 
+  // exceptions: persistent_restore_failed
   template<typename K, typename P, typename R>
-  void restore_set(restore_context&, std::set<K,P>& data, R restore_fn)
-    throw(persistent_restore_failed);
+  void restore_set(restore_context&, std::set<K,P>& data, R restore_fn);
 
 } // end namespace stlplus
 

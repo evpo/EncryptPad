@@ -17,7 +17,6 @@ namespace stlplus
 
   template<typename T>
   void dump_xref(dump_context& context, const T* const data)
-    throw(persistent_dump_failed)
   {
     // register the address and get the magic key for it
     std::pair<bool,unsigned> mapping = context.pointer_map(data);
@@ -30,7 +29,6 @@ namespace stlplus
   ////////////////////////////////////////////////////////////////////////////////>
   template<typename T>
   void dump_object_xref(dump_context& context, const T* const data)
-    throw(persistent_dump_failed)
   {
     // register the address and get the magic key for it
     std::pair<bool,unsigned> mapping = context.object_map(data);
@@ -44,7 +42,6 @@ namespace stlplus
 
   template<typename T>
   void restore_xref(restore_context& context, T*& data)
-    throw(persistent_restore_failed)
   {
     // Note: I do not try to delete the old data because this is a cross-reference
     // get the magic key
@@ -63,7 +60,6 @@ namespace stlplus
 
   template<typename T>
   void restore_object_xref(restore_context& context, T*& data)
-    throw(persistent_restore_failed)
   {
     // Note: I do not try to delete the old data because this is a cross-reference
     // get the magic key

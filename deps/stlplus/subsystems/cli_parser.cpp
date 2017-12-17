@@ -11,7 +11,7 @@
 #include "dprintf.hpp"
 ////////////////////////////////////////////////////////////////////////////////
 
-namespace stlplus 
+namespace stlplus
 {
 
   ////////////////////////////////////////////////////////////////////////////////
@@ -23,7 +23,7 @@ namespace stlplus
   }
 
   stlplus::cli_kind_t stlplus::cli_definition::kind(void) const
-  { 
+  {
     return m_kind;
   }
 
@@ -54,7 +54,7 @@ namespace stlplus
     std::string m_source;
 
     cli_value(unsigned definition, const std::string& value, unsigned level, const std::string& source) :
-      m_definition(definition), m_value(value), m_level(level), m_source(source) 
+      m_definition(definition), m_value(value), m_level(level), m_source(source)
       {
       }
   };
@@ -74,7 +74,7 @@ namespace stlplus
 
   public:
 
-    cli_parser_data(message_handler& messages) : 
+    cli_parser_data(message_handler& messages) :
       m_messages(messages), m_level(1), m_valid(true)
       {
         // ensure that the CLI's messages are in the message handler - these
@@ -113,25 +113,25 @@ namespace stlplus
         return static_cast<unsigned>(m_definitions.size())-1;
       }
 
-    std::string name(unsigned i) const throw(cli_index_error)
+    std::string name(unsigned i) const
       {
         if (i >= m_values.size()) throw cli_index_error("Index " + dformat("%u",i) + " out of range");
         return m_definitions[m_values[i].m_definition].name();
       }
 
-    unsigned id(unsigned i) const throw(cli_index_error)
+    unsigned id(unsigned i) const
       {
         if (i >= m_values.size()) throw cli_index_error("Index " + dformat("%u",i) + " out of range");
         return m_values[i].m_definition;
       }
 
-    cli_parser::kind_t kind(unsigned i) const throw(cli_index_error)
+    cli_parser::kind_t kind(unsigned i) const
       {
         if (i >= m_values.size()) throw cli_index_error("Index " + dformat("%u",i) + " out of range");
         return m_definitions[m_values[i].m_definition].kind();
       }
 
-    cli_parser::mode_t mode(unsigned i) const throw(cli_index_error)
+    cli_parser::mode_t mode(unsigned i) const
       {
         if (i >= m_values.size()) throw cli_index_error("Index " + dformat("%u",i) + " out of range");
         return m_definitions[m_values[i].m_definition].mode();
@@ -255,11 +255,11 @@ namespace stlplus
         return m_ini_files[i];
       }
 
-    unsigned add_checked_definition(const cli_parser::definition& definition) throw(cli_mode_error)
+    unsigned add_checked_definition(const cli_parser::definition& definition)
       {
         // check for stupid combinations
         // at this stage the only really stupid one is to declare command line arguments to be switch mode
-        if (definition.name().empty() && definition.kind() == cli_switch_kind) 
+        if (definition.name().empty() && definition.kind() == cli_switch_kind)
         {
           set_invalid();
           throw cli_mode_error("CLI arguments cannot be switch kind");
@@ -272,7 +272,7 @@ namespace stlplus
         return i;
       }
 
-    bool switch_value(unsigned i) const throw(cli_mode_error,cli_index_error)
+    bool switch_value(unsigned i) const
       {
         if (i >= m_values.size()) throw cli_index_error("Index " + dformat("%u",i) + " out of range");
         if (kind(i) != cli_switch_kind) throw cli_mode_error(name(i) + " is not a switch kind");
@@ -280,14 +280,14 @@ namespace stlplus
         return value == "on" || value == "true" || value == "1";
       }
 
-    std::string string_value(unsigned i) const throw(cli_mode_error,cli_index_error)
+    std::string string_value(unsigned i) const
       {
         if (i >= m_values.size()) throw cli_index_error("Index " + dformat("%u",i) + " out of range");
         if (kind(i) != cli_value_kind) throw cli_mode_error(name(i) + " is not a value kind");
         return m_values[i].m_value;
       }
 
-    void set_defaults(const ini_manager& defaults, const std::string& ini_section) throw()
+    void set_defaults(const ini_manager& defaults, const std::string& ini_section)
       {
         // import default values from the Ini Manager
         increase_level();
@@ -327,7 +327,7 @@ namespace stlplus
           add_ini_file(defaults.filename(j));
       }
 
-    bool parse(char* argv[]) throw(cli_argument_error,message_handler_id_error,message_handler_format_error)
+    bool parse(char* argv[])
       {
         bool result = true;
         if (!argv) throw cli_argument_error("Argument vector cannot be null");
@@ -339,13 +339,12 @@ namespace stlplus
           std::string name = argv[i];
           if (!name.empty() && name[0] == '-')
           {
-            //Treat -- as - to support double dash command switches
-            if(name.length() > 1 && name[1] == '-')
-            {
-                // erase first -. Now it is -parameter as the parser needs
-                name.erase(0, 1);
-            }
             // we have a command line option
+            // Patch from Evgeny Pokhilko: Treat -- as - to support double dash command switches
+            // this is a simple work around that erases first -. Now it is -parameter as the parser needs
+            // TODO - implement idea of short and long parameters
+            if(name.length() > 1 && name[1] == '-')
+                name.erase(0, 1);
             unsigned found = find_definition(name.substr(1, name.size()-1));
             if (found < m_definitions.size())
             {
@@ -408,7 +407,7 @@ namespace stlplus
         return result;
       }
 
-    void usage(void) const throw(std::runtime_error)
+    void usage(void) const
       {
         m_messages.information("CLI_USAGE_PROGRAM", m_executable);
         m_messages.information("CLI_USAGE_DEFINITIONS");
@@ -463,60 +462,32 @@ namespace stlplus
 
   ////////////////////////////////////////////////////////////////////////////////
 
-  cli_parser::cli_parser(message_handler& messages) throw() : 
+  cli_parser::cli_parser(message_handler& messages)  :
     m_data(new cli_parser_data(messages))
   {
   }
 
-  cli_parser::cli_parser(cli_parser::definitions_t definitions, message_handler& messages) throw(cli_mode_error) : 
-    m_data(new cli_parser_data(messages))
-  {
-    add_definitions(definitions);
-  }
-
-  cli_parser::cli_parser(cli_parser::definitions_t definitions, const ini_manager& defaults, const std::string& ini_section, message_handler& messages)  throw(cli_mode_error) : 
-    m_data(new cli_parser_data(messages))
-  {
-    add_definitions(definitions);
-    set_defaults(defaults, ini_section);
-  }
-
-  cli_parser::cli_parser(char* argv[], cli_parser::definitions_t definitions, message_handler& messages)  throw(cli_mode_error,message_handler_id_error,message_handler_format_error) : 
-    m_data(new cli_parser_data(messages))
-  {
-    add_definitions(definitions);
-    parse(argv);
-  }
-
-  cli_parser::cli_parser(char* argv[], cli_parser::definitions_t definitions, const ini_manager& defaults, const std::string& ini_section, message_handler& messages)  throw(cli_mode_error,message_handler_id_error,message_handler_format_error) : 
-    m_data(new cli_parser_data(messages))
-  {
-    add_definitions(definitions);
-    set_defaults(defaults, ini_section);
-    parse(argv);
-  }
-
-  cli_parser::cli_parser(cli_parser::definitions definitions, message_handler& messages) throw(cli_mode_error) : 
+  cli_parser::cli_parser(cli_parser::definitions_t definitions, message_handler& messages)  :
     m_data(new cli_parser_data(messages))
   {
     add_definitions(definitions);
   }
 
-  cli_parser::cli_parser(cli_parser::definitions definitions, const ini_manager& defaults, const std::string& ini_section, message_handler& messages)  throw(cli_mode_error) : 
+  cli_parser::cli_parser(cli_parser::definitions_t definitions, const ini_manager& defaults, const std::string& ini_section, message_handler& messages)   :
     m_data(new cli_parser_data(messages))
   {
     add_definitions(definitions);
     set_defaults(defaults, ini_section);
   }
 
-  cli_parser::cli_parser(char* argv[], cli_parser::definitions definitions, message_handler& messages)  throw(cli_mode_error,message_handler_id_error,message_handler_format_error) : 
+  cli_parser::cli_parser(char* argv[], cli_parser::definitions_t definitions, message_handler& messages)   :
     m_data(new cli_parser_data(messages))
   {
     add_definitions(definitions);
     parse(argv);
   }
 
-  cli_parser::cli_parser(char* argv[], cli_parser::definitions definitions, const ini_manager& defaults, const std::string& ini_section, message_handler& messages)  throw(cli_mode_error,message_handler_id_error,message_handler_format_error) : 
+  cli_parser::cli_parser(char* argv[], cli_parser::definitions_t definitions, const ini_manager& defaults, const std::string& ini_section, message_handler& messages)   :
     m_data(new cli_parser_data(messages))
   {
     add_definitions(definitions);
@@ -524,11 +495,39 @@ namespace stlplus
     parse(argv);
   }
 
-  cli_parser::~cli_parser(void) throw()
+  cli_parser::cli_parser(cli_parser::definitions definitions, message_handler& messages)  :
+    m_data(new cli_parser_data(messages))
+  {
+    add_definitions(definitions);
+  }
+
+  cli_parser::cli_parser(cli_parser::definitions definitions, const ini_manager& defaults, const std::string& ini_section, message_handler& messages)   :
+    m_data(new cli_parser_data(messages))
+  {
+    add_definitions(definitions);
+    set_defaults(defaults, ini_section);
+  }
+
+  cli_parser::cli_parser(char* argv[], cli_parser::definitions definitions, message_handler& messages)   :
+    m_data(new cli_parser_data(messages))
+  {
+    add_definitions(definitions);
+    parse(argv);
+  }
+
+  cli_parser::cli_parser(char* argv[], cli_parser::definitions definitions, const ini_manager& defaults, const std::string& ini_section, message_handler& messages)   :
+    m_data(new cli_parser_data(messages))
+  {
+    add_definitions(definitions);
+    set_defaults(defaults, ini_section);
+    parse(argv);
+  }
+
+  cli_parser::~cli_parser(void)
   {
   }
 
-  void cli_parser::add_definitions(cli_parser::definitions_t definitions) throw(cli_mode_error)
+  void cli_parser::add_definitions(cli_parser::definitions_t definitions)
   {
     m_data->clear_definitions();
     // the definitions array is terminated by a definition with a null name pointer
@@ -536,7 +535,7 @@ namespace stlplus
       add_definition(definitions[i]);
   }
 
-  unsigned cli_parser::add_definition(const cli_parser::definition_t& definition) throw(cli_mode_error,cli_argument_error)
+  unsigned cli_parser::add_definition(const cli_parser::definition_t& definition)
   {
     std::string name = definition.m_name ? definition.m_name : "";
     std::string message = definition.m_message ? definition.m_message : "";
@@ -544,96 +543,96 @@ namespace stlplus
     return add_definition(cli_parser::definition(name, definition.m_kind, definition.m_mode, message, value));
   }
 
-  void cli_parser::add_definitions(cli_parser::definitions definitions) throw(cli_mode_error)
+  void cli_parser::add_definitions(cli_parser::definitions definitions)
   {
     m_data->clear_definitions();
     for (unsigned i = 0; i < definitions.size(); i++)
       add_definition(definitions[i]);
   }
 
-  unsigned cli_parser::add_definition(const cli_parser::definition& definition) throw(cli_mode_error)
+  unsigned cli_parser::add_definition(const cli_parser::definition& definition)
   {
     return m_data->add_checked_definition(definition);
   }
 
-  void cli_parser::set_defaults(const ini_manager& defaults, const std::string& ini_section) throw()
+  void cli_parser::set_defaults(const ini_manager& defaults, const std::string& ini_section)
   {
     m_data->set_defaults(defaults, ini_section);
   }
 
-  bool cli_parser::parse(char* argv[]) throw(cli_argument_error,message_handler_id_error,message_handler_format_error)
+  bool cli_parser::parse(char* argv[])
   {
     return m_data->parse(argv);
   }
 
-  bool cli_parser::valid(void) throw()
+  bool cli_parser::valid(void)
   {
     return m_data->valid();
   }
 
-  unsigned cli_parser::size(void) const throw()
+  unsigned cli_parser::size(void) const
   {
     return static_cast<unsigned>(m_data->m_values.size());
   }
 
-  std::string cli_parser::name(unsigned i) const throw(cli_index_error)
+  std::string cli_parser::name(unsigned i) const
   {
     return m_data->name(i);
   }
 
-  unsigned cli_parser::id(unsigned i) const throw(cli_index_error)
+  unsigned cli_parser::id(unsigned i) const
   {
     return m_data->id(i);
   }
 
-  cli_parser::kind_t cli_parser::kind(unsigned i) const throw(cli_index_error)
+  cli_parser::kind_t cli_parser::kind(unsigned i) const
   {
     return m_data->kind(i);
   }
 
-  bool cli_parser::switch_kind(unsigned i) const throw(cli_index_error)
+  bool cli_parser::switch_kind(unsigned i) const
   {
     return kind(i) == cli_switch_kind;
   }
 
-  bool cli_parser::value_kind(unsigned i) const throw(cli_index_error)
+  bool cli_parser::value_kind(unsigned i) const
   {
     return kind(i) == cli_value_kind;
   }
 
-  cli_parser::mode_t cli_parser::mode(unsigned i) const throw(cli_index_error)
+  cli_parser::mode_t cli_parser::mode(unsigned i) const
   {
     return m_data->mode(i);
   }
 
-  bool cli_parser::single_mode(unsigned i) const throw(cli_index_error)
+  bool cli_parser::single_mode(unsigned i) const
   {
     return mode(i) == cli_single_mode;
   }
 
-  bool cli_parser::multiple_mode(unsigned i) const throw(cli_index_error)
+  bool cli_parser::multiple_mode(unsigned i) const
   {
     return mode(i) == cli_multiple_mode;
   }
 
-  bool cli_parser::cumulative_mode(unsigned i) const throw(cli_index_error)
+  bool cli_parser::cumulative_mode(unsigned i) const
   {
     return mode(i) == cli_cumulative_mode;
   }
 
-  bool cli_parser::switch_value(unsigned i) const throw(cli_mode_error,cli_index_error)
+  bool cli_parser::switch_value(unsigned i) const
   {
     return m_data->switch_value(i);
   }
 
-  std::string cli_parser::string_value(unsigned i) const throw(cli_mode_error,cli_index_error)
+  std::string cli_parser::string_value(unsigned i) const
   {
     return m_data->string_value(i);
   }
 
   ////////////////////////////////////////////////////////////////////////////////
 
-  void cli_parser::usage(void) const throw(std::runtime_error)
+  void cli_parser::usage(void) const
   {
     m_data->usage();
   }

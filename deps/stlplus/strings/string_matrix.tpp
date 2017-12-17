@@ -32,4 +32,3 @@ namespace stlplus
   }
 
 } // end namespace stlplus
-

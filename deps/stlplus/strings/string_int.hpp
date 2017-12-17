@@ -36,60 +36,60 @@ namespace stlplus
   // For example, using the hash representation of 0 in hex with width=4 gives:
   // 16#0000 - so there's 4 digits in the number part
 
+  // exceptions: std::invalid_argument
   std::string short_to_string(short i,
                               unsigned radix = 10,
                               radix_display_t display = radix_c_style_or_hash,
-                              unsigned width = 0)
-    throw(std::invalid_argument);
+                              unsigned width = 0);
 
+  // exceptions: std::invalid_argument
   std::string unsigned_short_to_string(unsigned short i,
                                        unsigned radix = 10,
                                        radix_display_t display = radix_c_style_or_hash,
-                                       unsigned width = 0)
-    throw(std::invalid_argument);
+                                       unsigned width = 0);
 
+  // exceptions: std::invalid_argument
   std::string int_to_string(int i,
                             unsigned radix = 10,
                             radix_display_t display = radix_c_style_or_hash,
-                            unsigned width = 0)
-    throw(std::invalid_argument);
+                            unsigned width = 0);
 
+  // exceptions: std::invalid_argument
   std::string unsigned_to_string(unsigned i,
                                  unsigned radix = 10,
                                  radix_display_t display = radix_c_style_or_hash,
-                                 unsigned width = 0)
-    throw(std::invalid_argument);
+                                 unsigned width = 0);
 
+  // exceptions: std::invalid_argument
   std::string long_to_string(long i,
                              unsigned radix = 10,
                              radix_display_t display = radix_c_style_or_hash,
-                             unsigned width = 0)
-    throw(std::invalid_argument);
+                             unsigned width = 0);
 
+  // exceptions: std::invalid_argument
   std::string unsigned_long_to_string(unsigned long i,
                                       unsigned radix = 10,
                                       radix_display_t display = radix_c_style_or_hash,
-                                      unsigned width = 0)
-    throw(std::invalid_argument);
+                                      unsigned width = 0);
 
+  // exceptions: std::invalid_argument
   std::string longlong_to_string(long long i,
                                  unsigned radix = 10,
                                  radix_display_t display = radix_c_style_or_hash,
-                                 unsigned width = 0)
-    throw(std::invalid_argument);
+                                 unsigned width = 0);
 
+  // exceptions: std::invalid_argument
   std::string unsigned_longlong_to_string(unsigned long long i,
                                           unsigned radix = 10,
                                           radix_display_t display = radix_c_style_or_hash,
-                                          unsigned width = 0)
-    throw(std::invalid_argument);
+                                          unsigned width = 0);
 
   // address displayed as an integer
+  // exceptions: std::invalid_argument
   std::string address_to_string(const void*,
                                 unsigned radix = 16,
                                 radix_display_t display = radix_c_style_or_hash,
-                                unsigned width = 0)
-    throw(std::invalid_argument);
+                                unsigned width = 0);
 
   ////////////////////////////////////////////////////////////////////////////////
   // Convert a string to an integer type
@@ -106,34 +106,34 @@ namespace stlplus
   // e.g. the hex value FEDCBA has no indication that it is hex, so specify radix 16
   // Any other value of radix will cause std::invalid_argument to be thrown
 
+  // exceptions: std::invalid_argument
   short string_to_short(const std::string& value,
-                        unsigned radix = 0)
-    throw(std::invalid_argument);
+                        unsigned radix = 0);
 
+  // exceptions: std::invalid_argument
   unsigned short string_to_unsigned_short(const std::string& value,
-                                          unsigned radix = 0)
-    throw(std::invalid_argument);
+                                          unsigned radix = 0);
 
+  // exceptions: std::invalid_argument
   int string_to_int(const std::string& value,
-                    unsigned radix = 0)
-    throw(std::invalid_argument);
+                    unsigned radix = 0);
 
+  // exceptions: std::invalid_argument
   unsigned string_to_unsigned(const std::string& value,
-                              unsigned radix = 0)
-    throw(std::invalid_argument);
+                              unsigned radix = 0);
 
+  // exceptions: std::invalid_argument
   long string_to_long(const std::string& value,
-                      unsigned radix = 0)
-    throw(std::invalid_argument);
+                      unsigned radix = 0);
 
+  // exceptions: std::invalid_argument
   unsigned long string_to_unsigned_long(const std::string& value,
-                                        unsigned radix = 0)
-    throw(std::invalid_argument);
+                                        unsigned radix = 0);
 
   // string representation of a pointer as an integer
+  // exceptions: std::invalid_argument
   void* string_to_address(const std::string& value,
-                          unsigned radix = 0)
-    throw(std::invalid_argument);
+                          unsigned radix = 0);
 
   ////////////////////////////////////////////////////////////////////////////////
 

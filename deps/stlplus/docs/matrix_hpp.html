@@ -20,7 +20,7 @@
 //              (c) Andy Rushton           2004 onwards
 //   License:   BSD License, see ../docs/license.html
 
-//   General-purpose 2D matrix data structure 
+//   General-purpose 2D matrix data structure
 
 ////////////////////////////////////////////////////////////////////////////////
 #include &quot;containers_fixes.hpp&quot;
@@ -34,33 +34,41 @@ namespace stlplus
   template&lt;typename T&gt; class matrix
   {
   public:
-    matrix(unsigned rows = 0, unsigned cols = 0, const T&amp; fill = T()) throw();
-    ~matrix(void) throw();
+    matrix(unsigned rows = 0, unsigned cols = 0, const T&amp; fill = T()) ;
+    ~matrix(void) ;
 
-    matrix(const matrix&amp;) throw();
-    matrix&amp; operator =(const matrix&amp;) throw();
+    matrix(const matrix&amp;) ;
+    matrix&amp; operator =(const matrix&amp;) ;
 
-    void resize(unsigned rows, unsigned cols, const T&amp; fill = T()) throw();
+    void resize(unsigned rows, unsigned cols, const T&amp; fill = T()) ;
 
-    unsigned rows(void) const throw();
-    unsigned columns(void) const throw();
+    unsigned rows(void) const ;
+    unsigned columns(void) const ;
 
-    void erase(const T&amp; fill = T()) throw();
-    void erase(unsigned row, unsigned col, const T&amp; fill = T()) throw(std::out_of_range);
-    void insert(unsigned row, unsigned col, const T&amp;) throw(std::out_of_range);
-    const T&amp; item(unsigned row, unsigned col) const throw(std::out_of_range);
-    T&amp; item(unsigned row, unsigned col) throw(std::out_of_range);
-    const T&amp; operator()(unsigned row, unsigned col) const throw(std::out_of_range);
-    T&amp; operator()(unsigned row, unsigned col) throw(std::out_of_range);
+    void erase(const T&amp; fill = T()) ;
+    // exceptions: std::out_of_range
+    void erase(unsigned row, unsigned col, const T&amp; fill = T()) ;
+    // exceptions: std::out_of_range
+    void insert(unsigned row, unsigned col, const T&amp;) ;
+    // exceptions: std::out_of_range
+    const T&amp; item(unsigned row, unsigned col) const ;
+    // exceptions: std::out_of_range
+    T&amp; item(unsigned row, unsigned col) ;
+    // exceptions: std::out_of_range
+    const T&amp; operator()(unsigned row, unsigned col) const ;
+    // exceptions: std::out_of_range
+    T&amp; operator()(unsigned row, unsigned col) ;
 
-    void fill(const T&amp; item = T()) throw();
-    void fill_column(unsigned col, const T&amp; item = T()) throw(std::out_of_range);
-    void fill_row(unsigned row, const T&amp; item = T()) throw(std::out_of_range);
-    void fill_leading_diagonal(const T&amp; item = T()) throw();
-    void fill_trailing_diagonal(const T&amp; item = T()) throw();
-    void make_identity(const T&amp; one, const T&amp; zero = T()) throw();
+    void fill(const T&amp; item = T()) ;
+    // exceptions: std::out_of_range
+    void fill_column(unsigned col, const T&amp; item = T()) ;
+    // exceptions: std::out_of_range
+    void fill_row(unsigned row, const T&amp; item = T()) ;
+    void fill_leading_diagonal(const T&amp; item = T()) ;
+    void fill_trailing_diagonal(const T&amp; item = T()) ;
+    void make_identity(const T&amp; one, const T&amp; zero = T()) ;
 
-    void transpose(void) throw();
+    void transpose(void) ;
 
   private:
     unsigned m_rows;

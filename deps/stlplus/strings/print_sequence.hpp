@@ -22,7 +22,7 @@ namespace stlplus
 
   template <typename I, typename S>
   void print_sequence(std::ostream& device,
-                      I begin, I end, 
+                      I begin, I end,
                       S print_fn,
                       const std::string& separator);
 

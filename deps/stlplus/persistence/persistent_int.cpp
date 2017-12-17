@@ -36,7 +36,7 @@
 // had to assume that a char is 1 byte.
 
 static void dump_unsigned(stlplus::dump_context& context, unsigned bytes, unsigned char* data)
-  throw(stlplus::persistent_dump_failed)
+
 {
   // first skip zero bytes - this may reduce the data to zero bytes long
   unsigned i = bytes;
@@ -50,7 +50,7 @@ static void dump_unsigned(stlplus::dump_context& context, unsigned bytes, unsign
 }
 
 static void dump_signed(stlplus::dump_context& context, unsigned bytes, unsigned char* data)
-  throw(stlplus::persistent_dump_failed)
+
 {
   // first skip all-zero or all-one bytes but only if doing so does not change the sign
   unsigned i = bytes;
@@ -74,7 +74,7 @@ static void dump_signed(stlplus::dump_context& context, unsigned bytes, unsigned
 }
 
 static void restore_unsigned(stlplus::restore_context& context, unsigned bytes, unsigned char* data)
-  throw(stlplus::persistent_restore_failed)
+
 {
   // get the dumped size from the file
   unsigned dumped_bytes = (unsigned)context.get();
@@ -94,7 +94,7 @@ static void restore_unsigned(stlplus::restore_context& context, unsigned bytes, 
 }
 
 static void restore_signed(stlplus::restore_context& context, unsigned bytes, unsigned char* data)
-  throw(stlplus::persistent_restore_failed)
+
 {
   // get the dumped size from the file
   unsigned dumped_bytes = (unsigned)context.get();
@@ -130,102 +130,102 @@ static void restore_signed(stlplus::restore_context& context, unsigned bytes, un
 // exported functions
 
 // char is dumped and restored as an unsigned char because the signedness of char is not defined and can vary
-void stlplus::dump_char(stlplus::dump_context& context, const char& data) throw(stlplus::persistent_dump_failed)
+void stlplus::dump_char(stlplus::dump_context& context, const char& data)
 {
   context.put((unsigned char)data);
 }
 
-void stlplus::restore_char(restore_context& context, char& data) throw(stlplus::persistent_restore_failed)
+void stlplus::restore_char(restore_context& context, char& data)
 {
   data = (char)(unsigned char)context.get();
 }
 
-void stlplus::dump_signed_char(stlplus::dump_context& context, const signed char& data) throw(stlplus::persistent_dump_failed)
+void stlplus::dump_signed_char(stlplus::dump_context& context, const signed char& data)
 {
   context.put((unsigned char)data);
 }
 
-void stlplus::restore_signed_char(restore_context& context, signed char& data) throw(stlplus::persistent_restore_failed)
+void stlplus::restore_signed_char(restore_context& context, signed char& data)
 {
   data = (signed char)(unsigned char)context.get();
 }
 
-void stlplus::dump_unsigned_char(stlplus::dump_context& context, const unsigned char& data) throw(stlplus::persistent_dump_failed)
+void stlplus::dump_unsigned_char(stlplus::dump_context& context, const unsigned char& data)
 {
   context.put((unsigned char)data);
 }
 
-void stlplus::restore_unsigned_char(restore_context& context, unsigned char& data) throw(stlplus::persistent_restore_failed)
+void stlplus::restore_unsigned_char(restore_context& context, unsigned char& data)
 {
   data = (signed char)(unsigned char)context.get();
 }
 
-void stlplus::dump_short(stlplus::dump_context& context, const short& data) throw(stlplus::persistent_dump_failed)
+void stlplus::dump_short(stlplus::dump_context& context, const short& data)
 {
   ::dump_signed(context, sizeof(short), (unsigned char*)&data);
 }
 
-void stlplus::restore_short(restore_context& context, short& data) throw(stlplus::persistent_restore_failed)
+void stlplus::restore_short(restore_context& context, short& data)
 {
   ::restore_signed(context, sizeof(short),(unsigned char*)&data);
 }
 
-void stlplus::dump_unsigned_short(stlplus::dump_context& context, const unsigned short& data) throw(stlplus::persistent_dump_failed)
+void stlplus::dump_unsigned_short(stlplus::dump_context& context, const unsigned short& data)
 {
   ::dump_unsigned(context, sizeof(unsigned short), (unsigned char*)&data);
 }
 
-void stlplus::restore_unsigned_short(restore_context& context, unsigned short& data) throw(stlplus::persistent_restore_failed)
+void stlplus::restore_unsigned_short(restore_context& context, unsigned short& data)
 {
   ::restore_unsigned(context, sizeof(unsigned short),(unsigned char*)&data);
 }
 
-void stlplus::dump_int(stlplus::dump_context& context, const int& data) throw(stlplus::persistent_dump_failed)
+void stlplus::dump_int(stlplus::dump_context& context, const int& data)
 {
   ::dump_signed(context, sizeof(int), (unsigned char*)&data);
 }
 
-void stlplus::restore_int(restore_context& context, int& data) throw(stlplus::persistent_restore_failed)
+void stlplus::restore_int(restore_context& context, int& data)
 {
   ::restore_signed(context, sizeof(int),(unsigned char*)&data);
 }
 
-void stlplus::dump_unsigned(stlplus::dump_context& context, const unsigned& data) throw(stlplus::persistent_dump_failed)
+void stlplus::dump_unsigned(stlplus::dump_context& context, const unsigned& data)
 {
   ::dump_unsigned(context, sizeof(unsigned), (unsigned char*)&data);
 }
 
-void stlplus::restore_unsigned(restore_context& context, unsigned& data) throw(stlplus::persistent_restore_failed)
+void stlplus::restore_unsigned(restore_context& context, unsigned& data)
 {
   ::restore_unsigned(context, sizeof(unsigned),(unsigned char*)&data);
 }
 
-void stlplus::dump_long(stlplus::dump_context& context, const long& data) throw(stlplus::persistent_dump_failed)
+void stlplus::dump_long(stlplus::dump_context& context, const long& data)
 {
   ::dump_signed(context, sizeof(long), (unsigned char*)&data);
 }
 
-void stlplus::restore_long(restore_context& context, long& data) throw(stlplus::persistent_restore_failed)
+void stlplus::restore_long(restore_context& context, long& data)
 {
   ::restore_signed(context, sizeof(long),(unsigned char*)&data);
 }
 
-void stlplus::dump_unsigned_long(stlplus::dump_context& context, const unsigned long& data) throw(stlplus::persistent_dump_failed)
+void stlplus::dump_unsigned_long(stlplus::dump_context& context, const unsigned long& data)
 {
   ::dump_unsigned(context, sizeof(unsigned long), (unsigned char*)&data);
 }
 
-void stlplus::restore_unsigned_long(restore_context& context, unsigned long& data) throw(stlplus::persistent_restore_failed)
+void stlplus::restore_unsigned_long(restore_context& context, unsigned long& data)
 {
   ::restore_unsigned(context, sizeof(unsigned long),(unsigned char*)&data);
 }
 
-void stlplus::dump_size_t(stlplus::dump_context& context, const size_t& data) throw(stlplus::persistent_dump_failed)
+void stlplus::dump_size_t(stlplus::dump_context& context, const size_t& data)
 {
   ::dump_unsigned(context, sizeof(size_t), (unsigned char*)&data);
 }
 
-void stlplus::restore_size_t(restore_context& context, size_t& data) throw(stlplus::persistent_restore_failed)
+void stlplus::restore_size_t(restore_context& context, size_t& data)
 {
   ::restore_unsigned(context, sizeof(size_t),(unsigned char*)&data);
 }

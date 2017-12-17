@@ -32,13 +32,13 @@
 namespace stlplus
 {
 
+  // exceptions: persistent_dump_failed
   template<typename T, typename D>
-  void dump_pointer(dump_context&, const T* const data, D dump_fn)
-    throw(persistent_dump_failed);
+  void dump_pointer(dump_context&, const T* const data, D dump_fn);
 
+  // exceptions: persistent_restore_failed
   template<typename T, typename R>
-  void restore_pointer(restore_context&, T*& data, R restore_fn)
-    throw(persistent_restore_failed);
+  void restore_pointer(restore_context&, T*& data, R restore_fn);
 
 } // end namespace stlplus
 

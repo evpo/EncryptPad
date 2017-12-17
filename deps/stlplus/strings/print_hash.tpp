@@ -19,11 +19,10 @@ namespace stlplus
                   const std::string& pair_separator,
                   const std::string& separator)
   {
-    print_pair_sequence(device, 
+    print_pair_sequence(device,
                         values.begin(), values.end(),
                         key_print_fn, value_print_fn,
                         pair_separator, separator);
   }
 
 } // end namespace stlplus
-

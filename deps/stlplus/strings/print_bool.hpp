@@ -21,11 +21,11 @@ namespace stlplus
 
   ////////////////////////////////////////////////////////////////////////////////
 
+  // exceptions: std::invalid_argument
   void print_bool(std::ostream& device, bool i,
                   unsigned radix = 10,
                   radix_display_t display = radix_c_style_or_hash,
-                  unsigned width = 0)
-    throw(std::invalid_argument);
+                  unsigned width = 0);
 
   ////////////////////////////////////////////////////////////////////////////////
 

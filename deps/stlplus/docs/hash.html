@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-<title>STLplus Library Collection - containers/hash.hpp - A Chained Hash Table Container</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STLplus C++ Library Collection - containers/hash.hpp - A Chained Hash Table Container</title>
 <link rel="icon" href="plus.png" type="image/png"/>
 <meta name="Author" content="Andy Rushton"/>
 <link rel="stylesheet" media="screen" type="text/css" href="screen.css"/>
@@ -13,9 +14,7 @@
 <div id="header">
 
 <div id="headerBanner">
-<h1>The
-<span style="color:red">S</span><span style="color:blue">T</span><span style="color:green">L</span><span style="color:#ecec80">plus</span>
-C++ Library Collection</h1>
+<h1>STLplus C++ Library Collection</h1>
 </div>
 
 <div id="headerNavigation">
@@ -94,7 +93,7 @@ struct hash_string
 {
   unsigned operator()(const std::string&amp; s) const
   {
-    ... 
+    ...
   }
 };
 </pre>
@@ -300,7 +299,7 @@ iterator insert(const K&amp; key);
 </pre>
 
 <p>This insert method adds a new key/data pair to the hash, but this time with a default-contructed
-data field. If the key is already present in the hash, then the new value replaces the old value. 
+data field. If the key is already present in the hash, then the new value replaces the old value.
 The insert method returns an iterator to the new element so that it can be inspected or its data
 field modified.</p>
 
@@ -325,26 +324,7 @@ for hashes because they are unsorted and therefore there is no meaningful interp
 of keys.So there is no equivalent erase method in the hash.</p>
 
 <pre class="cpp">
-const_iterator find(const K&amp; key) const;
-iterator find(const K&amp; key);
-</pre>
-
-<p>The find() functions are the most flexible way of accessing elements in a
-hash, although the use of iterators can make them a bit clumsy. The first form
-works on const hashes and returns a const_iterator, which means you can look at
-the element but not change it. The second form works on non-const hashes,
-giving a non-const iterator, thus allowing the data field (not the key) to be
-changed.</p>
-
-<p>If the key is not present in the hash, the iterator will be equal to end().
-It is illegal to try to dereference an iterator equal to end, so make this check
-first. Dereferencing an iterator accesses the value type stored in the hash,
-which is in fact the same type used in the STL map - a std::pair containing a
-const key type and a data type. Dereferencing of iterators will be dealt with in
-the section on iterators.</p>
-
-<pre class="cpp">
-const T&amp; operator[] (const K&amp; key) const throw(std::out_of_range);
+const T&amp; operator[] (const K&amp; key) const;
 T&amp; operator[] (const K&amp; key);
 </pre>
 
@@ -373,6 +353,36 @@ table["two"] = table["one"] + 1;
 change the contents of the hash. If you don't want this, either guard against
 it using present() or avoid the issue completely by using find().</p>
 
+<pre class="cpp">
+const T&amp; at(const K&amp; key) const;
+T* at_pointer(const K&amp; key) const;
+</pre>
+
+<p>The hash::at() method has the same functionality as the
+hash::operator[] method in read-only mode, but does not have the catch
+that in read-write mode, [] creates a new value if the key is not
+found. The at() method throws an exception when the key is not
+found. The at_pointer() method returns a pointer to the value, rather
+than a reference and returns null if the key is not found.</p>
+
+<pre class="cpp">
+const_iterator find(const K&amp; key) const;
+iterator find(const K&amp; key);
+</pre>
+
+<p>The find() functions are the most flexible way of accessing elements in a
+hash, although the use of iterators can make them a bit clumsy. The first form
+works on const hashes and returns a const_iterator, which means you can look at
+the element but not change it. The second form works on non-const hashes,
+giving a non-const iterator, thus allowing the data field (not the key) to be
+changed.</p>
+
+<p>If the key is not present in the hash, the iterator will be equal to end().
+It is illegal to try to dereference an iterator equal to end, so make this check
+first. Dereferencing an iterator accesses the value type stored in the hash,
+which is in fact the same type used in the STL map - a std::pair containing a
+const key type and a data type. Dereferencing of iterators will be dealt with in
+the section on iterators.</p>
 
 <h2 id="iterators">Iterators</h2>
 

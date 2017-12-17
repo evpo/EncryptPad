@@ -66,17 +66,17 @@ namespace stlplus
     // increment/decrement operators used to step through the set of all nodes in a graph
     // it is only legal to increment a valid iterator
     // pre-increment
-    this_iterator& operator ++ (void)
-      throw(null_dereference,end_dereference);
+    // exceptions: null_dereference,end_dereference
+    this_iterator& operator ++ (void);
     // post-increment
-    this_iterator operator ++ (int)
-      throw(null_dereference,end_dereference);
+    // exceptions: null_dereference,end_dereference
+    this_iterator operator ++ (int);
     // pre-decrement
-    this_iterator& operator -- (void)
-      throw(null_dereference,end_dereference);
+    // exceptions: null_dereference,end_dereference
+    this_iterator& operator -- (void);
     // post-decrement
-    this_iterator operator -- (int)
-      throw(null_dereference,end_dereference);
+    // exceptions: null_dereference,end_dereference
+    this_iterator operator -- (int);
 
     // test useful for testing whether iteration has completed and for inclusion in other containers
     // Note: this class also inherits the safe_iterator methods: valid(), null(), end()
@@ -86,10 +86,10 @@ namespace stlplus
 
     // access the node data - a const_iterator gives you a const element, an iterator a non-const element
     // it is illegal to dereference an invalid (i.e. null or end) iterator
-    reference operator*(void) const
-      throw(null_dereference,end_dereference);
-    pointer operator->(void) const
-      throw(null_dereference,end_dereference);
+    // exceptions: null_dereference,end_dereference
+    reference operator*(void) const;
+    // exceptions: null_dereference,end_dereference
+    pointer operator->(void) const;
 
   public:
     // constructor used by digraph to create a non-null iterator
@@ -129,17 +129,17 @@ namespace stlplus
     // increment/decrement operators used to step through the set of all nodes in a graph
     // it is only legal to increment a valid iterator
     // pre-increment
-    this_iterator& operator ++ (void)
-      throw(null_dereference,end_dereference);
+    // exceptions: null_dereference,end_dereference
+    this_iterator& operator ++ (void);
     // post-increment
-    this_iterator operator ++ (int)
-      throw(null_dereference,end_dereference);
+    // exceptions: null_dereference,end_dereference
+    this_iterator operator ++ (int);
     // pre-decrement
-    this_iterator& operator -- (void)
-      throw(null_dereference,end_dereference);
+    // exceptions: null_dereference,end_dereference
+    this_iterator& operator -- (void);
     // post-decrement
-    this_iterator operator -- (int)
-      throw(null_dereference,end_dereference);
+    // exceptions: null_dereference,end_dereference
+    this_iterator operator -- (int);
 
     // test useful for testing whether iteration has completed and for inclusion in other containers
     // Note: this class also inherits the safe_iterator methods: valid(), null(), end()
@@ -149,10 +149,10 @@ namespace stlplus
 
     // access the node data - a const_iterator gives you a const element, an iterator a non-const element
     // it is illegal to dereference an invalid (i.e. null or end) iterator
-    reference operator*(void) const
-      throw(null_dereference,end_dereference);
-    pointer operator->(void) const
-      throw(null_dereference,end_dereference);
+    // exceptions: null_dereference,end_dereference
+    reference operator*(void) const;
+    // exceptions: null_dereference,end_dereference
+    pointer operator->(void) const;
 
   public:
     // constructor used by digraph to create a non-null iterator
@@ -193,28 +193,28 @@ namespace stlplus
     // traversal can be done by traversing the vector backwards
     typedef std::vector<arc_iterator> arc_vector;
     typedef std::vector<const_arc_iterator> const_arc_vector;
-    const_arc_vector constify_arcs(const arc_vector&) const
-      throw(wrong_object,null_dereference,end_dereference);
-    arc_vector deconstify_arcs(const const_arc_vector&) const
-      throw(wrong_object,null_dereference,end_dereference);
+    // exceptions: wrong_object,null_dereference,end_dereference
+    const_arc_vector constify_arcs(const arc_vector&) const;
+    // exceptions: wrong_object,null_dereference,end_dereference
+    arc_vector deconstify_arcs(const const_arc_vector&) const;
 
     // a path vector is a vector of paths used to represent all the paths from one node to another
     // there is no particular ordering to the paths in the vector
     typedef std::vector<arc_vector> path_vector;
     typedef std::vector<const_arc_vector> const_path_vector;
-    const_path_vector constify_paths(const path_vector&) const
-      throw(wrong_object,null_dereference,end_dereference);
-    path_vector deconstify_paths(const const_path_vector&) const
-      throw(wrong_object,null_dereference,end_dereference);
+    // exceptions: wrong_object,null_dereference,end_dereference
+    const_path_vector constify_paths(const path_vector&) const;
+    // exceptions: wrong_object,null_dereference,end_dereference
+    path_vector deconstify_paths(const const_path_vector&) const;
 
     // a node vector is a simple vector of nodes used to represent the reachable sets
     // there is no particular ordering to the nodes in the vector
     typedef std::vector<iterator> node_vector;
     typedef std::vector<const_iterator> const_node_vector;
-    const_node_vector constify_nodes(const node_vector&) const
-      throw(wrong_object,null_dereference,end_dereference);
-    node_vector deconstify_nodes(const const_node_vector&) const
-      throw(wrong_object,null_dereference,end_dereference);
+    // exceptions: wrong_object,null_dereference,end_dereference
+    const_node_vector constify_nodes(const node_vector&) const;
+    // exceptions: wrong_object,null_dereference,end_dereference
+    node_vector deconstify_nodes(const const_node_vector&) const;
 
     // callback used in the path algorithms to select which arcs to consider
     typedef bool (*arc_select_fn) (const digraph<NT,AT>&, const_arc_iterator);
@@ -251,8 +251,8 @@ namespace stlplus
 
     // remove a node and return the iterator to the next node
     // erasing a node erases its arcs
-    iterator erase(iterator)
-      throw(wrong_object,null_dereference,end_dereference);
+    // exceptions: wrong_object,null_dereference,end_dereference
+    iterator erase(iterator);
     // remove all nodes
     void clear(void);
 
@@ -264,51 +264,51 @@ namespace stlplus
 
     // access the inputs of this node
     // the fanin is the number of inputs and the inputs are accessed using an index from 0..fanin-1
-    unsigned fanin(const_iterator) const
-      throw(wrong_object,null_dereference,end_dereference);
-    unsigned fanin(iterator)
-      throw(wrong_object,null_dereference,end_dereference);
-    const_arc_iterator input(const_iterator, unsigned) const
-      throw(wrong_object,null_dereference,end_dereference,std::out_of_range);
-    arc_iterator input(iterator, unsigned)
-      throw(wrong_object,null_dereference,end_dereference,std::out_of_range);
+    // exceptions: wrong_object,null_dereference,end_dereference
+    unsigned fanin(const_iterator) const;
+    // exceptions: wrong_object,null_dereference,end_dereference
+    unsigned fanin(iterator);
+    // exceptions: wrong_object,null_dereference,end_dereference,std::out_of_range
+    const_arc_iterator input(const_iterator, unsigned) const;
+    // exceptions: wrong_object,null_dereference,end_dereference,std::out_of_range
+    arc_iterator input(iterator, unsigned);
 
     // access the outputs of this node
     // the fanout is the number of outputs and the outputs are accessed using an index from 0..fanout-1
-    unsigned fanout(const_iterator) const
-      throw(wrong_object,null_dereference,end_dereference);
-    unsigned fanout(iterator)
-      throw(wrong_object,null_dereference,end_dereference);
-    const_arc_iterator output(const_iterator, unsigned) const
-      throw(wrong_object,null_dereference,end_dereference,std::out_of_range);
-    arc_iterator output(iterator, unsigned)
-      throw(wrong_object,null_dereference,end_dereference,std::out_of_range);
+    // exceptions: wrong_object,null_dereference,end_dereference
+    unsigned fanout(const_iterator) const;
+    // exceptions: wrong_object,null_dereference,end_dereference
+    unsigned fanout(iterator);
+    // exceptions: wrong_object,null_dereference,end_dereference,std::out_of_range
+    const_arc_iterator output(const_iterator, unsigned) const;
+    // exceptions: wrong_object,null_dereference,end_dereference,std::out_of_range
+    arc_iterator output(iterator, unsigned);
 
     // convenience routines for getting the set of all inputs or all outputs as vectors
-    const_arc_vector inputs(const_iterator) const
-      throw(wrong_object,null_dereference,end_dereference);
-    arc_vector inputs(iterator)
-      throw(wrong_object,null_dereference,end_dereference);
-    const_arc_vector outputs(const_iterator) const
-      throw(wrong_object,null_dereference,end_dereference);
-    arc_vector outputs(iterator)
-      throw(wrong_object,null_dereference,end_dereference);
+    // exceptions: wrong_object,null_dereference,end_dereference
+    const_arc_vector inputs(const_iterator) const;
+    // exceptions: wrong_object,null_dereference,end_dereference
+    arc_vector inputs(iterator);
+    // exceptions: wrong_object,null_dereference,end_dereference
+    const_arc_vector outputs(const_iterator) const;
+    // exceptions: wrong_object,null_dereference,end_dereference
+    arc_vector outputs(iterator);
 
     // find the output index of an arc which goes from this node
     // returns digraph<NT,AT>::npos if the arc is not an output of from
-    unsigned output_offset(const_iterator from, const_arc_iterator arc) const
-      throw(wrong_object,null_dereference,end_dereference);
-    unsigned output_offset(iterator from, arc_iterator arc)
-      throw(wrong_object,null_dereference,end_dereference);
+    // exceptions: wrong_object,null_dereference,end_dereference
+    unsigned output_offset(const_iterator from, const_arc_iterator arc) const;
+    // exceptions: wrong_object,null_dereference,end_dereference
+    unsigned output_offset(iterator from, arc_iterator arc);
     // ditto for an input arc
-    unsigned input_offset(const_iterator to, const_arc_iterator arc) const
-      throw(wrong_object,null_dereference,end_dereference);
-    unsigned input_offset(iterator to, arc_iterator arc)
-      throw(wrong_object,null_dereference,end_dereference);
+    // exceptions: wrong_object,null_dereference,end_dereference
+    unsigned input_offset(const_iterator to, const_arc_iterator arc) const;
+    // exceptions: wrong_object,null_dereference,end_dereference
+    unsigned input_offset(iterator to, arc_iterator arc);
 
     //////////////////////////////////////////////////////////////////////////
     // Basic Arc functions
-    // to avoid name conflicts, arc functions have the arc_ prefix 
+    // to avoid name conflicts, arc functions have the arc_ prefix
     // Arcs, like nodes, are referred to by a list iterator which is returned by the arc_insert function
     // They may also be visited from arc_begin() to arc_end()
     // Each arc has a from field and a to field which contain the node iterators of the endpoints of the arc
@@ -319,12 +319,12 @@ namespace stlplus
     unsigned arc_size(void) const;
 
     // add a new arc and return its iterator
-    arc_iterator arc_insert(iterator from, iterator to, const AT& arc_data = AT())
-      throw(wrong_object,null_dereference,end_dereference);
+    // exceptions: wrong_object,null_dereference,end_dereference
+    arc_iterator arc_insert(iterator from, iterator to, const AT& arc_data = AT());
 
     // remove an arc and return the iterator to the next arc
-    arc_iterator arc_erase(arc_iterator)
-      throw(wrong_object,null_dereference,end_dereference);
+    // exceptions: wrong_object,null_dereference,end_dereference
+    arc_iterator arc_erase(arc_iterator);
     // remove all arcs
     void arc_clear(void);
 
@@ -335,27 +335,27 @@ namespace stlplus
     arc_iterator arc_end(void);
 
     // find the node that an arc points from or to
-    const_iterator arc_from(const_arc_iterator) const
-      throw(wrong_object,null_dereference,end_dereference);
-    iterator arc_from(arc_iterator)
-      throw(wrong_object,null_dereference,end_dereference);
-    const_iterator arc_to(const_arc_iterator) const
-      throw(wrong_object,null_dereference,end_dereference);
-    iterator arc_to(arc_iterator)
-      throw(wrong_object,null_dereference,end_dereference);
+    // exceptions: wrong_object,null_dereference,end_dereference
+    const_iterator arc_from(const_arc_iterator) const;
+    // exceptions: wrong_object,null_dereference,end_dereference
+    iterator arc_from(arc_iterator);
+    // exceptions: wrong_object,null_dereference,end_dereference
+    const_iterator arc_to(const_arc_iterator) const;
+    // exceptions: wrong_object,null_dereference,end_dereference
+    iterator arc_to(arc_iterator);
 
     // reconnect an arc to a different from and to node
-    void arc_move(arc_iterator arc, iterator from, iterator to)
-      throw(wrong_object,null_dereference,end_dereference);
+    // exceptions: wrong_object,null_dereference,end_dereference
+    void arc_move(arc_iterator arc, iterator from, iterator to);
     // reconnect just the from node
-    void arc_move_from(arc_iterator arc, iterator from)
-      throw(wrong_object,null_dereference,end_dereference);
+    // exceptions: wrong_object,null_dereference,end_dereference
+    void arc_move_from(arc_iterator arc, iterator from);
     // reconnect just the to node
-    void arc_move_to(arc_iterator arc, iterator to)
-      throw(wrong_object,null_dereference,end_dereference);
+    // exceptions: wrong_object,null_dereference,end_dereference
+    void arc_move_to(arc_iterator arc, iterator to);
     // reverse the arc direction so that to becomes from and vice-versa
-    void arc_flip(arc_iterator arc)
-      throw(wrong_object,null_dereference,end_dereference);
+    // exceptions: wrong_object,null_dereference,end_dereference
+    void arc_flip(arc_iterator arc);
 
     ////////////////////////////////////////////////////////////////////////////////
     // whole graph manipulations
@@ -369,43 +369,43 @@ namespace stlplus
     // Adjacency algorithms
 
     // test whether the nodes are adjacent i.e. whether there is an arc going from from to to
-    bool adjacent(const_iterator from, const_iterator to) const
-      throw(wrong_object,null_dereference,end_dereference);
-    bool adjacent(iterator from, iterator to)
-      throw(wrong_object,null_dereference,end_dereference);
+    // exceptions: wrong_object,null_dereference,end_dereference
+    bool adjacent(const_iterator from, const_iterator to) const;
+    // exceptions: wrong_object,null_dereference,end_dereference
+    bool adjacent(iterator from, iterator to);
 
     // as above, but returns the arc that makes the nodes adjacent
     // returns the first arc if there's more than one, returns arc_end() if there are none
-    const_arc_iterator adjacent_arc(const_iterator from, const_iterator to) const
-      throw(wrong_object,null_dereference,end_dereference);
-    arc_iterator adjacent_arc(iterator from, iterator to)
-      throw(wrong_object,null_dereference,end_dereference);
+    // exceptions: wrong_object,null_dereference,end_dereference
+    const_arc_iterator adjacent_arc(const_iterator from, const_iterator to) const;
+    // exceptions: wrong_object,null_dereference,end_dereference
+    arc_iterator adjacent_arc(iterator from, iterator to);
 
     // as above, but returns the set of all arcs that make two nodes adjacent (there may be more than one)
     // returns an empty vector if there are none
-    const_arc_vector adjacent_arcs(const_iterator from, const_iterator to) const
-      throw(wrong_object,null_dereference,end_dereference);
-    arc_vector adjacent_arcs(iterator from, iterator to)
-      throw(wrong_object,null_dereference,end_dereference);
+    // exceptions: wrong_object,null_dereference,end_dereference
+    const_arc_vector adjacent_arcs(const_iterator from, const_iterator to) const;
+    // exceptions: wrong_object,null_dereference,end_dereference
+    arc_vector adjacent_arcs(iterator from, iterator to);
 
     // return the adjacency sets for the node inputs or outputs, i.e. the set of nodes adjacent to this node
     // each adjacent node will only be entered once even if there are multiple arcs between the nodes
-    const_node_vector input_adjacencies(const_iterator to) const
-      throw(wrong_object,null_dereference,end_dereference);
-    node_vector input_adjacencies(iterator to)
-      throw(wrong_object,null_dereference,end_dereference);
-    const_node_vector output_adjacencies(const_iterator from) const
-      throw(wrong_object,null_dereference,end_dereference);
-    node_vector output_adjacencies(iterator from)
-      throw(wrong_object,null_dereference,end_dereference);
+    // exceptions: wrong_object,null_dereference,end_dereference
+    const_node_vector input_adjacencies(const_iterator to) const;
+    // exceptions: wrong_object,null_dereference,end_dereference
+    node_vector input_adjacencies(iterator to);
+    // exceptions: wrong_object,null_dereference,end_dereference
+    const_node_vector output_adjacencies(const_iterator from) const;
+    // exceptions: wrong_object,null_dereference,end_dereference
+    node_vector output_adjacencies(iterator from);
 
     ////////////////////////////////////////////////////////////////////////////////
     // Topographical Sort Algorithm
     // This generates a node ordering such that each node is visited after its fanin nodes.
 
-    // This only generates a valid ordering for a Directed Acyclic Graph (DAG). 
+    // This only generates a valid ordering for a Directed Acyclic Graph (DAG).
 
-    // The return value is a pair : 
+    // The return value is a pair :
     //  - the node vector which is a set of iterators to the nodes in sorted order
     //  - the arc vector is the set of backward arcs that were broken to achieve the sort
     // If the arc vector is empty then the graph formed a DAG.
@@ -441,28 +441,28 @@ namespace stlplus
     // Note: I used a callback because the STL-like predicate idea wasn't working for me...
 
     // test for the existence of a path from from to to
-    bool path_exists(const_iterator from, const_iterator to, arc_select_fn = 0) const
-      throw(wrong_object,null_dereference,end_dereference);
-    bool path_exists(iterator from, iterator to, arc_select_fn = 0)
-      throw(wrong_object,null_dereference,end_dereference);
+    // exceptions: wrong_object,null_dereference,end_dereference
+    bool path_exists(const_iterator from, const_iterator to, arc_select_fn = 0) const;
+    // exceptions: wrong_object,null_dereference,end_dereference
+    bool path_exists(iterator from, iterator to, arc_select_fn = 0);
 
     // get the set of all paths from from to to
-    const_path_vector all_paths(const_iterator from, const_iterator to, arc_select_fn = 0) const
-      throw(wrong_object,null_dereference,end_dereference);
-    path_vector all_paths(iterator from, iterator to, arc_select_fn = 0)
-      throw(wrong_object,null_dereference,end_dereference);
+    // exceptions: wrong_object,null_dereference,end_dereference
+    const_path_vector all_paths(const_iterator from, const_iterator to, arc_select_fn = 0) const;
+    // exceptions: wrong_object,null_dereference,end_dereference
+    path_vector all_paths(iterator from, iterator to, arc_select_fn = 0);
 
     // get the set of all nodes that can be reached by any path from from
-    const_node_vector reachable_nodes(const_iterator from, arc_select_fn = 0) const
-      throw(wrong_object,null_dereference,end_dereference);
-    node_vector reachable_nodes(iterator from, arc_select_fn = 0)
-      throw(wrong_object,null_dereference,end_dereference);
+    // exceptions: wrong_object,null_dereference,end_dereference
+    const_node_vector reachable_nodes(const_iterator from, arc_select_fn = 0) const;
+    // exceptions: wrong_object,null_dereference,end_dereference
+    node_vector reachable_nodes(iterator from, arc_select_fn = 0);
 
     // get the set of all nodes that can reach to to by any path
-    const_node_vector reaching_nodes(const_iterator to, arc_select_fn = 0) const
-      throw(wrong_object,null_dereference,end_dereference);
-    node_vector reaching_nodes(iterator to, arc_select_fn = 0)
-      throw(wrong_object,null_dereference,end_dereference);
+    // exceptions: wrong_object,null_dereference,end_dereference
+    const_node_vector reaching_nodes(const_iterator to, arc_select_fn = 0) const;
+    // exceptions: wrong_object,null_dereference,end_dereference
+    node_vector reaching_nodes(iterator to, arc_select_fn = 0);
 
     ////////////////////////////////////////////////////////////////////////////////
     // Unweighted Shortest path algorithms
@@ -472,20 +472,20 @@ namespace stlplus
     // arc is assumed to be 1, so just counts the number of arcs
     // if there is more than one shortest path it returns the first one
     // If there are no paths, returns an empty path
-    const_arc_vector shortest_path(const_iterator from, const_iterator to, arc_select_fn = 0) const
-      throw(wrong_object,null_dereference,end_dereference);
-    arc_vector shortest_path(iterator from, iterator to, arc_select_fn = 0)
-      throw(wrong_object,null_dereference,end_dereference);
+    // exceptions: wrong_object,null_dereference,end_dereference
+    const_arc_vector shortest_path(const_iterator from, const_iterator to, arc_select_fn = 0) const;
+    // exceptions: wrong_object,null_dereference,end_dereference
+    arc_vector shortest_path(iterator from, iterator to, arc_select_fn = 0);
 
     // find the set of shortest paths from from to any other node in the graph
     // that is reachable (i.e. for which path_exists() is true)
     // This is an unweighted shortest path, so just counts the number of arcs
     // if there is more than one shortest path to a node it returns the first one
     // If there are no paths, returns an empty list
-    const_path_vector shortest_paths(const_iterator from, arc_select_fn = 0) const
-      throw(wrong_object,null_dereference,end_dereference);
-    path_vector shortest_paths(iterator from, arc_select_fn = 0)
-      throw(wrong_object,null_dereference,end_dereference);
+    // exceptions: wrong_object,null_dereference,end_dereference
+    const_path_vector shortest_paths(const_iterator from, arc_select_fn = 0) const;
+    // exceptions: wrong_object,null_dereference,end_dereference
+    path_vector shortest_paths(iterator from, arc_select_fn = 0);
 
   private:
     friend class digraph_iterator<NT,AT,NT&,NT*>;
@@ -494,19 +494,19 @@ namespace stlplus
     friend class digraph_arc_iterator<NT,AT,const AT&, const AT*>;
 
     typedef std::set<const_iterator> const_iterator_set;
-    typedef TYPENAME const_iterator_set::iterator const_iterator_set_iterator;
+    typedef typename const_iterator_set::iterator const_iterator_set_iterator;
 
-    bool path_exists_r(const_iterator from, const_iterator to, const_iterator_set& visited, arc_select_fn) const
-      throw(wrong_object,null_dereference,end_dereference);
+    // exceptions: wrong_object,null_dereference,end_dereference
+    bool path_exists_r(const_iterator from, const_iterator to, const_iterator_set& visited, arc_select_fn) const;
 
-    void all_paths_r(const_iterator from, const_iterator to, const_arc_vector& so_far, const_path_vector& result, arc_select_fn) const
-      throw(wrong_object,null_dereference,end_dereference);
+    // exceptions: wrong_object,null_dereference,end_dereference
+    void all_paths_r(const_iterator from, const_iterator to, const_arc_vector& so_far, const_path_vector& result, arc_select_fn) const;
 
-    void reachable_nodes_r(const_iterator from, const_iterator_set& visited, arc_select_fn) const
-      throw(wrong_object,null_dereference,end_dereference);
+    // exceptions: wrong_object,null_dereference,end_dereference
+    void reachable_nodes_r(const_iterator from, const_iterator_set& visited, arc_select_fn) const;
 
-    void reaching_nodes_r(const_iterator to, const_iterator_set& visited, arc_select_fn) const
-      throw(wrong_object,null_dereference,end_dereference);
+    // exceptions: wrong_object,null_dereference,end_dereference
+    void reaching_nodes_r(const_iterator to, const_iterator_set& visited, arc_select_fn) const;
 
     digraph_node<NT,AT>* m_nodes_begin;
     digraph_node<NT,AT>* m_nodes_end;

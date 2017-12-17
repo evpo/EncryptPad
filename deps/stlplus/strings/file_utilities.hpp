@@ -28,13 +28,15 @@ namespace stlplus
   text read_text(std::istream& device);
   // read text from a file, given the filename
   // throws an exception if the file does not exist
-  text read_text(std::string filename) throw(std::invalid_argument);
+  // exceptions: std::invalid_argument
+  text read_text(std::string filename) ;
 
   // write text to any ostream
   bool write_text(const text& file, std::ostream& device);
   // write text to a file, given the filename
   // throws an exception if the file could not be created
-  bool write_text(const text& file, std::string filename) throw(std::invalid_argument);
+  // exceptions: std::invalid_argument
+  bool write_text(const text& file, std::string filename) ;
 
 }
 

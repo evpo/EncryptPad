@@ -25,7 +25,7 @@ stlplus::text stlplus::read_text(std::istream& device)
   return result;
 }
 
-stlplus::text stlplus::read_text(std::string filename) throw(std::invalid_argument)
+stlplus::text stlplus::read_text(std::string filename)
 {
   std::ifstream input(filename.c_str());
   if (input.fail())
@@ -40,7 +40,7 @@ bool stlplus::write_text(const stlplus::text& file, std::ostream& device)
   return true;
 }
 
-bool stlplus::write_text(const stlplus::text& file, std::string filename) throw(std::invalid_argument)
+bool stlplus::write_text(const stlplus::text& file, std::string filename)
 {
   std::ofstream device(filename.c_str());
   if (device.fail())

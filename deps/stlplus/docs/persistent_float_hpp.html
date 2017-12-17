@@ -38,11 +38,15 @@
 namespace stlplus
 {
 
-  void dump_float(dump_context&amp;, const float&amp; data) throw(persistent_dump_failed);
-  void restore_float(restore_context&amp;, float&amp; data) throw(persistent_restore_failed);
+  // exceptions: persistent_dump_failed
+  void dump_float(dump_context&amp;, const float&amp; data) ;
+  // exceptions: persistent_restore_failed
+  void restore_float(restore_context&amp;, float&amp; data) ;
 
-  void dump_double(dump_context&amp;, const double&amp; data) throw(persistent_dump_failed);
-  void restore_double(restore_context&amp;, double&amp; data) throw(persistent_restore_failed);
+  // exceptions: persistent_dump_failed
+  void dump_double(dump_context&amp;, const double&amp; data) ;
+  // exceptions: persistent_restore_failed
+  void restore_double(restore_context&amp;, double&amp; data) ;
 
 } // end namespace stlplus
 

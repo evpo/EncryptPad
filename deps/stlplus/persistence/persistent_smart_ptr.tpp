@@ -16,11 +16,11 @@
 template<typename  T, typename DE>
 void stlplus::dump_smart_ptr(stlplus::dump_context& context, const stlplus::smart_ptr<T>& data,
                              DE dump_element)
-  throw(stlplus::persistent_dump_failed)
+
 {
   // similar to the simple pointer routines, but use the address of the holder to tell which objects are aliases
   // Many smart pointers can point to the same object.
-  // I could have used the address of the object to differentiate, 
+  // I could have used the address of the object to differentiate,
   // but that would not have differentiated between different null smart pointers
   // so I use the address of the substructure to differentiate between different objects.
   // get a magic key for the substructure - this also returns a flag saying whether its been seen before
@@ -36,7 +36,7 @@ void stlplus::dump_smart_ptr(stlplus::dump_context& context, const stlplus::smar
 template<typename T, typename RE>
 void stlplus::restore_smart_ptr(stlplus::restore_context& context, stlplus::smart_ptr<T>& data,
                                 RE restore_element)
-  throw(stlplus::persistent_restore_failed)
+
 {
   // get the old substructure magic key
   unsigned magic = 0;
@@ -69,11 +69,11 @@ void stlplus::restore_smart_ptr(stlplus::restore_context& context, stlplus::smar
 
 template<typename T>
 void stlplus::dump_smart_ptr_clone_callback(stlplus::dump_context& context, const stlplus::smart_ptr_clone<T>& data)
-  throw(stlplus::persistent_dump_failed)
+
 {
   // similar to the simple pointer routines, but use the address of the holder to tell which objects are aliases
   // Many smart pointers can point to the same object.
-  // I could have used the address of the object to differentiate, 
+  // I could have used the address of the object to differentiate,
   // but that would not have differentiated between different null smart pointers
   // so I use the address of the substructure to differentiate between different objects.
   // get a magic key for the substructure - this also returns a flag saying whether its been seen before
@@ -88,7 +88,7 @@ void stlplus::dump_smart_ptr_clone_callback(stlplus::dump_context& context, cons
 
 template<typename T>
 void stlplus::restore_smart_ptr_clone_callback(stlplus::restore_context& context, stlplus::smart_ptr_clone<T>& data)
-  throw(stlplus::persistent_restore_failed)
+
 {
   // get the old substructure magic key
   unsigned magic = 0;
@@ -121,11 +121,11 @@ void stlplus::restore_smart_ptr_clone_callback(stlplus::restore_context& context
 
 template<typename T>
 void stlplus::dump_smart_ptr_clone_interface(stlplus::dump_context& context, const stlplus::smart_ptr_clone<T>& data)
-  throw(stlplus::persistent_dump_failed)
+
 {
   // similar to the simple pointer routines, but use the address of the holder to tell which objects are aliases
   // Many smart pointers can point to the same object.
-  // I could have used the address of the object to differentiate, 
+  // I could have used the address of the object to differentiate,
   // but that would not have differentiated between different null smart pointers
   // so I use the address of the substructure to differentiate between different objects.
   // get a magic key for the substructure - this also returns a flag saying whether its been seen before
@@ -140,7 +140,7 @@ void stlplus::dump_smart_ptr_clone_interface(stlplus::dump_context& context, con
 
 template<typename T>
 void stlplus::restore_smart_ptr_clone_interface(stlplus::restore_context& context, stlplus::smart_ptr_clone<T>& data)
-  throw(stlplus::persistent_restore_failed)
+
 {
   // get the old substructure magic key
   unsigned magic = 0;

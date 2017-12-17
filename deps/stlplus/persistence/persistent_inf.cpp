@@ -17,7 +17,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 void stlplus::dump_inf(stlplus::dump_context& context, const stlplus::inf& data)
-  throw(stlplus::persistent_dump_failed)
+
 {
   // don't support dumping of old versions
   if (context.version() < 2)
@@ -29,7 +29,7 @@ void stlplus::dump_inf(stlplus::dump_context& context, const stlplus::inf& data)
 ////////////////////////////////////////////////////////////////////////////////
 
 void stlplus::restore_inf(stlplus::restore_context& context, stlplus::inf& data)
-  throw(stlplus::persistent_restore_failed)
+
 {
   if (context.version() < 1)
     throw stlplus::persistent_restore_failed(std::string("stlplus::inf::restore: wrong version"));

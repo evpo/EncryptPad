@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-<title>STLplus Library Collection - containers/ntree.hpp - Ntree - a Rooted Tree Container</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STLplus C++ Library Collection - containers/ntree.hpp - Ntree - a Rooted Tree Container</title>
 <link rel="icon" href="plus.png" type="image/png"/>
 <meta name="Author" content="Andy Rushton"/>
 <link rel="stylesheet" media="screen" type="text/css" href="screen.css"/>
@@ -14,9 +15,7 @@
 <div id="header">
 
 <div id="headerBanner">
-<h1>The
-<span style="color:red">S</span><span style="color:blue">T</span><span style="color:green">L</span><span style="color:#ecec80">plus</span>
-C++ Library Collection</h1>
+<h1>STLplus C++ Library Collection</h1>
 </div>
 
 <div id="headerNavigation">
@@ -54,7 +53,7 @@ C++ Library Collection</h1>
 
 <p>This component is an STL-like template class which implements a tree data structure. I called it
 an ntree (short for n-ary tree) years ago due to a misunderstanding - this is in fact a <a
-href="http://en.wikipedia.org/wiki/Tree_(graph_theory)">rooted ordered tree</a>. However, the name
+                                                                                          href="http://en.wikipedia.org/wiki/Tree_(graph_theory)">rooted ordered tree</a>. However, the name
 has stuck because I don't want to break existing code that uses it.</p>
 
 
@@ -121,19 +120,19 @@ iterator ntree::parent(iterator);
 <p>Note: These methods are members of the ntree class, not the iterator class.</p>
 
 <p>Thus, you can traverse a tree by first getting the root node, then
-  iterating through its child nodes. Alternatively, you can walk up
-  the tree from a node to the root by following the parent
-  pointers. Children are accessed by a numeric offset starting at
-  0 and ending at children()-1. The children method gives the number of children for that
-  node. Thus a node with 4 children will have offsets of 0..3 to
-  access them. A child node is accessed by getting its iterator using
-  the child method and then manipulating the child mode via that
-  iterator. The child_offset method allows an iterator to a child to
-  be converted back to a numeric offset.</p>
+iterating through its child nodes. Alternatively, you can walk up
+the tree from a node to the root by following the parent
+pointers. Children are accessed by a numeric offset starting at
+0 and ending at children()-1. The children method gives the number of children for that
+node. Thus a node with 4 children will have offsets of 0..3 to
+access them. A child node is accessed by getting its iterator using
+the child method and then manipulating the child mode via that
+iterator. The child_offset method allows an iterator to a child to
+be converted back to a numeric offset.</p>
 
 <p>Note: child_offset uses a linear search thorough all the children
 of the node. This is efficient on trees with few children per node but
-  can be very expensive on trees with large number of children per node,
+can be very expensive on trees with large number of children per node,
 in which case you are advised to use a different approach such as
 maintaining a map of iterators to parent/child offsets.</p>
 
@@ -227,19 +226,19 @@ void swap(const iterator&amp; node, unsigned child1, unsigned child2)
 </pre>
 
 <p>The reorder method moves the specified child that was
-  at offset so that it is at new_offset. The siblings will be moved
-  to accommodate the move so as to preserve their
-  order except for the moved child. For example, say you have a list
-  [a,b,c,d] and the method reorder(node,1,3) is called, then child 1
-  (b) will be moved to position 3 to give: [a,c,d,b]. Note how this is
-  equivalent to removing the child, allowing all the remaining
-  children to shuffle down to fill the gap, then re-inserting the child at the specified
-  new_offset.</p>
+at offset so that it is at new_offset. The siblings will be moved
+to accommodate the move so as to preserve their
+order except for the moved child. For example, say you have a list
+[a,b,c,d] and the method reorder(node,1,3) is called, then child 1
+(b) will be moved to position 3 to give: [a,c,d,b]. Note how this is
+equivalent to removing the child, allowing all the remaining
+children to shuffle down to fill the gap, then re-inserting the child at the specified
+new_offset.</p>
 
 <p>The swap method swaps over two children without affecting the
-  position of any other siblings. For example, say you have a list
-  [a,b,c,d] and the method swap(node,1,3) is called, then child 1 (b)
-  will be swapped with child 3 (d) to give: [a,d,c,b].</p>
+position of any other siblings. For example, say you have a list
+[a,b,c,d] and the method swap(node,1,3) is called, then child 1 (b)
+will be swapped with child 3 (d) to give: [a,d,c,b].</p>
 
 <p>It is also possible to add a <em>copy</em> of another tree to the
 root or to a node, thus adding a whole subtree in one go:</p>
@@ -251,17 +250,17 @@ iterator ntree::insert(iterator, const ntree&lt;T&gt;&amp;);
 </pre>
 
 <p>All of these methods copy the argument into the current tree. The
-  first method erases the current tree and then copies the argument tree into
-  the root. The second copies the tree to make it the designated child
-  of the node. The third is the same as the second but appends it to
-  the set of children.</p>
+first method erases the current tree and then copies the argument tree into
+the root. The second copies the tree to make it the designated child
+of the node. The third is the same as the second but appends it to
+the set of children.</p>
 
 <p>Another way of adding a copy of another tree as the root of this tree is done by simple
 assignment of one tree to another - assignment does a copy.</p>
 
 <p>If you want to move one tree into another tree without copying it,
-  use the move methods. Once again, there are three with similar
-  functionality to the insert functions:</p>
+use the move methods. Once again, there are three with similar
+functionality to the insert functions:</p>
 
 <pre class="cpp">
 iterator ntree::move(ntree&lt;T&gt;&amp;);
@@ -270,11 +269,11 @@ iterator ntree::move(iterator, ntree&lt;T&gt;&amp;);
 </pre>
 
 <p>Note that the argument is non-const because it's contents are
-  moved into the destination tree, leaving the source tree empty after the move.</p>
+moved into the destination tree, leaving the source tree empty after the move.</p>
 
 <p>The move operations also move all iterators to nodes in the tree
-  being moved so that they can continue to be used even though the
-  nodes now belong to a different tree.</p>
+being moved so that they can continue to be used even though the
+nodes now belong to a different tree.</p>
 
 <p>There are four erase functions:</p>
 
@@ -345,7 +344,7 @@ node after all of its children</li>
 
 <p>These iterators are used just like other STL-like forward
 iterators. This means that ++ is used to move the iterator forward,
-  but only forward traversals are possible, by which I mean that only
+but only forward traversals are possible, by which I mean that only
 the ++ operator is provided and there is no -- oerator.</p>
 
 <p>The iteration is started by prefix_begin() for prefix iterators and
@@ -385,7 +384,7 @@ information from the ntree class such as the parent node or the child
 nodes, since the functions providing this information only take simple
 iterators. For this reason, all the traversal iterators have a member
 function called simplify() which returns a simple iterator from a
-  prefix or postfix iterator. For example, a prefix_iterator simplifies
+prefix or postfix iterator. For example, a prefix_iterator simplifies
 to an iterator and a const_postfix_iterator simplifies to a
 const_iterator. The full set of simplify functions are:</p>
 
@@ -409,7 +408,7 @@ portable between compilers, so this is the compromise that was made.</p>
 
 <p>An alternative traversal order is the breadth-first traversal. In
 this, the nodes are visited in layers, starting with all nodes at
-  depth 0 (the root), then all nodes at depth 1 and so on. This is a
+depth 0 (the root), then all nodes at depth 1 and so on. This is a
 complex algorithm so is not implemented using an iterator. Instead, a
 method returns a vector of iterators in breadth-first traversal order:</p>
 
@@ -419,7 +418,7 @@ iterator_vector breadth_first_traversal(void);
 </pre>
 
 <p>An iterator vector is a std::vector of iterator. A
-  const_iterator_vector is a std::vector of const_iterator.</p>
+const_iterator_vector is a std::vector of const_iterator.</p>
 
 <p>The vector will be empty if the tree is empty, otherwise element 0
 will be the root node, followed by its children and then their

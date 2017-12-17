@@ -15,7 +15,7 @@
 // Null-terminated char arrays
 // Format: address [ size data ]
 
-void stlplus::dump_cstring(stlplus::dump_context& context, const char* data) throw(stlplus::persistent_dump_failed)
+void stlplus::dump_cstring(stlplus::dump_context& context, const char* data)
 {
   // register the address and get the magic key for it
   std::pair<bool,unsigned> mapping = context.pointer_map(data);
@@ -31,7 +31,7 @@ void stlplus::dump_cstring(stlplus::dump_context& context, const char* data) thr
   }
 }
 
-void stlplus::restore_cstring(restore_context& context, char*& data) throw(stlplus::persistent_restore_failed)
+void stlplus::restore_cstring(restore_context& context, char*& data)
 {
   // destroy any previous contents
   if (data)

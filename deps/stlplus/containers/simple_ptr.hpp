@@ -106,19 +106,25 @@ namespace stlplus
     // dereference operators and functions
 
     // dereference the smart pointer to get the object - use in the form *p1
-    T& operator*(void) throw(null_dereference);
-    const T& operator*(void) const throw(null_dereference);
+    // exceptions: null_dereference
+    T& operator*(void) ;
+    // exceptions: null_dereference
+    const T& operator*(void) const ;
 
     // used as a prefix to a member access to the contained object e.g. p1->print() calls T::print()
-    T* operator->(void) throw(null_dereference);
-    const T* operator->(void) const throw(null_dereference);
+    // exceptions: null_dereference
+    T* operator->(void) ;
+    // exceptions: null_dereference
+    const T* operator->(void) const ;
 
     //////////////////////////////////////////////////////////////////////////////
     // explicit function forms of the above assignment and dereference operators
 
     // get the value
-    T& value(void) throw(null_dereference);
-    const T& value(void) const throw(null_dereference);
+    // exceptions: null_dereference
+    T& value(void) ;
+    // exceptions: null_dereference
+    const T& value(void) const ;
 
     // set the pointer
     // deletes the previous pointer and adopts the passed pointer instead
@@ -162,18 +168,22 @@ namespace stlplus
     // create a pointer containing a *copy* of the object using the template parameter C
     // this copy is taken because the pointer class maintains a dynamically allocated object
     // and the T& may not be (usually is not) dynamically allocated
-    explicit simple_ptr_base(const T& data) throw(illegal_copy);
+    // exceptions: illegal_copy
+    explicit simple_ptr_base(const T& data) ;
 
     // set the value - note that this does a copy using the C template parameter
-    void set_value(const T& data) throw(illegal_copy);
+    // exceptions: illegal_copy
+    void set_value(const T& data) ;
 
     // make this pointer unique with respect to any other references to the same object
     // if this pointer is already unique, it does nothing - otherwise it copies the object
-    void make_unique(void) throw(illegal_copy);
+    // exceptions: illegal_copy
+    void make_unique(void) ;
 
     // make this pointer a unique copy of the parameter
     // useful for expressions like p1.copy(p2) which makes p1 a pointer to a unique copy of the contents of p2
-    void copy(const simple_ptr_base<T,C>&) throw(illegal_copy);
+    // exceptions: illegal_copy
+    void copy(const simple_ptr_base<T,C>&) ;
 
     //////////////////////////////////////////////////////////////////////////////
 

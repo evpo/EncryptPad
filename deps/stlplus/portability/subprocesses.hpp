@@ -68,8 +68,10 @@ namespace stlplus
     // insert/clear an argument at a certain index
     // adding is like the other array classes - it moves the current item at index
     // up one (and all subsequent values) to make room
-    void insert (unsigned index, const std::string&) throw(std::out_of_range);
-    void clear (unsigned index) throw(std::out_of_range);
+    // exceptions: std::out_of_range
+    void insert (unsigned index, const std::string&) ;
+    // exceptions: std::out_of_range
+    void clear (unsigned index) ;
     void clear (void);
 
     // number of values in the vector (including argv[0], the command itself
@@ -81,10 +83,12 @@ namespace stlplus
     char** argv (void) const;
 
     // access individual values in the vector
-    char* operator [] (unsigned index) const throw(std::out_of_range);
+    // exceptions: std::out_of_range
+    char* operator [] (unsigned index) const ;
 
     // special-case access of the command name (e.g. to do path lookup on the command)
-    char* argv0 (void) const throw(std::out_of_range);
+    // exceptions: std::out_of_range
+    char* argv0 (void) const ;
 
     // get the command-line string represented by this vector
     // includes escaping of special characters and quoting
@@ -136,8 +140,10 @@ namespace stlplus
     unsigned size (void) const;
 
     // get the name=value pairs by index (in the range 0 to size()-1)
-    std::pair<std::string,std::string> operator [] (unsigned index) const throw(std::out_of_range);
-    std::pair<std::string,std::string> get (unsigned index) const throw(std::out_of_range);
+    // exceptions: std::out_of_range
+    std::pair<std::string,std::string> operator [] (unsigned index) const ;
+    // exceptions: std::out_of_range
+    std::pair<std::string,std::string> get (unsigned index) const ;
   };
 
   ////////////////////////////////////////////////////////////////////////////////

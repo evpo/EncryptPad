@@ -19,8 +19,10 @@
 namespace stlplus
 {
 
-  void dump_bool(dump_context&, const bool& data) throw(persistent_dump_failed);
-  void restore_bool(restore_context&, bool& data) throw(persistent_restore_failed);
+  // exceptions: persistent_dump_failed
+  void dump_bool(dump_context&, const bool& data) ;
+  // exceptions: persistent_restore_failed
+  void restore_bool(restore_context&, bool& data) ;
 
 } // end namespace stlplus
 

@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-<title>STLplus Library Collection - portability/udp_sockets.hpp - Platform-Independent UDP Internet Classes</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STLplus C++ Library Collection - portability/udp_sockets.hpp - Platform-Independent UDP Internet Classes</title>
 <link rel="icon" href="plus.png" type="image/png"/>
 <meta name="Author" content="Andy Rushton"/>
 <link rel="stylesheet" media="screen" type="text/css" href="screen.css"/>
@@ -13,9 +14,7 @@
 <div id="header">
 
 <div id="headerBanner">
-<h1>The
-<span style="color:red">S</span><span style="color:blue">T</span><span style="color:green">L</span><span style="color:#ecec80">plus</span>
-C++ Library Collection</h1>
+<h1>STLplus C++ Library Collection</h1>
 </div>
 
 <div id="headerNavigation">
@@ -51,7 +50,7 @@ C++ Library Collection</h1>
 <h2 id="introduction">Introduction</h2>
 
 <p>UDP is an internet protocol that is faster and simpler than the more common <a
-href="tcp_sockets.html">TCP</a>. It achieves this by being unreliable. Packets may be lost or arrive
+                                                                                 href="tcp_sockets.html">TCP</a>. It achieves this by being unreliable. Packets may be lost or arrive
 in a different order to that sent. Why would you use this? There are some applications where
 performance matters, but reliability doesn't. For example, a live video feed - if a frame gets lost,
 so what? The most important thing is that the picture stays as up-to-date as possible. It also
@@ -74,7 +73,7 @@ to build an internet server.</p>
 
 <p><b>Note:</b> some people might object to this description on the grounds that UDP is often
 described as "connectionless". This is a misunderstanding since all internet protocols are
-connectionless; the connection is an abstract concept, but communication is always in packet form. 
+connectionless; the connection is an abstract concept, but communication is always in packet form.
 UDP is more accurately described as "stateless" in that the protocol does not assume any
 relationships between packets and delivers each as a separate entity, rather than the ordered stream
 of TCP. In fact TCP makes the unordered Internet protocol <em>look</em> ordered by numbering the
@@ -146,7 +145,7 @@ give an error code corresponding to the cause for the failure and the message me
 textual representation of the error.</p>
 
 <p>The first initialise method (and the second constructor) takes three arguments. The first is a
-string containing the internet address to connect to, either as a name (e.g. 
+string containing the internet address to connect to, either as a name (e.g.
 stlplus.sourceforge.net) or as a number (e.g. 195.0.0.1) and the second is the port to connect to
 (e.g. 80 for the HTTP service). The third argument is the local port to connect from; if set to
 zero, the operating system will choose an 'ephemeral' port.</p>
@@ -298,7 +297,7 @@ close. The destructor also calls close, so allowing the server object to be
 destroyed will close the listening port automatically.</p>
 
 <p>The communication methods mirror the client data exchange methods. The send method sends data to
-the client. Because UDP is stateless, the remote address and port need to be specified every time. 
+the client. Because UDP is stateless, the remote address and port need to be specified every time.
 The address of the first send method is a string containing the remote address as either a name
 (e.g. stlplus.sourceforge.net) or as a dotted number (e.g. 127.0.0.1). The second send method takes
 this argument as an unsigned long encoded form of the internet address as returned by the ip_lookup
@@ -413,7 +412,7 @@ int server(std::vector&lt;std::string&gt; values, int port, const std::string&am
             ++errors;
           }
         }
-      }            
+      }
     }
   }
   std::cerr &lt;&lt; "server: exited server loop" &lt;&lt; std::endl;
@@ -491,7 +490,7 @@ int client(std::vector&lt;std::string&gt; values, int port)
           std::cerr &lt;&lt; "client: ERROR: received data \"" &lt;&lt; data &lt;&lt; "\" != \"" &lt;&lt; value &lt;&lt; "\"" &lt;&lt; std::endl;
           ++errors;
         }
-      }            
+      }
     }
   }
   std::cerr &lt;&lt; "client: exited communication loop" &lt;&lt; std::endl;

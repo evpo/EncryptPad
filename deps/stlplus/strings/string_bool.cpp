@@ -17,7 +17,6 @@ namespace stlplus
   ////////////////////////////////////////////////////////////////////////////////
 
   std::string bool_to_string(bool i, unsigned radix, radix_display_t display, unsigned width)
-    throw(std::invalid_argument)
   {
     return unsigned_short_to_string((unsigned short)i, radix, display, width);
   }
@@ -25,7 +24,6 @@ namespace stlplus
   ////////////////////////////////////////////////////////////////////////////////
 
   bool string_to_bool(const std::string& str, unsigned radix)
-    throw(std::invalid_argument)
   {
     return string_to_unsigned_short(str, radix) != 0;
   }

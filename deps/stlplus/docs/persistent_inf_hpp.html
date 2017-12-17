@@ -19,7 +19,7 @@
 //     Copyright: (c) Southampton University 1999-2004
 //              (c) Andy Rushton           2004 onwards
 //     License:   BSD License, see ../docs/license.html
-  
+
 //     Persistence of stlplus infinite integer type - inf
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -30,8 +30,10 @@
 namespace stlplus
 {
 
-  void dump_inf(dump_context&amp;, const inf&amp; data) throw(persistent_dump_failed);
-  void restore_inf(restore_context&amp;, inf&amp; data) throw(persistent_restore_failed);
+  // exceptions: persistent_dump_failed
+  void dump_inf(dump_context&amp;, const inf&amp; data) ;
+  // exceptions: persistent_restore_failed
+  void restore_inf(restore_context&amp;, inf&amp; data) ;
 
 } // end namespace stlplus
 

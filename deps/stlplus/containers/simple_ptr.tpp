@@ -25,7 +25,7 @@ namespace stlplus
 
   // create a pointer containing a *copy* of the object pointer
   template <typename T, typename C>
-  simple_ptr_base<T,C>::simple_ptr_base(const T& data) throw(illegal_copy) :
+  simple_ptr_base<T,C>::simple_ptr_base(const T& data)  :
     m_pointer(C()(data)),
     m_count(0)
   {
@@ -106,28 +106,28 @@ namespace stlplus
   // dereference operators and functions
 
   template <typename T, typename C>
-  T& simple_ptr_base<T,C>::operator*(void) throw(null_dereference)
+  T& simple_ptr_base<T,C>::operator*(void) 
   {
     if (!m_pointer) throw null_dereference("null pointer dereferenced in simple_ptr::operator*");
     return *m_pointer;
   }
 
   template <typename T, typename C>
-  const T& simple_ptr_base<T,C>::operator*(void) const throw(null_dereference)
+  const T& simple_ptr_base<T,C>::operator*(void) const 
   {
     if (!m_pointer) throw null_dereference("null pointer dereferenced in simple_ptr::operator*");
     return *m_pointer;
   }
 
   template <typename T, typename C>
-  T* simple_ptr_base<T,C>::operator->(void) throw(null_dereference)
+  T* simple_ptr_base<T,C>::operator->(void) 
   {
     if (!m_pointer) throw null_dereference("null pointer dereferenced in simple_ptr::operator->");
     return m_pointer;
   }
 
   template <typename T, typename C>
-  const T* simple_ptr_base<T,C>::operator->(void) const throw(null_dereference)
+  const T* simple_ptr_base<T,C>::operator->(void) const 
   {
     if (!m_pointer) throw null_dereference("null pointer dereferenced in simple_ptr::operator->");
     return m_pointer;
@@ -137,20 +137,20 @@ namespace stlplus
   // explicit function forms of the above assignment dereference operators
 
   template <typename T, typename C>
-  void simple_ptr_base<T,C>::set_value(const T& data) throw(illegal_copy)
+  void simple_ptr_base<T,C>::set_value(const T& data) 
   {
     set(C()(data));
   }
 
   template <typename T, typename C>
-  T& simple_ptr_base<T,C>::value(void) throw(null_dereference)
+  T& simple_ptr_base<T,C>::value(void) 
   {
     if (!m_pointer) throw null_dereference("null pointer dereferenced in simple_ptr::value");
     return *m_pointer;
   }
 
   template <typename T, typename C>
-  const T& simple_ptr_base<T,C>::value(void) const throw(null_dereference)
+  const T& simple_ptr_base<T,C>::value(void) const 
   {
     if (!m_pointer) throw null_dereference("null pointer dereferenced in simple_ptr::value");
     return *m_pointer;
@@ -294,7 +294,7 @@ namespace stlplus
   }
 
   template <typename T, typename C>
-  void simple_ptr_base<T,C>::make_unique(void) throw(illegal_copy)
+  void simple_ptr_base<T,C>::make_unique(void) 
   {
     if (!m_count) {
       return;
@@ -309,7 +309,7 @@ namespace stlplus
   }
 
   template <typename T, typename C>
-  void simple_ptr_base<T,C>::copy(const simple_ptr_base<T,C>& data) throw(illegal_copy)
+  void simple_ptr_base<T,C>::copy(const simple_ptr_base<T,C>& data) 
   {
     alias(data);
     make_unique();

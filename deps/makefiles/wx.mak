@@ -12,49 +12,40 @@
 #
 ################################################################################
 
-ifeq ($(GPROF),on)
-# gprof variant
-$(error "wxWidgets doesn't support a profiling build")
-endif
-
-ifeq ($(GCOV),on)
-# gcov variant
-$(error "wxWidgets doesn't support a code coverage build")
-endif
-
-# default to unicode on, must switch off explicitly by setting the variable UNICODE=off before this is included
-# Note: this is really obsolete from wx v2.9 onwards - all builds are now Unicode builds
-UNICODE_FLAG := --unicode=yes
-ifeq ($(UNICODE),off)
-UNICODE_FLAG := --unicode=no
-endif
+THIS_MAKEFILE_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
+include $(THIS_MAKEFILE_DIR)/platform.mak
 
 # default to debug build, must switch release build on explicitly
-DEBUG_FLAG := --debug=yes
+WX_DEBUG_FLAG := --debug=yes
 ifeq ($(RELEASE),on)
-DEBUG_FLAG := --debug=no
+WX_DEBUG_FLAG := --debug=no
 endif
 
 # default to shared build since this is also the wxWidgets default
 # However, I recommend a static build because it is the least
 # problematic when distributing programs this also removes the
 # dependencies on gcc libraries
-STATIC_FLAG := --static=no
+WX_STATIC_FLAG := --static=no
 ifeq ($(WXSTATIC),on)
-STATIC_FLAG := --static=yes
+WX_STATIC_FLAG := --static=yes
 endif
 
 # allow a specific version to be selected
-VERSION_FLAG :=
+WX_VERSION_FLAG :=
 ifneq ($(WXVERSION),)
-VERSION_FLAG := --version=$(WXVERSION)
+WX_VERSION_FLAG := --version=$(WXVERSION)
 endif
 
+# WX v3.0 headers produce a lot of deprecated warnings, swamping anything from the user's code,
+# so for now disable deprecated warnings
+# Note that this will also switch off warnings about problems in the user's code
+CXXFLAGS += -Wno-deprecated-declarations
+
 # configure the compilation tools for the project to match those required by the wxWidgets library being used
-CXX := `wx-config $(VERSION_FLAG) $(DEBUG_FLAG) $(UNICODE_FLAG) $(STATIC_FLAG) --cxx`
-CXXFLAGS += `wx-config $(VERSION_FLAG) $(DEBUG_FLAG) $(UNICODE_FLAG) $(STATIC_FLAG) --cxxflags`
-LOADLIBES += `wx-config $(VERSION_FLAG) $(DEBUG_FLAG) $(UNICODE_FLAG) $(STATIC_FLAG) --libs`
-RC := `wx-config $(VERSION_FLAG) $(DEBUG_FLAG) $(UNICODE_FLAG) $(STATIC_FLAG) --rescomp`
+CXX := `wx-config $(WX_VERSION_FLAG) $(WX_DEBUG_FLAG) $(WX_STATIC_FLAG) --cxx`
+CXXFLAGS += `wx-config $(WX_VERSION_FLAG) $(WX_DEBUG_FLAG) $(WX_STATIC_FLAG) --cxxflags`
+LDLIBS += `wx-config $(WX_VERSION_FLAG) $(WX_DEBUG_FLAG) $(WX_STATIC_FLAG) --libs`
+RC := `wx-config $(WX_VERSION_FLAG) $(WX_DEBUG_FLAG) $(WX_STATIC_FLAG) --rescomp`
 
 ifeq ($(PLATFORM),MINGW)
 # the mingw32 library maps the gcc main onto the Windows WinMain - so seed the link with this file

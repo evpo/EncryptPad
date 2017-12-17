@@ -32,13 +32,13 @@
 namespace stlplus
 {
 
+  // exceptions: persistent_dump_failed
   template&lt;typename K, typename T, typename H, typename E, typename DK, typename DT&gt;
-  void dump_hash(dump_context&amp;, const hash&lt;K,T,H,E&gt;&amp; data, DK key_dump_fn, DT val_dump_fn)
-    throw(persistent_dump_failed);
+  void dump_hash(dump_context&amp;, const hash&lt;K,T,H,E&gt;&amp; data, DK key_dump_fn, DT val_dump_fn);
 
+  // exceptions: persistent_restore_failed
   template&lt;typename K, typename T, typename H, typename E, typename RK, typename RT&gt;
-  void restore_hash(restore_context&amp;, hash&lt;K,T,H,E&gt;&amp; data, RK key_restore_fn, RT val_restore_fn)
-    throw(persistent_restore_failed);
+  void restore_hash(restore_context&amp;, hash&lt;K,T,H,E&gt;&amp; data, RK key_restore_fn, RT val_restore_fn);
 
 } // end namespace stlplus
 

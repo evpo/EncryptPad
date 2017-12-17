@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-<title>STLplus Library Collection - subsystems/cli_parser.hpp - A General-Purpose Command-Line Parser</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STLplus C++ Library Collection - subsystems/cli_parser.hpp - A General-Purpose Command-Line Parser</title>
 <link rel="icon" href="plus.png" type="image/png"/>
 <meta name="Author" content="Andy Rushton"/>
 <link rel="stylesheet" media="screen" type="text/css" href="screen.css"/>
@@ -14,9 +15,7 @@
 <div id="header">
 
 <div id="headerBanner">
-<h1>The
-<span style="color:red">S</span><span style="color:blue">T</span><span style="color:green">L</span><span style="color:#ecec80">plus</span>
-C++ Library Collection</h1>
+<h1>STLplus C++ Library Collection</h1>
 </div>
 
 <div id="headerNavigation">
@@ -137,16 +136,16 @@ class stlplus::cli_parser
 public:
   cli_parser(stlplus::message_handler&amp; errors);
 
-  cli_parser(stlplus::cli_definitions_t, stlplus::message_handler&amp; errors) throw(stlplus::cli_mode_error);
-  cli_parser(stlplus::cli_definitions_t, const stlplus::ini_manager&amp; defaults, const std::string&amp; ini_section, stlplus::message_handler&amp; errors) throw(stlplus::cli_mode_error);
-  cli_parser(char* argv[], stlplus::cli_definitions_t, stlplus::message_handler&amp; errors) throw(stlplus::cli_mode_error);
-  cli_parser(char* argv[], stlplus::cli_definitions_t, const stlplus::ini_manager&amp; defaults, const std::string&amp; ini_section, stlplus::message_handler&amp; errors) throw(stlplus::cli_mode_error);
+  cli_parser(stlplus::cli_definitions_t, stlplus::message_handler&amp; errors);
+  cli_parser(stlplus::cli_definitions_t, const stlplus::ini_manager&amp; defaults, const std::string&amp; ini_section, stlplus::message_handler&amp; errors);
+  cli_parser(char* argv[], stlplus::cli_definitions_t, stlplus::message_handler&amp; errors);
+  cli_parser(char* argv[], stlplus::cli_definitions_t, const stlplus::ini_manager&amp; defaults, const std::string&amp; ini_section, stlplus::message_handler&amp; errors);
 
-  cli_parser(stlplus::cli_definitions, stlplus::message_handler&amp; errors) throw(stlplus::cli_mode_error);
-  cli_parser(stlplus::cli_definitions, const stlplus::ini_manager&amp; defaults, const std::string&amp; ini_section, stlplus::message_handler&amp; errors) throw(stlplus::cli_mode_error);
-  cli_parser(char* argv[], stlplus::cli_definitions, stlplus::message_handler&amp; errors) throw(stlplus::cli_mode_error);
+  cli_parser(stlplus::cli_definitions, stlplus::message_handler&amp; errors);
+  cli_parser(stlplus::cli_definitions, const stlplus::ini_manager&amp; defaults, const std::string&amp; ini_section, stlplus::message_handler&amp; errors);
+  cli_parser(char* argv[], stlplus::cli_definitions, stlplus::message_handler&amp; errors);
   cli_parser(char* argv[], stlplus::cli_definitions, const stlplus::ini_manager&amp; defaults, const std::string&amp;
-ini_section, stlplus::message_handler&amp; errors) throw(stlplus::cli_mode_error);
+ini_section, stlplus::message_handler&amp; errors);
 };
 </pre>
 
@@ -166,7 +165,7 @@ exception is thrown.</p>
 
 <p>The third constructor does these jobs but also reads default values
 from an Ini-file. You have to use the <a
-href="ini_manager.html">stlplus::ini_manager</a> class to manage the Ini files. You
+                                        href="ini_manager.html">stlplus::ini_manager</a> class to manage the Ini files. You
 also have to state which section of the Ini file to read - Ini files are
 divided into sections, typically one for each tool in a set of tools. It is
 recommended that default command-line options are stored in an Ini-file
@@ -192,8 +191,8 @@ so.</p>
 <p>The support functions for the step-by-step approach are:</p>
 
 <pre class="cpp">
-void cli_parser::add_definitions(definitions) throw(stlplus::cli_mode_error);
-unsigned cli_parser::add_definition(const definition&amp;) throw(stlplus::cli_mode_error);
+void cli_parser::add_definitions(definitions);
+unsigned cli_parser::add_definition(const definition&amp;);
 void cli_parser::set_defaults(const stlplus::ini_manager&amp; defaults, const std::string&amp; ini_section);
 bool parse(char* argv[]);
 </pre>
@@ -324,7 +323,7 @@ public:
 
   cli_definition(const std::string&amp; name,
                  stlplus::cli_kind_t kind,
-                 stlplus::cli_mode_t mode, 
+                 stlplus::cli_mode_t mode,
                  const std::string&amp; message,
                  const std::string&amp; default_value = std::string());
 };
@@ -574,8 +573,8 @@ std::string cli_parser::name(unsigned i) const;
 unsigned cli_parser::id(unsigned i) const;
 stlplus::cli_kind_t cli_parser::kind(unsigned i) const;
 stlplus::cli_mode_t cli_parser::mode(unsigned i) const;
-bool cli_parser::switch_value(unsigned i) const throw(stlplus::cli_mode_error);
-std::string cli_parser::string_value(unsigned i) const throw(stlplus::cli_mode_error);
+bool cli_parser::switch_value(unsigned i) const;
+std::string cli_parser::string_value(unsigned i) const;
 </pre>
 
 <p>The size function is used to control the for loop that processes the
@@ -791,7 +790,7 @@ int main (int argc, char* argv[])
     }
     else if (parser.name(i) == "create")
     {
-      // create a new library 
+      // create a new library
 
       // This demonstrates how to handle a value-mode argument. First, detect
       // that the option has been specified as with the above switch-mode

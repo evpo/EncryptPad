@@ -20,7 +20,6 @@ namespace stlplus
 
   template<size_t N>
   void dump_bitset(dump_context& context, const std::bitset<N>& data)
-    throw(persistent_dump_failed)
   {
     size_t bits = data.size();
     size_t bytes = (bits+7)/8;
@@ -39,7 +38,6 @@ namespace stlplus
 
   template<size_t N>
   void restore_bitset(restore_context& context, std::bitset<N>& data)
-    throw(persistent_restore_failed)
   {
     size_t bits = data.size();
     size_t bytes = (bits+7)/8;

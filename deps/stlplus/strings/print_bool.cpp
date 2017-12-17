@@ -17,7 +17,6 @@ namespace stlplus
   ////////////////////////////////////////////////////////////////////////////////
 
   void print_bool(std::ostream& device, bool i, unsigned radix, radix_display_t display, unsigned width)
-    throw(std::invalid_argument)
   {
     print_unsigned_short(device, (unsigned short)i, radix, display, width);
   }

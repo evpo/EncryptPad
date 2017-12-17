@@ -7,7 +7,7 @@
 // Many shared pointers can point to the same object. I have used the
 // address of the pointed-to object so that shared pointers to the
 // same object can be restored as shared pointers to the same
-// object. 
+// object.
 //
 // However, this solution does not differentiated between different
 // null shared pointers. I don't know of a solution to this problem at
@@ -28,7 +28,7 @@
 template<typename  T, typename DE>
 void stlplus::dump_shared_ptr(stlplus::dump_context& context, const std::shared_ptr<T>& data,
                               DE dump_element)
-  throw(stlplus::persistent_dump_failed)
+
 {
   // I have to handle empty and null shared pointers as a special case, which
   // means the file format is different from other pointer types
@@ -50,7 +50,7 @@ void stlplus::dump_shared_ptr(stlplus::dump_context& context, const std::shared_
 template<typename T, typename RE>
 void stlplus::restore_shared_ptr(stlplus::restore_context& context, std::shared_ptr<T>& data,
                                  RE restore_element)
-  throw(stlplus::persistent_restore_failed)
+
 {
   // get the classification
   unsigned classification = 0;
@@ -102,7 +102,7 @@ void stlplus::restore_shared_ptr(stlplus::restore_context& context, std::shared_
 
 template<typename T>
 void stlplus::dump_shared_ptr_callback(stlplus::dump_context& context, const std::shared_ptr<T>& data)
-  throw(stlplus::persistent_dump_failed)
+
 {
   // same as for non-polymorphic types except for how the pointer is dumped
   unsigned classification = (data.use_count() == 0) ? 0 : (data.get() == 0) ? 1 : 2;
@@ -125,7 +125,7 @@ void stlplus::dump_shared_ptr_callback(stlplus::dump_context& context, const std
 
 template<typename T>
 void stlplus::restore_shared_ptr_callback(stlplus::restore_context& context, std::shared_ptr<T>& data)
-  throw(stlplus::persistent_restore_failed)
+
 {
   // get the classification
   unsigned classification = 0;
@@ -177,7 +177,7 @@ void stlplus::restore_shared_ptr_callback(stlplus::restore_context& context, std
 
 template<typename T>
 void stlplus::dump_shared_ptr_interface(stlplus::dump_context& context, const std::shared_ptr<T>& data)
-  throw(stlplus::persistent_dump_failed)
+
 {
   // same as for non-polymorphic types except for how the pointer is dumped
   unsigned classification = (data.use_count() == 0) ? 0 : (data.get() == 0) ? 1 : 2;
@@ -197,7 +197,7 @@ void stlplus::dump_shared_ptr_interface(stlplus::dump_context& context, const st
 
 template<typename T>
 void stlplus::restore_shared_ptr_interface(stlplus::restore_context& context, std::shared_ptr<T>& data)
-  throw(stlplus::persistent_restore_failed)
+
 {
   // get the classification
   unsigned classification = 0;

@@ -46,21 +46,21 @@
 namespace stlplus
 {
 
+  // exceptions: persistent_dump_failed
   template&lt;typename T&gt;
-  void dump_xref(dump_context&amp;, const T* const data)
-    throw(persistent_dump_failed);
+  void dump_xref(dump_context&amp;, const T* const data);
 
+  // exceptions: persistent_dump_failed
   template&lt;typename T&gt;
-  void dump_object_xref(dump_context&amp;, const T* const data)
-    throw(persistent_dump_failed);
+  void dump_object_xref(dump_context&amp;, const T* const data);
 
+  // exceptions: persistent_restore_failed
   template&lt;typename T&gt;
-  void restore_xref(restore_context&amp;, T*&amp; data)
-    throw(persistent_restore_failed);
+  void restore_xref(restore_context&amp;, T*&amp; data);
 
+  // exceptions: persistent_restore_failed
   template&lt;typename T&gt;
-  void restore_object_xref(restore_context&amp;, T*&amp; data)
-    throw(persistent_restore_failed);
+  void restore_object_xref(restore_context&amp;, T*&amp; data);
 
 } // end namespace stlplus
 

@@ -34,33 +34,33 @@ namespace stlplus
 
   // smart_ptr - uses dump/restore_pointer on the contents
 
+  // exceptions: persistent_dump_failed
   template&lt;typename T, typename DE&gt;
-  void dump_smart_ptr(dump_context&amp;, const smart_ptr&lt;T&gt;&amp; data, DE dump_element)
-    throw(persistent_dump_failed);
+  void dump_smart_ptr(dump_context&amp;, const smart_ptr&lt;T&gt;&amp; data, DE dump_element);
 
+  // exceptions: persistent_restore_failed
   template&lt;typename T, typename RE&gt;
-  void restore_smart_ptr(restore_context&amp;, smart_ptr&lt;T&gt;&amp; data, RE restore_element)
-    throw(persistent_restore_failed);
+  void restore_smart_ptr(restore_context&amp;, smart_ptr&lt;T&gt;&amp; data, RE restore_element);
 
   // smart_ptr_clone using the polymorphic callback approach - uses dump/restore_callback on the contents
 
+  // exceptions: persistent_dump_failed
   template&lt;typename T&gt;
-  void dump_smart_ptr_clone_callback(dump_context&amp;, const smart_ptr_clone&lt;T&gt;&amp; data)
-    throw(persistent_dump_failed);
+  void dump_smart_ptr_clone_callback(dump_context&amp;, const smart_ptr_clone&lt;T&gt;&amp; data);
 
+  // exceptions: persistent_restore_failed
   template&lt;typename T&gt;
-  void restore_smart_ptr_clone_callback(restore_context&amp;, smart_ptr_clone&lt;T&gt;&amp; data)
-    throw(persistent_restore_failed);
+  void restore_smart_ptr_clone_callback(restore_context&amp;, smart_ptr_clone&lt;T&gt;&amp; data);
 
   // smart_ptr_clone using the interface approach - uses dump/restore_interface on the contents
 
+  // exceptions: persistent_dump_failed
   template&lt;typename T&gt;
-  void dump_smart_ptr_clone_interface(dump_context&amp;, const smart_ptr_clone&lt;T&gt;&amp; data)
-    throw(persistent_dump_failed);
+  void dump_smart_ptr_clone_interface(dump_context&amp;, const smart_ptr_clone&lt;T&gt;&amp; data);
 
+  // exceptions: persistent_restore_failed
   template&lt;typename T&gt;
-  void restore_smart_ptr_clone_interface(restore_context&amp;, smart_ptr_clone&lt;T&gt;&amp; data)
-    throw(persistent_restore_failed);
+  void restore_smart_ptr_clone_interface(restore_context&amp;, smart_ptr_clone&lt;T&gt;&amp; data);
 
   // smart_ptr_nocopy is not made persistent because if it is uncopyable, it must be undumpable
 

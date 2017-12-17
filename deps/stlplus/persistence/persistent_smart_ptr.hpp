@@ -21,33 +21,33 @@ namespace stlplus
 
   // smart_ptr - uses dump/restore_pointer on the contents
 
+  // exceptions: persistent_dump_failed
   template<typename T, typename DE>
-  void dump_smart_ptr(dump_context&, const smart_ptr<T>& data, DE dump_element)
-    throw(persistent_dump_failed);
+  void dump_smart_ptr(dump_context&, const smart_ptr<T>& data, DE dump_element);
 
+  // exceptions: persistent_restore_failed
   template<typename T, typename RE>
-  void restore_smart_ptr(restore_context&, smart_ptr<T>& data, RE restore_element)
-    throw(persistent_restore_failed);
+  void restore_smart_ptr(restore_context&, smart_ptr<T>& data, RE restore_element);
 
   // smart_ptr_clone using the polymorphic callback approach - uses dump/restore_callback on the contents
 
+  // exceptions: persistent_dump_failed
   template<typename T>
-  void dump_smart_ptr_clone_callback(dump_context&, const smart_ptr_clone<T>& data)
-    throw(persistent_dump_failed);
+  void dump_smart_ptr_clone_callback(dump_context&, const smart_ptr_clone<T>& data);
 
+  // exceptions: persistent_restore_failed
   template<typename T>
-  void restore_smart_ptr_clone_callback(restore_context&, smart_ptr_clone<T>& data)
-    throw(persistent_restore_failed);
+  void restore_smart_ptr_clone_callback(restore_context&, smart_ptr_clone<T>& data);
 
   // smart_ptr_clone using the interface approach - uses dump/restore_interface on the contents
 
+  // exceptions: persistent_dump_failed
   template<typename T>
-  void dump_smart_ptr_clone_interface(dump_context&, const smart_ptr_clone<T>& data)
-    throw(persistent_dump_failed);
+  void dump_smart_ptr_clone_interface(dump_context&, const smart_ptr_clone<T>& data);
 
+  // exceptions: persistent_restore_failed
   template<typename T>
-  void restore_smart_ptr_clone_interface(restore_context&, smart_ptr_clone<T>& data)
-    throw(persistent_restore_failed);
+  void restore_smart_ptr_clone_interface(restore_context&, smart_ptr_clone<T>& data);
 
   // smart_ptr_nocopy is not made persistent because if it is uncopyable, it must be undumpable
 

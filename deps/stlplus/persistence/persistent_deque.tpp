@@ -15,7 +15,6 @@ namespace stlplus
 
   template<typename T, typename D>
   void dump_deque(dump_context& context, const std::deque<T>& data, D dump_fn)
-    throw(persistent_dump_failed)
   {
     dump_size_t(context,data.size());
     for (typename std::deque<T>::const_iterator i = data.begin(); i != data.end(); i++)
@@ -24,7 +23,6 @@ namespace stlplus
 
   template<typename T, typename R>
   void restore_deque(restore_context& context, std::deque<T>& data, R restore_fn)
-    throw(persistent_restore_failed)
   {
     data.clear();
     size_t size = 0;

@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-<title>STLplus Library Collection - persistence/persistent_contexts.hpp - The Persistence Infrastructure</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STLplus C++ Library Collection - persistence/persistent_contexts.hpp - The Persistence Infrastructure</title>
 <link rel="icon" href="plus.png" type="image/png"/>
 <meta name="Author" content="Andy Rushton"/>
 <link rel="stylesheet" media="screen" type="text/css" href="screen.css"/>
@@ -13,9 +14,7 @@
 <div id="header">
 
 <div id="headerBanner">
-<h1>The
-<span style="color:red">S</span><span style="color:blue">T</span><span style="color:green">L</span><span style="color:#ecec80">plus</span>
-C++ Library Collection</h1>
+<h1>STLplus C++ Library Collection</h1>
 </div>
 
 <div id="headerNavigation">
@@ -56,11 +55,11 @@ class stlplus::dump_context
 {
 public:
   // constructor
-  dump_context(std::ostream&amp; device, unsigned char version = PersistentVersion) throw(persistent_dump_failed);
+  dump_context(std::ostream&amp; device, unsigned char version = PersistentVersion);
   ~dump_context(void);
 
   // low level output used to dump a byte
-  void put(unsigned char data) throw(persistent_dump_failed);
+  void put(unsigned char data);
 
   // access the device, for example to check the error status
   const std::ostream&amp; device(void) const;
@@ -120,11 +119,11 @@ public:
   //////////////////////////////////////////////////////////////////////////////
 
   // constructor
-  restore_context(std::istream&amp; device) throw(persistent_restore_failed);
+  restore_context(std::istream&amp; device);
   ~restore_context(void);
 
   // low level input used to restore a byte
-  int get(void) throw(persistent_restore_failed);
+  int get(void);
 
   // access the device, for example to check the error status
   const std::istream&amp; device(void) const;

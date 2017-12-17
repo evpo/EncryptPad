@@ -22,33 +22,33 @@ namespace stlplus
 
   // shared_ptr - uses dump/restore_pointer on the contents
 
+  // exceptions: persistent_dump_failed
   template<typename T, typename DE>
-  void dump_shared_ptr(dump_context&, const std::shared_ptr<T>& data, DE dump_element)
-    throw(persistent_dump_failed);
+  void dump_shared_ptr(dump_context&, const std::shared_ptr<T>& data, DE dump_element);
 
+  // exceptions: persistent_restore_failed
   template<typename T, typename RE>
-  void restore_shared_ptr(restore_context&, std::shared_ptr<T>& data, RE restore_element)
-    throw(persistent_restore_failed);
+  void restore_shared_ptr(restore_context&, std::shared_ptr<T>& data, RE restore_element);
 
   // shared_ptr using the polymorphic callback approach - uses dump/restore_callback on the contents
 
+  // exceptions: persistent_dump_failed
   template<typename T>
-  void dump_shared_ptr_callback(dump_context&, const std::shared_ptr<T>& data)
-    throw(persistent_dump_failed);
+  void dump_shared_ptr_callback(dump_context&, const std::shared_ptr<T>& data);
 
+  // exceptions: persistent_restore_failed
   template<typename T>
-  void restore_shared_ptr_callback(restore_context&, std::shared_ptr<T>& data)
-    throw(persistent_restore_failed);
+  void restore_shared_ptr_callback(restore_context&, std::shared_ptr<T>& data);
 
   // shared_ptr using the interface approach - uses dump/restore_interface on the contents
 
+  // exceptions: persistent_dump_failed
   template<typename T>
-  void dump_shared_ptr_interface(dump_context&, const std::shared_ptr<T>& data)
-    throw(persistent_dump_failed);
+  void dump_shared_ptr_interface(dump_context&, const std::shared_ptr<T>& data);
 
+  // exceptions: persistent_restore_failed
   template<typename T>
-  void restore_shared_ptr_interface(restore_context&, std::shared_ptr<T>& data)
-    throw(persistent_restore_failed);
+  void restore_shared_ptr_interface(restore_context&, std::shared_ptr<T>& data);
 
 } // end namespace stlplus
 

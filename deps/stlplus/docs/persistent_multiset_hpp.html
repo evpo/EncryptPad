@@ -32,13 +32,13 @@
 namespace stlplus
 {
 
+  // exceptions: persistent_dump_failed
   template&lt;typename K, typename P, typename D&gt;
-  void dump_multiset(dump_context&amp;, const std::multiset&lt;K,P&gt;&amp; data, D dump_fn)
-    throw(persistent_dump_failed);
+  void dump_multiset(dump_context&amp;, const std::multiset&lt;K,P&gt;&amp; data, D dump_fn);
 
+  // exceptions: persistent_restore_failed
   template&lt;typename K, typename P, typename R&gt;
-  void restore_multiset(restore_context&amp;, std::multiset&lt;K,P&gt;&amp; data, R restore_fn)
-    throw(persistent_restore_failed);
+  void restore_multiset(restore_context&amp;, std::multiset&lt;K,P&gt;&amp; data, R restore_fn);
 
 } // end namespace stlplus
 

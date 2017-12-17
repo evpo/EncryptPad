@@ -33,11 +33,13 @@
 namespace stlplus
 {
 
+  // exceptions: persistent_dump_failed
   template&lt;typename T, typename D&gt;
-  void dump_complex(dump_context&amp;, const std::complex&lt;T&gt;&amp; data, D dump_fn) throw(persistent_dump_failed);
+  void dump_complex(dump_context&amp;, const std::complex&lt;T&gt;&amp; data, D dump_fn) ;
 
+  // exceptions: persistent_restore_failed
   template&lt;typename T, typename R&gt;
-  void restore_complex(restore_context&amp;, std::complex&lt;T&gt;&amp; data, R restore_fn) throw(persistent_restore_failed);
+  void restore_complex(restore_context&amp;, std::complex&lt;T&gt;&amp; data, R restore_fn) ;
 
 } // end namespace stlplus
 

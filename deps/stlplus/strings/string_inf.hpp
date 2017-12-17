@@ -24,16 +24,16 @@ namespace stlplus
   ////////////////////////////////////////////////////////////////////////////////
 
   // conversion TO string
+  // exceptions: std::invalid_argument
   std::string inf_to_string(const inf&,
                             unsigned radix = 10,
                             radix_display_t display = radix_c_style_or_hash,
-                            unsigned width = 0)
-    throw(std::invalid_argument);
+                            unsigned width = 0);
 
   // conversion FROM string
+  // exceptions: std::invalid_argument
   inf string_to_inf(const std::string&,
-                    unsigned radix = 0)
-    throw(std::invalid_argument);
+                    unsigned radix = 0);
 
 ////////////////////////////////////////////////////////////////////////////////
 } // end namespace stlplus

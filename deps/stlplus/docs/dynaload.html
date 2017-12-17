@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-<title>STLplus Library Collection - portability/dynaload.hpp - Dynamic Library Loader</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STLplus C++ Library Collection - portability/dynaload.hpp - Dynamic Library Loader</title>
 <link rel="icon" href="plus.png" type="image/png"/>
 <meta name="Author" content="Andy Rushton"/>
 <link rel="stylesheet" media="screen" type="text/css" href="screen.css"/>
@@ -14,9 +15,7 @@
 <div id="header">
 
 <div id="headerBanner">
-<h1>The
-<span style="color:red">S</span><span style="color:blue">T</span><span style="color:green">L</span><span style="color:#ecec80">plus</span>
-C++ Library Collection</h1>
+<h1>STLplus C++ Library Collection</h1>
 </div>
 
 <div id="headerNavigation">
@@ -120,16 +119,16 @@ calling the first constructor followed by load.</p>
 <p>The destructor unloads the library if it is loaded by calling the unload method, otherwise it does nothing.</p>
 
 <p>The load method tries to load the dynamic library named by the
-  string parameter. The library must be the raw name of the library
-  with no prefix or extension. For example, on Unix-like operating
-  systems the library "xyz" will be mapped onto the filename libxyz.so
-  whereas on Windows it will be mapped onto xyz.dll. To keep this
-  platform independent, the dynaloader takes only the raw name,
-  i.e. "xyz".</p>
+string parameter. The library must be the raw name of the library
+with no prefix or extension. For example, on Unix-like operating
+systems the library "xyz" will be mapped onto the filename libxyz.so
+whereas on Windows it will be mapped onto xyz.dll. To keep this
+platform independent, the dynaloader takes only the raw name,
+i.e. "xyz".</p>
 
 <p>If the dynamic library referred to is loaded successfully then the
 method returns true. If not, the error fields are filled in and it
-  returns false - see later for details of error handling.</p>
+returns false - see later for details of error handling.</p>
 
 <p>The load method has an optional second argument that specifies the
 directory to load the library from (e.g. "."). If present this is the
@@ -139,19 +138,19 @@ specific path lookup to find the library.</p>
 <p>On Gnu/Linux for example, the following is a typical search path:</p>
 
 <ul>
-  <li>the set of colon-separated directories in environment variable LD_LIBRARY_PATH</li>
-  <li>the ldconfig cache</li>
-  <li>/lib and /usr/lib</li>
+<li>the set of colon-separated directories in environment variable LD_LIBRARY_PATH</li>
+<li>the ldconfig cache</li>
+<li>/lib and /usr/lib</li>
 </ul>
 
 <p>On Windows, the following is a typical search path:</p>
 
 <ul>
-  <li>directory of the calling program</li>
-  <li>system directory</li>
-  <li>Windows directory</li>
-  <li>current directory</li>
-  <li>the set of colon-separated directories in environment variable PATH</li>
+<li>directory of the calling program</li>
+<li>system directory</li>
+<li>Windows directory</li>
+<li>current directory</li>
+<li>the set of colon-separated directories in environment variable PATH</li>
 </ul>
 
 <p>The unload method unloads the library if it is loaded, returning true if the unload succeeded. If

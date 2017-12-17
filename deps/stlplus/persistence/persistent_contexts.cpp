@@ -68,7 +68,7 @@ namespace stlplus
     callback_map m_callbacks;
     interface_map m_interfaces;
 
-    dump_context_body(std::ostream& device, unsigned char version) throw(persistent_dump_failed) : 
+    dump_context_body(std::ostream& device, unsigned char version)  :
       m_max_key(0), m_version(version), m_little_endian(stlplus::little_endian()), m_device(&device)
       {
         // write the version number as a single byte
@@ -80,7 +80,7 @@ namespace stlplus
           throw persistent_dump_failed(std::string("wrong version: ") + to_string(m_version));
       }
 
-    void put(unsigned char data) throw(persistent_dump_failed)
+    void put(unsigned char data)
       {
         if (!m_device->put(data))
           throw persistent_dump_failed(std::string("output device error"));
@@ -142,7 +142,7 @@ namespace stlplus
         return m_callbacks.find(info.name()) != m_callbacks.end();
       }
 
-    dump_context::callback_data lookup_callback(const std::type_info& info) const throw(persistent_illegal_type)
+    dump_context::callback_data lookup_callback(const std::type_info& info) const
       {
         std::string key = info.name();
         callback_map::const_iterator found = m_callbacks.find(key);
@@ -164,7 +164,7 @@ namespace stlplus
         return m_interfaces.find(info.name()) != m_interfaces.end();
       }
 
-    unsigned lookup_interface(const std::type_info& info) const throw(persistent_illegal_type)
+    unsigned lookup_interface(const std::type_info& info) const
       {
         std::string key = info.name();
         interface_map::const_iterator found = m_interfaces.find(key);
@@ -176,7 +176,7 @@ namespace stlplus
 
   ////////////////////////////////////////////////////////////////////////////////
 
-  dump_context::dump_context(std::ostream& device, unsigned char version) throw(persistent_dump_failed) : m_body(0)
+  dump_context::dump_context(std::ostream& device, unsigned char version)  : m_body(0)
   {
     m_body = new dump_context_body(device,version);
   }
@@ -186,7 +186,7 @@ namespace stlplus
     delete m_body;
   }
 
-  void dump_context::put(unsigned char data) throw(persistent_dump_failed)
+  void dump_context::put(unsigned char data)
   {
     m_body->put(data);
   }
@@ -226,7 +226,7 @@ namespace stlplus
     return m_body->is_callback(info);
   }
 
-  dump_context::callback_data dump_context::lookup_callback(const std::type_info& info) const throw(persistent_illegal_type)
+  dump_context::callback_data dump_context::lookup_callback(const std::type_info& info) const
   {
     return m_body->lookup_callback(info);
   }
@@ -241,7 +241,7 @@ namespace stlplus
     return m_body->is_interface(info);
   }
 
-  unsigned dump_context::lookup_interface(const std::type_info& info) const throw(persistent_illegal_type)
+  unsigned dump_context::lookup_interface(const std::type_info& info) const
   {
     return m_body->lookup_interface(info);
   }
@@ -272,7 +272,7 @@ namespace stlplus
     callback_map m_callbacks;
     interface_map m_interfaces;
 
-    restore_context_body(std::istream& device) throw(persistent_restore_failed) : 
+    restore_context_body(std::istream& device)  :
       m_max_key(0), m_little_endian(stlplus::little_endian()), m_device(&device)
       {
         // map a null pointer onto magic number zero
@@ -306,7 +306,7 @@ namespace stlplus
         return m_little_endian;
       }
 
-    int get(void) throw(persistent_restore_failed)
+    int get(void)
       {
         int result = m_device->get();
         if (!m_device->good())
@@ -358,7 +358,7 @@ namespace stlplus
         return m_callbacks.find(key) != m_callbacks.end();
       }
 
-    restore_context::callback_data lookup_callback(unsigned key) const throw(persistent_illegal_type)
+    restore_context::callback_data lookup_callback(unsigned key) const
       {
         callback_map::const_iterator found = m_callbacks.find(key);
         if (found == m_callbacks.end())
@@ -378,7 +378,7 @@ namespace stlplus
         return m_interfaces.find(key) != m_interfaces.end();
       }
 
-    persistent* lookup_interface(unsigned key) const throw(persistent_illegal_type)
+    persistent* lookup_interface(unsigned key) const
       {
         interface_map::const_iterator found = m_interfaces.find(key);
         if (found == m_interfaces.end())
@@ -389,7 +389,7 @@ namespace stlplus
 
   ////////////////////////////////////////////////////////////////////////////////
 
-  restore_context::restore_context(std::istream& device) throw(persistent_restore_failed) : 
+  restore_context::restore_context(std::istream& device)  :
     m_body(0)
   {
     m_body = new restore_context_body(device);
@@ -415,7 +415,7 @@ namespace stlplus
     return m_body->little_endian();
   }
 
-  int restore_context::get(void) throw(persistent_restore_failed)
+  int restore_context::get(void)
   {
     return m_body->get();
   }
@@ -450,7 +450,7 @@ namespace stlplus
     return m_body->is_callback(key);
   }
 
-  restore_context::callback_data restore_context::lookup_callback(unsigned key) const throw(persistent_illegal_type)
+  restore_context::callback_data restore_context::lookup_callback(unsigned key) const
   {
     return m_body->lookup_callback(key);
   }
@@ -465,7 +465,7 @@ namespace stlplus
     return m_body->is_interface(key);
   }
 
-  persistent* restore_context::lookup_interface(unsigned key) const throw(persistent_illegal_type)
+  persistent* restore_context::lookup_interface(unsigned key) const
   {
     return m_body->lookup_interface(key);
   }
@@ -478,4 +478,3 @@ namespace stlplus
   ////////////////////////////////////////////////////////////////////////////////
 
 } // end namespace stlplus
-

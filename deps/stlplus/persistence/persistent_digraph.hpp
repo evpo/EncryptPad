@@ -21,33 +21,33 @@ namespace stlplus
 
   // digraph
 
+  // exceptions: persistent_dump_failed
   template<typename NT, typename AT, typename DN, typename DA>
-  void dump_digraph(dump_context&, const digraph<NT,AT>& data, DN dump_node, DA dump_arc)
-    throw(persistent_dump_failed);
+  void dump_digraph(dump_context&, const digraph<NT,AT>& data, DN dump_node, DA dump_arc);
 
+  // exceptions: persistent_restore_failed
   template<typename NT, typename AT, typename RN, typename RA>
-  void restore_digraph(restore_context&, digraph<NT,AT>& data, RN restore_node, RA restore_arc)
-    throw(persistent_restore_failed);
+  void restore_digraph(restore_context&, digraph<NT,AT>& data, RN restore_node, RA restore_arc);
 
   // node iterator
 
+  // exceptions: persistent_dump_failed
   template<typename NT, typename AT, typename NRef, typename NPtr>
-  void dump_digraph_iterator(dump_context& str, const digraph_iterator<NT,AT,NRef,NPtr>& data)
-    throw(persistent_dump_failed);
+  void dump_digraph_iterator(dump_context& str, const digraph_iterator<NT,AT,NRef,NPtr>& data);
 
+  // exceptions: persistent_restore_failed
   template<typename NT, typename AT, typename NRef, typename NPtr>
-  void restore_digraph_iterator(restore_context& str, digraph_iterator<NT,AT,NRef,NPtr>& data)
-    throw(persistent_restore_failed);
+  void restore_digraph_iterator(restore_context& str, digraph_iterator<NT,AT,NRef,NPtr>& data);
 
   // arc iterator
 
+  // exceptions: persistent_dump_failed
   template<typename NT, typename AT, typename NRef, typename NPtr>
-  void dump_digraph_arc_iterator(dump_context& str, const digraph_arc_iterator<NT,AT,NRef,NPtr>& data)
-    throw(persistent_dump_failed);
+  void dump_digraph_arc_iterator(dump_context& str, const digraph_arc_iterator<NT,AT,NRef,NPtr>& data);
 
+  // exceptions: persistent_restore_failed
   template<typename NT, typename AT, typename NRef, typename NPtr>
-  void restore_digraph_arc_iterator(restore_context& str, digraph_arc_iterator<NT,AT,NRef,NPtr>& data)
-    throw(persistent_restore_failed);
+  void restore_digraph_arc_iterator(restore_context& str, digraph_arc_iterator<NT,AT,NRef,NPtr>& data);
 
 } // end namespace stlplus
 

@@ -17,7 +17,6 @@ namespace stlplus
 
   template<typename T, typename D>
   void dump_pointer(dump_context& context, const T* const data, D dump_fn)
-    throw(persistent_dump_failed)
   {
     // register the address and get the magic key for it
     std::pair<bool,unsigned> mapping = context.pointer_map(data);
@@ -33,7 +32,6 @@ namespace stlplus
 
   template<typename T, typename R>
   void restore_pointer(restore_context& context, T*& data, R restore_fn)
-    throw(persistent_restore_failed)
   {
     if (data)
     {

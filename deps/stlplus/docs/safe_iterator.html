@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-<title>STLplus Library Collection - containers/safe_iterator.hpp - The STLplus Safe-Iterator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STLplus C++ Library Collection - containers/safe_iterator.hpp - The STLplus Safe-Iterator</title>
 <link rel="icon" href="plus.png" type="image/png"/>
 <meta name="Author" content="Andy Rushton"/>
 <link rel="stylesheet" media="screen" type="text/css" href="screen.css"/>
@@ -14,9 +15,7 @@
 <div id="header">
 
 <div id="headerBanner">
-<h1>The
-<span style="color:red">S</span><span style="color:blue">T</span><span style="color:green">L</span><span style="color:#ecec80">plus</span>
-C++ Library Collection</h1>
+<h1>STLplus C++ Library Collection</h1>
 </div>
 
 <div id="headerNavigation">
@@ -60,8 +59,8 @@ them. Some of the STLplus components therefore also use iterators.</p>
 <ul>
 
 <li>Unassigned iterators are poorly defined and can not only point to
-  random memory but have no checking to stop them from being
-  dereferenced.</li>
+random memory but have no checking to stop them from being
+dereferenced.</li>
 
 <li>End iterators conceptually point to a location one element after
 the end of the data structure. The STL classes actually have a piece
@@ -75,8 +74,8 @@ accidentally using it in a second list can potentially corrupt the
 list.</li>
 
 <li>When an object held by a container is destroyed, iterators can
-  still point to the deallocated memory and there's nothing to stop
-  them from being dereferenced.</li>
+still point to the deallocated memory and there's nothing to stop
+them from being dereferenced.</li>
 
 </ul>
 
@@ -84,7 +83,7 @@ list.</li>
 <h2 id="errors">Errors Caught by the Safe Iterator</h2>
 
 <p>The STLplus safe iterators were designed to solve the problems with
-  the STL iterators. The following solutions have been implemented:</p>
+the STL iterators. The following solutions have been implemented:</p>
 
 <ul>
 
@@ -127,34 +126,34 @@ class stlplus::safe_iterator
 {
 public:
   // construct a null iterator
-  safe_iterator(void) throw();
+  safe_iterator(void);
 
   // construct a valid iterator from the owner node's master iterator
-  safe_iterator(const master_iterator&lt;O,N&gt;&amp;) throw();
+  safe_iterator(const master_iterator&lt;O,N&gt;&amp;);
 
   // comparison - used to create comparison operators for putting
   // iterators into maps and hashes
-  bool equal(const safe_iterator&lt;O,N&gt;&amp; right) const throw();
-  int compare(const safe_iterator&lt;O,N&gt;&amp; right) const throw();
+  bool equal(const safe_iterator&lt;O,N&gt;&amp; right) const;
+  int compare(const safe_iterator&lt;O,N&gt;&amp; right) const;
 
   // dereference
-  N&amp; operator*(void) const throw(null_dereference,end_dereference);
-  N* operator-&gt;(void) const throw(null_dereference,end_dereference);
+  N&amp; operator*(void) const;
+  N* operator-&gt;(void) const;
 
   // a null iterator is one that has not been initialised with a value yet
   // i.e. you just declared it but didn't assign to it
-  bool null(void) const throw();
+  bool null(void) const;
 
   // an end iterator is one that points to the end element of the list of nodes
   // in STL conventions this is one past the last valid element and must not be dereferenced
-  bool end(void) const throw();
+  bool end(void) const;
 
   // a valid iterator is one that can be dereferenced
   // i.e. non-null and non-end
-  bool valid(void) const throw();
+  bool valid(void) const;
 
   // called by the owner class to check the rules
-  void assert_valid(const O* owner) const throw(wrong_object,null_dereference,end_dereference);
+  void assert_valid(const O* owner) const;
 };
 </pre>
 
@@ -165,10 +164,10 @@ classified as a null iterator.</p>
 create a valid iterator.</p>
 
 <p>Built-in comparison methods allow for comparison operators to be
-  written for any iterator derived from safe_iterator, for example to
-  test for the end condition in a for loop or any other
-  conditional. They also allow iterators to be added to sets (the &lt;
-  operator) and hashes (the == operator).</p>
+written for any iterator derived from safe_iterator, for example to
+test for the end condition in a for loop or any other
+conditional. They also allow iterators to be added to sets (the &lt;
+operator) and hashes (the == operator).</p>
 
 <p>The dereference operators are only legal on valid iterators - any
 attempt to dereference a null or end iterator will throw an

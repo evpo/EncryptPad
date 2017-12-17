@@ -27,11 +27,11 @@ namespace stlplus
   // The definitions for the alignment are declared in format_types.hpp
   // Any other value will cause std::invalid_argument to be thrown
 
+  // exceptions: std::invalid_argument
   std::string pad(const std::string& str,
                   alignment_t alignment,
                   unsigned width,
-                  char padch = ' ')
-    throw(std::invalid_argument);
+                  char padch = ' ');
 
   ////////////////////////////////////////////////////////////////////////////////
   // whitespace trimming

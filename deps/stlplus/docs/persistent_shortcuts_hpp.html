@@ -44,35 +44,35 @@ namespace stlplus
   // arbitrary IOStream device
   // must be in binary mode
 
+  // exceptions: persistent_dump_failed
   template&lt;typename T, class D&gt;
-  void dump_to_device(const T&amp; source, std::ostream&amp; result, D dump_fn, dump_context::installer installer)
-    throw(persistent_dump_failed);
+  void dump_to_device(const T&amp; source, std::ostream&amp; result, D dump_fn, dump_context::installer installer);
 
+  // exceptions: persistent_restore_failed
   template&lt;typename T, class R&gt;
-  void restore_from_device(std::istream&amp; source, T&amp; result, R restore_fn, restore_context::installer installer)
-    throw(persistent_restore_failed);
+  void restore_from_device(std::istream&amp; source, T&amp; result, R restore_fn, restore_context::installer installer);
 
   ////////////////////////////////////////////////////////////////////////////////
   // string IO device
 
+  // exceptions: persistent_dump_failed
   template&lt;typename T, class D&gt;
-  void dump_to_string(const T&amp; source, std::string&amp; result, D dump_fn, dump_context::installer installer)
-    throw(persistent_dump_failed);
+  void dump_to_string(const T&amp; source, std::string&amp; result, D dump_fn, dump_context::installer installer);
 
+  // exceptions: persistent_restore_failed
   template&lt;typename T, class R&gt;
-  void restore_from_string(const std::string&amp; source, T&amp; result, R restore_fn, restore_context::installer installer)
-    throw(persistent_restore_failed);
+  void restore_from_string(const std::string&amp; source, T&amp; result, R restore_fn, restore_context::installer installer);
 
   ////////////////////////////////////////////////////////////////////////////////
   // file IO device
 
+  // exceptions: persistent_dump_failed
   template&lt;typename T, class D&gt;
-  void dump_to_file(const T&amp; source, const std::string&amp; filename, D dump_fn, dump_context::installer installer)
-    throw(persistent_dump_failed);
+  void dump_to_file(const T&amp; source, const std::string&amp; filename, D dump_fn, dump_context::installer installer);
 
+  // exceptions: persistent_restore_failed
   template&lt;typename T, class R&gt;
-  void restore_from_file(const std::string&amp; filename, T&amp; result, R restore_fn, restore_context::installer installer)
-    throw(persistent_restore_failed);
+  void restore_from_file(const std::string&amp; filename, T&amp; result, R restore_fn, restore_context::installer installer);
 
   ////////////////////////////////////////////////////////////////////////////////
 

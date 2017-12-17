@@ -28,17 +28,17 @@ namespace stlplus
   // The way in which the number is displayed is defined in radix_types.hpp
   // Using any other value for the display type causes std::invalid_argument to be thrown
 
+  // exceptions: std::invalid_argument
   void print_float(std::ostream& device, float f,
                    real_display_t display = display_mixed,
                    unsigned width = 0,
-                   unsigned precision = 6)
-    throw(std::invalid_argument);
+                   unsigned precision = 6);
 
+  // exceptions: std::invalid_argument
   void print_double(std::ostream& device, double f,
                     real_display_t display = display_mixed,
                     unsigned width = 0,
-                    unsigned precision = 6)
-    throw(std::invalid_argument);
+                    unsigned precision = 6);
 
   ////////////////////////////////////////////////////////////////////////////////
 

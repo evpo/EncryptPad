@@ -21,33 +21,33 @@ namespace stlplus
 
   // simple_ptr - uses dump/restore_pointer on the contents
 
+  // exceptions: persistent_dump_failed
   template<typename T, typename DE>
-  void dump_simple_ptr(dump_context&, const simple_ptr<T>& data, DE dump_element)
-    throw(persistent_dump_failed);
+  void dump_simple_ptr(dump_context&, const simple_ptr<T>& data, DE dump_element);
 
+  // exceptions: persistent_restore_failed
   template<typename T, typename RE>
-  void restore_simple_ptr(restore_context&, simple_ptr<T>& data, RE restore_element)
-    throw(persistent_restore_failed);
+  void restore_simple_ptr(restore_context&, simple_ptr<T>& data, RE restore_element);
 
   // simple_ptr_clone using the polymorphic callback approach - uses dump/restore_callback on the contents
 
+  // exceptions: persistent_dump_failed
   template<typename T>
-  void dump_simple_ptr_clone_callback(dump_context&, const simple_ptr_clone<T>& data)
-    throw(persistent_dump_failed);
+  void dump_simple_ptr_clone_callback(dump_context&, const simple_ptr_clone<T>& data);
 
+  // exceptions: persistent_restore_failed
   template<typename T>
-  void restore_simple_ptr_clone_callback(restore_context&, simple_ptr_clone<T>& data)
-    throw(persistent_restore_failed);
+  void restore_simple_ptr_clone_callback(restore_context&, simple_ptr_clone<T>& data);
 
   // simple_ptr_clone using the interface approach - uses dump/restore_interface on the contents
 
+  // exceptions: persistent_dump_failed
   template<typename T>
-  void dump_simple_ptr_clone_interface(dump_context&, const simple_ptr_clone<T>& data)
-    throw(persistent_dump_failed);
+  void dump_simple_ptr_clone_interface(dump_context&, const simple_ptr_clone<T>& data);
 
+  // exceptions: persistent_restore_failed
   template<typename T>
-  void restore_simple_ptr_clone_interface(restore_context&, simple_ptr_clone<T>& data)
-    throw(persistent_restore_failed);
+  void restore_simple_ptr_clone_interface(restore_context&, simple_ptr_clone<T>& data);
 
   // simple_ptr_nocopy is not made persistent because if it is uncopyable, it must be undumpable
 

@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-<title>STLplus Library Collection - Versions and the Change Log</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STLplus C++ Library Collection - Versions and the Change Log</title>
 <link rel="icon" href="plus.png" type="image/png"/>
 <meta name="Author" content="Andy Rushton"/>
 <link rel="stylesheet" media="screen" type="text/css" href="screen.css"/>
@@ -14,9 +15,7 @@
 <div id="header">
 
 <div id="headerBanner">
-<h1>The
-<span style="color:red">S</span><span style="color:blue">T</span><span style="color:green">L</span><span style="color:#ecec80">plus</span>
-C++ Library Collection</h1>
+<h1>STLplus C++ Library Collection</h1>
 </div>
 
 <div id="headerNavigation">
@@ -37,6 +36,8 @@ C++ Library Collection</h1>
 <div id="documentNavigation">
 <ul>
 <li class="internal"><a href="#introduction">Introduction</a></li>
+<li class="internal"><a href="#v3.15">Changes from Version 3.14 to 3.15</a></li>
+<li class="internal"><a href="#v3.14">Changes from Version 3.13 to 3.14</a></li>
 <li class="internal"><a href="#v3.13">Changes from Version 3.12 to 3.13</a></li>
 <li class="internal"><a href="#v3.12">Changes from Version 3.11 to 3.12</a></li>
 <li class="internal"><a href="#v3.11">Changes from Version 3.10 to 3.11</a></li>
@@ -60,9 +61,96 @@ C++ Library Collection</h1>
 However, the change log has been restarted for version 3 of the library since the changes
 for this version are huge. Therefore only the changes since then have been documented.</p>
 
-<p>The official open-source version of STLplus starts at version 2.0 and you can access the change
-log for all version 2 releases by looking at the 
-<a href="http://stlplus.sourceforge.net/stlplus/docs/changes.html">version 2 documentation</a>.</p>
+<h2 id="v3.15">Changes from Version 3.14 to 3.15</h2>
+
+<h3>Clang Build and Recognition of the Clang Compiler</h3>
+
+<p>Experiments on FreeBSD (the TrueOS distribution) confirm that
+STLplus builds with clang instead of Gnu gcc. Small changes, such as
+the reintroduction of a small number of exception specifications
+mentioned below were necessary, but no functional changes were
+needed. The portability/build.cpp utilities now recognises a clang
+build and correctly identifies the compiler and version.</p>
+
+<h3>Removed throw specifications</h3>
+
+<p>STLplus has always had throw specifications (also known as
+exception specifications), e.g. throw(exception1,exception2), after
+function declarations so that both the compiler and user know what
+exceptions the function can throw.</p>
+
+<p>However, in C++11 the use of throw specifications is
+deprecated. This started to show up as compiler warnings in gcc
+v7.2. I have decided to go with the spirit of C++11 and removed all of
+the throw specifications from STLplus. Where possible in the
+headers I have turned them into a comment so there is still some user
+information about what exceptions might be thrown by a function.</p>
+
+<p>I have left throw specifications on exception classes derived from
+system exceptions because otherwise I was seeing compiler errors due
+to the derivative having a different throw specification than its base
+class.</p>
+
+<h2 id="v3.14">Changes from Version 3.13 to 3.14</h2>
+
+<h3>Scrapped support for old compilers</h3>
+
+<p>Traditionally, the STLplus code has been littered with macros to
+allow for differences in support for C++ features between
+compilers. This was always difficult to maintain. The fixes are
+localised in each library to a single header called
+&lt;library&gt;_fixes.hpp.</p>
+
+<p>I have decided to scrap support for old compilers that require
+these work-arounds. These are:</p>
+
+<ul>
+<li>Visual Studio v6</li>
+<li>Borland v5.5</li>
+<li>gcc v2.xx</li>
+</ul>
+
+<p>This decision has enabled significant simplifications to the code
+and now nearly all the fixes are gone from the code - it is almost
+exactly the same on all platforms and all compilers. It is a relief at
+last to see C++ standardisation reaching this point.</p>
+
+<h3>Added at() and at_pointer() methods to containers/hash</h3>
+
+<p>Patch submitted by DJDM:</p>
+
+<p>Added hash::at() and hash::at_pointer() methods to get the value
+associated with a key directly, avoiding the use of iterators. The
+motivation was to avoid a problem with iterators which are not
+thread-safe, but these are also generally useful functions.</p>
+
+<p>The hash::at() method has the same functionality as the
+hash::operator[] method in read-only mode, but does not have the catch
+that in read-write mode, [] creates a new value if the key is not
+found. The at() method throws an exception instead when the key is not
+found. The at_pointer() method returns a pointer to the value, rather
+than a reference and returns null if the key is not found.</p>
+
+<h3>Reworked portability/dprintf</h3>
+
+<p>This component was written originally to avoid the buffer-overrun
+problem of sprintf, it formats text in the same way as sprintf but
+into a std::string.</p>
+
+<p>This was written originally to unpick the format string and use
+sprintf in a controlled way that ensured buffer overrun could not
+happen. It was rewritten a few years ago to use platform-specific
+functions that did their own low-level memory allocation, eliminating
+the need to unpick the format string. This solution was non-standard
+but used commonly available functions. However, one of these common
+functions (vasprintf) has been removed from some versions of the C
+runtime (specifically Cygwin) so I have written a more
+standard-conformant version using vsnprintf to print to a buffer.</p>
+
+<p>Note: there are local copies of these functions in
+strings/string_float and strings/string_utilities which were added
+to eliminate a dependency from strings library to portability
+library. These have been changed to the new implementation as well.</p>
 
 <h2 id="v3.13">Changes from Version 3.12 to 3.13</h2>
 
@@ -94,7 +182,7 @@ files at the last release. These references have been removed.</p>
 
 <p>These are a simple conversion of the VS 2012 project files, but
 have their own IDE folder so that they can be kept separate for users
-  running more than one version of Visual Studio</p>
+running more than one version of Visual Studio</p>
 
 <h3>Added string formatting for long long types</h3>
 
@@ -117,9 +205,9 @@ and should be built-in.</p>
 <p>So, the following methods have been added:</p>
 
 <ul>
-  <li>child_offset - find the integer offset of a child given its iterator</li>
-  <li>reorder - move a child to a new position in the node's child list</li>
-  <li>swap - swap two children in the node's child list</li>
+<li>child_offset - find the integer offset of a child given its iterator</li>
+<li>reorder - move a child to a new position in the node's child list</li>
+<li>swap - swap two children in the node's child list</li>
 </ul>
 
 <p>See the <a href="ntree.html">documentation for ntree</a> to see how these are used.</p>
@@ -175,14 +263,14 @@ results.</p>
 Posix codes EINPROGRESS etc. and the Windows sockets variants
 WSAEINPROGRESS etc. I had assumed that Microsoft had mapped one set
 onto the other (previous versions of Visual Studio didn't define the
-  Posix codes at all).</p>
+Posix codes at all).</p>
 
 <p>The bug only shows itself with the Visual Studio compiler - so for
-  example using MingW to compile a native Windows program works.</p>
+example using MingW to compile a native Windows program works.</p>
 
 <p>Unfortunately it also shows up a bug in the test pack (actually, two)
 so the problem didn't get caught in testing. This is why the bug made
-  it out into the field.</p>
+it out into the field.</p>
 
 <h2 id="v3.10">Changes from Version 3.9 to 3.10</h2>
 
@@ -197,7 +285,7 @@ std::iterator to fix this.</p>
 <p>STLplus has supported 64-bit builds for a long time, but gave a
 number of compiler warnings. I have eliminated these warnings so the
 library collection should now compile cleanly in both 32-bit and
-  64-bit modes.</p>
+64-bit modes.</p>
 
 <h3>Added support for 64-bit platforms in Visual Studio 2012 Project Files</h3>
 
@@ -208,11 +296,11 @@ mode or x64 mode.</p>
 <h3>Added support for Visual Studio 2012</h3>
 
 <p>There are now project files for Visual Studio 2012 as well as
-  2010. Pick the correct one for the version of the compiler you are
-  using.</p>
+2010. Pick the correct one for the version of the compiler you are
+using.</p>
 
 <p>Developers: there is now an IDE directory in the tests directory which
-  contains separate project files for the different Visual Studio versions.</p>
+contains separate project files for the different Visual Studio versions.</p>
 
 <h3>Recreated project files for Visual Studio 2010</h3>
 
@@ -247,9 +335,9 @@ faster find method for internal use only.</p>
 <h3>Fixed missing this-&gt;</h3>
 
 <p>Some of the containers referenced internal methods without the
-  <code>this-&gt;</code> prefix. This is now required by the latest version of g++,
-  so I have added the required prefix in all cases where the compiler
-  raised an error.</p>
+<code>this-&gt;</code> prefix. This is now required by the latest version of g++,
+so I have added the required prefix in all cases where the compiler
+raised an error.</p>
 
 <h2 id="v3.8">Changes from Version 3.7 to 3.8</h2>
 
@@ -274,10 +362,10 @@ destroyed object.</p>
 <h3>Re-added a bug fix to containers/ntree</h3>
 
 <p>The ntree::cut method had a bug (reported by sacbor) where the old method name
-  set_new_owner was used when the renamed method change_owner should
-  have been used. This bug was fixed in v3.6 but seems to have crept
-  back in, possibly in the rework of ntree which was done for v3.7. So
-  I've fixed it again.</p>
+set_new_owner was used when the renamed method change_owner should
+have been used. This bug was fixed in v3.6 but seems to have crept
+back in, possibly in the rework of ntree which was done for v3.7. So
+I've fixed it again.</p>
 
 <h2 id="v3.7">Changes from Version 3.6 to 3.7</h2>
 
@@ -294,9 +382,9 @@ from another instance.</p>
 <h3>Moved Project Files to Separate /ide Directory</h3>
 
 <p>The project files for various IDEs are multiplying. So to manage
-  these files better, I have created a separate top-level directory to
-  contain them. There is a separate sub-directory for each supported
-  IDE.</p>
+these files better, I have created a separate top-level directory to
+contain them. There is a separate sub-directory for each supported
+IDE.</p>
 
 <p>At present the following IDEs are supported:</p>
 
@@ -310,31 +398,31 @@ from another instance.</p>
 
 <dt>vs6</dt>
 <dd>Microsoft Visual Studio v6 - A baseline from which other versions
-  can be supported</dd>
+can be supported</dd>
 
 </dl>
 
 <p>There is a project file for building STLplus as 5 separate
-  libraries and another for building the single monolithic library.</p>
+libraries and another for building the single monolithic library.</p>
 
 <p>The <strong>gcc</strong> make system has not been changed and the Makefiles are
-  still local to each folder in the build. This works better in my
-  opinion for command-line make.</p>
+still local to each folder in the build. This works better in my
+opinion for command-line make.</p>
 
 <h3>Added persistence and print/to_string to the STL shared_ptr</h3>
 
 <p>There is now support in the persistence library and in the strings
-  library for the std::shared_ptr class. This is only supported if it
-  is a true c++0x version of shared_ptr - that is, it is in the std::
-  namespace.</p>
+library for the std::shared_ptr class. This is only supported if it
+is a true c++0x version of shared_ptr - that is, it is in the std::
+namespace.</p>
 
 <p>I don't support std::tr1::shared_ptr nor boost::shared_ptr.</p>
 
 <p>In Visual Studio 2010, std::shared_ptr is available as
-  standard.</p>
+standard.</p>
 
 <p>In gcc version 4.5 (I'm not sure the earliest version), it is
-  enabled by the gcc option -std=c++0x or by running make as:</p>
+enabled by the gcc option -std=c++0x or by running make as:</p>
 
 <pre>
 make CXXFLAGS=-std=c++0x
@@ -343,10 +431,10 @@ make CXXFLAGS=-std=c++0x
 <p>In Borland (Embarcadero) C++ Builder, std::shared_ptr is not available.</p>
 
 <p>In order to support this, I've made internal changes to the
-  persistence context classes and to the implementation of persistence
-  for smart_ptr, simple_ptr, digraph and ntree. However, these have no
-  impact on user code and there is no change in the persistence file
-  format.</p>
+persistence context classes and to the implementation of persistence
+for smart_ptr, simple_ptr, digraph and ntree. However, these have no
+impact on user code and there is no change in the persistence file
+format.</p>
 
 <h3>docs/persistent_examples.html</h3>
 
@@ -355,100 +443,100 @@ make CXXFLAGS=-std=c++0x
 <h3>strings/print_pair.tpp and strings/print_map.tpp: Bug fixes</h3>
 
 <p>A couple of bugs fixed related to the conversion from STLplus
-  2. These only showed when trying to compile a program that uses
-  these functions.</p>
+2. These only showed when trying to compile a program that uses
+these functions.</p>
 
 <h3>portability/ip_sockets.cpp: Visual Studio 10 fixes</h3>
 
 <p>Visual Studio now defines constants such as EINPROGRESS so I no
-  longer need to define these. However, I still define them
-  for older versions of Visual Studio.</p>
+longer need to define these. However, I still define them
+for older versions of Visual Studio.</p>
 
 <h3>portability/file_system.cpp: Clarified definition of file and folder</h3>
 
 <p>The functions for differentiating between a file and a folder did
-  not handle 'other' filesystem objects correctly. I have now defined
-  a file to be a regular file (any OS), symbolic link (Unix only), socket (Unix
-  only) or named pipe (any OS). A folder is defined as just a
-  directory (any OS). Character devices (any OS) and block devices (Unix only) are
-  neither files nor folders.</p>
+not handle 'other' filesystem objects correctly. I have now defined
+a file to be a regular file (any OS), symbolic link (Unix only), socket (Unix
+only) or named pipe (any OS). A folder is defined as just a
+directory (any OS). Character devices (any OS) and block devices (Unix only) are
+neither files nor folders.</p>
 
 <h3>Makefile: fixed path problems</h3>
 
 <p>Two makefiles source/Makefile and tests/Makefile, relied on the
-  current directory ('.') being on the path, which for me it always
-  is. However, this caused make to fail for other users. The makefiles
-  have been fixed so they do not rely on this.</p>
+current directory ('.') being on the path, which for me it always
+is. However, this caused make to fail for other users. The makefiles
+have been fixed so they do not rely on this.</p>
 
 <h2 id="v3.6">Changes from Version 3.5 to 3.6</h2>
 
 <h3>Switched to Visual Studio 10 (2010)</h3>
 
 <p>Visual Studio 10 Express Edition is now the preferred offering from
-  Microsoft. Converting the solution and project files from Visual Studio 9
-  overwrote them, so now there are only Visual Studio 10 solutions and
-  projects.</p>
+Microsoft. Converting the solution and project files from Visual Studio 9
+overwrote them, so now there are only Visual Studio 10 solutions and
+projects.</p>
 
 <p>In principle I could rename these to support both simultaneously,
-  but I will wait and see if there is a demand before investing the
-  time and effort to do so.</p>
+but I will wait and see if there is a demand before investing the
+time and effort to do so.</p>
 
 <h3>Made internals of subprocess and async_subprocess protected</h3>
 
 <p>These fields were private so that derived classes couldn't access
-  them. This was orignally chosen to hide the platform-specific nature
-  of the internals. However, there are occasions when a subclass needs
-  to access these fields, so they are now protected.</p>
+them. This was orignally chosen to hide the platform-specific nature
+of the internals. However, there are occasions when a subclass needs
+to access these fields, so they are now protected.</p>
 
 <p>Change requested/contributed by DJDM.</p>
 
 <h3>Bug Fix - Declaration of environ incorrect for NetBSD</h3>
 
 <p>On some platforms the external variable environ has to be declared
-  before use. The declaration was accidentally moved inside the
-  stlplus namespace. This doesn't show as a problem on other platforms
-  because they supply system declarations of this variable. However,
-  on NetBSD the system declaration is missing and this shows up the
-  scoping problem.</p>
+before use. The declaration was accidentally moved inside the
+stlplus namespace. This doesn't show as a problem on other platforms
+because they supply system declarations of this variable. However,
+on NetBSD the system declaration is missing and this shows up the
+scoping problem.</p>
 
 <p>The problem has been solved by simply moving the external
-  declaration back into global scope where it belongs.</p>
+declaration back into global scope where it belongs.</p>
 
 <h3>Bug Fix - Crash in portability/ip_sockets due to signals on Gnu/Linux</h3>
 
 <p>Bug fix contributed by DJDM</p>
 
 <p>On Gnu/Linux, occasionally, if a socket disconnects remotely between
-  the points at which you ask for send_ready and actually doing the
-  send, then the send will fail, but also on Gnu/Linux sends the SIGPIPE
-  signal, which kills the program if it is unhandled - most of the
-  time. As the return of -1 is all you need from the send function,
-  it's best to set it not to generate the SIGPIPE in the first place,
-  which is done by adding the MSG_NOSIGNAL flag to the send calls.</p>
+the points at which you ask for send_ready and actually doing the
+send, then the send will fail, but also on Gnu/Linux sends the SIGPIPE
+signal, which kills the program if it is unhandled - most of the
+time. As the return of -1 is all you need from the send function,
+it's best to set it not to generate the SIGPIPE in the first place,
+which is done by adding the MSG_NOSIGNAL flag to the send calls.</p>
 
 <h3>Tidy-up of portability/build Reporting</h3>
 
 <p>You can use the portability/build functions to report which version
-  of compiler and build options were used to build STLplus. I've
-  tidied this up and provided more functions to get parts of the
-  build string.</p>
+of compiler and build options were used to build STLplus. I've
+tidied this up and provided more functions to get parts of the
+build string.</p>
 
 <h3>Bug Fix - Crash in portability/file_system</h3>
 
 <p>The getcwd function returns the C-string path to the current
-  directory. This is then used to construct a std::string. However,
-  getcwd can very rarely return a null pointer, which crashes the
-  std::string constructor. I've fixed the code so that a null return
-  value is converted into an empty string.</p>
+directory. This is then used to construct a std::string. However,
+getcwd can very rarely return a null pointer, which crashes the
+std::string constructor. I've fixed the code so that a null return
+value is converted into an empty string.</p>
 
 <h3>Minor Tidy-up of portability/subprocesses</h3>
 
 <p>Some of the error handling was inconsistently handled in the
-  subprocess classes, so I've worked through systematically adding
-  error handling in a consistent way.</p>
+subprocess classes, so I've worked through systematically adding
+error handling in a consistent way.</p>
 
 <p>I've also added get_variables methods to the subprocess classes so
-  you can examine the environment of the subprocess.</p>
+you can examine the environment of the subprocess.</p>
 
 <h3>Added &lt; operator to containers/foursome and containers/triple</h3>
 
@@ -461,15 +549,15 @@ each of the contained types.</p>
 <h3>Rework of containers/ntree</h3>
 
 <p>The ntree container was lacking a set of methods for building trees
-  out of other trees without copying the contents. This is
-  inefficient. I have added a set of move methods which move the
-  argument tree into the target tree, destroying the argument tree in
-  the process. These complement the insert methods that add subtrees
-  in the same way, but copy them first.</p>
+out of other trees without copying the contents. This is
+inefficient. I have added a set of move methods which move the
+argument tree into the target tree, destroying the argument tree in
+the process. These complement the insert methods that add subtrees
+in the same way, but copy them first.</p>
 
 <p>In the process, I've deprecated the append method in favour of an
-  insert or move with no offset, which defaults to the append
-  functionality.</p>
+insert or move with no offset, which defaults to the append
+functionality.</p>
 
 <h2 id="v3.5">Changes from Version 3.4 to 3.5</h2>
 
@@ -724,10 +812,12 @@ needed quoting (i.e. contained special characters). This has been fixed.</p>
 <h3>Split the library into a Collection</h3>
 
 <p>The original STLplus was a single, rather large, library. It has now been split into 5 libraries.
-So STLplus is now referred to as a Library Collection, containing within it the STLplus <a
-href="containers.html">containers</a>, <a href="portability.html">portability</a>, <a
-href="persistence.html">persistence</a>, <a href="subsystems.html">subsystems</a> and <a
-href="strings.html">strings</a> libraries.</p>
+So STLplus is now referred to as a Library Collection, containing within it the STLplus
+<a href="containers.html">containers</a>,
+<a href="portability.html">portability</a>,
+<a href="persistence.html">persistence</a>,
+<a href="subsystems.html">subsystems</a> and
+<a href="strings.html">strings</a> libraries.</p>
 
 <h3>Added the stlplus Namespace</h3>
 
@@ -773,16 +863,17 @@ to be in the global namespace. This approach is not compatible with placing all 
 a separate namespace. All these functions have been rewritten to take an extra parameter so
 that those external resources are now passed as parameters.</p>
 
-<p>This rewrite applies to the <a href="persistence.html">persistence</a> library and the <a
-href="strings.html">strings</a> library.</p>
+<p>This rewrite applies to the
+<a href="persistence.html">persistence</a> library and the
+<a href="strings.html">strings</a> library.</p>
 
 <h3>Persistence Functions Renamed</h3>
 
 <p>STLplus 2 relied on overloading the functions dump and restore to implement persistence. However,
 because of the redesign of the functions discussed above, persistence functions are now passed as
 parameters to other persistence functions. To avoid ambiguity, all persistence functions now have
-unique names - dump_<em>type</em> and restore_<em>type</em>. See the <a
-href="persistence.html">persistence library</a> for more information.</p>
+unique names - dump_<em>type</em> and restore_<em>type</em>. See the
+<a href="persistence.html">persistence library</a> for more information.</p>
 
 <p><strong>Note:</strong> the persistence file format is unchanged by this rewrite, so STLplus version 2 files
 can be read by version 3 and vice versa.</p>

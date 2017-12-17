@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-<title>STLplus Library Collection - Persistence Library</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STLplus C++ Library Collection - Persistence Library</title>
 <link rel="icon" href="plus.png" type="image/png"/>
 <meta name="Author" content="Andy Rushton"/>
 <link rel="stylesheet" media="screen" type="text/css" href="screen.css"/>
@@ -14,7 +15,7 @@
 <div id="header">
 
 <div id="headerBanner">
-<h1>The <span style="color:red">S</span><span style="color:blue">T</span><span style="color:green">L</span><span style="color:#ecec80">plus</span> C++ Library Collection</h1>
+<h1>STLplus C++ Library Collection</h1>
 </div>
 
 <div id="headerNavigation">
@@ -113,9 +114,9 @@ is being used, what convention is used to store numeric types (i.e. little-endia
 big-endian) or even what size of word is being used (e.g. 32-bit versus 64-bit).</p>
 
 <p>So, for example, a program compiled with Gnu's gcc on Gnu/Linux running
-  on a 32-bit big-endian processor can transfer data either as a file
-  or over the internet to a program compiled with Microsoft's Visual
-  Studio, running on a 64-bit little-endian processor.</p>
+on a 32-bit big-endian processor can transfer data either as a file
+or over the internet to a program compiled with Microsoft's Visual
+Studio, running on a 64-bit little-endian processor.</p>
 
 <p>The approach taken with the persistence subsystem is to provide a toolkit which makes it easy if
 not trivial to make a data structure persistent. However, it is not totally automatic - C++ is too
@@ -161,11 +162,9 @@ for string. Two sets of functions are written, one for dumping and one for resto
 here are the dump/restore functions for std::string:</p>
 
 <pre class="cpp">
-void stlplus::dump_string(stlplus::dump_context&amp;, const std::string&amp; data)
-  throw(stlplus::persistent_dump_failed);
+void stlplus::dump_string(stlplus::dump_context&amp;, const std::string&amp; data);
 
-void stlplus::restore_string(stlplus::restore_context&amp;, std::string&amp; data) 
-  throw(stlplus::persistent_restore_failed);
+void stlplus::restore_string(stlplus::restore_context&amp;, std::string&amp; data);
 </pre>
 
 <p>The persistence functions for container templates take an extra parameter - the name of a
@@ -174,12 +173,10 @@ functions for vector:</p>
 
 <pre class="cpp">
 template&lt;typename T, typename D&gt;
-void stlplus::dump_vector(stlplus::dump_context&amp;, const std::vector&lt;T&gt;&amp; data, D dump_fn)
-  throw(stlplus::persistent_dump_failed);
+void stlplus::dump_vector(stlplus::dump_context&amp;, const std::vector&lt;T&gt;&amp; data, D dump_fn);
 
 template&lt;typename T, typename R&gt;
-void stlplus::restore_vector(stlplus::restore_context&amp;, std::vector&lt;T&gt;&amp; data, R restore_fn)
-  throw(stlplus::persistent_restore_failed);
+void stlplus::restore_vector(stlplus::restore_context&amp;, std::vector&lt;T&gt;&amp; data, R restore_fn);
 </pre>
 
 <p>Note how there is a final parameter dump_fn/restore_fn. In use, these must be provided with the
@@ -195,24 +192,22 @@ stlplus::dump_vector(context, data, stlplus::dump_string);
 
 <pre class="cpp">
 template&lt;typename T, typename D&gt;
-void stlplus::dump_list(stlplus::dump_context&amp;, const std::list&lt;T&gt;&amp; data, D dump_fn)
-  throw(stlplus::persistent_dump_failed);
+void stlplus::dump_list(stlplus::dump_context&amp;, const std::list&lt;T&gt;&amp; data, D dump_fn);
 
 template&lt;typename T, typename R&gt;
-void stlplus::restore_list(stlplus::restore_context&amp;, std::list&lt;T&gt;&amp; data, R restore_fn)
-  throw(stlplus::persistent_restore_failed);
+void stlplus::restore_list(stlplus::restore_context&amp;, std::list&lt;T&gt;&amp; data, R restore_fn);
 </pre>
 
 <p>However, the last parameter - the dump_fn and restore_fn - must be only two-parameter functions.
 This means you need to wrap the existing dump_vector call into a specialisation function:</p>
 
 <pre class="cpp">
-void dump_string_vector(stlplus::dump_context&amp;, const std::vector&lt;std::string&gt;&amp; data) throw(stlplus::persistent_dump_failed)
+void dump_string_vector(stlplus::dump_context&amp;, const std::vector&lt;std::string&gt;&amp; data)
 {
   stlplus::dump_vector(context, data, stlplus::dump_string);
 }
 
-void restore_string_vector(stlplus::restore_context&amp;, std::vector&lt;std::string&gt;&amp; data) throw(stlplus::persistent_restore_failed)
+void restore_string_vector(stlplus::restore_context&amp;, std::vector&lt;std::string&gt;&amp; data)
 {
   stlplus::restore_vector(context, data, stlplus::restore_string);
 }
@@ -229,12 +224,12 @@ stlplus::dump_list(context, data, dump_string_vector);
 level of data structure.</p>
 
 <pre class="cpp">
-void dump_string_vector_list(stlplus::dump_context&amp;, const std::list&lt;std::vector&lt;std::string&gt; &gt;&amp; data) throw(stlplus::persistent_dump_failed)
+void dump_string_vector_list(stlplus::dump_context&amp;, const std::list&lt;std::vector&lt;std::string&gt; &gt;&amp; data)
 {
   stlplus::dump_list(context, data, stlplus::dump_string_vector);
 }
 
-void restore_string_vector_list(stlplus::restore_context&amp;, std::list&lt;std::vector&lt;std::string&gt; &gt;&amp; data) throw(stlplus::persistent_restore_failed)
+void restore_string_vector_list(stlplus::restore_context&amp;, std::list&lt;std::vector&lt;std::string&gt; &gt;&amp; data)
 {
   stlplus::restore_list(context, data, stlplus::restore_string_vector);
 }

@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-<title>STLplus Library Collection - strings/string_stl.hpp - String Formatting of STL Containers</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STLplus C++ Library Collection - strings/string_stl.hpp - String Formatting of STL Containers</title>
 <link rel="icon" href="plus.png" type="image/png"/>
 <meta name="Author" content="Andy Rushton"/>
 <link rel="stylesheet" media="screen" type="text/css" href="screen.css"/>
@@ -14,9 +15,7 @@
 <div id="header">
 
 <div id="headerBanner">
-<h1>The
-<span style="color:red">S</span><span style="color:blue">T</span><span style="color:green">L</span><span style="color:#ecec80">plus</span>
-C++ Library Collection</h1>
+<h1>STLplus C++ Library Collection</h1>
 </div>
 
 <div id="headerNavigation">
@@ -73,7 +72,7 @@ the sequence contains std::pair (such as in std::map):</p>
 <pre class="cpp">
 template &lt;typename I, typename S&gt;
 std::string stlplus::sequence_to_string(I begin,
-                                        I end, 
+                                        I end,
                                         S to_string,
                                         const std::string&amp; separator);
 
@@ -145,7 +144,7 @@ std::string stlplus::pointer_to_string(const T* value,
 </pre>
 
 <p>The shared_ptr container has a similar interface, but there is a
-  difference between an empty string and a null string:</p>
+difference between an empty string and a null string:</p>
 
 <pre class="cpp">
 template &lt;typename T, typename S&gt;
@@ -221,7 +220,7 @@ void print_shared_ptr(std::ostream&amp; device,
 
 template &lt;typename I, typename S&gt;
 void print_sequence(std::ostream&amp; device,
-                    I begin, I end, 
+                    I begin, I end,
                     S print_fn,
                     const std::string&amp; separator);
 

@@ -164,7 +164,7 @@ static stlplus::lm_dependencies& out_of_date_check (visited_map& visited,
           else
           {
             // the unit hasn't been visited before, so recurse on it now
-            stlplus::lm_dependencies other_dependencies = 
+            stlplus::lm_dependencies other_dependencies =
               out_of_date_check(visited, manager, other_name.first, other_name.second);
             if (!other_dependencies.empty())
             {
@@ -342,7 +342,7 @@ stlplus::lm_unit_dependency::lm_unit_dependency(void)
 {
 }
 
-stlplus::lm_unit_dependency::lm_unit_dependency(const std::string& library, const lm_unit_name& name) : 
+stlplus::lm_unit_dependency::lm_unit_dependency(const std::string& library, const lm_unit_name& name) :
   m_library(library), m_name(name)
 {
 }
@@ -587,7 +587,7 @@ std::ostream& stlplus::operator << (std::ostream& str, const stlplus::lm_depende
 // lm_unit
 ////////////////////////////////////////////////////////////////////////////////
 
-stlplus::lm_unit::lm_unit(const lm_unit_name& name, lm_library* library) : 
+stlplus::lm_unit::lm_unit(const lm_unit_name& name, lm_library* library) :
   m_name(name), m_header_modified(false), m_loaded(false), m_marked(false), m_library(library), m_error(false)
 {
   read_header();

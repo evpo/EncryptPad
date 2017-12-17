@@ -45,11 +45,13 @@ namespace stlplus
     //////////////////////////////////////////////////////////////////////////////
 
     // device must be in binary mode
-    dump_context(std::ostream& device, unsigned char version = PersistentVersion) throw(persistent_dump_failed);
+    // exceptions: persistent_dump_failed
+    dump_context(std::ostream& device, unsigned char version = PersistentVersion) ;
     ~dump_context(void);
 
     // low level output used to dump a byte
-    void put(unsigned char data) throw(persistent_dump_failed);
+    // exceptions: persistent_dump_failed
+    void put(unsigned char data) ;
 
     // access the device, for example to check the error status
     const std::ostream& device(void) const;
@@ -72,12 +74,14 @@ namespace stlplus
     unsigned register_callback(const std::type_info& info, dump_callback);
     bool is_callback(const std::type_info& info) const;
     typedef std::pair<unsigned,dump_callback> callback_data;
-    callback_data lookup_callback(const std::type_info&) const throw(persistent_illegal_type);
+    // exceptions: persistent_illegal_type
+    callback_data lookup_callback(const std::type_info&) const ;
 
     // Assist functions for Polymorphous classes (i.e. subclasses) using interface approach
     unsigned register_interface(const std::type_info& info);
     bool is_interface(const std::type_info& info) const;
-    unsigned lookup_interface(const std::type_info&) const throw(persistent_illegal_type);
+    // exceptions: persistent_illegal_type
+    unsigned lookup_interface(const std::type_info&) const ;
 
     // Register all Polymorphous classes using either approach by calling an installer callback
     typedef void (*installer)(dump_context&);
@@ -102,11 +106,13 @@ namespace stlplus
     //////////////////////////////////////////////////////////////////////////////
 
     // device must be in binary mode
-    restore_context(std::istream& device) throw(persistent_restore_failed);
+    // exceptions: persistent_restore_failed
+    restore_context(std::istream& device) ;
     ~restore_context(void);
 
     // low level input used to restore a byte
-    int get(void) throw(persistent_restore_failed);
+    // exceptions: persistent_restore_failed
+    int get(void) ;
 
     // access the device, for example to check the error status
     const std::istream& device(void) const;
@@ -130,12 +136,14 @@ namespace stlplus
     unsigned register_callback(create_callback,restore_callback);
     bool is_callback(unsigned) const;
     typedef std::pair<create_callback, restore_callback> callback_data;
-    callback_data lookup_callback(unsigned) const throw(persistent_illegal_type);
+    // exceptions: persistent_illegal_type
+    callback_data lookup_callback(unsigned) const ;
 
     // Assist functions for Polymorphous classes using the interface approach
     unsigned register_interface(persistent*);
     bool is_interface(unsigned) const;
-    persistent* lookup_interface(unsigned) const throw(persistent_illegal_type);
+    // exceptions: persistent_illegal_type
+    persistent* lookup_interface(unsigned) const ;
 
     // Register all Polymorphous classes using either approach by calling an installer callback
     typedef void (*installer)(restore_context&);

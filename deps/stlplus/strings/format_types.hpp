@@ -22,7 +22,7 @@ namespace stlplus
 //       note that this is an unsigned representation
 //     - Hash style - in the form radix#value - the value may be signed, e.g. 10#-9
 
-enum radix_display_t 
+enum radix_display_t
 {
   radix_none,               // just print the number with no radix indicated
   radix_hash_style,         // none for decimal, hash style for all others

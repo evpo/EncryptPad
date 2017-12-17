@@ -32,7 +32,6 @@
 
 #ifdef MSWINDOWS
 #include <windows.h>
-#include <dos.h>
 #include <direct.h>
 #include <fcntl.h>
 #include <io.h>
@@ -363,8 +362,8 @@ namespace stlplus
       set_drive("");
       // first remove leading elements that are identical to the corresponding element in root
       unsigned i = 0;
-      while(subpath_size() > 0 && 
-            i < absolute_root.subpath_size() && 
+      while(subpath_size() > 0 &&
+            i < absolute_root.subpath_size() &&
             path_compare(subpath_element(0), absolute_root.subpath_element(i)))
       {
         subpath_erase(0);
@@ -421,12 +420,12 @@ namespace stlplus
 //   S_IFCHR 	0020000	character device
 //   S_IFIFO 	0010000	FIFO
 // There are also some Posix-standard macros:
-//   S_ISREG(m)        is it a regular file? 
-//   S_ISDIR(m)        directory? 
-//   S_ISCHR(m)        character device? 
-//   S_ISBLK(m)        block device? 
-//   S_ISFIFO(m)       FIFO (named pipe)? 
-//   S_ISLNK(m)        symbolic link? (Not in POSIX.1-1996.) 
+//   S_ISREG(m)        is it a regular file?
+//   S_ISDIR(m)        directory?
+//   S_ISCHR(m)        character device?
+//   S_ISBLK(m)        block device?
+//   S_ISFIFO(m)       FIFO (named pipe)?
+//   S_ISLNK(m)        symbolic link? (Not in POSIX.1-1996.)
 //   S_ISSOCK(m)       socket? (Not in POSIX.1-1996.)
 // Under Windows, the following are defined:
 // source: Header file sys/stat.h distributed with Visual Studio 10
@@ -686,11 +685,11 @@ namespace stlplus
     {
       std::vector<std::string> subdirectories = folder_subdirectories(dir);
       for (std::vector<std::string>::size_type d = 0; d < subdirectories.size(); ++d)
-        if (!folder_delete(folder_down(dir,subdirectories[d]),true)) 
+        if (!folder_delete(folder_down(dir,subdirectories[d]),true))
           result = false;
       std::vector<std::string> files = folder_files(dir);
       for (std::vector<std::string>::size_type f = 0; f < files.size(); ++f)
-        if (!file_delete(create_filespec(dir, files[f]))) 
+        if (!file_delete(create_filespec(dir, files[f])))
           result = false;
     }
     if (rmdir(dir.c_str())!=0) result = false;

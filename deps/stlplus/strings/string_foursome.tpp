@@ -18,16 +18,15 @@ namespace stlplus
                                  S4 to_string_fn4,
                                  const std::string& separator)
   {
-    return 
-      to_string_fn1(values.first) + 
-      separator + 
-      to_string_fn2(values.second) + 
-      separator + 
+    return
+      to_string_fn1(values.first) +
+      separator +
+      to_string_fn2(values.second) +
+      separator +
       to_string_fn3(values.third) +
-      separator + 
+      separator +
       to_string_fn4(values.fourth);
   }
 
 
 } // end namespace stlplus
-

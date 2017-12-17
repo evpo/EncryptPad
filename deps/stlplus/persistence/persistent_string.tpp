@@ -16,7 +16,6 @@ namespace stlplus
 
   template<typename charT, typename traits, typename allocator, typename D>
   void dump_basic_string(dump_context& context, const std::basic_string<charT,traits,allocator>& data, D dump_fn)
-    throw(persistent_dump_failed)
   {
     size_t size = data.size();
     dump_size_t(context, size);
@@ -29,7 +28,6 @@ namespace stlplus
 
   template<typename charT, typename traits, typename allocator, typename R>
   void restore_basic_string(restore_context& context, std::basic_string<charT,traits,allocator>& data, R restore_fn)
-    throw(persistent_restore_failed)
   {
     data.erase();
     size_t size = 0;

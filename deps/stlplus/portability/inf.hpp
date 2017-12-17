@@ -55,7 +55,8 @@ namespace stlplus
     explicit inf(unsigned);
     explicit inf(long);
     explicit inf(unsigned long);
-    explicit inf(const std::string&) throw(std::invalid_argument);
+    // exceptions: std::invalid_argument
+    explicit inf(const std::string&) ;
     inf(const inf&);
 
     ~inf(void);
@@ -68,7 +69,8 @@ namespace stlplus
     inf& operator = (unsigned);
     inf& operator = (long);
     inf& operator = (unsigned long);
-    inf& operator = (const std::string&) throw(std::invalid_argument);
+    // exceptions: std::invalid_argument
+    inf& operator = (const std::string&) ;
     inf& operator = (const inf&);
 
     //////////////////////////////////////////////////////////////////////////////
@@ -77,14 +79,20 @@ namespace stlplus
     //           true: truncate the value
     //           false: throw an exception
 
-    short to_short(bool truncate = true) const throw(std::overflow_error);
-    unsigned short to_unsigned_short(bool truncate = true) const throw(std::overflow_error);
+    // exceptions: std::overflow_error
+    short to_short(bool truncate = true) const ;
+    // exceptions: std::overflow_error
+    unsigned short to_unsigned_short(bool truncate = true) const ;
 
-    int to_int(bool truncate = true) const throw(std::overflow_error);
-    unsigned to_unsigned(bool truncate = true) const throw(std::overflow_error);
+    // exceptions: std::overflow_error
+    int to_int(bool truncate = true) const ;
+    // exceptions: std::overflow_error
+    unsigned to_unsigned(bool truncate = true) const ;
 
-    long to_long(bool truncate = true) const throw(std::overflow_error);
-    unsigned long to_unsigned_long(bool truncate = true) const throw(std::overflow_error);
+    // exceptions: std::overflow_error
+    long to_long(bool truncate = true) const ;
+    // exceptions: std::overflow_error
+    unsigned long to_unsigned_long(bool truncate = true) const ;
 
     //////////////////////////////////////////////////////////////////////////////
     // bitwise manipulation
@@ -99,14 +107,20 @@ namespace stlplus
     // the number of bits that can be accessed by the bit() method (=bits() rounded up to the next byte)
     unsigned indexable_bits(void) const;
 
-    bool bit (unsigned index) const throw(std::out_of_range);
-    bool operator [] (unsigned index) const throw(std::out_of_range);
+    // exceptions: std::out_of_range
+    bool bit (unsigned index) const ;
+    // exceptions: std::out_of_range
+    bool operator [] (unsigned index) const ;
 
-    void set (unsigned index) throw(std::out_of_range);
-    void clear (unsigned index) throw(std::out_of_range);
-    void preset (unsigned index, bool value) throw(std::out_of_range);
+    // exceptions: std::out_of_range
+    void set (unsigned index) ;
+    // exceptions: std::out_of_range
+    void clear (unsigned index) ;
+    // exceptions: std::out_of_range
+    void preset (unsigned index, bool value) ;
 
-    inf slice(unsigned low, unsigned high) const throw(std::out_of_range);
+    // exceptions: std::out_of_range
+    inf slice(unsigned low, unsigned high) const ;
 
     //////////////////////////////////////////////////////////////////////////////
     // tests for common values or ranges
@@ -170,14 +184,19 @@ namespace stlplus
     inf& operator *= (const inf&);
     inf operator * (const inf&) const;
 
-    inf& operator /= (const inf&) throw(divide_by_zero);
-    inf operator / (const inf&) const throw(divide_by_zero);
+    // exceptions: divide_by_zero
+    inf& operator /= (const inf&) ;
+    // exceptions: divide_by_zero
+    inf operator / (const inf&) const ;
 
-    inf& operator %= (const inf&) throw(divide_by_zero);
-    inf operator % (const inf&) const throw(divide_by_zero);
+    // exceptions: divide_by_zero
+    inf& operator %= (const inf&) ;
+    // exceptions: divide_by_zero
+    inf operator % (const inf&) const ;
 
     // combined division operator - returns the result pair(quotient,remainder) in one go
-    std::pair<inf,inf> divide(const inf&) const throw(divide_by_zero);
+    // exceptions: divide_by_zero
+    std::pair<inf,inf> divide(const inf&) const ;
 
     //////////////////////////////////////////////////////////////////////////////
     // pre- and post- increment and decrement
@@ -194,14 +213,14 @@ namespace stlplus
 
     // conversion to a string representation
     // radix must be 10, 2, 8 or 16
-    std::string to_string(unsigned radix = 10) const
-      throw(std::invalid_argument);
+    // exceptions: std::invalid_argument
+    std::string to_string(unsigned radix = 10) const;
 
     // conversion from a string
     // radix == 0 - radix is deduced from the input - assumed 10 unless number is prefixed by 0b, 0 or 0x
     // however, you can specify the radix to be 10, 2, 8 or 16 to force that interpretation
-    inf& from_string(const std::string&, unsigned radix = 0)
-      throw(std::invalid_argument);
+    // exceptions: std::invalid_argument
+    inf& from_string(const std::string&, unsigned radix = 0);
 
     //////////////////////////////////////////////////////////////////////////////
   private:

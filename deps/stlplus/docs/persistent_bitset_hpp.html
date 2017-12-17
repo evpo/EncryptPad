@@ -33,11 +33,13 @@
 namespace stlplus
 {
 
+  // exceptions: persistent_dump_failed
   template&lt;size_t N&gt;
-  void dump_bitset(dump_context&amp;, const std::bitset&lt;N&gt;&amp; data) throw(persistent_dump_failed);
+  void dump_bitset(dump_context&amp;, const std::bitset&lt;N&gt;&amp; data) ;
 
+  // exceptions: persistent_restore_failed
   template&lt;size_t N&gt;
-  void restore_bitset(restore_context&amp;, std::bitset&lt;N&gt;&amp; data) throw(persistent_restore_failed);
+  void restore_bitset(restore_context&amp;, std::bitset&lt;N&gt;&amp; data) ;
 
 } // end namespace stlplus
 

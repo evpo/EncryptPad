@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-<title>STLplus Library Collection - containers/simple_ptr.hpp - Simple Pointer Containers</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STLplus C++ Library Collection - containers/simple_ptr.hpp - Simple Pointer Containers</title>
 <link rel="icon" href="plus.png" type="image/png"/>
 <meta name="Author" content="Andy Rushton"/>
 <link rel="stylesheet" media="screen" type="text/css" href="screen.css"/>
@@ -14,9 +15,7 @@
 <div id="header">
 
 <div id="headerBanner">
-<h1>The
-<span style="color:red">S</span><span style="color:blue">T</span><span style="color:green">L</span><span style="color:#ecec80">plus</span>
-C++ Library Collection</h1>
+<h1>STLplus C++ Library Collection</h1>
 </div>
 
 <div id="headerNavigation">
@@ -349,8 +348,8 @@ else if (s2.null())
 pointer. In fact there are two variants of this:</p>
 
 <pre class="cpp">
-T&amp; simple_ptr::operator*(void) throw(stlplus::null_dereference);
-const T&amp; simple_ptr::operator*(void) const throw(stlplus::null_dereference);
+T&amp; simple_ptr::operator*(void);
+const T&amp; simple_ptr::operator*(void) const;
 </pre>
 
 <p>In other words, if you dereference a non-const simple_ptr you get a non-const reference to the
@@ -365,8 +364,8 @@ null, use one of the logical tests to check first.</p>
 in one go, use the -&gt; operator. There are two forms of this too:</p>
 
 <pre class="cpp">
-T* simple_ptr::operator-&gt;(void) throw(stlplus::null_dereference);
-const T* simple_ptr::operator-&gt;(void) const throw(stlplus::null_dereference);
+T* simple_ptr::operator-&gt;(void);
+const T* simple_ptr::operator-&gt;(void) const;
 </pre>
 
 <p>So, if you dereference a non-const simple_ptr you get a pointer to a non-const
@@ -383,8 +382,8 @@ explicit access to the pointer or value pointed to:</p>
 
 <pre class="cpp">
 void simple_ptr::set_value(const T&amp; data);
-T&amp; simple_ptr::value(void) throw(stlplus::null_dereference);
-const T&amp; simple_ptr::value(void) const throw(stlplus::null_dereference);
+T&amp; simple_ptr::value(void);
+const T&amp; simple_ptr::value(void) const;
 </pre>
 
 <p>The set_value method allows the contents of a simple pointer to be changed:</p>
@@ -554,13 +553,13 @@ method to both classes:</p>
 class base
 {
   ...
-  <strong>base* clone(void) const {return new base(*this);}</strong>
+<strong>base* clone(void) const {return new base(*this);}</strong>
 };
 
 class derived : public base
 {
   ...
-  <strong>base* clone(void) const {return new derived(*this);}</strong>
+<strong>base* clone(void) const {return new derived(*this);}</strong>
 };
 </pre>
 

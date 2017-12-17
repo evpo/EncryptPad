@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-<title>STLplus Library Collection - Data Persistence Examples</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STLplus C++ Library Collection - Data Persistence Examples</title>
 <link rel="icon" href="plus.png" type="image/png"/>
 <meta name="Author" content="Andy Rushton"/>
 <link rel="stylesheet" media="screen" type="text/css" href="screen.css"/>
@@ -13,9 +14,7 @@
 <div id="header">
 
 <div id="headerBanner">
-<h1>The
-<span style="color:red">S</span><span style="color:blue">T</span><span style="color:green">L</span><span style="color:#ecec80">plus</span>
-C++ Library Collection</h1>
+<h1>STLplus C++ Library Collection</h1>
 </div>
 
 <div id="headerNavigation">
@@ -130,11 +129,11 @@ void restore_point(stlplus::restore_context&amp; context, point&amp; pt)
 
 <p>Note that neither the dump nor the restore actually do any file I/O themselves, it is all
 delegated to the pre-written functions provided in <a
-href="persistent_basic.html#integer">persistent_basic.hpp</a> for type int. Note also that to access
+                                                     href="persistent_basic.html#integer">persistent_basic.hpp</a> for type int. Note also that to access
 the values directly I have declared the functions as friends.</p>
 
 <p>A complete test program demonstrating this example can
-  be <a href="persistent_point_test.cpp">downloaded here</a>.</p>
+be <a href="persistent_point_test.cpp">downloaded here</a>.</p>
 
 <h2 id="enums">Persistence of Enumeration Types</h2>
 
@@ -164,7 +163,7 @@ void restore_traffic_light(stlplus::restore_context&amp; context, traffic_light&
 </pre>
 
 <p>A complete test program demonstrating this example can
-  be <a href="persistent_traffic_light_test.cpp">downloaded here</a>.</p>
+be <a href="persistent_traffic_light_test.cpp">downloaded here</a>.</p>
 
 <h2 id="layers">Persistence of Multi-Level Types</h2>
 
@@ -217,7 +216,7 @@ the class.</p>
 class written in the last section. This layering can be continued ad infinitum.</p>
 
 <p>A complete test program demonstrating this example can
-  be <a href="persistent_edge_test.cpp">downloaded here</a>.</p>
+be <a href="persistent_edge_test.cpp">downloaded here</a>.</p>
 
 <h2 id="templates">Persistence of Templates</h2>
 
@@ -251,7 +250,7 @@ void restore_edge_vector(stlplus::restore_context&amp; context, std::vector&lt;e
 </pre>
 
 <p>A complete test program demonstrating this example can
-  be <a href="persistent_edge_vector_test.cpp">downloaded here</a>.</p>
+be <a href="persistent_edge_vector_test.cpp">downloaded here</a>.</p>
 
 <h2 id="single">Single-Level STL Structures</h2>
 
@@ -285,15 +284,15 @@ include will be explained as the example unfolds:</p>
 
 <p>The following definition is used to define a type that maps an
 int onto a string, allowing only one mapping for each int (use a multi
- map if you want multiple mappings of each int):</p>
+map if you want multiple mappings of each int):</p>
 
 <pre class="cpp">
 typedef std::map&lt;int,std::string&gt; int_string_map;
 </pre>
 
 <p>The persistence functions are then instantiations of the template
-  persistence functions for map, using the persistence functions for
-  int and string as parameters:</p>
+persistence functions for map, using the persistence functions for
+int and string as parameters:</p>
 
 <pre class="cpp">
 void dump_int_string_map(stlplus::dump_context&amp; context, const int_string_map&amp; data)
@@ -315,7 +314,7 @@ which already has a dump function defined. The data type is string,
 which also has a dump function defined.</p>
 
 <p>For the test we need to be able to compare a restored map with an
-  original one, so here is a comparison function:</p>
+original one, so here is a comparison function:</p>
 
 <pre class="cpp">
 bool compare(const int_string_map&amp; left, const int_string_map&amp; right)
@@ -340,7 +339,7 @@ bool compare(const int_string_map&amp; left, const int_string_map&amp; right)
 </pre>
 
 <p>We also need to be able to print out the map, so print functions
-  can be built up using the STLplus strings library::</p>
+can be built up using the STLplus strings library::</p>
 
 <pre class="cpp">
 void print_int(std::ostream&amp; str, int data)
@@ -356,9 +355,9 @@ std::ostream&amp; operator&lt;&lt; (std::ostream&amp; str, const int_string_map&
 </pre>
 
 <p>The local version of print_int is needed because the STLplus
-  version has extra formatting parameters and the way the print templates work
-  means there must be exactly two parameters to a function passed as
-  an argument.</p>
+version has extra formatting parameters and the way the print templates work
+means there must be exactly two parameters to a function passed as
+an argument.</p>
 
 <p>Finally, a test program can be written:</p>
 
@@ -426,10 +425,10 @@ string representation of the number, just to demonstrate the data
 persistence.</p>
 
 <p>To save this data structure to file I use the shortcut function
-  dump_to_file, which does the whole job in one step.</p>
+dump_to_file, which does the whole job in one step.</p>
 
 <p>Then the data structure is restored using the complementarry
-  shortcut function restore_from_file.</p>
+shortcut function restore_from_file.</p>
 
 <p>The rest of the program compares the two data structures to confirm
 they are identical. It also compares with a pre-saved master copy.</p>
@@ -453,7 +452,7 @@ void restore_int_string_map(stlplus::restore_context&amp; context, int_string_ma
 </pre>
 
 <p>A complete test program demonstrating this example can
-  be <a href="persistent_map_test.cpp">downloaded here</a>.</p>
+be <a href="persistent_map_test.cpp">downloaded here</a>.</p>
 
 <h2 id="multi">Multi-level STL Structures</h2>
 
@@ -588,9 +587,9 @@ int main(int argc, char* argv[])
 
 <p>In this case I'm using persistence to a file, so I've used the fstream
 devices ofstream and ifstream. This program has no output in its
-  present form - you could then add iostream output methods to print
-  out the restored address book and confirm that it is identical to
-  the input.</p>
+present form - you could then add iostream output methods to print
+out the restored address book and confirm that it is identical to
+the input.</p>
 
 <h2 id="interfaces">Polymorphic Classes using Interfaces</h2>
 
@@ -613,8 +612,8 @@ must provide for all subclasses to be made persistent:</p>
 class stlplus::persistent
 {
 public:
-  virtual void dump(stlplus::dump_context&amp;) const throw(persistent_dump_failed) = 0;
-  virtual void restore(stlplus::restore_context&amp;)  throw(persistent_restore_failed) = 0;
+  virtual void dump(stlplus::dump_context&amp;) const = 0;
+  virtual void restore(stlplus::restore_context&amp;)  = 0;
   virtual stlplus::persistent* clone(void) const = 0;
   virtual ~persistent(void) {}
 };
@@ -668,18 +667,18 @@ public:
   virtual int value (void) const {return m_value;}
   virtual void set(int value = 0) {m_value = value;}
 
-  <strong>persistent* clone(void) const
-  {
-    return new base(*this);
-  }
-  void dump(stlplus::dump_context&amp; context) const throw(stlplus::persistent_dump_failed)
-  {
-    stlplus::dump_int(context,m_value);
-  }
-  void restore(stlplus::restore_context&amp; context) throw(stlplus::persistent_restore_failed)
-  {
-    stlplus::restore_int(context,m_value);
-  }</strong>
+<strong>persistent* clone(void) const
+{
+return new base(*this);
+}
+void dump(stlplus::dump_context&amp; context) const
+{
+stlplus::dump_int(context,m_value);
+}
+void restore(stlplus::restore_context&amp; context)
+{
+stlplus::restore_int(context,m_value);
+}</strong>
 };
 
 class derived : public base
@@ -692,20 +691,20 @@ public:
 
   virtual void set(int value = 0) {m_image = dformat("%d",value); base::set(value);}
 
-  <strong>persistent* clone(void) const
-  {
-    return new derived(*this);
-  }
-  void dump(stlplus::dump_context&amp; context) const throw(stlplus::persistent_dump_failed)
-  {
-    base::dump(context);
-    stlplus::dump_string(context,m_image);
-  }
-  void restore(stlplus::restore_context&amp; context) throw(stlplus::persistent_restore_failed)
-  {
-    base::restore(context);
-    stlplus::restore_string(context,m_image);
-  }</strong>
+<strong>persistent* clone(void) const
+{
+return new derived(*this);
+}
+void dump(stlplus::dump_context&amp; context) const
+{
+base::dump(context);
+stlplus::dump_string(context,m_image);
+}
+void restore(stlplus::restore_context&amp; context)
+{
+base::restore(context);
+stlplus::restore_string(context,m_image);
+}</strong>
 };
 </pre>
 
@@ -716,7 +715,7 @@ should never use knowledge of the internals of the superclass. This convention
 is easy to follow: call the dump/restore method of the immediate superclass
 first, then dump/restore the subclass-specific data.</p>
 
-<p>The STLplus approach to persistence of Polymorphic classes requires that every subclass 
+<p>The STLplus approach to persistence of Polymorphic classes requires that every subclass
 be registered with the dump_context or restore_context before the dump or restore operation
 commences. Furthermore, where there are many polymorphic types being handled, the order of
 registration must be the same for the restore operation as it was for the dump operation.</p>

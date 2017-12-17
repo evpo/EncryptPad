@@ -16,7 +16,7 @@ namespace stlplus
 
   template <typename I, typename S>
   std::string sequence_to_string(I begin,
-                                 I end, 
+                                 I end,
                                  S to_string,
                                  const std::string& separator)
   {

@@ -45,7 +45,7 @@ namespace stlplus
   // removes leading bytes that don't contribute to the value to create the minimum string representation
   static void reduce_string(std::string& data)
   {
-    while(data.size() > 1 && 
+    while(data.size() > 1 &&
           ((byte(data[data.size()-1]) == byte(0) && byte(data[data.size()-2]) < byte(128)) ||
            (byte(data[data.size()-1]) == byte(255) && byte(data[data.size()-2]) >= byte(128))))
     {
@@ -130,7 +130,7 @@ namespace stlplus
   // Conversions to string
 
   static char to_char [] = "0123456789abcdefghijklmnopqrstuvwxyz";
-  static int from_char [] = 
+  static int from_char [] =
   {
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
@@ -151,7 +151,6 @@ namespace stlplus
   };
 
   static void convert_to_string(const stlplus::inf& data, std::string& result, unsigned radix = 10)
-    throw(std::invalid_argument)
   {
     // only support the C-style radixes plus 0b for binary
     if (radix != 2 && radix != 8 && radix != 10 && radix != 16)
@@ -372,7 +371,7 @@ namespace stlplus
   ////////////////////////////////////////////////////////////////////////////////
   // Conversions FROM string
 
-  void convert_from_string(const std::string& str, inf& result, unsigned radix = 10) throw(std::invalid_argument)
+  void convert_from_string(const std::string& str, inf& result, unsigned radix = 10)
   {
     result = 0;
     // only support the C-style radixes plus 0b for binary
@@ -602,7 +601,7 @@ namespace stlplus
     operator=(r);
   }
 
-  inf::inf (const std::string& r) throw(std::invalid_argument)
+  inf::inf (const std::string& r)
   {
     operator=(r);
   }
@@ -664,7 +663,7 @@ namespace stlplus
     return *this;
   }
 
-  inf& inf::operator = (const std::string& r) throw(std::invalid_argument)
+  inf& inf::operator = (const std::string& r)
   {
     convert_from_string(r, *this);
     return *this;
@@ -678,7 +677,7 @@ namespace stlplus
 
   ////////////////////////////////////////////////////////////////////////////////
 
-  short inf::to_short(bool truncate) const throw(std::overflow_error)
+  short inf::to_short(bool truncate) const
   {
     short result = 0;
     if (!convert_to_signed(m_data, result))
@@ -687,7 +686,7 @@ namespace stlplus
     return result;
   }
 
-  unsigned short inf::to_unsigned_short(bool truncate) const throw(std::overflow_error)
+  unsigned short inf::to_unsigned_short(bool truncate) const
   {
     unsigned short result = 0;
     if (!convert_to_unsigned(m_data, result))
@@ -696,7 +695,7 @@ namespace stlplus
     return result;
   }
 
-  int inf::to_int(bool truncate) const throw(std::overflow_error)
+  int inf::to_int(bool truncate) const
   {
     int result = 0;
     if (!convert_to_signed(m_data, result))
@@ -705,7 +704,7 @@ namespace stlplus
     return result;
   }
 
-  unsigned inf::to_unsigned(bool truncate) const throw(std::overflow_error)
+  unsigned inf::to_unsigned(bool truncate) const
   {
     unsigned result = 0;
     if (!convert_to_unsigned(m_data, result))
@@ -714,7 +713,7 @@ namespace stlplus
     return result;
   }
 
-  long inf::to_long(bool truncate) const throw(std::overflow_error)
+  long inf::to_long(bool truncate) const
   {
     long result = 0;
     if (!convert_to_signed(m_data, result))
@@ -723,7 +722,7 @@ namespace stlplus
     return result;
   }
 
-  unsigned long inf::to_unsigned_long(bool truncate) const throw(std::overflow_error)
+  unsigned long inf::to_unsigned_long(bool truncate) const
   {
     unsigned long result = 0;
     if (!convert_to_unsigned(m_data, result))
@@ -779,7 +778,7 @@ namespace stlplus
   ////////////////////////////////////////////////////////////////////////////////
   // bitwise operations
 
-  bool inf::bit (unsigned index) const throw(std::out_of_range)
+  bool inf::bit (unsigned index) const
   {
     if (index >= indexable_bits())
       throw std::out_of_range(std::string("stlplus::inf::bit"));
@@ -789,12 +788,12 @@ namespace stlplus
     return (byte(m_data[byte_offset]) & (byte(1) << bit_offset)) != 0;
   }
 
-  bool inf::operator [] (unsigned index) const throw(std::out_of_range)
+  bool inf::operator [] (unsigned index) const
   {
     return bit(index);
   }
 
-  void inf::set (unsigned index)  throw(std::out_of_range)
+  void inf::set (unsigned index)
   {
     if (index >= indexable_bits())
       throw std::out_of_range(std::string("stlplus::inf::set"));
@@ -804,7 +803,7 @@ namespace stlplus
     m_data[byte_offset] |= (byte(1) << bit_offset);
   }
 
-  void inf::clear (unsigned index)  throw(std::out_of_range)
+  void inf::clear (unsigned index)
   {
     if (index >= indexable_bits())
       throw std::out_of_range(std::string("stlplus::inf::clear"));
@@ -814,7 +813,7 @@ namespace stlplus
     m_data[byte_offset] &= (~(byte(1) << bit_offset));
   }
 
-  void inf::preset (unsigned index, bool value)  throw(std::out_of_range)
+  void inf::preset (unsigned index, bool value)
   {
     if (value)
       set(index);
@@ -822,7 +821,7 @@ namespace stlplus
       clear(index);
   }
 
-  inf inf::slice(unsigned low, unsigned high) const throw(std::out_of_range)
+  inf inf::slice(unsigned low, unsigned high) const
   {
     if (low >= indexable_bits())
       throw std::out_of_range(std::string("stlplus::inf::slice: low index"));
@@ -1263,7 +1262,7 @@ namespace stlplus
     left <<= right.bits()-1;
     for (unsigned i = right.bits(); i--; )
     {
-      if (right[i]) 
+      if (right[i])
         operator += (left);
       left >>= 1;
     }
@@ -1284,7 +1283,7 @@ namespace stlplus
   ////////////////////////////////////////////////////////////////////////////////
   // division and remainder operators
 
-  std::pair<inf,inf> inf::divide(const inf& right) const throw(divide_by_zero)
+  std::pair<inf,inf> inf::divide(const inf& right) const
   {
     if (right.zero())
       throw divide_by_zero("stlplus::inf::divide");
@@ -1310,7 +1309,7 @@ namespace stlplus
       // start with the numerator shifted to the far left
       unsigned shift = numerator.bits() - denominator.bits();
       denominator <<= shift;
-      // do the division by repeated subtraction, 
+      // do the division by repeated subtraction,
       for (unsigned i = shift+1; i--; )
       {
         if (remainder >= denominator)
@@ -1321,7 +1320,7 @@ namespace stlplus
         denominator >>= 1;
       }
     }
-    // now adjust the signs 
+    // now adjust the signs
     // x/(-y) == (-x)/y == -(x/y)
     if (numerator_negative != denominator_negative)
       quotient.negate();
@@ -1333,27 +1332,27 @@ namespace stlplus
     return std::pair<inf,inf>(quotient,remainder);
   }
 
-  inf& inf::operator /= (const inf& r) throw(divide_by_zero)
+  inf& inf::operator /= (const inf& r)
   {
     std::pair<inf,inf> result = divide(r);
     operator=(result.first);
     return *this;
   }
 
-  inf inf::operator / (const inf& r) const throw(divide_by_zero)
+  inf inf::operator / (const inf& r) const
   {
     std::pair<inf,inf> result = divide(r);
     return result.first;
   }
 
-  inf& inf::operator %= (const inf& r) throw(divide_by_zero)
+  inf& inf::operator %= (const inf& r)
   {
     std::pair<inf,inf> result = divide(r);
     operator=(result.second);
     return *this;
   }
 
-  inf inf::operator % (const inf& r) const throw(divide_by_zero)
+  inf inf::operator % (const inf& r) const
   {
     std::pair<inf,inf> result = divide(r);
     return result.second;
@@ -1392,7 +1391,7 @@ namespace stlplus
   // string representation and I/O routines
 
   std::string inf::to_string(unsigned radix) const
-    throw(std::invalid_argument)
+
   {
     std::string result;
     convert_to_string(*this, result, radix);
@@ -1400,7 +1399,6 @@ namespace stlplus
   }
 
   inf& inf::from_string(const std::string& value, unsigned radix)
-    throw(std::invalid_argument)
   {
     convert_from_string(value, *this, radix);
     return *this;

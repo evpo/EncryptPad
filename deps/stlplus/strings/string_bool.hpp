@@ -20,17 +20,17 @@ namespace stlplus
 
   ////////////////////////////////////////////////////////////////////////////////
 
+  // exceptions: std::invalid_argument
   std::string bool_to_string(bool i,
                              unsigned radix = 10,
                              radix_display_t display = radix_c_style_or_hash,
-                             unsigned width = 0)
-    throw(std::invalid_argument);
+                             unsigned width = 0);
 
   ////////////////////////////////////////////////////////////////////////////////
 
+  // exceptions: std::invalid_argument
   bool string_to_bool(const std::string& value,
-                      unsigned radix = 0)
-    throw(std::invalid_argument);
+                      unsigned radix = 0);
 
   ////////////////////////////////////////////////////////////////////////////////
 

@@ -8,54 +8,15 @@
 ////////////////////////////////////////////////////////////////////////////////
 #include "string_utilities.hpp"
 #include "string_basic.hpp"
-#include <stdlib.h>
-#include <ctype.h>
-#include <stdarg.h>
-#include <stdio.h>
+#include "string_float.hpp"
+#include "string_int.hpp"
 
 namespace stlplus
 {
 
-  // added as a local copy to break the dependency on the portability library
-  static std::string local_dformat(const char* format, ...) throw(std::invalid_argument)
-  {
-    std::string formatted;
-    va_list args;
-    va_start(args, format);
-#ifdef MSWINDOWS
-    int length = 0;
-    char* buffer = 0;
-    for(int buffer_length = 256; ; buffer_length*=2)
-    {
-      buffer = (char*)malloc(buffer_length);
-      if (!buffer) throw std::invalid_argument("string_utilities");
-      length = _vsnprintf(buffer, buffer_length-1, format, args);
-      if (length >= 0)
-      {
-        buffer[length] = 0;
-        formatted += std::string(buffer);
-        free(buffer);
-        break;
-      }
-      free(buffer);
-    }
-#else
-    char* buffer = 0;
-    int length = vasprintf(&buffer, format, args);
-    if (!buffer) throw std::invalid_argument("string_utilities");
-    if (length >= 0)
-      formatted += std::string(buffer);
-    free(buffer);
-#endif
-    va_end(args);
-    if (length < 0) throw std::invalid_argument("string_utilities");
-    return formatted;
-  }
-
   ////////////////////////////////////////////////////////////////////////////////
 
   std::string pad(const std::string& str, alignment_t alignment, unsigned width, char padch)
-    throw(std::invalid_argument)
   {
     std::string result = str;
     switch(alignment)
@@ -371,25 +332,25 @@ namespace stlplus
       result += '-';
       bytes = -bytes;
     }
-    static const long kB = 1024l;
-    static const long MB = kB * kB;
-    static const long GB = MB * kB;
+    long kB = 1024l;
+    long MB = kB * kB;
+    long GB = MB * kB;
     if (bytes < kB)
-      result += local_dformat("%i", bytes);
+      result += int_to_string(bytes);
     else if (bytes < (10l * kB))
-      result += local_dformat("%.2fk", ((float)bytes / (float)kB));
+      result += double_to_string(((double)bytes / kB), stlplus::display_fixed, 0, 2) + "k";
     else if (bytes < (100l * kB))
-      result += local_dformat("%.1fk", ((float)bytes / (float)kB));
+      result += double_to_string(((double)bytes / kB), stlplus::display_fixed, 0, 1) + "k";
     else if (bytes < MB)
-      result += local_dformat("%.0fk", ((float)bytes / (float)kB));
+      result += double_to_string(((double)bytes / kB), stlplus::display_fixed, 0, 0) + "k";
     else if (bytes < (10l * MB))
-      result += local_dformat("%.2fM", ((float)bytes / (float)MB));
+      result += double_to_string(((double)bytes / MB), stlplus::display_fixed, 0, 2) + "M";
     else if (bytes < (100l * MB))
-      result += local_dformat("%.1fM", ((float)bytes / (float)MB));
+      result += double_to_string(((double)bytes / MB), stlplus::display_fixed, 0, 1) + "M";
     else if (bytes < GB)
-      result += local_dformat("%.0fM", ((float)bytes / (float)MB));
+      result += double_to_string(((double)bytes / MB), stlplus::display_fixed, 0, 0) + "M";
     else
-      result += local_dformat("%.2fG", ((float)bytes / (float)GB));
+      result += double_to_string(((double)bytes / GB), stlplus::display_fixed, 0, 2) + "G";
     return result;
   }
 

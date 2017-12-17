@@ -37,9 +37,11 @@ namespace stlplus
 
   class persistent
   {
+    // exceptions: persistent_dump_failed
   public:
-    virtual void dump(dump_context&amp;) const throw(persistent_dump_failed) = 0;
-    virtual void restore(restore_context&amp;) throw(persistent_restore_failed) = 0;
+    virtual void dump(dump_context&amp;) const  = 0;
+    // exceptions: persistent_restore_failed
+    virtual void restore(restore_context&amp;)  = 0;
     virtual persistent* clone(void) const = 0;
     virtual ~persistent(void) {}
   };

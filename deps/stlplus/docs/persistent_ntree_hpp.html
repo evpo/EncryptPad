@@ -34,43 +34,43 @@ namespace stlplus
 
   // ntree
 
+  // exceptions: persistent_dump_failed
   template&lt;typename T, typename D&gt;
-  void dump_ntree(dump_context&amp;, const ntree&lt;T&gt;&amp; data, D dump_fn)
-    throw(persistent_dump_failed);
+  void dump_ntree(dump_context&amp;, const ntree&lt;T&gt;&amp; data, D dump_fn);
 
+  // exceptions: persistent_restore_failed
   template&lt;typename T, typename R&gt;
-  void restore_ntree(restore_context&amp;, ntree&lt;T&gt;&amp; data, R restore_fn)
-    throw(persistent_restore_failed);
+  void restore_ntree(restore_context&amp;, ntree&lt;T&gt;&amp; data, R restore_fn);
 
   // iterator
 
+  // exceptions: persistent_dump_failed
   template&lt;typename T, typename TRef, typename TPtr&gt;
-  void dump_ntree_iterator(dump_context&amp;, const ntree_iterator&lt;T,TRef,TPtr&gt;&amp;)
-    throw(persistent_dump_failed);
+  void dump_ntree_iterator(dump_context&amp;, const ntree_iterator&lt;T,TRef,TPtr&gt;&amp;);
 
+  // exceptions: persistent_restore_failed
   template&lt;typename T, typename TRef, typename TPtr&gt;
-  void restore_ntree_iterator(restore_context&amp;, ntree_iterator&lt;T,TRef,TPtr&gt;&amp;)
-    throw(persistent_restore_failed);
+  void restore_ntree_iterator(restore_context&amp;, ntree_iterator&lt;T,TRef,TPtr&gt;&amp;);
 
   // prefix iterator
 
+  // exceptions: persistent_dump_failed
   template&lt;typename T, typename TRef, typename TPtr&gt;
-  void dump_ntree_prefix_iterator(dump_context&amp;, const ntree_prefix_iterator&lt;T,TRef,TPtr&gt;&amp;)
-    throw(persistent_dump_failed);
+  void dump_ntree_prefix_iterator(dump_context&amp;, const ntree_prefix_iterator&lt;T,TRef,TPtr&gt;&amp;);
 
+  // exceptions: persistent_restore_failed
   template&lt;typename T, typename TRef, typename TPtr&gt;
-  void restore_ntree_prefix_iterator(restore_context&amp;, ntree_prefix_iterator&lt;T,TRef,TPtr&gt;&amp;)
-    throw(persistent_restore_failed);
+  void restore_ntree_prefix_iterator(restore_context&amp;, ntree_prefix_iterator&lt;T,TRef,TPtr&gt;&amp;);
 
   // postfix iterator
 
+  // exceptions: persistent_dump_failed
   template&lt;typename T, typename TRef, typename TPtr&gt;
-  void dump_ntree_postfix_iterator(dump_context&amp;, const ntree_postfix_iterator&lt;T,TRef,TPtr&gt;&amp;)
-    throw(persistent_dump_failed);
+  void dump_ntree_postfix_iterator(dump_context&amp;, const ntree_postfix_iterator&lt;T,TRef,TPtr&gt;&amp;);
 
+  // exceptions: persistent_restore_failed
   template&lt;typename T, typename TRef, typename TPtr&gt;
-  void restore_ntree_postfix_iterator(restore_context&amp;, ntree_postfix_iterator&lt;T,TRef,TPtr&gt;&amp;)
-    throw(persistent_restore_failed);
+  void restore_ntree_postfix_iterator(restore_context&amp;, ntree_postfix_iterator&lt;T,TRef,TPtr&gt;&amp;);
 
 } // end namespace stlplus
 

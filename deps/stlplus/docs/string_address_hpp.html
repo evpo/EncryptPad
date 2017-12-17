@@ -31,21 +31,7 @@
 namespace stlplus
 {
 
-  ////////////////////////////////////////////////////////////////////////////////
-
-  std::string address_to_string(const void*,
-                                unsigned radix = 16,
-                                radix_display_t display = radix_c_style_or_hash,
-                                unsigned width = 0)
-    throw(std::invalid_argument);
-
-  ////////////////////////////////////////////////////////////////////////////////
-
-  void* string_to_address(const std::string&amp; value,
-                          unsigned radix = 0)
-    throw(std::invalid_argument);
-
-  ////////////////////////////////////////////////////////////////////////////////
+  // addresses are displayed as integers so these functions have been moved to string_int.hpp
 
 } // end namespace stlplus
 

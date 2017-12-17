@@ -18,7 +18,7 @@ namespace stlplus
                     S3 print_fn3,
                     const std::string& separator)
   {
-    
+
     print_fn1(device, values.first);
     device << separator;
     print_fn2(device, values.second);
@@ -27,4 +27,3 @@ namespace stlplus
   }
 
 } // end namespace stlplus
-

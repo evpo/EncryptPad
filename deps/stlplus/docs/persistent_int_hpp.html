@@ -29,35 +29,55 @@
 namespace stlplus
 {
 
-  void dump_char(dump_context&amp;, const char&amp; data) throw(persistent_dump_failed);
-  void restore_char(restore_context&amp;, char&amp; data) throw(persistent_restore_failed);
+  // exceptions: persistent_dump_failed
+  void dump_char(dump_context&amp;, const char&amp; data) ;
+  // exceptions: persistent_restore_failed
+  void restore_char(restore_context&amp;, char&amp; data) ;
 
-  void dump_signed_char(dump_context&amp;, const signed char&amp; data) throw(persistent_dump_failed);
-  void restore_signed_char(restore_context&amp;, signed char&amp; data) throw(persistent_restore_failed);
+  // exceptions: persistent_dump_failed
+  void dump_signed_char(dump_context&amp;, const signed char&amp; data) ;
+  // exceptions: persistent_restore_failed
+  void restore_signed_char(restore_context&amp;, signed char&amp; data) ;
 
-  void dump_unsigned_char(dump_context&amp;, const unsigned char&amp; data) throw(persistent_dump_failed);
-  void restore_unsigned_char(restore_context&amp;, unsigned char&amp; data) throw(persistent_restore_failed);
+  // exceptions: persistent_dump_failed
+  void dump_unsigned_char(dump_context&amp;, const unsigned char&amp; data) ;
+  // exceptions: persistent_restore_failed
+  void restore_unsigned_char(restore_context&amp;, unsigned char&amp; data) ;
 
-  void dump_short(dump_context&amp;, const short&amp; data) throw(persistent_dump_failed);
-  void restore_short(restore_context&amp;, short&amp; data) throw(persistent_restore_failed);
+  // exceptions: persistent_dump_failed
+  void dump_short(dump_context&amp;, const short&amp; data) ;
+  // exceptions: persistent_restore_failed
+  void restore_short(restore_context&amp;, short&amp; data) ;
 
-  void dump_unsigned_short(dump_context&amp;, const unsigned short&amp; data) throw(persistent_dump_failed);
-  void restore_unsigned_short(restore_context&amp;, unsigned short&amp; data) throw(persistent_restore_failed);
+  // exceptions: persistent_dump_failed
+  void dump_unsigned_short(dump_context&amp;, const unsigned short&amp; data) ;
+  // exceptions: persistent_restore_failed
+  void restore_unsigned_short(restore_context&amp;, unsigned short&amp; data) ;
 
-  void dump_int(dump_context&amp;, const int&amp; data) throw(persistent_dump_failed);
-  void restore_int(restore_context&amp;, int&amp; data) throw(persistent_restore_failed);
+  // exceptions: persistent_dump_failed
+  void dump_int(dump_context&amp;, const int&amp; data) ;
+  // exceptions: persistent_restore_failed
+  void restore_int(restore_context&amp;, int&amp; data) ;
 
-  void dump_unsigned(dump_context&amp;, const unsigned&amp; data) throw(persistent_dump_failed);
-  void restore_unsigned(restore_context&amp;, unsigned&amp; data) throw(persistent_restore_failed);
+  // exceptions: persistent_dump_failed
+  void dump_unsigned(dump_context&amp;, const unsigned&amp; data) ;
+  // exceptions: persistent_restore_failed
+  void restore_unsigned(restore_context&amp;, unsigned&amp; data) ;
 
-  void dump_long(dump_context&amp;, const long&amp; data) throw(persistent_dump_failed);
-  void restore_long(restore_context&amp;, long&amp; data) throw(persistent_restore_failed);
+  // exceptions: persistent_dump_failed
+  void dump_long(dump_context&amp;, const long&amp; data) ;
+  // exceptions: persistent_restore_failed
+  void restore_long(restore_context&amp;, long&amp; data) ;
 
-  void dump_unsigned_long(dump_context&amp;, const unsigned long&amp; data) throw(persistent_dump_failed);
-  void restore_unsigned_long(restore_context&amp;, unsigned long&amp; data) throw(persistent_restore_failed);
+  // exceptions: persistent_dump_failed
+  void dump_unsigned_long(dump_context&amp;, const unsigned long&amp; data) ;
+  // exceptions: persistent_restore_failed
+  void restore_unsigned_long(restore_context&amp;, unsigned long&amp; data) ;
 
-  void dump_size_t(dump_context&amp;, const size_t&amp; data) throw(persistent_dump_failed);
-  void restore_size_t(restore_context&amp;, size_t&amp; data) throw(persistent_restore_failed);
+  // exceptions: persistent_dump_failed
+  void dump_size_t(dump_context&amp;, const size_t&amp; data) ;
+  // exceptions: persistent_restore_failed
+  void restore_size_t(restore_context&amp;, size_t&amp; data) ;
 
   ////////////////////////////////////////////////////////////////////////////////
 

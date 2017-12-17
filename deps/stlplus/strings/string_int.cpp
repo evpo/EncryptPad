@@ -17,7 +17,7 @@ namespace stlplus
   // character mappings
 
   static char to_char [] = "0123456789abcdefghijklmnopqrstuvwxyz";
-  static int from_char [] = 
+  static int from_char [] =
   {
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
@@ -44,7 +44,6 @@ namespace stlplus
   // signed version of the generic image generation function for all integer types
   template<typename T>
   static std::string simage (T i, unsigned radix, radix_display_t display, unsigned width)
-    throw(std::invalid_argument)
   {
     if (radix < 2 || radix > 36)
       throw std::invalid_argument("invalid radix value " + unsigned_to_string(radix));
@@ -318,7 +317,6 @@ namespace stlplus
   // unsigned version
   template<typename T>
   static std::string uimage (T i, unsigned radix, radix_display_t display, unsigned width)
-    throw(std::invalid_argument)
   {
     if (radix < 2 || radix > 36)
       throw std::invalid_argument("invalid radix value " + unsigned_to_string(radix));
@@ -582,55 +580,46 @@ namespace stlplus
   // exported conversions to string
 
   std::string short_to_string(short i, unsigned radix, radix_display_t display, unsigned width)
-    throw(std::invalid_argument)
   {
     return simage(i, radix, display, width);
   }
 
   std::string unsigned_short_to_string(unsigned short i, unsigned radix, radix_display_t display, unsigned width)
-    throw(std::invalid_argument)
   {
     return uimage(i, radix, display, width);
   }
 
   std::string int_to_string(int i, unsigned radix, radix_display_t display, unsigned width)
-    throw(std::invalid_argument)
   {
     return simage(i, radix, display, width);
   }
 
   std::string unsigned_to_string(unsigned i, unsigned radix, radix_display_t display, unsigned width)
-    throw(std::invalid_argument)
   {
     return uimage(i, radix, display, width);
   }
 
   std::string long_to_string(long i, unsigned radix, radix_display_t display, unsigned width)
-    throw(std::invalid_argument)
   {
     return simage(i, radix, display, width);
   }
 
   std::string unsigned_long_to_string(unsigned long i, unsigned radix, radix_display_t display, unsigned width)
-    throw(std::invalid_argument)
   {
     return uimage(i, radix, display, width);
   }
 
   std::string longlong_to_string(long long i, unsigned radix, radix_display_t display, unsigned width)
-    throw(std::invalid_argument)
   {
     return simage(i, radix, display, width);
   }
 
   std::string unsigned_longlong_to_string(unsigned long long i, unsigned radix, radix_display_t display, unsigned width)
-    throw(std::invalid_argument)
   {
     return uimage(i, radix, display, width);
   }
 
   std::string address_to_string(const void* i, unsigned radix, radix_display_t display, unsigned width)
-    throw(std::invalid_argument)
   {
     return simage((std::ptrdiff_t)i, radix, display, width);
   }
@@ -643,7 +632,6 @@ namespace stlplus
   // signed version
   template<typename T>
   static T svalue(const std::string& str, unsigned radix)
-    throw(std::invalid_argument)
   {
     if (radix != 0 && (radix < 2 || radix > 36))
       throw std::invalid_argument("invalid radix value " + unsigned_to_string(radix));
@@ -869,7 +857,6 @@ namespace stlplus
   // unsigned version
   template<typename T>
   static T uvalue(const std::string& str, unsigned radix)
-    throw(std::invalid_argument)
   {
     if (radix != 0 && (radix < 2 || radix > 36))
       throw std::invalid_argument("invalid radix value " + unsigned_to_string(radix));
@@ -1095,43 +1082,36 @@ namespace stlplus
   // exported functions
 
   short string_to_short(const std::string& str, unsigned radix)
-    throw(std::invalid_argument)
   {
     return svalue<short>(str, radix);
   }
 
   unsigned short string_to_unsigned_short(const std::string& str, unsigned radix)
-    throw(std::invalid_argument)
   {
     return uvalue<unsigned short>(str, radix);
   }
 
   int string_to_int(const std::string& str, unsigned radix)
-    throw(std::invalid_argument)
   {
     return svalue<int>(str, radix);
   }
 
   unsigned string_to_unsigned(const std::string& str, unsigned radix)
-    throw(std::invalid_argument)
   {
     return uvalue<unsigned>(str, radix);
   }
 
   long string_to_long(const std::string& str, unsigned radix)
-    throw(std::invalid_argument)
   {
     return svalue<long>(str, radix);
   }
 
   unsigned long string_to_unsigned_long(const std::string& str, unsigned radix)
-    throw(std::invalid_argument)
   {
     return uvalue<unsigned long>(str, radix);
   }
 
   void* string_to_address(const std::string& str, unsigned radix)
-    throw(std::invalid_argument)
   {
     return (void*)svalue<std::ptrdiff_t>(str, radix);
   }

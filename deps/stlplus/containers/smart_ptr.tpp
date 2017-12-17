@@ -114,7 +114,7 @@ namespace stlplus
 
   // create a pointer containing a *copy* of the object pointer
   template <typename T, typename C>
-  smart_ptr_base<T,C>::smart_ptr_base(const T& data) throw(illegal_copy) :
+  smart_ptr_base<T,C>::smart_ptr_base(const T& data)  :
     m_holder(new smart_ptr_holder<T>)
   {
     m_holder->set(C()(data));
@@ -141,7 +141,7 @@ namespace stlplus
 
 	// assignment operator - required, else the output of GCC suffers segmentation faults
   template <typename T, typename C>
-  smart_ptr_base<T,C>& smart_ptr_base<T,C>::operator=(const smart_ptr_base<T,C>& r) 
+  smart_ptr_base<T,C>& smart_ptr_base<T,C>::operator=(const smart_ptr_base<T,C>& r)
   {
     alias(r);
     return *this;
@@ -189,28 +189,28 @@ namespace stlplus
   // dereference operators and functions
 
   template <typename T, typename C>
-  T& smart_ptr_base<T,C>::operator*(void) throw(null_dereference)
+  T& smart_ptr_base<T,C>::operator*(void)
   {
     if (m_holder->null()) throw null_dereference("null pointer dereferenced in smart_ptr::operator*");
     return m_holder->value();
   }
 
   template <typename T, typename C>
-  const T& smart_ptr_base<T,C>::operator*(void) const throw(null_dereference)
+  const T& smart_ptr_base<T,C>::operator*(void) const
   {
     if (m_holder->null()) throw null_dereference("null pointer dereferenced in smart_ptr::operator*");
     return m_holder->value();
   }
 
   template <typename T, typename C>
-  T* smart_ptr_base<T,C>::operator->(void) throw(null_dereference)
+  T* smart_ptr_base<T,C>::operator->(void)
   {
     if (m_holder->null()) throw null_dereference("null pointer dereferenced in smart_ptr::operator->");
     return m_holder->pointer();
   }
 
   template <typename T, typename C>
-  const T* smart_ptr_base<T,C>::operator->(void) const throw(null_dereference)
+  const T* smart_ptr_base<T,C>::operator->(void) const
   {
     if (m_holder->null()) throw null_dereference("null pointer dereferenced in smart_ptr::operator->");
     return m_holder->pointer();
@@ -220,20 +220,20 @@ namespace stlplus
   // explicit function forms of the above assignment dereference operators
 
   template <typename T, typename C>
-  void smart_ptr_base<T,C>::set_value(const T& data) throw(illegal_copy)
+  void smart_ptr_base<T,C>::set_value(const T& data)
   {
     m_holder->set(C()(data));
   }
 
   template <typename T, typename C>
-  T& smart_ptr_base<T,C>::value(void) throw(null_dereference)
+  T& smart_ptr_base<T,C>::value(void)
   {
     if (m_holder->null()) throw null_dereference("null pointer dereferenced in smart_ptr::value");
     return m_holder->value();
   }
 
   template <typename T, typename C>
-  const T& smart_ptr_base<T,C>::value(void) const throw(null_dereference)
+  const T& smart_ptr_base<T,C>::value(void) const
   {
     if (m_holder->null()) throw null_dereference("null pointer dereferenced in smart_ptr::value");
     return m_holder->value();
@@ -299,7 +299,7 @@ namespace stlplus
   }
 
   template <typename T, typename C>
-  void smart_ptr_base<T,C>::make_unique(void) throw(illegal_copy)
+  void smart_ptr_base<T,C>::make_unique(void)
   {
     if (m_holder->count() > 1)
     {
@@ -313,7 +313,7 @@ namespace stlplus
   }
 
   template <typename T, typename C>
-  void smart_ptr_base<T,C>::copy(const smart_ptr_base<T,C>& data) throw(illegal_copy)
+  void smart_ptr_base<T,C>::copy(const smart_ptr_base<T,C>& data)
   {
     alias(data);
     make_unique();
@@ -348,4 +348,3 @@ namespace stlplus
   ////////////////////////////////////////////////////////////////////////////////
 
 } // end namespace stlplus
-

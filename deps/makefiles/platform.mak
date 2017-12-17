@@ -22,7 +22,7 @@
 ################################################################################
 
 # start by identifying the operating system
-OS     := $(shell uname)
+OS     := $(shell uname -o)
 
 # on most platforms "uname -m" gives the CPU name
 # However, see below for situations where this is overridden
@@ -40,13 +40,6 @@ PLATFORM  := MINGW
 WINDOWS := on
 endif
 
-# MinGW build on Windows
-# this is a native Windows build
-ifneq ($(findstring MINGW,$(OS)),)
-PLATFORM  := MINGW
-WINDOWS := on
-endif
-
 # Cygwin build on Windows
 # this is a Unix emulation running on Windows so is classed as Unix for building purposes
 ifneq ($(findstring Cygwin,$(OS)),)
@@ -57,7 +50,7 @@ endif
 # Unix builds
 
 # Build on GNU/Linux
-ifneq ($(findstring Linux,$(OS)),)
+ifneq ($(findstring GNU/Linux,$(OS)),)
 PLATFORM  := GNULINUX
 UNIX := on
 endif
@@ -124,11 +117,7 @@ endif # GCOV
 endif # GPROF
 endif # RELEASE
 
-################################################################################
 # define the name of the subdirectory so that different builds have different subdirectories
-
 SUBDIR := $(BUILD)-$(VARIANT)
 
 ################################################################################
-
-

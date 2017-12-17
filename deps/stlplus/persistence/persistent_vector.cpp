@@ -12,7 +12,7 @@
 // specialisation for a vector of bool which has a different implementation to a vector of anything else
 
 void stlplus::dump_vector_bool(stlplus::dump_context& context, const std::vector<bool>& data)
-  throw(stlplus::persistent_dump_failed)
+
 {
   stlplus::dump_size_t(context,data.size());
   size_t size = data.size();
@@ -33,7 +33,7 @@ void stlplus::dump_vector_bool(stlplus::dump_context& context, const std::vector
 }
 
 void stlplus::restore_vector_bool(stlplus::restore_context& context, std::vector<bool>& data)
-  throw(stlplus::persistent_restore_failed)
+
 {
   size_t size = 0;
   stlplus::restore_size_t(context,size);

@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-<title>STLplus Library Collection - persistence/persistent_shortcuts.hpp - Data Persistence Shortcut Functions</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STLplus C++ Library Collection - persistence/persistent_shortcuts.hpp - Data Persistence Shortcut Functions</title>
 <link rel="icon" href="plus.png" type="image/png"/>
 <meta name="Author" content="Andy Rushton"/>
 <link rel="stylesheet" media="screen" type="text/css" href="screen.css"/>
@@ -13,9 +14,7 @@
 <div id="header">
 
 <div id="headerBanner">
-<h1>The
-<span style="color:red">S</span><span style="color:blue">T</span><span style="color:green">L</span><span style="color:#ecec80">plus</span>
-C++ Library Collection</h1>
+<h1>STLplus C++ Library Collection</h1>
 </div>
 
 <div id="headerNavigation">
@@ -70,12 +69,10 @@ dump_to_file/restore_from_file:</p>
 
 <pre class="cpp">
 template&lt;typename T, class D&gt;
-void stlplus::dump_to_file(const T&amp; source, const std::string&amp; filename, D dump_fn, dump_context::installer installer)
-  throw(stlplus::persistent_dump_failed);
+void stlplus::dump_to_file(const T&amp; source, const std::string&amp; filename, D dump_fn, dump_context::installer installer);
 
 template&lt;typename T, class R&gt;
-void stlplus::restore_from_file(const std::string&amp; filename, T&amp; result, R restore_fn, restore_context::installer installer)
-  throw(stlplus::persistent_restore_failed);
+void stlplus::restore_from_file(const std::string&amp; filename, T&amp; result, R restore_fn, restore_context::installer installer);
 </pre>
 
 <p>To dump a data structure to a file, simply call dump_to_file with the first argument being the
@@ -86,12 +83,12 @@ polymorphic types to register.</p>
 
 <p>Similarly, to restore the same data structure, simply call restore_from_file with the name of the
 file as the first argument (conceptually, the first argument is the source and the second the
-destination), the data structure to be restored as the second and the restore function the third. 
+destination), the data structure to be restored as the second and the restore function the third.
 Again the fourth argument is an installer function for restoring polymorphic types and may be
 null.</p>
 
 <p>As an example of how to use these functions, see the <a
-href="persistent_examples.html#shortcuts">examples page</a>.</p>
+                                                          href="persistent_examples.html#shortcuts">examples page</a>.</p>
 
 
 <h2 id="string">String-Based Persistence</h2>
@@ -104,12 +101,10 @@ string:</p>
 
 <pre class="cpp">
 template&lt;typename T, class D&gt;
-void stlplus::dump_to_string(const T&amp; source, std::string&amp; result, D dump_fn, dump_context::installer installer)
-  throw(stlplus::persistent_dump_failed);
+void stlplus::dump_to_string(const T&amp; source, std::string&amp; result, D dump_fn, dump_context::installer installer);
 
 template&lt;typename T, class R&gt;
-void stlplus::restore_from_string(const std::string&amp; source, T&amp; result, R restore_fn, restore_context::installer installer)
-  throw(stlplus::persistent_restore_failed);
+void stlplus::restore_from_string(const std::string&amp; source, T&amp; result, R restore_fn, restore_context::installer installer);
 </pre>
 
 <p>This is very similar to the previous section's file-based persistence,
@@ -139,12 +134,10 @@ common ones of files and in-memory strings.</p>
 
 <pre class="cpp">
 template&lt;typename T, class D&gt;
-void stlplus::dump_to_device(const T&amp; source, std::ostream&amp; result, D dump_fn, dump_context::installer installer)
-  throw(stlplus::persistent_dump_failed);
+void stlplus::dump_to_device(const T&amp; source, std::ostream&amp; result, D dump_fn, dump_context::installer installer);
 
 template&lt;typename T, class R&gt;
-void stlplus::restore_from_device(std::istream&amp; source, T&amp; result, R restore_fn, restore_context::installer installer)
-  throw(stlplus::persistent_restore_failed);
+void stlplus::restore_from_device(std::istream&amp; source, T&amp; result, R restore_fn, restore_context::installer installer);
 </pre>
 
 <p>To dump a data structure to an output device, simply call dump_to_device

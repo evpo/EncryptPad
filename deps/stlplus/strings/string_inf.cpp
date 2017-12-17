@@ -24,7 +24,7 @@ namespace stlplus
   ////////////////////////////////////////////////////////////////////////////////
 
   static char to_char [] = "0123456789abcdefghijklmnopqrstuvwxyz";
-  static int from_char [] = 
+  static int from_char [] =
   {
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
@@ -47,7 +47,6 @@ namespace stlplus
   ////////////////////////////////////////////////////////////////////////////////
 
   std::string inf_to_string(const stlplus::inf& data, unsigned radix, radix_display_t display, unsigned width)
-    throw(std::invalid_argument)
   {
     std::string result;
     if (radix < 2 || radix > 36)
@@ -315,7 +314,7 @@ namespace stlplus
   ////////////////////////////////////////////////////////////////////////////////
   // Conversions FROM string
 
-  inf string_to_inf(const std::string& str, unsigned radix) throw(std::invalid_argument)
+  inf string_to_inf(const std::string& str, unsigned radix)
   {
     inf result;
     if (radix != 0 && (radix < 2 || radix > 36))

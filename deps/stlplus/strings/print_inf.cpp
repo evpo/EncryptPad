@@ -25,7 +25,6 @@ namespace stlplus
                  unsigned radix,
                  radix_display_t display,
                  unsigned width)
-    throw(std::invalid_argument)
   {
     device << inf_to_string(data, radix, display, width);
   }

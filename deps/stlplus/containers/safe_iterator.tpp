@@ -14,12 +14,12 @@ namespace stlplus
 
   public:
 
-    safe_iterator_body(const O* owner, N* node) throw() : 
+    safe_iterator_body(const O* owner, N* node)  : 
       m_owner(owner), m_node(node), m_count(1)
       {
       }
 
-    ~safe_iterator_body(void) throw()
+    ~safe_iterator_body(void) 
       {
         m_owner = 0;
         m_node = 0;
@@ -41,12 +41,12 @@ namespace stlplus
         return m_count == 0;
       }
 
-    N* node(void) const throw()
+    N* node(void) const 
       {
         return m_node;
       }
 
-    const O* owner(void) const throw()
+    const O* owner(void) const 
       {
         return m_owner;
       }
@@ -56,44 +56,44 @@ namespace stlplus
         m_owner = owner;
       }
 
-    bool equal(const safe_iterator_body<O,N>* right) const throw()
+    bool equal(const safe_iterator_body<O,N>* right) const 
       {
         return m_node == right->m_node;
       }
 
-    int compare(const safe_iterator_body<O,N>* right) const throw()
+    int compare(const safe_iterator_body<O,N>* right) const 
       {
         if (m_node == right->m_node) return 0;
         return (m_node < right->m_node) ? -1 : 1;
       }
 
-    bool null(void) const throw()
+    bool null(void) const 
       {
         return m_owner == 0;
       }
 
-    bool end(void) const throw()
+    bool end(void) const 
       {
         return m_owner != 0 && m_node == 0;
       }
 
-    bool valid(void) const throw()
+    bool valid(void) const 
       {
         return m_owner != 0 && m_node != 0;
       }
 
-    void set_end(void) throw()
+    void set_end(void) 
       {
         m_node = 0;
       }
 
-    void set_null(void) throw()
+    void set_null(void) 
       {
         m_owner = 0;
         m_node = 0;
       }
 
-    void assert_valid(void) const throw(null_dereference,end_dereference)
+    void assert_valid(void) const 
       {
         if (null())
           throw null_dereference("stlplus::safe_iterator: dereferencing null iterator");
@@ -101,13 +101,13 @@ namespace stlplus
           throw end_dereference("stlplus::safe_iterator: dereferencing end iterator");
       }
 
-    void assert_non_null(void) const throw(null_dereference)
+    void assert_non_null(void) const 
       {
         if (null())
           throw null_dereference("stlplus::safe_iterator: dereferencing null iterator");
       }
 
-    void assert_owner(const O* owner) const throw(wrong_object)
+    void assert_owner(const O* owner) const 
       {
         if (!owned_by(owner))
           throw wrong_object("stlplus::safe_iterator: using iterator with wrong object");
@@ -126,7 +126,7 @@ namespace stlplus
 
   // construct a valid iterator
   template<typename O, typename N>
-  master_iterator<O,N>::master_iterator(const O* owner, N* node) throw() :
+  master_iterator<O,N>::master_iterator(const O* owner, N* node)  :
     m_body(new safe_iterator_body<O,N>(owner,node))
   {
   }
@@ -134,7 +134,7 @@ namespace stlplus
   // destructor - disconnect all iterators from the node
   // this usually happens when the node is deleted and must invalidate all aliases
   template<typename O, typename N>
-  master_iterator<O,N>::~master_iterator(void) throw()
+  master_iterator<O,N>::~master_iterator(void) 
   {
     m_body->set_end();
     if(m_body->decrement())
@@ -146,13 +146,13 @@ namespace stlplus
 
   // dereference
   template<typename O, typename N>
-  N* master_iterator<O,N>::node(void) const throw()
+  N* master_iterator<O,N>::node(void) const 
   {
     return m_body->node();
   }
 
   template<typename O, typename N>
-  const O* master_iterator<O,N>::owner(void) const throw()
+  const O* master_iterator<O,N>::owner(void) const 
   {
     return m_body->owner();
   }
@@ -160,7 +160,7 @@ namespace stlplus
   // when you move a node from one owner to another, call this on the node's iterator
   // this effectively moves all iterators to the node so that they are owned by the new owner too
   template<typename O, typename N>
-  void master_iterator<O,N>::change_owner(const O* owner) throw()
+  void master_iterator<O,N>::change_owner(const O* owner) 
   {
     m_body->change_owner(owner);
   }
@@ -172,14 +172,14 @@ namespace stlplus
   // construct a null iterator
   // later assignment of a valid iterator to this is done by using step
   template<typename O, typename N>
-  safe_iterator<O,N>::safe_iterator(void) throw() : 
+  safe_iterator<O,N>::safe_iterator(void)  : 
     m_body(new safe_iterator_body<O,N>(0,0))
   {
   }
 
   // construct a valid iterator by aliasing from the owner node's master iterator
   template<typename O, typename N>
-  safe_iterator<O,N>::safe_iterator(const master_iterator<O,N>& r) throw() :
+  safe_iterator<O,N>::safe_iterator(const master_iterator<O,N>& r)  :
     m_body(0)
   {
     m_body = r.m_body;
@@ -188,7 +188,7 @@ namespace stlplus
 
   // construct a valid iterator by aliasing from the owner node's master iterator
   template<typename O, typename N>
-  safe_iterator<O,N>::safe_iterator(const safe_iterator<O,N>& r) throw() :
+  safe_iterator<O,N>::safe_iterator(const safe_iterator<O,N>& r)  :
     m_body(0)
   {
     m_body = r.m_body;
@@ -197,7 +197,7 @@ namespace stlplus
 
   // assignment implements dealiasing followed by aliasing
   template<typename O, typename N>
-  safe_iterator<O,N>& safe_iterator<O,N>::operator=(const safe_iterator<O,N>& r) throw()
+  safe_iterator<O,N>& safe_iterator<O,N>::operator=(const safe_iterator<O,N>& r) 
   {
     if (m_body != r.m_body)
     {
@@ -211,7 +211,7 @@ namespace stlplus
 
   // destructor - implements dealiasing
   template<typename O, typename N>
-  safe_iterator<O,N>::~safe_iterator(void) throw()
+  safe_iterator<O,N>::~safe_iterator(void) 
   {
     if(m_body->decrement())
     {
@@ -224,7 +224,7 @@ namespace stlplus
   // increment/decrement operation
   // implements dealiasing followed by aliasing
   template<typename O, typename N>
-  void safe_iterator<O,N>::set(const master_iterator<O,N>& r) throw()
+  void safe_iterator<O,N>::set(const master_iterator<O,N>& r) 
   {
     if (m_body != r.m_body)
     {
@@ -237,13 +237,13 @@ namespace stlplus
 
   // dereference
   template<typename O, typename N>
-  N* safe_iterator<O,N>::node(void) const throw()
+  N* safe_iterator<O,N>::node(void) const 
   {
     return m_body->node();
   }
 
   template<typename O, typename N>
-  const O* safe_iterator<O,N>::owner(void) const throw()
+  const O* safe_iterator<O,N>::owner(void) const 
   {
     return m_body->owner();
   }
@@ -251,7 +251,7 @@ namespace stlplus
   // change to a null iterator - i.e. one that doees not belong to any object
   // this does not affect any other iterators pointing to the same node
   template<typename O, typename N>
-  void safe_iterator<O,N>::set_null(void) throw()
+  void safe_iterator<O,N>::set_null(void) 
   {
     if (m_body->count() == 1)
     {
@@ -273,14 +273,14 @@ namespace stlplus
 
   // construct an end iterator
   template<typename O, typename N>
-  safe_iterator<O,N>::safe_iterator(const O* owner) throw() :
+  safe_iterator<O,N>::safe_iterator(const O* owner)  :
     m_body(new safe_iterator_body<O,N>(owner,0))
   {
   }
 
   // change to an end iterator - e.g. as a result of incrementing off the end
   template<typename O, typename N>
-  void safe_iterator<O,N>::set_end(void) throw()
+  void safe_iterator<O,N>::set_end(void) 
   {
     if (m_body->count() == 1)
     {
@@ -300,35 +300,35 @@ namespace stlplus
 
   // comparison
   template<typename O, typename N>
-  bool safe_iterator<O,N>::equal(const safe_iterator<O,N>& right) const throw()
+  bool safe_iterator<O,N>::equal(const safe_iterator<O,N>& right) const 
   {
     if (m_body == right.m_body) return true;
     return m_body->equal(right.m_body);
   }
 
   template<typename O, typename N>
-  int safe_iterator<O,N>::compare(const safe_iterator<O,N>& right) const throw()
+  int safe_iterator<O,N>::compare(const safe_iterator<O,N>& right) const 
   {
     return m_body->compare(right.m_body);
   }
 
   // a null iterator is one that has not been initialised with a value yet
   template<typename O, typename N>
-  bool safe_iterator<O,N>::null(void) const throw()
+  bool safe_iterator<O,N>::null(void) const 
   {
     return m_body->null();
   }
 
   // an end iterator is one that points to the end element of the list of nodes
   template<typename O, typename N>
-  bool safe_iterator<O,N>::end(void) const throw()
+  bool safe_iterator<O,N>::end(void) const 
   {
     return m_body->end();
   }
 
   // a valid iterator is one that can be dereferenced
   template<typename O, typename N>
-  bool safe_iterator<O,N>::valid(void) const throw()
+  bool safe_iterator<O,N>::valid(void) const 
   {
     return m_body->valid();
   }
@@ -341,21 +341,21 @@ namespace stlplus
 
   // check the rules for a valid iterator
   template<typename O, typename N>
-  void safe_iterator<O,N>::assert_valid(const O* owner) const throw(wrong_object,null_dereference,end_dereference)
+  void safe_iterator<O,N>::assert_valid(const O* owner) const 
   {
     m_body->assert_valid();
     if (owner) m_body->assert_owner(owner);
   }
 
   template<typename O, typename N>
-  void safe_iterator<O,N>::assert_non_null(const O* owner) const throw(wrong_object,null_dereference)
+  void safe_iterator<O,N>::assert_non_null(const O* owner) const 
   {
     m_body->assert_non_null();
     if (owner) m_body->assert_owner(owner);
   }
 
   template<typename O, typename N>
-  void safe_iterator<O,N>::assert_owner(const O* owner) const throw(wrong_object)
+  void safe_iterator<O,N>::assert_owner(const O* owner) const 
   {
     m_body->assert_owner(owner);
   }

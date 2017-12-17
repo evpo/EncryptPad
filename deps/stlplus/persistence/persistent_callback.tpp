@@ -19,7 +19,6 @@ namespace stlplus
 
   template<typename T>
   void dump_callback(dump_context& context, const T* const data)
-    throw(persistent_dump_failed)
   {
     try
     {
@@ -50,7 +49,6 @@ namespace stlplus
 
   template<typename T>
   void restore_callback(restore_context& context, T*& data)
-    throw(persistent_restore_failed)
   {
     try
     {

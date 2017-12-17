@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-<title>STLplus Library Collection - portability/tcp_sockets.hpp - Platform-Independent TCP Internet Classes</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STLplus C++ Library Collection - portability/tcp_sockets.hpp - Platform-Independent TCP Internet Classes</title>
 <link rel="icon" href="plus.png" type="image/png"/>
 <meta name="Author" content="Andy Rushton"/>
 <link rel="stylesheet" media="screen" type="text/css" href="screen.css"/>
@@ -13,9 +14,7 @@
 <div id="header">
 
 <div id="headerBanner">
-<h1>The
-<span style="color:red">S</span><span style="color:blue">T</span><span style="color:green">L</span><span style="color:#ecec80">plus</span>
-C++ Library Collection</h1>
+<h1>STLplus C++ Library Collection</h1>
 </div>
 
 <div id="headerNavigation">
@@ -147,7 +146,7 @@ separated out from the actual connection process. The second and third argument,
 operation of the function, is the same as the previous initialisation function.</p>
 
 <p>The TCP client class supports assignment. This is done using a <a
-href="smart_ptr.html">smart pointer</a> to the underlying data structures. Thus,
+                                                                    href="smart_ptr.html">smart pointer</a> to the underlying data structures. Thus,
 when you assign TCP clients, you simply create multiple pointers to the same
 data structure. There is no way of having more than one client class for a
 single connection.</p>
@@ -364,7 +363,7 @@ client requests to allow to be queued before rejecting connections. This may be 
 any incoming requests while processing a connection will be rejected.</p>
 
 <p>The TCP server class supports assignment. This is done using a <a
-href="smart_ptr.html">smart pointer</a> to the underlying data structures. Thus,
+                                                                    href="smart_ptr.html">smart pointer</a> to the underlying data structures. Thus,
 when you assign TCP servers, you simply create multiple pointers to the same
 data structure as with the TCP client.</p>
 
@@ -561,7 +560,7 @@ int server(std::vector&lt;std::string&gt; values, int port, const std::string&am
             }
           }
           request++;
-        }            
+        }
       }
       // just check for client having exited
       if (!client.tick())
@@ -651,7 +650,7 @@ int client(std::vector&lt;std::string&gt; values, int port)
           ++errors;
         }
         request++;
-      }            
+      }
     }
     if (request &gt;= values.size())
     {

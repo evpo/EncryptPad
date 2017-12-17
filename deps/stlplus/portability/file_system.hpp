@@ -156,7 +156,7 @@ namespace stlplus
   std::string folder_append_separator(const std::string& folder);
   // undo the above to give a simplified folder with no trailing separator
   std::string folder_remove_end_separator(const std::string& folder);
-  
+
   ////////////////////////////////////////////////////////////////////////////////
   // access functions split a filespec into its elements
 

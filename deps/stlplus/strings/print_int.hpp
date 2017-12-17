@@ -38,61 +38,61 @@ namespace stlplus
   // For example, using the hash representation of 0 in hex with width=4 gives:
   // 16#0000 - so there's 4 digits in the number part
 
+  // exceptions: std::invalid_argument
   void print_short(std::ostream& device, short i,
                    unsigned radix = 10,
                    radix_display_t display = radix_c_style_or_hash,
-                   unsigned width = 0)
-    throw(std::invalid_argument);
+                   unsigned width = 0);
 
+  // exceptions: std::invalid_argument
   void print_unsigned_short(std::ostream& device, unsigned short i,
                             unsigned radix = 10,
                             radix_display_t display = radix_c_style_or_hash,
-                            unsigned width = 0)
-    throw(std::invalid_argument);
+                            unsigned width = 0);
 
+  // exceptions: std::invalid_argument
   void print_int(std::ostream& device, int i,
                  unsigned radix = 10,
                  radix_display_t display = radix_c_style_or_hash,
-                 unsigned width = 0)
-    throw(std::invalid_argument);
+                 unsigned width = 0);
 
+  // exceptions: std::invalid_argument
   void print_unsigned(std::ostream& device, unsigned i,
                       unsigned radix = 10,
                       radix_display_t display = radix_c_style_or_hash,
-                      unsigned width = 0)
-    throw(std::invalid_argument);
+                      unsigned width = 0);
 
+  // exceptions: std::invalid_argument
   void print_long(std::ostream& device, long i,
                   unsigned radix = 10,
                   radix_display_t display = radix_c_style_or_hash,
-                  unsigned width = 0)
-    throw(std::invalid_argument);
+                  unsigned width = 0);
 
+  // exceptions: std::invalid_argument
   void print_unsigned_long(std::ostream& device, unsigned long i,
                            unsigned radix = 10,
                            radix_display_t display = radix_c_style_or_hash,
-                           unsigned width = 0)
-    throw(std::invalid_argument);
+                           unsigned width = 0);
 
+  // exceptions: std::invalid_argument
   void print_longlong(std::ostream& device, long long i,
                       unsigned radix = 10,
                       radix_display_t display = radix_c_style_or_hash,
-                      unsigned width = 0)
-    throw(std::invalid_argument);
+                      unsigned width = 0);
 
+  // exceptions: std::invalid_argument
   void print_unsigned_longlong(std::ostream& device, unsigned long long i,
                                unsigned radix = 10,
                                radix_display_t display = radix_c_style_or_hash,
-                               unsigned width = 0)
-    throw(std::invalid_argument);
+                               unsigned width = 0);
 
   ////////////////////////////////////////////////////////////////////////////////
 
+  // exceptions: std::invalid_argument
   void print_address(std::ostream& device, const void*,
                      unsigned radix = 16,
                      radix_display_t display = radix_c_style_or_hash,
-                     unsigned width = 0)
-    throw(std::invalid_argument);
+                     unsigned width = 0);
 
   ////////////////////////////////////////////////////////////////////////////////
 

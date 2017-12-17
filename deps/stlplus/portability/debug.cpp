@@ -32,7 +32,7 @@ namespace stlplus
   ////////////////////////////////////////////////////////////////////////////////
 
   assert_failed::assert_failed(const char* file, int line, const char* function, const char* message)
-    throw() : 
+     :
     std::logic_error(format(file, line, function, message))
   {
   }
@@ -58,10 +58,9 @@ namespace stlplus
     fprintf(stderr, "debug global : %s\n", _debug_global ? "on" : "off");
   }
 
-  void debug_assert_fail(const char* file, int line, const char* function, const char* test) 
-    throw(assert_failed)
+  void debug_assert_fail(const char* file, int line, const char* function, const char* test)
   {
-    fprintf(stderr, "%s:%i:[%i]%s: assertion failed: %s\n", 
+    fprintf(stderr, "%s:%i:[%i]%s: assertion failed: %s\n",
             file, line, _debug_depth, function ? function : "", test);
     if (debug_last) debug_last->stackdump();
     throw assert_failed(file, line, function, test);
@@ -70,7 +69,7 @@ namespace stlplus
   ////////////////////////////////////////////////////////////////////////////////
 
   debug_trace::debug_trace(const char* f, int l, const char* fn) :
-    m_file(f), m_line(l), m_function(fn ? fn : ""), 
+    m_file(f), m_line(l), m_function(fn ? fn : ""),
     m_depth(0), m_last(debug_last), m_dbg(false), m_old(false)
   {
     if (!_debug_read)

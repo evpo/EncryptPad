@@ -38,8 +38,8 @@ namespace stlplus
   class persistent_illegal_type : public std::logic_error
   {
   public:
-    persistent_illegal_type(const std::string&amp; type) throw();
-    persistent_illegal_type(unsigned key) throw();
+    persistent_illegal_type(const std::string&amp; type) ;
+    persistent_illegal_type(unsigned key) ;
     ~persistent_illegal_type(void) throw();
   };
 
@@ -47,7 +47,7 @@ namespace stlplus
   class persistent_dump_failed : public std::runtime_error
   {
   public:
-    persistent_dump_failed(const std::string&amp; message) throw();
+    persistent_dump_failed(const std::string&amp; message) ;
     ~persistent_dump_failed(void) throw();
   };
 
@@ -55,7 +55,7 @@ namespace stlplus
   class persistent_restore_failed : public std::runtime_error
   {
   public:
-    persistent_restore_failed(const std::string&amp; message) throw();
+    persistent_restore_failed(const std::string&amp; message) ;
     ~persistent_restore_failed(void) throw();
   };
 

@@ -31,35 +31,35 @@ namespace stlplus
   // arbitrary IOStream device
   // must be in binary mode
 
+  // exceptions: persistent_dump_failed
   template<typename T, class D>
-  void dump_to_device(const T& source, std::ostream& result, D dump_fn, dump_context::installer installer)
-    throw(persistent_dump_failed);
+  void dump_to_device(const T& source, std::ostream& result, D dump_fn, dump_context::installer installer);
 
+  // exceptions: persistent_restore_failed
   template<typename T, class R>
-  void restore_from_device(std::istream& source, T& result, R restore_fn, restore_context::installer installer)
-    throw(persistent_restore_failed);
+  void restore_from_device(std::istream& source, T& result, R restore_fn, restore_context::installer installer);
 
   ////////////////////////////////////////////////////////////////////////////////
   // string IO device
 
+  // exceptions: persistent_dump_failed
   template<typename T, class D>
-  void dump_to_string(const T& source, std::string& result, D dump_fn, dump_context::installer installer)
-    throw(persistent_dump_failed);
+  void dump_to_string(const T& source, std::string& result, D dump_fn, dump_context::installer installer);
 
+  // exceptions: persistent_restore_failed
   template<typename T, class R>
-  void restore_from_string(const std::string& source, T& result, R restore_fn, restore_context::installer installer)
-    throw(persistent_restore_failed);
+  void restore_from_string(const std::string& source, T& result, R restore_fn, restore_context::installer installer);
 
   ////////////////////////////////////////////////////////////////////////////////
   // file IO device
 
+  // exceptions: persistent_dump_failed
   template<typename T, class D>
-  void dump_to_file(const T& source, const std::string& filename, D dump_fn, dump_context::installer installer)
-    throw(persistent_dump_failed);
+  void dump_to_file(const T& source, const std::string& filename, D dump_fn, dump_context::installer installer);
 
+  // exceptions: persistent_restore_failed
   template<typename T, class R>
-  void restore_from_file(const std::string& filename, T& result, R restore_fn, restore_context::installer installer)
-    throw(persistent_restore_failed);
+  void restore_from_file(const std::string& filename, T& result, R restore_fn, restore_context::installer installer);
 
   ////////////////////////////////////////////////////////////////////////////////
 

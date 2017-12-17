@@ -55,7 +55,9 @@ namespace stlplus
   // compiler_name is the short name of the compiler, e.g. "gcc" or "MSVC"
   std::string compiler_name(void)
   {
-#if defined __GNUC__
+#if defined __clang__
+    return std::string("clang");
+#elif defined __GNUC__
     return std::string("gcc");
 #elif defined _MSC_VER
     return std::string("MSVC");
@@ -69,7 +71,9 @@ namespace stlplus
   // compiler_version is the version string of the compiler e.g. "3.4" for gcc or "15.00" for MSVC
   std::string compiler_version(void)
   {
-#if defined __GNUC__
+#if defined __clang__
+    return dformat("%d.%d",__clang_major__,__clang_minor__);
+#elif defined __GNUC__
     return dformat("%d.%d.%d",__GNUC__,__GNUC_MINOR__,__GNUC_PATCHLEVEL__);
 #elif defined _MSC_VER
     return dformat("%0.2f",((float)_MSC_VER)/100.0);

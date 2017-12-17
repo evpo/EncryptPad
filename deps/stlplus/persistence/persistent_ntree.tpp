@@ -17,10 +17,9 @@ namespace stlplus
 
   template<typename T, typename D>
   void dump_ntree_r(dump_context& context,
-                    const ntree<T>& tree, 
-                    const TYPENAME ntree<T>::const_iterator& node,
+                    const ntree<T>& tree,
+                    const typename ntree<T>::const_iterator& node,
                     D dump_fn)
-    throw(persistent_dump_failed)
   {
     // the magic key of the ntree_node is dumped as well as the contents - this is used in iterator persistence
     std::pair<bool,unsigned> node_mapping = context.pointer_map(node.node());
@@ -40,7 +39,6 @@ namespace stlplus
   void dump_ntree(dump_context& context,
                   const ntree<T>& tree,
                   D dump_fn)
-    throw(persistent_dump_failed)
   {
     // dump a magic key to the address of the tree for use in persistence of iterators
     // and register it as a dumped address
@@ -59,9 +57,8 @@ namespace stlplus
   template<typename T, typename R>
   void restore_ntree_r(restore_context& context,
                        ntree<T>& tree,
-                       const TYPENAME ntree<T>::iterator& node,
+                       const typename ntree<T>::iterator& node,
                        R restore_fn)
-    throw(persistent_restore_failed)
   {
     // restore the node magic key, check whether it has been used before and add it to the set of known addresses
     unsigned node_magic = 0;
@@ -86,7 +83,6 @@ namespace stlplus
   void restore_ntree(restore_context& context,
                      ntree<T>& tree,
                      R restore_fn)
-    throw(persistent_restore_failed)
   {
     tree.erase();
     // restore the tree's magic key and map it onto the tree's address
@@ -108,8 +104,7 @@ namespace stlplus
 
   template<typename T, typename TRef, typename TPtr>
   void dump_ntree_iterator(dump_context& context,
-                           const ntree_iterator<T,TRef,TPtr>& data) 
-    throw(persistent_dump_failed)
+                           const ntree_iterator<T,TRef,TPtr>& data)
   {
     data.assert_valid();
     dump_object_xref(context,data.owner());
@@ -119,7 +114,6 @@ namespace stlplus
   template<typename T, typename TRef, typename TPtr>
   void restore_ntree_iterator(restore_context& context,
                               ntree_iterator<T,TRef,TPtr>& data)
-    throw(persistent_restore_failed)
   {
     const ntree<T>* owner = 0;
     ntree_node<T>* node = 0;
@@ -134,7 +128,6 @@ namespace stlplus
   template<typename T, typename TRef, typename TPtr>
   void dump_ntree_prefix_iterator(dump_context& context,
                                   const ntree_prefix_iterator<T,TRef,TPtr>& data)
-    throw(persistent_dump_failed)
   {
     dump_ntree_iterator(context,data.iterator());
   }
@@ -142,7 +135,6 @@ namespace stlplus
   template<typename T, typename TRef, typename TPtr>
   void restore_ntree_prefix_iterator(restore_context& context,
                                      ntree_prefix_iterator<T,TRef,TPtr>& data)
-    throw(persistent_restore_failed)
   {
     ntree_iterator<T,TRef,TPtr> iterator;
     restore_ntree_iterator(context,iterator);
@@ -154,7 +146,6 @@ namespace stlplus
   template<typename T, typename TRef, typename TPtr>
   void dump_ntree_postfix_iterator(dump_context& context,
                                    const ntree_postfix_iterator<T,TRef,TPtr>& data)
-    throw(persistent_dump_failed)
   {
     dump_ntree_iterator(context,data.iterator());
   }
@@ -162,7 +153,6 @@ namespace stlplus
   template<typename T, typename TRef, typename TPtr>
   void restore_ntree_postfix_iterator(restore_context& context,
                                       ntree_postfix_iterator<T,TRef,TPtr>& data)
-    throw(persistent_restore_failed)
   {
     ntree_iterator<T,TRef,TPtr> iterator;
     restore_ntree_iterator(context,iterator);

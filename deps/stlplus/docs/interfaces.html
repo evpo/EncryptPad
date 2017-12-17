@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-<title>STLplus Library Collection - Interfaces</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STLplus C++ Library Collection - Interfaces</title>
 <link rel="icon" href="plus.png" type="image/png"/>
 <meta name="Author" content="Andy Rushton"/>
 <link rel="stylesheet" media="screen" type="text/css" href="screen.css"/>
@@ -14,9 +15,7 @@
 <div id="header">
 
 <div id="headerBanner">
-<h1>The
-<span style="color:red">S</span><span style="color:blue">T</span><span style="color:green">L</span><span style="color:#ecec80">plus</span>
-C++ Library Collection</h1>
+<h1>STLplus C++ Library Collection</h1>
 </div>
 
 <div id="headerNavigation">
@@ -156,8 +155,8 @@ namespace stlplus
   class persistent
   {
   public:
-    virtual void dump(dump_context&amp;) const throw(persistent_dump_failed) = 0;
-    virtual void restore(restore_context&amp;) throw(persistent_restore_failed) = 0;
+    virtual void dump(dump_context&amp;) const = 0;
+    virtual void restore(restore_context&amp;) = 0;
     virtual persistent* clone(void) const = 0;
   };
 
@@ -178,13 +177,13 @@ public:
   virtual int value (void) const {return m_value;}
   virtual void set(int value = 0) {m_value = value;}
 
-  <strong>void dump(dump_context&amp; context) const {stlplus::dump_int(context,m_value);}</strong>
-  <strong>void restore(restore_context&amp; context) {stlplus::restore_int(context,m_value);}</strong>
-  <strong>persistent* clone(void) const {return new base(*this);}</strong>
+<strong>void dump(dump_context&amp; context) const {stlplus::dump_int(context,m_value);}</strong>
+<strong>void restore(restore_context&amp; context) {stlplus::restore_int(context,m_value);}</strong>
+<strong>persistent* clone(void) const {return new base(*this);}</strong>
 };
 </pre>
 
-<p>You will need to read the 
+<p>You will need to read the
 <a href="persistence.html">documentation on persistence</a> to find out all the
 details of how this interface is used to provide data persistence - this
 document is only concerned with the meaning of the interface class and the

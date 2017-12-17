@@ -19,13 +19,13 @@
 namespace stlplus
 {
 
+  // exceptions: persistent_dump_failed
   template<typename T, typename DT>
-  void dump_matrix(dump_context&, const matrix<T>& data, DT dump_fn)
-    throw(persistent_dump_failed);
+  void dump_matrix(dump_context&, const matrix<T>& data, DT dump_fn);
 
+  // exceptions: persistent_restore_failed
   template<typename T, typename RT>
-  void restore_matrix(restore_context&, matrix<T>& data, RT restore_fn)
-    throw(persistent_restore_failed);
+  void restore_matrix(restore_context&, matrix<T>& data, RT restore_fn);
 
 } // end namespace stlplus
 

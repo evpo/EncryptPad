@@ -9,7 +9,7 @@ endif
 CXXFLAGS += -Wall -Wextra -std=c++11
 CXXFLAGS += -I../include -I../deps/plog/include -I/usr/include/botan-2
 LDFLAGS += -Wall
-LOADLIBES += -lm -lbotan-2
+LDLIBS += -lm -lbotan-2
 
 #ifeq ($(RELEASE),on)
 #TARGETDIR := ../../bin/release

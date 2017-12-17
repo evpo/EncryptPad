@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-<title>STLplus Library Collection - containers/digraph.hpp - A Directed Graph Container</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STLplus C++ Library Collection - containers/digraph.hpp - A Directed Graph Container</title>
 <link rel="icon" href="plus.png" type="image/png"/>
 <meta name="Author" content="Andy Rushton"/>
 <link rel="stylesheet" media="screen" type="text/css" href="screen.css"/>
@@ -14,9 +15,7 @@
 <div id="header">
 
 <div id="headerBanner">
-<h1>The
-<span style="color:red">S</span><span style="color:blue">T</span><span style="color:green">L</span><span style="color:#ecec80">plus</span>
-C++ Library Collection</h1>
+<h1>STLplus C++ Library Collection</h1>
 </div>
 
 <div id="headerNavigation">
@@ -169,10 +168,10 @@ Any attempt to dereference an end or null iterator will result in an exception b
 section below on <a href="#exceptions">Exceptions</a> to see which.</p>
 
 <p>STLplus iterators are slightly different to STL iterators in that
-  they know which graph object they belong to. The graph is referred
-  to as the "owner" of the iterator. An iterator can only be used with
-  it's owner. Using an iterator with the wrong graph throws an
-  exception (specifically, the stlplus::wrong_object exception).</p>
+they know which graph object they belong to. The graph is referred
+to as the "owner" of the iterator. An iterator can only be used with
+it's owner. Using an iterator with the wrong graph throws an
+exception (specifically, the stlplus::wrong_object exception).</p>
 
 <p>You can test whether a graph owns an iterator with the owns method:</p>
 
@@ -311,19 +310,25 @@ digraph&lt;my_node,my_arc&gt;::path_vector paths = graph.all_paths(from,to,selec
 
 <h2 id="graph">Whole Graph Operations</h2>
 
-<p>The only operations on a whole graph are the copy constructor, assignment and
-the clear function:</p>
+<p>The operations on a whole graph are the copy constructor, assignment, move method and clear method:</p>
 
 <pre class="cpp">
-digraph(const digraph&lt;NT,AT&gt;&amp;);
-digraph&lt;NT,AT&gt;&amp; operator=(const digraph&lt;NT,AT&gt;&amp;);
+digraph(const digraph&lt;NT,AT&gt;&amp; source);
+digraph&lt;NT,AT&gt;&amp; operator=(const digraph&lt;NT,AT&gt;&amp; source);
+void move(digraph&amp; source);
 void clear(void);
 </pre>
 
-<p>The copy constructor and assignment both make copies of the graph,
-maintaining the connectivity of the arcs. Clever huh? The clear function, as its
-name suggests, trashes the entire contents of the graph.</p>
+<p>The copy constructor and assignment both make copies of the source graph,
+maintaining the connectivity of the arcs.</p>
 
+<p>The move method moves the source graph's nodes and arcs into the target
+graph. The source will be left empty by this move. All iterators to
+the source graph will become owned by the target graph, so the
+iterators will continue working and pointing to the same node or arc.</p>
+
+<p>The clear function, as its name suggests, removes the entire
+contents of the graph.</p>
 
 <h2 id="nodes">Basic Node Functions</h2>
 
@@ -664,20 +669,6 @@ arc, leaving the to node untouched. Similarly the arc_move_to function only
 changes the to node and leaves the from node untouched. Finally, the arc_flip
 function swaps the from and to nodes so as to flip the arc's direction.</p>
 
-<h2 id="whole">Whole Graph Methods</h2>
-
-<p>The whole-graph operations allow large-scale manipulations of
-graphs. At present there is only one whole-graph operation:</p>
-
-<pre class="cpp">
-void move(digraph&amp; source);
-</pre>
-
-<p>This moves the source graph's nodes and arcs into the target
-graph. The source will be left empty by this move. All iterators to
-the source graph will become owned by the target graph, so the
-iterators will continue working and pointing to the same node or arc.</p>
-
 <h2 id="adjacency">Adjacency Functions</h2>
 
 <p>Nodes are adjacent if they are connected by an arc. Since digraph is a
@@ -685,7 +676,7 @@ directed graph, the direction of the arc is significant. For example, if there
 is an arc from London to Manchester, London is considered adjacent to Manchester,
 but Manchester is not considered adjacent to London (a principle well
 understood by the owner of Virgin trains). The following functions
-allow operations on adjacent nodes. They are simply composite oprations which
+allow operations on adjacent nodes. They are simply composite operations which
 combine basic node and arc access functions to give a slightly more abstract
 approach. To put it another way, you can manipulate nodes without having to go
 via arcs all the time.</p>
@@ -728,7 +719,6 @@ node_vector input_adjacencies(iterator to);
 const_node_vector output_adjacencies(const_iterator from) const;
 node_vector output_adjacencies(iterator from);
 </pre>
-
 
 <h2 id="sort">Topographical Sort Algorithms</h2>
 
@@ -1044,7 +1034,7 @@ static void test (string_int_graph&amp; graph)
         std::cout &lt;&lt; "  " &lt;&lt; "shortest path from " &lt;&lt; *i &lt;&lt; " to " &lt;&lt; *j &lt;&lt; " is: " &lt;&lt; graph.shortest_path(i, j) &lt;&lt; std::endl;
       }
     }
-    std::cout &lt;&lt; "  " &lt;&lt; "shortest paths for " &lt;&lt; *i &lt;&lt; " less than " &lt;&lt; 4 &lt;&lt; " are: " 
+    std::cout &lt;&lt; "  " &lt;&lt; "shortest paths for " &lt;&lt; *i &lt;&lt; " less than " &lt;&lt; 4 &lt;&lt; " are: "
          &lt;&lt; graph.shortest_paths(i, select_less_than_4) &lt;&lt; std::endl;
     std::cout &lt;&lt; "  " &lt;&lt; "reachable nodes from " &lt;&lt; *i &lt;&lt; " are: " &lt;&lt; graph.reachable_nodes(i) &lt;&lt; std::endl;
     std::cout &lt;&lt; "  " &lt;&lt; "nodes which can reach " &lt;&lt; *i &lt;&lt; " are: " &lt;&lt; graph.reaching_nodes(i) &lt;&lt; std::endl;
@@ -1094,7 +1084,7 @@ void restore_node_vector(stlplus::restore_context&amp; context, node_vector&amp;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
- 
+
 typedef std::vector&lt;string_int_graph::arc_iterator&gt; arc_vector;
 
 void dump_string_int_graph_arc_iterator(stlplus::dump_context&amp; context, const string_int_graph::arc_iterator&amp; arc)
@@ -1294,7 +1284,7 @@ arcs:
   shortest path from node1 to node5 is: 4073412-&gt;4 : 4073468-&gt;5
   shortest paths for node1 less than 4 are: 4073164-&gt;1 - 4073164-&gt;1 : 4073212-&gt;2 : 4073316-&gt;3 - 4073164-&gt;1 : 4073212-&gt;2
   reachable nodes from node1 are: 4072772-&gt;node2 - 4072860-&gt;node3 - 4072988-&gt;node4 - 4073092-&gt;node5
-  nodes which can reach node1 are: 
+  nodes which can reach node1 are:
   node2 is NOT adjacent to node1
   node2 does NOT have a path to node1
   node2 is NOT adjacent to node2
@@ -1330,7 +1320,7 @@ arcs:
   node3 has a path to node5
   paths from node3 to node5 are: 4073468-&gt;5
   shortest path from node3 to node5 is: 4073468-&gt;5
-  shortest paths for node3 less than 4 are: 
+  shortest paths for node3 less than 4 are:
   reachable nodes from node3 are: 4072988-&gt;node4 - 4073092-&gt;node5
   nodes which can reach node3 are: 4072772-&gt;node2 - 4072988-&gt;node4 - 4073092-&gt;node5 - 4079404-&gt;node1
   node4 is NOT adjacent to node1
@@ -1368,7 +1358,7 @@ arcs:
   node5 has a path to node5
   paths from node5 to node5 are: 4073540-&gt;-6 : 4073316-&gt;3 : 4073468-&gt;5 - 4073540-&gt;-6 : 4073604-&gt;-7 : 4073316-&gt;3 : 4073468-&gt;5
   shortest path from node5 to node5 is: 4073540-&gt;-6 : 4073316-&gt;3 : 4073468-&gt;5
-  shortest paths for node5 less than 4 are: 
+  shortest paths for node5 less than 4 are:
   reachable nodes from node5 are: 4072860-&gt;node3 - 4072988-&gt;node4
   nodes which can reach node5 are: 4072772-&gt;node2 - 4072860-&gt;node3 - 4072988-&gt;node4 - 4079404-&gt;node1
   topographical sort: 4079404-&gt;node1 - 4072772-&gt;node2 - 4072988-&gt;node4 - 4072860-&gt;node3 - 4073092-&gt;node5
@@ -1417,7 +1407,7 @@ arcs:
   shortest path from node1 to node5 is: 4089268-&gt;4 : 4089372-&gt;5
   shortest paths for node1 less than 4 are: 4089004-&gt;1 - 4089004-&gt;1 : 4089100-&gt;2 : 4089164-&gt;3 - 4089004-&gt;1 : 4089100-&gt;2
   reachable nodes from node1 are: 4088500-&gt;node2 - 4088612-&gt;node3 - 4088820-&gt;node4 - 4088932-&gt;node5
-  nodes which can reach node1 are: 
+  nodes which can reach node1 are:
   node2 is NOT adjacent to node1
   node2 does NOT have a path to node1
   node2 is NOT adjacent to node2
@@ -1453,7 +1443,7 @@ arcs:
   node3 has a path to node5
   paths from node3 to node5 are: 4089372-&gt;5
   shortest path from node3 to node5 is: 4089372-&gt;5
-  shortest paths for node3 less than 4 are: 
+  shortest paths for node3 less than 4 are:
   reachable nodes from node3 are: 4088820-&gt;node4 - 4088932-&gt;node5
   nodes which can reach node3 are: 4073772-&gt;node1 - 4088500-&gt;node2 - 4088820-&gt;node4 - 4088932-&gt;node5
   node4 is NOT adjacent to node1
@@ -1491,7 +1481,7 @@ arcs:
   node5 has a path to node5
   paths from node5 to node5 are: 4089476-&gt;-6 : 4089164-&gt;3 : 4089372-&gt;5 - 4089476-&gt;-6 : 4089596-&gt;-7 : 4089164-&gt;3 : 4089372-&gt;5
   shortest path from node5 to node5 is: 4089476-&gt;-6 : 4089164-&gt;3 : 4089372-&gt;5
-  shortest paths for node5 less than 4 are: 
+  shortest paths for node5 less than 4 are:
   reachable nodes from node5 are: 4088612-&gt;node3 - 4088820-&gt;node4
   nodes which can reach node5 are: 4073772-&gt;node1 - 4088500-&gt;node2 - 4088612-&gt;node3 - 4088820-&gt;node4
   topographical sort: 4073772-&gt;node1 - 4088500-&gt;node2 - 4088820-&gt;node4 - 4088612-&gt;node3 - 4088932-&gt;node5

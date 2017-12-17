@@ -19,13 +19,13 @@
 namespace stlplus
 {
 
+  // exceptions: persistent_dump_failed
   template<typename K, typename T, typename P, typename DK, typename DT>
-  void dump_multimap(dump_context&, const std::multimap<K,T,P>& data, DK key_dump_fn, DT val_dump_fn)
-    throw(persistent_dump_failed);
+  void dump_multimap(dump_context&, const std::multimap<K,T,P>& data, DK key_dump_fn, DT val_dump_fn);
 
+  // exceptions: persistent_restore_failed
   template<typename K, typename T, typename P, typename RK, typename RT>
-  void restore_multimap(restore_context&, std::multimap<K,T,P>& data, RK key_restore_fn, RT val_restore_fn)
-    throw(persistent_restore_failed);
+  void restore_multimap(restore_context&, std::multimap<K,T,P>& data, RK key_restore_fn, RT val_restore_fn);
 
 } // end namespace stlplus
 

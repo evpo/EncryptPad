@@ -44,8 +44,10 @@
 namespace stlplus
 {
 
-  void dump_cstring(dump_context&amp;, const char* data) throw(persistent_dump_failed);
-  void restore_cstring(restore_context&amp;, char*&amp; data) throw(persistent_restore_failed);
+  // exceptions: persistent_dump_failed
+  void dump_cstring(dump_context&amp;, const char* data) ;
+  // exceptions: persistent_restore_failed
+  void restore_cstring(restore_context&amp;, char*&amp; data) ;
 
 } // end namespace stlplus
 

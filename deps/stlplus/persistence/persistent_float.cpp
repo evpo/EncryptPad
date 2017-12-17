@@ -30,7 +30,6 @@ namespace stlplus
 {
 
   static void dump_float(stlplus::dump_context& context, unsigned bytes, unsigned char* data)
-    throw(stlplus::persistent_dump_failed)
   {
     unsigned i = bytes;
     // put the size
@@ -41,7 +40,6 @@ namespace stlplus
   }
 
   static void restore_float(stlplus::restore_context& context, unsigned bytes, unsigned char* data)
-    throw(stlplus::persistent_restore_failed)
   {
     // get the dumped size from the file
     unsigned dumped_bytes = (unsigned)context.get();
@@ -63,22 +61,22 @@ namespace stlplus
   ////////////////////////////////////////////////////////////////////////////////
   // exported functions which simply call the low-level byte-dump and byte-restore routines above
 
-void stlplus::dump_float(stlplus::dump_context& context, const float& data) throw(stlplus::persistent_dump_failed)
+void stlplus::dump_float(stlplus::dump_context& context, const float& data)
 {
   stlplus::dump_float(context, sizeof(float), (unsigned char*)&data);
 }
 
-void stlplus::restore_float(restore_context& context, float& data) throw(stlplus::persistent_restore_failed)
+void stlplus::restore_float(restore_context& context, float& data)
 {
   stlplus::restore_float(context, sizeof(float), (unsigned char*)&data);
 }
 
-void stlplus::dump_double(stlplus::dump_context& context, const double& data) throw(stlplus::persistent_dump_failed)
+void stlplus::dump_double(stlplus::dump_context& context, const double& data)
 {
   stlplus::dump_float(context, sizeof(double), (unsigned char*)&data);
 }
 
-void stlplus::restore_double(restore_context& context, double& data) throw(stlplus::persistent_restore_failed)
+void stlplus::restore_double(restore_context& context, double& data)
 {
   stlplus::restore_float(context, sizeof(double), (unsigned char*)&data);
 }

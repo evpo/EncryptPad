@@ -21,21 +21,21 @@ namespace stlplus
 
   // basic_string
 
+  // exceptions: persistent_dump_failed
   template<typename charT, typename traits, typename allocator, typename D>
-  void dump_basic_string(dump_context&, const std::basic_string<charT,traits,allocator>& data, D dump_fn)
-    throw(persistent_dump_failed);
+  void dump_basic_string(dump_context&, const std::basic_string<charT,traits,allocator>& data, D dump_fn);
 
+  // exceptions: persistent_restore_failed
   template<typename charT, typename traits, typename allocator, typename R>
-  void restore_basic_string(restore_context&, std::basic_string<charT,traits,allocator>& data, R restore_fn)
-    throw(persistent_restore_failed);
+  void restore_basic_string(restore_context&, std::basic_string<charT,traits,allocator>& data, R restore_fn);
 
   // string
 
-  void dump_string(dump_context&, const std::string& data)
-    throw(persistent_dump_failed);
+  // exceptions: persistent_dump_failed
+  void dump_string(dump_context&, const std::string& data);
 
-  void restore_string(restore_context&, std::string& data) 
-    throw(persistent_restore_failed);
+  // exceptions: persistent_restore_failed
+  void restore_string(restore_context&, std::string& data);
 
 
   // Note: persistence of wstring not supported because it is too weakly defined and messy

@@ -40,26 +40,26 @@ namespace stlplus
   // The way in which the number is displayed is defined in radix_types.hpp
   // Using any other value for the display type causes std::invalid_argument to be thrown
 
+  // exceptions: std::invalid_argument
   std::string float_to_string(float f,
                               real_display_t display = display_mixed,
                               unsigned width = 0,
-                              unsigned precision = 6)
-    throw(std::invalid_argument);
+                              unsigned precision = 6);
 
+  // exceptions: std::invalid_argument
   std::string double_to_string(double f,
                                real_display_t display = display_mixed,
                                unsigned width = 0,
-                               unsigned precision = 6)
-    throw(std::invalid_argument);
+                               unsigned precision = 6);
 
   ////////////////////////////////////////////////////////////////////////////////
   // Convert a string to a floating-point type
 
-  float string_to_float(const std::string&amp; value)
-    throw(std::invalid_argument);
+  // exceptions: std::invalid_argument
+  float string_to_float(const std::string&amp; value);
 
-  double string_to_double(const std::string&amp; value)
-    throw(std::invalid_argument);
+  // exceptions: std::invalid_argument
+  double string_to_double(const std::string&amp; value);
 
   ////////////////////////////////////////////////////////////////////////////////
 

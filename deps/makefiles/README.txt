@@ -7,9 +7,9 @@ of builds in a multi-library project.
 These rules do the following tasks:
 
  - compile all the .cpp or .c files in the current directory
- - archive the object files together into a single object library
+ - archive the object files together into a static object library
  - build all other projects on which the current project depends
- - link an image
+ - link an image or shared library
  - (optionally) compile and build a wxWidgets application
 
 Note: These files are designed for ***Gnu make ONLY***.

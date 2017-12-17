@@ -188,17 +188,15 @@ namespace stlplus
 
     // show determines whether the source file line containing the source of a problem should also be shown
 
-    message_handler_base(bool show = true)
-      throw();
+    message_handler_base(bool show = true);
 
-    message_handler_base(const std::string& message_file, bool show = true)
-      throw(message_handler_read_error);
+    // exceptions: message_handler_read_error
+    message_handler_base(const std::string& message_file, bool show = true);
 
-    message_handler_base(const std::vector<std::string>& message_files, bool show = true)
-      throw(message_handler_read_error);
+    // exceptions: message_handler_read_error
+    message_handler_base(const std::vector<std::string>& message_files, bool show = true);
 
-    virtual ~message_handler_base(void)
-      throw();
+    virtual ~message_handler_base(void);
 
     //////////////////////////////////////////////////////////////////////////////
     // message file handling
@@ -220,17 +218,15 @@ namespace stlplus
 
     // Any number of message files can be added and they accumulate
 
-    void add_message_file(const std::string& message_file)
-      throw(message_handler_read_error);
+    // exceptions: message_handler_read_error
+    void add_message_file(const std::string& message_file);
 
-    void add_message_files(const std::vector<std::string>& message_files)
-      throw(message_handler_read_error);
+    // exceptions: message_handler_read_error
+    void add_message_files(const std::vector<std::string>& message_files);
 
-    void add_message(const std::string& id, const std::string& text)
-      throw();
+    void add_message(const std::string& id, const std::string& text);
 
-    bool message_present(const std::string& id) const
-      throw();
+    bool message_present(const std::string& id) const;
 
     //////////////////////////////////////////////////////////////////////////////
     // format control
@@ -264,26 +260,19 @@ namespace stlplus
     //
     //   positional:  "\"@1\" (@2,@3) : @0"
 
-    void set_information_format(const std::string& format)
-      throw();
+    void set_information_format(const std::string& format);
 
-    void set_warning_format(const std::string& format)
-      throw();
+    void set_warning_format(const std::string& format);
 
-    void set_error_format(const std::string& format)
-      throw();
+    void set_error_format(const std::string& format);
 
-    void set_fatal_format(const std::string& format)
-      throw();
+    void set_fatal_format(const std::string& format);
 
-    void set_context_format(const std::string& format)
-      throw();
+    void set_context_format(const std::string& format);
 
-    void set_supplement_format(const std::string& format)
-      throw();
+    void set_supplement_format(const std::string& format);
 
-    void set_position_format(const std::string& format)
-      throw();
+    void set_position_format(const std::string& format);
 
     //////////////////////////////////////////////////////////////////////////////
     // source file position display control
@@ -291,11 +280,9 @@ namespace stlplus
     //   should be shown with the message on subsequent lines
     // hide_position indicates that the source file line should not be shown
 
-    void show_position(void)
-      throw();
+    void show_position(void);
 
-    void hide_position(void)
-      throw();
+    void hide_position(void);
 
     //////////////////////////////////////////////////////////////////////////////
     // Message formatting functions
@@ -309,7 +296,7 @@ namespace stlplus
     //            processing may continue but only to find further errors
     //   - fatal: an internal (programming) error has been found and the operation is stopping NOW
     // The remaining two always follow one of the above
-    //   - context: give stack-like information of the error context 
+    //   - context: give stack-like information of the error context
     //              e.g. if processing include files, the sequence of includes forms a stack
     //   - supplement: give extra information of the error context
     //              e.g. give the set of possible solutions to the problem
@@ -317,7 +304,7 @@ namespace stlplus
     // There are 2 kinds of message: simple, positional
     //   - simple: just a text message
     //   - positional: a message relating to a source file and a specific position in that file
-    // This gives 8 variants. 
+    // This gives 8 variants.
     // Note: a positional message with an empty position is treated as a simple message
 
     // Messages can have arguments.
@@ -333,389 +320,386 @@ namespace stlplus
     // information messages
 
     // simple messages
+    // exceptions: message_handler_id_error,message_handler_format_error
     std::vector<std::string> information_message(const std::string& id,
-                                                 const std::vector<std::string>& args)
-      throw(message_handler_id_error,message_handler_format_error);
+                                                 const std::vector<std::string>& args);
 
-    std::vector<std::string> information_message(const std::string& id)
-      throw(message_handler_id_error,message_handler_format_error);
+    // exceptions: message_handler_id_error,message_handler_format_error
+    std::vector<std::string> information_message(const std::string& id);
 
+    // exceptions: message_handler_id_error,message_handler_format_error
     std::vector<std::string> information_message(const std::string& id,
-                                                 const std::string& arg1)
-      throw(message_handler_id_error,message_handler_format_error);
+                                                 const std::string& arg1);
 
+    // exceptions: message_handler_id_error,message_handler_format_error
     std::vector<std::string> information_message(const std::string& id,
                                                  const std::string& arg1,
-                                                 const std::string& arg2)
-      throw(message_handler_id_error,message_handler_format_error);
+                                                 const std::string& arg2);
 
+    // exceptions: message_handler_id_error,message_handler_format_error
     std::vector<std::string> information_message(const std::string& id,
                                                  const std::string& arg1,
                                                  const std::string& arg2,
-                                                 const std::string& arg3)
-      throw(message_handler_id_error,message_handler_format_error);
+                                                 const std::string& arg3);
 
     // positional messages
+    // exceptions: message_handler_id_error,message_handler_format_error
     std::vector<std::string> information_message(const message_position&,
                                                  const std::string& id,
-                                                 const std::vector<std::string>& args)
-      throw(message_handler_id_error,message_handler_format_error);
+                                                 const std::vector<std::string>& args);
 
+    // exceptions: message_handler_id_error,message_handler_format_error
     std::vector<std::string> information_message(const message_position&,
-                                                 const std::string& id)
-      throw(message_handler_id_error,message_handler_format_error);
+                                                 const std::string& id);
 
+    // exceptions: message_handler_id_error,message_handler_format_error
     std::vector<std::string> information_message(const message_position&,
                                                  const std::string& id,
-                                                 const std::string& arg1)
-      throw(message_handler_id_error,message_handler_format_error);
+                                                 const std::string& arg1);
 
+    // exceptions: message_handler_id_error,message_handler_format_error
     std::vector<std::string> information_message(const message_position&,
                                                  const std::string& id,
                                                  const std::string& arg1,
-                                                 const std::string& arg2)
-      throw(message_handler_id_error,message_handler_format_error);
+                                                 const std::string& arg2);
 
+    // exceptions: message_handler_id_error,message_handler_format_error
     std::vector<std::string> information_message(const message_position&,
                                                  const std::string& id,
                                                  const std::string& arg1,
                                                  const std::string& arg2,
-                                                 const std::string& arg3)
-      throw(message_handler_id_error,message_handler_format_error);
+                                                 const std::string& arg3);
 
     // warning messages
 
     // simple messages
+    // exceptions: message_handler_id_error,message_handler_format_error
     std::vector<std::string> warning_message(const std::string& id,
-                                             const std::vector<std::string>& args)
-      throw(message_handler_id_error,message_handler_format_error);
+                                             const std::vector<std::string>& args);
 
-    std::vector<std::string> warning_message(const std::string& id)
-      throw(message_handler_id_error,message_handler_format_error);
+    // exceptions: message_handler_id_error,message_handler_format_error
+    std::vector<std::string> warning_message(const std::string& id);
 
+    // exceptions: message_handler_id_error,message_handler_format_error
     std::vector<std::string> warning_message(const std::string& id,
-                                             const std::string& arg1)
-      throw(message_handler_id_error,message_handler_format_error);
+                                             const std::string& arg1);
 
+    // exceptions: message_handler_id_error,message_handler_format_error
     std::vector<std::string> warning_message(const std::string& id,
                                              const std::string& arg1,
-                                             const std::string& arg2)
-      throw(message_handler_id_error,message_handler_format_error);
+                                             const std::string& arg2);
 
+    // exceptions: message_handler_id_error,message_handler_format_error
     std::vector<std::string> warning_message(const std::string& id,
                                              const std::string& arg1,
                                              const std::string& arg2,
-                                             const std::string& arg3)
-      throw(message_handler_id_error,message_handler_format_error);
+                                             const std::string& arg3);
 
     // positional messages
+    // exceptions: message_handler_id_error,message_handler_format_error
     std::vector<std::string> warning_message(const message_position&,
                                              const std::string& id,
-                                             const std::vector<std::string>& args)
-      throw(message_handler_id_error,message_handler_format_error);
+                                             const std::vector<std::string>& args);
 
+    // exceptions: message_handler_id_error,message_handler_format_error
     std::vector<std::string> warning_message(const message_position&,
-                                             const std::string& id)
-      throw(message_handler_id_error,message_handler_format_error);
+                                             const std::string& id);
 
+    // exceptions: message_handler_id_error,message_handler_format_error
     std::vector<std::string> warning_message(const message_position&,
                                              const std::string& id,
-                                             const std::string& arg1)
-      throw(message_handler_id_error,message_handler_format_error);
+                                             const std::string& arg1);
 
+    // exceptions: message_handler_id_error,message_handler_format_error
     std::vector<std::string> warning_message(const message_position&,
                                              const std::string& id,
                                              const std::string& arg1,
-                                             const std::string& arg2)
-      throw(message_handler_id_error,message_handler_format_error);
+                                             const std::string& arg2);
 
+    // exceptions: message_handler_id_error,message_handler_format_error
     std::vector<std::string> warning_message(const message_position&,
                                              const std::string& id,
                                              const std::string& arg1,
                                              const std::string& arg2,
-                                             const std::string& arg3)
-      throw(message_handler_id_error,message_handler_format_error);
+                                             const std::string& arg3);
 
     // error messages
 
     // simple messages
+    // exceptions: message_handler_id_error,message_handler_format_error
     std::vector<std::string> error_message(const std::string& id,
-                                           const std::vector<std::string>& args)
-      throw(message_handler_id_error,message_handler_format_error);
+                                           const std::vector<std::string>& args);
 
-    std::vector<std::string> error_message(const std::string& id)
-      throw(message_handler_id_error,message_handler_format_error);
+    // exceptions: message_handler_id_error,message_handler_format_error
+    std::vector<std::string> error_message(const std::string& id);
 
+    // exceptions: message_handler_id_error,message_handler_format_error
     std::vector<std::string> error_message(const std::string& id,
-                                           const std::string& arg1)
-      throw(message_handler_id_error,message_handler_format_error);
+                                           const std::string& arg1);
 
+    // exceptions: message_handler_id_error,message_handler_format_error
     std::vector<std::string> error_message(const std::string& id,
                                            const std::string& arg1,
-                                           const std::string& arg2)
-      throw(message_handler_id_error,message_handler_format_error);
+                                           const std::string& arg2);
 
+    // exceptions: message_handler_id_error,message_handler_format_error
     std::vector<std::string> error_message(const std::string& id,
                                            const std::string& arg1,
                                            const std::string& arg2,
-                                           const std::string& arg3)
-      throw(message_handler_id_error,message_handler_format_error);
+                                           const std::string& arg3);
 
     // positional messages
+    // exceptions: message_handler_id_error,message_handler_format_error
     std::vector<std::string> error_message(const message_position&,
                                            const std::string& id,
-                                           const std::vector<std::string>& args)
-      throw(message_handler_id_error,message_handler_format_error);
+                                           const std::vector<std::string>& args);
 
+    // exceptions: message_handler_id_error,message_handler_format_error
     std::vector<std::string> error_message(const message_position&,
-                                           const std::string& id)
-      throw(message_handler_id_error,message_handler_format_error);
+                                           const std::string& id);
 
+    // exceptions: message_handler_id_error,message_handler_format_error
     std::vector<std::string> error_message(const message_position&,
                                            const std::string& id,
-                                           const std::string& arg1)
-      throw(message_handler_id_error,message_handler_format_error);
+                                           const std::string& arg1);
 
+    // exceptions: message_handler_id_error,message_handler_format_error
     std::vector<std::string> error_message(const message_position&,
                                            const std::string& id,
                                            const std::string& arg1,
-                                           const std::string& arg2)
-      throw(message_handler_id_error,message_handler_format_error);
+                                           const std::string& arg2);
 
+    // exceptions: message_handler_id_error,message_handler_format_error
     std::vector<std::string> error_message(const message_position&,
                                            const std::string& id,
                                            const std::string& arg1,
                                            const std::string& arg2,
-                                           const std::string& arg3)
-      throw(message_handler_id_error,message_handler_format_error);
+                                           const std::string& arg3);
 
     // fatal messages
     // Note that these do not throw the fatal_error exception because that would prevent the message being reported
     // the caller should throw the exception after reporting the message
 
     // simple messages
+    // exceptions: message_handler_id_error,message_handler_format_error
     std::vector<std::string> fatal_message(const std::string& id,
-                                           const std::vector<std::string>& args)
-      throw(message_handler_id_error,message_handler_format_error);
+                                           const std::vector<std::string>& args);
 
-    std::vector<std::string> fatal_message(const std::string& id)
-      throw(message_handler_id_error,message_handler_format_error);
+    // exceptions: message_handler_id_error,message_handler_format_error
+    std::vector<std::string> fatal_message(const std::string& id);
 
+    // exceptions: message_handler_id_error,message_handler_format_error
     std::vector<std::string> fatal_message(const std::string& id,
-                                           const std::string& arg1)
-      throw(message_handler_id_error,message_handler_format_error);
+                                           const std::string& arg1);
 
+    // exceptions: message_handler_id_error,message_handler_format_error
     std::vector<std::string> fatal_message(const std::string& id,
                                            const std::string& arg1,
-                                           const std::string& arg2)
-      throw(message_handler_id_error,message_handler_format_error);
+                                           const std::string& arg2);
 
+    // exceptions: message_handler_id_error,message_handler_format_error
     std::vector<std::string> fatal_message(const std::string& id,
                                            const std::string& arg1,
                                            const std::string& arg2,
-                                           const std::string& arg3)
-      throw(message_handler_id_error,message_handler_format_error);
+                                           const std::string& arg3);
 
     // positional messages
+    // exceptions: message_handler_id_error,message_handler_format_error
     std::vector<std::string> fatal_message(const message_position&,
                                            const std::string& id,
-                                           const std::vector<std::string>& args)
-      throw(message_handler_id_error,message_handler_format_error);
+                                           const std::vector<std::string>& args);
 
+    // exceptions: message_handler_id_error,message_handler_format_error
     std::vector<std::string> fatal_message(const message_position&,
-                                           const std::string& id)
-      throw(message_handler_id_error,message_handler_format_error);
+                                           const std::string& id);
 
+    // exceptions: message_handler_id_error,message_handler_format_error
     std::vector<std::string> fatal_message(const message_position&,
                                            const std::string& id,
-                                           const std::string& arg1)
-      throw(message_handler_id_error,message_handler_format_error);
+                                           const std::string& arg1);
 
+    // exceptions: message_handler_id_error,message_handler_format_error
     std::vector<std::string> fatal_message(const message_position&,
                                            const std::string& id,
                                            const std::string& arg1,
-                                           const std::string& arg2)
-      throw(message_handler_id_error,message_handler_format_error);
+                                           const std::string& arg2);
 
+    // exceptions: message_handler_id_error,message_handler_format_error
     std::vector<std::string> fatal_message(const message_position&,
                                            const std::string& id,
                                            const std::string& arg1,
                                            const std::string& arg2,
-                                           const std::string& arg3)
-      throw(message_handler_id_error,message_handler_format_error);
+                                           const std::string& arg3);
 
     // supplement messages - these must be pushed *before* the message that they apply to
 
     // simple messages
+    // exceptions: message_handler_id_error,message_handler_format_error
     void push_supplement(const std::string& id,
-                         const std::vector<std::string>& args)
-      throw(message_handler_id_error,message_handler_format_error);
+                         const std::vector<std::string>& args);
 
-    void push_supplement(const std::string& id)
-      throw(message_handler_id_error,message_handler_format_error);
+    // exceptions: message_handler_id_error,message_handler_format_error
+    void push_supplement(const std::string& id);
 
+    // exceptions: message_handler_id_error,message_handler_format_error
     void push_supplement(const std::string& id,
-                         const std::string& arg1)
-      throw(message_handler_id_error,message_handler_format_error);
+                         const std::string& arg1);
 
+    // exceptions: message_handler_id_error,message_handler_format_error
     void push_supplement(const std::string& id,
                          const std::string& arg1,
-                         const std::string& arg2)
-      throw(message_handler_id_error,message_handler_format_error);
+                         const std::string& arg2);
 
+    // exceptions: message_handler_id_error,message_handler_format_error
     void push_supplement(const std::string& id,
                          const std::string& arg1,
                          const std::string& arg2,
-                         const std::string& arg3)
-      throw(message_handler_id_error,message_handler_format_error);
+                         const std::string& arg3);
 
     // positional messages
+    // exceptions: message_handler_id_error,message_handler_format_error
     void push_supplement(const message_position&,
                          const std::string& id,
-                         const std::vector<std::string>& args)
-      throw(message_handler_id_error,message_handler_format_error);
+                         const std::vector<std::string>& args);
 
+    // exceptions: message_handler_id_error,message_handler_format_error
     void push_supplement(const message_position&,
-                         const std::string& id)
-      throw(message_handler_id_error,message_handler_format_error);
+                         const std::string& id);
 
+    // exceptions: message_handler_id_error,message_handler_format_error
     void push_supplement(const message_position&,
                          const std::string& id,
-                         const std::string& arg1)
-      throw(message_handler_id_error,message_handler_format_error);
+                         const std::string& arg1);
 
+    // exceptions: message_handler_id_error,message_handler_format_error
     void push_supplement(const message_position&,
                          const std::string& id,
                          const std::string& arg1,
-                         const std::string& arg2)
-      throw(message_handler_id_error,message_handler_format_error);
+                         const std::string& arg2);
 
+    // exceptions: message_handler_id_error,message_handler_format_error
     void push_supplement(const message_position&,
                          const std::string& id,
                          const std::string& arg1,
                          const std::string& arg2,
-                         const std::string& arg3)
-      throw(message_handler_id_error,message_handler_format_error);
+                         const std::string& arg3);
 
     //////////////////////////////////////////////////////////////////////////////
     // context stack - allows supplementary messages to be printed after each message showing where it came from
     // for example, an message whilst inlining a function could be followed by a "function called from..." message
 
     // simple context messages
+    // exceptions: message_handler_id_error,message_handler_format_error
     void push_context(const std::string& id,
-                      const std::vector<std::string>& args)
-      throw(message_handler_id_error,message_handler_format_error);
+                      const std::vector<std::string>& args);
 
-    void push_context(const std::string& id)
-      throw(message_handler_id_error,message_handler_format_error);
+    // exceptions: message_handler_id_error,message_handler_format_error
+    void push_context(const std::string& id);
 
+    // exceptions: message_handler_id_error,message_handler_format_error
     void push_context(const std::string& id,
-                      const std::string& arg1)
-      throw(message_handler_id_error,message_handler_format_error);
+                      const std::string& arg1);
 
+    // exceptions: message_handler_id_error,message_handler_format_error
     void push_context(const std::string& id,
                       const std::string& arg1,
-                      const std::string& arg2)
-      throw(message_handler_id_error,message_handler_format_error);
+                      const std::string& arg2);
 
+    // exceptions: message_handler_id_error,message_handler_format_error
     void push_context(const std::string& id,
                       const std::string& arg1,
                       const std::string& arg2,
-                      const std::string& arg3)
-      throw(message_handler_id_error,message_handler_format_error);
+                      const std::string& arg3);
 
     // positional context messages
+    // exceptions: message_handler_id_error,message_handler_format_error
     void push_context(const message_position&,
                       const std::string& id,
-                      const std::vector<std::string>& args)
-      throw(message_handler_id_error,message_handler_format_error);
+                      const std::vector<std::string>& args);
 
+    // exceptions: message_handler_id_error,message_handler_format_error
     void push_context(const message_position&,
-                      const std::string& id)
-      throw(message_handler_id_error,message_handler_format_error);
+                      const std::string& id);
 
+    // exceptions: message_handler_id_error,message_handler_format_error
     void push_context(const message_position&,
                       const std::string& id,
-                      const std::string& arg1)
-      throw(message_handler_id_error,message_handler_format_error);
+                      const std::string& arg1);
 
+    // exceptions: message_handler_id_error,message_handler_format_error
     void push_context(const message_position&,
                       const std::string& id,
                       const std::string& arg1,
-                      const std::string& arg2)
-      throw(message_handler_id_error,message_handler_format_error);
+                      const std::string& arg2);
 
+    // exceptions: message_handler_id_error,message_handler_format_error
     void push_context(const message_position&,
                       const std::string& id,
                       const std::string& arg1,
                       const std::string& arg2,
-                      const std::string& arg3)
-      throw(message_handler_id_error,message_handler_format_error);
+                      const std::string& arg3);
 
-    unsigned context_depth(void) const
-      throw();
+    unsigned context_depth(void) const;
 
     // remove the last level of context if there is one
-    void pop_context(void)
-      throw();
+    void pop_context(void);
     // remove context messages to the specified depth
-    void pop_context(unsigned)
-      throw();
+    void pop_context(unsigned);
 
     // push the context and save it in the message_context handle. When the
     // message_context handle goes out of scope, the context is popped
     // automatically
 
     // simple context messages
+    // exceptions: message_handler_id_error,message_handler_format_error
     message_context auto_push_context(const std::string& id,
-                                      const std::vector<std::string>& args)
-      throw(message_handler_id_error,message_handler_format_error);
+                                      const std::vector<std::string>& args);
 
-    message_context auto_push_context(const std::string& id)
-      throw(message_handler_id_error,message_handler_format_error);
+    // exceptions: message_handler_id_error,message_handler_format_error
+    message_context auto_push_context(const std::string& id);
 
+    // exceptions: message_handler_id_error,message_handler_format_error
     message_context auto_push_context(const std::string& id,
-                                      const std::string& arg1)
-      throw(message_handler_id_error,message_handler_format_error);
+                                      const std::string& arg1);
 
+    // exceptions: message_handler_id_error,message_handler_format_error
     message_context auto_push_context(const std::string& id,
                                       const std::string& arg1,
-                                      const std::string& arg2)
-      throw(message_handler_id_error,message_handler_format_error);
+                                      const std::string& arg2);
 
+    // exceptions: message_handler_id_error,message_handler_format_error
     message_context auto_push_context(const std::string& id,
                                       const std::string& arg1,
                                       const std::string& arg2,
-                                      const std::string& arg3)
-      throw(message_handler_id_error,message_handler_format_error);
+                                      const std::string& arg3);
 
     // positional context messages
+    // exceptions: message_handler_id_error,message_handler_format_error
     message_context auto_push_context(const message_position&,
                                       const std::string& id,
-                                      const std::vector<std::string>& args)
-      throw(message_handler_id_error,message_handler_format_error);
+                                      const std::vector<std::string>& args);
 
+    // exceptions: message_handler_id_error,message_handler_format_error
     message_context auto_push_context(const message_position&,
-                                      const std::string& id)
-      throw(message_handler_id_error,message_handler_format_error);
+                                      const std::string& id);
 
+    // exceptions: message_handler_id_error,message_handler_format_error
     message_context auto_push_context(const message_position&,
                                       const std::string& id,
-                                      const std::string& arg1)
-      throw(message_handler_id_error,message_handler_format_error);
+                                      const std::string& arg1);
 
+    // exceptions: message_handler_id_error,message_handler_format_error
     message_context auto_push_context(const message_position&,
                                       const std::string& id,
                                       const std::string& arg1,
-                                      const std::string& arg2)
-      throw(message_handler_id_error,message_handler_format_error);
+                                      const std::string& arg2);
 
+    // exceptions: message_handler_id_error,message_handler_format_error
     message_context auto_push_context(const message_position&,
                                       const std::string& id,
                                       const std::string& arg1,
                                       const std::string& arg2,
-                                      const std::string& arg3)
-      throw(message_handler_id_error,message_handler_format_error);
+                                      const std::string& arg3);
 
   private:
     friend class message_handler_base_body;
@@ -744,34 +728,28 @@ namespace stlplus
     // limit sets the error limit - zero disables this feature
     // show determines whether the source file line containing the error should also be shown
 
-    message_handler(std::ostream& device,unsigned limit = 0,bool show = true) 
-      throw();
+    message_handler(std::ostream& device,unsigned limit = 0,bool show = true);
 
+    // exceptions: message_handler_read_error
     message_handler(std::ostream& device,
-                    const std::string& message_file,unsigned limit = 0,bool show = true) 
-      throw(message_handler_read_error);
+                    const std::string& message_file,unsigned limit = 0,bool show = true);
 
+    // exceptions: message_handler_read_error
     message_handler(std::ostream& device,
-                    const std::vector<std::string>& message_files,unsigned limit = 0,bool show = true) 
-      throw(message_handler_read_error);
+                    const std::vector<std::string>& message_files,unsigned limit = 0,bool show = true);
 
-    ~message_handler(void)
-      throw();
+    ~message_handler(void);
 
     //////////////////////////////////////////////////////////////////////////////
     // error count and error limits
 
-    void set_error_limit(unsigned error_limit)
-      throw();
+    void set_error_limit(unsigned error_limit);
 
-    unsigned error_limit(void) const
-      throw();
+    unsigned error_limit(void) const;
 
-    void reset_error_count(void)
-      throw();
+    void reset_error_count(void);
 
-    unsigned error_count(void) const
-      throw();
+    unsigned error_count(void) const;
 
     //////////////////////////////////////////////////////////////////////////////
     // access the output device for whatever reason (for example, to ensure that
@@ -786,215 +764,215 @@ namespace stlplus
     // information messages
 
     // simple messages
+    // exceptions: message_handler_id_error,message_handler_format_error
     bool information(const std::string& id,
-                     const std::vector<std::string>& args)
-      throw(message_handler_id_error,message_handler_format_error);
+                     const std::vector<std::string>& args);
 
-    bool information(const std::string& id)
-      throw(message_handler_id_error,message_handler_format_error);
+    // exceptions: message_handler_id_error,message_handler_format_error
+    bool information(const std::string& id);
 
+    // exceptions: message_handler_id_error,message_handler_format_error
     bool information(const std::string& id,
-                     const std::string& arg1)
-      throw(message_handler_id_error,message_handler_format_error);
+                     const std::string& arg1);
 
+    // exceptions: message_handler_id_error,message_handler_format_error
     bool information(const std::string& id,
                      const std::string& arg1,
-                     const std::string& arg2)
-      throw(message_handler_id_error,message_handler_format_error);
+                     const std::string& arg2);
 
+    // exceptions: message_handler_id_error,message_handler_format_error
     bool information(const std::string& id,
                      const std::string& arg1,
                      const std::string& arg2,
-                     const std::string& arg3)
-      throw(message_handler_id_error,message_handler_format_error);
+                     const std::string& arg3);
 
     // positional messages
+    // exceptions: message_handler_id_error,message_handler_format_error
     bool information(const message_position&,
                      const std::string& id,
-                     const std::vector<std::string>& args)
-      throw(message_handler_id_error,message_handler_format_error);
+                     const std::vector<std::string>& args);
 
+    // exceptions: message_handler_id_error,message_handler_format_error
     bool information(const message_position&,
-                     const std::string& id)
-      throw(message_handler_id_error,message_handler_format_error);
+                     const std::string& id);
 
+    // exceptions: message_handler_id_error,message_handler_format_error
     bool information(const message_position&,
                      const std::string& id,
-                     const std::string& arg1)
-      throw(message_handler_id_error,message_handler_format_error);
+                     const std::string& arg1);
 
+    // exceptions: message_handler_id_error,message_handler_format_error
     bool information(const message_position&,
                      const std::string& id,
                      const std::string& arg1,
-                     const std::string& arg2)
-      throw(message_handler_id_error,message_handler_format_error);
+                     const std::string& arg2);
 
+    // exceptions: message_handler_id_error,message_handler_format_error
     bool information(const message_position&,
                      const std::string& id,
                      const std::string& arg1,
                      const std::string& arg2,
-                     const std::string& arg3)
-      throw(message_handler_id_error,message_handler_format_error);
+                     const std::string& arg3);
 
     // warning messages
 
     // simple messages
+    // exceptions: message_handler_id_error,message_handler_format_error
     bool warning(const std::string& id,
-                 const std::vector<std::string>& args)
-      throw(message_handler_id_error,message_handler_format_error);
+                 const std::vector<std::string>& args);
 
-    bool warning(const std::string& id)
-      throw(message_handler_id_error,message_handler_format_error);
+    // exceptions: message_handler_id_error,message_handler_format_error
+    bool warning(const std::string& id);
 
+    // exceptions: message_handler_id_error,message_handler_format_error
     bool warning(const std::string& id,
-                 const std::string& arg1)
-      throw(message_handler_id_error,message_handler_format_error);
+                 const std::string& arg1);
 
+    // exceptions: message_handler_id_error,message_handler_format_error
     bool warning(const std::string& id,
                  const std::string& arg1,
-                 const std::string& arg2)
-      throw(message_handler_id_error,message_handler_format_error);
+                 const std::string& arg2);
 
+    // exceptions: message_handler_id_error,message_handler_format_error
     bool warning(const std::string& id,
                  const std::string& arg1,
                  const std::string& arg2,
-                 const std::string& arg3)
-      throw(message_handler_id_error,message_handler_format_error);
+                 const std::string& arg3);
 
     // positional messages
+    // exceptions: message_handler_id_error,message_handler_format_error
     bool warning(const message_position&,
                  const std::string& id,
-                 const std::vector<std::string>& args)
-      throw(message_handler_id_error,message_handler_format_error);
+                 const std::vector<std::string>& args);
 
+    // exceptions: message_handler_id_error,message_handler_format_error
     bool warning(const message_position&,
-                 const std::string& id)
-      throw(message_handler_id_error,message_handler_format_error);
+                 const std::string& id);
 
+    // exceptions: message_handler_id_error,message_handler_format_error
     bool warning(const message_position&,
                  const std::string& id,
-                 const std::string& arg1)
-      throw(message_handler_id_error,message_handler_format_error);
+                 const std::string& arg1);
 
+    // exceptions: message_handler_id_error,message_handler_format_error
     bool warning(const message_position&,
                  const std::string& id,
                  const std::string& arg1,
-                 const std::string& arg2)
-      throw(message_handler_id_error,message_handler_format_error);
+                 const std::string& arg2);
 
+    // exceptions: message_handler_id_error,message_handler_format_error
     bool warning(const message_position&,
                  const std::string& id,
                  const std::string& arg1,
                  const std::string& arg2,
-                 const std::string& arg3)
-      throw(message_handler_id_error,message_handler_format_error);
+                 const std::string& arg3);
 
     // error messages
 
     // simple messages
+    // exceptions: message_handler_id_error,message_handler_format_error,message_handler_limit_error
     bool error(const std::string& id,
-               const std::vector<std::string>& args)
-      throw(message_handler_id_error,message_handler_format_error,message_handler_limit_error);
+               const std::vector<std::string>& args);
 
-    bool error(const std::string& id)
-      throw(message_handler_id_error,message_handler_format_error,message_handler_limit_error);
+    // exceptions: message_handler_id_error,message_handler_format_error,message_handler_limit_error
+    bool error(const std::string& id);
 
+    // exceptions: message_handler_id_error,message_handler_format_error,message_handler_limit_error
     bool error(const std::string& id,
-               const std::string& arg1)
-      throw(message_handler_id_error,message_handler_format_error,message_handler_limit_error);
+               const std::string& arg1);
 
+    // exceptions: message_handler_id_error,message_handler_format_error,message_handler_limit_error
     bool error(const std::string& id,
                const std::string& arg1,
-               const std::string& arg2)
-      throw(message_handler_id_error,message_handler_format_error,message_handler_limit_error);
+               const std::string& arg2);
 
+    // exceptions: message_handler_id_error,message_handler_format_error,message_handler_limit_error
     bool error(const std::string& id,
                const std::string& arg1,
                const std::string& arg2,
-               const std::string& arg3)
-      throw(message_handler_id_error,message_handler_format_error,message_handler_limit_error);
+               const std::string& arg3);
 
     // positional messages
+    // exceptions: message_handler_id_error,message_handler_format_error,message_handler_limit_error
     bool error(const message_position&,
                const std::string& id,
-               const std::vector<std::string>& args)
-      throw(message_handler_id_error,message_handler_format_error,message_handler_limit_error);
+               const std::vector<std::string>& args);
 
+    // exceptions: message_handler_id_error,message_handler_format_error,message_handler_limit_error
     bool error(const message_position&,
-               const std::string& id)
-      throw(message_handler_id_error,message_handler_format_error,message_handler_limit_error);
+               const std::string& id);
 
+    // exceptions: message_handler_id_error,message_handler_format_error,message_handler_limit_error
     bool error(const message_position&,
                const std::string& id,
-               const std::string& arg1)
-      throw(message_handler_id_error,message_handler_format_error,message_handler_limit_error);
+               const std::string& arg1);
 
+    // exceptions: message_handler_id_error,message_handler_format_error,message_handler_limit_error
     bool error(const message_position&,
                const std::string& id,
                const std::string& arg1,
-               const std::string& arg2)
-      throw(message_handler_id_error,message_handler_format_error,message_handler_limit_error);
+               const std::string& arg2);
 
+    // exceptions: message_handler_id_error,message_handler_format_error,message_handler_limit_error
     bool error(const message_position&,
                const std::string& id,
                const std::string& arg1,
                const std::string& arg2,
-               const std::string& arg3)
-      throw(message_handler_id_error,message_handler_format_error,message_handler_limit_error);
+               const std::string& arg3);
 
     // fatal messages
     // These report the error and then always throw the fatal_error exception
 
     // simple messages
+    // exceptions: message_handler_id_error,message_handler_format_error,message_handler_fatal_error
     bool fatal(const std::string& id,
-               const std::vector<std::string>& args)
-      throw(message_handler_id_error,message_handler_format_error,message_handler_fatal_error);
+               const std::vector<std::string>& args);
 
-    bool fatal(const std::string& id)
-      throw(message_handler_id_error,message_handler_format_error,message_handler_fatal_error);
+    // exceptions: message_handler_id_error,message_handler_format_error,message_handler_fatal_error
+    bool fatal(const std::string& id);
 
+    // exceptions: message_handler_id_error,message_handler_format_error,message_handler_fatal_error
     bool fatal(const std::string& id,
-               const std::string& arg1)
-      throw(message_handler_id_error,message_handler_format_error,message_handler_fatal_error);
+               const std::string& arg1);
 
+    // exceptions: message_handler_id_error,message_handler_format_error,message_handler_fatal_error
     bool fatal(const std::string& id,
                const std::string& arg1,
-               const std::string& arg2)
-      throw(message_handler_id_error,message_handler_format_error,message_handler_fatal_error);
+               const std::string& arg2);
 
+    // exceptions: message_handler_id_error,message_handler_format_error,message_handler_fatal_error
     bool fatal(const std::string& id,
                const std::string& arg1,
                const std::string& arg2,
-               const std::string& arg3)
-      throw(message_handler_id_error,message_handler_format_error,message_handler_fatal_error);
+               const std::string& arg3);
 
     // positional messages
+    // exceptions: message_handler_id_error,message_handler_format_error,message_handler_fatal_error
     bool fatal(const message_position&,
                const std::string& id,
-               const std::vector<std::string>& args)
-      throw(message_handler_id_error,message_handler_format_error,message_handler_fatal_error);
+               const std::vector<std::string>& args);
 
+    // exceptions: message_handler_id_error,message_handler_format_error,message_handler_fatal_error
     bool fatal(const message_position&,
-               const std::string& id)
-      throw(message_handler_id_error,message_handler_format_error,message_handler_fatal_error);
+               const std::string& id);
 
+    // exceptions: message_handler_id_error,message_handler_format_error,message_handler_fatal_error
     bool fatal(const message_position&,
                const std::string& id,
-               const std::string& arg1)
-      throw(message_handler_id_error,message_handler_format_error,message_handler_fatal_error);
+               const std::string& arg1);
 
+    // exceptions: message_handler_id_error,message_handler_format_error,message_handler_fatal_error
     bool fatal(const message_position&,
                const std::string& id,
                const std::string& arg1,
-               const std::string& arg2)
-      throw(message_handler_id_error,message_handler_format_error,message_handler_fatal_error);
+               const std::string& arg2);
 
+    // exceptions: message_handler_id_error,message_handler_format_error,message_handler_fatal_error
     bool fatal(const message_position&,
                const std::string& id,
                const std::string& arg1,
                const std::string& arg2,
-               const std::string& arg3)
-      throw(message_handler_id_error,message_handler_format_error,message_handler_fatal_error);
+               const std::string& arg3);
 
     //////////////////////////////////////////////////////////////////////////////
     // plain text output

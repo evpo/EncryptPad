@@ -11,12 +11,12 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 // bool is dumped and restored as an unsigned char
-void stlplus::dump_bool(stlplus::dump_context& context, const bool& data) throw(stlplus::persistent_dump_failed)
+void stlplus::dump_bool(stlplus::dump_context& context, const bool& data)
 {
   context.put((unsigned char)data);
 }
 
-void stlplus::restore_bool(restore_context& context, bool& data) throw(stlplus::persistent_restore_failed)
+void stlplus::restore_bool(restore_context& context, bool& data)
 {
   data = context.get() != 0;
 }

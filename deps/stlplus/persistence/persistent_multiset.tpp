@@ -15,7 +15,6 @@ namespace stlplus
 
   template<typename K, typename P, typename D>
   void dump_multiset(dump_context& context, const std::multiset<K,P>& data, D dump_fn)
-    throw(persistent_dump_failed)
   {
     dump_size_t(context,data.size());
     for (typename std::multiset<K,P>::const_iterator i = data.begin(); i != data.end(); i++)
@@ -24,7 +23,6 @@ namespace stlplus
 
   template<typename K, typename P, typename R>
   void restore_multiset(restore_context& context, std::multiset<K,P>& data, R restore_fn)
-    throw(persistent_restore_failed)
   {
     data.clear();
     size_t size = 0;

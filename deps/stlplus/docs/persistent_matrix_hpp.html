@@ -32,13 +32,13 @@
 namespace stlplus
 {
 
+  // exceptions: persistent_dump_failed
   template&lt;typename T, typename DT&gt;
-  void dump_matrix(dump_context&amp;, const matrix&lt;T&gt;&amp; data, DT dump_fn)
-    throw(persistent_dump_failed);
+  void dump_matrix(dump_context&amp;, const matrix&lt;T&gt;&amp; data, DT dump_fn);
 
+  // exceptions: persistent_restore_failed
   template&lt;typename T, typename RT&gt;
-  void restore_matrix(restore_context&amp;, matrix&lt;T&gt;&amp; data, RT restore_fn)
-    throw(persistent_restore_failed);
+  void restore_matrix(restore_context&amp;, matrix&lt;T&gt;&amp; data, RT restore_fn);
 
 } // end namespace stlplus
 

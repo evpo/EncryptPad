@@ -16,10 +16,10 @@
 template<typename  T, typename DE>
 void stlplus::dump_simple_ptr(stlplus::dump_context& context, const stlplus::simple_ptr<T>& data,
                               DE dump_element)
-  throw(stlplus::persistent_dump_failed)
+
 {
   // Many smart pointers can point to the same object.
-  // I could have used the address of the object to differentiate, 
+  // I could have used the address of the object to differentiate,
   // but that would not have differentiated between different null smart pointers
   // so I use the address of the count to differentiate between different objects.
   // get a magic key for the substructure - this also returns a flag saying whether its been seen before
@@ -34,7 +34,7 @@ void stlplus::dump_simple_ptr(stlplus::dump_context& context, const stlplus::sim
 template<typename T, typename RE>
 void stlplus::restore_simple_ptr(stlplus::restore_context& context, stlplus::simple_ptr<T>& data,
                                  RE restore_element)
-  throw(stlplus::persistent_restore_failed)
+
 {
   // get the old counter magic key
   unsigned magic = 0;
@@ -72,7 +72,7 @@ void stlplus::restore_simple_ptr(stlplus::restore_context& context, stlplus::sim
 
 template<typename T>
 void stlplus::dump_simple_ptr_clone_callback(stlplus::dump_context& context, const stlplus::simple_ptr_clone<T>& data)
-  throw(stlplus::persistent_dump_failed)
+
 {
   std::pair<bool,unsigned> mapping = context.object_map(data._count());
   stlplus::dump_unsigned(context,mapping.second);
@@ -81,7 +81,7 @@ void stlplus::dump_simple_ptr_clone_callback(stlplus::dump_context& context, con
 
 template<typename T>
 void stlplus::restore_simple_ptr_clone_callback(stlplus::restore_context& context, stlplus::simple_ptr_clone<T>& data)
-  throw(stlplus::persistent_restore_failed)
+
 {
   unsigned magic = 0;
   stlplus::restore_unsigned(context,magic);
@@ -107,7 +107,7 @@ void stlplus::restore_simple_ptr_clone_callback(stlplus::restore_context& contex
 
 template<typename T>
 void stlplus::dump_simple_ptr_clone_interface(stlplus::dump_context& context, const stlplus::simple_ptr_clone<T>& data)
-  throw(stlplus::persistent_dump_failed)
+
 {
   std::pair<bool,unsigned> mapping = context.object_map(data._count());
   stlplus::dump_unsigned(context,mapping.second);
@@ -116,7 +116,7 @@ void stlplus::dump_simple_ptr_clone_interface(stlplus::dump_context& context, co
 
 template<typename T>
 void stlplus::restore_simple_ptr_clone_interface(stlplus::restore_context& context, stlplus::simple_ptr_clone<T>& data)
-  throw(stlplus::persistent_restore_failed)
+
 {
   unsigned magic = 0;
   stlplus::restore_unsigned(context,magic);

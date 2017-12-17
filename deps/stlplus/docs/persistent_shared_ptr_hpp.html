@@ -35,33 +35,33 @@ namespace stlplus
 
   // shared_ptr - uses dump/restore_pointer on the contents
 
+  // exceptions: persistent_dump_failed
   template&lt;typename T, typename DE&gt;
-  void dump_shared_ptr(dump_context&amp;, const std::shared_ptr&lt;T&gt;&amp; data, DE dump_element)
-    throw(persistent_dump_failed);
+  void dump_shared_ptr(dump_context&amp;, const std::shared_ptr&lt;T&gt;&amp; data, DE dump_element);
 
+  // exceptions: persistent_restore_failed
   template&lt;typename T, typename RE&gt;
-  void restore_shared_ptr(restore_context&amp;, std::shared_ptr&lt;T&gt;&amp; data, RE restore_element)
-    throw(persistent_restore_failed);
+  void restore_shared_ptr(restore_context&amp;, std::shared_ptr&lt;T&gt;&amp; data, RE restore_element);
 
   // shared_ptr using the polymorphic callback approach - uses dump/restore_callback on the contents
 
+  // exceptions: persistent_dump_failed
   template&lt;typename T&gt;
-  void dump_shared_ptr_callback(dump_context&amp;, const std::shared_ptr&lt;T&gt;&amp; data)
-    throw(persistent_dump_failed);
+  void dump_shared_ptr_callback(dump_context&amp;, const std::shared_ptr&lt;T&gt;&amp; data);
 
+  // exceptions: persistent_restore_failed
   template&lt;typename T&gt;
-  void restore_shared_ptr_callback(restore_context&amp;, std::shared_ptr&lt;T&gt;&amp; data)
-    throw(persistent_restore_failed);
+  void restore_shared_ptr_callback(restore_context&amp;, std::shared_ptr&lt;T&gt;&amp; data);
 
   // shared_ptr using the interface approach - uses dump/restore_interface on the contents
 
+  // exceptions: persistent_dump_failed
   template&lt;typename T&gt;
-  void dump_shared_ptr_interface(dump_context&amp;, const std::shared_ptr&lt;T&gt;&amp; data)
-    throw(persistent_dump_failed);
+  void dump_shared_ptr_interface(dump_context&amp;, const std::shared_ptr&lt;T&gt;&amp; data);
 
+  // exceptions: persistent_restore_failed
   template&lt;typename T&gt;
-  void restore_shared_ptr_interface(restore_context&amp;, std::shared_ptr&lt;T&gt;&amp; data)
-    throw(persistent_restore_failed);
+  void restore_shared_ptr_interface(restore_context&amp;, std::shared_ptr&lt;T&gt;&amp; data);
 
 } // end namespace stlplus
 

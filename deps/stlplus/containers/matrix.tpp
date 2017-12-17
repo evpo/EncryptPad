@@ -13,7 +13,7 @@ namespace stlplus
   ////////////////////////////////////////////////////////////////////////////////
 
   template<typename T>
-  matrix<T>::matrix(unsigned rows, unsigned cols, const T& fill) throw()
+  matrix<T>::matrix(unsigned rows, unsigned cols, const T& fill)
   {
     m_rows = 0;
     m_cols = 0;
@@ -22,7 +22,7 @@ namespace stlplus
   }
 
   template<typename T>
-  matrix<T>::~matrix(void) throw()
+  matrix<T>::~matrix(void)
   {
     for (unsigned row = 0; row < m_rows; row++)
       delete[] m_data[row];
@@ -30,7 +30,7 @@ namespace stlplus
   }
 
   template<typename T>
-  matrix<T>::matrix(const matrix<T>& r) throw()
+  matrix<T>::matrix(const matrix<T>& r)
   {
     m_rows = 0;
     m_cols = 0;
@@ -39,7 +39,7 @@ namespace stlplus
   }
 
   template<typename T>
-  matrix<T>& matrix<T>::operator =(const matrix<T>& right) throw()
+  matrix<T>& matrix<T>::operator =(const matrix<T>& right)
   {
     // clear the old values
     for (unsigned row = 0; row < m_rows; row++)
@@ -57,7 +57,7 @@ namespace stlplus
   }
 
   template<typename T>
-  void matrix<T>::resize(unsigned rows, unsigned cols, const T& fill) throw()
+  void matrix<T>::resize(unsigned rows, unsigned cols, const T& fill)
   {
     // a grid is an array of rows, where each row is an array of T
     // a zero-row or zero-column matrix has a null grid
@@ -89,19 +89,19 @@ namespace stlplus
   }
 
   template<typename T>
-  unsigned matrix<T>::rows(void) const throw()
+  unsigned matrix<T>::rows(void) const
   {
     return m_rows;
   }
 
   template<typename T>
-  unsigned matrix<T>::columns(void) const throw()
+  unsigned matrix<T>::columns(void) const
   {
     return m_cols;
   }
 
   template<typename T>
-  void matrix<T>::erase(const T& fill) throw()
+  void matrix<T>::erase(const T& fill)
   {
     for (unsigned row = 0; row < m_rows; row++)
       for (unsigned col = 0; col < m_cols; col++)
@@ -109,13 +109,13 @@ namespace stlplus
   }
 
   template<typename T>
-  void matrix<T>::erase(unsigned row, unsigned col, const T& fill) throw(std::out_of_range)
+  void matrix<T>::erase(unsigned row, unsigned col, const T& fill)
   {
     insert(row,col,fill);
   }
 
   template<typename T>
-  void matrix<T>::insert(unsigned row, unsigned col, const T& element) throw(std::out_of_range)
+  void matrix<T>::insert(unsigned row, unsigned col, const T& element)
   {
     if (row >= m_rows) throw std::out_of_range("matrix::insert row");
     if (col >= m_cols) throw std::out_of_range("matrix::insert col");
@@ -123,7 +123,7 @@ namespace stlplus
   }
 
   template<typename T>
-  const T& matrix<T>::item(unsigned row, unsigned col) const throw(std::out_of_range)
+  const T& matrix<T>::item(unsigned row, unsigned col) const
   {
     if (row >= m_rows) throw std::out_of_range("matrix::item row");
     if (col >= m_cols) throw std::out_of_range("matrix::item col");
@@ -131,7 +131,7 @@ namespace stlplus
   }
 
   template<typename T>
-  T& matrix<T>::item(unsigned row, unsigned col) throw(std::out_of_range)
+  T& matrix<T>::item(unsigned row, unsigned col)
   {
     if (row >= m_rows) throw std::out_of_range("matrix::item row");
     if (col >= m_cols) throw std::out_of_range("matrix::item col");
@@ -139,7 +139,7 @@ namespace stlplus
   }
 
   template<typename T>
-  const T& matrix<T>::operator()(unsigned row, unsigned col) const throw(std::out_of_range)
+  const T& matrix<T>::operator()(unsigned row, unsigned col) const
   {
     if (row >= m_rows) throw std::out_of_range("matrix::operator() row");
     if (col >= m_cols) throw std::out_of_range("matrix::operator() col");
@@ -147,7 +147,7 @@ namespace stlplus
   }
 
   template<typename T>
-  T& matrix<T>::operator()(unsigned row, unsigned col) throw(std::out_of_range)
+  T& matrix<T>::operator()(unsigned row, unsigned col)
   {
     if (row >= m_rows) throw std::out_of_range("matrix::operator() row");
     if (col >= m_cols) throw std::out_of_range("matrix::operator() col");
@@ -155,13 +155,13 @@ namespace stlplus
   }
 
   template<typename T>
-  void matrix<T>::fill(const T& item) throw()
+  void matrix<T>::fill(const T& item)
   {
     erase(item);
   }
 
   template<typename T>
-  void matrix<T>::fill_column(unsigned col, const T& item) throw (std::out_of_range)
+  void matrix<T>::fill_column(unsigned col, const T& item)
   {
     if (col >= m_cols) throw std::out_of_range("matrix::fill_column");
     for (unsigned row = 0; row < m_rows; row++)
@@ -169,7 +169,7 @@ namespace stlplus
   }
 
   template<typename T>
-  void matrix<T>::fill_row(unsigned row, const T& item) throw (std::out_of_range)
+  void matrix<T>::fill_row(unsigned row, const T& item)
   {
     if (row >= m_rows) throw std::out_of_range("matrix::fill_row");
     for (unsigned col = 0; col < m_cols; col++)
@@ -177,28 +177,28 @@ namespace stlplus
   }
 
   template<typename T>
-  void matrix<T>::fill_leading_diagonal(const T& item) throw()
+  void matrix<T>::fill_leading_diagonal(const T& item)
   {
     for (unsigned i = 0; i < m_cols && i < m_rows; i++)
       insert(i, i, item);
   }
 
   template<typename T>
-  void matrix<T>::fill_trailing_diagonal(const T& item) throw()
+  void matrix<T>::fill_trailing_diagonal(const T& item)
   {
     for (unsigned i = 0; i < m_cols && i < m_rows; i++)
       insert(i, m_cols-i-1, item);
   }
 
   template<typename T>
-  void matrix<T>::make_identity(const T& one, const T& zero) throw()
+  void matrix<T>::make_identity(const T& one, const T& zero)
   {
     fill(zero);
     fill_leading_diagonal(one);
   }
 
   template<typename T>
-  void matrix<T>::transpose(void) throw()
+  void matrix<T>::transpose(void)
   {
     // no gain in manipulating this, since building a new matrix is no less efficient
     matrix<T> transposed(columns(), rows());
@@ -212,4 +212,3 @@ namespace stlplus
   ////////////////////////////////////////////////////////////////////////////////
 
 } // end namespace stlplus
-

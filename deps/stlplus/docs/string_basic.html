@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-<title>STLplus Library Collection - strings/string_basic.hpp - String Formatting of Basic Types</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STLplus C++ Library Collection - strings/string_basic.hpp - String Formatting of Basic Types</title>
 <link rel="icon" href="plus.png" type="image/png"/>
 <meta name="Author" content="Andy Rushton"/>
 <link rel="stylesheet" media="screen" type="text/css" href="screen.css"/>
@@ -14,9 +15,7 @@
 <div id="header">
 
 <div id="headerBanner">
-<h1>The
-<span style="color:red">S</span><span style="color:blue">T</span><span style="color:green">L</span><span style="color:#ecec80">plus</span>
-C++ Library Collection</h1>
+<h1>STLplus C++ Library Collection</h1>
 </div>
 
 <div id="headerNavigation">
@@ -67,9 +66,9 @@ for printing the same types.</p>
 </ul>
 
 <p>The string formatting functions in <a
-href="string_basic_hpp.html"><code>string_basic.hpp</code></a> are controlled by a set of
+                                        href="string_basic_hpp.html"><code>string_basic.hpp</code></a> are controlled by a set of
 enumeration types which have been separated out into the header <a
-href="format_types_hpp.html"><code>format_types.hpp</code></a>.</p>
+                                                                  href="format_types_hpp.html"><code>format_types.hpp</code></a>.</p>
 
 <h2 id="radix">Radix Handling</h2>
 
@@ -160,8 +159,7 @@ is:</p>
 std::string stlplus::<em>type</em>_to_string(<em>type</em> i,
                                     unsigned radix = 10,
                                     stlplus::radix_display_t display = stlplus::radix_c_style_or_hash,
-                                    unsigned width = 0)
-  throw(std::invalid_argument);
+                                    unsigned width = 0);
 </pre>
 
 <p>In this case, <em>type</em> is any integer type - namely bool, short, unsigned short, int,
@@ -195,8 +193,7 @@ radix_c_style_or_hash prints decimal as just a simple number).</p>
 std::string stlplus::address_to_string(const void*,
                                        unsigned radix = 16,
                                        radix_display_t display = radix_c_style_or_hash,
-                                       unsigned width = 0)
-  throw(std::invalid_argument);
+                                       unsigned width = 0);
 </pre>
 
 <p>This prints out an address as a number (any address, since in C any pointer can be
@@ -213,8 +210,7 @@ base.</p>
 <p>The integer conversion functions are of the form:</p>
 
 <pre class="cpp">
-<em>type</em> string_to_<em>type</em>(const std::string&amp; value, unsigned radix = 0);
-  throw(std::invalid_argument);
+<em>type</em> string_to_<em>type</em>(const std::string&amp; value, unsigned radix = 0);;
 </pre>
 
 <p>where <em>type</em> is bool, short, unsigned short, int, unsigned int, long
@@ -233,8 +229,7 @@ outside the range 2-36.</p>
 <p>And finally, there is the reverse conversion for addresses:</p>
 
 <pre class="cpp">
-void* string_to_address(const std::string&amp; value, unsigned radix = 0)
-  throw(std::invalid_argument);
+void* string_to_address(const std::string&amp; value, unsigned radix = 0);
 </pre>
 
 <h2 id="real_to_string">Conversion from Real to String</h2>
@@ -243,12 +238,12 @@ void* string_to_address(const std::string&amp; value, unsigned radix = 0)
 string representation. These are:</p>
 
 <pre class="cpp">
-std::string stlplus::float_to_string(float f, 
+std::string stlplus::float_to_string(float f,
                                      stlplus::real_display_t display = stlplus::display_mixed,
                                      unsigned width = 0,
                                      unsigned precision = 6);
 
-std::string stlplus::double_to_string(double f, 
+std::string stlplus::double_to_string(double f,
                                       stlplus::real_display_t display = stlplus::display_mixed,
                                       unsigned width = 0,
                                       unsigned precision = 6);
@@ -288,8 +283,7 @@ print to.</p>
 void stlplus::print_<em>type</em>(std::ostream&amp; str, <em>type</em> value,
                          unsigned radix = 10,
                          stlplus::radix_display_t display = stlplus::radix_c_style_or_hash,
-                         unsigned width = 0)
-  throw(std::invalid_argument);
+                         unsigned width = 0);
 </pre>
 
 <p>In this case, <em>type</em> is any integer type - namely bool, short, unsigned
@@ -300,11 +294,10 @@ short, int, unsigned, long and unsigned long.</p>
 <p>Similarly, floating-point types are handled:</p>
 
 <pre class="cpp">
-void stlplus::print_<em>type</em>(std::ostream&amp; str, <em>type</em> f, 
+void stlplus::print_<em>type</em>(std::ostream&amp; str, <em>type</em> f,
                          stlplus::real_display_t display = stlplus::display_mixed,
                          unsigned width = 0,
-                         unsigned precision = 6)
-  throw(std::invalid_argument);
+                         unsigned precision = 6);
 </pre>
 
 

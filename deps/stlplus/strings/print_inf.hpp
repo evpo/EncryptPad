@@ -26,12 +26,12 @@ namespace stlplus
 
   ////////////////////////////////////////////////////////////////////////////////
 
+  // exceptions: std::invalid_argument
   void print_inf(std::ostream& device,
                  const inf&,
                  unsigned radix = 10,
                  radix_display_t display = radix_c_style_or_hash,
-                 unsigned width = 0)
-    throw(std::invalid_argument);
+                 unsigned width = 0);
 
 ////////////////////////////////////////////////////////////////////////////////
 } // end namespace stlplus

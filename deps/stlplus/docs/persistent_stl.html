@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-<title>STLplus Library Collection - persistence/persistent_stl.hpp - Data Persistence for the STL Classes</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STLplus C++ Library Collection - persistence/persistent_stl.hpp - Data Persistence for the STL Classes</title>
 <link rel="icon" href="plus.png" type="image/png"/>
 <meta name="Author" content="Andy Rushton"/>
 <link rel="stylesheet" media="screen" type="text/css" href="screen.css"/>
@@ -13,9 +14,7 @@
 <div id="header">
 
 <div id="headerBanner">
-<h1>The
-<span style="color:red">S</span><span style="color:blue">T</span><span style="color:green">L</span><span style="color:#ecec80">plus</span>
-C++ Library Collection</h1>
+<h1>STLplus C++ Library Collection</h1>
 </div>
 
 <div id="headerNavigation">
@@ -159,20 +158,16 @@ minimises the number of STL headers that get included indirectly.</p>
 // basic_string
 
 template&lt;typename charT, typename traits, typename allocator, typename D&gt;
-void stlplus::dump_basic_string(stlplus::dump_context&amp;, const std::basic_string&lt;charT,traits,allocator&gt;&amp; data, D dump_fn)
-  throw(stlplus::persistent_dump_failed);
+void stlplus::dump_basic_string(stlplus::dump_context&amp;, const std::basic_string&lt;charT,traits,allocator&gt;&amp; data, D dump_fn);
 
 template&lt;typename charT, typename traits, typename allocator, typename R&gt;
-void stlplus::restore_basic_string(stlplus::restore_context&amp;, std::basic_string&lt;charT,traits,allocator&gt;&amp; data, R restore_fn)
-  throw(stlplus::persistent_restore_failed);
+void stlplus::restore_basic_string(stlplus::restore_context&amp;, std::basic_string&lt;charT,traits,allocator&gt;&amp; data, R restore_fn);
 
 // string
 
-void stlplus::dump_string(stlplus::dump_context&amp;, const std::string&amp; data)
-  throw(stlplus::persistent_dump_failed);
+void stlplus::dump_string(stlplus::dump_context&amp;, const std::string&amp; data);
 
-void stlplus::restore_string(stlplus::restore_context&amp;, std::string&amp; data) 
-  throw(stlplus::persistent_restore_failed);
+void stlplus::restore_string(stlplus::restore_context&amp;, std::string&amp; data);
 </pre>
 
 <p>The first pair of functions are template persistence functions for the templatised class
@@ -181,7 +176,7 @@ std::basic_string which can be used to represent strings of any character width.
 <p>The second pair of functions are non-templatised functions for the persistence of std::string -
 the specialisation of std::basic_string for 8-bit characters.</p>
 
-<p><strong>Note:</strong>The 'standard' type std::wstring is not supported because it is too weakly defined. 
+<p><strong>Note:</strong>The 'standard' type std::wstring is not supported because it is too weakly defined.
 It is ostensibly the Unicode string, which requires a minimum of 21 bits. On Windows wstring is only
 16 bits wide so is actually UTF-16 encoded Unicode. On Gnu/Linux, wstring is 32 bits wide and therefore
 is unencoded UCS-4. Since UTF-16 and UCS-4 are not compatible and are not easily convertible, it is
@@ -202,12 +197,10 @@ above.</p>
 
 <pre class="cpp">
 template&lt;typename V1, typename V2, typename D1, typename D2&gt;
-void stlplus::dump_pair(stlplus::dump_context&amp;, const std::pair&lt;V1,V2&gt;&amp; data, D1 dump_fn1, D2 dump_fn2)
-  throw(stlplus::persistent_dump_failed);
+void stlplus::dump_pair(stlplus::dump_context&amp;, const std::pair&lt;V1,V2&gt;&amp; data, D1 dump_fn1, D2 dump_fn2);
 
 template&lt;typename V1, typename V2, typename R1, typename R2&gt;
-void stlplus::restore_pair(stlplus::restore_context&amp;, std::pair&lt;V1,V2&gt;&amp; data, R1 restore_fn1, R2 restore_fn2)
-  throw(stlplus::persistent_restore_failed);
+void stlplus::restore_pair(stlplus::restore_context&amp;, std::pair&lt;V1,V2&gt;&amp; data, R1 restore_fn1, R2 restore_fn2);
 </pre>
 
 <p>These functions take two parameters that are names of functions: one for each element in the
@@ -246,20 +239,16 @@ void restore_string_int_pair(stlplus::restore_context&amp; context, string_int_p
 
 <pre class="cpp">
 template&lt;typename T, typename D&gt;
-void stlplus::dump_vector(stlplus::dump_context&amp;, const std::vector&lt;T&gt;&amp; data, D dump_fn)
-  throw(stlplus::persistent_dump_failed);
+void stlplus::dump_vector(stlplus::dump_context&amp;, const std::vector&lt;T&gt;&amp; data, D dump_fn);
 
 template&lt;typename T, typename R&gt;
-void stlplus::restore_vector(stlplus::restore_context&amp;, std::vector&lt;T&gt;&amp; data, R restore_fn)
-  throw(stlplus::persistent_restore_failed);
+void stlplus::restore_vector(stlplus::restore_context&amp;, std::vector&lt;T&gt;&amp; data, R restore_fn);
 
 // specialism for vector&lt;bool&gt;
 
-void stlplus::dump_vector_bool(stlplus::dump_context&amp;, const std::vector&lt;bool&gt;&amp; data)
-  throw(stlplus::persistent_dump_failed);
+void stlplus::dump_vector_bool(stlplus::dump_context&amp;, const std::vector&lt;bool&gt;&amp; data);
 
-void stlplus::restore_vector_bool(stlplus::restore_context&amp;, std::vector&lt;bool&gt;&amp; data)
-  throw(stlplus::persistent_restore_failed);
+void stlplus::restore_vector_bool(stlplus::restore_context&amp;, std::vector&lt;bool&gt;&amp; data);
 </pre>
 
 <p>The first pair of functions are templatised functions for the persistence of a vector containing
@@ -282,12 +271,10 @@ bool, which has a specialised implementation in the STL and a slightly different
 
 <pre class="cpp">
 template&lt;typename T, typename D&gt;
-void stlplus::dump_list(stlplus::dump_context&amp;, const std::list&lt;T&gt;&amp; data, D dump_fn)
-  throw(stlplus::persistent_dump_failed);
+void stlplus::dump_list(stlplus::dump_context&amp;, const std::list&lt;T&gt;&amp; data, D dump_fn);
 
 template&lt;typename T, typename R&gt;
-void stlplus::restore_list(stlplus::restore_context&amp;, std::list&lt;T&gt;&amp; data, R restore_fn)
-  throw(stlplus::persistent_restore_failed);
+void stlplus::restore_list(stlplus::restore_context&amp;, std::list&lt;T&gt;&amp; data, R restore_fn);
 </pre>
 
 <p>This pair of functions are templatised functions for the persistence of a list containing
@@ -307,12 +294,10 @@ stlplus::restore_string.</p>
 
 <pre class="cpp">
 template&lt;typename T, typename D&gt;
-void stlplus::dump_deque(stlplus::dump_context&amp;, const std::deque&lt;T&gt;&amp; data, D dump_fn)
-  throw(stlplus::persistent_dump_failed);
+void stlplus::dump_deque(stlplus::dump_context&amp;, const std::deque&lt;T&gt;&amp; data, D dump_fn);
 
 template&lt;typename T, typename R&gt;
-void stlplus::restore_deque(stlplus::restore_context&amp;, std::deque&lt;T&gt;&amp; data, R restore_fn)
-  throw(stlplus::persistent_restore_failed);
+void stlplus::restore_deque(stlplus::restore_context&amp;, std::deque&lt;T&gt;&amp; data, R restore_fn);
 </pre>
 
 <p>This pair of functions are templatised functions for the persistence of a deque containing
@@ -332,12 +317,10 @@ stlplus::restore_string.</p>
 
 <pre class="cpp">
 template&lt;typename K, typename P, typename D&gt;
-void stlplus::dump_set(stlplus::dump_context&amp;, const std::set&lt;K,P&gt;&amp; data, D dump_fn)
-  throw(stlplus::persistent_dump_failed);
+void stlplus::dump_set(stlplus::dump_context&amp;, const std::set&lt;K,P&gt;&amp; data, D dump_fn);
 
 template&lt;typename K, typename P, typename R&gt;
-void stlplus::restore_set(stlplus::restore_context&amp;, std::set&lt;K,P&gt;&amp; data, R restore_fn)
-  throw(stlplus::persistent_restore_failed);
+void stlplus::restore_set(stlplus::restore_context&amp;, std::set&lt;K,P&gt;&amp; data, R restore_fn);
 </pre>
 
 <p>This pair of functions are templatised functions for the persistence of a set containing
@@ -357,12 +340,10 @@ stlplus::restore_string.</p>
 
 <pre class="cpp">
 template&lt;typename K, typename P, typename D&gt;
-void stlplus::dump_multiset(stlplus::dump_context&amp;, const std::multiset&lt;K,P&gt;&amp; data, D dump_fn)
-  throw(stlplus::persistent_dump_failed);
+void stlplus::dump_multiset(stlplus::dump_context&amp;, const std::multiset&lt;K,P&gt;&amp; data, D dump_fn);
 
 template&lt;typename K, typename P, typename R&gt;
-void stlplus::restore_multiset(stlplus::restore_context&amp;, std::multiset&lt;K,P&gt;&amp; data, R restore_fn)
-  throw(stlplus::persistent_restore_failed);
+void stlplus::restore_multiset(stlplus::restore_context&amp;, std::multiset&lt;K,P&gt;&amp; data, R restore_fn);
 </pre>
 
 <p>This pair of functions are templatised functions for the persistence of a multiset containing
@@ -382,12 +363,10 @@ stlplus::restore_string.</p>
 
 <pre class="cpp">
 template&lt;typename K, typename T, typename P, typename DK, typename DT&gt;
-void stlplus::dump_map(stlplus::dump_context&amp;, const std::map&lt;K,T,P&gt;&amp; data, DK key_dump_fn, DT val_dump_fn)
-  throw(stlplus::persistent_dump_failed);
+void stlplus::dump_map(stlplus::dump_context&amp;, const std::map&lt;K,T,P&gt;&amp; data, DK key_dump_fn, DT val_dump_fn);
 
 template&lt;typename K, typename T, typename P, typename RK, typename RT&gt;
-void stlplus::restore_map(stlplus::restore_context&amp;, std::map&lt;K,T,P&gt;&amp; data, RK key_restore_fn, RT val_restore_fn)
-  throw(stlplus::persistent_restore_failed);
+void stlplus::restore_map(stlplus::restore_context&amp;, std::map&lt;K,T,P&gt;&amp; data, RK key_restore_fn, RT val_restore_fn);
 </pre>
 
 <p>This pair of functions are templatised functions for the persistence of a map containing an
@@ -407,12 +386,10 @@ would be stlplus::dump_int/stlplus::dump_string and stlplus::restore_int/stlplus
 
 <pre class="cpp">
 template&lt;typename K, typename T, typename P, typename DK, typename DT&gt;
-void stlplus::dump_multimap(stlplus::dump_context&amp;, const std::multimap&lt;K,T,P&gt;&amp; data, DK key_dump_fn, DT val_dump_fn)
-  throw(stlplus::persistent_dump_failed);
+void stlplus::dump_multimap(stlplus::dump_context&amp;, const std::multimap&lt;K,T,P&gt;&amp; data, DK key_dump_fn, DT val_dump_fn);
 
 template&lt;typename K, typename T, typename P, typename RK, typename RT&gt;
-void stlplus::restore_multimap(stlplus::restore_context&amp;, std::multimap&lt;K,T,P&gt;&amp; data, RK key_restore_fn, RT val_restore_fn)
-  throw(stlplus::persistent_restore_failed);
+void stlplus::restore_multimap(stlplus::restore_context&amp;, std::multimap&lt;K,T,P&gt;&amp; data, RK key_restore_fn, RT val_restore_fn);
 </pre>
 
 <p>This pair of functions are templatised functions for the persistence of a multimap containing an
@@ -431,16 +408,14 @@ type. For example, a complex&lt;int&gt; or complex&lt;float&gt;.</p>
 
 <pre class="cpp">
 template&lt;typename T, typename D&gt;
-void stlplus::dump_complex(stlplus::dump_context&amp;, const std::complex&lt;T&gt;&amp; data, D dump_fn)
-  throw(stlplus::persistent_dump_failed);
+void stlplus::dump_complex(stlplus::dump_context&amp;, const std::complex&lt;T&gt;&amp; data, D dump_fn);
 
 template&lt;typename T, typename R&gt;
-void stlplus::restore_complex(stlplus::restore_context&amp;, std::complex&lt;T&gt;&amp; data, R restore_fn)
-  throw(stlplus::persistent_restore_failed);
+void stlplus::restore_complex(stlplus::restore_context&amp;, std::complex&lt;T&gt;&amp; data, R restore_fn);
 </pre>
 
 <p>This pair of functions are templatised functions for the persistence of a complex containing an
-element of any class and takes as its third parameter the function for managing the contained type. 
+element of any class and takes as its third parameter the function for managing the contained type.
 For example, for a complex of int, the element functions would be stlplus::dump_int and
 stlplus::restore_int.</p>
 
@@ -456,12 +431,10 @@ parameter. This means that bitsets of different sizes are in fact different type
 
 <pre class="cpp">
 template&lt;size_t N&gt;
-void dump_bitset(dump_context&amp;, const std::bitset&lt;N&gt;&amp; data)
-  throw(stlplus::persistent_dump_failed);
+void dump_bitset(dump_context&amp;, const std::bitset&lt;N&gt;&amp; data);
 
 template&lt;size_t N&gt;
-void restore_bitset(restore_context&amp;, std::bitset&lt;N&gt;&amp; data)
-  throw(stlplus::persistent_restore_failed);
+void restore_bitset(restore_context&amp;, std::bitset&lt;N&gt;&amp; data);
 </pre>
 
 <p>These functions take two arguments, so can be used as parameters to higher-level persistence
@@ -495,37 +468,37 @@ void restore_flags_vector(stlplus::restore_context&amp; context, flags_vector&am
 </ul>
 
 <p>The shared_ptr class is part of the "C++11" extensions to
-  C++. This standard has now been ratified, and some compilers
-  support some of its features. For this reason, support
-  for persistence of shared_ptr has been added to the STLplus
-  persistence library, but only for those compilers that support
-  it.</p>
+C++. This standard has now been ratified, and some compilers
+support some of its features. For this reason, support
+for persistence of shared_ptr has been added to the STLplus
+persistence library, but only for those compilers that support
+it.</p>
 
 <p>Note: the shared_ptr class was pre-released as part of the
-  "TR1" proposed extensions which eventually became part of the
-  "C++11" standard. I do not support shared_ptr in its TR1 form
-  because it's implementation has varied between compilers too much to
-  provide a portable solution. The feature must be used in its final, standard-compliant form.</p>
+"TR1" proposed extensions which eventually became part of the
+"C++11" standard. I do not support shared_ptr in its TR1 form
+because it's implementation has varied between compilers too much to
+provide a portable solution. The feature must be used in its final, standard-compliant form.</p>
 
 <p>At the time of writing the following compilers support
-  shared_ptr:</p>
+shared_ptr:</p>
 
 <dl>
 
 <dt>Microsoft Visual Studio</dt>
 <dd>From Visual Studio Express 2010 the C++11 form of shared_ptr is
-  provided by default.</dd>
+provided by default.</dd>
 
 <dt>Gnu gcc</dt>
 <dd>The C++11 form of shared_ptr is supported in gcc from version 4,
-  provided you enable the c++11 mode with the command-line switch
-  -std=c++11. It is available in TR1 form without the switch but I do
-  not support that version.</dd>
+provided you enable the c++11 mode with the command-line switch
+-std=c++11. It is available in TR1 form without the switch but I do
+not support that version.</dd>
 
 <dt>Borland (now Embarcadero) C++ Builder</dt>
 <dd>The Borland compiler does not provide shared_ptr as yet (checked
-  in v6.31). It uses the Dinkumware STL library as does Visual Studio,
-  but an older version.</dd>
+in v6.31). It uses the Dinkumware STL library as does Visual Studio,
+but an older version.</dd>
 
 </dl>
 
@@ -536,12 +509,10 @@ therefore is parametrised by one element function.</p>
 
 <pre class="cpp">
 template&lt;typename T, typename DE&gt;
-void dump_shared_ptr(dump_context&amp;, const std::shared_ptr&lt;T&gt;&amp; data, DE dump_element)
-  throw(persistent_dump_failed);
+void dump_shared_ptr(dump_context&amp;, const std::shared_ptr&lt;T&gt;&amp; data, DE dump_element);
 
 template&lt;typename T, typename RE&gt;
-void restore_shared_ptr(restore_context&amp;, std::shared_ptr&lt;T&gt;&amp; data, RE restore_element)
-  throw(persistent_restore_failed);
+void restore_shared_ptr(restore_context&amp;, std::shared_ptr&lt;T&gt;&amp; data, RE restore_element);
 </pre>
 
 <p>This pair of functions are templatised functions for the persistence of a shared_ptr containing
@@ -550,9 +521,9 @@ example, for a pointer to a string, the element functions would be stlplus::dump
 stlplus::restore_string.</p>
 
 <p>Note: the functions for implementing pointers to polymorphic
-  classes haven't been completed yet. See the discussion for
-  implementing persistence with polymorphism for the
-  <a href="persistent_pointers.html#smart_ptr">STLplus smart pointers</a> for more information.</p>
+classes haven't been completed yet. See the discussion for
+implementing persistence with polymorphism for the
+<a href="persistent_pointers.html#smart_ptr">STLplus smart pointers</a> for more information.</p>
 
 <h2 id="omitted">Omitted Classes - Adaptors and Iterators</h2>
 

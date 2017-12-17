@@ -40,7 +40,7 @@ namespace stlplus
   class assert_failed : public std::logic_error
   {
   public:
-    assert_failed(const char* file, int line, const char* function, const char* message) throw();
+    assert_failed(const char* file, int line, const char* function, const char* message) ;
     ~assert_failed(void) throw();
   };
 
@@ -86,7 +86,8 @@ namespace stlplus
 {
 
   void debug_global(const char* file, int line, const char* function, bool state = true);
-  void debug_assert_fail(const char* file, int line, const char* function, const char* test) throw(assert_failed);
+  // exceptions: assert_failed
+  void debug_assert_fail(const char* file, int line, const char* function, const char* test) ;
 
   class debug_trace
   {

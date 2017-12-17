@@ -16,7 +16,6 @@ namespace stlplus
   template<typename T, typename DT>
   void dump_matrix(dump_context& context, const matrix<T>& data,
                    DT dump_fn)
-    throw(persistent_dump_failed)
   {
     unsigned rows = data.rows();
     unsigned cols = data.columns();
@@ -32,7 +31,6 @@ namespace stlplus
   template<typename T, typename RT>
   void restore_matrix(restore_context& context, matrix<T>& data,
                       RT restore_fn)
-    throw(persistent_restore_failed)
   {
     unsigned rows = 0;
     restore_unsigned(context, rows);
