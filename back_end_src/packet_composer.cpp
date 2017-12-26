@@ -17,6 +17,9 @@
 //You should have received a copy of the GNU General Public License
 //along with EncryptPad.  If not, see <http://www.gnu.org/licenses/>.
 //**********************************************************************************
+// comment everything out
+#if 0
+
 #include "packet_composer.h"
 #include <array>
 #include "encryption_pipeline.h"
@@ -1092,3 +1095,4 @@ namespace EncryptPad
     }
     // end of packet methods implementations
 }
+#endif

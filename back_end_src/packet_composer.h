@@ -94,10 +94,4 @@ namespace EncryptPad
         {
         }
     };
-
-    PacketResult ReadPacket(InStream &in, OutStream &out, 
-            const EncryptParams &enc_params, PacketMetadata &metadata);
-
-    PacketResult WritePacket(InStream &in, OutStream &out, 
-            EncryptParams &enc_params, PacketMetadata &metadata);
 }

@@ -33,6 +33,18 @@ namespace
     using namespace EncryptPad;
     typedef Botan::SecureVector<byte> Buffer;
 
+    PacketResult ReadPacket(InStream &in, OutStream &out, 
+            const EncryptParams &enc_params, PacketMetadata &metadata)
+    {
+
+    }
+
+    PacketResult WritePacket(InStream &in, OutStream &out, 
+            EncryptParams &enc_params, PacketMetadata &metadata)
+    {
+
+    }
+
     PacketResult EncryptWithKey(InStream &in, EncryptParams &encrypt_params, 
         OutStream &out, PacketMetadata &metadata)
     {
@@ -66,7 +78,7 @@ namespace
         if(result != PacketResult::Success)
             return result;
 
-        InPacketStreamMemory buffer_in(buffer.begin(), buffer.begin() + buffer_out->GetCount());
+        InPacketStreamMemory buffer_in(buffer.data(), buffer.data() + buffer_out->GetCount());
         WriteWad(buffer_in, out, 
                 metadata.persist_key_path ? metadata.key_file : std::string());
         return PacketResult::Success;
@@ -91,7 +103,7 @@ namespace
             if(result != PacketResult::Success)
                 return result;
 
-            InPacketStreamMemory buffer_in(buffer.begin(), buffer.begin() + buffer_out->GetCount());
+            InPacketStreamMemory buffer_in(buffer.data(), buffer.data() + buffer_out->GetCount());
 
             return WritePacket(buffer_in, out, encrypt_params, metadata);
         }
@@ -117,12 +129,12 @@ namespace
 
         if(buffer.size() >= 4)
         {
-            marker.insert(0U, reinterpret_cast<const char*>(buffer.begin()), 4U);
+            marker.insert(0U, reinterpret_cast<const char*>(buffer.data()), 4U);
         }
 
         if(marker == "IWAD" || marker == "PWAD")
         {
-            InPacketStreamMemory buffer_in(buffer.begin(), buffer.begin() + buffer_out->GetCount());
+            InPacketStreamMemory buffer_in(buffer.data(), buffer.data() + buffer_out->GetCount());
             result = DecryptWad(buffer_in, metadata.key_file, enc_params, out_stm, metadata);
             if(result == PacketResult::InvalidSurrogateIV)
                 return PacketResult::InvalidKeyFile;
@@ -132,7 +144,7 @@ namespace
         }
         else
         {
-            out_stm.Write(buffer.begin(), buffer_out->GetCount());
+            out_stm.Write(buffer.data(), buffer_out->GetCount());
         }
         
         return PacketResult::Success;
@@ -185,7 +197,7 @@ namespace
             metadata.key_file = key_file_tmp;
         }
 
-        InPacketStreamMemory payload_stm(payload.begin(), payload.begin() + payload_out->GetCount());
+        InPacketStreamMemory payload_stm(payload.data(), payload.data() + payload_out->GetCount());
         return DecryptWithKey(payload_stm, encrypt_params, out, metadata);
     }
 
@@ -195,7 +207,7 @@ namespace
         if(OpenFile(file_name, out) != OpenFileResult::OK)
             return PacketResult::IOErrorOutput;
 
-        if(!out.Write(stm.begin(), stm.size()))
+        if(!out.Write(stm.data(), stm.size()))
             return PacketResult::IOErrorOutput;
 
         return PacketResult::Success;
@@ -235,7 +247,7 @@ namespace EncryptPad
     PacketResult EncryptBuffer(const Botan::SecureVector<byte> &input_buffer, EncryptParams &encrypt_params,
              Botan::SecureVector<byte> &output_buffer, PacketMetadata &metadata)
     {
-        InPacketStreamMemory in(input_buffer.begin(), input_buffer.end());
+        InPacketStreamMemory in(input_buffer.data(), input_buffer.data() + input_buffer.size());
         output_buffer.clear();
         auto out = MakeOutStream(output_buffer);
         return EncryptStream(in, encrypt_params, *out, metadata);
@@ -244,7 +256,7 @@ namespace EncryptPad
     PacketResult DecryptBuffer(const Botan::SecureVector<byte> &input_buffer, const EncryptParams &encrypt_params,
              Botan::SecureVector<byte> &output_buffer, PacketMetadata &metadata)
     {
-        InPacketStreamMemory in(input_buffer.begin(), input_buffer.end());
+        InPacketStreamMemory in(input_buffer.data(), input_buffer.data() + input_buffer.size());
         output_buffer.clear();
         auto out = MakeOutStream(output_buffer);
         return DecryptStream(in, encrypt_params, *out, metadata);
@@ -256,7 +268,7 @@ namespace EncryptPad
         PacketResult result = PacketResult::None;
 
         {
-            InPacketStreamMemory stm_in(input_buffer.begin(), input_buffer.end());
+            InPacketStreamMemory stm_in(input_buffer.data(), input_buffer.data() + input_buffer.size());
 
             OutPacketStreamFile out;
             if(OpenFile(file_out, out) != OpenFileResult::OK)
