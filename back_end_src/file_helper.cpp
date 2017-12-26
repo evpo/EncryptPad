@@ -101,7 +101,7 @@ namespace EncryptPad
         if(!file.Valid())
             return false;
 
-        size_t count = fwrite(buffer.begin(), 1, buffer.size(), file.get());
+        size_t count = fwrite(buffer.data(), 1, buffer.size(), file.get());
         return !ferror(file.get()) && count == buffer.size();
     }
 

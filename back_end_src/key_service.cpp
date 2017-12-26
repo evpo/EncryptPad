@@ -20,13 +20,14 @@
 #include "key_service.h"
 #include <algorithm>
 #include "assert.h"
-#include "botan.h"
-#include "key_generation.h"
 #include "algo_spec.h"
+#include "openpgp_conversions.h"
+#include "emsg_symmetric_key.h"
+
+using namespace LibEncryptMsg;
 
 namespace EncryptPad
 {
-
     KeyService::KeyService(int key_count)
         :key_count_(key_count)
         {}
@@ -66,7 +67,7 @@ namespace EncryptPad
         return **it;
     }
 
-    const KeyRecord &KeyService::GetKeyForLoading(const Botan::SecureVector<byte> &salt, int iterations, HashAlgo hash_algo) const
+    const KeyRecord &KeyService::GetKeyForLoading(const Botan::SecureVector<byte> &salt, int iterations, LibEncryptMsg::HashAlgo hash_algo) const
     {
         if(hash_algo != hash_algo_)
             return EmptyRecord();
@@ -80,8 +81,8 @@ namespace EncryptPad
         return **it;
     }
 
-    const KeyRecord &KeyService::ChangePassphrase(const std::string &passphrase, HashAlgo hash_algo, int key_size,
-            int iterations, const Botan::SecureVector<byte> &salt)
+    const KeyRecord &KeyService::ChangePassphrase(const std::string &passphrase_str, LibEncryptMsg::HashAlgo hash_algo, unsigned key_size,
+            int iterations, LibEncryptMsg::Salt salt)
     {
         using namespace Botan;
 
@@ -90,24 +91,18 @@ namespace EncryptPad
         key_size_ = key_size;
         hash_algo_ = hash_algo;
 
-        auto hash_spec = GetHashSpec(hash_algo_);
-        
-        std::unique_ptr<PBKDF> pbkdf(get_s2k(hash_spec.botan_name));
-
         key_records_.clear();
-        
+
+        Passphrase passphrase(SafeVector(passphrase_str.begin(), passphrase_str.end()));
+
         if(salt.size() > 0)
         {
             KeyRecordPtr key_record(new KeyRecord());
             key_record->used = true;
             key_record->iterations = iterations;
             key_record->salt = salt;
-            key_record->key = pbkdf->derive_key(
-                    key_size_ / 8,
-                    passphrase, 
-                    salt.begin(), 
-                    salt.size(), 
-                    iterations);
+            key_record->key = LibEncryptMsg::GenerateEncryptionKey(
+                    passphrase, key_size, hash_algo, EncodeS2KIterations(iterations), key_record->salt);
             key_records_.push_back(key_record);
             ret_val = key_record.get();
         }
@@ -117,21 +112,14 @@ namespace EncryptPad
         assert(size_before <= key_count_);
         for(int i = 0; i < key_count_ - size_before; i++)
         {
-            byte buf[kSaltSize];
-            GenerateNewKey(buf, kSaltSize);
+            Salt newSalt = GenerateRandomSalt();
 
             KeyRecordPtr key_record(new KeyRecord());
             key_record->used = false;
             key_record->iterations = iterations;
-            key_record->salt.resize(kSaltSize);
-            key_record->salt.copy(buf, kSaltSize);
-            
-            key_record->key = pbkdf->derive_key(
-                    key_size_ / 8,
-                    passphrase, 
-                    key_record->salt.begin(), 
-                    key_record->salt.size(), 
-                    iterations);
+            key_record->salt = newSalt;
+            key_record->key = LibEncryptMsg::GenerateEncryptionKey(
+                    passphrase, key_size_, hash_algo_, iterations, key_record->salt);
             key_records_.push_back(key_record);
         }
 

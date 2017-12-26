@@ -24,21 +24,22 @@
 #include "botan.h"
 #include "algo_spec.h"
 #include "packet_typedef.h"
+#include "emsg_types.h"
 
 namespace EncryptPad
 {
 
     struct KeyRecord
     {
-        Botan::OctetString key;
-        Botan::SecureVector<byte> salt;
+        std::unique_ptr<LibEncryptMsg::EncryptionKey> key;
+        LibEncryptMsg::Salt salt;
         int iterations;
 
         bool used;
 
         bool IsEmpty() const
         {
-            return key.length() == 0;
+            return key->length() == 0;
         }
     };
 
@@ -55,7 +56,7 @@ namespace EncryptPad
 
         int key_count_;
 
-        HashAlgo hash_algo_;
+        LibEncryptMsg::HashAlgo hash_algo_;
         int key_size_;
 
         KeyRecord empty_record_;
@@ -76,7 +77,7 @@ namespace EncryptPad
             return key_size_;
         }
 
-        HashAlgo get_hash_algo() const
+        LibEncryptMsg::HashAlgo get_hash_algo() const
         {
             return hash_algo_;
         }
@@ -98,8 +99,8 @@ namespace EncryptPad
         // Clears all previous keys and generates new keys from passphrase with different salts, 
         // one of them has the salt from the parameter.
         // Returns the key with the salt from the parameter. This key is also marked as used.
-        const KeyRecord &ChangePassphrase(const std::string &passphrase, HashAlgo hash_algo, int key_size,
-                int iterations, const Botan::SecureVector<byte> &salt = Botan::SecureVector<byte>());
+        const KeyRecord &ChangePassphrase(const std::string &passphrase, LibEncryptMsg::HashAlgo hash_algo, unsigned key_size,
+                int iterations, LibEncryptMsg::Salt salt = LibEncryptMsg::Salt());
 
         // Returns a key generated from the current passphrase and marks it as used so it is not used for saving again. 
         // When all key_count_ keys have been used, it returns an empty record and all keys are deleted.
@@ -107,7 +108,7 @@ namespace EncryptPad
 
         // Check if we have this key in the storage
         // If we don't have it, we need to regenerate new keys. Call ChangePassphrase.
-        const KeyRecord &GetKeyForLoading(const Botan::SecureVector<byte> &salt, int iterations, HashAlgo hash_algo) const;
+        const KeyRecord &GetKeyForLoading(const Botan::SecureVector<byte> &salt, int iterations, LibEncryptMsg::HashAlgo hash_algo) const;
 
     private:
         const KeyRecord &EmptyRecord() const;

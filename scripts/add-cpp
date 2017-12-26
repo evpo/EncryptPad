@@ -1,0 +1,33 @@
+#!/bin/bash
+
+if [ $# != 1 ]
+then
+    echo "$0 <base-file-name>"
+    exit -1
+fi
+
+if [[ "$1" == *".cpp" || "$1" == *".h" ]]
+then
+    echo "Specify file name without extention"
+    exit -1
+fi
+
+cat >back_end_src/${1}.cpp <<EOF
+#include "${1}.h"
+
+namespace EncryptPad
+{
+
+}
+
+EOF
+
+cat >back_end_src/${1}.h <<EOF
+#pragma once
+
+namespace EncryptPad
+{
+
+}
+
+EOF

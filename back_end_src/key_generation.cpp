@@ -21,7 +21,7 @@
 #include "file_helper.h"
 #include "key_file_converter.h"
 #include "packet_composer.h"
-#include "algo_spec.h"
+#include "algo_defaults.h"
 
 using namespace EncryptPad;
 
@@ -67,12 +67,12 @@ namespace EncryptPad
         Botan::SecureVector<Botan::byte> buffer(key_byte_length);
         // The formula is from Botan base64.cpp implementation
         size_t output_buffer_size = (botan_round_up<size_t>(buffer.size(), 3) / 3) * 4;
-        GenerateNewKey(buffer.begin(), buffer.size());
+        GenerateNewKey(buffer.data(), buffer.size());
         Botan::SecureVector<Botan::byte> output_buffer(output_buffer_size);
         size_t input_consumed = 0U;
         size_t output_size = Botan::base64_encode(
-                reinterpret_cast<char*>(output_buffer.begin()),
-                buffer.begin(),
+                reinterpret_cast<char*>(output_buffer.data()),
+                buffer.data(),
                 buffer.size(),
                 input_consumed,
                 true);
@@ -88,7 +88,7 @@ namespace EncryptPad
         }
         else
         {
-            std::string plain_key(reinterpret_cast<char*>(output_buffer.begin()), output_buffer.size());
+            std::string plain_key(reinterpret_cast<char*>(output_buffer.data()), output_buffer.size());
             WriteKeyFile(key_file_path, plain_key);
             std::fill(plain_key.begin(), plain_key.end(), '\0');
         }
@@ -100,7 +100,7 @@ namespace EncryptPad
         metadata.cipher_algo = kDefaultCipherAlgo;
         metadata.iterations = iterations;
         // Key file is too small for compression
-        metadata.compression = Compression::Uncompressed;
+        metadata.compression = LibEncryptMsg::Compression::Uncompressed;
         metadata.hash_algo = kDefaultHashAlgo;
         return metadata;
     }

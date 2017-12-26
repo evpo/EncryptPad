@@ -1,5 +1,5 @@
 #include "key_file_converter.h"
-#include "botan/openpgp.h"
+#include "openpgp.h"
 #include "file_encryption.h"
 
 using namespace Botan;
@@ -30,7 +30,7 @@ namespace EncryptPad
         if(result != PacketResult::Success)
             return false;
 
-        out = std::string(reinterpret_cast<const char*>(out_buffer.begin()), out_buffer.size());
+        out = std::string(reinterpret_cast<const char*>(out_buffer.data()), out_buffer.size());
         return true;
     }
 
@@ -45,7 +45,7 @@ namespace EncryptPad
         if(result != PacketResult::Success)
             return false;
 
-        out = PGP_encode(out_buffer.begin(), out_buffer.size(), "MESSAGE");
+        out = PGP_encode(out_buffer.data(), out_buffer.size(), "MESSAGE");
         return true;
     }
 

@@ -222,8 +222,8 @@ namespace EncryptPad
 
         Botan::SecureVector<byte> buffer;
         buffer.resize(metadata.payload_size);
-        in.Read(buffer.begin(), metadata.payload_size);
-        out.Write(buffer.begin(), buffer.size());
+        in.Read(buffer.data(), metadata.payload_size);
+        out.Write(buffer.data(), buffer.size());
 
         key_file.clear();
 

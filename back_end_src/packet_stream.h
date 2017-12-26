@@ -66,7 +66,7 @@ namespace EncryptPad
     {
     private:
         Botan::SecureVector<byte> *out_;
-        byte *ptr_;
+        Botan::SecureVector<byte>::iterator ptr_;
 
         void Resize(size_t size)
         {

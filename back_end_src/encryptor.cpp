@@ -246,7 +246,7 @@ EncryptPadEncryptor::Result Encryptor::Save(const string &fileName, const Secure
 {
     bool is_protected = !GetIsPlainText() || !x2KeyLocation.empty();
 
-    if(!IsCpadFormat(fileName) && is_protected)
+    if(is_protected)
     {
         // New EncryptPad format
         using namespace EncryptPad;
@@ -310,28 +310,6 @@ EncryptPadEncryptor::Result Encryptor::Save(const string &fileName, const Secure
 	Pipe firstStepTgtPipe;
 
 	SecureVector<byte> cpad_metadata;
-	if(!x2KeyLocation.empty())
-	{
-		string metadataString = x2KeyParameterName + string("=") + (persistX2KeyLocation ? x2KeyLocation : string(""));
-		cpad_metadata.resize(metadataString.size());
-		cpad_metadata.copy(reinterpret_cast<const byte*>(metadataString.c_str()), metadataString.size());
-		cpad_metadata.push_back(13);
-		cpad_metadata.push_back(10);
-
-		try
-		{
-			ConvertToPipe(content, SecureVector<byte>(), firstStepTgtPipe, ENCRYPTION, octet_key, mIV, "AES-256/CBC");
-		}
-		catch (const Botan::Invalid_Block_Size)
-		{
-			return Result::InvalidX2File;
-		}
-		catch (const Botan::Invalid_Key_Length)
-		{
-			return Result::InvalidX2File;
-		}
-	}
-
 	OctetString emptyOctet;
 	const OctetString *key = mPlainText ? &emptyOctet : &mKey;
 	const OctetString *iv = mPlainText ? &emptyOctet : &mIV;
@@ -409,7 +387,7 @@ Result Encryptor::Load(const std::string &fileName, SecureVector<byte> &content,
     if(mKey.length() == 0 && mX2KeyLocation.empty() && x2KeyLocation.empty() && !is_cpad)
     {
         content.resize(file.GetCount());
-        file.Read(content.begin(), file.GetCount());
+        file.Read(content.data(), file.GetCount());
         return Result::OK;
     }
 
@@ -466,10 +444,6 @@ Result Encryptor::Load(const std::string &fileName, SecureVector<byte> &content,
 	catch (const Botan::Decoding_Error &)
 	{
 		return Result::EncryptionError;
-	}
-	catch (const Botan::Invalid_Block_Size &)
-	{
-		return Result::InvalidX2File;
 	}
 	catch (const Botan::Invalid_Key_Length &)
 	{
