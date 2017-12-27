@@ -20,10 +20,11 @@
 #pragma once
 #include <string>
 #include "packet_typedef.h"
+#include "emsg_types.h"
 
 namespace EncryptPad
 {
-    PacketResult LoadKeyFromFileThroughCurl(const std::string& fileName,
+    LibEncryptMsg::PacketResult LoadKeyFromFileThroughCurl(const std::string& fileName,
             const std::string &libcurl_path, const std::string &libcurl_params,
             std::string &key);
 }

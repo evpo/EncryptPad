@@ -26,6 +26,7 @@
 
 using namespace std;
 using namespace Botan;
+using namespace LibEncryptMsg;
 
 namespace 
 {

@@ -108,7 +108,7 @@ namespace EncryptPad
 
         // Check if we have this key in the storage
         // If we don't have it, we need to regenerate new keys. Call ChangePassphrase.
-        const KeyRecord &GetKeyForLoading(const Botan::SecureVector<byte> &salt, int iterations, LibEncryptMsg::HashAlgo hash_algo) const;
+        const KeyRecord &GetKeyForLoading(const std::vector<uint8_t> &salt, int iterations, LibEncryptMsg::HashAlgo hash_algo) const;
 
     private:
         const KeyRecord &EmptyRecord() const;

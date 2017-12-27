@@ -27,21 +27,101 @@
 #include "file_helper.h"
 #include "win_file_reader.h"
 #include "key_file_converter.h"
+#include "message_encryption.h"
+#include "message_decryption.h"
+#include "openpgp_conversions.h"
 
-namespace 
+using namespace LibEncryptMsg;
+namespace
 {
     using namespace EncryptPad;
     typedef Botan::SecureVector<byte> Buffer;
 
-    PacketResult ReadPacket(InStream &in, OutStream &out, 
+    MessageConfig ConvertToMessageConfig(const PacketMetadata &metadata)
+    {
+        MessageConfig config;
+        config.SetCipherAlgo(metadata.cipher_algo);
+        config.SetHashAlgo(metadata.hash_algo);
+        config.SetIterations(EncodeS2KIterations(metadata.iterations));
+        config.SetCompression(metadata.compression);
+        config.SetFileName(metadata.file_name);
+        config.SetFileDate(metadata.file_date);
+        config.SetBinary(metadata.is_binary);
+        //TODO: use some meaningful default
+        config.SetPartialLengthPower(16);
+        return config;
+    }
+
+    class KeyServiceKeyProvider : public SymmetricKeyProvider
+    {
+        private:
+            MessageConfig *config_;
+            KeyService *key_service_;
+            const std::string *passphrase_;
+            unsigned key_size_;
+        public:
+            KeyServiceKeyProvider(MessageConfig *config, KeyService *key_service, const std::string *passphrase):
+                config_(config),
+                key_service_(key_service),
+                passphrase_(passphrase)
+            {
+                AlgoSpec algo_spec = GetAlgoSpec(config_->GetCipherAlgo());
+                key_size_ = algo_spec.key_size;
+            }
+
+            std::unique_ptr<EncryptionKey> GetKey(CipherAlgo cipher_algo, HashAlgo hash_algo, uint8_t iterations, Salt salt,
+                    std::string description, bool &canceled) override
+            {
+                const KeyRecord *key_record = nullptr;
+                if(passphrase_)
+                {
+                    key_record = &key_service_->ChangePassphrase(
+                            *passphrase_,
+                            config_->GetHashAlgo(),
+                            key_size_,
+                            DecodeS2KIterations(iterations),
+                            salt
+                            );
+                }
+                else
+                {
+                    key_record = &key_service_->GetKeyForLoading(
+                            salt, DecodeS2KIterations(iterations),
+                            hash_algo);
+                }
+                std::unique_ptr<EncryptionKey> ret_val;
+                if(!key_record->IsEmpty())
+                {
+                    //TODO: Work on the key provider API to use pointer or reference
+                    ret_val.reset(new EncryptionKey(*key_record->key));
+                }
+
+                return ret_val;
+            }
+    };
+
+    PacketResult ReadPacket(InStream &in, OutStream &out,
             const EncryptParams &enc_params, PacketMetadata &metadata)
     {
-
+        MessageConfig config = ConvertToMessageConfig(metadata);
+        KeyService *key_service = enc_params.key_service;
+        KeyServiceKeyProvider key_provider(&config, key_service, enc_params.passphrase);
+        MessageReader reader;
+        reader.Start(key_provider);
+        SafeVector buf;
+        buf.resize(in.GetCount());
+        stream_length_type length = in.Read(buf.data(), in.GetCount());
+        assert(length == in.GetCount());
+        reader.Finish(buf);
+        bool result = out.Write(buf.data(), buf.size());
+        assert(result);
     }
 
     PacketResult WritePacket(InStream &in, OutStream &out, 
             EncryptParams &enc_params, PacketMetadata &metadata)
     {
+        MessageWriter writer;
+
 
     }
 

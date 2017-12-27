@@ -67,7 +67,7 @@ namespace EncryptPad
         return **it;
     }
 
-    const KeyRecord &KeyService::GetKeyForLoading(const Botan::SecureVector<byte> &salt, int iterations, LibEncryptMsg::HashAlgo hash_algo) const
+    const KeyRecord &KeyService::GetKeyForLoading(const std::vector<uint8_t> &salt, int iterations, LibEncryptMsg::HashAlgo hash_algo) const
     {
         if(hash_algo != hash_algo_)
             return EmptyRecord();

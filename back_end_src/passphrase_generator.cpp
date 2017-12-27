@@ -22,6 +22,7 @@
 #include <stack>
 #include "assert.h"
 #include "botan.h"
+#include "botan/auto_rng.h"
 
 using namespace std;
 

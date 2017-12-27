@@ -20,39 +20,12 @@
 #pragma once
 #include <string>
 #include "botan.h"
+#include "emsg_types.h"
 
 namespace EncryptPad
 {
     typedef std::streamoff stream_length_type;
     typedef Botan::byte byte;
 
-    enum class PacketResult
-    {
-        Success = 0,
-        UnexpectedError,
-        InvalidSurrogateIV,
-        Empty,
-        UnexpectedFormat,
-        UnsupportedPacketType,
-        UnsupportedAlgo,
-        UnsupportedS2K,
-        UnsupportedCompressionAlgo,
-        IOError,
-        IOErrorInput,
-        IOErrorOutput,
-        MDCError,
-        CompressionError,
-        KeyFileNotSpecified,
-        IOErrorKeyFile,
-        InvalidKeyFile,
-        CurlIsNotFound,
-        CurlExitNonZero,
-        InvalidWadFile,
-        InvalidPassphrase,
-        KeyIsRequiredForSaving,
-        InvalidKeyFilePassphrase,
-        None,
-    };
-
-    std::string InterpretResult(PacketResult result);
+    std::string InterpretResult(LibEncryptMsg::PacketResult result);
 }

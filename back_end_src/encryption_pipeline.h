@@ -19,7 +19,7 @@
 //**********************************************************************************
 #pragma once
 #include <fstream>
-#include "botan.h"
+#include "botan/botan.h"
 #include "packet_stream.h"
 
 namespace EncryptPad

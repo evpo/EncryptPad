@@ -20,7 +20,7 @@
 #pragma once
 
 #include <string>
-#include "botan.h"
+#include "botan/botan.h"
 #include "key_service.h"
 #include "packet_composer.h"
 
@@ -54,8 +54,6 @@ namespace EncryptPadEncryptor
 		static const int sBlockSize = 128;
 		static const int sBufferSizeForReading = 256;
 		static const int sIterationCount = 1000;
-
-        Botan::LibraryInitializer mInit;
 
         EncryptedPlainSwitchFunctor *mEncryptedPlainSwitchFunctor;
         EncryptPad::KeyService key_service_;

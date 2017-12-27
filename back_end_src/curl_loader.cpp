@@ -21,6 +21,7 @@
 #include "subprocesses.hpp"
 
 using namespace stlplus;
+using namespace LibEncryptMsg;
 
 namespace {
     class CurlSubprocess : public subprocess

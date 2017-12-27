@@ -21,10 +21,11 @@
 #include <string>
 #include "botan.h"
 #include "packet_typedef.h"
+#include "emsg_types.h"
 
 namespace EncryptPad
 {
-    PacketResult LoadKeyFromFile(const std::string& file_name,
+    LibEncryptMsg::PacketResult LoadKeyFromFile(const std::string& file_name,
             const std::string &libcurl_path, const std::string &libcurl_params,
             std::string &key);
 

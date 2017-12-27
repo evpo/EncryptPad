@@ -23,10 +23,11 @@
 #include <string>
 #include "packet_typedef.h"
 #include "packet_stream.h"
+#include "emsg_types.h"
 
 namespace EncryptPad
 {
-    PacketResult ExtractFromWad(RandomInStream &in, OutStream &out, std::string &key_file);
-    PacketResult ExtractKeyFromWad(RandomInStream &in, std::string &key_file);
+    LibEncryptMsg::PacketResult ExtractFromWad(RandomInStream &in, OutStream &out, std::string &key_file);
+    LibEncryptMsg::PacketResult ExtractKeyFromWad(RandomInStream &in, std::string &key_file);
     bool WriteWad(InStream &in, OutStream &out, const std::string &key_file);
 }

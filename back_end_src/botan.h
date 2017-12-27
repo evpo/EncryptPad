@@ -19,7 +19,6 @@
 //**********************************************************************************
 #pragma once
 #define BOTAN_DLL
-#include "botan/botan.h"
 #include "botan/base64.h"
 #include "botan/pbkdf2.h"
 #include "botan/sha160.h"

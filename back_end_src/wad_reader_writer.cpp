@@ -33,6 +33,8 @@
 // #define ASSERT(x) assert(x) 
 // #endif
 
+using namespace LibEncryptMsg;
+
 namespace
 {
     using namespace EncryptPad;

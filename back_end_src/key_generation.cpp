@@ -22,6 +22,7 @@
 #include "key_file_converter.h"
 #include "packet_composer.h"
 #include "algo_defaults.h"
+#include "botan/auto_rng.h"
 
 using namespace EncryptPad;
 

@@ -20,9 +20,11 @@
 #include "packet_typedef.h"
 #include "assert.h"
 
+using namespace LibEncryptMsg;
+
 namespace EncryptPad
 {
-    std::string InterpretResult(PacketResult result)
+    std::string InterpretResult(LibEncryptMsg::PacketResult result)
     {
         switch(result)
         {

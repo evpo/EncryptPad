@@ -37,6 +37,7 @@
 using namespace std;
 using namespace EncryptPadEncryptor;
 using namespace EncryptPad;
+using namespace LibEncryptMsg;
 using namespace Botan;
 
 namespace EncryptPadEncryptor

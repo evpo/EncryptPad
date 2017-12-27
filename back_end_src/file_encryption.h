@@ -20,25 +20,26 @@
 #pragma once
 #include <string>
 #include "packet_composer.h"
+#include "emsg_types.h"
 
 namespace EncryptPad
 {
-    PacketResult DecryptPacketFile(const std::string &file_in, const EncryptParams &encrypt_params, 
+    LibEncryptMsg::PacketResult DecryptPacketFile(const std::string &file_in, const EncryptParams &encrypt_params, 
             Botan::SecureVector<byte> &output_buffer, PacketMetadata &metadata);
 
-    PacketResult DecryptPacketFile(const std::string &file_in, const std::string &file_out, 
+    LibEncryptMsg::PacketResult DecryptPacketFile(const std::string &file_in, const std::string &file_out, 
             const EncryptParams &encrypt_params, PacketMetadata &metadata);
 
-    PacketResult DecryptBuffer(const Botan::SecureVector<byte> &input_buffer, const EncryptParams &encrypt_params,
+    LibEncryptMsg::PacketResult DecryptBuffer(const Botan::SecureVector<byte> &input_buffer, const EncryptParams &encrypt_params,
              Botan::SecureVector<byte> &output_buffer, PacketMetadata &metadata);
 
-    PacketResult EncryptBuffer(const Botan::SecureVector<byte> &input_buffer, EncryptParams &encrypt_params,
+    LibEncryptMsg::PacketResult EncryptBuffer(const Botan::SecureVector<byte> &input_buffer, EncryptParams &encrypt_params,
              Botan::SecureVector<byte> &output_buffer, PacketMetadata &metadata);
 
-    PacketResult EncryptPacketFile(const std::string &file_in, const std::string &file_out, 
+    LibEncryptMsg::PacketResult EncryptPacketFile(const std::string &file_in, const std::string &file_out, 
             EncryptParams &encrypt_params, PacketMetadata &metadata);
 
-    PacketResult EncryptPacketFile(const Botan::SecureVector<byte> &input_buffer, const std::string &file_out, 
+    LibEncryptMsg::PacketResult EncryptPacketFile(const Botan::SecureVector<byte> &input_buffer, const std::string &file_out, 
             EncryptParams &encrypt_params, PacketMetadata &metadata);
 
     bool CheckIfPassphraseProtected(const std::string &file_name, bool &wad_file, std::string &key_file);

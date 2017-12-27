@@ -3,6 +3,7 @@
 #include "file_encryption.h"
 
 using namespace Botan;
+using namespace LibEncryptMsg;
 
 namespace EncryptPad
 {
