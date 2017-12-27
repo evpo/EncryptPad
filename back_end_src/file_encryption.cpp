@@ -55,30 +55,28 @@ namespace
     class KeyServiceKeyProvider : public SymmetricKeyProvider
     {
         private:
-            MessageConfig *config_;
             KeyService *key_service_;
             const std::string *passphrase_;
-            unsigned key_size_;
         public:
-            KeyServiceKeyProvider(MessageConfig *config, KeyService *key_service, const std::string *passphrase):
-                config_(config),
+            KeyServiceKeyProvider(KeyService *key_service, const std::string *passphrase):
                 key_service_(key_service),
                 passphrase_(passphrase)
             {
-                AlgoSpec algo_spec = GetAlgoSpec(config_->GetCipherAlgo());
-                key_size_ = algo_spec.key_size;
             }
 
             std::unique_ptr<EncryptionKey> GetKey(CipherAlgo cipher_algo, HashAlgo hash_algo, uint8_t iterations, Salt salt,
                     std::string description, bool &canceled) override
             {
                 const KeyRecord *key_record = nullptr;
+                AlgoSpec algo_spec = GetAlgoSpec(cipher_algo);
+                unsigned key_size = algo_spec.key_size;
+
                 if(passphrase_)
                 {
                     key_record = &key_service_->ChangePassphrase(
                             *passphrase_,
-                            config_->GetHashAlgo(),
-                            key_size_,
+                            hash_algo,
+                            key_size,
                             DecodeS2KIterations(iterations),
                             salt
                             );
@@ -103,18 +101,19 @@ namespace
     PacketResult ReadPacket(InStream &in, OutStream &out,
             const EncryptParams &enc_params, PacketMetadata &metadata)
     {
-        MessageConfig config = ConvertToMessageConfig(metadata);
         KeyService *key_service = enc_params.key_service;
-        KeyServiceKeyProvider key_provider(&config, key_service, enc_params.passphrase);
+        KeyServiceKeyProvider key_provider(key_service, enc_params.passphrase);
         MessageReader reader;
         reader.Start(key_provider);
         SafeVector buf;
         buf.resize(in.GetCount());
         stream_length_type length = in.Read(buf.data(), in.GetCount());
-        assert(length == in.GetCount());
+        assert(length == buf.size());
         reader.Finish(buf);
         bool result = out.Write(buf.data(), buf.size());
-        assert(result);
+
+        //TODO: handle exceptions properly to interpret the result
+        return result ? PacketResult::Success : PacketResult::UnexpectedError;
     }
 
     PacketResult WritePacket(InStream &in, OutStream &out, 

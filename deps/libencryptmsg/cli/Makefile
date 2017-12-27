@@ -6,10 +6,12 @@ ifeq ($(RELEASE),on)
 CXXFLAGS += -ggdb
 endif
 
-CXXFLAGS += -Wall -Wextra -std=c++11
-CXXFLAGS += -I../include -I../deps/plog/include -I/usr/include/botan-2
+BOTANLIB := $(shell pkg-config --libs botan-2)
+BOTANCXX := $(shell pkg-config --cflags botan-2)
+CXXFLAGS += -Wall -Wextra -std=c++11 $(BOTANCXX)
+CXXFLAGS += -I../include -I../deps/plog/include
 LDFLAGS += -Wall
-LDLIBS += -lm -lbotan-2
+LDLIBS += -lm $(BOTANLIB)
 
 #ifeq ($(RELEASE),on)
 #TARGETDIR := ../../bin/release

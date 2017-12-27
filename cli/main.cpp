@@ -35,6 +35,7 @@
 #include "file_helper.h"
 #include "openpgp_conversions.h"
 #include "algo_spec.h"
+#include "algo_defaults.h"
 
 namespace EncryptPad
 {
@@ -97,9 +98,10 @@ namespace EncryptPad
         std::transform(str.begin(), str.end(), str.begin(), ::toupper);
     }
 
-    EncryptPad::CipherAlgo ParseCipherAlgo(std::string str)
+    LibEncryptMsg::CipherAlgo ParseCipherAlgo(std::string str)
     {
         using namespace EncryptPad;
+        using namespace LibEncryptMsg;
         StringToUpper(str);
         if(str == "CAST5")
         {
@@ -123,9 +125,10 @@ namespace EncryptPad
         }
     }
 
-    EncryptPad::HashAlgo ParseHashAlgo(std::string str)
+    LibEncryptMsg::HashAlgo ParseHashAlgo(std::string str)
     {
         using namespace EncryptPad;
+        using namespace LibEncryptMsg;
         StringToUpper(str);
         if(str == "SHA1")
         {
@@ -145,9 +148,10 @@ namespace EncryptPad
         }
     }
 
-    EncryptPad::Compression ParseCompression(std::string str)
+    LibEncryptMsg::Compression ParseCompression(std::string str)
     {
         using namespace EncryptPad;
+        using namespace LibEncryptMsg;
         StringToUpper(str);
         if(str == "ZIP")
         {
@@ -583,7 +587,7 @@ int main(int argc, char *argv[])
             std::cerr << "s2k-count: '" << s2k_count_str << "' is invalid" << std::endl;
             exit(1);
         }
-        s2k_count = DecodeS2KIterations(EncodeS2KIterations(s2k_count));
+        s2k_count = LibEncryptMsg::DecodeS2KIterations(LibEncryptMsg::EncodeS2KIterations(s2k_count));
     }
 
     if(!passphrase_fd_str.empty())
@@ -801,7 +805,7 @@ int main(int argc, char *argv[])
         enc_params.key_file_encrypt_params = &key_file_encrypt_params;
     }
 
-    PacketResult result = PacketResult::None;
+    LibEncryptMsg::PacketResult result = LibEncryptMsg::PacketResult::None;
     if(encrypt)
     {
         result = EncryptPacketFile(in_file, out_file, enc_params, metadata);
@@ -811,13 +815,13 @@ int main(int argc, char *argv[])
         result = DecryptPacketFile(in_file, out_file, enc_params, metadata);
     }
 
-    if(result == PacketResult::InvalidKeyFilePassphrase && !key_file_passphrase_required)
+    if(result == LibEncryptMsg::PacketResult::InvalidKeyFilePassphrase && !key_file_passphrase_required)
     {
         std::cerr << "File is encrypted with an encrypted key file. Use '--force-key-pwd' switch." << std::endl;
         exit(1);
     }
 
-    if(result != PacketResult::Success)
+    if(result != LibEncryptMsg::PacketResult::Success)
     {
         std::cerr << "Cannot " << (encrypt ? "encrypt" : "decrypt") << " the file: " << InterpretResult(result) << std::endl;
         exit(1);
