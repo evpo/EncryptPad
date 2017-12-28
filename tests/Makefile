@@ -1,12 +1,12 @@
 include ../deps/makefiles/platform.mak
 
-LIBRARIES += ../back_end_src
+LIBRARIES += ../back_end_src ../deps/libencryptmsg/src ../deps/libencryptmsg/deps/botan_1_openpgp_codec
 
 ifeq ($(PLATFORM),MACOS)
 LDFLAGS += -all_load
 else
 LDFLAGS += -Wl,--whole-archive
-LOADLIBES += -Wl,--no-whole-archive
+LDLIBS += -Wl,--no-whole-archive
 #-dl
 endif
 
@@ -14,16 +14,18 @@ ifeq ($(RELEASE),on)
 CXXFLAGS += -ggdb
 endif
 
-LOADLIBES += ../deps/gtest/build/libgtest.a ../deps/stlplus/portability/$(SUBDIR)/libportability.a -lpthread
+CXXFLAGS += -I../deps/libencryptmsg/include
+
+LDLIBS += ../deps/gtest/build/libgtest.a ../deps/stlplus/portability/$(SUBDIR)/libportability.a -lpthread
 CXXFLAGS += -I../deps/gtest/include -pthread -std=c++11 -Wall -Wextra
 
 ifneq ($(USE_SYSTEM_LIBS),on)
-LOADLIBES += ../deps/botan/libbotan-1.10.a ../deps/zlib/libz.a
+LDLIBS += ../deps/botan/libbotan-1.10.a ../deps/zlib/libz.a
 CXXFLAGS += -I../deps/botan/build/include -I../deps/zlib
 else
-BOTANLIB := $(shell pkg-config --libs botan-1.10)
-BOTANCXX := $(shell pkg-config --cflags botan-1.10)
-LOADLIBES += $(BOTANLIB) -lz
+BOTANLIB := $(shell pkg-config --libs botan-2)
+BOTANCXX := $(shell pkg-config --cflags botan-2)
+LDLIBS += $(BOTANLIB) -lz
 CXXFLAGS += $(BOTANCXX)
 endif
 

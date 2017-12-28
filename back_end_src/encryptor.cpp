@@ -247,7 +247,7 @@ EncryptPadEncryptor::Result Encryptor::Save(const string &fileName, const Secure
 {
     bool is_protected = !GetIsPlainText() || !x2KeyLocation.empty();
 
-    if(is_protected)
+    if(!IsCpadFormat(fileName) && is_protected)
     {
         // New EncryptPad format
         using namespace EncryptPad;

@@ -94,6 +94,7 @@ namespace EncryptPad
         key_records_.clear();
 
         Passphrase passphrase(SafeVector(passphrase_str.begin(), passphrase_str.end()));
+        uint8_t encoded_iterations = EncodeS2KIterations(iterations);
 
         if(salt.size() > 0)
         {
@@ -102,7 +103,7 @@ namespace EncryptPad
             key_record->iterations = iterations;
             key_record->salt = salt;
             key_record->key = LibEncryptMsg::GenerateEncryptionKey(
-                    passphrase, key_size, hash_algo, EncodeS2KIterations(iterations), key_record->salt);
+                    passphrase, key_size, hash_algo, encoded_iterations, key_record->salt);
             key_records_.push_back(key_record);
             ret_val = key_record.get();
         }
@@ -119,7 +120,7 @@ namespace EncryptPad
             key_record->iterations = iterations;
             key_record->salt = newSalt;
             key_record->key = LibEncryptMsg::GenerateEncryptionKey(
-                    passphrase, key_size_, hash_algo_, iterations, key_record->salt);
+                    passphrase, key_size, hash_algo, encoded_iterations, key_record->salt);
             key_records_.push_back(key_record);
         }
 

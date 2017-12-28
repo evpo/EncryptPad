@@ -22,6 +22,8 @@
 #include <iostream>
 #include <fstream>
 #include <utility>
+#include <algorithm>
+
 #include <tuple>
 #include "gtest/gtest.h"
 #include "encryptor.h"
@@ -44,7 +46,7 @@ protected:
 	void SetUpBase()
 	{
 		initial_string_.resize(text_to_encrypt_.size());
-		initial_string_.copy(reinterpret_cast<const byte*>(text_to_encrypt_.c_str()), text_to_encrypt_.size());
+        std::copy_n(reinterpret_cast<const byte*>(text_to_encrypt_.c_str()), text_to_encrypt_.size(), initial_string_.data());
 	}
 
 	void TearDownBase()
@@ -78,7 +80,7 @@ protected:
 namespace {
 	string FromSecureVectorToString(const SecureVector<byte> &sec_vec)
 	{
-		const char *sec_vec_buf = reinterpret_cast<const char *>(sec_vec.begin());
+		const char *sec_vec_buf = reinterpret_cast<const char *>(sec_vec.data());
 		return string(sec_vec_buf, sec_vec_buf + sec_vec.size());
 	}
 

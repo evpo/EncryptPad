@@ -23,6 +23,7 @@
 #include "key_generation.h"
 #include "test_utilities.h"
 #include "algo_spec.h"
+#include "algo_defaults.h"
 
 using namespace EncryptPad;
 

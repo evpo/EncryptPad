@@ -20,9 +20,12 @@
 #include "gtest/gtest.h"
 #include <cstring>
 #include <string>
+#include <algorithm>
 #include "file_encryption.h"
+#include "algo_defaults.h"
 
 using namespace EncryptPad;
+using namespace LibEncryptMsg;
 using namespace Botan;
 
 
@@ -41,14 +44,14 @@ class FileEncryptionFixture : public ::testing::Test
         void AssignBuffer(const std::string &text)
         {
             in_buffer_.resize(text.size());
-            in_buffer_.copy(reinterpret_cast<const byte*>(text.data()), text.size());
+            std::copy(reinterpret_cast<const byte*>(text.data()), reinterpret_cast<const byte*>(text.data() + text.size()), in_buffer_.data());
         }
 
         std::string ResultString()
         {
             return std::string(
-                    reinterpret_cast<const char*>(result_buffer_.begin()),
-                    reinterpret_cast<const char*>(result_buffer_.end()));
+                    reinterpret_cast<const char*>(result_buffer_.data()),
+                    reinterpret_cast<const char*>(result_buffer_.data() + result_buffer_.size()));
         }
 
         virtual void SetUp()

@@ -30,6 +30,7 @@
 #include "message_encryption.h"
 #include "message_decryption.h"
 #include "openpgp_conversions.h"
+#include "emsg_symmetric_key.h"
 
 using namespace LibEncryptMsg;
 namespace
@@ -108,20 +109,66 @@ namespace
         SafeVector buf;
         buf.resize(in.GetCount());
         stream_length_type length = in.Read(buf.data(), in.GetCount());
-        assert(length == buf.size());
-        reader.Finish(buf);
-        bool result = out.Write(buf.data(), buf.size());
+        assert(static_cast<size_t>(length) == buf.size());
+        try
+        {
+            reader.Finish(buf);
+        }
+        catch(const EmsgException &e)
+        {
+            return e.result;
+        }
+        if(!out.Write(buf.data(), buf.size()))
+        {
+            return PacketResult::IOErrorOutput;
+        }
 
-        //TODO: handle exceptions properly to interpret the result
-        return result ? PacketResult::Success : PacketResult::UnexpectedError;
+        return PacketResult::Success;
     }
 
-    PacketResult WritePacket(InStream &in, OutStream &out, 
+    PacketResult WritePacket(InStream &in, OutStream &out,
             EncryptParams &enc_params, PacketMetadata &metadata)
     {
+        MessageConfig config = ConvertToMessageConfig(metadata);
+        std::unique_ptr<EncryptionKey> encryption_key;
+        Salt salt;
+        if(enc_params.passphrase)
+        {
+            Passphrase passphrase(SafeVector(enc_params.passphrase->begin(), enc_params.passphrase->end()));
+            salt = GenerateRandomSalt();
+            encryption_key = GenerateEncryptionKey(passphrase, config.GetCipherAlgo(),
+                    config.GetHashAlgo(), config.GetIterations(), salt);
+        }
+        else
+        {
+            const KeyRecord &key_record = enc_params.key_service->GetKeyForSaving();
+            salt = key_record.salt;
+            // We assume that key_service has been set with the same encryption parameters
+            encryption_key.reset(new EncryptionKey(key_record.key->bits_of()));
+        }
+
+        SafeVector buf;
+        buf.resize(in.GetCount());
+        stream_length_type length = in.Read(buf.data(), in.GetCount());
+        assert(static_cast<size_t>(length) == buf.size());
+
         MessageWriter writer;
+        writer.Start(std::move(encryption_key), config, salt);
+        try
+        {
+            writer.Finish(buf);
+        }
+        catch(const EmsgException &e)
+        {
+            return e.result;
+        }
 
+        if(!out.Write(buf.data(), buf.size()))
+        {
+            return PacketResult::IOErrorOutput;
+        }
 
+        return PacketResult::Success;
     }
 
     PacketResult EncryptWithKey(InStream &in, EncryptParams &encrypt_params, 

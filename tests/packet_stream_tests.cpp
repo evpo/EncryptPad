@@ -41,8 +41,8 @@ protected:
         const char *str = "Hello 123456";
         length_ = strlen(str) + 1;
         buffer_.resize(length_);
-        buffer_.copy(reinterpret_cast<const byte*>(str), length_);
-        in_.Set(buffer_.begin(), buffer_.end());
+        std::copy_n(reinterpret_cast<const byte*>(str), length_, buffer_.data());
+        in_.Set(buffer_.data(), buffer_.data() + buffer_.size());
     }
 
     virtual void TearDown()
@@ -195,7 +195,7 @@ TEST_F(InPacketStreamFixture, When_writing_to_OutPacketStreamCont_It_populates_a
 
     //Assert
     ASSERT_EQ(22, out.GetCount());
-    ASSERT_STREQ(">Hello Array 1234567<", reinterpret_cast<const char*>(buffer.begin()));
+    ASSERT_STREQ(">Hello Array 1234567<", reinterpret_cast<const char*>(buffer.data()));
 }
 
 TEST_F(InPacketStreamFixture, When_writing_to_OutPacketStreamCont_It_populates_a_half_full_container)
@@ -214,7 +214,7 @@ TEST_F(InPacketStreamFixture, When_writing_to_OutPacketStreamCont_It_populates_a
     //Assert
     ASSERT_EQ(20, out.GetCount());
     ASSERT_GE(buffer.size(), 20U);
-    ASSERT_STREQ("Hello Array 1234567", reinterpret_cast<const char*>(buffer.begin()));
+    ASSERT_STREQ("Hello Array 1234567", reinterpret_cast<const char*>(buffer.data()));
 }
 
 TEST_F(InPacketStreamFixture, When_writing_to_OutPacketStreamCont_incrementally_It_populates_an_empty_container)
@@ -241,7 +241,7 @@ TEST_F(InPacketStreamFixture, When_writing_to_OutPacketStreamCont_incrementally_
     //Assert
     ASSERT_EQ(20, out.GetCount());
     ASSERT_GE(buffer.size(), 20);
-    ASSERT_STREQ("Hello Array 1234567", reinterpret_cast<const char*>(buffer.begin()));
+    ASSERT_STREQ("Hello Array 1234567", reinterpret_cast<const char*>(buffer.data()));
 }
 // end of PacketStream tests
 
