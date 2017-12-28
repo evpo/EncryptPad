@@ -1,7 +1,9 @@
 #!/bin/bash
 set -e
+set -x
 set -o pipefail
-CMD="gpg -c --verbose --no-use-agent --passphrase-file passphrase.txt"
+GPG="gpg2"
+CMD="$GPG -c --verbose --batch --no-use-agent --passphrase-file passphrase.txt"
 
 if [ "$PLAIN_TEXT_FILE" = "" ]
 then

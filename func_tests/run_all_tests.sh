@@ -1,8 +1,10 @@
 #!/bin/bash
 set -e
 set -o pipefail
+GPG="gpg2"
 
-S="$SHELL"
+S=""
+#S="$SHELL"
 
 USAGE="run_all_tests.sh <path-to-encryptcli>"
 if [ $# -lt 1 ]
@@ -43,7 +45,7 @@ rm -R ./gpg_encrypted_last
 $S ./encrypt_with_epd.sh $BIN "$PLAIN_TEXT_FILE"
 
 # decrypt the above with gpg
-$S ./decryption_test.sh gpg ./epd_encrypted_last
+$S ./decryption_test.sh $GPG ./epd_encrypted_last
 rm -R ./epd_encrypted_last
 
 # input output redirection and pipes
