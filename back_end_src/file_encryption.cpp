@@ -366,6 +366,56 @@ namespace
 
         return in_stm;
     }
+
+    PacketResult DecryptPacketFile(const std::string &file_in, const EncryptParams &encrypt_params,
+            OutStream &out_stm, PacketMetadata &metadata)
+    {
+        const int kInvalid = -1;
+
+        std::vector<byte> fall_back_buffer;
+        std::unique_ptr<RandomInStream> stm = CreateInStream(file_in, fall_back_buffer);
+        if(stm.get() == nullptr)
+            return PacketResult::IOErrorInput;
+
+        int b = stm->Get();
+
+        // Check if the file is empty
+        if(b == kInvalid)
+            return PacketResult::UnexpectedFormat;
+
+        stm->Seek(0);
+        // gpg should have this bit set
+        // 0xEF is BOM or a new format 47 packet that is not known to us. Let's assume it is BOM.
+        if(b & 0x80 && b != 0xEF)
+        {
+            PacketResult result = PacketResult::None;
+            if(metadata.key_only)
+            {
+                // It is a file with GPG extension that doesn't support WAD format
+                result = DecryptWithKey(*stm, encrypt_params, out_stm, metadata);
+                if(result == PacketResult::InvalidSurrogateIV)
+                    result = PacketResult::InvalidKeyFile;
+            }
+            else
+            {
+                result = DecryptStream(*stm, encrypt_params, out_stm, metadata);
+            }
+            return result;
+        }
+        else // wad starts from I or P, in which the most significant bit is not set
+        {
+            auto result = DecryptWad(*stm, metadata.key_file, encrypt_params, out_stm, metadata);
+
+            if(result == PacketResult::InvalidWadFile)
+                return PacketResult::UnexpectedFormat;
+            if(result == PacketResult::InvalidSurrogateIV)
+                return PacketResult::InvalidKeyFile;
+
+            metadata.key_only = true;
+            return result;
+        }
+    }
+
 }
 
 namespace EncryptPad
@@ -436,54 +486,10 @@ namespace EncryptPad
     PacketResult DecryptPacketFile(const std::string &file_in, const EncryptParams &encrypt_params, 
             Buffer &output_buffer, PacketMetadata &metadata)
     {
-        const int kInvalid = -1;
-
-        std::vector<byte> fall_back_buffer;
-        std::unique_ptr<RandomInStream> stm = CreateInStream(file_in, fall_back_buffer);
-        if(stm.get() == nullptr)
-            return PacketResult::IOErrorInput;
-
         auto out_stm = MakeOutStream(output_buffer);
-
-        int b = stm->Get();
-
-        // Check if the file is empty
-        if(b == kInvalid)
-            return PacketResult::UnexpectedFormat;
-
-        stm->Seek(0);
-        // gpg should have this bit set
-        // 0xEF is BOM or a new format 47 packet that is not known to us. Let's assume it is BOM.
-        if(b & 0x80 && b != 0xEF)
-        {
-            PacketResult result = PacketResult::None;
-            if(metadata.key_only)
-            {
-                // It is a file with GPG extension that doesn't support WAD format
-                result = DecryptWithKey(*stm, encrypt_params, *out_stm, metadata);
-                if(result == PacketResult::InvalidSurrogateIV)
-                    result = PacketResult::InvalidKeyFile;
-            }
-            else
-            {
-                result = DecryptStream(*stm, encrypt_params, *out_stm, metadata);
-            }
-            output_buffer.resize(out_stm->GetCount());
-            return result;
-        }
-        else // wad starts from I or P, in which the most significant bit is not set
-        {
-            auto result = DecryptWad(*stm, metadata.key_file, encrypt_params, *out_stm, metadata);
-            output_buffer.resize(out_stm->GetCount());
-
-            if(result == PacketResult::InvalidWadFile)
-                return PacketResult::UnexpectedFormat;
-            if(result == PacketResult::InvalidSurrogateIV)
-                return PacketResult::InvalidKeyFile;
-
-            metadata.key_only = true;
-            return result;
-        }
+        PacketResult result = DecryptPacketFile(file_in, encrypt_params, output_buffer, metadata);
+        output_buffer.resize(out_stm->GetCount());
+        return result;
     }
 
     PacketResult DecryptPacketFile(const std::string &file_in, const std::string &file_out, 
