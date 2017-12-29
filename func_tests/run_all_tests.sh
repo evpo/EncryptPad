@@ -3,8 +3,8 @@ set -e
 set -o pipefail
 GPG="gpg2"
 
+#Assign S if a different shell is needed
 S=""
-#S="$SHELL"
 
 USAGE="run_all_tests.sh <path-to-encryptcli>"
 if [ $# -lt 1 ]

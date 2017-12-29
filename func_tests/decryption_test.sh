@@ -27,7 +27,7 @@ for FILE in ${IN_DIR}/*
 do
     if [[ "$DECRYPTOR" = "gpg" || "$DECRYPTOR" = "gpg2" ]]
     then
-        $DECRYPTOR -d --batch --no-use-agent --passphrase-file $PASSPHRASE_FILE -o $TMP_DIR/out_file.txt $FILE
+        $DECRYPTOR -d --batch --passphrase-file $PASSPHRASE_FILE -o $TMP_DIR/out_file.txt $FILE
     else
         cat $PASSPHRASE_FILE | $DECRYPTOR -d --pwd-fd 0 -o $TMP_DIR/out_file.txt $FILE
     fi

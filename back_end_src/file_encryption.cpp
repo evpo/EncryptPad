@@ -367,7 +367,7 @@ namespace
         return in_stm;
     }
 
-    PacketResult DecryptPacketFile(const std::string &file_in, const EncryptParams &encrypt_params,
+    PacketResult DecryptPacketFileToStream(const std::string &file_in, const EncryptParams &encrypt_params,
             OutStream &out_stm, PacketMetadata &metadata)
     {
         const int kInvalid = -1;
@@ -495,13 +495,13 @@ namespace EncryptPad
     PacketResult DecryptPacketFile(const std::string &file_in, const std::string &file_out, 
             const EncryptParams &encrypt_params, PacketMetadata &metadata)
     {
-        Buffer output_buffer;
+        OutPacketStreamFile out;
+        if(OpenFile(file_out, out) != OpenFileResult::OK)
+        {
+            return PacketResult::IOErrorOutput;
+        }
 
-        auto result = DecryptPacketFile(file_in, encrypt_params, output_buffer, metadata);
-        if(result != PacketResult::Success)
-            return result;
-
-        result = WriteFile(file_out, output_buffer);
+        auto result = DecryptPacketFileToStream(file_in, encrypt_params, out, metadata);
         if(result != PacketResult::Success)
             return result;
 
