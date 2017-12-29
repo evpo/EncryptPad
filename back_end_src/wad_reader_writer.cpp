@@ -54,7 +54,7 @@ namespace
         out.Write(reinterpret_cast<byte *>(&val), 4);
     }
 
-    bool WriteWadImpl(InStream &in, OutStream &out, const std::string &key_file)
+    bool WriteWadHeadImpl(const std::string &key_file, uint32_t payload_size, OutStream &out)
     {
         // uint32_t dir_offset = 12 + payload_size + key_file.size(); // 12 - these 4 items
 
@@ -80,7 +80,6 @@ namespace
         out.Write(reinterpret_cast<const byte*>(&lump_name[0]), 8);
 
         lump_name = "_PAYLOAD";
-        uint32_t payload_size = in.GetCount();
         uint32_t payload_offset = header_size + directory_size + key_file_size;
         WriteUint(out, payload_offset);
         WriteUint(out, payload_size);
@@ -94,6 +93,13 @@ namespace
         out.Write(reinterpret_cast<const byte*>(key_file.c_str()), key_file_size);
 
         assert(payload_offset == out.GetCount());
+        return true;
+    }
+
+    bool WriteWadImpl(InStream &in, OutStream &out, const std::string &key_file)
+    {
+        if(!WriteWadHeadImpl(key_file, in.GetCount(), out))
+            return false;
 
         // Payload
         int b;
@@ -189,6 +195,11 @@ namespace EncryptPad
         return WriteWadImpl(in, out, key_file);
     }
 
+    bool WriteWadHead(const std::string &key_file, uint32_t payload_size, OutStream &out)
+    {
+        return WriteWadHeadImpl(key_file, payload_size, out);
+    }
+
     PacketResult ExtractKeyFromWad(RandomInStream &in, std::string &key_file)
     {
         WadMetadata metadata;
@@ -223,8 +234,8 @@ namespace EncryptPad
             return result;
 
         Botan::SecureVector<byte> buffer;
-        buffer.resize(metadata.payload_size);
-        in.Read(buffer.data(), metadata.payload_size);
+        buffer.resize(metadata.payload_size != 0 ? metadata.payload_size : in.GetCount());
+        in.Read(buffer.data(), buffer.size());
         out.Write(buffer.data(), buffer.size());
 
         key_file.clear();
