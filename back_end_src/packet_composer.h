@@ -26,6 +26,7 @@
 #include "botan.h"
 #include "packet_typedef.h"
 #include "algo_spec.h"
+#include "algo_defaults.h"
 #include "packet_stream.h"
 #include "key_service.h"
 
@@ -51,13 +52,15 @@ namespace EncryptPad
         // Path to libcurl executable, which is used to download the key file from a remote location such as SSH
         const std::string *libcurl_path;
         const std::string *libcurl_parameters;
+        size_t memory_buffer;
 
         EncryptParams():
             passphrase(nullptr),
             key_service(nullptr),
             key_file_encrypt_params(nullptr),
             libcurl_path(nullptr),
-            libcurl_parameters(nullptr)
+            libcurl_parameters(nullptr),
+            memory_buffer(kDefaultMemoryBuffer)
         {}
     };
 

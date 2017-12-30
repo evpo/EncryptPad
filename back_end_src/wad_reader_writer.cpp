@@ -54,51 +54,64 @@ namespace
         out.Write(reinterpret_cast<byte *>(&val), 4);
     }
 
-    bool WriteWadHeadImpl(const std::string &key_file, uint32_t payload_size, OutStream &out)
+    bool WriteWadHeadImpl(const std::string &key_file, uint32_t payload_size, const std::string &version, OutStream &out)
     {
-        // uint32_t dir_offset = 12 + payload_size + key_file.size(); // 12 - these 4 items
+        // Version 0 does not support undefined payload size
+        assert(payload_size > 0 || version != "0");
 
         // Header
         out.Write(reinterpret_cast<const byte*>("PWAD"), 4);
-        uint32_t lumps = 2;
-        WriteUint(out, lumps); // 2 lumps
+        uint32_t lumps = 3;
+        WriteUint(out, lumps);
         uint32_t dir_offset = 12;
         WriteUint(out, dir_offset);
         // Header end
 
         uint32_t header_size = out.GetCount();
-        uint32_t directory_size = 2 * (4 + 4 + 8); // 2 records in the directory
-        uint32_t key_file_offset = header_size + directory_size;
-        uint32_t key_file_size = key_file.size();
+        uint32_t directory_size = lumps * (4 + 4 + 8);
         assert(dir_offset == out.GetCount());
 
         // Directory
         std::string lump_name = "__X2_KEY";
-        WriteUint(out, key_file_offset);
-        WriteUint(out, key_file_size);
+        uint32_t offset = header_size + directory_size;
+        uint32_t size = key_file.size();
+        WriteUint(out, offset);
+        WriteUint(out, size);
         assert(lump_name.size() == 8);
         out.Write(reinterpret_cast<const byte*>(&lump_name[0]), 8);
+        offset += size;
+
+        lump_name = "_VERSION";
+        size = version.size();
+        WriteUint(out, offset);
+        WriteUint(out, size);
+        assert(lump_name.size() == 8);
+        out.Write(reinterpret_cast<const byte*>(&lump_name[0]), 8);
+        offset += size;
 
         lump_name = "_PAYLOAD";
-        uint32_t payload_offset = header_size + directory_size + key_file_size;
-        WriteUint(out, payload_offset);
-        WriteUint(out, payload_size);
+        size = payload_size;
+        WriteUint(out, offset);
+        WriteUint(out, size);
         assert(lump_name.size() == 8);
         out.Write(reinterpret_cast<const byte*>(&lump_name[0]), 8);
+        offset += size;
+
         // Directory end
 
-        assert(key_file_offset == out.GetCount());
-
         // Key
-        out.Write(reinterpret_cast<const byte*>(key_file.c_str()), key_file_size);
+        out.Write(reinterpret_cast<const byte*>(key_file.c_str()), key_file.size());
 
-        assert(payload_offset == out.GetCount());
+        // Version
+        out.Write(reinterpret_cast<const byte*>(version.c_str()), version.size());
+
         return true;
     }
 
     bool WriteWadImpl(InStream &in, OutStream &out, const std::string &key_file)
     {
-        if(!WriteWadHeadImpl(key_file, in.GetCount(), out))
+        std::string version = "0";
+        if(!WriteWadHeadImpl(key_file, in.GetCount(), version, out))
             return false;
 
         // Payload
@@ -119,6 +132,9 @@ namespace
         bool key_file_found;
         uint32_t key_file_offset;
         uint32_t key_file_size;
+        bool version_found;
+        uint32_t version_offset;
+        uint32_t version_size;
     };
 
     PacketResult ExtractWadMetadata(RandomInStream &stm, stream_length_type length, WadMetadata &metadata)
@@ -174,6 +190,12 @@ namespace
                 metadata.key_file_offset = offset;
                 metadata.key_file_size = size;
             }
+            else if(name == "_VERSION")
+            {
+                metadata.version_found = true;
+                metadata.version_offset = offset;
+                metadata.version_size = size;
+            }
             else
             {
                 metadata.payload_offset = offset;
@@ -190,14 +212,15 @@ namespace
 
 namespace EncryptPad
 {
+    //TODO: The function is not used
     bool WriteWad(InStream &in, OutStream &out, const std::string &key_file)
     {
         return WriteWadImpl(in, out, key_file);
     }
 
-    bool WriteWadHead(const std::string &key_file, uint32_t payload_size, OutStream &out)
+    bool WriteWadHead(const std::string &key_file, uint32_t payload_size, const std::string &version, OutStream &out)
     {
-        return WriteWadHeadImpl(key_file, payload_size, out);
+        return WriteWadHeadImpl(key_file, payload_size, version, out);
     }
 
     PacketResult ExtractKeyFromWad(RandomInStream &in, std::string &key_file)

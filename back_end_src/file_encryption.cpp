@@ -111,6 +111,7 @@ namespace
         buf.resize(in.GetCount());
         stream_length_type length = in.Read(buf.data(), in.GetCount());
         assert(static_cast<size_t>(length) == buf.size());
+        buf.resize(length);
         try
         {
             reader.Finish(buf);
@@ -152,6 +153,7 @@ namespace
         buf.resize(in.GetCount());
         stream_length_type length = in.Read(buf.data(), in.GetCount());
         assert(static_cast<size_t>(length) == buf.size());
+        buf.resize(length);
 
         MessageWriter writer;
         writer.Start(std::move(encryption_key), config, salt);
@@ -341,6 +343,7 @@ namespace
         bool is_passphrase_session = (mode == FileNestingMode::SimpleGPG || mode == FileNestingMode::NestedGPGWithWad);
         bool is_key_file_session = (mode == FileNestingMode::SimpleGPGWithKey || mode == FileNestingMode::WadWithGPG ||
                 mode == FileNestingMode::NestedGPGWithWad);
+
         MessageWriter passphrase_session_writer;
         MessageWriter key_file_session_writer;
         if(is_passphrase_session)
@@ -357,22 +360,24 @@ namespace
             key_file_session_writer.Start(std::move(key_file_session.key), key_file_config, key_file_session.salt);
         }
 
-        const size_t kBufSize = 1024;
         bool wad_head_written = false;
         std::string wad_key_file = metadata.persist_key_path ? metadata.key_file : std::string();
         //The payload is always last in the file. So its size is not necessary to store
         //Sadly, we have to violate WAD specification for files that are bigger than the buffer
+        //We will only use this variable if the file is bigger than the buffer size
         uint32_t wad_payload_size = 0;
+        std::string wad_version = "1";
 
         SafeVector buf;
         // Use do while to process empty files
         do
         {
-            buf.resize(std::min(in.GetCount(), static_cast<stream_length_type>(kBufSize)));
+            buf.resize(std::min(in.GetCount(), static_cast<stream_length_type>(encrypt_params.memory_buffer)));
             stream_length_type length = in.Read(buf.data(), buf.size());
             buf.resize(length);
             MessageWriter *writer = nullptr;
             PacketResult result = PacketResult::None;
+
 
             switch(mode)
             {
@@ -395,11 +400,14 @@ namespace
 
                     if(!wad_head_written)
                     {
-                        //We know the payload size
                         if(in.IsEOF())
+                        {
+                            //We know the payload size
                             wad_payload_size = buf.size();
+                            wad_version = "0";
+                        }
 
-                        if(!WriteWadHead(wad_key_file, wad_payload_size, out))
+                        if(!WriteWadHead(wad_key_file, wad_payload_size, wad_version, out))
                             return PacketResult::IOErrorOutput;
                         wad_head_written = true;
                     }
@@ -412,11 +420,15 @@ namespace
 
                     if(!wad_head_written)
                     {
-                        SafeVector wad_head;
                         if(in.IsEOF())
+                        {
+                            //We know the payload size
                             wad_payload_size = buf.size();
+                            wad_version = "0";
+                        }
+                        SafeVector wad_head;
                         auto wad_head_out = MakeOutStream(wad_head);
-                        if(!WriteWadHead(wad_key_file, wad_payload_size, *wad_head_out))
+                        if(!WriteWadHead(wad_key_file, wad_payload_size, wad_version, *wad_head_out))
                             return PacketResult::IOErrorOutput;
                         wad_head.resize(wad_head_out->GetCount());
                         buf.insert(buf.begin(), wad_head.cbegin(), wad_head.cend());
