@@ -141,20 +141,20 @@ namespace
     {
         std::string wad_type(4, ' ');
         if(stm.Read(reinterpret_cast<byte *>(&wad_type[0]), 4) != 4)
-            return PacketResult::InvalidWadFile;
+            return PacketResult::InvalidOrIncompleteWadFile;
 
         uint32_t num_lumps;
         if(!ReadUint(stm, num_lumps))
-            return PacketResult::InvalidWadFile;
+            return PacketResult::InvalidOrIncompleteWadFile;
 
         if(!ReadUint(stm, metadata.dir_offset))
-            return PacketResult::InvalidWadFile;
+            return PacketResult::InvalidOrIncompleteWadFile;
 
         if(wad_type != "PWAD" && wad_type != "IWAD")
             return PacketResult::InvalidWadFile;
 
         if(length - 1 < metadata.dir_offset)
-            return PacketResult::InvalidWadFile;
+            return PacketResult::InvalidOrIncompleteWadFile;
 
         metadata.payload_offset = kInvalid;
         metadata.payload_size = 0;
@@ -164,7 +164,7 @@ namespace
 
         if(!stm.Seek(metadata.dir_offset))
         {
-            return PacketResult::InvalidWadFile;
+            return PacketResult::InvalidOrIncompleteWadFile;
         }
 
         for(unsigned i = 0; i < num_lumps; i++)
@@ -174,13 +174,13 @@ namespace
             std::string name(8, ' ');
 
             if(!ReadUint(stm, offset))
-                return PacketResult::InvalidWadFile;
+                return PacketResult::InvalidOrIncompleteWadFile;
 
             if(!ReadUint(stm, size))
-                return PacketResult::InvalidWadFile;
+                return PacketResult::InvalidOrIncompleteWadFile;
 
             if(stm.Read(reinterpret_cast<byte *>(&name[0]), 8) != 8)
-                return PacketResult::InvalidWadFile;
+                return PacketResult::InvalidOrIncompleteWadFile;
 
             std::transform(std::begin(name), std::end(name), std::begin(name), ::toupper);
 
@@ -240,11 +240,14 @@ namespace EncryptPad
             return PacketResult::Success;
 
         if(!in.Seek(metadata.key_file_offset))
-            return PacketResult::InvalidWadFile;
+            return PacketResult::InvalidOrIncompleteWadFile;
 
         key_file.resize(metadata.key_file_size);
         if(in.Read(reinterpret_cast<byte *>(&key_file[0]), metadata.key_file_size) != metadata.key_file_size)
-            return PacketResult::InvalidWadFile;
+            return PacketResult::InvalidOrIncompleteWadFile;
+
+        if(!in.Seek(metadata.payload_offset))
+            return PacketResult::InvalidOrIncompleteWadFile;
 
         return PacketResult::Success;
     }

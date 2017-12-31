@@ -27,5 +27,6 @@ namespace EncryptPad
     typedef std::streamoff stream_length_type;
     typedef Botan::byte byte;
 
+    //TODO: Replace this method with emsg_exception
     std::string InterpretResult(LibEncryptMsg::PacketResult result);
 }

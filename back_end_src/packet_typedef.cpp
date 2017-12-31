@@ -66,6 +66,8 @@ namespace EncryptPad
                 return "Cannot get key file: CURL returned non-zero exit code";
             case PacketResult::InvalidWadFile:
                 return "Unexpected format: invalid wad file";
+            case PacketResult::InvalidOrIncompleteWadFile:
+                return "Unexpected format: invalid or incomplete wad file";
             case PacketResult::InvalidPassphrase:
                 return "Key service does not containt a suitable key";
             case PacketResult::KeyIsRequiredForSaving:

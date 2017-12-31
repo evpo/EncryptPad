@@ -659,22 +659,25 @@ namespace
             case FileNestingMode::SimpleGPGOrNestedGPGWithWad:
                 passphrase_session.reset(new DecryptionSession(encrypt_params.key_service, encrypt_params.passphrase));
                 break;
-            case FileNestingMode::SimpleGPGWithKey:
-                {
-                    auto key_file_session_result = CreateKeyFileDecryptionSession(encrypt_params, metadata);
-                    if(key_file_session_result.first != PacketResult::Success)
-                        return key_file_session_result.first;
-                }
-                break;
             default:
                 //we don't know yet
                 break;
         }
 
+        if(!metadata.key_file.empty() && mode != FileNestingMode::SimpleGPG)
+        {
+            // The preset key file takes precedence over the persistent key file
+            auto key_file_session_result = CreateKeyFileDecryptionSession(encrypt_params, metadata);
+            if(key_file_session_result.first != PacketResult::Success)
+                return key_file_session_result.first;
+
+            key_file_session = std::move(key_file_session_result.second);
+        }
         //TODO: This buffer size if for only testing small buffers
         const size_t kBufferSize = 16;
         SafeVector buffer;
-        SafeVector accumulated_buffer;
+        SafeVector accumulated_pre_buffer;
+        SafeVector accumulated_post_buffer;
 
         while(!in->IsEOF())
         {
@@ -693,15 +696,56 @@ namespace
                             &passphrase_session->reader :
                             &key_file_session->reader;
 
+                        if(accumulated_pre_buffer.size() > 0)
+                        {
+                            buffer.insert(buffer.begin(), accumulated_pre_buffer.begin(), accumulated_pre_buffer.end());
+                            accumulated_pre_buffer.clear();
+                        }
+
                         result = UpdateOrFinish(*reader, buffer, in->IsEOF());
                         if(result != PacketResult::Success)
                             return result;
 
-                        if(accumulated_buffer.size() > 0)
+                        if(accumulated_post_buffer.size() > 0)
                         {
-                            buffer.insert(buffer.begin(), accumulated_buffer.begin(), accumulated_buffer.end());
-                            accumulated_buffer.clear();
+                            buffer.insert(buffer.begin(), accumulated_post_buffer.begin(), accumulated_post_buffer.end());
+                            accumulated_post_buffer.clear();
                         }
+                    }
+                    break;
+                case FileNestingMode::WadWithGPG:
+                    {
+                        accumulated_pre_buffer.insert(accumulated_pre_buffer.end(), buffer.begin(), buffer.end());
+                        buffer.clear();
+                        InPacketStreamMemory accumulated_in(accumulated_pre_buffer.data(),
+                                accumulated_pre_buffer.data() + accumulated_pre_buffer.size());
+
+                        uint32_t payload_offset = 0;
+                        result = ParseWad(accumulated_in, metadata.key_file, payload_offset);
+
+                        if(result != PacketResult::Success && result != PacketResult::InvalidOrIncompleteWadFile)
+                            return result;
+
+                        if(result != PacketResult::Success)
+                            break;
+
+                        //erase the wad head
+                        assert(accumulated_pre_buffer.size() >= payload_offset);
+                        accumulated_pre_buffer.erase(accumulated_pre_buffer.begin(),
+                                accumulated_pre_buffer.begin() + payload_offset);
+
+                        if(!key_file_session)
+                        {
+                            // The key wasn't preset and we recovered the key file location from the wad file
+                            auto key_file_session_result = CreateKeyFileDecryptionSession(encrypt_params, metadata);
+                            if(key_file_session_result.first != PacketResult::Success)
+                                return key_file_session_result.first;
+
+                            key_file_session = std::move(key_file_session_result.second);
+                        }
+
+                        // The rest of the file is simple gpg with key
+                        mode = FileNestingMode::SimpleGPGWithKey;
                     }
                     break;
                 case FileNestingMode::SimpleGPGOrNestedGPGWithWad:
@@ -710,13 +754,13 @@ namespace
                         if(result != PacketResult::Success)
                             return result;
 
-                        accumulated_buffer.insert(accumulated_buffer.end(), buffer.begin(), buffer.end());
+                        accumulated_post_buffer.insert(accumulated_post_buffer.end(), buffer.begin(), buffer.end());
                         buffer.clear();
 
-                        if(accumulated_buffer.size() >= 4)
+                        if(accumulated_post_buffer.size() >= 4)
                         {
                             std::string marker;
-                            marker.insert(0U, reinterpret_cast<const char*>(accumulated_buffer.data()), 4U);
+                            marker.insert(0U, reinterpret_cast<const char*>(accumulated_post_buffer.data()), 4U);
                             if(marker == "IWAD" || marker == "PWAD")
                             {
                                 mode = FileNestingMode::NestedGPGWithWad;
@@ -731,12 +775,6 @@ namespace
                 case FileNestingMode::NestedGPGWithWad:
                     {
                         assert(false);//Not implemented
-                        // InPacketStreamMemory accumulated_in(accumulated_buffer.data(),
-                        //         accumulated_buffer.data() + accumulated_buffer.size());
-                        //
-                        // uint32_t payload_offset = 0;
-                        // result = ParseWad(accumulated_in, metadata.key_file, payload_offset);
-                        // if(result == PacketResult::Success)
                     }
                     break;
                 default:
