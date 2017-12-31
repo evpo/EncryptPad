@@ -27,6 +27,7 @@ namespace LibEncryptMsg
         CurlIsNotFound,
         CurlExitNonZero,
         InvalidWadFile,
+        InvalidOrIncompleteWadFile,
         InvalidPassphrase,
         KeyIsRequiredForSaving,
         InvalidKeyFilePassphrase,
