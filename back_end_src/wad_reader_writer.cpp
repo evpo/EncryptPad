@@ -223,6 +223,31 @@ namespace EncryptPad
         return WriteWadHeadImpl(key_file, payload_size, version, out);
     }
 
+    PacketResult ParseWad(RandomInStream &in, std::string &key_file, uint32_t &payload_offset)
+    {
+        WadMetadata metadata;
+        key_file.clear();
+        auto result = ExtractWadMetadata(in, in.GetCount(), metadata);
+        if(result != PacketResult::Success)
+            return result;
+
+        payload_offset = metadata.payload_offset;
+
+        if(!metadata.key_file_found)
+            return PacketResult::InvalidWadFile;
+
+        if(metadata.key_file_size <= 0)
+            return PacketResult::Success;
+
+        if(!in.Seek(metadata.key_file_offset))
+            return PacketResult::InvalidWadFile;
+
+        key_file.resize(metadata.key_file_size);
+        if(in.Read(reinterpret_cast<byte *>(&key_file[0]), metadata.key_file_size) != metadata.key_file_size)
+            return PacketResult::InvalidWadFile;
+
+        return PacketResult::Success;
+    }
     PacketResult ExtractKeyFromWad(RandomInStream &in, std::string &key_file)
     {
         WadMetadata metadata;
