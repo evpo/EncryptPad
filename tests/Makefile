@@ -1,6 +1,6 @@
 include ../deps/makefiles/platform.mak
 
-LIBRARIES += ../back_end_src ../deps/libencryptmsg/src ../deps/libencryptmsg/deps/botan_1_openpgp_codec
+LIBRARIES += ../back_end_src ../deps/libencryptmsg/src ../deps/libencryptmsg/state_machine ../deps/libencryptmsg/state_machine_client ../deps/libencryptmsg/deps/botan_1_openpgp_codec
 
 ifeq ($(PLATFORM),MACOS)
 LDFLAGS += -all_load
@@ -16,8 +16,8 @@ endif
 
 CXXFLAGS += -I../deps/libencryptmsg/include
 
-LDLIBS += ../deps/gtest/build/libgtest.a ../deps/stlplus/portability/$(SUBDIR)/libportability.a -lpthread
-CXXFLAGS += -I../deps/gtest/include -pthread -std=c++11 -Wall -Wextra
+LDLIBS += ../deps/gtest/googletest/build/libgtest.a ../deps/stlplus/portability/$(SUBDIR)/libportability.a -lpthread
+CXXFLAGS += -I../deps/gtest/googletest/include -pthread -std=c++11 -Wall -Wextra
 
 ifneq ($(USE_SYSTEM_LIBS),on)
 LDLIBS += ../deps/botan/libbotan-1.10.a ../deps/zlib/libz.a
