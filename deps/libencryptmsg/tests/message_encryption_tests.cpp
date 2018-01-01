@@ -30,8 +30,8 @@ namespace LibEncryptMsg
 
                 virtual void SetUp() override;
 
-                SecureVector Update(MessageWriter &writer);
-                SecureVector Decrypt(const SecureVector &passphrase);
+                SafeVector Update(MessageWriter &writer);
+                SafeVector Decrypt(const SafeVector &passphrase);
         };
 
         size_t MessageEncryptionFixture::ParameterCombination[] = {8, 24, 128, 512, 1024};
@@ -59,7 +59,7 @@ namespace LibEncryptMsg
             //Arrange
             MessageWriter writer;
             string pwd_str("123456");
-            SecureVector passphrase(FromChar(pwd_str.data()), FromChar(pwd_str.data()) + pwd_str.size());
+            SafeVector passphrase(FromChar(pwd_str.data()), FromChar(pwd_str.data()) + pwd_str.size());
             MessageConfig config;
             config.SetCipherAlgo(CipherAlgo::AES256);
             config.SetHashAlgo(HashAlgo::SHA256);
@@ -85,9 +85,9 @@ namespace LibEncryptMsg
             ASSERT_TRUE(result);
         }
 
-        SecureVector MessageEncryptionFixture::Update(MessageWriter &writer)
+        SafeVector MessageEncryptionFixture::Update(MessageWriter &writer)
         {
-            SecureVector ret_val;
+            SafeVector ret_val;
             buf_.resize(buffer_size_);
             auto it = plain_file_.begin();
             while(it != plain_file_.end())
@@ -105,7 +105,7 @@ namespace LibEncryptMsg
             return ret_val;
         }
 
-        SecureVector MessageEncryptionFixture::Decrypt(const SecureVector &passphrase)
+        SafeVector MessageEncryptionFixture::Decrypt(const SafeVector &passphrase)
         {
             MessageReader reader;
             reader.Start(passphrase);

@@ -1,7 +1,7 @@
 CRYPT_ROOT=..
 BACK_END := $(CRYPT_ROOT)/back_end_src
 PORTABILITY := $(CRYPT_ROOT)/deps/stlplus/portability
-BACK_END_DEPS := portability
+BACK_END_DEPS := portability libencryptmsg
 ifneq ($(USE_SYSTEM_LIBS),on)
 	BACK_END_DEPS += zlib
 endif
@@ -9,6 +9,9 @@ endif
 all : back_end
 back_end : $(BACK_END_DEPS)
 	$(MAKE) -C $(BACK_END) RELEASE=$(RELEASE) USE_SYSTEM_LIBS=$(USE_SYSTEM_LIBS)
+
+libencryptmsg :
+	$(MAKE) -C $(CRYPT_ROOT)/deps/libencryptmsg RELEASE=$(RELEASE)
 portability :
 	$(MAKE) -C $(PORTABILITY) RELEASE=$(RELEASE)
 zlib :
@@ -17,3 +20,4 @@ clean :
 	$(MAKE) -C $(BACK_END) clean RELEASE=$(RELEASE)
 	$(MAKE) -C $(PORTABILITY) clean RELEASE=$(RELEASE)
 	$(MAKE) -f Makefile.zlib clean
+	$(MAKE) -C $(CRYPT_ROOT)/deps/libencryptmsg clean RELEASE=$(RELEASE)

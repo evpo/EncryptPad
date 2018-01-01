@@ -3,7 +3,7 @@
 #include <queue>
 #include "context.h"
 #include "state_graph.h"
-#include "utility.h"
+#include "state_machine_utility.h"
 
 namespace LightStateMachine
 {

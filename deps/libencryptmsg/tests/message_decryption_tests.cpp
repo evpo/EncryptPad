@@ -33,13 +33,13 @@ namespace LibEncryptMsg
                 size_t buffer_size_;
                 vector<uint8_t> plain_file_;
                 vector<uint8_t> encrypted_file_;
-                SecureVector buf_;
+                SafeVector buf_;
 
                 virtual void SetUp() override;
 
                 void TestSecurity(const MessageConfig &config, const Salt &salt);
                 bool Update(PacketAnalyzer &analyzer, bool stop_when_analyzed = false);
-                SecureVector Update(MessageReader &reader, std::vector<uint8_t> &file);
+                SafeVector Update(MessageReader &reader, std::vector<uint8_t> &file);
         };
 
         TestParameters MessageDecryptionFixture::ParameterCombination[] =
@@ -95,7 +95,7 @@ namespace LibEncryptMsg
             //Arrange
             MessageReader reader;
             string pwd_str("123456");
-            SecureVector passphrase(FromChar(pwd_str.data()), FromChar(pwd_str.data()) + pwd_str.size());
+            SafeVector passphrase(FromChar(pwd_str.data()), FromChar(pwd_str.data()) + pwd_str.size());
 
             //Act
             reader.Start(passphrase);
@@ -113,7 +113,7 @@ namespace LibEncryptMsg
             //Arrange
             PacketAnalyzer analyzer;
             string pwd_str("123456");
-            SecureVector passphrase(FromChar(pwd_str.data()), FromChar(pwd_str.data()) + pwd_str.size());
+            SafeVector passphrase(FromChar(pwd_str.data()), FromChar(pwd_str.data()) + pwd_str.size());
 
             //Act
             analyzer.Start(passphrase);
@@ -153,9 +153,9 @@ namespace LibEncryptMsg
             ASSERT_EQ(parameters_.salt, salt_str);
         }
 
-        SecureVector MessageDecryptionFixture::Update(MessageReader &reader, std::vector<uint8_t> &file)
+        SafeVector MessageDecryptionFixture::Update(MessageReader &reader, std::vector<uint8_t> &file)
         {
-            SecureVector ret_val;
+            SafeVector ret_val;
             buf_.resize(buffer_size_);
             auto it = file.begin();
             while(it != file.end())

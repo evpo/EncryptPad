@@ -1,5 +1,5 @@
 #pragma once
-namespace LibEncryptMsg
+namespace LightStateMachine
 {
     class NonCopyable
     {

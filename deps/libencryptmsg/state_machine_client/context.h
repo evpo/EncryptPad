@@ -1,5 +1,5 @@
 #pragma once
-#include "utility.h"
+#include "state_machine_utility.h"
 
 namespace LibEncryptMsg
 {
