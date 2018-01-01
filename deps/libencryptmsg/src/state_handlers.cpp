@@ -6,23 +6,32 @@
 
 using namespace std;
 using namespace LightStateMachine;
-using namespace LightStateMachine::Client;
+
 
 namespace LibEncryptMsg
 {
-    bool InitCanEnter(Context &context)
+    Context &ToContext(StateMachineContext &ctx)
     {
+        StateMachineContext *p = &ctx;
+        return *(static_cast<Context*>(p));
+    }
+
+    bool InitCanEnter(StateMachineContext &ctx)
+    {
+        Context &context = ToContext(ctx);
         return !context.State().buffer_stack.empty() || context.State().finish_packets;
     }
 
-    void InitOnEnter(Context &context)
+    void InitOnEnter(StateMachineContext &ctx)
     {
+        Context &context = ToContext(ctx);
         auto &state = context.State();
         state.packet_chain_it = state.packet_chain.begin();
     }
 
-    bool HeaderCanEnter(Context &context)
+    bool HeaderCanEnter(StateMachineContext &ctx)
     {
+        Context &context = ToContext(ctx);
         if(context.State().buffer_stack.empty() ||
                 context.State().buffer_stack.top().empty())
             return false;
@@ -34,8 +43,9 @@ namespace LibEncryptMsg
         return true;
     }
 
-    bool HeaderCanExit(Context &context)
+    bool HeaderCanExit(StateMachineContext &ctx)
     {
+        Context &context = ToContext(ctx);
         auto &state = context.State();
         switch(state.packet_result)
         {
@@ -47,8 +57,9 @@ namespace LibEncryptMsg
         }
     }
 
-    void HeaderOnEnter(Context &context)
+    void HeaderOnEnter(StateMachineContext &ctx)
     {
+        Context &context = ToContext(ctx);
         auto &state = context.State();
         auto &reader = state.packet_factory.GetHeaderReader();
         reader.GetInStream().Push(state.buffer_stack.top());
@@ -76,8 +87,9 @@ namespace LibEncryptMsg
     }
 
 
-    bool PacketCanExit(Context &context)
+    bool PacketCanExit(StateMachineContext &ctx)
     {
+        Context &context = ToContext(ctx);
         auto result = context.State().packet_result;
         switch(result)
         {
@@ -89,8 +101,9 @@ namespace LibEncryptMsg
         }
     }
 
-    bool PacketCanEnter(Context &context)
+    bool PacketCanEnter(StateMachineContext &ctx)
     {
+        Context &context = ToContext(ctx);
         if(context.State().buffer_stack.empty() && !context.State().finish_packets)
             return false;
 
@@ -101,8 +114,9 @@ namespace LibEncryptMsg
         return true;
     }
 
-    void PacketOnEnter(Context &context)
+    void PacketOnEnter(StateMachineContext &ctx)
     {
+        Context &context = ToContext(ctx);
         auto &state = context.State();
         auto packet_chain_it = state.packet_chain_it;
         LOG_DEBUG << "Packet: " << GetPacketSpec(*packet_chain_it).packet_name;
@@ -179,21 +193,24 @@ namespace LibEncryptMsg
         }
     }
 
-    bool FinishCanEnter(Context &context)
+    bool FinishCanEnter(StateMachineContext &ctx)
     {
+        Context &context = ToContext(ctx);
         if(*context.State().packet_chain_it == PacketType::Unknown)
             return false;
 
         return context.State().finish_packets;
     }
 
-    bool FinishCanExit(Context &context)
+    bool FinishCanExit(StateMachineContext &ctx)
     {
+        Context &context = ToContext(ctx);
         return context.State().packet_result == PacketResult::Success;
     }
 
-    void FinishOnEnter(Context &context)
+    void FinishOnEnter(StateMachineContext &ctx)
     {
+        Context &context = ToContext(ctx);
         auto &state = context.State();
         auto packet_pair = state.packet_factory.GetOrCreatePacket(*state.packet_chain_it);
         assert(packet_pair.first);
@@ -204,13 +221,15 @@ namespace LibEncryptMsg
         state.packet_chain_it ++;
     }
 
-    bool BufferEmptyCanEnter(Context &context)
+    bool BufferEmptyCanEnter(StateMachineContext &ctx)
     {
+        Context &context = ToContext(ctx);
         return context.State().buffer_stack.empty() || !context.State().finish_packets;
     }
 
-    void BufferEmptyOnEnter(Context &context)
+    void BufferEmptyOnEnter(StateMachineContext &ctx)
     {
+        Context &context = ToContext(ctx);
         auto &packet_chain = context.State().packet_chain;
         context.State().packet_chain_it = *packet_chain.begin() == PacketType::Unknown
             ? packet_chain.end() : packet_chain.begin();
@@ -218,8 +237,9 @@ namespace LibEncryptMsg
             context.State().buffer_stack.pop();
     }
 
-    bool EndCanEnter(Context &context)
+    bool EndCanEnter(StateMachineContext &ctx)
     {
+        Context &context = ToContext(ctx);
         auto &state = context.State();
         if(state.finish_packets && *state.packet_chain_it != PacketType::Unknown)
             return false;

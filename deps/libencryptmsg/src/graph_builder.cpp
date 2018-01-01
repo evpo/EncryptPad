@@ -1,12 +1,17 @@
 #include "graph_builder.h"
 #include <memory>
 #include "state_handlers.h"
+#include "state_id.h"
 
 using namespace LightStateMachine;
-using namespace LightStateMachine::Client;
 
 namespace LibEncryptMsg
 {
+    int ToInt(StateID state_id)
+    {
+        return static_cast<int>(state_id);
+    }
+
     StateGraphInfo BuildStateGraph()
     {
         static StateGraph state_graph;
@@ -34,30 +39,30 @@ namespace LibEncryptMsg
         };
 
         // Stub functions
-        auto T = [](Context &){ return true; };
-        auto F = [](Context &){ return false; };
-        auto Stub = [](Context &){};
+        auto T = [](StateMachineContext &){ return true; };
+        auto F = [](StateMachineContext &){ return false; };
+        auto Stub = [](StateMachineContext &){};
 
         // Start state
-        start_node = I(State(StateID::Start));
+        start_node = I(State(ToInt(StateID::Start)));
 
         // Fail state
-        fail_node = I(State(StateID::Fail, Stub, Stub, T, F));
+        fail_node = I(State(ToInt(StateID::Fail), Stub, Stub, T, F));
 
         // Init state
-        auto init_node = I(State(StateID::Init, InitOnEnter, Stub, InitCanEnter, T));
+        auto init_node = I(State(ToInt(StateID::Init), InitOnEnter, Stub, InitCanEnter, T));
 
         // End state
-        auto end_node = I(State(StateID::End, Stub, Stub, EndCanEnter, F));
+        auto end_node = I(State(ToInt(StateID::End), Stub, Stub, EndCanEnter, F));
 
         // Packet
-        auto packet_node = I(State(StateID::Packet, PacketOnEnter, Stub, PacketCanEnter, PacketCanExit));
+        auto packet_node = I(State(ToInt(StateID::Packet), PacketOnEnter, Stub, PacketCanEnter, PacketCanExit));
 
         // FinishPacket
-        auto finish_node = I(State(StateID::FinishPacket, FinishOnEnter, Stub, FinishCanEnter, FinishCanExit));
+        auto finish_node = I(State(ToInt(StateID::FinishPacket), FinishOnEnter, Stub, FinishCanEnter, FinishCanExit));
 
         // Header
-        auto header_node = I(State(StateID::Header, HeaderOnEnter, Stub, HeaderCanEnter, T));
+        auto header_node = I(State(ToInt(StateID::Header), HeaderOnEnter, Stub, HeaderCanEnter, T));
 
         L(start_node, init_node);
         L(init_node, packet_node);
@@ -70,7 +75,7 @@ namespace LibEncryptMsg
         L(finish_node, end_node);
 
         // BufferEmpty
-        auto buffer_empty_node = I(State(StateID::BufferEmpty, BufferEmptyOnEnter, Stub, BufferEmptyCanEnter, T));
+        auto buffer_empty_node = I(State(ToInt(StateID::BufferEmpty), BufferEmptyOnEnter, Stub, BufferEmptyCanEnter, T));
         L(buffer_empty_node, header_node);
         L(buffer_empty_node, end_node);
         L(header_node, buffer_empty_node);

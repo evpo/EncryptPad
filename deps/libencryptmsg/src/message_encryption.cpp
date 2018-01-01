@@ -12,7 +12,6 @@
 
 using namespace std;
 using namespace LightStateMachine;
-using namespace LightStateMachine::Client;
 using namespace LibEncryptMsg;
 
 namespace LibEncryptMsg

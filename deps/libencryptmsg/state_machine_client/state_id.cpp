@@ -2,24 +2,21 @@
 #include <map>
 
 using namespace std;
-namespace LightStateMachine
+namespace LibEncryptMsg
 {
-    namespace Client
+    const std::string &PrintStateID(StateID state_id)
     {
-        const std::string &PrintStateID(StateID state_id)
+        static map<StateID, string> state_id2string =
         {
-            static map<StateID, string> state_id2string =
-            {
-                {StateID::Start, "Start"},
-                {StateID::Init, "Init"},
-                {StateID::Header,"Header"},
-                {StateID::Packet,"Packet"},
-                {StateID::BufferEmpty, "BufferEmpty"},
-                {StateID::FinishPacket, "FinishPacket"},
-                {StateID::End, "End"},
-                {StateID::Fail, "Fail"}
-            };
-            return state_id2string[state_id];
-        }
+            {StateID::Start, "Start"},
+            {StateID::Init, "Init"},
+            {StateID::Header,"Header"},
+            {StateID::Packet,"Packet"},
+            {StateID::BufferEmpty, "BufferEmpty"},
+            {StateID::FinishPacket, "FinishPacket"},
+            {StateID::End, "End"},
+            {StateID::Fail, "Fail"}
+        };
+        return state_id2string[state_id];
     }
 }

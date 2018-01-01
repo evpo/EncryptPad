@@ -9,18 +9,17 @@
 #endif
 
 using namespace std;
-using namespace LightStateMachine::Client;
 
 namespace
 {
 #ifdef TRACE_STATE_MACHINE
-    void DebugPrintState(StateID state_id)
+    void DebugPrintState(LightStateMachine::StateMachineStateID state_id)
     {
-        string str = PrintStateID(state_id);
+        string str = PRINT_STATE_MACHINE_STATE_ID(state_id);
         LOG_DEBUG << str;
     }
 #else
-    void DebugPrintState(StateID)
+    void DebugPrintState(LightStateMachine::StateMachineStateID)
     {
     }
 #endif
@@ -30,7 +29,7 @@ namespace LightStateMachine
 {
 
     unsigned kQueueSize = 3U;
-    StateMachine::StateMachine(StateGraph &state_graph, StateGraph::iterator start_state, StateGraph::iterator fail_state, Context &context)
+    StateMachine::StateMachine(StateGraph &state_graph, StateGraph::iterator start_state, StateGraph::iterator fail_state, StateMachineContext &context)
         :
             state_graph_(&state_graph),
             start_state_(start_state),
@@ -80,7 +79,7 @@ namespace LightStateMachine
         return true;
     }
 
-    StateID StateMachine::CurrentState() const
+    StateMachineStateID StateMachine::CurrentState() const
     {
         return current_state_->GetID();
     }
@@ -96,7 +95,7 @@ namespace LightStateMachine
         DebugPrintState(current_state_->GetID());
     }
 
-    StateID StateMachine::PreviousState() const
+    StateMachineStateID StateMachine::PreviousState() const
     {
         return state_queue_.back();
     }

@@ -1,11 +1,9 @@
 #include "state.h"
 
-using namespace LightStateMachine::Client;
-
 namespace LightStateMachine
 {
 
-    State::State(StateID id, VoidFunction on_enter, VoidFunction on_exit,
+    State::State(StateMachineStateID id, VoidFunction on_enter, VoidFunction on_exit,
             BoolFunction can_enter, BoolFunction can_exit)
         :
         state_id_(id),
@@ -16,36 +14,36 @@ namespace LightStateMachine
     {
     }
 
-    StateID State::GetID() const
+    StateMachineStateID State::GetID() const
     {
         return state_id_;
     }
 
-    bool State::CanEnter(Context &context)
+    bool State::CanEnter(StateMachineContext &context)
     {
         return can_enter_(context);
     }
 
-    bool State::CanExit(Context &context)
+    bool State::CanExit(StateMachineContext &context)
     {
         return can_exit_(context);
     }
 
-    void State::OnEnter(Context &context)
+    void State::OnEnter(StateMachineContext &context)
     {
         on_enter_(context);
     }
 
-    void State::OnExit(Context &context)
+    void State::OnExit(StateMachineContext &context)
     {
         on_exit_(context);
     }
 
-    void StubVoidFunction(Client::Context&)
+    void StubVoidFunction(StateMachineContext&)
     {
     }
 
-    bool StubBoolFunction(Client::Context&)
+    bool StubBoolFunction(StateMachineContext&)
     {
         return true;
     }

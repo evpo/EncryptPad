@@ -1,22 +1,18 @@
 #pragma once
 #include <string>
 
-namespace LightStateMachine
+namespace LibEncryptMsg
 {
-    namespace Client
+    enum class StateID : int
     {
-        enum class StateID
-        {
-            Start,
-            Init,
-            Header,
-            Packet,
-            FinishPacket,
-            BufferEmpty,
-            End,
-            Fail
-        };
-
-        const std::string &PrintStateID(StateID state_id);
-    }
+        Start,
+        Init,
+        Header,
+        Packet,
+        FinishPacket,
+        BufferEmpty,
+        End,
+        Fail
+    };
+    const std::string &PrintStateID(StateID state_id);
 }

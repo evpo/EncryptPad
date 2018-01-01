@@ -3,10 +3,10 @@
 #include "state_machine.h"
 #include "session_state.h"
 #include "emsg_symmetric_key.h"
+#include "context.h"
 
 using namespace std;
 using namespace LightStateMachine;
-using namespace LightStateMachine::Client;
 using namespace LibEncryptMsg;
 
 namespace LightStateMachine
@@ -93,7 +93,7 @@ namespace LibEncryptMsg
         private:
             SessionState session_state_;
             StateGraphInfo graph_info_;
-            LightStateMachine::Client::Context context_;
+            Context context_;
             LightStateMachine::StateMachine state_machine_;
             PacketFactory packet_factory_;
             bool analyze_only_;
