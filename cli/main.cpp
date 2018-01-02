@@ -36,6 +36,7 @@
 #include "openpgp_conversions.h"
 #include "algo_spec.h"
 #include "algo_defaults.h"
+#include "plog/Log.h"
 
 namespace EncryptPad
 {
@@ -102,6 +103,7 @@ namespace EncryptPad
     {
         using namespace EncryptPad;
         using namespace LibEncryptMsg;
+
         StringToUpper(str);
         if(str == "CAST5")
         {
@@ -180,6 +182,10 @@ void GenerateKeyFile(const std::string &path, size_t key_byte_size, const std::s
 // end Packet read write tests
 int main(int argc, char *argv[])
 {
+
+    //TODO: switch enable / disable later
+    plog::init(plog::debug, "debug.log");
+    LOG_INFO << "Log instance started";
 
     cli_definitions_t cli_defs = {
         {

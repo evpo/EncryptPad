@@ -19,7 +19,7 @@ endif
 CXXFLAGS += -Wall -Wextra
 LDFLAGS += -Wall
 
-CXXFLAGS += -I../deps/libencryptmsg/include
+CXXFLAGS += -I../deps/libencryptmsg/include -I../deps/libencryptmsg/deps/plog/include
 
 ifneq ($(USE_SYSTEM_LIBS),on)
 LDLIBS += ../deps/botan/libbotan-1.10.a ../deps/zlib/libz.a -lpthread

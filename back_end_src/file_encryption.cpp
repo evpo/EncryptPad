@@ -33,6 +33,7 @@
 #include "openpgp_conversions.h"
 #include "emsg_symmetric_key.h"
 #include "key_service_key_provider.h"
+#include "decryption_state_machine.h"
 
 using namespace LibEncryptMsg;
 namespace
@@ -415,39 +416,39 @@ namespace
     PacketResult DecryptWad(RandomInStream &in, const std::string &key_file, 
             const EncryptParams &encrypt_params, OutStream &out, PacketMetadata &metadata);
 
-    PacketResult DecryptStream(InStream &in_stm, const EncryptParams &enc_params, 
-            OutStream &out_stm, PacketMetadata &metadata)
-    {
-        Buffer buffer;
-        auto buffer_out = MakeOutStream(buffer);
-        PacketResult result = ReadPacket(in_stm, *buffer_out, enc_params, metadata);
-        if(result != PacketResult::Success)
-            return result;
-
-        std::string marker;
-
-        if(buffer.size() >= 4)
-        {
-            marker.insert(0U, reinterpret_cast<const char*>(buffer.data()), 4U);
-        }
-
-        if(marker == "IWAD" || marker == "PWAD")
-        {
-            InPacketStreamMemory buffer_in(buffer.data(), buffer.data() + buffer_out->GetCount());
-            result = DecryptWad(buffer_in, metadata.key_file, enc_params, out_stm, metadata);
-            if(result == PacketResult::InvalidSurrogateIV)
-                return PacketResult::InvalidKeyFile;
-
-            if(result != PacketResult::Success)
-                return result;
-        }
-        else
-        {
-            out_stm.Write(buffer.data(), buffer_out->GetCount());
-        }
-        
-        return PacketResult::Success;
-    }
+    // PacketResult DecryptStream(InStream &in_stm, const EncryptParams &enc_params, 
+    //         OutStream &out_stm, PacketMetadata &metadata)
+    // {
+    //     Buffer buffer;
+    //     auto buffer_out = MakeOutStream(buffer);
+    //     PacketResult result = ReadPacket(in_stm, *buffer_out, enc_params, metadata);
+    //     if(result != PacketResult::Success)
+    //         return result;
+    //
+    //     std::string marker;
+    //
+    //     if(buffer.size() >= 4)
+    //     {
+    //         marker.insert(0U, reinterpret_cast<const char*>(buffer.data()), 4U);
+    //     }
+    //
+    //     if(marker == "IWAD" || marker == "PWAD")
+    //     {
+    //         InPacketStreamMemory buffer_in(buffer.data(), buffer.data() + buffer_out->GetCount());
+    //         result = DecryptWad(buffer_in, metadata.key_file, enc_params, out_stm, metadata);
+    //         if(result == PacketResult::InvalidSurrogateIV)
+    //             return PacketResult::InvalidKeyFile;
+    //
+    //         if(result != PacketResult::Success)
+    //             return result;
+    //     }
+    //     else
+    //     {
+    //         out_stm.Write(buffer.data(), buffer_out->GetCount());
+    //     }
+    //     
+    //     return PacketResult::Success;
+    // }
 
     PacketResult DecryptWithKey(InStream &in, const EncryptParams &encrypt_params,
             OutStream &out, PacketMetadata &metadata)
@@ -579,28 +580,6 @@ namespace
         }
     }
 
-    struct DecryptionSession
-    {
-        MessageReader reader;
-        KeyServiceKeyProvider key_provider;
-
-        //These are only for memory management
-        std::string own_passphrase;
-        KeyService own_key_service;
-
-        DecryptionSession()
-            :key_provider(&own_key_service, &own_passphrase)
-        {
-            reader.Start(key_provider);
-        }
-
-        DecryptionSession(KeyService *key_service, const std::string *passphrase)
-            :key_provider(key_service, passphrase)
-        {
-            reader.Start(key_provider);
-        }
-    };
-
     using SessionResult = std::pair<PacketResult, std::unique_ptr<DecryptionSession> >;
     SessionResult CreateKeyFileDecryptionSession(const EncryptParams &encrypt_params,
             PacketMetadata &metadata)
@@ -636,156 +615,167 @@ namespace
     PacketResult DecryptPacketFileToStream(const std::string &file_in, const EncryptParams &encrypt_params,
             OutStream &out, PacketMetadata &metadata)
     {
-        std::vector<byte> fall_back_buffer;
-        std::unique_ptr<RandomInStream> in = CreateInStream(file_in, fall_back_buffer);
-        if(in.get() == nullptr)
+        InPacketStreamFile in_stm_file;
+        OpenFileResult result = OpenFile(file_in, in_stm_file);
+        if(result != OpenFileResult::OK)
             return PacketResult::IOErrorInput;
 
-        auto mode_pair = IdentifyFileNestingMode(*in, encrypt_params, metadata);
-        if(mode_pair.first != PacketResult::Success)
-            return mode_pair.first;
-
-        FileNestingMode mode = mode_pair.second;
-        if(mode == FileNestingMode::WadWithGPG)
-            metadata.key_only = true;
-
-        std::unique_ptr<DecryptionSession> passphrase_session;
-        std::unique_ptr<DecryptionSession> key_file_session;
-
-        switch(mode)
-        {
-            case FileNestingMode::SimpleGPG:
-            case FileNestingMode::NestedGPGWithWad:
-            case FileNestingMode::SimpleGPGOrNestedGPGWithWad:
-                passphrase_session.reset(new DecryptionSession(encrypt_params.key_service, encrypt_params.passphrase));
-                break;
-            default:
-                //we don't know yet
-                break;
-        }
-
-        if(!metadata.key_file.empty() && mode != FileNestingMode::SimpleGPG)
-        {
-            // The preset key file takes precedence over the persistent key file
-            auto key_file_session_result = CreateKeyFileDecryptionSession(encrypt_params, metadata);
-            if(key_file_session_result.first != PacketResult::Success)
-                return key_file_session_result.first;
-
-            key_file_session = std::move(key_file_session_result.second);
-        }
-        //TODO: This buffer size if for only testing small buffers
-        const size_t kBufferSize = 16;
-        SafeVector buffer;
-        SafeVector accumulated_pre_buffer;
-        SafeVector accumulated_post_buffer;
-
-        while(!in->IsEOF())
-        {
-            buffer.resize(std::min(static_cast<size_t>(in->GetCount()), kBufferSize));
-            auto length = in->Read(buffer.data(), buffer.size());
-            buffer.resize(length);
-
-            PacketResult result = PacketResult::None;
-            switch(mode)
-            {
-                case FileNestingMode::SimpleGPG:
-                case FileNestingMode::SimpleGPGWithKey:
-                    {
-                        MessageReader *reader = nullptr;
-                        reader = (mode == FileNestingMode::SimpleGPG) ?
-                            &passphrase_session->reader :
-                            &key_file_session->reader;
-
-                        if(accumulated_pre_buffer.size() > 0)
-                        {
-                            buffer.insert(buffer.begin(), accumulated_pre_buffer.begin(), accumulated_pre_buffer.end());
-                            accumulated_pre_buffer.clear();
-                        }
-
-                        result = UpdateOrFinish(*reader, buffer, in->IsEOF());
-                        if(result != PacketResult::Success)
-                            return result;
-
-                        if(accumulated_post_buffer.size() > 0)
-                        {
-                            buffer.insert(buffer.begin(), accumulated_post_buffer.begin(), accumulated_post_buffer.end());
-                            accumulated_post_buffer.clear();
-                        }
-                    }
-                    break;
-                case FileNestingMode::WadWithGPG:
-                    {
-                        accumulated_pre_buffer.insert(accumulated_pre_buffer.end(), buffer.begin(), buffer.end());
-                        buffer.clear();
-                        InPacketStreamMemory accumulated_in(accumulated_pre_buffer.data(),
-                                accumulated_pre_buffer.data() + accumulated_pre_buffer.size());
-
-                        uint32_t payload_offset = 0;
-                        result = ParseWad(accumulated_in, metadata.key_file, payload_offset);
-
-                        if(result != PacketResult::Success && result != PacketResult::InvalidOrIncompleteWadFile)
-                            return result;
-
-                        if(result != PacketResult::Success)
-                            break;
-
-                        //erase the wad head
-                        assert(accumulated_pre_buffer.size() >= payload_offset);
-                        accumulated_pre_buffer.erase(accumulated_pre_buffer.begin(),
-                                accumulated_pre_buffer.begin() + payload_offset);
-
-                        if(!key_file_session)
-                        {
-                            // The key wasn't preset and we recovered the key file location from the wad file
-                            auto key_file_session_result = CreateKeyFileDecryptionSession(encrypt_params, metadata);
-                            if(key_file_session_result.first != PacketResult::Success)
-                                return key_file_session_result.first;
-
-                            key_file_session = std::move(key_file_session_result.second);
-                        }
-
-                        // The rest of the file is simple gpg with key
-                        mode = FileNestingMode::SimpleGPGWithKey;
-                    }
-                    break;
-                case FileNestingMode::SimpleGPGOrNestedGPGWithWad:
-                    {
-                        result = UpdateOrFinish(passphrase_session->reader, buffer, in->IsEOF());
-                        if(result != PacketResult::Success)
-                            return result;
-
-                        accumulated_post_buffer.insert(accumulated_post_buffer.end(), buffer.begin(), buffer.end());
-                        buffer.clear();
-
-                        if(accumulated_post_buffer.size() >= 4)
-                        {
-                            std::string marker;
-                            marker.insert(0U, reinterpret_cast<const char*>(accumulated_post_buffer.data()), 4U);
-                            if(marker == "IWAD" || marker == "PWAD")
-                            {
-                                mode = FileNestingMode::NestedGPGWithWad;
-                            }
-                            else
-                            {
-                                mode = FileNestingMode::SimpleGPG;
-                            }
-                        }
-                    }
-                    break;
-                case FileNestingMode::NestedGPGWithWad:
-                    {
-                        assert(false);//Not implemented
-                    }
-                    break;
-                default:
-                    assert(false);
-                    break;
-            }
-
-            out.Write(buffer.data(), buffer.size());
-        }
-        return PacketResult::Success;
+        return DecryptStream(in_stm_file, encrypt_params, out, metadata);
     }
+
+    // PacketResult DecryptPacketFileToStream(const std::string &file_in, const EncryptParams &encrypt_params,
+    //         OutStream &out, PacketMetadata &metadata)
+    // {
+    //     std::vector<byte> fall_back_buffer;
+    //     std::unique_ptr<RandomInStream> in = CreateInStream(file_in, fall_back_buffer);
+    //     if(in.get() == nullptr)
+    //         return PacketResult::IOErrorInput;
+    //
+    //     auto mode_pair = IdentifyFileNestingMode(*in, encrypt_params, metadata);
+    //     if(mode_pair.first != PacketResult::Success)
+    //         return mode_pair.first;
+    //
+    //     FileNestingMode mode = mode_pair.second;
+    //     if(mode == FileNestingMode::WadWithGPG)
+    //         metadata.key_only = true;
+    //
+    //     std::unique_ptr<DecryptionSession> passphrase_session;
+    //     std::unique_ptr<DecryptionSession> key_file_session;
+    //
+    //     switch(mode)
+    //     {
+    //         case FileNestingMode::SimpleGPG:
+    //         case FileNestingMode::NestedGPGWithWad:
+    //         case FileNestingMode::SimpleGPGOrNestedGPGWithWad:
+    //             passphrase_session.reset(new DecryptionSession(encrypt_params.key_service, encrypt_params.passphrase));
+    //             break;
+    //         default:
+    //             //we don't know yet
+    //             break;
+    //     }
+    //
+    //     if(!metadata.key_file.empty() && mode != FileNestingMode::SimpleGPG)
+    //     {
+    //         // The preset key file takes precedence over the persistent key file
+    //         auto key_file_session_result = CreateKeyFileDecryptionSession(encrypt_params, metadata);
+    //         if(key_file_session_result.first != PacketResult::Success)
+    //             return key_file_session_result.first;
+    //
+    //         key_file_session = std::move(key_file_session_result.second);
+    //     }
+    //     //TODO: This buffer size if for only testing small buffers
+    //     const size_t kBufferSize = 16;
+    //     SafeVector buffer;
+    //     SafeVector accumulated_pre_buffer;
+    //     SafeVector accumulated_post_buffer;
+    //
+    //     while(!in->IsEOF())
+    //     {
+    //         buffer.resize(std::min(static_cast<size_t>(in->GetCount()), kBufferSize));
+    //         auto length = in->Read(buffer.data(), buffer.size());
+    //         buffer.resize(length);
+    //
+    //         PacketResult result = PacketResult::None;
+    //         switch(mode)
+    //         {
+    //             case FileNestingMode::SimpleGPG:
+    //             case FileNestingMode::SimpleGPGWithKey:
+    //                 {
+    //                     MessageReader *reader = nullptr;
+    //                     reader = (mode == FileNestingMode::SimpleGPG) ?
+    //                         &passphrase_session->reader :
+    //                         &key_file_session->reader;
+    //
+    //                     if(accumulated_pre_buffer.size() > 0)
+    //                     {
+    //                         buffer.insert(buffer.begin(), accumulated_pre_buffer.begin(), accumulated_pre_buffer.end());
+    //                         accumulated_pre_buffer.clear();
+    //                     }
+    //
+    //                     result = UpdateOrFinish(*reader, buffer, in->IsEOF());
+    //                     if(result != PacketResult::Success)
+    //                         return result;
+    //
+    //                     if(accumulated_post_buffer.size() > 0)
+    //                     {
+    //                         buffer.insert(buffer.begin(), accumulated_post_buffer.begin(), accumulated_post_buffer.end());
+    //                         accumulated_post_buffer.clear();
+    //                     }
+    //                 }
+    //                 break;
+    //             case FileNestingMode::WadWithGPG:
+    //                 {
+    //                     accumulated_pre_buffer.insert(accumulated_pre_buffer.end(), buffer.begin(), buffer.end());
+    //                     buffer.clear();
+    //                     InPacketStreamMemory accumulated_in(accumulated_pre_buffer.data(),
+    //                             accumulated_pre_buffer.data() + accumulated_pre_buffer.size());
+    //
+    //                     uint32_t payload_offset = 0;
+    //                     result = ParseWad(accumulated_in, metadata.key_file, payload_offset);
+    //
+    //                     if(result != PacketResult::Success && result != PacketResult::InvalidOrIncompleteWadFile)
+    //                         return result;
+    //
+    //                     if(result != PacketResult::Success)
+    //                         break;
+    //
+    //                     //erase the wad head
+    //                     assert(accumulated_pre_buffer.size() >= payload_offset);
+    //                     accumulated_pre_buffer.erase(accumulated_pre_buffer.begin(),
+    //                             accumulated_pre_buffer.begin() + payload_offset);
+    //
+    //                     if(!key_file_session)
+    //                     {
+    //                         // The key wasn't preset and we recovered the key file location from the wad file
+    //                         auto key_file_session_result = CreateKeyFileDecryptionSession(encrypt_params, metadata);
+    //                         if(key_file_session_result.first != PacketResult::Success)
+    //                             return key_file_session_result.first;
+    //
+    //                         key_file_session = std::move(key_file_session_result.second);
+    //                     }
+    //
+    //                     // The rest of the file is simple gpg with key
+    //                     mode = FileNestingMode::SimpleGPGWithKey;
+    //                 }
+    //                 break;
+    //             case FileNestingMode::SimpleGPGOrNestedGPGWithWad:
+    //                 {
+    //                     result = UpdateOrFinish(passphrase_session->reader, buffer, in->IsEOF());
+    //                     if(result != PacketResult::Success)
+    //                         return result;
+    //
+    //                     accumulated_post_buffer.insert(accumulated_post_buffer.end(), buffer.begin(), buffer.end());
+    //                     buffer.clear();
+    //
+    //                     if(accumulated_post_buffer.size() >= 4)
+    //                     {
+    //                         std::string marker;
+    //                         marker.insert(0U, reinterpret_cast<const char*>(accumulated_post_buffer.data()), 4U);
+    //                         if(marker == "IWAD" || marker == "PWAD")
+    //                         {
+    //                             mode = FileNestingMode::NestedGPGWithWad;
+    //                         }
+    //                         else
+    //                         {
+    //                             mode = FileNestingMode::SimpleGPG;
+    //                         }
+    //                     }
+    //                 }
+    //                 break;
+    //             case FileNestingMode::NestedGPGWithWad:
+    //                 {
+    //                     assert(false);//Not implemented
+    //                 }
+    //                 break;
+    //             default:
+    //                 assert(false);
+    //                 break;
+    //         }
+    //
+    //         out.Write(buffer.data(), buffer.size());
+    //     }
+    //     return PacketResult::Success;
+    // }
 
 #if 0
     PacketResult DecryptPacketFileToStream(const std::string &file_in, const EncryptParams &encrypt_params,

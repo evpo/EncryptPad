@@ -18,7 +18,7 @@
 //along with EncryptPad.  If not, see <http://www.gnu.org/licenses/>.
 //**********************************************************************************
 #pragma once
-#define BOTAN_DLL
+// #define BOTAN_DLL
 #include "botan/base64.h"
 #include "botan/pbkdf2.h"
 #include "botan/sha160.h"

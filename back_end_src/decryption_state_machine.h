@@ -7,6 +7,7 @@
 #include "emsg_mem.h"
 #include "message_decryption.h"
 #include "key_service_key_provider.h"
+#include <string>
 
 namespace EncryptPad
 {
@@ -60,6 +61,7 @@ namespace EncryptPad
     class DecryptionContext : public LightStateMachine::StateMachineContext
     {
         private:
+            using super = LightStateMachine::StateMachineContext;
             int filter_count_;
             Format format_;
             LibEncryptMsg::PacketResult result_;
@@ -75,6 +77,7 @@ namespace EncryptPad
         public:
             DecryptionContext(InStream &in, OutStream &out,
                     const EncryptParams &encrypt_params, PacketMetadata &metadata):
+                super(),
                 filter_count_(0),
                 format_(Format::Unknown),
                 result_(LibEncryptMsg::PacketResult::None),
@@ -151,7 +154,7 @@ namespace EncryptPad
                 return metadata_;
             }
 
-            const EncryptParams &EncryptParams() const
+            const EncryptParams &GetEncryptParams() const
             {
                 return encrypt_params_;
             }

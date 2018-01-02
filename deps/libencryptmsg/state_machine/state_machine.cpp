@@ -13,30 +13,46 @@ using namespace std;
 namespace
 {
 #ifdef TRACE_STATE_MACHINE
-    void DebugPrintState(LightStateMachine::StateMachineStateID state_id)
+    void DebugPrintState(std::string str)
     {
-        string str = PRINT_STATE_MACHINE_STATE_ID(state_id);
         LOG_DEBUG << str;
     }
 #else
-    void DebugPrintState(LightStateMachine::StateMachineStateID)
+    void DebugPrintState(std::string)
     {
     }
 #endif
 }
 
+
 namespace LightStateMachine
 {
 
     unsigned kQueueSize = 3U;
+
+    class StandardStateIDToStringConverter : public StateIDToStringConverter
+    {
+        public:
+            std::string Convert(StateMachineStateID state_id)
+            {
+                return std::string("state_id = ") + std::to_string(state_id);
+            }
+    };
+
     StateMachine::StateMachine(StateGraph &state_graph, StateGraph::iterator start_state, StateGraph::iterator fail_state, StateMachineContext &context)
         :
             state_graph_(&state_graph),
             start_state_(start_state),
             current_state_(start_state),
             fail_state_(fail_state),
-            context_(&context)
+            context_(&context),
+            state_id_to_string_converter_(new StandardStateIDToStringConverter())
     {
+    }
+
+    void StateMachine::SetStateIDToStringConverter(std::unique_ptr<StateIDToStringConverter> converter)
+    {
+        state_id_to_string_converter_ = std::move(converter);
     }
 
     void StateMachine::Reset()
@@ -92,7 +108,7 @@ namespace LightStateMachine
             state_queue_.pop();
         }
         current_state_ = new_state;
-        DebugPrintState(current_state_->GetID());
+        DebugPrintState(state_id_to_string_converter_->Convert(current_state_->GetID()));
     }
 
     StateMachineStateID StateMachine::PreviousState() const

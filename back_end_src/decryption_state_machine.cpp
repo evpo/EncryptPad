@@ -3,6 +3,7 @@
 #include "state_machine.h"
 #include "emsg_exception.h"
 #include "decryption_state_handlers.h"
+#include "decryption_state_debug.h"
 
 using namespace LightStateMachine;
 using namespace LibEncryptMsg;
@@ -50,7 +51,6 @@ namespace EncryptPad
         // Fail state
         auto fail = I(State(ID(StateID::Fail), Fail_OnEnter, Stub, T, F));
         graph->fail_node = fail;
-        return graph;
 
         auto read_in = I(State(ID(StateID::ReadIn), ReadIn_OnEnter, Stub,
                     ReadIn_CanEnter, T));
@@ -67,7 +67,7 @@ namespace EncryptPad
         auto write_out = I(State(ID(StateID::WriteOut), WriteOut_OnEnter, Stub,
                     WriteOut_CanEnter, T));
         auto end = I(State(ID(StateID::End), End_OnEnter, Stub,
-                    End_CanEnter, T));
+                    End_CanEnter, F));
 
         L(start, read_in);
 
@@ -81,6 +81,7 @@ namespace EncryptPad
         L(parse_format, wad_head);
         L(parse_format, read_key_file);
         L(parse_format, set_pwd_key);
+        L(parse_format, write_out);
 
         L(set_pwd_key, gpg);
 
@@ -98,8 +99,17 @@ namespace EncryptPad
         L(wad_head, read_in);
 
         L(write_out, read_in);
+        return graph;
     }
 
+    class DecryptionStateIDToStringConverter: public LightStateMachine::StateIDToStringConverter
+    {
+        public:
+            std::string Convert(StateMachineStateID state_id) override
+            {
+                return PrintDecryptionStateMachineStateID(state_id);
+            }
+    };
     LibEncryptMsg::PacketResult DecryptStream(InStream &in, const EncryptParams &encrypt_params,
             OutStream &out, PacketMetadata &metadata)
     {
@@ -107,6 +117,9 @@ namespace EncryptPad
         auto graph = BuildStateGraph();
 
         StateMachine state_machine(graph->state_graph, graph->start_node, graph->fail_node, context);
+        state_machine.SetStateIDToStringConverter(
+                std::unique_ptr<StateIDToStringConverter>(new DecryptionStateIDToStringConverter())
+                );
         while(state_machine.NextState())
         {
         }

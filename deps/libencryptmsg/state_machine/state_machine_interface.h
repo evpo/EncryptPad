@@ -25,11 +25,11 @@ namespace LightStateMachine
             void SetFailed(bool value);
             StateMachineContext();
     };
+
+    // Inherit this class to trace application specific state ids
+    class StateIDToStringConverter: public NonCopyable
+    {
+        public:
+            virtual std::string Convert(StateMachineStateID state_id) = 0;
+    };
 }
-
-//Define your own function to log your application specific state id
-#ifndef PRINT_STATE_MACHINE_STATE_ID
-    std::string PrintStateMachineStateID(LightStateMachine::StateMachineStateID state_id);
-#define PRINT_STATE_MACHINE_STATE_ID PrintStateMachineStateID
-#endif
-

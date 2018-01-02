@@ -10,7 +10,8 @@ namespace EncryptPad
 
     bool ReadIn_CanEnter(LightStateMachine::StateMachineContext &ctx)
     {
-        return true;
+        auto &c = ToContext(ctx);
+        return c.Buffer().size() == 0;
     }
 
     void ReadIn_OnEnter(LightStateMachine::StateMachineContext &ctx)
@@ -115,6 +116,9 @@ namespace EncryptPad
     bool GPG_CanEnter(LightStateMachine::StateMachineContext &ctx)
     {
         auto &c = ToContext(ctx);
+        if(c.GetFilterCount() > 1)
+            return false;
+
         switch(c.GetFormat())
         {
             case Format::Empty:
@@ -124,6 +128,8 @@ namespace EncryptPad
             case Format::GPG:
             case Format::GPGOrNestedWad:
                 if(!c.PassphraseSession())
+                    return false;
+                if(c.GetFilterCount() == 1)
                     return false;
                 break;
 
@@ -163,10 +169,16 @@ namespace EncryptPad
     {
         using namespace LibEncryptMsg;
         auto &c = ToContext(ctx);
-        MessageReader *reader = (c.GetFormat() == Format::GPG) ?
-            &c.PassphraseSession()->reader
-            :
-            &c.KeyFileSession()->reader;
+        MessageReader *reader = nullptr;
+        if(c.GetFormat() == Format::GPG ||
+                (c.GetFormat() == Format::GPGOrNestedWad && c.GetFilterCount() == 0))
+        {
+            reader = &c.PassphraseSession()->reader;
+        }
+        else
+        {
+            reader = &c.KeyFileSession()->reader;
+        }
 
         try
         {
@@ -184,6 +196,7 @@ namespace EncryptPad
             c.SetResult(e.result);
             c.SetFailed(true);
         }
+        c.SetFilterCount(c.GetFilterCount() + 1);
         c.SetResult(PacketResult::Success);
     }
 
@@ -208,14 +221,36 @@ namespace EncryptPad
         auto &c = ToContext(ctx);
         c.PassphraseSession().reset(
                 new DecryptionSession(
-                    c.EncryptParams().key_service,
-                    c.EncryptParams().passphrase)
+                    c.GetEncryptParams().key_service,
+                    c.GetEncryptParams().passphrase)
                 );
     }
     bool WriteOut_CanEnter(LightStateMachine::StateMachineContext &ctx)
     {
         auto &c = ToContext(ctx);
-        return c.Buffer().size() > 0;
+        if(c.Buffer().size() == 0)
+            return false;
+
+        switch(c.GetFormat())
+        {
+            case Format::Empty:
+            case Format::Unknown:
+            case Format::GPGOrNestedWad:
+                return false;
+            case Format::GPGByKeyFile:
+            case Format::GPG:
+            case Format::WAD:
+                if(c.GetFilterCount() != 1)
+                    return false;
+                break;
+            case Format::NestedWAD:
+                if(c.GetFilterCount() != 2)
+                    return false;
+                break;
+            default:
+                break;
+        }
+        return true;
     }
 
     void WriteOut_OnEnter(LightStateMachine::StateMachineContext &ctx)
@@ -230,10 +265,23 @@ namespace EncryptPad
         // auto &c = ToContext(ctx);
     }
 
-    bool ReadKeyFile_CanEnter(LightStateMachine::StateMachineContext &ctx);
-    bool WADHead_CanEnter(LightStateMachine::StateMachineContext &ctx);
+    bool ReadKeyFile_CanEnter(LightStateMachine::StateMachineContext &ctx)
+    {
+        return false;
 
-    void ReadKeyFile_OnEnter(LightStateMachine::StateMachineContext &ctx);
-    void WADHead_OnEnter(LightStateMachine::StateMachineContext &ctx);
+    }
+    bool WADHead_CanEnter(LightStateMachine::StateMachineContext &ctx)
+    {
+        return false;
+    }
+
+    void ReadKeyFile_OnEnter(LightStateMachine::StateMachineContext &ctx)
+    {
+
+    }
+    void WADHead_OnEnter(LightStateMachine::StateMachineContext &ctx)
+    {
+
+    }
 }
 
