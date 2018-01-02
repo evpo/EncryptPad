@@ -184,7 +184,7 @@ int main(int argc, char *argv[])
 {
 
     //TODO: switch enable / disable later
-    plog::init(plog::debug, "debug.log");
+    plog::init(plog::debug, "epad.log");
     LOG_INFO << "Log instance started";
 
     cli_definitions_t cli_defs = {

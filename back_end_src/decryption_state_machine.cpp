@@ -109,7 +109,13 @@ namespace EncryptPad
             {
                 return PrintDecryptionStateMachineStateID(state_id);
             }
+
+            std::string StateMachineName() override
+            {
+                return "decryption";
+            }
     };
+
     LibEncryptMsg::PacketResult DecryptStream(InStream &in, const EncryptParams &encrypt_params,
             OutStream &out, PacketMetadata &metadata)
     {

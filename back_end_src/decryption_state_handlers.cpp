@@ -1,5 +1,10 @@
 #include "decryption_state_handlers.h"
 #include "decryption_state_machine.h"
+#include "x2_key_loader.h"
+#include "key_file_converter.h"
+#include "wad_reader_writer.h"
+
+using namespace LibEncryptMsg;
 
 namespace EncryptPad
 {
@@ -60,7 +65,7 @@ namespace EncryptPad
         auto &c = ToContext(ctx);
         size_t required_bytes = c.GetFilterCount() == 1 ? 4 : 1;
 
-        c.PendingBuffer().insert(c.PendingBuffer().begin(), c.Buffer().begin(), c.Buffer().end());
+        c.PendingBuffer().insert(c.PendingBuffer().end(), c.Buffer().begin(), c.Buffer().end());
         c.Buffer().clear();
 
         // We need more bytes
@@ -136,13 +141,16 @@ namespace EncryptPad
             case Format::GPGByKeyFile:
                 if(!c.KeyFileSession())
                     return false;
+                if(c.GetFilterCount() == 1)
+                    return false;
                 break;
 
             case Format::WAD:
-                assert(c.GetFilterCount() == 0);
                 if(!c.IsWADHeadFinished())
                     return false;
                 if(!c.KeyFileSession())
+                    return false;
+                if(c.GetFilterCount() == 1)
                     return false;
                 break;
 
@@ -170,14 +178,25 @@ namespace EncryptPad
         using namespace LibEncryptMsg;
         auto &c = ToContext(ctx);
         MessageReader *reader = nullptr;
-        if(c.GetFormat() == Format::GPG ||
-                (c.GetFormat() == Format::GPGOrNestedWad && c.GetFilterCount() == 0))
+        switch(c.GetFormat())
         {
-            reader = &c.PassphraseSession()->reader;
-        }
-        else
-        {
-            reader = &c.KeyFileSession()->reader;
+            case Format::GPG:
+            case Format::GPGOrNestedWad:
+                assert(c.GetFilterCount() == 0);
+                reader = &c.PassphraseSession()->reader;
+                break;
+
+            case Format::NestedWAD:
+                reader = (c.GetFilterCount() == 0)
+                    ?
+                    &c.PassphraseSession()->reader
+                    :
+                    &c.KeyFileSession()->reader;
+                break;
+
+            default:
+                reader = &c.KeyFileSession()->reader;
+                break;
         }
 
         try
@@ -210,6 +229,7 @@ namespace EncryptPad
                 if(!c.PassphraseSession())
                     return true;
                 break;
+
             default:
                 break;
         }
@@ -237,16 +257,19 @@ namespace EncryptPad
             case Format::Unknown:
             case Format::GPGOrNestedWad:
                 return false;
+
             case Format::GPGByKeyFile:
             case Format::GPG:
             case Format::WAD:
                 if(c.GetFilterCount() != 1)
                     return false;
                 break;
+
             case Format::NestedWAD:
                 if(c.GetFilterCount() != 2)
                     return false;
                 break;
+
             default:
                 break;
         }
@@ -267,21 +290,127 @@ namespace EncryptPad
 
     bool ReadKeyFile_CanEnter(LightStateMachine::StateMachineContext &ctx)
     {
-        return false;
+        auto &c = ToContext(ctx);
+        if(c.KeyFileSession())
+            return false;
 
-    }
-    bool WADHead_CanEnter(LightStateMachine::StateMachineContext &ctx)
-    {
-        return false;
+        switch(c.GetFormat())
+        {
+            case Format::GPGByKeyFile:
+                break;
+
+            case Format::WAD:
+            case Format::NestedWAD:
+                if(!c.IsWADHeadFinished())
+                    return false;
+                break;
+
+            default:
+                return false;
+        }
+        return true;
     }
 
     void ReadKeyFile_OnEnter(LightStateMachine::StateMachineContext &ctx)
     {
+        auto &c = ToContext(ctx);
+        PacketMetadata &metadata = c.Metadata();
+        const EncryptParams &encrypt_params = c.GetEncryptParams();
 
+        if(metadata.key_file.empty())
+        {
+            c.SetResult(PacketResult::KeyFileNotSpecified);
+            c.SetFailed(true);
+            return;
+        }
+
+        c.KeyFileSession().reset(new DecryptionSession());
+
+        std::string empty_str;
+        PacketResult result = LoadKeyFromFile(metadata.key_file,
+                encrypt_params.libcurl_path ? *encrypt_params.libcurl_path : empty_str,
+                encrypt_params.libcurl_parameters ? *encrypt_params.libcurl_parameters : empty_str,
+                c.KeyFileSession()->own_passphrase);
+
+        if(result != PacketResult::Success)
+        {
+            c.SetResult(result);
+            c.SetFailed(true);
+            return;
+        }
+
+        if(!DecryptKeyFileContent(c.KeyFileSession()->own_passphrase,
+                    encrypt_params.key_file_encrypt_params, c.KeyFileSession()->own_passphrase))
+        {
+            c.SetResult(PacketResult::InvalidKeyFilePassphrase);
+            c.SetFailed(true);
+            return;
+        }
+
+        c.SetResult(PacketResult::Success);
     }
+
+    bool WADHead_CanEnter(LightStateMachine::StateMachineContext &ctx)
+    {
+        auto &c = ToContext(ctx);
+
+        if(c.IsWADHeadFinished())
+            return false;
+
+        if(c.Buffer().size() == 0 && c.PendingBuffer().size() == 0)
+            return false;
+
+        switch(c.GetFormat())
+        {
+            case Format::WAD:
+            case Format::NestedWAD:
+                break;
+
+            default:
+                return false;
+        }
+        return true;
+    }
+
     void WADHead_OnEnter(LightStateMachine::StateMachineContext &ctx)
     {
+        auto &c = ToContext(ctx);
+        c.PendingBuffer().insert(c.PendingBuffer().end(), c.Buffer().begin(), c.Buffer().end());
+        c.Buffer().clear();
 
+        InPacketStreamMemory stm_in(c.PendingBuffer().data(),
+                c.PendingBuffer().data() + c.PendingBuffer().size());
+
+        uint32_t payload_offset = 0;
+        std::string key_file;
+        PacketResult result = ParseWad(stm_in, key_file, payload_offset);
+
+        switch(result)
+        {
+            case PacketResult::Success:
+                break;
+
+            case PacketResult::InvalidOrIncompleteWadFile:
+                if(c.In().IsEOF())
+                {
+                    c.SetResult(result);
+                    c.SetFailed(true);
+                }
+                return;
+
+            default:
+                c.SetResult(result);
+                c.SetFailed(true);
+                return;
+        }
+
+        if(c.Metadata().key_file.empty())
+            c.Metadata().key_file = key_file;
+
+        c.Buffer().swap(c.PendingBuffer());
+        c.Buffer().erase(c.Buffer().begin(), c.Buffer().begin() + payload_offset);
+        c.SetWADHeadFinished(true);
+        c.SetResult(PacketResult::Success);
     }
 }
 

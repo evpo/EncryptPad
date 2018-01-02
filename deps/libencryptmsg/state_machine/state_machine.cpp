@@ -13,12 +13,12 @@ using namespace std;
 namespace
 {
 #ifdef TRACE_STATE_MACHINE
-    void DebugPrintState(std::string str)
+    void DebugPrintState(std::string state_machine_name, std::string str)
     {
-        LOG_DEBUG << str;
+        LOG_DEBUG << "SM:" << state_machine_name << ": " << str;
     }
 #else
-    void DebugPrintState(std::string)
+    void DebugPrintState(std::string state_machine_name, std::string str)
     {
     }
 #endif
@@ -33,9 +33,14 @@ namespace LightStateMachine
     class StandardStateIDToStringConverter : public StateIDToStringConverter
     {
         public:
-            std::string Convert(StateMachineStateID state_id)
+            std::string Convert(StateMachineStateID state_id) override
             {
                 return std::string("state_id = ") + std::to_string(state_id);
+            }
+
+            std::string StateMachineName() override
+            {
+                return "default";
             }
     };
 
@@ -108,7 +113,9 @@ namespace LightStateMachine
             state_queue_.pop();
         }
         current_state_ = new_state;
-        DebugPrintState(state_id_to_string_converter_->Convert(current_state_->GetID()));
+#ifdef TRACE_STATE_MACHINE
+        DebugPrintState(state_id_to_string_converter_->StateMachineName(), state_id_to_string_converter_->Convert(current_state_->GetID()));
+#endif
     }
 
     StateMachineStateID StateMachine::PreviousState() const
