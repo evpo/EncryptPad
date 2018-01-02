@@ -4,15 +4,16 @@
 
 namespace LightStateMachine
 {
+    using StateMachineStateID = int;
+
+    //StateID
     //The caller is recommended to use typed "enum class" and cast to int
     //before interacting with LightStateMachine as below:
-    //enum class StateID : int
+    //enum class StateID : StateMachineStateID
     //{
     //    Init,
     //    Stop,
     //};
-    using StateMachineStateID = int;
-
 
     //Inherit this class to add the application specific context
     class StateMachineContext : public NonCopyable
