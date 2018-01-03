@@ -19,5 +19,5 @@ zlib :
 clean :
 	$(MAKE) -C $(BACK_END) clean RELEASE=$(RELEASE)
 	$(MAKE) -C $(PORTABILITY) clean RELEASE=$(RELEASE)
-	$(MAKE) -f Makefile.zlib clean
+#	$(MAKE) -f Makefile.zlib clean
 	$(MAKE) -C $(CRYPT_ROOT)/deps/libencryptmsg clean RELEASE=$(RELEASE)
