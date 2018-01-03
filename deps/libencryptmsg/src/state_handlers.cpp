@@ -47,10 +47,10 @@ namespace LibEncryptMsg
     {
         Context &context = ToContext(ctx);
         auto &state = context.State();
-        switch(state.packet_result)
+        switch(state.emsg_result)
         {
-            case PacketResult::Success:
-            case PacketResult::Pending:
+            case EmsgResult::Success:
+            case EmsgResult::Pending:
                 return true;
             default:
                 return false;
@@ -64,10 +64,10 @@ namespace LibEncryptMsg
         auto &reader = state.packet_factory.GetHeaderReader();
         reader.GetInStream().Push(state.buffer_stack.top());
         state.buffer_stack.pop();
-        state.packet_result = reader.Read(state.finish_packets);
-        switch(state.packet_result)
+        state.emsg_result = reader.Read(state.finish_packets);
+        switch(state.emsg_result)
         {
-            case PacketResult::Success:
+            case EmsgResult::Success:
                 {
                     if(reader.GetInStream().GetCount() > 0)
                     {
@@ -78,7 +78,7 @@ namespace LibEncryptMsg
                     LOG_DEBUG << "Header: " << GetPacketSpec(reader.GetPacketHeader().packet_type).packet_name;
                 }
                 break;
-            case PacketResult::Pending:
+            case EmsgResult::Pending:
                 break;
             default:
                 context.SetFailed(true);
@@ -90,11 +90,11 @@ namespace LibEncryptMsg
     bool PacketCanExit(StateMachineContext &ctx)
     {
         Context &context = ToContext(ctx);
-        auto result = context.State().packet_result;
+        auto result = context.State().emsg_result;
         switch(result)
         {
-            case PacketResult::Success:
-            case PacketResult::Pending:
+            case EmsgResult::Success:
+            case EmsgResult::Pending:
                 return true;
             default:
                 return false;
@@ -153,10 +153,10 @@ namespace LibEncryptMsg
             buffer_stack.pop();
         }
 
-        state.packet_result = packet.Read(*out_stm);
-        switch(state.packet_result)
+        state.emsg_result = packet.Read(*out_stm);
+        switch(state.emsg_result)
         {
-            case PacketResult::Success:
+            case EmsgResult::Success:
                 *state.packet_chain_it = PacketType::Unknown;
                 if(packet.GetInStream().GetCount() > 0)
                 {
@@ -164,7 +164,7 @@ namespace LibEncryptMsg
                     AppendToBuffer(packet.GetInStream(), buffer_stack.top());
                 }
                 break;
-            case PacketResult::Pending:
+            case EmsgResult::Pending:
                 break;
             default:
                 context.SetFailed(true);
@@ -183,7 +183,7 @@ namespace LibEncryptMsg
                 state.packet_chain_it++;
             assert(state.packet_chain.end() != state.packet_chain_it);
         }
-        else if (state.packet_result == PacketResult::Success)
+        else if (state.emsg_result == EmsgResult::Success)
         {
             auto it = state.packet_chain.begin();
             for(;it != state.packet_chain.end() && *it != PacketType::Unknown; it++)
@@ -205,7 +205,7 @@ namespace LibEncryptMsg
     bool FinishCanExit(StateMachineContext &ctx)
     {
         Context &context = ToContext(ctx);
-        return context.State().packet_result == PacketResult::Success;
+        return context.State().emsg_result == EmsgResult::Success;
     }
 
     void FinishOnEnter(StateMachineContext &ctx)
@@ -216,7 +216,7 @@ namespace LibEncryptMsg
         assert(packet_pair.first);
         assert(!packet_pair.second);
 
-        state.packet_result = packet_pair.first->Finish();
+        state.emsg_result = packet_pair.first->Finish();
         *state.packet_chain_it = PacketType::Unknown;
         state.packet_chain_it ++;
     }

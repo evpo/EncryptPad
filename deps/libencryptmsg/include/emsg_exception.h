@@ -8,15 +8,16 @@ namespace LibEncryptMsg
     class EmsgException : public std::exception
     {
         public:
-            PacketResult result;
+            EmsgResult result;
             std::string message;
             const char *what() const noexcept override
             {
                 return message.c_str();
             }
 
-            EmsgException(PacketResult result_p);
+            EmsgException(EmsgResult result_p);
     };
 
+    std::string InterpretEmsgResult(EmsgResult result);
 }
 

@@ -193,8 +193,8 @@ namespace LibEncryptMsg
         {
         }
 
-        if(context_.GetFailed() && (session_state_.packet_result != PacketResult::InvalidPassphrase || !analyze_only_))
-            throw EmsgException(session_state_.packet_result);
+        if(context_.GetFailed() && (session_state_.emsg_result != EmsgResult::InvalidPassphrase || !analyze_only_))
+            throw EmsgException(session_state_.emsg_result);
 
         buf.swap(session_state_.output);
         session_state_.output.clear();
@@ -215,8 +215,8 @@ namespace LibEncryptMsg
         while(state_machine_.NextState())
         {
         }
-        if(context_.GetFailed() && (session_state_.packet_result != PacketResult::InvalidPassphrase || !analyze_only_))
-            throw EmsgException(session_state_.packet_result);
+        if(context_.GetFailed() && (session_state_.emsg_result != EmsgResult::InvalidPassphrase || !analyze_only_))
+            throw EmsgException(session_state_.emsg_result);
         buf.insert(buf.end(), session_state_.output.begin(), session_state_.output.end());
         session_state_.output.clear();
     }

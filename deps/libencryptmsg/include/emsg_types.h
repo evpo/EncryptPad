@@ -4,33 +4,18 @@
 
 namespace LibEncryptMsg
 {
-    enum class PacketResult
+    enum class EmsgResult
     {
         Success = 0,
         Pending,
-        UnexpectedError,
         InvalidSurrogateIV,
-        Empty,
         UnexpectedFormat,
         UnsupportedPacketType,
         UnsupportedAlgo,
         UnsupportedS2K,
         UnsupportedCompressionAlgo,
-        IOError,
-        IOErrorInput,
-        IOErrorOutput,
         MDCError,
-        CompressionError,
-        KeyFileNotSpecified,
-        IOErrorKeyFile,
-        InvalidKeyFile,
-        CurlIsNotFound,
-        CurlExitNonZero,
-        InvalidWadFile,
-        InvalidOrIncompleteWadFile,
         InvalidPassphrase,
-        KeyIsRequiredForSaving,
-        InvalidKeyFilePassphrase,
         None,
     };
 

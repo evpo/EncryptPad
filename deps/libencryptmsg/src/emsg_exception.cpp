@@ -3,66 +3,35 @@
 
 namespace LibEncryptMsg
 {
-    std::string InterpretPacketResult(PacketResult result)
+    std::string InterpretEmsgResult(EmsgResult result)
     {
         switch(result)
         {
-            case PacketResult::UnexpectedError:
-                return "Unexpected error";
-            case PacketResult::InvalidSurrogateIV:
+            case EmsgResult::InvalidSurrogateIV:
                 return "Incorrect passphrase";
-            case PacketResult::Empty:
-                return "Composite packet is empty";
-            case PacketResult::UnexpectedFormat:
+            case EmsgResult::UnexpectedFormat:
                 return "Unexpected format";
-            case PacketResult::UnsupportedPacketType:
+            case EmsgResult::UnsupportedPacketType:
                 return "Packet type is not supported";
-            case PacketResult::UnsupportedAlgo:
+            case EmsgResult::UnsupportedAlgo:
                 return "Encryption algorithm is not supported";
-            case PacketResult::UnsupportedS2K:
+            case EmsgResult::UnsupportedS2K:
                 return "S2K algorithm is not supported";
-            case PacketResult::UnsupportedCompressionAlgo:
+            case EmsgResult::UnsupportedCompressionAlgo:
                 return "Unsupported compression algorithm";
-            case PacketResult::IOError:
-                return "Input / Output error";
-            case PacketResult::IOErrorInput:
-                return "Input error";
-            case PacketResult::IOErrorOutput:
-                return "Output error";
-            case PacketResult::MDCError:
+            case EmsgResult::MDCError:
                 return "File integrity check failed"; 
-            case PacketResult::CompressionError:
-                return "Compression / decompression error";
-            case PacketResult::KeyFileNotSpecified:
-                return "Key file is required. Use -k option.";
-            case PacketResult::IOErrorKeyFile:
-                return "Cannot read key file";
-            case PacketResult::InvalidKeyFile:
-                return "Invalid key file";
-            case PacketResult::CurlIsNotFound:
-                return "Cannot get key file: CURL executable is not found";
-            case PacketResult::CurlExitNonZero:
-                return "Cannot get key file: CURL returned non-zero exit code";
-            case PacketResult::InvalidWadFile:
-                return "Unexpected format: invalid wad file";
-            case PacketResult::InvalidOrIncompleteWadFile:
-                return "Unexpected format: invalid or incomplete wad file";
-            case PacketResult::InvalidPassphrase:
+            case EmsgResult::InvalidPassphrase:
                 return "Key service does not containt a suitable key";
-            case PacketResult::KeyIsRequiredForSaving:
-                return "Key file is required. Use -k option.";
-            case PacketResult::InvalidKeyFilePassphrase:
-                return "Key file passphrase is invalid";
             default:
                 assert(false);
                 return "";
         }
     }
 
-    EmsgException::EmsgException(PacketResult result_p):result(result_p)
+    EmsgException::EmsgException(EmsgResult result_p):result(result_p)
     {
-        std::string InterpretPacketResult(PacketResult result);
-        message = InterpretPacketResult(result);
+        message = InterpretEmsgResult(result);
     }
 }
 

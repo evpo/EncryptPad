@@ -27,7 +27,7 @@ namespace LibEncryptMsg
         std::stack<SafeVector> buffer_stack;
         SafeVector output;
         PacketFactory packet_factory;
-        PacketResult packet_result;
+        EmsgResult emsg_result;
         bool is_message_analyzed;
         bool finish_packets;
 

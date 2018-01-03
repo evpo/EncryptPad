@@ -25,8 +25,8 @@ namespace LibEncryptMsg
         }
 
     protected:
-        PacketResult DoRead(OutStream &out) override;
-        PacketResult DoFinish() override;
+        EmsgResult DoRead(OutStream &out) override;
+        EmsgResult DoFinish() override;
     };
 
     class SymmetricRWBase : public PacketRWBase
@@ -44,8 +44,8 @@ namespace LibEncryptMsg
         public:
             SymmetricRW(SessionState &state);
         protected:
-            PacketResult DoRead(OutStream &out) override;
-            PacketResult DoFinish() override;
+            EmsgResult DoRead(OutStream &out) override;
+            EmsgResult DoFinish() override;
         private:
             bool read_prefix_;
     };
@@ -56,8 +56,8 @@ namespace LibEncryptMsg
             SymmetricIntegProtectedRW(SessionState &state);
 
         protected:
-            PacketResult DoRead(OutStream &out) override;
-            PacketResult DoFinish() override;
+            EmsgResult DoRead(OutStream &out) override;
+            EmsgResult DoFinish() override;
         private:
             const size_t kMDCLength = 20 + 2;
             bool version_read_;
@@ -71,8 +71,8 @@ namespace LibEncryptMsg
             CompressedRW(SessionState &state);
 
         protected:
-            PacketResult DoRead(OutStream &out) override;
-            PacketResult DoFinish() override;
+            EmsgResult DoRead(OutStream &out) override;
+            EmsgResult DoFinish() override;
 
         private:
             bool algo_read_;
@@ -84,15 +84,15 @@ namespace LibEncryptMsg
     {
     }
 
-    PacketResult HeaderReader::Read(bool finish_packets)
+    EmsgResult HeaderReader::Read(bool finish_packets)
     {
         if(in_stm_.GetCount() < kHeaderMaxSize && !finish_packets)
-            return PacketResult::Pending;
+            return EmsgResult::Pending;
         packet_header_ = ReadPacketHeader(in_stm_);
         if(GetPacketSpec(packet_header_.packet_type).packet_type == PacketType::Unknown)
-            return PacketResult::UnsupportedPacketType;
+            return EmsgResult::UnsupportedPacketType;
 
-        return PacketResult::Success;
+        return EmsgResult::Success;
     }
 
     class LiteralRW : public PacketRWBase
@@ -101,14 +101,14 @@ namespace LibEncryptMsg
             LiteralRW(SessionState &state);
 
         protected:
-            PacketResult DoRead(OutStream &out) override;
-            PacketResult DoFinish() override;
+            EmsgResult DoRead(OutStream &out) override;
+            EmsgResult DoFinish() override;
         private:
             bool header_read_;
             bool name_and_date_read_;
             uint8_t file_name_length_;
-            PacketResult ReadHeader();
-            PacketResult ReadNameAndDate();
+            EmsgResult ReadHeader();
+            EmsgResult ReadNameAndDate();
     };
 
     std::pair<PacketRWBase*, bool> PacketFactory::GetOrCreatePacket(PacketType packet_type)
@@ -167,7 +167,7 @@ namespace LibEncryptMsg
 
         if(canceled || !state.encryption_key)
         {
-            state.packet_result = PacketResult::InvalidPassphrase;
+            state.emsg_result = EmsgResult::InvalidPassphrase;
             return;
         }
 
@@ -185,25 +185,25 @@ namespace LibEncryptMsg
     SymmetricIntegProtectedRW::SymmetricIntegProtectedRW(SessionState &state)
         : SymmetricRWBase(state), version_read_(false){}
 
-    PacketResult CheckPrefix(const SafeVector &prefix)
+    EmsgResult CheckPrefix(const SafeVector &prefix)
     {
         // check the last two bytes for integrity of the message
         const uint8_t *ptr = prefix.data();
         ptr += prefix.size() - 4;
         if(*ptr != *(ptr + 2))
-            return PacketResult::InvalidSurrogateIV;
+            return EmsgResult::InvalidSurrogateIV;
         if(*(ptr + 1) != *(ptr + 3))
-            return PacketResult::InvalidSurrogateIV;
+            return EmsgResult::InvalidSurrogateIV;
 
-        return PacketResult::Success;
+        return EmsgResult::Success;
     }
 
-    PacketResult SymmetricRW::DoRead(OutStream &out)
+    EmsgResult SymmetricRW::DoRead(OutStream &out)
     {
-        if(state_.packet_result == PacketResult::InvalidPassphrase)
+        if(state_.emsg_result == EmsgResult::InvalidPassphrase)
         {
             state_.is_message_analyzed = true;
-            return state_.packet_result;
+            return state_.emsg_result;
         }
 
         auto &algo_spec = GetAlgoSpec(state_.message_config.GetCipherAlgo());
@@ -212,14 +212,14 @@ namespace LibEncryptMsg
         {
             const unsigned prefix_len = algo_spec.block_size + 2;
             if(in_.GetCount() < prefix_len)
-                return PacketResult::Pending;
+                return EmsgResult::Pending;
 
             SafeVector enc_prefix(prefix_len);
             in_.Read(enc_prefix.data(), enc_prefix.size());
             SafeVector prefix(enc_prefix);
             this->cipher_mode_->finish(prefix);
-            PacketResult result = CheckPrefix(prefix);
-            if(result != PacketResult::Success)
+            EmsgResult result = CheckPrefix(prefix);
+            if(result != EmsgResult::Success)
                 return result;
 
             // resync the cipher
@@ -255,25 +255,25 @@ namespace LibEncryptMsg
         }
 
         if(buf.size() == 0)
-            return PacketResult::Pending;
+            return EmsgResult::Pending;
 
         out.Write(buf.data(), buf.size());
 
         // We expect Finish to return Success
-        return PacketResult::Pending;
+        return EmsgResult::Pending;
     }
 
-    PacketResult SymmetricRW::DoFinish()
+    EmsgResult SymmetricRW::DoFinish()
     {
-        return PacketResult::Success;
+        return EmsgResult::Success;
     }
 
-    PacketResult SymmetricIntegProtectedRW::DoRead(OutStream &out)
+    EmsgResult SymmetricIntegProtectedRW::DoRead(OutStream &out)
     {
-        if(state_.packet_result == PacketResult::InvalidPassphrase)
+        if(state_.emsg_result == EmsgResult::InvalidPassphrase)
         {
             state_.is_message_analyzed = true;
-            return state_.packet_result;
+            return state_.emsg_result;
         }
 
         auto &algo_spec = GetAlgoSpec(state_.message_config.GetCipherAlgo());
@@ -282,7 +282,7 @@ namespace LibEncryptMsg
             uint8_t b = in_.Get();
             version_read_ = true;
             if(b != 1)
-                return PacketResult::UnexpectedFormat;
+                return EmsgResult::UnexpectedFormat;
         }
 
         const size_t prefix_len = algo_spec.block_size + 2;
@@ -320,7 +320,7 @@ namespace LibEncryptMsg
         }
 
         if(buf.size() == 0)
-            return PacketResult::Pending;
+            return EmsgResult::Pending;
 
         if(prefix_.size() < prefix_len)
         {
@@ -332,7 +332,7 @@ namespace LibEncryptMsg
             if(prefix_.size() == prefix_len)
             {
                 auto result = CheckPrefix(prefix_);
-                if(result != PacketResult::Success)
+                if(result != EmsgResult::Success)
                     return result;
                 hash_.update(prefix_);
             }
@@ -374,20 +374,20 @@ namespace LibEncryptMsg
         assert(mdc_.size() == kMDCLength);
 
         // We expect Finish to return Success
-        return PacketResult::Pending;
+        return EmsgResult::Pending;
     }
 
-    PacketResult SymmetricIntegProtectedRW::DoFinish()
+    EmsgResult SymmetricIntegProtectedRW::DoFinish()
     {
         using namespace Botan;
 
         InBufferStream stm;
         stm.Push(mdc_);
         if(stm.Get() != 0xD3)
-            return PacketResult::UnexpectedFormat;
+            return EmsgResult::UnexpectedFormat;
 
         if(stm.Get() != 0x14)
-            return PacketResult::UnexpectedFormat;
+            return EmsgResult::UnexpectedFormat;
 
         hash_.update(0xD3);
         hash_.update(0x14);
@@ -399,22 +399,22 @@ namespace LibEncryptMsg
         assert(stm.GetCount() == 0);
 
         if(actual_sha1 != expected_sha1)
-            return PacketResult::MDCError;
+            return EmsgResult::MDCError;
 
-        return PacketResult::Success;
+        return EmsgResult::Success;
     }
 
-    PacketResult SymmetricKeyESKRW::DoRead(OutStream &out)
+    EmsgResult SymmetricKeyESKRW::DoRead(OutStream &out)
     {
         const size_t kRequiredLength = 13;
 
         (void)out;
 
         if(in_.GetCount() < kRequiredLength)
-            return PacketResult::Pending;
+            return EmsgResult::Pending;
 
         if(in_.Get()!=4)
-            return PacketResult::UnexpectedFormat;
+            return EmsgResult::UnexpectedFormat;
 
         state_.message_config.SetCipherAlgo(static_cast<CipherAlgo>(in_.Get()));
         switch(state_.message_config.GetCipherAlgo())
@@ -425,11 +425,11 @@ namespace LibEncryptMsg
             case CipherAlgo::AES256:
                 break;
             default:
-                return PacketResult::UnsupportedAlgo;
+                return EmsgResult::UnsupportedAlgo;
         }
 
         if(in_.Get() != 3)
-            return PacketResult::UnsupportedS2K;
+            return EmsgResult::UnsupportedS2K;
 
         state_.message_config.SetHashAlgo(static_cast<HashAlgo>(in_.Get()));
         switch(state_.message_config.GetHashAlgo())
@@ -439,22 +439,22 @@ namespace LibEncryptMsg
             case HashAlgo::SHA512:
                 break;
             default:
-                return PacketResult::UnsupportedS2K;
+                return EmsgResult::UnsupportedS2K;
         }
 
         auto &salt = state_.salt;
         salt.resize(kSaltSize);
         if(in_.Read(salt.data(), salt.size()) != static_cast<size_t>(salt.size()))
-            return PacketResult::UnexpectedFormat;
+            return EmsgResult::UnexpectedFormat;
 
         state_.message_config.SetIterations(in_.Get());
         // return empty because this packet doesn't have children
-        return PacketResult::Success;
+        return EmsgResult::Success;
     }
 
-    PacketResult SymmetricKeyESKRW::DoFinish()
+    EmsgResult SymmetricKeyESKRW::DoFinish()
     {
-        return PacketResult::Success;
+        return EmsgResult::Success;
     }
 
     CompressedRW::CompressedRW(SessionState &state)
@@ -477,7 +477,7 @@ namespace LibEncryptMsg
             case Compression::BZip2:
                 break;
             default:
-                state_.packet_result = PacketResult::UnsupportedCompressionAlgo;
+                state_.emsg_result = EmsgResult::UnsupportedCompressionAlgo;
                 return;
         }
         auto &compression_spec = GetCompressionSpec(state_.message_config.GetCompression());
@@ -486,11 +486,11 @@ namespace LibEncryptMsg
             decompression_->start();
     }
 
-    PacketResult CompressedRW::DoRead(OutStream &out)
+    EmsgResult CompressedRW::DoRead(OutStream &out)
     {
         ReadAlgo();
         if(!decompression_)
-            return state_.packet_result;
+            return state_.emsg_result;
 
         Botan::secure_vector<uint8_t> buf(in_.GetCount());
         in_.Read(buf.data(), buf.size());
@@ -502,12 +502,12 @@ namespace LibEncryptMsg
 
         out.Write(buf.data(), buf.size());
 
-        return PacketResult::Pending;
+        return EmsgResult::Pending;
     }
 
-    PacketResult CompressedRW::DoFinish()
+    EmsgResult CompressedRW::DoFinish()
     {
-        return PacketResult::Success;
+        return EmsgResult::Success;
     }
 
     LiteralRW::LiteralRW(SessionState &state)
@@ -516,14 +516,14 @@ namespace LibEncryptMsg
     {
     }
 
-    PacketResult LiteralRW::ReadHeader()
+    EmsgResult LiteralRW::ReadHeader()
     {
         if(header_read_)
-            return PacketResult::Success;
+            return EmsgResult::Success;
 
         const size_t kHeaderLength = 2;
         if(in_.GetCount() < kHeaderLength)
-            return PacketResult::Pending;
+            return EmsgResult::Pending;
 
         uint8_t b = in_.Get();
         switch(b)
@@ -532,24 +532,24 @@ namespace LibEncryptMsg
             case 'b': case 't': case 'u': case 'l': case '1':
                 break;
             default:
-                return PacketResult::UnexpectedFormat;
+                return EmsgResult::UnexpectedFormat;
         }
 
         // it is the only important thing for us for now
         state_.message_config.SetBinary(b == 'b');
         file_name_length_ = in_.Get();
         header_read_ = true;
-        return PacketResult::Success;
+        return EmsgResult::Success;
     }
 
-    PacketResult LiteralRW::ReadNameAndDate()
+    EmsgResult LiteralRW::ReadNameAndDate()
     {
         if(name_and_date_read_)
-            return PacketResult::Success;
+            return EmsgResult::Success;
 
         const size_t required_length = 4 + file_name_length_; // date is 4 bytes
         if(in_.GetCount() < required_length)
-            return PacketResult::Pending;
+            return EmsgResult::Pending;
 
         Botan::secure_vector<uint8_t> buffer;
         buffer.resize(file_name_length_ + 1);// 1 for the terminator
@@ -568,29 +568,29 @@ namespace LibEncryptMsg
         state_.message_config.SetFileDate(file_date);
         state_.is_message_analyzed = true;
         name_and_date_read_ = true;
-        return PacketResult::Success;
+        return EmsgResult::Success;
     }
 
-    PacketResult LiteralRW::DoRead(OutStream &out)
+    EmsgResult LiteralRW::DoRead(OutStream &out)
     {
-        PacketResult result = ReadHeader();
-        if(result != PacketResult::Success)
+        EmsgResult result = ReadHeader();
+        if(result != EmsgResult::Success)
             return result;
 
         result = ReadNameAndDate();
-        if(result != PacketResult::Success)
+        if(result != EmsgResult::Success)
             return result;
 
         Botan::secure_vector<uint8_t> buffer(in_.GetCount());
         in_.Read(buffer.data(), buffer.size());
         out.Write(buffer.data(), buffer.size());
 
-        return PacketResult::Pending;
+        return EmsgResult::Pending;
     }
 
-    PacketResult LiteralRW::DoFinish()
+    EmsgResult LiteralRW::DoFinish()
     {
-        return PacketResult::Success;
+        return EmsgResult::Success;
     }
 
 }
