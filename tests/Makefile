@@ -15,6 +15,7 @@ CXXFLAGS += -ggdb
 endif
 
 CXXFLAGS += -I../deps/libencryptmsg/include
+CXXFLAGS += -I../deps/libencryptmsg/deps/plog/include
 
 LDLIBS += ../deps/gtest/googletest/build/libgtest.a ../deps/stlplus/portability/$(SUBDIR)/libportability.a -lpthread
 CXXFLAGS += -I../deps/gtest/googletest/include -pthread -std=c++11 -Wall -Wextra

@@ -163,6 +163,7 @@ namespace
         auto result = EncryptWithKey(in, encrypt_params, *buffer_out, metadata);
         if(result != PacketResult::Success)
             return result;
+        buffer.resize(buffer_out->GetCount());
 
         InPacketStreamMemory buffer_in(buffer.data(), buffer.data() + buffer_out->GetCount());
         WriteWad(buffer_in, out, 
@@ -488,6 +489,7 @@ namespace
         auto result = ExtractFromWad(in, *payload_out, key_file_tmp);
         if(result != PacketResult::Success)
             return result;
+        payload.resize(payload_out->GetCount());
 
         if(!key_file_tmp.empty())
             metadata.persist_key_path = true;
@@ -838,7 +840,11 @@ namespace EncryptPad
         InPacketStreamMemory in(input_buffer.data(), input_buffer.data() + input_buffer.size());
         output_buffer.clear();
         auto out = MakeOutStream(output_buffer);
-        return EncryptStream(in, encrypt_params, *out, metadata);
+        auto result = EncryptStream(in, encrypt_params, *out, metadata);
+        if(result != PacketResult::Success)
+            return result;
+        output_buffer.resize(out->GetCount());
+        return result;
     }
 
     PacketResult DecryptBuffer(const Botan::SecureVector<byte> &input_buffer, const EncryptParams &encrypt_params,
@@ -847,7 +853,11 @@ namespace EncryptPad
         InPacketStreamMemory in(input_buffer.data(), input_buffer.data() + input_buffer.size());
         output_buffer.clear();
         auto out = MakeOutStream(output_buffer);
-        return DecryptStream(in, encrypt_params, *out, metadata);
+        auto result = DecryptStream(in, encrypt_params, *out, metadata);
+        if(result != PacketResult::Success)
+            return result;
+        output_buffer.resize(out->GetCount());
+        return result;
     }
 
     PacketResult EncryptPacketFile(const Buffer &input_buffer, const std::string &file_out, 

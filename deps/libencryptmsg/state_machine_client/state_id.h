@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include "state_machine_interface.h"
 
 namespace LibEncryptMsg
 {
@@ -15,4 +16,18 @@ namespace LibEncryptMsg
         Fail
     };
     const std::string &PrintStateID(StateID state_id);
+
+    class EmsgStateIDToStringConverter : public LightStateMachine::StateIDToStringConverter
+    {
+        public:
+            std::string Convert(LightStateMachine::StateMachineStateID state_id)
+            {
+                return PrintStateID(static_cast<StateID>(state_id));
+            }
+
+            std::string StateMachineName()
+            {
+                return "emsg";
+            }
+    };
 }

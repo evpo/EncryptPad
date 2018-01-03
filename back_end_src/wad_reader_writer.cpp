@@ -223,7 +223,7 @@ namespace EncryptPad
         return WriteWadHeadImpl(key_file, payload_size, version, out);
     }
 
-    PacketResult ParseWad(RandomInStream &in, std::string &key_file, uint32_t &payload_offset)
+    PacketResult ParseWad(RandomInStream &in, std::string &key_file, uint32_t &payload_offset, uint32_t &payload_size)
     {
         WadMetadata metadata;
         key_file.clear();
@@ -232,6 +232,7 @@ namespace EncryptPad
             return result;
 
         payload_offset = metadata.payload_offset;
+        payload_size = metadata.payload_size;
 
         if(!metadata.key_file_found)
             return PacketResult::InvalidWadFile;

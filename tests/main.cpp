@@ -21,11 +21,16 @@
 
 #include "gtest/gtest.h"
 #include "encryptor.h"
+#include "plog/Log.h"
 
 using namespace EncryptPadEncryptor;
 
 GTEST_API_ int main(int argc, char **argv) {
   std::cout << "Running main() from main.cpp\n";
+
+  //TODO: switch enable / disable later
+  plog::init(plog::debug, "epad.log");
+  LOG_INFO << "Log instance started";
 
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

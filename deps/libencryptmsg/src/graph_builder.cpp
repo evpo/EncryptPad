@@ -72,6 +72,7 @@ namespace LibEncryptMsg
         L(packet_node, finish_node);
         L(packet_node, packet_node);
         L(finish_node, packet_node);
+        L(finish_node, header_node);
         L(finish_node, end_node);
 
         // BufferEmpty

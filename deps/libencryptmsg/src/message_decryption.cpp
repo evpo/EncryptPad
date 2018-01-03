@@ -1,8 +1,10 @@
 #include "message_decryption.h"
 #include "graph_builder.h"
 #include "state_machine.h"
+#include "state_machine_interface.h"
 #include "session_state.h"
 #include "emsg_symmetric_key.h"
+#include "state_id.h"
 #include "context.h"
 
 using namespace std;
@@ -82,7 +84,6 @@ namespace
             KnownPassphraseProvider(std::unique_ptr<SafeVector> passphrase_data);
             std::unique_ptr<SafeVector> GetPassphrase(std::string description, bool &canceled) override;
     };
-
 }
 
 namespace LibEncryptMsg
@@ -131,6 +132,8 @@ namespace LibEncryptMsg
         packet_factory_(session_state_), analyze_only_(analyze_only)
     {
         context_.SetState(session_state_);
+        state_machine_.SetStateIDToStringConverter(
+                std::unique_ptr<EmsgStateIDToStringConverter>(new EmsgStateIDToStringConverter()));
     }
 
     void MessageReaderImpl::Start()

@@ -382,8 +382,9 @@ namespace EncryptPad
                 c.PendingBuffer().data() + c.PendingBuffer().size());
 
         uint32_t payload_offset = 0;
+        uint32_t payload_size = 0;
         std::string key_file;
-        PacketResult result = ParseWad(stm_in, key_file, payload_offset);
+        PacketResult result = ParseWad(stm_in, key_file, payload_offset, payload_size);
 
         switch(result)
         {
@@ -409,6 +410,12 @@ namespace EncryptPad
 
         c.Buffer().swap(c.PendingBuffer());
         c.Buffer().erase(c.Buffer().begin(), c.Buffer().begin() + payload_offset);
+        if(payload_size != 0 && payload_size < c.Buffer().size())
+        {
+            //This is 3.2.1 format, in which the key string and the dictionary goes after the payload.
+            //We need to trim the file
+            c.Buffer().erase(c.Buffer().begin() + payload_size, c.Buffer().end());
+        }
         c.SetWADHeadFinished(true);
         c.SetResult(PacketResult::Success);
     }
