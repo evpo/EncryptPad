@@ -64,7 +64,7 @@ namespace EncryptPad
             using super = LightStateMachine::StateMachineContext;
             int filter_count_;
             Format format_;
-            LibEncryptMsg::PacketResult result_;
+            EpadResult result_;
             bool is_wad_head_finished_;
             InStream &in_;
             OutStream &out_;
@@ -80,7 +80,7 @@ namespace EncryptPad
                 super(),
                 filter_count_(0),
                 format_(Format::Unknown),
-                result_(LibEncryptMsg::PacketResult::None),
+                result_(EpadResult::None),
                 is_wad_head_finished_(false),
                 in_(in),
                 out_(out),
@@ -109,12 +109,12 @@ namespace EncryptPad
                 return filter_count_;
             }
 
-            LibEncryptMsg::PacketResult GetResult() const
+            EpadResult GetResult() const
             {
                 return result_;
             }
 
-            void SetResult(LibEncryptMsg::PacketResult result)
+            void SetResult(EpadResult result)
             {
                 result_ = result;
             }
@@ -170,7 +170,7 @@ namespace EncryptPad
             }
     };
 
-    LibEncryptMsg::PacketResult DecryptStream(InStream &in, const EncryptParams &encrypt_params,
+    EpadResult DecryptStream(InStream &in, const EncryptParams &encrypt_params,
             OutStream &out, PacketMetadata &metadata);
 }
 

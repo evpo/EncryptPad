@@ -348,45 +348,45 @@ void FileEncryptionDialog::WorkDone()
 
     switch(async.get_result())
     {
-        case PacketResult::Success:
+        case EpadResult::Success:
             success = true;
             break;
-        case PacketResult::InvalidSurrogateIV:
+        case EpadResult::InvalidSurrogateIV:
             keyService.Clear();
             break;
-        case PacketResult::IOErrorKeyFile:
+        case EpadResult::IOErrorKeyFile:
             QMessageBox::warning(
                         this,
                         "EncryptPad",
                         tr("Cannot open the encryption key"));
             rejected = true;
             break;
-        case PacketResult::InvalidKeyFile:
+        case EpadResult::InvalidKeyFile:
             QMessageBox::warning(
                         this,
                         "EncryptPad",
                         tr("The encryption key is invalid"));
             rejected = true;
             break;
-        case PacketResult::CurlIsNotFound:
+        case EpadResult::CurlIsNotFound:
             QMessageBox::warning(
                         this,
                         "EncryptPad",
                         tr("Cannot download the encryption key. CURL tool is not found."));
             rejected = true;
             break;
-        case PacketResult::CurlExitNonZero:
+        case EpadResult::CurlExitNonZero:
             QMessageBox::warning(
                         this,
                         "EncryptPad",
                         tr("Cannot download the key. CURL returned non zero exit code"));
             rejected = true;
             break;
-        case PacketResult::KeyFileNotSpecified:
-        case PacketResult::KeyIsRequiredForSaving:
+        case EpadResult::KeyFileNotSpecified:
+        case EpadResult::KeyIsRequiredForSaving:
             rejected = !loadHandler.OpenSetEncryptionKeyDialogue();
             break;
-        case PacketResult::InvalidKeyFilePassphrase:
+        case EpadResult::InvalidKeyFilePassphrase:
             kfKeyService.Clear();
 
             if(IsEncryption())

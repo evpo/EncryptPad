@@ -20,7 +20,7 @@
 #pragma once
 #include <string>
 #include "botan.h"
-#include "emsg_types.h"
+#include "epad_result.h"
 
 namespace EncryptPad
 {
@@ -28,5 +28,5 @@ namespace EncryptPad
     typedef Botan::byte byte;
 
     //TODO: Replace this method with emsg_exception
-    std::string InterpretResult(LibEncryptMsg::PacketResult result);
+    std::string InterpretResult(EpadResult result);
 }

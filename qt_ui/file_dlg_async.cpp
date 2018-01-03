@@ -24,7 +24,7 @@ using namespace EncryptPad;
 
 FileDlgAsync::FileDlgAsync(PacketMetadata &metadata)
     :thread_(new QThread(this)), metadata_(metadata),
-    result_(PacketResult::None), is_encryption_(false),
+    result_(EpadResult::None), is_encryption_(false),
     key_service_(nullptr), kf_key_service_(nullptr)
 {
     QObject::connect(thread_, SIGNAL(started()), this, SLOT(DoWork()));

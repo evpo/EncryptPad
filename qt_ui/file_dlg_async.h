@@ -33,7 +33,7 @@ private:
     QString input_file_;
     QString output_file_;
     EncryptPad::PacketMetadata &metadata_;
-    EncryptPad::PacketResult result_;
+    EncryptPad::EpadResult result_;
     bool is_encryption_;
     EncryptPad::KeyService *key_service_;
     EncryptPad::KeyService *kf_key_service_;
@@ -63,7 +63,7 @@ public:
         return output_file_;
     }
 
-    EncryptPad::PacketResult get_result() const
+    EncryptPad::EpadResult get_result() const
     {
         return result_;
     }
@@ -77,7 +77,7 @@ public:
         key_service_ = key_service;
         kf_key_service_ = kf_key_service;
         passphrase_ = passphrase;
-        result_ = EncryptPad::PacketResult::None;
+        result_ = EncryptPad::EpadResult::None;
         kf_passphrase_ = kf_passphrase;
     }
 

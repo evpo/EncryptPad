@@ -116,7 +116,7 @@ namespace EncryptPad
             }
     };
 
-    LibEncryptMsg::PacketResult DecryptStream(InStream &in, const EncryptParams &encrypt_params,
+    EpadResult DecryptStream(InStream &in, const EncryptParams &encrypt_params,
             OutStream &out, PacketMetadata &metadata)
     {
         DecryptionContext context(in, out, encrypt_params, metadata);

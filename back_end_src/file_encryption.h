@@ -24,22 +24,22 @@
 
 namespace EncryptPad
 {
-    LibEncryptMsg::PacketResult DecryptPacketFile(const std::string &file_in, const EncryptParams &encrypt_params, 
+    EpadResult DecryptPacketFile(const std::string &file_in, const EncryptParams &encrypt_params, 
             Botan::SecureVector<byte> &output_buffer, PacketMetadata &metadata);
 
-    LibEncryptMsg::PacketResult DecryptPacketFile(const std::string &file_in, const std::string &file_out, 
+    EpadResult DecryptPacketFile(const std::string &file_in, const std::string &file_out, 
             const EncryptParams &encrypt_params, PacketMetadata &metadata);
 
-    LibEncryptMsg::PacketResult DecryptBuffer(const Botan::SecureVector<byte> &input_buffer, const EncryptParams &encrypt_params,
+    EpadResult DecryptBuffer(const Botan::SecureVector<byte> &input_buffer, const EncryptParams &encrypt_params,
              Botan::SecureVector<byte> &output_buffer, PacketMetadata &metadata);
 
-    LibEncryptMsg::PacketResult EncryptBuffer(const Botan::SecureVector<byte> &input_buffer, EncryptParams &encrypt_params,
+    EpadResult EncryptBuffer(const Botan::SecureVector<byte> &input_buffer, EncryptParams &encrypt_params,
              Botan::SecureVector<byte> &output_buffer, PacketMetadata &metadata);
 
-    LibEncryptMsg::PacketResult EncryptPacketFile(const std::string &file_in, const std::string &file_out, 
+    EpadResult EncryptPacketFile(const std::string &file_in, const std::string &file_out, 
             EncryptParams &encrypt_params, PacketMetadata &metadata);
 
-    LibEncryptMsg::PacketResult EncryptPacketFile(const Botan::SecureVector<byte> &input_buffer, const std::string &file_out, 
+    EpadResult EncryptPacketFile(const Botan::SecureVector<byte> &input_buffer, const std::string &file_out, 
             EncryptParams &encrypt_params, PacketMetadata &metadata);
 
     bool CheckIfPassphraseProtected(const std::string &file_name, bool &wad_file, std::string &key_file);

@@ -27,8 +27,8 @@ namespace EncryptPad
         SecureVector<byte> out_buffer;
 
         PacketMetadata metadata;
-        PacketResult result = DecryptBuffer(buffer, *key_file_encrypt_params, out_buffer, metadata);
-        if(result != PacketResult::Success)
+        EpadResult result = DecryptBuffer(buffer, *key_file_encrypt_params, out_buffer, metadata);
+        if(result != EpadResult::Success)
             return false;
 
         out = std::string(reinterpret_cast<const char*>(out_buffer.data()), out_buffer.size());
@@ -42,8 +42,8 @@ namespace EncryptPad
 
         SecureVector<byte> out_buffer;
 
-        PacketResult result = EncryptBuffer(in_buffer, *key_file_encrypt_params, out_buffer, metadata);
-        if(result != PacketResult::Success)
+        EpadResult result = EncryptBuffer(in_buffer, *key_file_encrypt_params, out_buffer, metadata);
+        if(result != EpadResult::Success)
             return false;
 
         out = PGP_encode(out_buffer.data(), out_buffer.size(), "MESSAGE");

@@ -7,16 +7,17 @@ namespace LibEncryptMsg
     enum class EmsgResult
     {
         Success = 0,
-        Pending,
-        InvalidSurrogateIV,
-        UnexpectedFormat,
-        UnsupportedPacketType,
-        UnsupportedAlgo,
-        UnsupportedS2K,
-        UnsupportedCompressionAlgo,
-        MDCError,
-        InvalidPassphrase,
-        None,
+        None = 1,
+        Pending = 2,
+        InvalidSurrogateIV = 3,
+        UnexpectedFormat = 4,
+        UnsupportedPacketType = 5,
+        UnsupportedAlgo = 6,
+        UnsupportedS2K = 7,
+        UnsupportedCompressionAlgo = 8,
+        MDCError = 9,
+        InvalidPassphrase = 10,
+        UnexpectedError = 11,
     };
 
     using FileDate = unsigned;

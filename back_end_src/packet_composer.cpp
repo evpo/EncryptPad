@@ -68,14 +68,14 @@ namespace EncryptPad
         PacketRWBase(PacketMetadata &metadata):metadata_(metadata){}
         // Reads packet body and writes its payload while setting metadata_out fields
         // Payload is the contained packets or empty if there are no packets inside
-        PacketResult Read()
+        EpadResult Read()
         {
             return DoRead();
         }
 
     protected:
         PacketMetadata &metadata_;
-        virtual PacketResult DoRead() = 0;
+        virtual EpadResult DoRead() = 0;
     };
 
     // PacketRWBase implementaions
@@ -94,8 +94,8 @@ namespace EncryptPad
         Botan::Keyed_Filter *cipher_;
         Botan::SecureVector<byte> prefix_;
 
-        PacketResult ReadAndCheckPrefix(Botan::Pipe &pipe, int prefix_len);
-        PacketResult InitRead();
+        EpadResult ReadAndCheckPrefix(Botan::Pipe &pipe, int prefix_len);
+        EpadResult InitRead();
     };
 
     class SymmetricIntegProtectedRW : public SymmetricRWBase
@@ -106,7 +106,7 @@ namespace EncryptPad
             : SymmetricRWBase(in, out, metadata, enc_params){} 
 
     protected:
-        PacketResult DoRead() override;
+        EpadResult DoRead() override;
     };
 
     class SymmetricRW : public SymmetricRWBase
@@ -117,7 +117,7 @@ namespace EncryptPad
             : SymmetricRWBase(in, out, metadata, enc_params){} 
 
     protected:
-        PacketResult DoRead() override;
+        EpadResult DoRead() override;
     };
 
     class SymmetricKeyESKRW : public PacketRWBase
@@ -130,7 +130,7 @@ namespace EncryptPad
         InStream &in_;
 
     protected:
-        PacketResult DoRead() override;
+        EpadResult DoRead() override;
     };
 
     class CompressedRW : public PacketRWBase
@@ -144,7 +144,7 @@ namespace EncryptPad
         OutStream &out_;
 
     protected:
-        PacketResult DoRead() override;
+        EpadResult DoRead() override;
     };
 
     class LiteralRW : public PacketRWBase
@@ -158,7 +158,7 @@ namespace EncryptPad
         OutStream &out_;
 
     protected:
-        PacketResult DoRead() override;
+        EpadResult DoRead() override;
     };
 
     // end PacketRWbase implementations
@@ -297,7 +297,7 @@ namespace EncryptPad
         }
     }
 
-    PacketResult WriteCompressed(InStream &in, OutStream &out, const PacketMetadata &metadata)
+    EpadResult WriteCompressed(InStream &in, OutStream &out, const PacketMetadata &metadata)
     {
         out.Put(static_cast<byte>(metadata.compression));
         //TODO: the code below is 70% similar to the inflating code. I will need to merge it somehow
@@ -316,11 +316,11 @@ namespace EncryptPad
                 break;
             default:
                 //unsupported
-                return PacketResult::UnsupportedCompressionAlgo;
+                return EpadResult::UnsupportedCompressionAlgo;
         }
 
         if(result != Z_OK)
-            return PacketResult::CompressionError;
+            return EpadResult::CompressionError;
 
         std::array<byte, kCompressionBufferSize> buffer_in;
         std::array<byte, kCompressionBufferSize> buffer_out;
@@ -350,7 +350,7 @@ namespace EncryptPad
                     case Z_BUF_ERROR:
                         break;
                     default:
-                        return PacketResult::CompressionError;
+                        return EpadResult::CompressionError;
                 }
                 out.Write(buffer_out.begin(), buffer_out.size() - zs.avail_out);
             }
@@ -362,10 +362,10 @@ namespace EncryptPad
         result = deflateEnd(&zs);
 
         if(result != Z_OK)
-            return PacketResult::CompressionError;
+            return EpadResult::CompressionError;
 
         assert(static_cast<unsigned long>(out.GetCount() - debug_test_counter) == zs.total_out); 
-        return PacketResult::Success;
+        return EpadResult::Success;
     }
 
     void WriteSymmetricKeyESK(OutStream &out, const KeyRecord &key_record, const PacketMetadata &metadata)
@@ -434,7 +434,7 @@ namespace EncryptPad
     }
 
     // Main Packet Methods
-    PacketResult WriteAllPackets(InStream &in, OutStream &out, PacketMetadata &metadata, EncryptParams &encrypt_params)
+    EpadResult WriteAllPackets(InStream &in, OutStream &out, PacketMetadata &metadata, EncryptParams &encrypt_params)
     {
         Buffer buffer;
         Buffer tmp_buf;
@@ -447,7 +447,7 @@ namespace EncryptPad
         // *** SymmetricKeyESK ***
         const KeyRecord &key_record = encrypt_params.key_service->GetKeyForSaving();
         if(key_record.IsEmpty())
-            return PacketResult::KeyIsRequiredForSaving;
+            return EpadResult::KeyIsRequiredForSaving;
 
           //ESK -> buffer
         WriteSymmetricKeyESK(*buffer_out, key_record, metadata);
@@ -488,7 +488,7 @@ namespace EncryptPad
             pipe_in.Push(in);
               //Compressed -> tmp_buf
             auto result = WriteCompressed(pipe_in, *tmp_out, metadata);
-            if(result != PacketResult::Success)
+            if(result != EpadResult::Success)
                 return result;
 
               //Clear buffer
@@ -534,7 +534,7 @@ namespace EncryptPad
         WriteHeader(out, header);
         out.Write(integ_buf.begin(), integ_buf_out->GetCount());
 
-        return PacketResult::Success;
+        return EpadResult::Success;
     }
 
     stream_length_type ReadOldLength(InStream &stm, byte len_bytes)
@@ -603,10 +603,10 @@ namespace EncryptPad
         }
     }
 
-    PacketResult ReadAllPackets(InStream &in, OutStream &out, PacketMetadata &metadata, const EncryptParams &encrypt_params)
+    EpadResult ReadAllPackets(InStream &in, OutStream &out, PacketMetadata &metadata, const EncryptParams &encrypt_params)
     {
         if(in.GetCount() == 0)
-            return PacketResult::Empty;
+            return EpadResult::Empty;
 
         Buffer high_buffer;
         Buffer low_buffer;
@@ -623,14 +623,14 @@ namespace EncryptPad
             PacketHeader header = ReadPacketHeader(*in_ptr);
 
             if(header.packet_type == PacketType::Unknown)
-                return PacketResult::UnsupportedPacketType;
+                return EpadResult::UnsupportedPacketType;
 
             stream_length_type previous_count = in_ptr->GetCount();
             stream_length_type body_length = header.is_partial_length && !header.is_new_format
                 ? previous_count : header.body_length;
 
             in_ptr->SetCount(body_length);
-            PacketResult result = PacketResult::UnexpectedError;
+            EpadResult result = EpadResult::UnexpectedError;
 
             std::unique_ptr<PacketRWBase> packet_rw;
             if(header.packet_type == PacketType::Literal)
@@ -643,7 +643,7 @@ namespace EncryptPad
             }
 
             if(!packet_rw.get())
-                return PacketResult::UnsupportedPacketType;
+                return EpadResult::UnsupportedPacketType;
 
             if(header.is_partial_length && header.is_new_format)
             {
@@ -665,10 +665,10 @@ namespace EncryptPad
                 in_ptr->SetCount(previous_count - body_length);
             }
 
-            if(result == PacketResult::Empty)
+            if(result == EpadResult::Empty)
                 continue;
 
-            if(result != PacketResult::Success)
+            if(result != EpadResult::Success)
                 return result;
 
             if(header.packet_type == PacketType::Literal)
@@ -697,13 +697,13 @@ namespace EncryptPad
             low2high = !low2high;
         }
 
-        return PacketResult::Success;
+        return EpadResult::Success;
     }
 
 
     // End of Main Packet Methods
 
-    PacketResult ReadPacketImpl(InStream &in, OutStream &out, 
+    EpadResult ReadPacketImpl(InStream &in, OutStream &out, 
             const EncryptParams &enc_params, PacketMetadata &metadata)
     {
         // Compression will not be set if the file is not compressed. We set it to uncompressed now.
@@ -713,13 +713,13 @@ namespace EncryptPad
 
     // Public interface
 
-    PacketResult ReadPacket(InStream &in, OutStream &out, 
+    EpadResult ReadPacket(InStream &in, OutStream &out, 
             const EncryptParams &enc_params, PacketMetadata &metadata)
     {
         return ReadPacketImpl(in, out, enc_params, metadata);
     }
 
-    PacketResult WritePacket(InStream &in, OutStream &out, 
+    EpadResult WritePacket(InStream &in, OutStream &out, 
             EncryptParams &enc_params, PacketMetadata &metadata)
     {
         return WriteAllPackets(in, out, metadata, enc_params);
@@ -727,10 +727,10 @@ namespace EncryptPad
     // End Public interface
 
     // Packet methods implementations
-    PacketResult SymmetricKeyESKRW::DoRead()
+    EpadResult SymmetricKeyESKRW::DoRead()
     {
         if(in_.Get()!=4)
-            return PacketResult::UnexpectedFormat;
+            return EpadResult::UnexpectedFormat;
 
         metadata_.cipher_algo = static_cast<CipherAlgo>(in_.Get());
         switch(metadata_.cipher_algo)
@@ -741,11 +741,11 @@ namespace EncryptPad
             case CipherAlgo::AES256:
                 break;
             default:
-                return PacketResult::UnsupportedAlgo;
+                return EpadResult::UnsupportedAlgo;
         }
 
         if(in_.Get() != 3)
-            return PacketResult::UnsupportedS2K;
+            return EpadResult::UnsupportedS2K;
 
         metadata_.hash_algo = static_cast<HashAlgo>(in_.Get());
         switch(metadata_.hash_algo)
@@ -755,23 +755,23 @@ namespace EncryptPad
             case HashAlgo::SHA512:
                 break;
             default:
-                return PacketResult::UnsupportedS2K;
+                return EpadResult::UnsupportedS2K;
         }
 
         metadata_.salt.resize(8);
         if(in_.Read(metadata_.salt.begin(), 8) != 8)
-            return PacketResult::UnexpectedFormat;
+            return EpadResult::UnexpectedFormat;
 
         metadata_.iterations = DecodeS2KIterations(in_.Get());
         // return empty because this packet doesn't have children
-        return PacketResult::Empty;
+        return EpadResult::Empty;
     }
 
-    PacketResult SymmetricRW::DoRead()
+    EpadResult SymmetricRW::DoRead()
     {
         using namespace Botan;
         auto result = InitRead();
-        if(result != PacketResult::Success)
+        if(result != EpadResult::Success)
             return result;
 
         Pipe &pipe = pipe_;
@@ -782,7 +782,7 @@ namespace EncryptPad
         int prefix_len = algo_spec.block_size + 2;
         if(in_.GetCount() < prefix_len)
         {
-            return PacketResult::UnexpectedFormat;
+            return EpadResult::UnexpectedFormat;
         }
 
         SecureVector<byte> enc_prefix; //encrypted prefix
@@ -794,7 +794,7 @@ namespace EncryptPad
         pipe.end_msg();
 
         auto prefix_result = ReadAndCheckPrefix(pipe, prefix_len);
-        if( prefix_result != PacketResult::Success)
+        if( prefix_result != EpadResult::Success)
             return prefix_result;
 
         // resync the cipher
@@ -818,29 +818,29 @@ namespace EncryptPad
             out_.Write(buffer.begin(), read_bytes);
         }
 
-        return PacketResult::Success;
+        return EpadResult::Success;
     }
 
-    PacketResult SymmetricRWBase::ReadAndCheckPrefix(Botan::Pipe &pipe, int prefix_len)
+    EpadResult SymmetricRWBase::ReadAndCheckPrefix(Botan::Pipe &pipe, int prefix_len)
     {
         using namespace Botan;
         prefix_.resize(prefix_len);
         int count = pipe.read(prefix_.begin(), prefix_len);
         if(count != prefix_len)
-            return PacketResult::InvalidSurrogateIV;
+            return EpadResult::InvalidSurrogateIV;
 
         // check the last two bytes for integrity of the message
         byte *ptr = prefix_.begin();
         ptr += prefix_len - 4;
         if(*ptr != *(ptr + 2)) 
-            return PacketResult::InvalidSurrogateIV;
+            return EpadResult::InvalidSurrogateIV;
         if(*(ptr + 1) != *(ptr + 3))
-            return PacketResult::InvalidSurrogateIV;
+            return EpadResult::InvalidSurrogateIV;
 
-        return PacketResult::Success;
+        return EpadResult::Success;
     }
 
-    PacketResult SymmetricRWBase::InitRead()
+    EpadResult SymmetricRWBase::InitRead()
     {
         using namespace Botan;
         auto algo_spec = GetAlgoSpec(this->metadata_.cipher_algo);
@@ -864,7 +864,7 @@ namespace EncryptPad
         }
 
         if(key_record->IsEmpty())
-            return PacketResult::InvalidPassphrase;
+            return EpadResult::InvalidPassphrase;
 
         SecureVector<byte> iv;
         iv.resize(algo_spec.block_size);
@@ -873,14 +873,14 @@ namespace EncryptPad
         cipher_ = Botan::get_cipher(algo_spec.botan_name, key_record->key, OctetString(iv), DECRYPTION);
         pipe_.append(cipher_);
 
-        return PacketResult::Success;
+        return EpadResult::Success;
     }
 
-    PacketResult SymmetricIntegProtectedRW::DoRead()
+    EpadResult SymmetricIntegProtectedRW::DoRead()
     {
         using namespace Botan;
         auto result = this->InitRead();
-        if(result != PacketResult::Success)
+        if(result != EpadResult::Success)
             return result;
 
         Pipe &pipe = this->pipe_;
@@ -888,7 +888,7 @@ namespace EncryptPad
         b = this->in_.Get();
 
         if(b != 1)
-            return PacketResult::UnexpectedFormat;
+            return EpadResult::UnexpectedFormat;
 
         auto algo_spec = GetAlgoSpec(this->metadata_.cipher_algo);
 
@@ -896,14 +896,14 @@ namespace EncryptPad
         int prefix_len = algo_spec.block_size + 2;
 
         if(this->in_.GetCount() < prefix_len)
-            return PacketResult::UnexpectedFormat;
+            return EpadResult::UnexpectedFormat;
 
         pipe.start_msg();
         WriteToPipe(this->in_, pipe);
         pipe.end_msg();
 
         auto prefix_result = this->ReadAndCheckPrefix(pipe, prefix_len);
-        if( prefix_result != PacketResult::Success)
+        if( prefix_result != EpadResult::Success)
             return prefix_result;
 
         // RFC 4880 (page 50)
@@ -958,17 +958,17 @@ namespace EncryptPad
         }
 
         if(total_count < static_cast<stream_length_type>(kLeaveBytes))
-            return PacketResult::UnexpectedFormat;
+            return EpadResult::UnexpectedFormat;
 
         const byte *ptr = left_bytes.begin();
 
         // tag and length of the MDC packet that need to be hashed too
 
         if(*ptr++ != 0xD3)
-            return PacketResult::UnexpectedFormat;
+            return EpadResult::UnexpectedFormat;
 
         if(*ptr++ != 0x14)
-            return PacketResult::UnexpectedFormat;
+            return EpadResult::UnexpectedFormat;
 
         hash.update(0xD3);
         hash.update(0x14);
@@ -981,12 +981,12 @@ namespace EncryptPad
         assert(ptr + 20 == left_bytes.end());
 
         if(actual_sha1 != expected_sha1)
-            return PacketResult::MDCError;
+            return EpadResult::MDCError;
 
-        return PacketResult::Success;
+        return EpadResult::Success;
     }
 
-    PacketResult CompressedRW::DoRead()
+    EpadResult CompressedRW::DoRead()
     {
         byte b = in_.Get();
         Compression comp_algo = static_cast<Compression>(b);
@@ -1005,7 +1005,7 @@ namespace EncryptPad
                 break;
             default:
                 //unsupported
-                return PacketResult::UnsupportedCompressionAlgo;
+                return EpadResult::UnsupportedCompressionAlgo;
         }
 
         std::array<byte, kCompressionBufferSize> buffer_in;
@@ -1032,7 +1032,7 @@ namespace EncryptPad
                     case Z_BUF_ERROR:
                         break;
                     default:
-                        return PacketResult::CompressionError;
+                        return EpadResult::CompressionError;
                 }
                 out_.Write(buffer_out.begin(), buffer_out.size() - zs.avail_out);
             }
@@ -1044,13 +1044,13 @@ namespace EncryptPad
         result = inflateEnd(&zs);
 
         if(result != Z_OK)
-            return PacketResult::CompressionError;
+            return EpadResult::CompressionError;
 
         assert(static_cast<unsigned long>(out_.GetCount() - debug_test_counter) == zs.total_out); 
-        return PacketResult::Success;
+        return EpadResult::Success;
     }
 
-    PacketResult LiteralRW::DoRead()
+    EpadResult LiteralRW::DoRead()
     {
         byte b = in_.Get();
         switch(b)
@@ -1059,7 +1059,7 @@ namespace EncryptPad
             case 'b': case 't': case 'u': case 'l': case '1':
                 break;
             default:
-                return PacketResult::UnexpectedFormat;
+                return EpadResult::UnexpectedFormat;
         }
 
         // it is the only important thing for us for now
@@ -1069,14 +1069,14 @@ namespace EncryptPad
         buffer.resize(file_name_length);
         auto read_bytes = in_.Read(buffer.begin(), file_name_length);
         if(read_bytes != file_name_length)
-            return PacketResult::UnexpectedFormat;
+            return EpadResult::UnexpectedFormat;
         buffer.push_back('\0');
         metadata_.file_name = reinterpret_cast<const char*>(buffer.begin());
         // File Date
         buffer.resize(4);
         read_bytes = in_.Read(buffer.begin(), 4);
         if(read_bytes != 4)
-            return PacketResult::UnexpectedFormat;
+            return EpadResult::UnexpectedFormat;
 
         static_assert(sizeof(metadata_.file_date) >= 4, "file_data_ type must be 4 bytes or more");
 
@@ -1091,7 +1091,7 @@ namespace EncryptPad
             out_.Write(copy_buf.begin(), bytes_read);
         }
 
-        return PacketResult::Success;
+        return EpadResult::Success;
     }
     // end of packet methods implementations
 }

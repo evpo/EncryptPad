@@ -91,49 +91,49 @@ namespace
         return true;
     }
 
-    Result FromPacketResult(PacketResult result)
+    Result FromPacketResult(EpadResult result)
     {
         struct PacketResult2Result
         {
-            PacketResult packet_result;
+            EpadResult epad_result;
             Result result;
         };
 
         static PacketResult2Result table[] =
         {
-            {PacketResult::Success, Result::OK},
-            {PacketResult::IOErrorKeyFile, Result::X2KeyIOError},
-            {PacketResult::InvalidKeyFile,  Result::InvalidX2File},
-            {PacketResult::CurlExitNonZero,  Result::X2CurlExitNonZero},
-            {PacketResult::CurlIsNotFound,  Result::X2CurlIsNotFound},
-            {PacketResult::UnexpectedError, Result::CpadFileIOError}, 
-            {PacketResult::InvalidSurrogateIV, Result::EncryptionError}, 
-            {PacketResult::Empty, Result::None}, 
-            {PacketResult::UnexpectedFormat, Result::InvalidCpadFile}, 
-            {PacketResult::UnsupportedPacketType, Result::InvalidCpadFile}, 
-            {PacketResult::UnsupportedAlgo, Result::InvalidCpadFile}, 
-            {PacketResult::UnsupportedS2K, Result::InvalidCpadFile}, 
-            {PacketResult::UnsupportedCompressionAlgo, Result::InvalidCpadFile}, 
-            {PacketResult::IOError, Result::CpadFileIOError}, 
-            {PacketResult::IOErrorInput, Result::CpadFileIOError}, 
-            {PacketResult::IOErrorOutput, Result::CpadFileIOError}, 
-            {PacketResult::MDCError, Result::InvalidCpadFile}, 
-            {PacketResult::CompressionError, Result::InvalidCpadFile}, 
-            {PacketResult::KeyFileNotSpecified, Result::X2FileIsRequired}, 
-            {PacketResult::InvalidWadFile, Result::InvalidCpadFile}, 
-            {PacketResult::InvalidPassphrase, Result::EncryptionError}, 
-            {PacketResult::KeyIsRequiredForSaving, Result::EncryptionError}, 
-            {PacketResult::InvalidKeyFilePassphrase, Result::InvalidKeyFilePassphrase},
-            {PacketResult::None, Result::None},
+            {EpadResult::Success, Result::OK},
+            {EpadResult::IOErrorKeyFile, Result::X2KeyIOError},
+            {EpadResult::InvalidKeyFile,  Result::InvalidX2File},
+            {EpadResult::CurlExitNonZero,  Result::X2CurlExitNonZero},
+            {EpadResult::CurlIsNotFound,  Result::X2CurlIsNotFound},
+            {EpadResult::UnexpectedError, Result::CpadFileIOError}, 
+            {EpadResult::InvalidSurrogateIV, Result::EncryptionError}, 
+            {EpadResult::Empty, Result::None}, 
+            {EpadResult::UnexpectedFormat, Result::InvalidCpadFile}, 
+            {EpadResult::UnsupportedPacketType, Result::InvalidCpadFile}, 
+            {EpadResult::UnsupportedAlgo, Result::InvalidCpadFile}, 
+            {EpadResult::UnsupportedS2K, Result::InvalidCpadFile}, 
+            {EpadResult::UnsupportedCompressionAlgo, Result::InvalidCpadFile}, 
+            {EpadResult::IOError, Result::CpadFileIOError}, 
+            {EpadResult::IOErrorInput, Result::CpadFileIOError}, 
+            {EpadResult::IOErrorOutput, Result::CpadFileIOError}, 
+            {EpadResult::MDCError, Result::InvalidCpadFile}, 
+            {EpadResult::CompressionError, Result::InvalidCpadFile}, 
+            {EpadResult::KeyFileNotSpecified, Result::X2FileIsRequired}, 
+            {EpadResult::InvalidWadFile, Result::InvalidCpadFile}, 
+            {EpadResult::InvalidPassphrase, Result::EncryptionError}, 
+            {EpadResult::KeyIsRequiredForSaving, Result::EncryptionError}, 
+            {EpadResult::InvalidKeyFilePassphrase, Result::InvalidKeyFilePassphrase},
+            {EpadResult::None, Result::None},
         };
 
         PacketResult2Result *p = table;
-        while(p->packet_result != result && p->packet_result != PacketResult::None)
+        while(p->epad_result != result && p->epad_result != EpadResult::None)
         {
             ++p;
         }
 
-        if(p->packet_result == PacketResult::None)
+        if(p->epad_result == EpadResult::None)
             assert(false);
         return p->result;
     }

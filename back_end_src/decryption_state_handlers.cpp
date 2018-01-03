@@ -3,6 +3,7 @@
 #include "x2_key_loader.h"
 #include "key_file_converter.h"
 #include "wad_reader_writer.h"
+#include "epad_result.h"
 
 using namespace LibEncryptMsg;
 
@@ -39,7 +40,7 @@ namespace EncryptPad
 
     void End_OnEnter(LightStateMachine::StateMachineContext &ctx)
     {
-        ToContext(ctx).SetResult(LibEncryptMsg::PacketResult::Success);
+        ToContext(ctx).SetResult(EpadResult::Success);
     }
 
     bool ParseFormat_CanEnter(LightStateMachine::StateMachineContext &ctx)
@@ -212,11 +213,11 @@ namespace EncryptPad
         }
         catch(const EmsgException &e)
         {
-            c.SetResult(e.result);
+            c.SetResult(ToEpadResult(e.result));
             c.SetFailed(true);
         }
         c.SetFilterCount(c.GetFilterCount() + 1);
-        c.SetResult(PacketResult::Success);
+        c.SetResult(EpadResult::Success);
     }
 
     bool SetPwdKey_CanEnter(LightStateMachine::StateMachineContext &ctx)
@@ -319,7 +320,7 @@ namespace EncryptPad
 
         if(metadata.key_file.empty())
         {
-            c.SetResult(PacketResult::KeyFileNotSpecified);
+            c.SetResult(EpadResult::KeyFileNotSpecified);
             c.SetFailed(true);
             return;
         }
@@ -327,12 +328,12 @@ namespace EncryptPad
         c.KeyFileSession().reset(new DecryptionSession());
 
         std::string empty_str;
-        PacketResult result = LoadKeyFromFile(metadata.key_file,
+        EpadResult result = LoadKeyFromFile(metadata.key_file,
                 encrypt_params.libcurl_path ? *encrypt_params.libcurl_path : empty_str,
                 encrypt_params.libcurl_parameters ? *encrypt_params.libcurl_parameters : empty_str,
                 c.KeyFileSession()->own_passphrase);
 
-        if(result != PacketResult::Success)
+        if(result != EpadResult::Success)
         {
             c.SetResult(result);
             c.SetFailed(true);
@@ -342,12 +343,12 @@ namespace EncryptPad
         if(!DecryptKeyFileContent(c.KeyFileSession()->own_passphrase,
                     encrypt_params.key_file_encrypt_params, c.KeyFileSession()->own_passphrase))
         {
-            c.SetResult(PacketResult::InvalidKeyFilePassphrase);
+            c.SetResult(EpadResult::InvalidKeyFilePassphrase);
             c.SetFailed(true);
             return;
         }
 
-        c.SetResult(PacketResult::Success);
+        c.SetResult(EpadResult::Success);
     }
 
     bool WADHead_CanEnter(LightStateMachine::StateMachineContext &ctx)
@@ -384,14 +385,14 @@ namespace EncryptPad
         uint32_t payload_offset = 0;
         uint32_t payload_size = 0;
         std::string key_file;
-        PacketResult result = ParseWad(stm_in, key_file, payload_offset, payload_size);
+        EpadResult result = ParseWad(stm_in, key_file, payload_offset, payload_size);
 
         switch(result)
         {
-            case PacketResult::Success:
+            case EpadResult::Success:
                 break;
 
-            case PacketResult::InvalidOrIncompleteWadFile:
+            case EpadResult::InvalidOrIncompleteWadFile:
                 if(c.In().IsEOF())
                 {
                     c.SetResult(result);
@@ -417,7 +418,7 @@ namespace EncryptPad
             c.Buffer().erase(c.Buffer().begin() + payload_size, c.Buffer().end());
         }
         c.SetWADHeadFinished(true);
-        c.SetResult(PacketResult::Success);
+        c.SetResult(EpadResult::Success);
     }
 }
 

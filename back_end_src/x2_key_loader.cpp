@@ -61,7 +61,7 @@ namespace EncryptPad
         return true;
     }
 
-    PacketResult LoadKeyFromFile(const string& file_name, const std::string &libcurl_path, const std::string &libcurl_params, std::string &key)
+    EpadResult LoadKeyFromFile(const string& file_name, const std::string &libcurl_path, const std::string &libcurl_params, std::string &key)
     {
         if(!libcurl_path.empty() && IsUrl(file_name))
             return LoadKeyFromFileThroughCurl(file_name, libcurl_path, libcurl_params, key);
@@ -75,9 +75,9 @@ namespace EncryptPad
                 std::string keyStoragePath = std::string(keyStorageDirectory) + directorySeparator + path;
                 return LoadKeyFromFile(keyStoragePath, std::string(), std::string(), key);
             }
-            return PacketResult::IOErrorKeyFile;
+            return EpadResult::IOErrorKeyFile;
         }
 
-        return PacketResult::Success;
+        return EpadResult::Success;
     }
 }

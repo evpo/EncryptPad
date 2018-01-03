@@ -811,7 +811,7 @@ int main(int argc, char *argv[])
         enc_params.key_file_encrypt_params = &key_file_encrypt_params;
     }
 
-    LibEncryptMsg::PacketResult result = LibEncryptMsg::PacketResult::None;
+    EpadResult result = EpadResult::None;
     if(encrypt)
     {
         result = EncryptPacketFile(in_file, out_file, enc_params, metadata);
@@ -821,13 +821,13 @@ int main(int argc, char *argv[])
         result = DecryptPacketFile(in_file, out_file, enc_params, metadata);
     }
 
-    if(result == LibEncryptMsg::PacketResult::InvalidKeyFilePassphrase && !key_file_passphrase_required)
+    if(result == EpadResult::InvalidKeyFilePassphrase && !key_file_passphrase_required)
     {
         std::cerr << "File is encrypted with an encrypted key file. Use '--force-key-pwd' switch." << std::endl;
         exit(1);
     }
 
-    if(result != LibEncryptMsg::PacketResult::Success)
+    if(result != EpadResult::Success)
     {
         std::cerr << "Cannot " << (encrypt ? "encrypt" : "decrypt") << " the file: " << InterpretResult(result) << std::endl;
         exit(1);

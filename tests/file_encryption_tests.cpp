@@ -85,12 +85,12 @@ TEST_F(FileEncryptionFixture, When_text_encrypted_then_decrypted_It_is_the_same)
     AssignBuffer(text);
 
     // Act
-    PacketResult encrypt_result = EncryptBuffer(in_buffer_, enc_params_, out_buffer_, metadata_);
-    PacketResult decrypt_result = DecryptBuffer(out_buffer_, enc_params_, result_buffer_, metadata_);
+    EpadResult encrypt_result = EncryptBuffer(in_buffer_, enc_params_, out_buffer_, metadata_);
+    EpadResult decrypt_result = DecryptBuffer(out_buffer_, enc_params_, result_buffer_, metadata_);
 
     // Assert
-    ASSERT_EQ(PacketResult::Success, encrypt_result);
-    ASSERT_EQ(PacketResult::Success, decrypt_result);
+    ASSERT_EQ(EpadResult::Success, encrypt_result);
+    ASSERT_EQ(EpadResult::Success, decrypt_result);
     ASSERT_EQ(text, ResultString());
 }
 
@@ -102,11 +102,11 @@ TEST_F(FileEncryptionFixture, When_two_chars_encrypted_without_compression_then_
     metadata_.compression = Compression::Uncompressed;
 
     // Act
-    PacketResult encrypt_result = EncryptBuffer(in_buffer_, enc_params_, out_buffer_, metadata_);
-    PacketResult decrypt_result = DecryptBuffer(out_buffer_, enc_params_, result_buffer_, metadata_);
+    EpadResult encrypt_result = EncryptBuffer(in_buffer_, enc_params_, out_buffer_, metadata_);
+    EpadResult decrypt_result = DecryptBuffer(out_buffer_, enc_params_, result_buffer_, metadata_);
 
     // Assert
-    ASSERT_EQ(PacketResult::Success, encrypt_result);
-    ASSERT_EQ(PacketResult::Success, decrypt_result);
+    ASSERT_EQ(EpadResult::Success, encrypt_result);
+    ASSERT_EQ(EpadResult::Success, decrypt_result);
     ASSERT_EQ(text, ResultString());
 }

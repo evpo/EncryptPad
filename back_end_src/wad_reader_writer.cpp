@@ -137,24 +137,24 @@ namespace
         uint32_t version_size;
     };
 
-    PacketResult ExtractWadMetadata(RandomInStream &stm, stream_length_type length, WadMetadata &metadata)
+    EpadResult ExtractWadMetadata(RandomInStream &stm, stream_length_type length, WadMetadata &metadata)
     {
         std::string wad_type(4, ' ');
         if(stm.Read(reinterpret_cast<byte *>(&wad_type[0]), 4) != 4)
-            return PacketResult::InvalidOrIncompleteWadFile;
+            return EpadResult::InvalidOrIncompleteWadFile;
 
         uint32_t num_lumps;
         if(!ReadUint(stm, num_lumps))
-            return PacketResult::InvalidOrIncompleteWadFile;
+            return EpadResult::InvalidOrIncompleteWadFile;
 
         if(!ReadUint(stm, metadata.dir_offset))
-            return PacketResult::InvalidOrIncompleteWadFile;
+            return EpadResult::InvalidOrIncompleteWadFile;
 
         if(wad_type != "PWAD" && wad_type != "IWAD")
-            return PacketResult::InvalidWadFile;
+            return EpadResult::InvalidWadFile;
 
         if(length - 1 < metadata.dir_offset)
-            return PacketResult::InvalidOrIncompleteWadFile;
+            return EpadResult::InvalidOrIncompleteWadFile;
 
         metadata.payload_offset = kInvalid;
         metadata.payload_size = 0;
@@ -164,7 +164,7 @@ namespace
 
         if(!stm.Seek(metadata.dir_offset))
         {
-            return PacketResult::InvalidOrIncompleteWadFile;
+            return EpadResult::InvalidOrIncompleteWadFile;
         }
 
         for(unsigned i = 0; i < num_lumps; i++)
@@ -174,13 +174,13 @@ namespace
             std::string name(8, ' ');
 
             if(!ReadUint(stm, offset))
-                return PacketResult::InvalidOrIncompleteWadFile;
+                return EpadResult::InvalidOrIncompleteWadFile;
 
             if(!ReadUint(stm, size))
-                return PacketResult::InvalidOrIncompleteWadFile;
+                return EpadResult::InvalidOrIncompleteWadFile;
 
             if(stm.Read(reinterpret_cast<byte *>(&name[0]), 8) != 8)
-                return PacketResult::InvalidOrIncompleteWadFile;
+                return EpadResult::InvalidOrIncompleteWadFile;
 
             std::transform(std::begin(name), std::end(name), std::begin(name), ::toupper);
 
@@ -204,9 +204,9 @@ namespace
         }
 
         if(metadata.payload_offset == kInvalid || !metadata.key_file_found)
-            return PacketResult::InvalidWadFile;
+            return EpadResult::InvalidWadFile;
 
-        return PacketResult::Success;
+        return EpadResult::Success;
     }
 }
 
@@ -223,66 +223,66 @@ namespace EncryptPad
         return WriteWadHeadImpl(key_file, payload_size, version, out);
     }
 
-    PacketResult ParseWad(RandomInStream &in, std::string &key_file, uint32_t &payload_offset, uint32_t &payload_size)
+    EpadResult ParseWad(RandomInStream &in, std::string &key_file, uint32_t &payload_offset, uint32_t &payload_size)
     {
         WadMetadata metadata;
         key_file.clear();
         auto result = ExtractWadMetadata(in, in.GetCount(), metadata);
-        if(result != PacketResult::Success)
+        if(result != EpadResult::Success)
             return result;
 
         payload_offset = metadata.payload_offset;
         payload_size = metadata.payload_size;
 
         if(!metadata.key_file_found)
-            return PacketResult::InvalidWadFile;
+            return EpadResult::InvalidWadFile;
 
         if(metadata.key_file_size <= 0)
-            return PacketResult::Success;
+            return EpadResult::Success;
 
         if(!in.Seek(metadata.key_file_offset))
-            return PacketResult::InvalidOrIncompleteWadFile;
+            return EpadResult::InvalidOrIncompleteWadFile;
 
         key_file.resize(metadata.key_file_size);
         if(in.Read(reinterpret_cast<byte *>(&key_file[0]), metadata.key_file_size) != metadata.key_file_size)
-            return PacketResult::InvalidOrIncompleteWadFile;
+            return EpadResult::InvalidOrIncompleteWadFile;
 
         if(!in.Seek(metadata.payload_offset))
-            return PacketResult::InvalidOrIncompleteWadFile;
+            return EpadResult::InvalidOrIncompleteWadFile;
 
-        return PacketResult::Success;
+        return EpadResult::Success;
     }
-    PacketResult ExtractKeyFromWad(RandomInStream &in, std::string &key_file)
+    EpadResult ExtractKeyFromWad(RandomInStream &in, std::string &key_file)
     {
         WadMetadata metadata;
         key_file.clear();
         auto result = ExtractWadMetadata(in, in.GetCount(), metadata);
-        if(result != PacketResult::Success)
+        if(result != EpadResult::Success)
             return result;
 
         if(!metadata.key_file_found)
-            return PacketResult::InvalidWadFile;
+            return EpadResult::InvalidWadFile;
 
         if(metadata.key_file_size <= 0)
-            return PacketResult::Success;
+            return EpadResult::Success;
 
         if(!in.Seek(metadata.key_file_offset))
-            return PacketResult::InvalidWadFile;
+            return EpadResult::InvalidWadFile;
 
         key_file.resize(metadata.key_file_size);
         if(in.Read(reinterpret_cast<byte *>(&key_file[0]), metadata.key_file_size) != metadata.key_file_size)
-            return PacketResult::InvalidWadFile;
+            return EpadResult::InvalidWadFile;
 
-        return PacketResult::Success;
+        return EpadResult::Success;
     }
 
-    PacketResult ExtractFromWad(RandomInStream &in, OutStream &out, std::string &key_file)
+    EpadResult ExtractFromWad(RandomInStream &in, OutStream &out, std::string &key_file)
     {
         WadMetadata metadata;
         auto result = ExtractWadMetadata(in, in.GetCount(), metadata);
         in.Seek(metadata.payload_offset);
 
-        if(result != PacketResult::Success)
+        if(result != EpadResult::Success)
             return result;
 
         Botan::SecureVector<byte> buffer;
@@ -299,6 +299,6 @@ namespace EncryptPad
             in.Read(reinterpret_cast<byte *>(&*key_file.begin()), metadata.key_file_size);
         }
 
-        return PacketResult::Success;
+        return EpadResult::Success;
     }
 }

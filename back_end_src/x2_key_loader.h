@@ -25,7 +25,7 @@
 
 namespace EncryptPad
 {
-    LibEncryptMsg::PacketResult LoadKeyFromFile(const std::string& file_name,
+    EpadResult LoadKeyFromFile(const std::string& file_name,
             const std::string &libcurl_path, const std::string &libcurl_params,
             std::string &key);
 

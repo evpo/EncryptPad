@@ -27,9 +27,9 @@
 
 namespace EncryptPad
 {
-    LibEncryptMsg::PacketResult ExtractFromWad(RandomInStream &in, OutStream &out, std::string &key_file);
-    LibEncryptMsg::PacketResult ExtractKeyFromWad(RandomInStream &in, std::string &key_file);
+    EpadResult ExtractFromWad(RandomInStream &in, OutStream &out, std::string &key_file);
+    EpadResult ExtractKeyFromWad(RandomInStream &in, std::string &key_file);
     bool WriteWad(InStream &in, OutStream &out, const std::string &key_file);
     bool WriteWadHead(const std::string &key_file, uint32_t payload_size, const std::string &version, OutStream &out);
-    LibEncryptMsg::PacketResult ParseWad(RandomInStream &in, std::string &key_file, uint32_t &payload_offset, uint32_t &payload_size);
+    EpadResult ParseWad(RandomInStream &in, std::string &key_file, uint32_t &payload_offset, uint32_t &payload_size);
 }

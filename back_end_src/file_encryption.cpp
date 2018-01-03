@@ -34,6 +34,7 @@
 #include "emsg_symmetric_key.h"
 #include "key_service_key_provider.h"
 #include "decryption_state_machine.h"
+#include "epad_result.h"
 
 using namespace LibEncryptMsg;
 namespace
@@ -56,7 +57,7 @@ namespace
         return config;
     }
 
-    PacketResult ReadPacket(InStream &in, OutStream &out,
+    EpadResult ReadPacket(InStream &in, OutStream &out,
             const EncryptParams &enc_params, PacketMetadata &metadata)
     {
         KeyService *key_service = enc_params.key_service;
@@ -74,17 +75,17 @@ namespace
         }
         catch(const EmsgException &e)
         {
-            return e.result;
+            return ToEpadResult(e.result);
         }
         if(!out.Write(buf.data(), buf.size()))
         {
-            return PacketResult::IOErrorOutput;
+            return EpadResult::IOErrorOutput;
         }
 
-        return PacketResult::Success;
+        return EpadResult::Success;
     }
 
-    PacketResult WritePacket(InStream &in, OutStream &out,
+    EpadResult WritePacket(InStream &in, OutStream &out,
             EncryptParams &enc_params, PacketMetadata &metadata)
     {
         MessageConfig config = ConvertToMessageConfig(metadata);
@@ -119,18 +120,18 @@ namespace
         }
         catch(const EmsgException &e)
         {
-            return e.result;
+            return ToEpadResult(e.result);
         }
 
         if(!out.Write(buf.data(), buf.size()))
         {
-            return PacketResult::IOErrorOutput;
+            return EpadResult::IOErrorOutput;
         }
 
-        return PacketResult::Success;
+        return EpadResult::Success;
     }
 
-    PacketResult EncryptWithKey(InStream &in, EncryptParams &encrypt_params, 
+    EpadResult EncryptWithKey(InStream &in, EncryptParams &encrypt_params, 
         OutStream &out, PacketMetadata &metadata)
     {
         //TODO: remove this code because it moved to PrepareKeyFileSession
@@ -141,11 +142,11 @@ namespace
                 encrypt_params.libcurl_parameters ? *encrypt_params.libcurl_parameters : empty_str,
                 raw_key_phrase);
 
-        if(result != PacketResult::Success)
+        if(result != EpadResult::Success)
             return result;
 
         if(!DecryptKeyFileContent(raw_key_phrase, encrypt_params.key_file_encrypt_params, key_phrase)) 
-            return PacketResult::InvalidKeyFilePassphrase;
+            return EpadResult::InvalidKeyFilePassphrase;
 
         KeyService key_service(1);
         key_service.ChangePassphrase(key_phrase, metadata.hash_algo, 
@@ -156,33 +157,33 @@ namespace
         return WritePacket(in, out, enc_params, metadata);
     }
 
-    PacketResult EncryptWad(InStream &in, EncryptParams &encrypt_params, OutStream &out, PacketMetadata &metadata)
+    EpadResult EncryptWad(InStream &in, EncryptParams &encrypt_params, OutStream &out, PacketMetadata &metadata)
     {
         Buffer buffer;
         auto buffer_out = MakeOutStream(buffer);
         auto result = EncryptWithKey(in, encrypt_params, *buffer_out, metadata);
-        if(result != PacketResult::Success)
+        if(result != EpadResult::Success)
             return result;
         buffer.resize(buffer_out->GetCount());
 
         InPacketStreamMemory buffer_in(buffer.data(), buffer.data() + buffer_out->GetCount());
         WriteWad(buffer_in, out, 
                 metadata.persist_key_path ? metadata.key_file : std::string());
-        return PacketResult::Success;
+        return EpadResult::Success;
     }
 
     struct SymmetricEncryptionSession
     {
         std::unique_ptr<EncryptionKey> key;
         Salt salt;
-        PacketResult preparation_result;
-        SymmetricEncryptionSession():preparation_result(PacketResult::None)
+        EpadResult preparation_result;
+        SymmetricEncryptionSession():preparation_result(EpadResult::None)
         {
         }
 
         bool IsValid()
         {
-            return preparation_result == PacketResult::Success;
+            return preparation_result == EpadResult::Success;
         }
     };
 
@@ -195,7 +196,7 @@ namespace
             ret_val.salt = GenerateRandomSalt();
             ret_val.key = GenerateEncryptionKey(passphrase, config.GetCipherAlgo(),
                     config.GetHashAlgo(), config.GetIterations(), ret_val.salt);
-            ret_val.preparation_result = PacketResult::Success;
+            ret_val.preparation_result = EpadResult::Success;
         }
         else
         {
@@ -203,7 +204,7 @@ namespace
             ret_val.salt = key_record.salt;
             // We assume that key_service has been set with the same encryption parameters
             ret_val.key.reset(new EncryptionKey(key_record.key->bits_of()));
-            ret_val.preparation_result = PacketResult::Success;
+            ret_val.preparation_result = EpadResult::Success;
         }
         return ret_val;
     }
@@ -219,13 +220,13 @@ namespace
                 encrypt_params.libcurl_parameters ? *encrypt_params.libcurl_parameters : empty_str,
                 raw_key_phrase);
 
-        if(session.preparation_result != PacketResult::Success)
+        if(session.preparation_result != EpadResult::Success)
             return session;
 
         //TODO: key_phrase should be SafeVector
         if(!DecryptKeyFileContent(raw_key_phrase, encrypt_params.key_file_encrypt_params, key_phrase))
         {
-            session.preparation_result = PacketResult::InvalidKeyFilePassphrase;
+            session.preparation_result = EpadResult::InvalidKeyFilePassphrase;
             return session;
         }
         Passphrase passphrase(SafeVector(key_phrase.cbegin(), key_phrase.cend()));
@@ -233,7 +234,7 @@ namespace
         session.salt = GenerateRandomSalt();
         session.key = GenerateEncryptionKey(passphrase, config.GetCipherAlgo(),
                 config.GetHashAlgo(), config.GetIterations(), session.salt);
-        session.preparation_result = PacketResult::Success;
+        session.preparation_result = EpadResult::Success;
         return session;
     }
 
@@ -270,7 +271,7 @@ namespace
     }
 
     template<typename T>
-    PacketResult UpdateOrFinish(T &reader_writer, SafeVector &buffer,  bool finish)
+    EpadResult UpdateOrFinish(T &reader_writer, SafeVector &buffer,  bool finish)
     {
         try
         {
@@ -285,12 +286,12 @@ namespace
         }
         catch(const EmsgException &e)
         {
-            return e.result;
+            return ToEpadResult(e.result);
         }
-        return PacketResult::Success;
+        return EpadResult::Success;
     }
 
-    PacketResult EncryptStream(InStream &in, EncryptParams &encrypt_params,
+    EpadResult EncryptStream(InStream &in, EncryptParams &encrypt_params,
             OutStream &out, PacketMetadata &metadata)
     {
         MessageConfig passphrase_config;
@@ -335,7 +336,7 @@ namespace
             stream_length_type length = in.Read(buf.data(), buf.size());
             buf.resize(length);
             MessageWriter *writer = nullptr;
-            PacketResult result = PacketResult::None;
+            EpadResult result = EpadResult::None;
 
 
             switch(mode)
@@ -347,14 +348,14 @@ namespace
                        &key_file_session_writer : &passphrase_session_writer);
 
                     result = UpdateOrFinish(*writer, buf, in.IsEOF());
-                    if(result != PacketResult::Success)
+                    if(result != EpadResult::Success)
                         return result;
 
                     break;
 
                 case FileNestingMode::WadWithGPG:
                     result = UpdateOrFinish(key_file_session_writer, buf, in.IsEOF());
-                    if(result != PacketResult::Success)
+                    if(result != EpadResult::Success)
                         return result;
 
                     if(!wad_head_written)
@@ -367,14 +368,14 @@ namespace
                         }
 
                         if(!WriteWadHead(wad_key_file, wad_payload_size, wad_version, out))
-                            return PacketResult::IOErrorOutput;
+                            return EpadResult::IOErrorOutput;
                         wad_head_written = true;
                     }
                     break;
 
                 case FileNestingMode::NestedGPGWithWad:
                     result = UpdateOrFinish(key_file_session_writer, buf, in.IsEOF());
-                    if(result != PacketResult::Success)
+                    if(result != EpadResult::Success)
                         return result;
 
                     if(!wad_head_written)
@@ -388,14 +389,14 @@ namespace
                         SafeVector wad_head;
                         auto wad_head_out = MakeOutStream(wad_head);
                         if(!WriteWadHead(wad_key_file, wad_payload_size, wad_version, *wad_head_out))
-                            return PacketResult::IOErrorOutput;
+                            return EpadResult::IOErrorOutput;
                         wad_head.resize(wad_head_out->GetCount());
                         buf.insert(buf.begin(), wad_head.cbegin(), wad_head.cend());
                         wad_head_written = true;
                     }
 
                     result = UpdateOrFinish(passphrase_session_writer, buf, in.IsEOF());
-                    if(result != PacketResult::Success)
+                    if(result != EpadResult::Success)
                         return result;
 
                     break;
@@ -407,14 +408,14 @@ namespace
 
             // All cases above should leave buf for writing to the out stream
             if(!out.Write(buf.data(), buf.size()))
-                return PacketResult::IOErrorOutput;
+                return EpadResult::IOErrorOutput;
         }
         while(!in.IsEOF());
 
-        return PacketResult::Success;
+        return EpadResult::Success;
     }
 
-    PacketResult DecryptWad(RandomInStream &in, const std::string &key_file, 
+    EpadResult DecryptWad(RandomInStream &in, const std::string &key_file, 
             const EncryptParams &encrypt_params, OutStream &out, PacketMetadata &metadata);
 
     // PacketResult DecryptStream(InStream &in_stm, const EncryptParams &enc_params, 
@@ -451,11 +452,11 @@ namespace
     //     return PacketResult::Success;
     // }
 
-    PacketResult DecryptWithKey(InStream &in, const EncryptParams &encrypt_params,
+    EpadResult DecryptWithKey(InStream &in, const EncryptParams &encrypt_params,
             OutStream &out, PacketMetadata &metadata)
     {
         if(metadata.key_file.empty())
-            return PacketResult::KeyFileNotSpecified;
+            return EpadResult::KeyFileNotSpecified;
 
         std::string passphrase_from_key;
         EncryptParams enc_params = {};
@@ -469,17 +470,17 @@ namespace
                 encrypt_params.libcurl_parameters ? *encrypt_params.libcurl_parameters : empty_str,
                 passphrase_from_key);
 
-        if(result != PacketResult::Success)
+        if(result != EpadResult::Success)
             return result;
 
         if(!DecryptKeyFileContent(passphrase_from_key, encrypt_params.key_file_encrypt_params, passphrase_from_key))
-            return PacketResult::InvalidKeyFilePassphrase;
+            return EpadResult::InvalidKeyFilePassphrase;
 
         return DecryptStream(in, enc_params, out, metadata);
     }
 
     // Extracts data from wad file and decrypts it.
-    PacketResult DecryptWad(RandomInStream &in, const std::string &key_file, 
+    EpadResult DecryptWad(RandomInStream &in, const std::string &key_file, 
             const EncryptParams &encrypt_params, OutStream &out, PacketMetadata &metadata)
     {
         Buffer payload;
@@ -487,7 +488,7 @@ namespace
         metadata.key_file = key_file;
         std::string key_file_tmp;
         auto result = ExtractFromWad(in, *payload_out, key_file_tmp);
-        if(result != PacketResult::Success)
+        if(result != EpadResult::Success)
             return result;
         payload.resize(payload_out->GetCount());
 
@@ -503,16 +504,16 @@ namespace
         return DecryptWithKey(payload_stm, encrypt_params, out, metadata);
     }
 
-    PacketResult WriteFile(const std::string &file_name, const Buffer &stm)
+    EpadResult WriteFile(const std::string &file_name, const Buffer &stm)
     {
         OutPacketStreamFile out;
         if(OpenFile(file_name, out) != OpenFileResult::OK)
-            return PacketResult::IOErrorOutput;
+            return EpadResult::IOErrorOutput;
 
         if(!out.Write(stm.data(), stm.size()))
-            return PacketResult::IOErrorOutput;
+            return EpadResult::IOErrorOutput;
 
-        return PacketResult::Success;
+        return EpadResult::Success;
     }
 
     // Factory method that opens file_in. If file_in is a pipe or it is not seekable for another reason,
@@ -543,13 +544,13 @@ namespace
         return in_stm;
     }
 
-    std::pair<PacketResult, FileNestingMode> IdentifyFileNestingMode(RandomInStream &in, const EncryptParams &encrypt_params,
+    std::pair<EpadResult, FileNestingMode> IdentifyFileNestingMode(RandomInStream &in, const EncryptParams &encrypt_params,
             const PacketMetadata &metadata)
     {
         const int kInvalid = -1;
 
-        std::pair<PacketResult, FileNestingMode> pair;
-        pair.first = PacketResult::None;
+        std::pair<EpadResult, FileNestingMode> pair;
+        pair.first = EpadResult::None;
         pair.second = FileNestingMode::Unknown;
 
         int b = in.Get();
@@ -557,7 +558,7 @@ namespace
         // Check if the file is empty
         if(b == kInvalid)
         {
-            pair.first = PacketResult::UnexpectedFormat;
+            pair.first = EpadResult::UnexpectedFormat;
             return pair;
         }
 
@@ -566,7 +567,7 @@ namespace
         // 0xEF is BOM or a new format 47 packet that is not known to us. Let's assume it is BOM.
         if(b & 0x80 && b != 0xEF)
         {
-            pair.first = PacketResult::Success;
+            pair.first = EpadResult::Success;
             pair.second = (metadata.key_only) ?
                 // It is a file with GPG extension that doesn't support WAD format
                 FileNestingMode::SimpleGPGWithKey
@@ -576,20 +577,20 @@ namespace
         }
         else // wad starts from I or P, in which the most significant bit is not set
         {
-            pair.first = PacketResult::Success;
+            pair.first = EpadResult::Success;
             pair.second = FileNestingMode::WadWithGPG;
             return pair;
         }
     }
 
-    using SessionResult = std::pair<PacketResult, std::unique_ptr<DecryptionSession> >;
+    using SessionResult = std::pair<EpadResult, std::unique_ptr<DecryptionSession> >;
     SessionResult CreateKeyFileDecryptionSession(const EncryptParams &encrypt_params,
             PacketMetadata &metadata)
     {
         SessionResult result;
         if(metadata.key_file.empty())
         {
-            result.first = PacketResult::KeyFileNotSpecified;
+            result.first = EpadResult::KeyFileNotSpecified;
             return result;
         }
 
@@ -600,27 +601,27 @@ namespace
                 encrypt_params.libcurl_parameters ? *encrypt_params.libcurl_parameters : empty_str,
                 result.second->own_passphrase);
 
-        if(result.first != PacketResult::Success)
+        if(result.first != EpadResult::Success)
             return result;
 
         if(!DecryptKeyFileContent(result.second->own_passphrase,
                     encrypt_params.key_file_encrypt_params, result.second->own_passphrase))
         {
-            result.first = PacketResult::InvalidKeyFilePassphrase;
+            result.first = EpadResult::InvalidKeyFilePassphrase;
             return result;
         }
 
-        result.first = PacketResult::Success;
+        result.first = EpadResult::Success;
         return result;
     }
 
-    PacketResult DecryptPacketFileToStream(const std::string &file_in, const EncryptParams &encrypt_params,
+    EpadResult DecryptPacketFileToStream(const std::string &file_in, const EncryptParams &encrypt_params,
             OutStream &out, PacketMetadata &metadata)
     {
         InPacketStreamFile in_stm_file;
         OpenFileResult result = OpenFile(file_in, in_stm_file);
         if(result != OpenFileResult::OK)
-            return PacketResult::IOErrorInput;
+            return EpadResult::IOErrorInput;
 
         return DecryptStream(in_stm_file, encrypt_params, out, metadata);
     }
@@ -780,7 +781,7 @@ namespace
     // }
 
 #if 0
-    PacketResult DecryptPacketFileToStream(const std::string &file_in, const EncryptParams &encrypt_params,
+    EpadResult DecryptPacketFileToStream(const std::string &file_in, const EncryptParams &encrypt_params,
             OutStream &out_stm, PacketMetadata &metadata)
     {
         const int kInvalid = -1;
@@ -788,26 +789,26 @@ namespace
         std::vector<byte> fall_back_buffer;
         std::unique_ptr<RandomInStream> stm = CreateInStream(file_in, fall_back_buffer);
         if(stm.get() == nullptr)
-            return PacketResult::IOErrorInput;
+            return EpadResult::IOErrorInput;
 
         int b = stm->Get();
 
         // Check if the file is empty
         if(b == kInvalid)
-            return PacketResult::UnexpectedFormat;
+            return EpadResult::UnexpectedFormat;
 
         stm->Seek(0);
         // gpg should have this bit set
         // 0xEF is BOM or a new format 47 packet that is not known to us. Let's assume it is BOM.
         if(b & 0x80 && b != 0xEF)
         {
-            PacketResult result = PacketResult::None;
+            EpadResult result = EpadResult::None;
             if(metadata.key_only)
             {
                 // It is a file with GPG extension that doesn't support WAD format
                 result = DecryptWithKey(*stm, encrypt_params, out_stm, metadata);
-                if(result == PacketResult::InvalidSurrogateIV)
-                    result = PacketResult::InvalidKeyFile;
+                if(result == EpadResult::InvalidSurrogateIV)
+                    result = EpadResult::InvalidKeyFile;
             }
             else
             {
@@ -819,10 +820,10 @@ namespace
         {
             auto result = DecryptWad(*stm, metadata.key_file, encrypt_params, out_stm, metadata);
 
-            if(result == PacketResult::InvalidWadFile)
-                return PacketResult::UnexpectedFormat;
-            if(result == PacketResult::InvalidSurrogateIV)
-                return PacketResult::InvalidKeyFile;
+            if(result == EpadResult::InvalidWadFile)
+                return EpadResult::UnexpectedFormat;
+            if(result == EpadResult::InvalidSurrogateIV)
+                return EpadResult::InvalidKeyFile;
 
             metadata.key_only = true;
             return result;
@@ -834,97 +835,97 @@ namespace
 
 namespace EncryptPad
 {
-    PacketResult EncryptBuffer(const Botan::SecureVector<byte> &input_buffer, EncryptParams &encrypt_params,
+    EpadResult EncryptBuffer(const Botan::SecureVector<byte> &input_buffer, EncryptParams &encrypt_params,
              Botan::SecureVector<byte> &output_buffer, PacketMetadata &metadata)
     {
         InPacketStreamMemory in(input_buffer.data(), input_buffer.data() + input_buffer.size());
         output_buffer.clear();
         auto out = MakeOutStream(output_buffer);
         auto result = EncryptStream(in, encrypt_params, *out, metadata);
-        if(result != PacketResult::Success)
+        if(result != EpadResult::Success)
             return result;
         output_buffer.resize(out->GetCount());
         return result;
     }
 
-    PacketResult DecryptBuffer(const Botan::SecureVector<byte> &input_buffer, const EncryptParams &encrypt_params,
+    EpadResult DecryptBuffer(const Botan::SecureVector<byte> &input_buffer, const EncryptParams &encrypt_params,
              Botan::SecureVector<byte> &output_buffer, PacketMetadata &metadata)
     {
         InPacketStreamMemory in(input_buffer.data(), input_buffer.data() + input_buffer.size());
         output_buffer.clear();
         auto out = MakeOutStream(output_buffer);
         auto result = DecryptStream(in, encrypt_params, *out, metadata);
-        if(result != PacketResult::Success)
+        if(result != EpadResult::Success)
             return result;
         output_buffer.resize(out->GetCount());
         return result;
     }
 
-    PacketResult EncryptPacketFile(const Buffer &input_buffer, const std::string &file_out, 
+    EpadResult EncryptPacketFile(const Buffer &input_buffer, const std::string &file_out, 
             EncryptParams &encrypt_params, PacketMetadata &metadata)
     {
-        PacketResult result = PacketResult::None;
+        EpadResult result = EpadResult::None;
 
         {
             InPacketStreamMemory stm_in(input_buffer.data(), input_buffer.data() + input_buffer.size());
 
             OutPacketStreamFile out;
             if(OpenFile(file_out, out) != OpenFileResult::OK)
-                return PacketResult::IOErrorOutput;
+                return EpadResult::IOErrorOutput;
 
             result = EncryptStream(stm_in, encrypt_params, out, metadata); 
         }
 
-        if(result != PacketResult::Success)
+        if(result != EpadResult::Success)
         {
             RemoveFile(file_out);
         }
         return result;
     }
 
-    PacketResult EncryptPacketFile(const std::string &file_in, const std::string &file_out, 
+    EpadResult EncryptPacketFile(const std::string &file_in, const std::string &file_out, 
             EncryptParams &encrypt_params, PacketMetadata &metadata)
     {
         std::vector<byte> fall_back_buffer;
         std::unique_ptr<RandomInStream> in = CreateInStream(file_in, fall_back_buffer);
         if(in.get() == nullptr)
-            return PacketResult::IOErrorInput;
+            return EpadResult::IOErrorInput;
 
         OutPacketStreamFile out;
         if(OpenFile(file_out, out) != OpenFileResult::OK)
         {
-            return PacketResult::IOErrorOutput;
+            return EpadResult::IOErrorOutput;
         }
 
-        PacketResult result = EncryptStream(*in, encrypt_params, out, metadata);
+        EpadResult result = EncryptStream(*in, encrypt_params, out, metadata);
 
-        if(result != PacketResult::Success && file_out != "-")
+        if(result != EpadResult::Success && file_out != "-")
         {
             RemoveFile(file_out);
         }
         return result;
     }
 
-    PacketResult DecryptPacketFile(const std::string &file_in, const EncryptParams &encrypt_params, 
+    EpadResult DecryptPacketFile(const std::string &file_in, const EncryptParams &encrypt_params, 
             Buffer &output_buffer, PacketMetadata &metadata)
     {
         auto out_stm = MakeOutStream(output_buffer);
-        PacketResult result = DecryptPacketFile(file_in, encrypt_params, output_buffer, metadata);
+        EpadResult result = DecryptPacketFile(file_in, encrypt_params, output_buffer, metadata);
         output_buffer.resize(out_stm->GetCount());
         return result;
     }
 
-    PacketResult DecryptPacketFile(const std::string &file_in, const std::string &file_out,
+    EpadResult DecryptPacketFile(const std::string &file_in, const std::string &file_out,
             const EncryptParams &encrypt_params, PacketMetadata &metadata)
     {
         OutPacketStreamFile out;
         if(OpenFile(file_out, out) != OpenFileResult::OK)
         {
-            return PacketResult::IOErrorOutput;
+            return EpadResult::IOErrorOutput;
         }
 
         auto result = DecryptPacketFileToStream(file_in, encrypt_params, out, metadata);
-        if(result != PacketResult::Success)
+        if(result != EpadResult::Success)
             return result;
 
         return result;
@@ -953,7 +954,7 @@ namespace EncryptPad
 
         auto result = ExtractKeyFromWad(stm, key_file);
 
-        if(result != PacketResult::Success)
+        if(result != EpadResult::Success)
             return false;
 
         wad_file = true;
@@ -968,7 +969,7 @@ namespace EncryptPad
             return true;
 
         auto result = LoadKeyFromFile(key_file, empty, empty, key_content);
-        if(result != PacketResult::Success || IsKeyFileEncrypted(key_content))
+        if(result != EpadResult::Success || IsKeyFileEncrypted(key_content))
             return true;
 
         return false;

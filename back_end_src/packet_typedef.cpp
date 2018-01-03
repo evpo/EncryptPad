@@ -24,55 +24,55 @@ using namespace LibEncryptMsg;
 
 namespace EncryptPad
 {
-    std::string InterpretResult(LibEncryptMsg::PacketResult result)
+    std::string InterpretResult(EpadResult result)
     {
         switch(result)
         {
-            case PacketResult::UnexpectedError:
+            case EpadResult::UnexpectedError:
                 return "Unexpected error";
-            case PacketResult::InvalidSurrogateIV:
+            case EpadResult::InvalidSurrogateIV:
                 return "Incorrect passphrase";
-            case PacketResult::Empty:
+            case EpadResult::Empty:
                 return "Composite packet is empty";
-            case PacketResult::UnexpectedFormat:
+            case EpadResult::UnexpectedFormat:
                 return "Unexpected format";
-            case PacketResult::UnsupportedPacketType:
+            case EpadResult::UnsupportedPacketType:
                 return "Packet type is not supported";
-            case PacketResult::UnsupportedAlgo:
+            case EpadResult::UnsupportedAlgo:
                 return "Encryption algorithm is not supported";
-            case PacketResult::UnsupportedS2K:
+            case EpadResult::UnsupportedS2K:
                 return "S2K algorithm is not supported";
-            case PacketResult::UnsupportedCompressionAlgo:
+            case EpadResult::UnsupportedCompressionAlgo:
                 return "Unsupported compression algorithm";
-            case PacketResult::IOError:
+            case EpadResult::IOError:
                 return "Input / Output error";
-            case PacketResult::IOErrorInput:
+            case EpadResult::IOErrorInput:
                 return "Input error";
-            case PacketResult::IOErrorOutput:
+            case EpadResult::IOErrorOutput:
                 return "Output error";
-            case PacketResult::MDCError:
+            case EpadResult::MDCError:
                 return "File integrity check failed"; 
-            case PacketResult::CompressionError:
+            case EpadResult::CompressionError:
                 return "Compression / decompression error";
-            case PacketResult::KeyFileNotSpecified:
+            case EpadResult::KeyFileNotSpecified:
                 return "Key file is required. Use -k option.";
-            case PacketResult::IOErrorKeyFile:
+            case EpadResult::IOErrorKeyFile:
                 return "Cannot read key file";
-            case PacketResult::InvalidKeyFile:
+            case EpadResult::InvalidKeyFile:
                 return "Invalid key file";
-            case PacketResult::CurlIsNotFound:
+            case EpadResult::CurlIsNotFound:
                 return "Cannot get key file: CURL executable is not found";
-            case PacketResult::CurlExitNonZero:
+            case EpadResult::CurlExitNonZero:
                 return "Cannot get key file: CURL returned non-zero exit code";
-            case PacketResult::InvalidWadFile:
+            case EpadResult::InvalidWadFile:
                 return "Unexpected format: invalid wad file";
-            case PacketResult::InvalidOrIncompleteWadFile:
+            case EpadResult::InvalidOrIncompleteWadFile:
                 return "Unexpected format: invalid or incomplete wad file";
-            case PacketResult::InvalidPassphrase:
+            case EpadResult::InvalidPassphrase:
                 return "Key service does not containt a suitable key";
-            case PacketResult::KeyIsRequiredForSaving:
+            case EpadResult::KeyIsRequiredForSaving:
                 return "Key file is required. Use -k option.";
-            case PacketResult::InvalidKeyFilePassphrase:
+            case EpadResult::InvalidKeyFilePassphrase:
                 return "Key file passphrase is invalid";
             default:
                 assert(false);

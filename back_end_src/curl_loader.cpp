@@ -43,7 +43,7 @@ namespace {
 
 namespace EncryptPad
 {
-    PacketResult LoadKeyFromFileThroughCurl(const std::string& file_name, const std::string &libcurl_path,
+    EpadResult LoadKeyFromFileThroughCurl(const std::string& file_name, const std::string &libcurl_path,
             const std::string &libcurl_params, std::string &key)
     {
         arg_vector arg_v(libcurl_path + " " + libcurl_params + " " + file_name);
@@ -55,19 +55,19 @@ namespace EncryptPad
             {
                 case 2:
                 case 3:
-                    return PacketResult::CurlIsNotFound;
+                    return EpadResult::CurlIsNotFound;
                 default:
-                    return PacketResult::IOErrorKeyFile;
+                    return EpadResult::IOErrorKeyFile;
             }
         }
 
         if(sub_proc.get_output().length() == 0)
-            return PacketResult::IOErrorKeyFile;
+            return EpadResult::IOErrorKeyFile;
         if(sub_proc.exit_status() != 0)
-            return PacketResult::CurlExitNonZero;
+            return EpadResult::CurlExitNonZero;
 
         key = sub_proc.get_output();
         // key = Botan::OctetString(Botan::base64_decode(sub_proc.get_output()));
-        return PacketResult::Success;
+        return EpadResult::Success;
     }
 }
