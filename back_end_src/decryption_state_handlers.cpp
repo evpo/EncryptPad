@@ -215,6 +215,7 @@ namespace EncryptPad
         {
             c.SetResult(ToEpadResult(e.result));
             c.SetFailed(true);
+            return;
         }
         c.SetFilterCount(c.GetFilterCount() + 1);
         c.SetResult(EpadResult::Success);
