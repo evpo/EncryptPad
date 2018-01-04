@@ -319,12 +319,12 @@ void MainWindow::AsyncOperationCompleted()
     {
         // need to destroy the string quickly
         {
-            setWindowsEol(inferWindowsEol(load_state_machine_.get_file_data().begin(),
-                            load_state_machine_.get_file_data().end()));
+            auto &data = load_state_machine_.get_file_data();
+            setWindowsEol(inferWindowsEol(data.data(), data.data() + data.size()));
 
             QString str = QString::fromUtf8(
-                        reinterpret_cast<const char *>(load_state_machine_.get_file_data().begin()),
-                        load_state_machine_.get_file_data().size());
+                        reinterpret_cast<const char *>(data.data()),
+                        data.size());
 
             // clear the unencrypted data in the buffer
             load_state_machine_.ClearBuffer();
@@ -371,6 +371,7 @@ void MainWindow::UpdateStatus(const QString &text)
 bool MainWindow::newFile()
 {
     using namespace EncryptPad;
+    using namespace LibEncryptMsg;
     if (maybeSave()) {
         textEdit->clear();
         setCurrentFile("");
@@ -1281,7 +1282,10 @@ void MainWindow::startSave(const QString &fileName, std::string &kf_passphrase)
             ConvertToWindowsEOL(str, byteArr);
         }
 
-        Botan::SecureVector<byte> secureVect(reinterpret_cast<const byte*>(byteArr.constData()), byteArr.size());
+        Botan::SecureVector<byte> secureVect;
+        secureVect.resize(byteArr.size());
+        std::copy_n(reinterpret_cast<const byte*>(byteArr.constData()), byteArr.size(), secureVect.data());
+        // Botan::SecureVector<byte> secureVect(reinterpret_cast<const byte*>(byteArr.constData()), byteArr.size());
         if(takeBakFile)
         {
             if(!TakeBakFile(fileName))

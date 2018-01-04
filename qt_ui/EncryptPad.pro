@@ -43,23 +43,32 @@ win32: LIBS += -luserenv
 #unix: LIBS += ldl
 LIBS += -L$$PWD/../deps/stlplus/portability/$$DEPS_SUBDIR \
      -L$$PWD/../back_end_src/$$DEPS_SUBDIR \
-     -lback_end_src -lportability
+     -lback_end_src -lportability \
+     -L$$PWD/../deps/libencryptmsg/src/$$DEPS_SUBDIR \
+     -L$$PWD/../deps/libencryptmsg/state_machine/$$DEPS_SUBDIR \
+     -L$$PWD/../deps/libencryptmsg/state_machine_client/$$DEPS_SUBDIR \
+     -L$$PWD/../deps/libencryptmsg/deps/botan_1_openpgp_codec/$$DEPS_SUBDIR \
+     -lsrc \
+     -lstate_machine \
+     -lstate_machine_client \
+     -lbotan_1_openpgp_codec
 
 !USE_SYSTEM_LIBS {
     LIBS += -L$$PWD/../deps/botan -lbotan-1.10 $$PWD/../deps/zlib/libz.a
 } else {
-    BOTANLIB = $$system(pkg-config --libs botan-1.10)
+    BOTANLIB = $$system(pkg-config --libs botan-2)
     LIBS += $$BOTANLIB -lz
 }
 
 !USE_SYSTEM_LIBS {
     INCLUDEPATH += $$PWD/../deps/botan/build/include
 } else {
-    BOTANCXX = $$system(pkg-config --cflags botan-1.10)
+    BOTANCXX = $$system(pkg-config --cflags botan-2)
     QMAKE_CXXFLAGS += $$BOTANCXX
 }
 INCLUDEPATH += $$PWD/../deps/stlplus/portability
 INCLUDEPATH += $$PWD/../back_end_src
+INCLUDEPATH += $$PWD/../deps/libencryptmsg/include
 
 SOURCES += \
     application.cpp \

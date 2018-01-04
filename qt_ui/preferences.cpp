@@ -10,7 +10,8 @@ namespace
     const bool kDefaultenableBakFiles = true;
     const bool kDefaultWordWrap = true;
     const int kDefaultS2KResultsPoolSize = 8;
-    const EncryptPad::Compression kDefaultKeyFileCompression = EncryptPad::Compression::Uncompressed;
+    const LibEncryptMsg::Compression kDefaultKeyFileCompression
+        = LibEncryptMsg::Compression::Uncompressed;
 #if defined(__MINGW__) || defined(__MINGW32__)
     const bool kDefaultWindowsEol = true;
 #else
@@ -72,17 +73,17 @@ namespace
                 return QVariant(value);
             }
 
-        QVariant ToVariant(EncryptPad::Compression &value)
+        QVariant ToVariant(LibEncryptMsg::Compression &value)
         {
             return QVariant(static_cast<int>(value));
         }
 
-        QVariant ToVariant(EncryptPad::CipherAlgo &value)
+        QVariant ToVariant(LibEncryptMsg::CipherAlgo &value)
         {
             return QVariant(static_cast<int>(value));
         }
 
-        QVariant ToVariant(EncryptPad::HashAlgo &value)
+        QVariant ToVariant(LibEncryptMsg::HashAlgo &value)
         {
             return QVariant(static_cast<int>(value));
         }
@@ -157,6 +158,7 @@ void SetDefaultPreferences(PersistentPreferences &preferences)
 
 void ReadPreferences(QSettings &settings, PersistentPreferences &preferences)
 {
+    using namespace LibEncryptMsg;
     if(settings.contains("font"))
     {
         QFont font;

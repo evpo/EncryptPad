@@ -405,10 +405,15 @@ namespace EncryptPad
     EpadResult DecryptPacketFile(const std::string &file_in, const EncryptParams &encrypt_params, 
             Buffer &output_buffer, PacketMetadata &metadata)
     {
+        InPacketStreamFile in;
+        OpenFileResult result = OpenFile(file_in, in);
+        if(result != OpenFileResult::OK)
+            return EpadResult::IOErrorInput;
+
         auto out_stm = MakeOutStream(output_buffer);
-        EpadResult result = DecryptPacketFile(file_in, encrypt_params, output_buffer, metadata);
+        EpadResult epad_result = DecryptStream(in, encrypt_params, *out_stm, metadata);
         output_buffer.resize(out_stm->GetCount());
-        return result;
+        return epad_result;
     }
 
     EpadResult DecryptPacketFile(const std::string &file_in, const std::string &file_out,

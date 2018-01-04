@@ -75,7 +75,7 @@ FilePropertiesDialog::~FilePropertiesDialog()
 
 void FilePropertiesDialog::PopulateItems()
 {
-    using namespace EncryptPad;
+    using namespace LibEncryptMsg;
     static Name2Id ciphers[] =
     {
         {"Triple DES", ToInt(CipherAlgo::TripleDES)},
@@ -142,7 +142,7 @@ bool FilePropertiesDialog::GetIsDirty() const
 
 void FilePropertiesDialog::UpdateMetadataFromUi(EncryptPad::PacketMetadata &metadata) const
 {
-    using namespace EncryptPad;
+    using namespace LibEncryptMsg;
     metadata.cipher_algo = static_cast<CipherAlgo>(ui->uiCipherAlgo->currentData().toInt());
     metadata.hash_algo = static_cast<HashAlgo>(ui->uiHashAlgo->currentData().toInt());
     metadata.compression = static_cast<Compression>(ui->uiCompressionAlgo->currentData().toInt());
