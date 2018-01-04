@@ -434,7 +434,9 @@ Result Encryptor::Load(const std::string &fileName, SecureVector<byte> &content,
 
     OctetString octet_key;
     if(!ConvertFromBase64(x2Key, octet_key))
+    {
         return Result::InvalidX2File;
+    }
 
 	Pipe finalPipe;
 	try
