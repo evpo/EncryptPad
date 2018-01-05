@@ -39,6 +39,7 @@ private:
     EncryptPad::KeyService *kf_key_service_;
     std::string passphrase_;
     std::string kf_passphrase_;
+    bool is_cancelled_;
 
 public slots:
     // this method is on the background thread
@@ -46,6 +47,7 @@ public slots:
 signals:
     void UpdateStatus(const QString &text);
     void WorkDone();
+    void Progress(int);
 public:
     FileDlgAsync(EncryptPad::PacketMetadata &metadata);
     bool get_is_encryption() const
@@ -81,6 +83,8 @@ public:
         kf_passphrase_ = kf_passphrase;
     }
 
+    void ProgressCallbackHandler(EncryptPad::ProgressEvent &event);
     void Start();
+    void Cancel();
 };
 

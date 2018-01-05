@@ -72,9 +72,12 @@ public:
     FileRequestService &GetFileRequestService();
 
     void SetDefaultFileParameters(const EncryptPad::PacketMetadata &default_metadata);
-
+    void closeEvent(QCloseEvent *event) override;
+signals:
+    void ToggleWorkInProgress(bool);
 private slots:
     void WorkDone();
+    void Progress(int progress_percent);
 
     void on_uiInputBrowse_clicked();
 
@@ -85,6 +88,7 @@ private slots:
     void on_uiSelectKeyFile_clicked();
 
     void on_uiStart_clicked();
+    void on_uiCancel_clicked();
 
     void on_actionSwitchDirection_triggered();
 
@@ -92,6 +96,8 @@ private slots:
 
     void on_uiInputFile_editingFinished();
     void on_uiEpdRadio_toggled(bool toggled);
+
+    void on_toggleWorkInProgress(bool value);
 
 private:
     Ui::FileEncryptionDialog *ui;
@@ -102,6 +108,7 @@ private:
     EncryptPad::KeyService keyService;
     EncryptPad::KeyService kfKeyService;
     FileRequestService &fileRequestService;
+    bool isWorkInProgress;
 
     bool IsEncryption() const;
     void suggestOutput();

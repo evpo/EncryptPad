@@ -22,14 +22,20 @@ namespace EncryptPad
 
     void ReadIn_OnEnter(LightStateMachine::StateMachineContext &ctx)
     {
-        //TODO: This buffer size if for only testing small buffers
-        const size_t kBufferSize = 16;
         auto &c = ToContext(ctx);
-        size_t size = std::min(kBufferSize, static_cast<size_t>(c.In().GetCount()));
+        size_t size = std::min(c.GetEncryptParams().memory_buffer, static_cast<size_t>(c.In().GetCount()));
         c.Buffer().resize(size);
         size = c.In().Read(c.Buffer().data(), c.Buffer().size());
         c.Buffer().resize(size);
         c.SetFilterCount(0);
+        c.GetEncryptParams().progress_callback(c.GetProgressEvent());
+        if(c.GetProgressEvent().cancel)
+        {
+            c.SetResult(EpadResult::Cancelled);
+            c.SetFailed(true);
+        }
+        c.GetProgressEvent().complete_bytes += size;
+
     }
 
     bool End_CanEnter(LightStateMachine::StateMachineContext &ctx)

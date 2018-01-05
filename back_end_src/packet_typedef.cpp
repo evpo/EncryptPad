@@ -74,6 +74,8 @@ namespace EncryptPad
                 return "Key file is required. Use -k option.";
             case EpadResult::InvalidKeyFilePassphrase:
                 return "Key file passphrase is invalid";
+            case EpadResult::Cancelled:
+                return "Cancelled by the user";
             default:
                 assert(false);
                 return "";

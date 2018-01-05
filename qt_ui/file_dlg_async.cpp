@@ -25,15 +25,41 @@ using namespace EncryptPad;
 FileDlgAsync::FileDlgAsync(PacketMetadata &metadata)
     :thread_(new QThread(this)), metadata_(metadata),
     result_(EpadResult::None), is_encryption_(false),
-    key_service_(nullptr), kf_key_service_(nullptr)
+    key_service_(nullptr), kf_key_service_(nullptr),
+    is_cancelled_(false)
 {
     QObject::connect(thread_, SIGNAL(started()), this, SLOT(DoWork()));
     this->moveToThread(thread_);
 }
 
+void FileDlgAsync::ProgressCallbackHandler(EncryptPad::ProgressEvent &event)
+{
+    if(is_cancelled_)
+    {
+        event.cancel = true;
+        is_cancelled_ = false;
+    }
+
+    if(event.total_bytes > 0)
+    {
+        emit Progress(static_cast<double>(event.complete_bytes) / event.total_bytes * 100);
+    }
+}
+
+void FileDlgAsync::Cancel()
+{
+    is_cancelled_ = true;
+}
+
 void FileDlgAsync::DoWork()
 {
+    is_cancelled_ = false;
+
     EncryptParams enc_params = {};
+    enc_params.progress_callback = [this](EncryptPad::ProgressEvent &event)
+    {
+        this->ProgressCallbackHandler(event);
+    };
 
     enc_params.passphrase = !passphrase_.empty() ? &passphrase_ : nullptr;
 

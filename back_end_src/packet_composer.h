@@ -23,6 +23,7 @@
 #include <algorithm>
 #include <memory>
 #include <vector>
+#include <functional>
 #include "botan.h"
 #include "packet_typedef.h"
 #include "algo_spec.h"
@@ -32,6 +33,30 @@
 
 namespace EncryptPad
 {
+    struct ProgressEvent
+    {
+        stream_length_type total_bytes;
+        stream_length_type complete_bytes;
+        bool cancel;
+        ProgressEvent():
+            total_bytes(0),
+            complete_bytes(0),
+            cancel(false)
+        {
+        }
+
+        ProgressEvent(stream_length_type total_bytes, stream_length_type complete_bytes):
+            total_bytes(total_bytes),
+            complete_bytes(complete_bytes),
+            cancel(false)
+        {
+        }
+    };
+
+    using ProgressCallback = std::function<void(ProgressEvent&)>;
+
+    void DefaultProgressCallback(ProgressEvent &event);
+
     struct EncryptParams;
 
     // Secret parameters for encryption and decryption
@@ -53,6 +78,7 @@ namespace EncryptPad
         const std::string *libcurl_path;
         const std::string *libcurl_parameters;
         size_t memory_buffer;
+        ProgressCallback progress_callback;
 
         EncryptParams():
             passphrase(nullptr),
@@ -60,7 +86,8 @@ namespace EncryptPad
             key_file_encrypt_params(nullptr),
             libcurl_path(nullptr),
             libcurl_parameters(nullptr),
-            memory_buffer(kDefaultMemoryBuffer)
+            memory_buffer(kDefaultMemoryBuffer),
+            progress_callback(ProgressCallback(DefaultProgressCallback))
         {}
     };
 

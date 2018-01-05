@@ -49,11 +49,13 @@ FileEncryptionDialog::FileEncryptionDialog(QWidget *parent, FileRequestService &
     loadHandler(this, loadAdapter, metadata),
     async(metadata),
     keyService(1),
-    fileRequestService(fileRequestService_p)
+    fileRequestService(fileRequestService_p),
+    isWorkInProgress(false)
 {
     ui->setupUi(this);
 
     QObject::connect(&async, SIGNAL(WorkDone()), this, SLOT(WorkDone()));
+    QObject::connect(&async, SIGNAL(Progress(int)), this, SLOT(Progress(int)));
 
     using namespace EncryptPad;
     metadata = {};
@@ -148,7 +150,8 @@ void FileEncryptionDialog::StartEncryption(const QString &fileName, std::string 
 
     bool encryption = true;
     async.Set(encryption, ui->uiInputFile->text(), fileName, &keyService, std::string(), &kfKeyService, kf_passphrase);
-    this->setEnabled(false);
+    //this->setEnabled(false);
+    emit ToggleWorkInProgress(true);
     async.Start();
 }
 
@@ -165,7 +168,8 @@ void FileEncryptionDialog::StartDecryption(const QString &fileName, const QStrin
 
     bool encryption = true;
     async.Set(!encryption, fileName, ui->uiOutputFile->text(), &keyService, passphrase, &kfKeyService, kf_passphrase);
-    this->setEnabled(false);
+    emit ToggleWorkInProgress(true);
+    //this->setEnabled(false);
     async.Start();
 }
 
@@ -269,6 +273,11 @@ void FileEncryptionDialog::on_uiSelectKeyFile_clicked()
     loadHandler.OpenSetEncryptionKeyDialogue();
 }
 
+void FileEncryptionDialog::on_uiCancel_clicked()
+{
+    async.Cancel();
+}
+
 void FileEncryptionDialog::on_uiStart_clicked()
 {
     QString inputFile = ui->uiInputFile->text();
@@ -339,7 +348,8 @@ void FileEncryptionDialog::WorkDone()
 {
     using namespace EncryptPad;
 
-    this->setEnabled(true);
+    emit ToggleWorkInProgress(false);
+//    this->setEnabled(true);
 
 
     bool success = false;
@@ -403,6 +413,14 @@ void FileEncryptionDialog::WorkDone()
             }
             break;
 
+        case EpadResult::Cancelled:
+            QMessageBox::warning(
+                    this,
+                    "EncryptPad",
+                    tr("The job has been cancelled"));
+            rejected = true;
+            break;
+
         default:
             rejected = true;
             break;
@@ -430,6 +448,11 @@ void FileEncryptionDialog::WorkDone()
     }
 }
 
+void FileEncryptionDialog::Progress(int progress_percent)
+{
+    ui->uiProgressBar->setValue(progress_percent);
+}
+
 void FileEncryptionDialog::on_actionSwitchDirection_triggered()
 {
     ui->uiPassphrase->clear();
@@ -449,4 +472,16 @@ void FileEncryptionDialog::on_actionIOChange_triggered()
 void FileEncryptionDialog::on_uiInputFile_editingFinished()
 {
     suggestOutput();
+}
+
+void FileEncryptionDialog::closeEvent(QCloseEvent *event)
+{
+    if(isWorkInProgress)
+        event->ignore();
+}
+
+void FileEncryptionDialog::on_toggleWorkInProgress(bool value)
+{
+    isWorkInProgress = value;
+    ui->uiProgressBar->setValue(0);
 }

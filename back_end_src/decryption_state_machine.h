@@ -74,6 +74,7 @@ namespace EncryptPad
             LibEncryptMsg::SafeVector pending_buffer_;
             std::unique_ptr<DecryptionSession> passphrase_session_;
             std::unique_ptr<DecryptionSession> key_file_session_;
+            ProgressEvent progress_event_;
         public:
             DecryptionContext(InStream &in, OutStream &out,
                     const EncryptParams &encrypt_params, PacketMetadata &metadata):
@@ -85,7 +86,8 @@ namespace EncryptPad
                 in_(in),
                 out_(out),
                 encrypt_params_(encrypt_params),
-                metadata_(metadata)
+                metadata_(metadata),
+                progress_event_(in_.GetCount(), 0)
             {
             }
 
@@ -167,6 +169,11 @@ namespace EncryptPad
             std::unique_ptr<DecryptionSession> &KeyFileSession()
             {
                 return key_file_session_;
+            }
+
+            ProgressEvent &GetProgressEvent()
+            {
+                return progress_event_;
             }
     };
 

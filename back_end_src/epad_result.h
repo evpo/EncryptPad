@@ -34,6 +34,7 @@ namespace EncryptPad
         InvalidOrIncompleteWadFile,
         KeyIsRequiredForSaving,
         InvalidKeyFilePassphrase,
+        Cancelled,
     };
 
     inline EpadResult ToEpadResult(LibEncryptMsg::EmsgResult emsg_result)

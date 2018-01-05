@@ -213,6 +213,11 @@ namespace
         uint32_t wad_payload_size = 0;
         std::string wad_version = "1";
 
+        // Progress counters
+        ProgressEvent progress_event;
+        progress_event.total_bytes = in.GetCount();
+        progress_event.complete_bytes = 0;
+
         SafeVector buf;
         // Use do while to process empty files
         do
@@ -222,7 +227,13 @@ namespace
             buf.resize(length);
             MessageWriter *writer = nullptr;
             EpadResult result = EpadResult::None;
-
+            progress_event.complete_bytes += length;
+            encrypt_params.progress_callback(progress_event);
+            if(progress_event.cancel)
+            {
+                result = EpadResult::Cancelled;
+                return result;
+            }
 
             switch(mode)
             {
