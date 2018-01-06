@@ -21,7 +21,7 @@ namespace EncryptPad
                     uint8_t iterations,
                     LibEncryptMsg::Salt salt,
                     std::string description,
-                    bool &canceled) override;
+                    bool &cancelled) override;
     };
 }
 

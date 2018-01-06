@@ -39,7 +39,7 @@ private:
     EncryptPad::PacketMetadata *metadata_;
     EncryptPadEncryptor::Encryptor &encryptor_;
     Botan::SecureVector<byte> file_data_;
-    EncryptPadEncryptor::Result load_result_;
+    EncryptPad::EpadResult load_result_;
 public slots:
     // this method is on the background thread
     void Load();
@@ -52,7 +52,7 @@ public:
         return file_name_;
     }
 
-    EncryptPadEncryptor::Result get_load_result() const
+    EncryptPad::EpadResult get_load_result() const
     {
         return load_result_;
     }

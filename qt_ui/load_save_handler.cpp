@@ -44,7 +44,6 @@ namespace EncryptPad
         bool is_wad_file = false;
         std::string key_file;
         bool isGpg = IsGpgFormat(fileName);
-        bool isCpad = IsCryptPadFormat(fileName);
 
         if(!QFile::exists(fileName))
         {
@@ -57,7 +56,7 @@ namespace EncryptPad
         }
 
         // Only check if it's an encrypt pad format
-        if(!isCpad && !isGpg)
+        if(!isGpg)
         {
             can_be_passphrase_protected = EncryptPad::CheckIfPassphraseProtected(
                         fileName.toStdString(), is_wad_file, key_file);
@@ -68,7 +67,7 @@ namespace EncryptPad
         bool isPwd = !client.IsPassphraseNotSet();
         bool isKey = !client.EncryptionKeyFile().isEmpty();
 
-        if(!isCpad && !can_be_passphrase_protected && !is_wad_file && (isPwd || isKey))
+        if(!can_be_passphrase_protected && !is_wad_file && (isPwd || isKey))
         {
             // this is an unencrypted file or a corrupted encrypted file. Reset encryption parameters.
             client.SetIsPlainText();
@@ -154,7 +153,7 @@ namespace EncryptPad
     {
         bool passphraseSet = !client.IsPassphraseNotSet();
         bool isGpg = IsGpgFormat(fileName);
-        bool isEncryptedFormat = IsCryptPadFormat(fileName) || IsEncryptPadFormat(fileName) || isGpg;
+        bool isEncryptedFormat = IsEncryptPadFormat(fileName) || isGpg;
 
         if(isGpg)
         {

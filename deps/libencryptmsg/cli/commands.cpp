@@ -41,10 +41,10 @@ namespace
             {
             }
 
-            std::unique_ptr<SafeVector> GetPassphrase(std::string description, bool &canceled) override
+            std::unique_ptr<SafeVector> GetPassphrase(std::string description, bool &cancelled) override
             {
                 (void)description;
-                canceled = false;
+                cancelled = false;
                 return std::unique_ptr<SafeVector>(new SafeVector(ReadFile(pwd_file_)));
             }
     };

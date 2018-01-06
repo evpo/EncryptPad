@@ -35,6 +35,7 @@ namespace EncryptPad
         KeyIsRequiredForSaving,
         InvalidKeyFilePassphrase,
         Cancelled,
+        BakFileMoveFailed,
     };
 
     inline EpadResult ToEpadResult(LibEncryptMsg::EmsgResult emsg_result)

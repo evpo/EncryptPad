@@ -20,47 +20,23 @@
 #pragma once
 
 #include <string>
-#include "botan/botan.h"
+#include "botan/secmem.h"
 #include "key_service.h"
 #include "packet_composer.h"
+#include "epad_result.h"
 
 namespace EncryptPadEncryptor
 {
 
 	class EncryptedPlainSwitchFunctor;
 
-    enum Result
-	{
-		OK = 0,
-		EncryptionError,
-		X2KeyIOError,
-		InvalidX2File,
-		X2FileIsRequired,
-        CpadFileIOError,
-        InvalidCpadFile,
-        X2CurlIsNotFound,
-        X2CurlExitNonZero,
-        InvalidKeyFilePassphrase,
-        BakFileMoveFailed,
-        None,
-	};
-
 	class Encryptor
 	{
 	private:
-		static const char* sSalt;
-		static const char* sIV4X2;
-		static const int sKeySize = 256;
-		static const int sBlockSize = 128;
-		static const int sBufferSizeForReading = 256;
-		static const int sIterationCount = 1000;
-
         EncryptedPlainSwitchFunctor *mEncryptedPlainSwitchFunctor;
         EncryptPad::KeyService key_service_;
         EncryptPad::KeyService kf_key_service_;
         bool mPlainText;
-        Botan::OctetString mKey;
-        Botan::OctetString mIV;
         std::string mX2KeyLocation;
         std::string mLibcurlPath;
         std::string mLibcurlParams;
@@ -89,18 +65,16 @@ namespace EncryptPadEncryptor
         void ClearKFPassphrase();
         bool HasKFPassphrase() const;
         void SetLibcurlPath(const std::string &path);
-        const std::string &GetLibcurlPath() const;
         void SetLibcurlParams(const std::string &params);
-        const std::string &GetLibcurlParams() const;
 
 		// Saves content to fileName
 		// persists the x2 key location in fileName if persistX2KeyLocation
-		Result Save(const std::string &fileName, const Botan::SecureVector<Botan::byte> &content, 
+        EncryptPad::EpadResult Save(const std::string &fileName, const Botan::SecureVector<Botan::byte> &content, 
                 const std::string &x2KeyLocation = "", bool persistX2KeyLocation = false, 
                 EncryptPad::PacketMetadata *metadata = nullptr, const std::string *kf_passphrase = nullptr
                 );
 
-		Result Load(const std::string &fileName, Botan::SecureVector<Botan::byte> &content, 
+        EncryptPad::EpadResult Load(const std::string &fileName, Botan::SecureVector<Botan::byte> &content, 
                 const std::string &x2KeyLocation = "", const std::string *passphrase = nullptr, 
                 EncryptPad::PacketMetadata *metadata = nullptr, const std::string *kf_passphrase = nullptr
                 );

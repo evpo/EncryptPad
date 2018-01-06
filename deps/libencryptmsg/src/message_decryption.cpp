@@ -30,7 +30,7 @@ namespace
             KeyFromPassphraseProvider(PassphraseProvider &passphrase_provider);
 
             std::unique_ptr<EncryptionKey> GetKey(CipherAlgo cipher_algo, HashAlgo hash_algo, uint8_t iterations, Salt salt,
-                    std::string description, bool &canceled) override;
+                    std::string description, bool &cancelled) override;
     };
 
     class KnownKeyProvider : public SymmetricKeyProvider
@@ -41,7 +41,7 @@ namespace
             KnownKeyProvider(std::unique_ptr<EncryptionKey> key);
 
             std::unique_ptr<EncryptionKey> GetKey(CipherAlgo cipher_algo, HashAlgo hash_algo, uint8_t iterations, Salt salt,
-                    std::string description, bool &canceled) override;
+                    std::string description, bool &cancelled) override;
     };
 
     class PassThroughKeyProvider : public SymmetricKeyProvider
@@ -54,9 +54,9 @@ namespace
             }
 
             std::unique_ptr<EncryptionKey> GetKey(CipherAlgo cipher_algo, HashAlgo hash_algo, uint8_t iterations, Salt salt,
-                    std::string description, bool &canceled) override
+                    std::string description, bool &cancelled) override
             {
-                return provider_.GetKey(cipher_algo, hash_algo, iterations, salt, description, canceled);
+                return provider_.GetKey(cipher_algo, hash_algo, iterations, salt, description, cancelled);
             }
     };
 
@@ -70,9 +70,9 @@ namespace
             {
             }
 
-            std::unique_ptr<SafeVector> GetPassphrase(std::string description, bool &canceled) override
+            std::unique_ptr<SafeVector> GetPassphrase(std::string description, bool &cancelled) override
             {
-                return passphrase_provider_.GetPassphrase(description, canceled);
+                return passphrase_provider_.GetPassphrase(description, cancelled);
             }
     };
 
@@ -82,7 +82,7 @@ namespace
             std::unique_ptr<SafeVector> passphrase_data_;
         public:
             KnownPassphraseProvider(std::unique_ptr<SafeVector> passphrase_data);
-            std::unique_ptr<SafeVector> GetPassphrase(std::string description, bool &canceled) override;
+            std::unique_ptr<SafeVector> GetPassphrase(std::string description, bool &cancelled) override;
     };
 }
 
@@ -391,15 +391,15 @@ namespace
     }
 
     std::unique_ptr<EncryptionKey> KeyFromPassphraseProvider::GetKey(CipherAlgo cipher_algo, HashAlgo hash_algo,
-            uint8_t iterations, Salt salt, std::string description, bool &canceled)
+            uint8_t iterations, Salt salt, std::string description, bool &cancelled)
     {
-        auto data_uptr = passphrase_provider_.GetPassphrase(description, canceled);
+        auto data_uptr = passphrase_provider_.GetPassphrase(description, cancelled);
         if(!data_uptr)
         {
             return std::unique_ptr<EncryptionKey>();
         }
         Passphrase pwd(*data_uptr);
-        if(canceled)
+        if(cancelled)
             return std::unique_ptr<EncryptionKey>();
 
         return GenerateEncryptionKey(pwd, cipher_algo, hash_algo, iterations, salt);
@@ -410,10 +410,10 @@ namespace
     {
     }
 
-    std::unique_ptr<SafeVector> KnownPassphraseProvider::GetPassphrase(std::string description, bool &canceled)
+    std::unique_ptr<SafeVector> KnownPassphraseProvider::GetPassphrase(std::string description, bool &cancelled)
     {
         (void)description;
-        canceled = false;
+        cancelled = false;
         std::unique_ptr<SafeVector> ret_val;
         if(passphrase_data_->size() == 0)
             return ret_val;
@@ -429,14 +429,14 @@ namespace
     }
 
     std::unique_ptr<EncryptionKey> KnownKeyProvider::GetKey(CipherAlgo cipher_algo, HashAlgo hash_algo, uint8_t iterations, Salt salt,
-            std::string description, bool &canceled)
+            std::string description, bool &cancelled)
     {
         (void)cipher_algo;
         (void)hash_algo;
         (void)iterations;
         (void)salt;
         (void)description;
-        canceled = false;
+        cancelled = false;
         return std::unique_ptr<EncryptionKey>(new EncryptionKey(*key_));
     }
 }

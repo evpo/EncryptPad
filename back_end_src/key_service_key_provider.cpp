@@ -16,8 +16,11 @@ namespace EncryptPad
             uint8_t iterations,
             LibEncryptMsg::Salt salt,
             std::string description,
-            bool &canceled)
+            bool &cancelled)
     {
+        (void)description;
+        (void)cancelled;
+
         const KeyRecord *key_record = nullptr;
         AlgoSpec algo_spec = GetAlgoSpec(cipher_algo);
         unsigned key_size = algo_spec.key_size;

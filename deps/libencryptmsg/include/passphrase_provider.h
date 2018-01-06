@@ -11,7 +11,7 @@ namespace LibEncryptMsg
     {
         public:
             virtual ~PassphraseProvider() {}
-            virtual std::unique_ptr<SafeVector> GetPassphrase(std::string description, bool &canceled) = 0;
+            virtual std::unique_ptr<SafeVector> GetPassphrase(std::string description, bool &cancelled) = 0;
     };
 
     class SymmetricKeyProvider
@@ -19,7 +19,7 @@ namespace LibEncryptMsg
         public:
             virtual ~SymmetricKeyProvider() {}
             virtual std::unique_ptr<EncryptionKey> GetKey(CipherAlgo cipher_algo, HashAlgo hash_algo, uint8_t iterations, Salt salt,
-                    std::string description, bool &canceled) = 0;
+                    std::string description, bool &cancelled) = 0;
     };
 
     struct Passphrase

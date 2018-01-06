@@ -33,12 +33,11 @@ namespace
     {
         {".epd", "EncryptPad (*.epd)"},
         {".gpg", "GnuPG (*.gpg)"},
-        {".cpad", "EncryptPad Alpha (*.cpad)"},
         {".txt", QT_TRANSLATE_NOOP("FileExtensions", "Plain Text (*.txt)")},
         {nullptr, nullptr}
     };
 
-    const char *sOpenDialogFilter = QT_TRANSLATE_NOOP("FileExtensions", "Encrypted Files (*.epd *.gpg *.cpad);; Plain Text (*.txt)");
+    const char *sOpenDialogFilter = QT_TRANSLATE_NOOP("FileExtensions", "Encrypted Files (*.epd *.gpg);; Plain Text (*.txt)");
     const char *sKeyDialogFilter = QT_TRANSLATE_NOOP("FileExtensions", "Key (*.key)");
 
 #if defined(__APPLE__) || defined(unix) || defined(__unix__) || defined(__unix)
@@ -105,7 +104,6 @@ namespace
         static Filter2Ext tbl[] =
         {
             {"(*.epd)", ".epd"},
-            {"(*.cpad)", ".cpad"},
             {"(*.gpg)", ".gpg"},
             {"(*.txt)", ".txt"},
             {"(*.key)", ".key"},
@@ -153,11 +151,6 @@ bool IsEncryptPadFormat(const QString &fileName)
 bool IsGpgFormat(const QString &fileName)
 {
     return fileName.endsWith(".gpg", Qt::CaseInsensitive);
-}
-
-bool IsCryptPadFormat(const QString &fileName)
-{
-    return fileName.endsWith(".cpad", Qt::CaseInsensitive);
 }
 
 QString GetFileFilterFromFileName(const QString &fileName)

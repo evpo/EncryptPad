@@ -226,6 +226,7 @@ namespace
 
 void MainWindow::AsyncOperationCompleted()
 {
+    using namespace EncryptPad;
     ExitWaitState();
 
     bool success = false;
@@ -234,18 +235,36 @@ void MainWindow::AsyncOperationCompleted()
 
     switch(load_state_machine_.get_load_result())
     {
-    case EncryptPadEncryptor::Result::OK:
+    case EpadResult::Success:
         success = true;
         break;
-    case EncryptPadEncryptor::Result::CpadFileIOError:
-    case EncryptPadEncryptor::Result::InvalidCpadFile:
+
+    //CpadFileIOError
+    case EpadResult::UnexpectedError:
+    case EpadResult::IOError:
+    case EpadResult::IOErrorOutput:
+    case EpadResult::IOErrorInput:
+
+    //InvalidCpadFile
+    case EpadResult::UnexpectedFormat:
+    case EpadResult::UnsupportedPacketType:
+    case EpadResult::UnsupportedAlgo:
+    case EpadResult::UnsupportedS2K:
+    case EpadResult::UnsupportedCompressionAlgo:
+    case EpadResult::MDCError:
+    case EpadResult::CompressionError:
+    case EpadResult::InvalidWadFile:
         QMessageBox::warning(
                     this,
                     "EncryptPad",
                     tr("Cannot open '%1'").arg(load_state_machine_.get_file_name()));
         rejected = true;
         break;
-    case EncryptPadEncryptor::Result::EncryptionError:
+
+    //EncryptionError:
+    case EpadResult::InvalidSurrogateIV:
+    case EpadResult::InvalidPassphrase:
+    case EpadResult::KeyIsRequiredForSaving:
         if(enc.GetIsPlainText())
         {
             // This is not normal. We decrypted without a passphrase.
@@ -263,42 +282,49 @@ void MainWindow::AsyncOperationCompleted()
         }
 
         break;
-    case EncryptPadEncryptor::Result::InvalidKeyFilePassphrase:
+
+    case EpadResult::InvalidKeyFilePassphrase:
         // There will be another request for the key file passphrase
         enc.ClearKFPassphrase();
         request_kf_passphrase = true;
         break;
-    case EncryptPadEncryptor::Result::X2KeyIOError:
+
+    case EpadResult::IOErrorKeyFile:
         QMessageBox::warning(
                     this,
                     "EncryptPad",
                     tr("Cannot open the encryption key"));
         rejected = true;
         break;
-    case EncryptPadEncryptor::Result::InvalidX2File:
+
+    case EpadResult::InvalidKeyFile:
         QMessageBox::warning(
                     this,
                     "EncryptPad",
                     tr("The encryption key is invalid"));
         rejected = true;
+
         break;
-    case EncryptPadEncryptor::Result::X2CurlIsNotFound:
+    case EpadResult::CurlIsNotFound:
         QMessageBox::warning(
                     this,
                     "EncryptPad",
                     tr("Cannot download the encryption key. CURL tool is not found."));
         rejected = true;
         break;
-    case EncryptPadEncryptor::Result::X2CurlExitNonZero:
+
+    case EpadResult::CurlExitNonZero:
         QMessageBox::warning(
                     this,
                     "EncryptPad",
                     tr("Cannot download the key. CURL returned non zero exit code"));
         rejected = true;
         break;
-    case EncryptPadEncryptor::Result::X2FileIsRequired:
+
+    case EpadResult::KeyFileNotSpecified:
         rejected = !OpenSetEncryptionKeyDialogue();
         break;
+
     default:
         rejected = true;
         break;
@@ -1265,7 +1291,8 @@ void MainWindow::startLoad(const QString &fileName, const QString &encryptionKey
 
 void MainWindow::startSave(const QString &fileName, std::string &kf_passphrase)
 {
-    EncryptPadEncryptor::Result result = EncryptPadEncryptor::OK;
+    using namespace EncryptPad;
+    EpadResult result = EpadResult::Success;
 #ifndef QT_NO_CURSOR
     QApplication::setOverrideCursor(Qt::WaitCursor);
 #endif
@@ -1290,12 +1317,12 @@ void MainWindow::startSave(const QString &fileName, std::string &kf_passphrase)
         {
             if(!TakeBakFile(fileName))
             {
-                result = EncryptPadEncryptor::Result::BakFileMoveFailed;
+                result = EpadResult::BakFileMoveFailed;
             }
             takeBakFile = false;
         }
 
-        if(result != EncryptPadEncryptor::Result::BakFileMoveFailed)
+        if(result != EpadResult::BakFileMoveFailed)
         {
             metadata.file_date = static_cast<EncryptPad::FileDate>(time(NULL));
             result = enc.Save(fileName.toUtf8().constData(), secureVect, 
@@ -1309,31 +1336,51 @@ void MainWindow::startSave(const QString &fileName, std::string &kf_passphrase)
     QString warningMessage;
     switch(result)
     {
-    case EncryptPadEncryptor::Result::OK:
+    case EpadResult::Success:
         break;
-    case EncryptPadEncryptor::Result::CpadFileIOError:
-    case EncryptPadEncryptor::Result::InvalidCpadFile:
+
+    //CpadFileIOError
+    case EpadResult::UnexpectedError:
+    case EpadResult::IOError:
+    case EpadResult::IOErrorOutput:
+    case EpadResult::IOErrorInput:
+
+    //InvalidCpadFile
+    case EpadResult::UnexpectedFormat:
+    case EpadResult::UnsupportedPacketType:
+    case EpadResult::UnsupportedAlgo:
+    case EpadResult::UnsupportedS2K:
+    case EpadResult::UnsupportedCompressionAlgo:
+    case EpadResult::MDCError:
+    case EpadResult::CompressionError:
+    case EpadResult::InvalidWadFile:
         warningMessage = tr("Cannot save '%1'").arg(fileName);
         break;
-    case EncryptPadEncryptor::Result::X2KeyIOError:
+    case EpadResult::IOErrorKeyFile:
         warningMessage = tr("Cannot open the specified encryption key");
         break;
-    case EncryptPadEncryptor::Result::InvalidX2File:
+    case EpadResult::InvalidKeyFile:
         warningMessage = tr("The specified encryption key is invalid");
         break;
-    case EncryptPadEncryptor::Result::X2CurlIsNotFound:
+    case EpadResult::CurlIsNotFound:
         warningMessage = tr("Cannot download the encryption key. CURL tool is not found");
         break;
-    case EncryptPadEncryptor::Result::X2CurlExitNonZero:
+    case EpadResult::CurlExitNonZero:
         warningMessage = tr("Cannot download the encryption key. CURL returned non zero exit code");
         break;
-    case EncryptPadEncryptor::Result::EncryptionError:
+
+    //EncryptionError:
+    case EpadResult::InvalidSurrogateIV:
+    case EpadResult::InvalidPassphrase:
+    case EpadResult::KeyIsRequiredForSaving:
         warningMessage = tr("Unknown encryption error");
         break;
-    case EncryptPadEncryptor::Result::BakFileMoveFailed:
+
+    case EpadResult::BakFileMoveFailed:
         warningMessage = tr("Cannot create bak file");
         break;
-    case EncryptPadEncryptor::Result::InvalidKeyFilePassphrase:
+
+    case EpadResult::InvalidKeyFilePassphrase:
         // Ask for the passphrase again
         enc.ClearKFPassphrase();
         saveFile(fileName);
@@ -1342,7 +1389,7 @@ void MainWindow::startSave(const QString &fileName, std::string &kf_passphrase)
         warningMessage = tr("Unknown error");
     }
 
-    if(result != EncryptPadEncryptor::Result::OK)
+    if(result != EpadResult::Success)
     {
         QMessageBox::warning(
                     this,

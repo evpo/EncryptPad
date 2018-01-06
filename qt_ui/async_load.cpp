@@ -47,7 +47,7 @@ void AsyncLoad::Set(const QString &file_name, const QString &encryption_key_file
 {
     file_name_ = file_name;
     encryption_key_file_ = encryption_key_file;
-    load_result_ = EncryptPadEncryptor::Result::None;
+    load_result_ = EncryptPad::EpadResult::None;
     passphrase_ = passphrase;
     kf_passphrase_ = kf_passphrase;
     metadata_ = &metadata;

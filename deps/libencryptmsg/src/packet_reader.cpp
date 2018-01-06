@@ -157,15 +157,15 @@ namespace LibEncryptMsg
     SymmetricRWBase::SymmetricRWBase(SessionState &state)
                 :PacketRWBase(state, false) // is_final_packet = false
     {
-        bool canceled = false;
+        bool cancelled = false;
         state.encryption_key = state.key_provider->GetKey(
                 state_.message_config.GetCipherAlgo(),
                 state_.message_config.GetHashAlgo(),
                 state_.message_config.GetIterations(),
                 state_.salt,
-                "", canceled);
+                "", cancelled);
 
-        if(canceled || !state.encryption_key)
+        if(cancelled || !state.encryption_key)
         {
             state.emsg_result = EmsgResult::InvalidPassphrase;
             return;
