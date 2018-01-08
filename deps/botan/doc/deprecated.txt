@@ -1,0 +1,36 @@
+The following functionality is currently deprecated, and will likely
+be removed in a future release. If you think you have a good reason to
+be using one of the following, contact the developers to explain your
+use case if you want to make sure your code continues to work.
+
+This is in addition to specific API calls marked with BOTAN_DEPRECATED
+in the source.
+
+- The headers botan.h, init.h, lookup.h
+
+- All or nothing package transform
+
+- The TLS constructors taking `std::function` for callbacks. Instead
+  use the TLS::Callbacks interface.
+
+- Platform support for BeOS and IRIX operating systems
+
+- 3DES and SEED ciphersuites in TLS
+
+- DSA ciphersuites/certs in TLS
+
+- Block ciphers CAST-256, Kasumi, MISTY1, and DESX.
+
+- CBC-MAC, X9.19-MAC
+
+- PBKDF1 key derivation
+
+- GCM support for 64-bit tags
+
+- Old (Google specific) ChaCha20 TLS ciphersuites
+
+- All built in ECC groups < 256 bits
+
+- All built in MODP groups < 2048 bits
+
+- All pre-created DSA groups

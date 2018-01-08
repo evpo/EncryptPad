@@ -2,21 +2,20 @@ macro_name HP_ACC
 
 binary_name aCC
 
-compile_option "-c "
 output_to_option "-o "
 add_include_dir_option -I
 add_lib_dir_option -L
 add_lib_option -l
 
-lib_opt_flags "+O2"
-check_opt_flags "+O2"
-debug_flags -g
-no_debug_flags ""
 lang_flags "-AA -ext +eh -z"
-warning_flags "" # +w
+
+compile_flags "-c"
+debug_info_flags "-g"
+optimization_flags "+O2"
+warning_flags "+w"
 shared_flags "+Z"
 
-makefile_style unix
+makefile_style gmake
 
 <mach_abi_linking>
 hppa1.0 -> "+DAportable"
@@ -24,6 +23,6 @@ hppa1.1 -> "+DA1.1"
 hppa2.0 -> "+DA2.0W"
 </mach_abi_linking>
 
-<so_link_flags>
-default -> "$(CXX) +Z -b -Wl,+h,$(SONAME)" # Documented in cc(1), but not CC(1) (?)
-</so_link_flags>
+<so_link_commands>
+default -> "$(CXX) +Z -b -Wl,+h,$(SONAME_ABI)" # Documented in cc(1), but not CC(1) (?)
+</so_link_commands>

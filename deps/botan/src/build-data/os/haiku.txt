@@ -1,5 +1,6 @@
 os_type unix
 
+building_shared_supported no
 install_root /boot
 header_dir develop/headers
 lib_dir system/lib
@@ -8,6 +9,8 @@ doc_dir system/documentation
 <target_features>
 gettimeofday
 gmtime_r
+threads
+filesystem
 </target_features>
 
 <aliases>

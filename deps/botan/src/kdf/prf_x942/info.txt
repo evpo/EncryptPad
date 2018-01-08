@@ -1,7 +1,0 @@
-define X942_PRF
-
-<requires>
-asn1
-oid_lookup
-sha1
-</requires>

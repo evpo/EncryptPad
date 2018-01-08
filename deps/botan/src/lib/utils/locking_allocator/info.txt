@@ -1,0 +1,11 @@
+<defines>
+LOCKING_ALLOCATOR -> 20131128
+</defines>
+
+<os>
+linux
+freebsd
+openbsd
+netbsd
+windows
+</os>

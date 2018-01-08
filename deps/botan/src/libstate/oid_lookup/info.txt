@@ -1,5 +1,0 @@
-define OID_LOOKUP
-
-<requires>
-asn1
-</requires>

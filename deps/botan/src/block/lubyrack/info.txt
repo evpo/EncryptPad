@@ -1,5 +1,0 @@
-define LUBY_RACKOFF
-
-<requires>
-hash
-</requires>

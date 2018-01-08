@@ -1,5 +1,0 @@
-define RIPEMD_128
-
-<requires>
-mdx_hash
-</requires>

@@ -1,0 +1,7 @@
+<defines>
+CURVE_25519 -> 20170621
+</defines>
+
+<header:public>
+curve25519.h
+</header:public>

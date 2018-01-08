@@ -1,0 +1,32 @@
+<defines>
+SYSTEM_RNG -> 20141202
+</defines>
+
+<os>
+aix
+android
+cygwin
+darwin
+dragonfly
+freebsd
+haiku
+hpux
+hurd
+includeos
+ios
+irix
+linux
+mingw
+netbsd
+openbsd
+qnx
+solaris
+windows
+winphone
+</os>
+
+<libs>
+windows -> advapi32.lib
+winphone -> bcrypt.lib
+mingw -> advapi32
+</libs>

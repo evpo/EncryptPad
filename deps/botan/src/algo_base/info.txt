@@ -1,6 +1,0 @@
-<requires>
-alloc
-filters
-hex
-rng
-</requires>

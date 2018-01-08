@@ -1,19 +1,4 @@
-### Compiler Options
-CXX           = %{cc}
-LIB_OPT       = %{lib_opt}
-CHECK_OPT     = %{check_opt}
-MACH_OPT      = %{mach_opt}
-LANG_FLAGS    = %{lang_flags}
-WARN_FLAGS    = %{warn_flags}
-SO_OBJ_FLAGS  = %{shared_flags}
-LIB_LINK_CMD  = %{so_link}
-LINK_TO       = %{link_to}
-
-### Version Numbers
-VERSION       = %{version}
-
-### Installation Settings
-DESTDIR       = %{prefix}
+%{header_in}
 
 ### Aliases for Common Programs
 AR            = %{ar_command}
@@ -28,63 +13,93 @@ RM            = @del /Q
 RM_R          = $(RM) /S
 RMDIR         = @rmdir
 
-### File Lists
-CHECK         = check
+# Executable targets
+CLI           = %{out_dir}\botan-cli%{program_suffix}
+TEST          = %{out_dir}\botan-test%{program_suffix}
 
-HEADERS       = %{include_files}
+# Library targets
+#
+# LIB_FILENAME is always the .lib file, that is either a static lib or a
+# by-product of the DLL creation used to link the DLL into applications
+LIB_BASENAME  = %{libname}
+LIB_FILENAME  = %{out_dir}\$(LIB_BASENAME).lib
 
-LIBOBJS       = %{lib_objs}
-
-CHECKOBJS     = %{check_objs}
-
-LIB_FLAGS     = $(LIB_OPT) $(MACH_OPT) $(LANG_FLAGS) $(WARN_FLAGS) $(SO_OBJ_FLAGS)
-CHECK_FLAGS   = $(CHECK_OPT) $(LANG_FLAGS) $(WARN_FLAGS)
-
-LIBNAME       = botan
-
-LIBRARIES     = $(BOTAN_LIB)
-
-# This will be either a static lib or the DLL import lib
-BOTAN_LIB     = $(LIBNAME).%{static_suffix}
-
-all: $(LIBRARIES)
-
-### Build Commands
-%{lib_build_cmds}
-
-%{check_build_cmds}
-
-### Link Commands
-$(CHECK): $(LIBRARIES) $(CHECKOBJS)
-	$(CXX) /Fe$@ $(CHECKOBJS) $(BOTAN_LIB) $(LINK_TO)
-
-$(BOTAN_LIB): $(LIBOBJS)
 !If "$(SO_OBJ_FLAGS)" == ""
-	$(AR) /OUT:$(BOTAN_LIB) $(LIBOBJS)
+# static lib
+LIBRARIES     = $(LIB_FILENAME)
 !Else
-	$(LIB_LINK_CMD) /Fe$(LIBNAME) $(LIBOBJS) $(LINK_TO)
+# shared lib
+SO_FILENAME   = %{out_dir}\$(LIB_BASENAME).dll
+LIBRARIES     = $(SO_FILENAME)
 !Endif
 
-### Fake Targets
+
+# File Lists
+LIBOBJS       = %{lib_objs}
+
+CLIOBJS       = %{cli_objs}
+
+TESTOBJS      = %{test_objs}
+
+# First make target. Will be used by default
+all: libs cli tests
+
+# Build Commands
+%{lib_build_cmds}
+
+%{cli_build_cmds}
+
+%{test_build_cmds}
+
+# Link Commands
+$(CLI): $(LIBRARIES) $(CLIOBJS)
+	$(CLI_LINK_CMD) /OUT:$@ $(CLIOBJS) $(LIB_FILENAME) $(CLI_LINKS_TO)
+	$(CLI_POST_LINK_CMD)
+
+$(TEST): $(LIBRARIES) $(TESTOBJS)
+	$(TEST_LINK_CMD) /OUT:$@ $(TESTOBJS) $(LIB_FILENAME) $(TEST_LINKS_TO)
+	$(TEST_POST_LINK_CMD)
+
+libs: $(LIBRARIES)
+cli: $(CLI)
+tests: $(TEST)
+
+!If "$(SO_OBJ_FLAGS)" == ""
+# static lib
+$(LIB_FILENAME): $(LIBOBJS)
+	$(AR) /OUT:$@ $(LIBOBJS)
+!Else
+# shared lib
+# Creates the DLL $(SO_FILENAME) and the .lib $(LIB_FILENAME)
+$(SO_FILENAME): $(LIBOBJS)
+	$(LIB_LINK_CMD) /OUT:$@ $(LIBOBJS) $(LIB_LINKS_TO)
+!Endif
+
+# Fake Targets
+
+SPHINX_CONFIG = %{sphinx_config_dir}
+SPHINX_OPTS = -b html
+
 docs:
 %{build_doc_commands}
 
 clean:
-	$(RM) %{build_dir}\lib\* %{build_dir}\checks\*
-	$(RM) *.manifest *.exp *.dll
-	$(RM) $(LIBRARIES) $(CHECK)
+	-$(RM) %{libobj_dir}\*
+	-$(RM) %{cliobj_dir}\*
+	-$(RM) %{testobj_dir}\*
+	-$(RM) %{out_dir}\*.manifest
+	-$(RM) %{out_dir}\*.exp
+	-$(RM) %{out_dir}\*.dll
+	-$(RM) $(LIBRARIES) $(CLI) $(TEST)
 
 distclean: clean
 	$(RM_R) %{build_dir}
 	$(RMDIR) %{build_dir}\include\botan\internal
 	$(RMDIR) %{build_dir}\include\botan
 	$(RMDIR) %{build_dir}\include
-	$(RMDIR) %{build_dir}\lib %{build_dir}\checks
+	$(RMDIR) %{build_dir}\lib %{build_dir}\tests
 	$(RMDIR) %{build_dir}
-	$(RM) Makefile $(LIBNAME).* $(CHECK).*
+	$(RM) Makefile $(LIB_BASENAME).* $(CLI).*
 
-### Install Commands
-install: $(LIBRARIES)
-	-$(MKDIR) $(DESTDIR)\include\botan
-	$(INSTALL_CMD) botan.* $(DESTDIR)
-	$(INSTALL_CMD) build\include\botan\*.h $(DESTDIR)\include\botan
+install: $(CLI) docs
+	$(SCRIPTS_DIR)\install.py --prefix=%{prefix} --build-dir="%{build_dir}" --bindir=%{bindir} --libdir=%{libdir} --docdir=%{docdir} --includedir=%{includedir}

@@ -1,0 +1,10 @@
+<defines>
+ELGAMAL -> 20131128
+</defines>
+
+<requires>
+dl_algo
+dl_group
+keypair
+numbertheory
+</requires>

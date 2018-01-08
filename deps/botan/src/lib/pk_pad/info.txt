@@ -1,0 +1,14 @@
+<defines>
+PK_PADDING -> 20131128
+</defines>
+
+load_on auto
+
+<requires>
+rng
+</requires>
+
+<header:public>
+eme.h
+emsa.h
+</header:public>

@@ -1,0 +1,14 @@
+<defines>
+SM2 -> 20170907
+</defines>
+
+<requires>
+asn1
+ec_group
+ecc_key
+keypair
+numbertheory
+rng
+sm3
+kdf2
+</requires>

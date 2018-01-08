@@ -1,7 +1,0 @@
-define SRP6
-
-<requires>
-bigint
-hash
-dl_group
-</requires>

@@ -2,61 +2,87 @@ macro_name GCC
 
 binary_name g++
 
-has_tr1 yes
-
-compile_option "-c "
 output_to_option "-o "
 add_include_dir_option -I
 add_lib_dir_option -L
 add_lib_option -l
 
-lang_flags "-D_REENTRANT -Wno-long-long"
-warning_flags "-W -Wall"
+lang_flags "-std=c++11 -D_REENTRANT"
 
-maintainer_warning_flags "-Werror -Wall -Wextra -Wstrict-aliasing -Wstrict-overflow=5 -Wcast-align -Wmissing-declarations -Wpointer-arith -Wcast-qual -Wold-style-cast"
+# This should only contain flags which are included in GCC 4.8
+warning_flags "-Wall -Wextra -Wpedantic -Wstrict-aliasing -Wstrict-overflow=5 -Wcast-align -Wmissing-declarations -Wpointer-arith -Wcast-qual -Wzero-as-null-pointer-constant -Wnon-virtual-dtor"
 
-lib_opt_flags "-O3"
-check_opt_flags "-O2"
+maintainer_warning_flags "-Wold-style-cast -Wsuggest-override -Wshadow -Werror -Wno-error=strict-overflow -Wno-error=deprecated-declarations"
+
+compile_flags "-c"
+debug_info_flags "-g"
+optimization_flags "-O3"
+size_optimization_flags "-Os"
+
 shared_flags "-fPIC"
-debug_flags -g
-no_debug_flags "-finline-functions"
+coverage_flags "--coverage"
+stack_protector_flags "-fstack-protector"
+
+# GCC 4.8
+sanitizer_flags "-D_GLIBCXX_DEBUG -fsanitize=address"
+
+# GCC 4.9 and later
+#sanitizer_flags "-D_GLIBCXX_DEBUG -fsanitize=address,undefined -fno-sanitize-recover=undefined"
 
 visibility_build_flags "-fvisibility=hidden"
 visibility_attribute '__attribute__((visibility("default")))'
 
-makefile_style unix
+makefile_style gmake
 
-<so_link_flags>
+<so_link_commands>
 # The default works for GNU ld and several other Unix linkers
-default -> "$(CXX) -shared -fPIC -Wl,-soname,$(SONAME)"
+default       -> "$(CXX) -shared -fPIC -Wl,-soname,$(SONAME_ABI)"
 
-# AIX doesn't seem to have soname support (weird...)
+# Darwin, HP-UX and Solaris linkers use different syntax
+darwin  -> "$(CXX) -dynamiclib -fPIC -install_name $(LIBDIR)/$(SONAME_ABI)"
+hpux    -> "$(CXX) -shared -fPIC -Wl,+h,$(SONAME_ABI)"
+solaris -> "$(CXX) -shared -fPIC -Wl,-h,$(SONAME_ABI)"
+
+# AIX and OpenBSD don't use sonames at all
 aix     -> "$(CXX) -shared -fPIC"
-
-# OpenBSD doesn't use soname
 openbsd -> "$(CXX) -shared -fPIC"
+</so_link_commands>
 
-darwin  -> "$(CXX) -dynamiclib -fPIC -install_name $(LIBDIR)/$(SONAME)"
-hpux    -> "$(CXX) -shared -fPIC -Wl,+h,$(SONAME)"
-solaris -> "$(CXX) -shared -fPIC -Wl,-h,$(SONAME)"
-</so_link_flags>
+<binary_link_commands>
+linux         -> "$(LINKER) -Wl,-rpath=\$$ORIGIN"
+default       -> "$(LINKER)"
+</binary_link_commands>
+
+<isa_flags>
+sse2    -> "-msse2"
+ssse3   -> "-mssse3"
+sse4.1  -> "-msse4.1"
+sse4.2  -> "-msse4.2"
+avx2    -> "-mavx2"
+bmi2    -> "-mbmi2"
+aesni   -> "-maes -mpclmul -mssse3"
+rdrand  -> "-mrdrnd"
+rdseed	-> "-mrdseed"
+sha     -> "-msha"
+altivec -> "-maltivec"
+
+# For Aarch32 -mfpu=neon is required
+# For Aarch64 NEON is enabled by default
+arm32:neon    -> "-mfpu=neon"
+arm64:neon    -> ""
+</isa_flags>
 
 <mach_opt>
-# Avoid using -march=i[345]86, instead tune for generic
-i386        -> "-mtune=generic -momit-leaf-frame-pointer"
-i486        -> "-mtune=generic -momit-leaf-frame-pointer"
-i586        -> "-mtune=generic -momit-leaf-frame-pointer"
+# Avoid using -march=i[3456]86, instead tune for generic
+i386        -> "-mtune=generic"
+i486        -> "-mtune=generic"
+i586        -> "-mtune=generic"
+i686        -> "-mtune=generic"
 
-sandybridge -> "-march=corei7-avx -momit-leaf-frame-pointer"
-atom32      -> "-march=atom -momit-leaf-frame-pointer"
-
-# For recent GCC
-nehalem     -> "-march=corei7 -momit-leaf-frame-pointer"
-westmere    -> "-march=corei7 -maes -momit-leaf-frame-pointer"
-
-# For older GCC
-#nehalem      -> "-march=core2 -msse4.1 -msse4.2 -momit-leaf-frame-pointer"
-#westmere     -> "-march=core2 -msse4.1 -msse4.2 -maes -momit-leaf-frame-pointer"
+# Translate to GCC-speak
+nehalem     -> "-march=corei7"
+sandybridge -> "-march=corei7-avx"
+ivybridge   -> "-march=core-avx-i"
 
 ppc601      -> "-mpowerpc -mcpu=601"
 cellppu     -> "-mcpu=cell"
@@ -70,39 +96,44 @@ alpha-ev7   -> "-mcpu=ev67"
 sh4         -> "-m4 -mieee"
 
 # Default family options (SUBMODEL is substitued with the actual
-# submodel name). Anything after the quotes is what should be
-# *removed* from the submodel name before it's put into SUBMODEL.
+# submodel name). Anything after the pipe will be removed from the
+# submodel name before it's put into SUBMODEL.
 
-alpha     -> "-mcpu=SUBMODEL" alpha-
-arm       -> "-march=SUBMODEL"
-superh    -> "-mSUBMODEL" sh
-hppa      -> "-march=SUBMODEL" hppa
+alpha     -> "-mcpu=SUBMODEL|alpha-"
+arm32     -> "-march=SUBMODEL"
+arm64     -> "-march=SUBMODEL"
+superh    -> "-mSUBMODEL|sh"
+hppa      -> "-march=SUBMODEL|hppa"
 ia64      -> "-mtune=SUBMODEL"
 m68k      -> "-mSUBMODEL"
-mips32    -> "-mips1 -mcpu=SUBMODEL" mips32-
-mips64    -> "-mips3 -mcpu=SUBMODEL" mips64-
-ppc32     -> "-mcpu=SUBMODEL" ppc
-ppc64     -> "-mcpu=SUBMODEL" ppc
-sparc32   -> "-mcpu=SUBMODEL -Wa,-xarch=v8plus" sparc32-
+mips32    -> "-mips1 -mcpu=SUBMODEL|mips32-"
+mips64    -> "-mips3 -mcpu=SUBMODEL|mips64-"
+ppc32     -> "-mcpu=SUBMODEL|ppc"
+ppc64     -> "-mcpu=SUBMODEL|ppc"
+sparc32   -> "-mcpu=SUBMODEL -Wa,-xarch=v8plus|sparc32-"
 sparc64   -> "-mcpu=v9 -mtune=SUBMODEL"
-x86_32    -> "-march=SUBMODEL -momit-leaf-frame-pointer"
-x86_64    -> "-march=SUBMODEL -momit-leaf-frame-pointer"
+x86_32    -> "-march=SUBMODEL"
+x86_64    -> "-march=SUBMODEL"
+
+all_x86_32 -> "-momit-leaf-frame-pointer"
+all_x86_64 -> "-momit-leaf-frame-pointer"
 </mach_opt>
 
-# The 'linking' bit means "use this for both compiling *and* linking"
+# Flags set here are included at compile and link time
 <mach_abi_linking>
-x86_64  -> "-m64"
+all     -> "-pthread"
+
+cilkplus -> "-fcilkplus"
+openmp   -> "-fopenmp"
+
 mips64  -> "-mabi=64"
 s390    -> "-m31"
 s390x   -> "-m64"
 sparc32 -> "-m32 -mno-app-regs"
 sparc64 -> "-m64 -mno-app-regs"
 ppc64   -> "-m64"
+x86_64  -> "-m64"
 
-# This should probably be used on most/all targets, but the docs are unclear
-openbsd   -> "-pthread"
-freebsd   -> "-pthread"
-dragonfly -> "-pthread"
-netbsd    -> "-pthread -D_NETBSD_SOURCE"
-qnx       -> "-fexceptions -D_QNX_SOURCE"
+netbsd  -> "-D_NETBSD_SOURCE"
+qnx     -> "-fexceptions -D_QNX_SOURCE"
 </mach_abi_linking>

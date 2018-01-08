@@ -1,5 +1,0 @@
-define BMW_512
-
-<requires>
-mdx_hash
-</requires>

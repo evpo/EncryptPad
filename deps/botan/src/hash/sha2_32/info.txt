@@ -1,5 +1,0 @@
-define SHA2_32
-
-<requires>
-mdx_hash
-</requires>

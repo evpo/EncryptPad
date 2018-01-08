@@ -61,8 +61,15 @@ intelcput2600 -> prescott
 intelcput2700 -> prescott
 </submodel_aliases>
 
-<isa_extn>
-sse2:pentium4,prescott,pentium-m,atom32
-ssse3:atom32
-movbe:atom32
-</isa_extn>
+<isa_extensions>
+aesni
+avx2
+bmi2
+rdrand
+rdseed
+sha
+sse2
+sse4.1
+sse4.2
+ssse3
+</isa_extensions>

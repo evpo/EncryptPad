@@ -1,55 +1,83 @@
-# Largely copied from the gcc config
-
 macro_name CLANG
 
 binary_name clang++
 
-compile_option "-c "
 output_to_option "-o "
 add_include_dir_option -I
 add_lib_dir_option -L
 add_lib_option -l
+add_framework_option "-framework "
 
-lang_flags "-D_REENTRANT -ansi -Wno-long-long"
-warning_flags "-W -Wall"
+lang_flags "-std=c++11 -D_REENTRANT"
 
-makefile_style unix
+warning_flags "-Wall -Wextra -Wpedantic -Wshadow -Wstrict-aliasing -Wstrict-overflow=5 -Wcast-align -Wmissing-declarations -Wpointer-arith -Wcast-qual"
+maintainer_warning_flags "-Wunreachable-code -Wdocumentation -Qunused-arguments -Werror -Wno-error=unused-parameter -Wno-error=unreachable-code -Wno-error=deprecated-declarations"
 
-lib_opt_flags "-O2"
-check_opt_flags "-O2"
+compile_flags "-c"
+debug_info_flags "-g"
+optimization_flags "-O3"
+size_optimization_flags "-Os"
+#sanitizer_flags "-fsanitize=address,undefined -fsanitize-coverage=edge,indirect-calls,8bit-counters -fno-sanitize-recover=undefined"
+sanitizer_flags "-fsanitize=address,undefined"
+
 shared_flags "-fPIC"
-debug_flags -g
-no_debug_flags "-finline-functions"
+coverage_flags "--coverage"
+stack_protector_flags "-fstack-protector"
 
 visibility_build_flags "-fvisibility=hidden"
 visibility_attribute '__attribute__((visibility("default")))'
 
-<so_link_flags>
-# The default works for GNU ld and several other Unix linkers
-default -> "$(CXX) -shared -fPIC -Wl,-soname,$(SONAME)"
+makefile_style gmake
 
-darwin  -> "$(CXX) -dynamiclib -fPIC -install_name $(LIBDIR)/$(SONAME)"
-</so_link_flags>
+<so_link_commands>
+darwin        -> "$(CXX) -dynamiclib -fPIC -install_name $(INSTALLED_LIB_DIR)/$(SONAME_ABI) -current_version $(DARWIN_CURRENT_VER) -compatibility_version $(DARWIN_COMPATIBILITY_VER)"
+
+# The default works for GNU ld and several other Unix linkers
+default       -> "$(CXX) -shared -fPIC -Wl,-soname,$(SONAME_ABI)"
+</so_link_commands>
+
+<binary_link_commands>
+darwin        -> "$(LINKER) -headerpad_max_install_names"
+linux         -> "$(LINKER) -Wl,-rpath=\$$ORIGIN"
+freebsd       -> "$(LINKER) -Wl,-rpath=\$$ORIGIN"
+default       -> "$(LINKER)"
+llvm          -> "llvm-link"
+</binary_link_commands>
+
+<isa_flags>
+sse2   -> "-msse2"
+ssse3  -> "-mssse3"
+sse4.1 -> "-msse4.1"
+sse4.2 -> "-msse4.2"
+avx2   -> "-mavx2"
+bmi2   -> "-mbmi2"
+aesni  -> "-maes -mpclmul -mssse3"
+rdrand -> "-mrdrnd"
+rdseed -> "-mrdseed"
+sha    -> "-msha"
+altivec -> "-maltivec"
+</isa_flags>
 
 <mach_opt>
-x86_64    -> "-march=SUBMODEL"
-nehalem   -> "-march=corei7"
-westmere  -> "-march=corei7 -maes"
+all_llvm    -> "-emit-llvm -fno-use-cxa-atexit"
+
+x86_32      -> "-march=SUBMODEL"
+x86_64      -> "-march=SUBMODEL"
+nehalem     -> "-march=corei7"
+sandybridge -> "-march=corei7-avx"
+ivybridge   -> "-march=core-avx-i"
 </mach_opt>
 
 <mach_abi_linking>
+all     -> "-pthread"
+
+openmp  -> "-fopenmp"
+
+x86_32  -> "-m32"
 x86_64  -> "-m64"
-mips64  -> "-mabi=64"
-s390    -> "-m31"
-s390x   -> "-m64"
-sparc32 -> "-m32 -mno-app-regs"
-sparc64 -> "-m64 -mno-app-regs"
 ppc64   -> "-m64"
 
-# This should probably be used on most/all targets, but the docs are incomplete
-openbsd -> "-pthread"
-freebsd -> "-pthread"
-dragonfly -> "-pthread"
-netbsd  -> "-pthread -D_NETBSD_SOURCE"
-qnx     -> "-fexceptions -D_QNX_SOURCE"
+darwin  -> "-stdlib=libc++"
+ios     -> "-stdlib=libc++"
+netbsd  -> "-D_NETBSD_SOURCE"
 </mach_abi_linking>

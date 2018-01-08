@@ -1,5 +1,0 @@
-define SKEIN_512
-
-<requires>
-alloc
-</requires>

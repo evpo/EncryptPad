@@ -1,9 +1,0 @@
-define ECDSA
-
-<requires>
-asn1
-ec_group
-ecc_key
-numbertheory
-rng
-</requires>

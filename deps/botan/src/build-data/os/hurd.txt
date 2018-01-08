@@ -1,7 +1,11 @@
 os_type unix
 
+soname_suffix "so"
+
 <target_features>
 posix_mlock
+threads
+filesystem
 </target_features>
 
 <aliases>

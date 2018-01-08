@@ -1,5 +1,0 @@
-define PBKDF1
-
-<requires>
-hash
-</requires>

@@ -1,7 +1,0 @@
-define EMSA4
-
-<requires>
-hash
-kdf
-mgf1
-</requires>

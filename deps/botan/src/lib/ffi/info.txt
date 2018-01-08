@@ -1,0 +1,26 @@
+<defines>
+FFI -> 20170815
+</defines>
+
+<header:internal>
+ffi_mp.h
+ffi_pkey.h
+ffi_rng.h
+ffi_util.h
+</header:internal>
+
+<header:public>
+ffi.h
+</header:public>
+
+<requires>
+aead
+kdf
+pbkdf
+pubkey
+bigint
+x509
+#tls
+system_rng
+auto_rng
+</requires>

@@ -1,0 +1,12 @@
+<defines>
+CAST -> 20131128
+</defines>
+
+<header:internal>
+cast_sboxes.h
+</header:internal>
+
+<header:public>
+cast128.h
+cast256.h
+</header:public>

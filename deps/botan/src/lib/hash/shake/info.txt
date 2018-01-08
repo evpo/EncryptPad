@@ -1,0 +1,7 @@
+<defines>
+SHAKE -> 20161009
+</defines>
+
+<requires>
+sha3
+</requires>

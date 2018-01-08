@@ -1,5 +1,0 @@
-define KDF2
-
-<requires>
-hash
-</requires>

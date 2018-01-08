@@ -1,3 +1,0 @@
-define MDX_HASH_FUNCTION
-
-load_on dep

@@ -1,0 +1,23 @@
+<defines>
+ENTROPY_SRC_PROC_WALKER -> 20131128
+</defines>
+
+<header:internal>
+proc_walk.h
+</header:internal>
+
+<os>
+android
+aix
+cygwin
+darwin
+dragonfly
+freebsd
+hpux
+hurd
+irix
+linux
+netbsd
+qnx
+solaris
+</os>

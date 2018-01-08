@@ -1,4 +1,7 @@
+# not really, but for our purposes
 os_type unix
+
+soname_suffix "so"
 
 <target_features>
 clock_gettime
@@ -6,4 +9,6 @@ gettimeofday
 posix_mlock
 gmtime_r
 dlopen
+threads
+filesystem
 </target_features>

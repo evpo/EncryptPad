@@ -1,0 +1,8 @@
+<defines>
+SP800_108 -> 20160128
+</defines>
+
+<requires>
+mac
+hmac
+</requires>

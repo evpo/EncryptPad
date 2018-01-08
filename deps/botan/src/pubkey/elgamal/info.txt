@@ -1,9 +1,0 @@
-define ELGAMAL
-
-<requires>
-dl_algo
-dl_group
-keypair
-libstate
-numbertheory
-</requires>

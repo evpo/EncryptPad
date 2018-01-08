@@ -1,5 +1,0 @@
-define ADLER32
-
-<requires>
-hash
-</requires>

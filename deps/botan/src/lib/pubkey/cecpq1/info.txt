@@ -1,0 +1,9 @@
+<defines>
+CECPQ1 -> 20161116
+</defines>
+
+<requires>
+newhope
+curve25519
+</requires>
+

@@ -1,0 +1,8 @@
+<defines>
+GMAC -> 20160207
+</defines>
+
+<requires>
+gcm
+mac
+</requires>

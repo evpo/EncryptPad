@@ -1,5 +1,0 @@
-define HMAC
-
-<requires>
-hash
-</requires>

@@ -1,5 +1,0 @@
-define HMAC_RNG
-
-<requires>
-mac
-</requires>

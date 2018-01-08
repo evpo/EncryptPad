@@ -1,8 +1,0 @@
-define PK_PADDING
-
-load_on auto
-
-<requires>
-alloc
-rng
-</requires>

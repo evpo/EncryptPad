@@ -1,5 +1,0 @@
-define MD4
-
-<requires>
-mdx_hash
-</requires>

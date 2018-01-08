@@ -1,5 +1,0 @@
-define STREAM_CIPHER
-
-<requires>
-algo_base
-</requires>

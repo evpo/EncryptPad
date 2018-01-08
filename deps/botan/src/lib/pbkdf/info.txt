@@ -1,0 +1,11 @@
+<defines>
+PBKDF -> 20150626
+</defines>
+
+<requires>
+base
+</requires>
+
+<header:public>
+pbkdf.h
+</header:public>

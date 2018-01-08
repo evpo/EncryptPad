@@ -1,5 +1,0 @@
-define X931_RNG
-
-<requires>
-block
-</requires>

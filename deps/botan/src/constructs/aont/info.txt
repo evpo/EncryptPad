@@ -1,8 +1,0 @@
-define PACKAGE_TRANSFORM
-
-<requires>
-block
-ctr
-rng
-filters
-</requires>

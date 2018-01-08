@@ -1,0 +1,22 @@
+<defines>
+PIPE_UNIXFD_IO -> 20131128
+</defines>
+
+load_on auto
+
+<os>
+android
+aix
+cygwin
+darwin
+dragonfly
+freebsd
+haiku
+hpux
+irix
+linux
+netbsd
+openbsd
+qnx
+solaris
+</os>

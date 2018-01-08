@@ -2,23 +2,21 @@ macro_name INTEL
 
 binary_name icpc
 
-has_tr1 yes
-
-compile_option "-c "
 output_to_option "-o "
 add_include_dir_option -I
 add_lib_dir_option -L
 add_lib_option -l
 
-lib_opt_flags "-O2 -ip -unroll"
-check_opt_flags "-O2"
-debug_flags -g
-no_debug_flags "-fomit-frame-pointer"
-lang_flags ""
+compile_flags "-c"
+debug_info_flags "-g"
+optimization_flags "-O2"
+size_optimization_flags "-Os"
+
+lang_flags "-std=c++0x"
 warning_flags "-w1"
 shared_flags "-fPIC"
 
-makefile_style unix
+makefile_style gmake
 
 <mach_opt>
 pentium3  -> "-march=pentium3"
@@ -31,6 +29,6 @@ nehalem   -> "-march=core2"
 westmere  -> "-march=core2"
 </mach_opt>
 
-<so_link_flags>
-default -> "$(CXX) -fPIC -shared -Wl,-soname,$(SONAME)"
-</so_link_flags>
+<so_link_commands>
+default -> "$(CXX) -fPIC -shared -Wl,-soname,$(SONAME_ABI)"
+</so_link_commands>

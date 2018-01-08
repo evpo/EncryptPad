@@ -1,0 +1,65 @@
+# Let's call MSVS 2017 the default compiler, 64 bit the default architecture,
+# release the default configuration and --enable-shared the default mode.
+#
+# Build jobs
+#  1. six basic builds: 32/64bit on MSVS2013/2015/2017
+#  2. MSVC2017 static lib with with amalgamation
+#  3. MSVC2017 with debug/sanitizers
+#  4. MSVC2015 for Windows RT (TODO)
+
+clone_depth: 5
+
+environment:
+
+  matrix:
+    # 1
+    - MSVS: 2013
+      PLATFORM: x86
+      TARGET: shared
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+    - MSVS: 2013
+      PLATFORM: x86_amd64
+      TARGET: shared
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+
+    - MSVS: 2015
+      PLATFORM: x86
+      TARGET: shared
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+    - MSVS: 2015
+      PLATFORM: x86_amd64
+      TARGET: shared
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+
+    - MSVS: 2017
+      PLATFORM: x86
+      TARGET: shared
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+    - MSVS: 2017
+      PLATFORM: x86_amd64
+      TARGET: shared
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+
+    # 2
+    - MSVS: 2017
+      PLATFORM: x86_amd64
+      TARGET: static
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+
+    # 3
+    - MSVS: 2017
+      PLATFORM: x86_amd64
+      TARGET: sanitizer
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+
+install:
+  - call src\scripts\ci\setup_appveyor.bat
+
+build_script:
+  - python src\scripts\ci_build.py --os=windows --cc=msvc --without-python3 --make-tool=jom --cpu=%PLATFORM% %TARGET%
+
+# whitelist branches to avoid testing feature branches twice (as branch and as pull request)
+branches:
+  only:
+    - master
+    - release-2

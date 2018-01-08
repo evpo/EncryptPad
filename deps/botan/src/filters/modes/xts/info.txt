@@ -1,5 +1,0 @@
-define XTS
-
-<requires>
-block
-</requires>

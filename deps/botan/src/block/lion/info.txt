@@ -1,6 +1,0 @@
-define LION
-
-<requires>
-hash
-stream
-</requires>

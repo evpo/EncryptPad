@@ -1,5 +1,0 @@
-define MD5
-
-<requires>
-mdx_hash
-</requires>

@@ -1,6 +1,8 @@
 os_type unix
 
-so_suffix dylib
+soname_pattern_base  "libbotan-{version_major}.dylib"
+soname_pattern_abi   "libbotan-{version_major}.{abi_rev}.dylib"
+soname_pattern_patch "libbotan-{version_major}.{abi_rev}.{version_minor}.{version_patch}.dylib"
 
 # It doesn't have the 's' option; you need to use needs ranlib
 ar_command "ar cr"
@@ -9,9 +11,20 @@ ar_needs_ranlib yes
 doc_dir doc
 
 <target_features>
+arc4random
+dlopen
+filesystem
 gettimeofday
+gmtime_r
+memset_s
+readdir
+sockets
+threads
+timegm
 </target_features>
 
 <aliases>
+macos
 macosx
+osx
 </aliases>

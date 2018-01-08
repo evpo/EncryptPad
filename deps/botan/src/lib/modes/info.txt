@@ -1,0 +1,8 @@
+<defines>
+MODES -> 20150626
+</defines>
+
+<header:public>
+cipher_mode.h
+stream_mode.h
+</header:public>

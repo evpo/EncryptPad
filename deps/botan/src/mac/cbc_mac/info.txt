@@ -1,5 +1,0 @@
-define CBC_MAC
-
-<requires>
-block
-</requires>

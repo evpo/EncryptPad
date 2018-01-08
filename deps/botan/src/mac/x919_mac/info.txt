@@ -1,5 +1,0 @@
-define ANSI_X919_MAC
-
-<requires>
-block
-</requires>

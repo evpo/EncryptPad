@@ -1,9 +1,12 @@
 os_type unix
 
-so_suffix sl
+# It is "sl" on HP-PA, but HP-UX on PA is EOL
+soname_suffix "so"
 
 <target_features>
 gettimeofday
+threads
+filesystem
 </target_features>
 
 <aliases>

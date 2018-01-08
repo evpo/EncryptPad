@@ -1,9 +1,0 @@
-define AES_NI
-
-load_on auto
-
-need_isa aes-ni
-
-<requires>
-aes_isa_eng
-</requires>

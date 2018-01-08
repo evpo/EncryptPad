@@ -1,0 +1,9 @@
+<defines>
+GCM_CLMUL -> 20131227
+</defines>
+
+need_isa aesni
+
+<header:internal>
+clmul.h
+</header:internal>

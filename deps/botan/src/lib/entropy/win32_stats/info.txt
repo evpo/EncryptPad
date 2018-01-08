@@ -1,0 +1,17 @@
+<defines>
+ENTROPY_SRC_WIN32 -> 20131128
+</defines>
+
+<header:internal>
+es_win32.h
+</header:internal>
+
+<os>
+windows
+cygwin
+mingw
+</os>
+
+<libs>
+windows -> user32.lib
+</libs>

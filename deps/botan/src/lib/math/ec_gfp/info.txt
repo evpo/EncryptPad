@@ -1,0 +1,9 @@
+<defines>
+EC_CURVE_GFP -> 20131128
+</defines>
+
+load_on auto
+
+<requires>
+numbertheory
+</requires>

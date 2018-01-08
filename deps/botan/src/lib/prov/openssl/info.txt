@@ -1,0 +1,18 @@
+<defines>
+OPENSSL -> 20151219
+</defines>
+
+load_on vendor
+
+<header:internal>
+openssl.h
+</header:internal>
+
+<libs>
+all!windows -> crypto
+windows -> libeay32.lib
+</libs>
+
+<requires>
+pubkey
+</requires>

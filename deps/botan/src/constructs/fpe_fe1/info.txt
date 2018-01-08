@@ -1,7 +1,0 @@
-define FPE_FE1
-
-<requires>
-hmac
-sha2_32
-bigint
-</requires>

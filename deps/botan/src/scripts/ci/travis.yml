@@ -1,0 +1,126 @@
+language: cpp
+
+os:
+  - linux
+  - osx
+
+dist: trusty
+sudo: required
+osx_image: xcode8.2
+
+compiler:
+  - clang
+  - gcc
+
+env:
+  global:
+    - CCACHE_MAXSIZE=250M
+    - CCACHE_MAXFILES=2000
+    - CCACHE_COMPRESS=1
+
+  matrix:
+    - BUILD_MODE="shared"
+    - BUILD_MODE="fuzzers"
+    - BUILD_MODE="coverage"
+    - BUILD_MODE="cross-ppc32"
+    - BUILD_MODE="cross-ppc64"
+    - BUILD_MODE="cross-arm32"
+    - BUILD_MODE="cross-arm64"
+    - BUILD_MODE="cross-win32"
+    - BUILD_MODE="valgrind"
+    - BUILD_MODE="sonar"
+    - BUILD_MODE="static"
+    - BUILD_MODE="mini-shared"
+    - BUILD_MODE="bsi"
+    - BUILD_MODE="nist"
+    - BUILD_MODE="docs"
+    - BUILD_MODE="lint"
+
+matrix:
+  exclude:
+    # Skip GCC on OS X entirely
+    - os: osx
+      compiler: gcc
+
+    - os: osx
+      env: BUILD_MODE="sonar"
+
+    # Run static, docs, lint, bsi, nist, fuzzers, coverage, valgrind,
+    # sonar, sanitizer, minimized and non-ARM cross builds only on Linux/gcc.
+    # The sanitizer builds under Clang run the tests very slowly and
+    # cause CI timeouts.
+
+    - compiler: clang
+      env: BUILD_MODE="static"
+    - compiler: clang
+      env: BUILD_MODE="bsi"
+    - compiler: clang
+      env: BUILD_MODE="nist"
+    - compiler: clang
+      env: BUILD_MODE="lint"
+    - compiler: clang
+      env: BUILD_MODE="docs"
+    - compiler: clang
+      env: BUILD_MODE="coverage"
+    - compiler: clang
+      env: BUILD_MODE="fuzzers"
+    - compiler: clang
+      env: BUILD_MODE="valgrind"
+    - compiler: clang
+      env: BUILD_MODE="mini-shared"
+    - compiler: clang
+      env: BUILD_MODE="cross-win32"
+    - compiler: clang
+      env: BUILD_MODE="cross-ppc32"
+    - compiler: clang
+      env: BUILD_MODE="cross-ppc64"
+
+    # Use clang coverage for Sonar
+    - compiler: gcc
+      env: BUILD_MODE="sonar"
+
+    # No ARM Clang compiler on Linux
+    - os: linux
+      compiler: clang
+      env: BUILD_MODE="cross-arm32"
+    - os: linux
+      compiler: clang
+      env: BUILD_MODE="cross-arm64"
+
+install:
+  - ./src/scripts/ci/setup_travis.sh
+
+script:
+  - ./src/scripts/ci_build.py --os=$TRAVIS_OS_NAME --cc=$CC --cc-bin=$CXX --pkcs11-lib=/tmp/softhsm/lib/softhsm/libsofthsm2.so $BUILD_MODE
+
+# whitelist branches to avoid testing feature branches twice (as branch and as pull request)
+branches:
+  only:
+    - master
+    - release-2
+    - coverity_scan
+
+notifications:
+  email: botan-commits@lists.randombit.net
+
+git:
+  depth: 5
+
+cache:
+  ccache: true
+  directories:
+    - $HOME/.sonar/cache
+
+addons:
+  sonarcloud:
+    organization: "randombit-github"
+    token:
+      secure: "MTveedl4eey6M4i12SdpXrCJs0eBerN+v+BzkUjCDiVSdHH+/m2wO4EJE/PoJAJyTPeZkxSLag4vCSebr0R1+ojBXUGW0Q1lnZ5xqrf3Vpb7Gvyavqc2kq4tFqVaU0nCF+sTm6dZMTTD7raxOSlP7fefp8yDVz7ddE1G9ZiT8rA="
+
+  coverity_scan:
+    project:
+      name: "randombit/botan"
+    notification_email: jack@randombit.net
+    build_command_prepend: "./configure.py --no-optimizations --with-zlib --with-openssl"
+    build_command: "make -j2"
+    branch_pattern: coverity_scan

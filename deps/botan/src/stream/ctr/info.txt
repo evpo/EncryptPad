@@ -1,6 +1,0 @@
-define CTR_BE
-
-<requires>
-block
-stream
-</requires>

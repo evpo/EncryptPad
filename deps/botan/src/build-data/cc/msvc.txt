@@ -1,18 +1,26 @@
 macro_name MSVC
 
 binary_name cl
+linker_name link
 
-compile_option "/nologo /c "
 output_to_option "/Fo"
 add_include_dir_option "/I"
-add_lib_dir_option -L
+add_lib_dir_option "/LIBPATH:"
 add_lib_option ""
 
-no_debug_flags "/O2"
-debug_flags "/Od /Zi /DDEBUG"
-check_opt_flags "/O2 /D_CONSOLE"
+compile_flags "/nologo /c"
+
+optimization_flags "/O2 /Oi"
+size_optimization_flags "/O1 /Os"
+
+# for debug info in the object file:
+#debug_info_flags "/Z7"
+
+# for using a PDB file:
+debug_info_flags "/Zi /FS"
+
 lang_flags "/EHs /GR"
-warning_flags "/W3 /wd4275 /wd4267"
+warning_flags "/W4 /wd4250 /wd4251 /wd4275"
 
 visibility_build_flags "/DBOTAN_DLL=__declspec(dllexport)"
 visibility_attribute "__declspec(dllimport)"
@@ -21,11 +29,30 @@ ar_command lib
 
 makefile_style nmake
 
-<so_link_flags>
-default -> "$(CXX) /LD"
-</so_link_flags>
+<isa_flags>
+sse2   -> ""
+ssse3  -> ""
+sse4.1 -> ""
+sse4.2 -> ""
+x86_64:avx2   -> ""
+bmi2   -> ""
+aesni  -> ""
+clmul  -> ""
+rdrand -> ""
+rdseed -> ""
+</isa_flags>
+
+<so_link_commands>
+default       -> "$(LINKER) /DLL"
+default-debug -> "$(LINKER) /DLL /DEBUG"
+</so_link_commands>
+
+<binary_link_commands>
+default       -> "$(LINKER)"
+default-debug -> "$(LINKER) /DEBUG"
+</binary_link_commands>
 
 <mach_abi_linking>
-all       -> "/MD"
-all-debug -> "/MDd"
+all       -> "/MD /bigobj"
+all-debug -> "/MDd /bigobj"
 </mach_abi_linking>

@@ -1,5 +1,0 @@
-define WHIRLPOOL
-
-<requires>
-mdx_hash
-</requires>

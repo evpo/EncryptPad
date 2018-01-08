@@ -1,5 +1,0 @@
-define CODEC_FILTERS
-
-<requires>
-filters
-</requires>

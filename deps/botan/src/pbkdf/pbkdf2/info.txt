@@ -1,5 +1,0 @@
-define PBKDF2
-
-<requires>
-mac
-</requires>

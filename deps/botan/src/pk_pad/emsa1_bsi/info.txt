@@ -1,5 +1,0 @@
-define EMSA1_BSI
-
-<requires>
-emsa1
-</requires>

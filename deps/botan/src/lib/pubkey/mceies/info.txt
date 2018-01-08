@@ -1,0 +1,10 @@
+<defines>
+MCEIES -> 20150706
+</defines>
+
+<requires>
+aes
+mce
+ocb
+kdf1
+</requires>

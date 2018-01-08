@@ -1,0 +1,9 @@
+<defines>
+LZMA -> 20160412
+</defines>
+
+load_on vendor
+
+<libs>
+all -> lzma
+</libs>

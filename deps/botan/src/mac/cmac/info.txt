@@ -1,5 +1,0 @@
-define CMAC
-
-<requires>
-block
-</requires>

@@ -1,0 +1,7 @@
+<defines>
+CAMELLIA -> 20150922
+</defines>
+
+<header:public>
+camellia.h
+</header:public>

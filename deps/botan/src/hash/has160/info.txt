@@ -1,5 +1,0 @@
-define HAS_160
-
-<requires>
-mdx_hash
-</requires>

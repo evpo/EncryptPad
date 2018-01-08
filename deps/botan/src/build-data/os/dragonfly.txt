@@ -1,7 +1,14 @@
 os_type unix
 
+soname_suffix "so"
+
 <target_features>
 clock_gettime
 gettimeofday
 posix_mlock
+sockets
+threads
+filesystem
+readdir
+dlopen
 </target_features>

@@ -1,9 +1,0 @@
-define BCRYPT
-
-<requires>
-libstate
-blowfish
-rng
-base64
-</requires>
-

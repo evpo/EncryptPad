@@ -1,5 +1,0 @@
-define HASH_ID
-
-<requires>
-alloc
-</requires>

@@ -1,0 +1,13 @@
+<defines>
+GOST_34_10_2001 -> 20131128
+</defines>
+
+load_on auto
+
+<requires>
+asn1
+ec_group
+ecc_key
+numbertheory
+rng
+</requires>

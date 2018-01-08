@@ -1,0 +1,10 @@
+<defines>
+ECIES -> 20160128
+</defines>
+
+<requires>
+kdf
+mac
+ecdh
+modes
+</requires>
