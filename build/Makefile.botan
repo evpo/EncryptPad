@@ -10,9 +10,10 @@ else
 PARAMS=--cpu=x86_32
 endif
 
-all:: $(BOTAN_DIR)/libbotan-1.10.a
-$(BOTAN_DIR)/libbotan-1.10.a:
-	cd $(BOTAN_DIR) && ./configure.py $(PARAMS) --enable-modules=rsa,aes,pbkdf2 --link-method=copy
-	$(MAKE) -C $(BOTAN_DIR) static
+all:: $(BOTAN_DIR)/libbotan-2.a
+$(BOTAN_DIR)/libbotan-2.a:
+	cd $(BOTAN_DIR) && ./configure.py $(PARAMS) --amalgamation --with-zlib --enable-modules aes,pbkdf2,auto_rng,compression
+#--with-bzip2
+	$(MAKE) -C $(BOTAN_DIR) libs
 clean:
 	$(MAKE) -C $(BOTAN_DIR) clean

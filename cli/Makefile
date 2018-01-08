@@ -22,7 +22,7 @@ LDFLAGS += -Wall
 CXXFLAGS += -I../deps/libencryptmsg/include -I../deps/libencryptmsg/deps/plog/include
 
 ifneq ($(USE_SYSTEM_LIBS),on)
-LDLIBS += ../deps/botan/libbotan-1.10.a ../deps/zlib/libz.a -lpthread
+LDLIBS += ../deps/botan/libbotan-2.a ../deps/zlib/libz.a -lpthread -ldl
 CXXFLAGS += -I../deps/botan/build/include -I../deps/zlib -pthread -std=c++11
 else
 BOTANLIB := $(shell pkg-config --libs botan-2)

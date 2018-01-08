@@ -10,6 +10,8 @@ tests: gtest cli src
 cli: src
 	$(MAKE) -C cli RELEASE=$(RELEASE)
 
+lib: src
+
 src: symlinks 
 	$(MAKE) -C src RELEASE=$(RELEASE)
 	$(MAKE) -C state_machine RELEASE=$(RELEASE)
@@ -25,7 +27,7 @@ clean-children: symlinks
 	$(MAKE) -C state_machine_client clean RELEASE=$(RELEASE)
 	$(MAKE) -C test_assets clean RELEASE=$(RELEASE)
 
-LNDIRNAME=makefiles stlplus gtest
+LNDIRNAME=makefiles stlplus gtest botan
 LNDIR=$(LNDIRNAME:%=deps/%)
 CLEANLNDIR=$(LNDIR:%=clean-%)
 
