@@ -1,4 +1,8 @@
 .PHONY: src tests cli gtest symlinks clean-symlinks
+
+include ../../deps/makefiles/platform.mak
+
+
 all: src cli
 gtest:
 	$(MAKE) -C tests -f Makefile.gtest RELEASE=$(RELEASE)
@@ -38,7 +42,11 @@ symlinks: $(LNDIR)
 clean-symlinks: $(CLEANLNDIR)
 
 $(LNDIR):
+ifneq ($(WINDOWS),on)
 	ln -s ../../$(@:deps/%=%) deps/
+else
+	cp -r ../../$(@) deps/
+endif
 
 $(CLEANLNDIR):
 	rm $(@:clean-%=%)

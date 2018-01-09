@@ -2,6 +2,13 @@ CRYPT_ROOT=..
 BOTAN_DIR=$(CRYPT_ROOT)/deps/botan
 
 include ../deps/makefiles/platform.mak
+
+ifneq ($(WINDOWS),on)
+BOTANLIB=$(BOTAN_DIR)/libbotan-2.a
+else
+BOTANLIB=$(BOTAN_DIR)/botan.lib
+endif
+
 ifeq ($(UNIX),on)
 PARAMS=
 else ifeq ($(PLATFORM),MACOS)
@@ -10,9 +17,9 @@ else
 PARAMS=--cpu=x86_32
 endif
 
-all:: $(BOTAN_DIR)/libbotan-2.a
-$(BOTAN_DIR)/libbotan-2.a:
-	cd $(BOTAN_DIR) && ./configure.py $(PARAMS) --amalgamation --with-zlib --enable-modules aes,pbkdf2,auto_rng,compression
+all:: $(BOTANLIB)
+$(BOTANLIB):
+	cd $(BOTAN_DIR) && ./configure.py $(PARAMS) --amalgamation --disable-shared --with-zlib --enable-modules aes,pbkdf2,auto_rng,compression
 #--with-bzip2
 	$(MAKE) -C $(BOTAN_DIR) libs
 clean:

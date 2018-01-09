@@ -12,8 +12,12 @@ LDFLAGS += -static
 endif
 endif
 
-ifeq ($(PLATFORM),WINDOWS)
+ifeq ($(WINDOWS),on)
 LDFLAGS += -lgdi32 -lkernel32 -luser32
+BOTANLIBFILE = ../deps/botan/botan.lib -fstack-protector
+else
+BOTANLIBFILE = ../deps/botan/libbotan-2.a
+LIBDL = -ldl
 endif
 
 CXXFLAGS += -Wall -Wextra
@@ -22,7 +26,7 @@ LDFLAGS += -Wall
 CXXFLAGS += -I../deps/libencryptmsg/include -I../deps/libencryptmsg/deps/plog/include
 
 ifneq ($(USE_SYSTEM_LIBS),on)
-LDLIBS += ../deps/botan/libbotan-2.a ../deps/zlib/libz.a -lpthread -ldl
+LDLIBS += $(BOTANLIBFILE) ../deps/zlib/libz.a -lpthread $(LIBDL)
 CXXFLAGS += -I../deps/botan/build/include -I../deps/zlib -pthread -std=c++11
 else
 BOTANLIB := $(shell pkg-config --libs botan-2)
