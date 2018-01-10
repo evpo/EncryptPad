@@ -53,11 +53,11 @@ LIBS += -L$$PWD/../deps/stlplus/portability/$$DEPS_SUBDIR \
      -lstate_machine_client \
      -lbotan_1_openpgp_codec
 
-win32: BOTANFILE = botan.lib -fstack-protector
-unix: BOTANFILE = -lbotan-2
+win32: BOTANFILE = $$PWD/../deps/botan/botan.lib -fstack-protector
+unix: BOTANFILE = -L$$PWD/../deps/botan -lbotan-2
 
 !USE_SYSTEM_LIBS {
-    LIBS += -L$$PWD/../deps/botan $$BOTANFILE $$PWD/../deps/zlib/libz.a
+    LIBS += $$BOTANFILE $$PWD/../deps/zlib/libz.a
 } else {
     BOTANLIB = $$system(pkg-config --libs botan-2)
     LIBS += $$BOTANLIB -lz

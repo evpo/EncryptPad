@@ -32,3 +32,4 @@ deps/makefiles
 deps/stlplus
 deps/zlib
 deps/libencryptmsg/deps
+*~
