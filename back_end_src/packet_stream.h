@@ -24,6 +24,7 @@
 #include <algorithm>
 #include <memory>
 #include <queue>
+#include <stdexcept>
 #include "assert.h"
 #include "packet_typedef.h"
 #include "epad_utilities.h"
@@ -254,7 +255,8 @@ namespace EncryptPad
 
         virtual stream_length_type ReadFromSource(byte *out_it, stream_length_type length) override
         {
-            return fread(out_it, sizeof(byte), length, file_.get());
+			stream_length_type ret_val = fread(out_it, sizeof(byte), length, file_.get());
+			return ret_val;
         }
 
         virtual stream_length_type DoRead(byte *out_it, stream_length_type bytes2read) override

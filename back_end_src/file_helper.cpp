@@ -43,6 +43,23 @@ namespace EncryptPad
         return file;
     }
 
+    int PlatformFSeek(FileHndl &file, stream_length_type offset, int origin)
+    {
+#if defined(__MINGW__) || defined(__MINGW32__)
+        return WinFSeek(file, offset, origin);
+#else
+        return fseek(file.get(), 0, origin);
+#endif
+    }
+
+    stream_length_type PlatformFTell(FileHndl &file)
+    {
+#if defined(__MINGW__) || defined(__MINGW32__)
+        return WinFTell(file);
+#else
+        return ftell(file.get());
+#endif
+    }
     OpenFileResult OpenFile(const std::string &file_name, InPacketStreamFile &stm)
     {
 #if defined(__MINGW__) || defined(__MINGW32__)
@@ -54,7 +71,7 @@ namespace EncryptPad
         if(!file)
             return OpenFileResult::Error;
 
-        if(fseek(file.get(), 0, SEEK_END))
+        if(PlatformFSeek(file, 0, SEEK_END))
         {
             if(errno == ESPIPE || errno == EBADF || errno == EINVAL)
                 return OpenFileResult::NotSeekable;
@@ -62,8 +79,8 @@ namespace EncryptPad
             return OpenFileResult::Error;
         }
 
-        stream_length_type length = ftell(file.get());
-        if(fseek(file.get(), 0, SEEK_SET))
+        stream_length_type length = PlatformFTell(file);
+        if(PlatformFSeek(file, 0, SEEK_SET))
         {
             return OpenFileResult::Error;
         }

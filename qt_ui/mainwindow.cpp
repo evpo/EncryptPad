@@ -152,8 +152,6 @@ MainWindow::MainWindow():
 
 void MainWindow::onTextEditLeave()
 {
-    if(QApplication::overrideCursor() != nullptr && QApplication::overrideCursor()->shape() == Qt::IBeamCursor)
-        QApplication::restoreOverrideCursor();
 }
 
 void MainWindow::updateLineStatus()
@@ -1223,30 +1221,12 @@ bool MainWindow::OpenPassphraseDialog(bool confirmationEnabled, std::string *pas
 void MainWindow::EnterWaitState()
 {
     isBusy = true;
-    #ifndef QT_NO_CURSOR
-    QApplication::setOverrideCursor(Qt::WaitCursor);
-    QApplication::processEvents();
-    #endif
     setAcceptDrops(false);
     this->setEnabled(false);
 }
 
 void MainWindow::ExitWaitState()
 {
-    #ifndef QT_NO_CURSOR
-    // There is probably a bug in Qt. When the mouse cursor is over textEdit
-    // and the restored cursor is an arrow. Therefore, we set the beam cursor explicitely here.
-    // We also handle textEdit leaveEvent in onTextEditLeave and restore the cursor there.
-    if(textEdit->underMouse())
-    {
-        QApplication::changeOverrideCursor(Qt::IBeamCursor);
-    }
-    else
-    {
-        QApplication::restoreOverrideCursor();
-    }
-    QApplication::processEvents();
-    #endif
     this->setEnabled(true);
     isBusy = false;
     setAcceptDrops(true);

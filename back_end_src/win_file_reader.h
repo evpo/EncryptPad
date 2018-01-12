@@ -32,6 +32,8 @@ namespace EncryptPad
     FileHndl OpenInputWin(const std::string &file_name);
     bool RemoveFileWin(const std::string &file_name);
     std::string ExpandVariablesWin(const std::string &path);
+    stream_length_type WinFTell(FileHndl &file);
+    int WinFSeek(FileHndl &file, stream_length_type offset, int origin);
 }
 #endif
 

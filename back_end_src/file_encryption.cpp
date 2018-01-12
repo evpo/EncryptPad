@@ -222,11 +222,11 @@ namespace
         // Use do while to process empty files
         do
         {
+            EpadResult result = EpadResult::None;
             buf.resize(std::min(in.GetCount(), static_cast<stream_length_type>(encrypt_params.memory_buffer)));
             stream_length_type length = in.Read(buf.data(), buf.size());
             buf.resize(length);
             MessageWriter *writer = nullptr;
-            EpadResult result = EpadResult::None;
             progress_event.complete_bytes += length;
             encrypt_params.progress_callback(progress_event);
             if(progress_event.cancel)

@@ -112,5 +112,15 @@ namespace EncryptPad
         Multi2Wide(file_name, wide);
         return _wremove(wide.data()) == 0;
     }
+
+    stream_length_type WinFTell(FileHndl &file)
+    {
+		return _ftelli64(file.get());
+    }
+
+    int WinFSeek(FileHndl &file, stream_length_type offset, int origin)
+    {
+		return _fseeki64(file.get(), offset, origin);
+    }
 }
 #endif
