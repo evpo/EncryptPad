@@ -16,7 +16,7 @@ cli: src
 
 lib: src
 
-src: symlinks 
+src: symlinks
 	$(MAKE) -C src RELEASE=$(RELEASE)
 	$(MAKE) -C state_machine RELEASE=$(RELEASE)
 	$(MAKE) -C state_machine_client RELEASE=$(RELEASE)

@@ -143,7 +143,10 @@ namespace LibEncryptMsg
         {
             size_t bytes2take = std::min(static_cast<size_t>(buf.cend() - it), GetPartialCount());
             buffer_.insert(buffer_.end(), it, it + bytes2take);
-            SetPartialCount(GetPartialCount() - bytes2take);
+
+            if(GetPartialLength())
+                SetPartialCount(GetPartialCount() - bytes2take);
+
             it += bytes2take;
             if(!GetPartialCount() && GetPartialLength())
             {
@@ -162,6 +165,7 @@ namespace LibEncryptMsg
                     length_buffer_.clear();
                 }
             }
+
             assert(GetPartialCount() || it == buf.cend() || bytes2take);
         }
 

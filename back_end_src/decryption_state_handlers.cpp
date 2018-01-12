@@ -4,6 +4,7 @@
 #include "key_file_converter.h"
 #include "wad_reader_writer.h"
 #include "epad_result.h"
+#include "openpgp_conversions.h"
 
 using namespace LibEncryptMsg;
 
@@ -46,7 +47,39 @@ namespace EncryptPad
 
     void End_OnEnter(LightStateMachine::StateMachineContext &ctx)
     {
-        ToContext(ctx).SetResult(EpadResult::Success);
+        auto &c = ToContext(ctx);
+        // Take outer reader
+        MessageReader *reader = nullptr;
+        switch(c.GetFormat())
+        {
+            case Format::NestedWAD:
+            case Format::GPG:
+                reader = &c.PassphraseSession()->reader;
+                break;
+
+            case Format::GPGByKeyFile:
+            case Format::WAD:
+                reader = &c.KeyFileSession()->reader;
+                break;
+
+            default:
+                c.SetResult(EpadResult::UnexpectedError);
+                c.SetFailed(true);
+                return;
+        }
+        auto &metadata = c.Metadata();
+        auto &config = reader->GetMessageConfig();
+
+        metadata.file_name = config.GetFileName();
+        metadata.file_date = config.GetFileDate();
+        metadata.is_binary = config.GetBinary();
+        metadata.cipher_algo = config.GetCipherAlgo();
+        metadata.compression = config.GetCompression();
+        metadata.hash_algo = config.GetHashAlgo();
+        metadata.iterations = DecodeS2KIterations(config.GetIterations());
+        metadata.salt = reader->GetSalt();
+
+        c.SetResult(EpadResult::Success);
     }
 
     bool ParseFormat_CanEnter(LightStateMachine::StateMachineContext &ctx)

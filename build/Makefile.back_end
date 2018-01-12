@@ -1,7 +1,7 @@
 CRYPT_ROOT=..
 BACK_END := $(CRYPT_ROOT)/back_end_src
 PORTABILITY := $(CRYPT_ROOT)/deps/stlplus/portability
-BACK_END_DEPS := portability
+BACK_END_DEPS := portability libencryptmsg
 #libencryptmsg
 ifneq ($(USE_SYSTEM_LIBS),on)
 	BACK_END_DEPS += zlib
