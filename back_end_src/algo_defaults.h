@@ -10,7 +10,7 @@ namespace EncryptPad
     const int kDefaultKeyFileKeyLength = 512 >> 3;
     // TODO: restore the production buffer size
     // const size_t kDefaultMemoryBuffer = 768 << 20; // 768 Mb 
-    const size_t kDefaultMemoryBuffer = 50 << 20; // 50 Mb 
+    const size_t kDefaultMemoryBuffer = 10 << 20; // 10 Mb 
     const LibEncryptMsg::Compression kDefaultCompression = LibEncryptMsg::Compression::ZLIB; 
 }
 
