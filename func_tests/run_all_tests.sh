@@ -2,7 +2,17 @@
 set -x
 set -e
 set -o pipefail
-GPG="gpg2"
+
+
+UNAME=$(uname)
+
+if [[ $UNAME == *MINGW* ]]; then
+    GPG="gpg"
+else
+    GPG="gpg2"
+fi
+
+export GPG
 
 #Assign S if a different shell is needed
 S=""
@@ -16,9 +26,13 @@ fi
 
 BIN="$1"
 TMP_DIR="./tmp"
-OS=$(uname)
 
-PLAIN_TEXT_FILE=$TMP_DIR/random.dat
+if [[ $UNAME == *MINGW* ]]
+then
+    PLAIN_TEXT_FILE=plain_text.txt
+else
+    PLAIN_TEXT_FILE=$TMP_DIR/random.dat
+fi
 
 export PLAIN_TEXT_FILE
 
@@ -27,7 +41,11 @@ rm -Rf ./epd_encrypted_last
 rm -Rf ./gpg_encrypted_last
 
 mkdir -p $TMP_DIR
-dd if=/dev/urandom of=$PLAIN_TEXT_FILE bs=1048576 count=15
+
+if [[ $UNAME != *MINGW* ]]
+then
+    dd if=/dev/urandom of=$PLAIN_TEXT_FILE bs=1048576 count=15
+fi
 
 # diffrent key file and passphrase combinations
 $S ./epd_encryption_test.sh $BIN "$PLAIN_TEXT_FILE"

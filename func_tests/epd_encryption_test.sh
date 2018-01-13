@@ -2,7 +2,6 @@
 set -x
 set -e
 set -o pipefail
-GPG="gpg2"
 
 USAGE="epd_encryption_test.sh <path_to_encryptcli> <tested_file>"
 if [ $# -lt 2 ]
