@@ -79,7 +79,7 @@ const string &Encryptor::GetX2KeyLocation() const
 
 void Encryptor::SetPassphrase(const char *pwd, EncryptPad::PacketMetadata *metadata)
 {
-
+    assert(metadata);
     key_service_.Clear();
     if(metadata)
     {

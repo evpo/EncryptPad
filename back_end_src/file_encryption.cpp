@@ -86,6 +86,7 @@ namespace
         else
         {
             const KeyRecord &key_record = encrypt_params.key_service->GetKeyForSaving();
+            assert(!key_record.IsEmpty());
             ret_val.salt = key_record.salt;
             // We assume that key_service has been set with the same encryption parameters
             ret_val.key.reset(new EncryptionKey(key_record.key->bits_of()));
@@ -114,6 +115,13 @@ namespace
             session.preparation_result = EpadResult::InvalidKeyFilePassphrase;
             return session;
         }
+
+        if(!ValidateDecryptedKeyFile(key_phrase))
+        {
+            session.preparation_result = EpadResult::InvalidKeyFile;
+            return session;
+        }
+
         Passphrase passphrase(SafeVector(key_phrase.cbegin(), key_phrase.cend()));
         std::fill(key_phrase.begin(), key_phrase.end(), '0');
         session.salt = GenerateRandomSalt();
@@ -195,6 +203,8 @@ namespace
         {
             passphrase_config = ConvertToMessageConfig(metadata);
             passphrase_session = PreparePassphraseSession(encrypt_params, passphrase_config);
+            if(!passphrase_session.IsValid())
+                return passphrase_session.preparation_result;
             passphrase_session_writer.Start(std::move(passphrase_session.key), passphrase_config, passphrase_session.salt);
         }
 
@@ -202,6 +212,8 @@ namespace
         {
             key_file_config = ConvertToMessageConfig(metadata);
             key_file_session = PrepareKeyFileSession(encrypt_params, metadata, key_file_config);
+            if(!key_file_session.IsValid())
+                return key_file_session.preparation_result;
             key_file_session_writer.Start(std::move(key_file_session.key), key_file_config, key_file_session.salt);
         }
 

@@ -218,6 +218,7 @@ namespace EncryptPad
         using namespace LibEncryptMsg;
         auto &c = ToContext(ctx);
         MessageReader *reader = nullptr;
+        bool is_key_file_session = false;
         switch(c.GetFormat())
         {
             case Format::GPG:
@@ -227,7 +228,8 @@ namespace EncryptPad
                 break;
 
             case Format::NestedWAD:
-                reader = (c.GetFilterCount() == 0)
+                is_key_file_session = (c.GetFilterCount() > 0);
+                reader = (!is_key_file_session)
                     ?
                     &c.PassphraseSession()->reader
                     :
@@ -235,6 +237,7 @@ namespace EncryptPad
                 break;
 
             default:
+                is_key_file_session = true;
                 reader = &c.KeyFileSession()->reader;
                 break;
         }
@@ -253,6 +256,11 @@ namespace EncryptPad
         catch(const EmsgException &e)
         {
             c.SetResult(ToEpadResult(e.result));
+            if(is_key_file_session && (c.GetResult() == EpadResult::InvalidSurrogateIV ||
+                        c.GetResult() == EpadResult::MDCError))
+            {
+                c.SetResult(EpadResult::InvalidKeyFile);
+            }
             c.SetFailed(true);
             return;
         }
@@ -388,6 +396,12 @@ namespace EncryptPad
             return;
         }
 
+        if(!ValidateDecryptedKeyFile(c.KeyFileSession()->own_passphrase))
+        {
+            c.SetResult(EpadResult::InvalidKeyFile);
+            c.SetFailed(true);
+            return;
+        }
         c.SetResult(EpadResult::Success);
     }
 

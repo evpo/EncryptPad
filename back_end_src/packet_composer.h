@@ -119,7 +119,7 @@ namespace EncryptPad
         bool persist_key_path;
 
         PacketMetadata()
-            :iterations(0), cipher_algo(LibEncryptMsg::CipherAlgo::Unknown), hash_algo(LibEncryptMsg::HashAlgo::Unknown), 
+            :iterations(0), compression(LibEncryptMsg::Compression::Unknown), cipher_algo(LibEncryptMsg::CipherAlgo::Unknown), hash_algo(LibEncryptMsg::HashAlgo::Unknown), 
             file_name(), file_date(0), is_binary(false), cannot_use_wad(false), salt(), key_file(), key_only(false), persist_key_path(false)
         {
         }

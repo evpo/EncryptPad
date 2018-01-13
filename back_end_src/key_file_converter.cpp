@@ -1,5 +1,7 @@
 #include "key_file_converter.h"
 #include "openpgp.h"
+#include "botan/base64.h"
+#include "botan/exceptn.h"
 #include "file_encryption.h"
 
 using namespace Botan;
@@ -55,5 +57,19 @@ namespace EncryptPad
         static std::string ascii_prefix("-----BEGIN PGP MESSAGE-----");
         return key.size() > ascii_prefix.size()
             && std::equal(ascii_prefix.begin(), ascii_prefix.end(), key.begin());
+    }
+
+    bool ValidateDecryptedKeyFile(const std::string &key)
+    {
+        SecureVector<byte> bytes;
+        try
+        {
+            bytes = base64_decode(key);
+        }
+        catch(const Botan::Invalid_Argument&)
+        {
+            return false;
+        }
+        return !bytes.empty();
     }
 }

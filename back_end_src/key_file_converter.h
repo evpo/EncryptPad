@@ -14,4 +14,6 @@ namespace EncryptPad
     // Encrypts key file content
     bool EncryptKeyFileContent(Botan::SecureVector<Botan::byte> &in_buffer, EncryptParams *key_file_encrypt_params, std::string &out,
             PacketMetadata &metadata);
+
+    bool ValidateDecryptedKeyFile(const std::string &key);
 }
