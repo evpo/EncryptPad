@@ -12,7 +12,7 @@ back_end : $(BACK_END_DEPS)
 	$(MAKE) -C $(BACK_END) RELEASE=$(RELEASE) USE_SYSTEM_LIBS=$(USE_SYSTEM_LIBS)
 
 libencryptmsg :
-	$(MAKE) -C $(CRYPT_ROOT)/deps/libencryptmsg lib RELEASE=$(RELEASE)
+	$(MAKE) -C $(CRYPT_ROOT)/deps/libencryptmsg lib RELEASE=$(RELEASE) USE_SYSTEM_LIBS=$(USE_SYSTEM_LIBS)
 portability :
 	$(MAKE) -C $(PORTABILITY) RELEASE=$(RELEASE)
 zlib :

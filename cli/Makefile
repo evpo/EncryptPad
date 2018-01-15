@@ -6,17 +6,15 @@ ifneq ($(RELEASE),on)
 CXXFLAGS += -ggdb
 endif
 
-ifneq ($(USE_SYSTEM_LIBS),on)
-ifneq ($(PLATFORM),MACOS)
+ifeq ($(WINDOWS),on)
 LDFLAGS += -static
-endif
 endif
 
 ifeq ($(WINDOWS),on)
 LDFLAGS += -lgdi32 -lkernel32 -luser32
 BOTANLIBFILE = ../deps/botan/botan.lib -fstack-protector
 else
-BOTANLIBFILE = ../deps/botan/libbotan-2.a
+BOTANLIBFILE = ../deps/botan/libbotan-2.a -lm
 LIBDL = -ldl
 endif
 

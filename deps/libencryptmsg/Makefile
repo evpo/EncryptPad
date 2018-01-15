@@ -8,16 +8,16 @@ gtest:
 	$(MAKE) -C tests -f Makefile.gtest RELEASE=$(RELEASE)
 
 tests: gtest cli src
-	$(MAKE) -C tests RELEASE=$(RELEASE)
+	$(MAKE) -C tests RELEASE=$(RELEASE) USE_SYSTEM_LIBS=$(USE_SYSTEM_LIBS)
 	$(MAKE) -C test_assets RELEASE=$(RELEASE)
 
 cli: src
-	$(MAKE) -C cli RELEASE=$(RELEASE)
+	$(MAKE) -C cli RELEASE=$(RELEASE) USE_SYSTEM_LIBS=$(USE_SYSTEM_LIBS)
 
 lib: src
 
 src: symlinks
-	$(MAKE) -C src RELEASE=$(RELEASE)
+	$(MAKE) -C src RELEASE=$(RELEASE) USE_SYSTEM_LIBS=$(USE_SYSTEM_LIBS)
 	$(MAKE) -C state_machine RELEASE=$(RELEASE)
 	$(MAKE) -C state_machine_client RELEASE=$(RELEASE)
 

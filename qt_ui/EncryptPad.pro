@@ -57,7 +57,7 @@ win32: BOTANFILE = $$PWD/../deps/botan/botan.lib -fstack-protector
 unix: BOTANFILE = -L$$PWD/../deps/botan -lbotan-2
 
 !USE_SYSTEM_LIBS {
-    LIBS += $$BOTANFILE $$PWD/../deps/zlib/libz.a
+    LIBS += $$BOTANFILE $$PWD/../deps/zlib/libz.a -lm -ldl
 } else {
     BOTANLIB = $$system(pkg-config --libs botan-2)
     LIBS += $$BOTANLIB -lz

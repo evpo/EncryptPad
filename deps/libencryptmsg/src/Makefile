@@ -3,10 +3,10 @@ include ../deps/makefiles/platform.mak
 LIBRARIES += ../state_machine ../state_machine_client ../deps/stlplus/containers ../deps/botan_1_openpgp_codec
 CXXFLAGS += -ggdb -std=c++11 -Wall -Wextra
 
-ifneq ($(WINDOWS),on)
-BOTAN=$(shell pkg-config --cflags botan-2)
-else
+ifneq ($(USE_SYSTEM_LIBS),on)
 BOTAN=-I../deps/botan/build/include
+else
+BOTAN=$(shell pkg-config --cflags botan-2)
 endif
 
 CXXFLAGS += -I./ -I../include -I../deps/plog/include $(BOTAN)
