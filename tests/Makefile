@@ -20,9 +20,17 @@ CXXFLAGS += -I../deps/libencryptmsg/deps/plog/include
 LDLIBS += ../deps/gtest/googletest/build/libgtest.a ../deps/stlplus/portability/$(SUBDIR)/libportability.a -lpthread
 CXXFLAGS += -I../deps/gtest/googletest/include -pthread -std=c++11 -Wall -Wextra
 
+ifeq ($(WINDOWS),on)
+LDFLAGS += -lgdi32 -lkernel32 -luser32
+BOTANLIBFILE = ../deps/botan/botan.lib -fstack-protector
+else
+BOTANLIBFILE = ../deps/botan/libbotan-2.a -lm
+LIBDL = -ldl
+endif
+
 ifneq ($(USE_SYSTEM_LIBS),on)
-LDLIBS += ../deps/botan/libbotan-1.10.a ../deps/zlib/libz.a
-CXXFLAGS += -I../deps/botan/build/include -I../deps/zlib
+LDLIBS += $(BOTANLIBFILE) ../deps/zlib/libz.a -lpthread $(LIBDL)
+CXXFLAGS += -I../deps/botan/build/include -I../deps/zlib -pthread -std=c++11
 else
 BOTANLIB := $(shell pkg-config --libs botan-2)
 BOTANCXX := $(shell pkg-config --cflags botan-2)

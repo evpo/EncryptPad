@@ -29,6 +29,5 @@ addons:
             - ubuntu-toolchain-r-test
             
         packages:
-            - libbotan1.10-dev
             - zlib1g-dev
             - g++-5
