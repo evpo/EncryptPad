@@ -17,9 +17,9 @@ script:
     - PATH="$QTDIR/bin:$PATH"
     - qt53-env.sh
     - qmake -v
-    - ./configure.sh --all --use-system-libs
-    - ./configure.sh --back-end --debug --use-system-libs
-    - ./configure.sh --tests --use-system-libs
+    - ./configure.sh --all
+    - ./configure.sh --back-end --debug
+    - ./configure.sh --tests
     - ./configure.sh --run-tests
     - ./configure.sh --run-func-tests --debug
     
