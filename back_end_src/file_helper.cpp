@@ -71,6 +71,12 @@ namespace EncryptPad
         if(!file)
             return OpenFileResult::Error;
 
+        if(file_name == "-")
+        {
+            stm.Set(file, std::numeric_limits<stream_length_type>::max());
+            return OpenFileResult::OK;
+        }
+
         if(PlatformFSeek(file, 0, SEEK_END))
         {
             if(errno == ESPIPE || errno == EBADF || errno == EINVAL)
