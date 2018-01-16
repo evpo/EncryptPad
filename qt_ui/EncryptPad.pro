@@ -45,12 +45,10 @@ LIBS += -L$$PWD/../deps/stlplus/portability/$$DEPS_SUBDIR \
      -L$$PWD/../back_end_src/$$DEPS_SUBDIR \
      -lback_end_src -lportability \
      -L$$PWD/../deps/libencryptmsg/src/$$DEPS_SUBDIR \
-     -L$$PWD/../deps/libencryptmsg/state_machine/$$DEPS_SUBDIR \
-     -L$$PWD/../deps/libencryptmsg/state_machine_client/$$DEPS_SUBDIR \
+     -L$$PWD/../deps/state_machine/$$DEPS_SUBDIR \
      -L$$PWD/../deps/libencryptmsg/deps/botan_1_openpgp_codec/$$DEPS_SUBDIR \
      -lsrc \
      -lstate_machine \
-     -lstate_machine_client \
      -lbotan_1_openpgp_codec
 
 win32: BOTANFILE = $$PWD/../deps/botan/botan.lib -fstack-protector

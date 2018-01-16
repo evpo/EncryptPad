@@ -8,45 +8,23 @@ gtest:
 	$(MAKE) -C tests -f Makefile.gtest RELEASE=$(RELEASE)
 
 tests: gtest cli src
-	$(MAKE) -C tests RELEASE=$(RELEASE) USE_SYSTEM_LIBS=$(USE_SYSTEM_LIBS)
+	$(MAKE) -C tests RELEASE=$(RELEASE)
 	$(MAKE) -C test_assets RELEASE=$(RELEASE)
 
 cli: src
-	$(MAKE) -C cli RELEASE=$(RELEASE) USE_SYSTEM_LIBS=$(USE_SYSTEM_LIBS)
+	$(MAKE) -C cli RELEASE=$(RELEASE)
 
 lib: src
 
 src: symlinks
-	$(MAKE) -C src RELEASE=$(RELEASE) USE_SYSTEM_LIBS=$(USE_SYSTEM_LIBS)
-	$(MAKE) -C state_machine RELEASE=$(RELEASE)
-	$(MAKE) -C state_machine_client RELEASE=$(RELEASE)
+	$(MAKE) -C src RELEASE=$(RELEASE) BOTAN_CXXFLAGS=$(BOTAN_CXXFLAGS)
+	$(MAKE) -C deps/state_machine RELEASE=$(RELEASE) TRACE_STATE_MACHINE=$(TRACE_STATE_MACHINE)
 
-clean: clean-children | clean-symlinks
-clean-children: symlinks
+clean:
 	$(MAKE) -C tests -f Makefile.gtest clean RELEASE=$(RELEASE)
 	$(MAKE) -C tests clean RELEASE=$(RELEASE)
 	$(MAKE) -C cli clean RELEASE=$(RELEASE)
 	$(MAKE) -C src clean RELEASE=$(RELEASE)
-	$(MAKE) -C state_machine clean RELEASE=$(RELEASE)
-	$(MAKE) -C state_machine_client clean RELEASE=$(RELEASE)
+	$(MAKE) -C deps/state_machine clean RELEASE=$(RELEASE)
+	$(MAKE) -C deps/botan_1_openpgp_codec clean RELEASE=$(RELEASE)
 	$(MAKE) -C test_assets clean RELEASE=$(RELEASE)
-
-LNDIRNAME=makefiles stlplus gtest botan
-LNDIR=$(LNDIRNAME:%=deps/%)
-CLEANLNDIR=$(LNDIR:%=clean-%)
-
-.PHONY: $(CLEANLNDIR)
-
-symlinks: $(LNDIR)
-
-clean-symlinks: $(CLEANLNDIR)
-
-$(LNDIR):
-ifneq ($(WINDOWS),on)
-	ln -s ../../$(@:deps/%=%) deps/
-else
-	cp -r ../../$(@) deps/
-endif
-
-$(CLEANLNDIR):
-	rm $(@:clean-%=%)

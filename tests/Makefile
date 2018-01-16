@@ -1,6 +1,6 @@
 include ../deps/makefiles/platform.mak
 
-LIBRARIES += ../back_end_src ../deps/libencryptmsg/src ../deps/libencryptmsg/state_machine ../deps/libencryptmsg/state_machine_client ../deps/libencryptmsg/deps/botan_1_openpgp_codec
+LIBRARIES += ../back_end_src ../deps/libencryptmsg/src ../deps/state_machine ../deps/libencryptmsg/deps/botan_1_openpgp_codec
 
 ifeq ($(PLATFORM),MACOS)
 LDFLAGS += -all_load

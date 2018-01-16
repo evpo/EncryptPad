@@ -1,6 +1,6 @@
 #include ../deps/makefiles/platform.mak
 
-LIBRARIES += ../src ../state_machine ../state_machine_client ../deps/stlplus/subsystems ../deps/stlplus/containers ../deps/stlplus/portability
+LIBRARIES += ../src ../deps/state_machine ../deps/stlplus/subsystems ../deps/stlplus/containers ../deps/stlplus/portability
 
 ifeq ($(RELEASE),on)
 CXXFLAGS += -ggdb

@@ -1,6 +1,6 @@
 include ../deps/makefiles/platform.mak
 
-LIBRARIES += ../src ../state_machine ../state_machine_client
+LIBRARIES += ../src ../deps/state_machine
 LDFLAGS += -Wl,--whole-archive
 LDLIBS += -Wl,--no-whole-archive
 

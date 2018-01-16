@@ -5,20 +5,44 @@ BACK_END_DEPS := portability libencryptmsg
 #libencryptmsg
 ifneq ($(USE_SYSTEM_LIBS),on)
 	BACK_END_DEPS += zlib
+	BOTAN_CXXFLAGS=-I../deps/botan/build/include
 endif
 
 all : back_end
 back_end : $(BACK_END_DEPS)
 	$(MAKE) -C $(BACK_END) RELEASE=$(RELEASE) USE_SYSTEM_LIBS=$(USE_SYSTEM_LIBS)
 
-libencryptmsg :
-	$(MAKE) -C $(CRYPT_ROOT)/deps/libencryptmsg lib RELEASE=$(RELEASE) USE_SYSTEM_LIBS=$(USE_SYSTEM_LIBS)
+libencryptmsg : symlinks
+	$(MAKE) -C $(CRYPT_ROOT)/deps/libencryptmsg lib RELEASE=$(RELEASE) BOTAN_CXXFLAGS=$(BOTAN_CXXFLAGS) TRACE_STATE_MACHINE=$(TRACE_STATE_MACHINE)
 portability :
 	$(MAKE) -C $(PORTABILITY) RELEASE=$(RELEASE)
 zlib :
 	$(MAKE) -f Makefile.zlib
-clean :
+
+clean: clean-children | clean-symlinks
+clean-children : symlinks
 	$(MAKE) -C $(BACK_END) clean RELEASE=$(RELEASE)
 	$(MAKE) -C $(PORTABILITY) clean RELEASE=$(RELEASE)
 #	$(MAKE) -f Makefile.zlib clean
 	$(MAKE) -C $(CRYPT_ROOT)/deps/libencryptmsg clean RELEASE=$(RELEASE)
+
+LIBENCRYPTMSG=$(CRYPT_ROOT)/deps/libencryptmsg
+LNDIRNAME=makefiles stlplus gtest botan plog state_machine
+LNDIR=$(LNDIRNAME:%=$(LIBENCRYPTMSG)/deps/%)
+CLEANLNDIR=$(LNDIR:%=clean-%)
+
+.PHONY: $(CLEANLNDIR)
+
+symlinks: $(LNDIR)
+
+clean-symlinks: $(CLEANLNDIR)
+
+$(LNDIR):
+ifneq ($(WINDOWS),on)
+	ln -s ../../$(@:$(LIBENCRYPTMSG)/deps/%=%) $(LIBENCRYPTMSG)/deps/
+else
+	echo cp -r deps/$(@:$(LIBENCRYPTMSG)/deps/%=%) $(LIBENCRYPTMSG)/deps/
+endif
+
+$(CLEANLNDIR):
+	rm $(@:clean-%=%)
