@@ -2,10 +2,13 @@ CRYPT_ROOT=..
 BACK_END := $(CRYPT_ROOT)/back_end_src
 PORTABILITY := $(CRYPT_ROOT)/deps/stlplus/portability
 BACK_END_DEPS := portability libencryptmsg
+
+include ../deps/makefiles/platform.mak
 #libencryptmsg
 ifneq ($(USE_SYSTEM_LIBS),on)
 	BACK_END_DEPS += zlib
 	BOTAN_CXXFLAGS=-I../deps/botan/build/include
+	OVERRIDE_BOTAN_FLAGS=on
 endif
 
 all : back_end
@@ -13,7 +16,7 @@ back_end : $(BACK_END_DEPS)
 	$(MAKE) -C $(BACK_END) RELEASE=$(RELEASE) USE_SYSTEM_LIBS=$(USE_SYSTEM_LIBS)
 
 libencryptmsg : symlinks
-	$(MAKE) -C $(CRYPT_ROOT)/deps/libencryptmsg lib RELEASE=$(RELEASE) BOTAN_CXXFLAGS=$(BOTAN_CXXFLAGS) TRACE_STATE_MACHINE=$(TRACE_STATE_MACHINE)
+	$(MAKE) -C $(CRYPT_ROOT)/deps/libencryptmsg lib RELEASE=$(RELEASE) BOTAN_CXXFLAGS=$(BOTAN_CXXFLAGS) OVERRIDE_BOTAN_FLAGS=$(OVERRIDE_BOTAN_FLAGS) TRACE_STATE_MACHINE=$(TRACE_STATE_MACHINE)
 portability :
 	$(MAKE) -C $(PORTABILITY) RELEASE=$(RELEASE)
 zlib :
@@ -41,7 +44,7 @@ $(LNDIR):
 ifneq ($(WINDOWS),on)
 	ln -s ../../$(@:$(LIBENCRYPTMSG)/deps/%=%) $(LIBENCRYPTMSG)/deps/
 else
-	echo cp -r deps/$(@:$(LIBENCRYPTMSG)/deps/%=%) $(LIBENCRYPTMSG)/deps/
+	cp -r ../deps/$(@:$(LIBENCRYPTMSG)/deps/%=%) $(LIBENCRYPTMSG)/deps/
 endif
 
 $(CLEANLNDIR):

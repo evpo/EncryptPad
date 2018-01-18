@@ -40,7 +40,10 @@ FORMS += \
     find_dialog.ui
 
 win32: LIBS += -luserenv
-#unix: LIBS += ldl
+!USE_SYSTEM_LIBS {
+unix: LIBS += ldl
+}
+
 LIBS += -L$$PWD/../deps/stlplus/portability/$$DEPS_SUBDIR \
      -L$$PWD/../back_end_src/$$DEPS_SUBDIR \
      -lback_end_src -lportability \
@@ -55,7 +58,7 @@ win32: BOTANFILE = $$PWD/../deps/botan/botan.lib -fstack-protector
 unix: BOTANFILE = -L$$PWD/../deps/botan -lbotan-2
 
 !USE_SYSTEM_LIBS {
-    LIBS += $$BOTANFILE $$PWD/../deps/zlib/libz.a -lm -ldl
+    LIBS += $$BOTANFILE $$PWD/../deps/zlib/libz.a -lm
 } else {
     BOTANLIB = $$system(pkg-config --libs botan-2)
     LIBS += $$BOTANLIB -lz
