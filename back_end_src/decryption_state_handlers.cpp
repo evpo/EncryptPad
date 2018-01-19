@@ -24,8 +24,13 @@ namespace EncryptPad
     void ReadIn_OnEnter(LightStateMachine::StateMachineContext &ctx)
     {
         auto &c = ToContext(ctx);
+        //memory_buffer should be smaller than max sizes of both types
+        assert(static_cast<uint64_t>(c.GetEncryptParams().memory_buffer) <=
+                std::min(
+                    static_cast<uint64_t>(std::numeric_limits<stream_length_type>::max()),
+                    static_cast<uint64_t>(std::numeric_limits<size_t>::max())
+                    ));
         stream_length_type size2read = std::min(static_cast<stream_length_type>(c.GetEncryptParams().memory_buffer), c.In().GetCount());
-        assert(size2read <= static_cast<stream_length_type>(std::numeric_limits<size_t>::max()));
         c.Buffer().resize(static_cast<size_t>(size2read));
         size_t size = c.In().Read(c.Buffer().data(), c.Buffer().size());
         c.Buffer().resize(size);
