@@ -41,7 +41,7 @@ FORMS += \
 
 win32: LIBS += -luserenv
 !USE_SYSTEM_LIBS {
-unix: LIBS += ldl
+unix: LIBS += -ldl
 }
 
 LIBS += -L$$PWD/../deps/stlplus/portability/$$DEPS_SUBDIR \
