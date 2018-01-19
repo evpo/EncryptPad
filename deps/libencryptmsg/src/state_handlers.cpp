@@ -241,8 +241,14 @@ namespace LibEncryptMsg
     {
         Context &context = ToContext(ctx);
         auto &state = context.State();
-        if(state.finish_packets && *state.packet_chain_it != PacketType::Unknown)
+        if(state.finish_packets && !std::all_of(state.packet_chain.begin(), state.packet_chain.end(),
+                    [](PacketType packet_type)
+                    {
+                        return packet_type == PacketType::Unknown;
+                    }))
+        {
             return false;
+        }
 
         return state.buffer_stack.empty();
     }

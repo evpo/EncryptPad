@@ -24,9 +24,10 @@ namespace EncryptPad
     void ReadIn_OnEnter(LightStateMachine::StateMachineContext &ctx)
     {
         auto &c = ToContext(ctx);
-        size_t size = std::min(c.GetEncryptParams().memory_buffer, static_cast<size_t>(c.In().GetCount()));
-        c.Buffer().resize(size);
-        size = c.In().Read(c.Buffer().data(), c.Buffer().size());
+        stream_length_type size2read = std::min(static_cast<stream_length_type>(c.GetEncryptParams().memory_buffer), c.In().GetCount());
+        assert(size2read <= static_cast<stream_length_type>(std::numeric_limits<size_t>::max()));
+        c.Buffer().resize(static_cast<size_t>(size2read));
+        size_t size = c.In().Read(c.Buffer().data(), c.Buffer().size());
         c.Buffer().resize(size);
         c.SetFilterCount(0);
         c.GetEncryptParams().progress_callback(c.GetProgressEvent());
@@ -42,7 +43,8 @@ namespace EncryptPad
     bool End_CanEnter(LightStateMachine::StateMachineContext &ctx)
     {
         auto &c = ToContext(ctx);
-        return c.In().IsEOF() && c.Buffer().empty() && c.PendingBuffer().empty();
+        return c.In().IsEOF() && c.Buffer().empty() && c.PendingBuffer().empty()
+            && c.GetResult() == EpadResult::Success;
     }
 
     void End_OnEnter(LightStateMachine::StateMachineContext &ctx)
@@ -334,7 +336,10 @@ namespace EncryptPad
 
     void Fail_OnEnter(LightStateMachine::StateMachineContext &ctx)
     {
-        // auto &c = ToContext(ctx);
+        auto &c = ToContext(ctx);
+        // If we came here because no states can enter
+        if(c.GetResult() == EpadResult::Success)
+            c.SetResult(EpadResult::UnexpectedError);
     }
 
     bool ReadKeyFile_CanEnter(LightStateMachine::StateMachineContext &ctx)

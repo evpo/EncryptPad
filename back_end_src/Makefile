@@ -8,5 +8,5 @@ LIBRARIES := ../deps/state_machine ../deps/stlplus/portability ../deps/stlplus/c
 CXXFLAGS += -ggdb -Wall -Wextra
 LDFLAGS += -Wall
 
-CXXFLAGS += $(BOTAN) -I../deps/libencryptmsg/include -std=c++11
+CXXFLAGS += $(BOTAN) -I../deps/libencryptmsg/include -I../deps/plog/include -std=c++11
 include ../deps/makefiles/gcc.mak
