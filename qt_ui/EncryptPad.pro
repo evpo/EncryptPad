@@ -40,9 +40,6 @@ FORMS += \
     find_dialog.ui
 
 win32: LIBS += -luserenv
-!USE_SYSTEM_LIBS {
-unix: LIBS += -ldl
-}
 
 LIBS += -L$$PWD/../deps/stlplus/portability/$$DEPS_SUBDIR \
      -L$$PWD/../back_end_src/$$DEPS_SUBDIR \
@@ -66,6 +63,7 @@ unix: BOTANFILE = -L$$PWD/../deps/botan -lbotan-2
 
 !USE_SYSTEM_LIBS {
     INCLUDEPATH += $$PWD/../deps/botan/build/include
+    unix: LIBS += -ldl
 } else {
     BOTANCXX = $$system(pkg-config --cflags botan-2)
     QMAKE_CXXFLAGS += $$BOTANCXX
