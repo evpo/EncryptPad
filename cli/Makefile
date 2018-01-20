@@ -34,6 +34,10 @@ LDLIBS += $(BOTANLIB) -lz -lpthread
 CXXFLAGS += $(BOTANCXX) -pthread -std=c++11
 endif
 
+ifeq ($(PLATFORM),MACOS)
+LDLIBS += -framework Security
+endif
+
 ifeq ($(RELEASE),on)
 TARGETDIR := ../../bin/release
 else

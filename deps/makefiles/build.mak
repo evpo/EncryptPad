@@ -43,6 +43,10 @@ LDFLAGS += -Wl,--enable-auto-import
 CC := gcc
 endif
 
+ifeq ($(PLATFORM),MACOS)
+CXX := clang -m64
+endif
+
 # need to build PIC on some platforms in order to use code in shared libraries
 # Note: I use PIC in all compiles on these platforms assuming that the historic lower performance of PIC is now negligible
 ifeq ($(PLATFORM),GNULINUX)

@@ -1,5 +1,6 @@
 #pragma once
 #include "memory_stream.h"
+#include <string>
 
 namespace LibEncryptMsg
 {

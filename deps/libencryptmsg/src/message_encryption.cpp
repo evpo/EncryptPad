@@ -1,5 +1,6 @@
 #include "message_encryption.h"
 #include <memory>
+#include <array>
 #include "assert.h"
 #include "botan/pbkdf.h"
 #include "context.h"

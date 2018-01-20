@@ -64,6 +64,7 @@ unix: BOTANFILE = -L$$PWD/../deps/botan -lbotan-2
 !USE_SYSTEM_LIBS {
     INCLUDEPATH += $$PWD/../deps/botan/build/include
     unix: LIBS += -ldl
+    macos: LIBS += -framework Security
 } else {
     BOTANCXX = $$system(pkg-config --cflags botan-2)
     QMAKE_CXXFLAGS += $$BOTANCXX
