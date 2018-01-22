@@ -34,6 +34,8 @@ LDLIBS += $(BOTANLIB) -lz -lpthread
 CXXFLAGS += $(BOTANCXX) -pthread -std=c++11
 endif
 
+CXXFLAGS += -D_FILE_OFFSET_BITS=64
+
 ifeq ($(PLATFORM),MACOS)
 LDLIBS += -framework Security
 endif

@@ -69,6 +69,9 @@ unix: BOTANFILE = -L$$PWD/../deps/botan -lbotan-2
     BOTANCXX = $$system(pkg-config --cflags botan-2)
     QMAKE_CXXFLAGS += $$BOTANCXX
 }
+
+unix:QMAKE_CXXFLAGS += -D_FILE_OFFSET_BITS=64
+
 INCLUDEPATH += $$PWD/../deps/stlplus/portability
 INCLUDEPATH += $$PWD/../back_end_src
 INCLUDEPATH += $$PWD/../deps/libencryptmsg/include

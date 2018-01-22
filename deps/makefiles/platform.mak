@@ -22,7 +22,7 @@
 ################################################################################
 
 # start by identifying the operating system
-OS     := $(shell uname)
+OS     := $(shell uname -o 2>/dev/null || uname)
 
 # on most platforms "uname -m" gives the CPU name
 # However, see below for situations where this is overridden

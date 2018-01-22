@@ -30,7 +30,7 @@ namespace EncryptPad
         if(file_name == "-")
             return FileHndl(stdin);
 
-        FileHndl file(fopen(file_name.data(), "rb"));
+        FileHndl file(fopen64(file_name.data(), "rb"));
         return file;
     }
 
@@ -39,7 +39,7 @@ namespace EncryptPad
         if(file_name == "-")
             return FileHndl(stdout);
 
-        FileHndl file(fopen(file_name.data(), "wb"));
+        FileHndl file(fopen64(file_name.data(), "wb"));
         return file;
     }
 
@@ -57,7 +57,7 @@ namespace EncryptPad
 #if defined(__MINGW__) || defined(__MINGW32__)
         return WinFTell(file);
 #else
-        return ftell(file.get());
+        return ftello(file.get());
 #endif
     }
     OpenFileResult OpenFile(const std::string &file_name, InPacketStreamFile &stm)
