@@ -25,12 +25,20 @@
 
 namespace EncryptPad
 {
+    FILE *PlatformFOpen(const char *file_name, const char *mode)
+    {
+#if defined(__APPLE__)
+        return fopen(file_name, mode);
+#else
+        return fopen64(file_name, mode);
+#endif
+    }
     FileHndl OpenInputLinux(const std::string &file_name)
     {
         if(file_name == "-")
             return FileHndl(stdin);
 
-        FileHndl file(fopen64(file_name.data(), "rb"));
+        FileHndl file(PlatformFOpen(file_name.data(), "rb"));
         return file;
     }
 
@@ -39,7 +47,7 @@ namespace EncryptPad
         if(file_name == "-")
             return FileHndl(stdout);
 
-        FileHndl file(fopen64(file_name.data(), "wb"));
+        FileHndl file(PlatformFOpen(file_name.data(), "wb"));
         return file;
     }
 
