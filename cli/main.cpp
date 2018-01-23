@@ -75,7 +75,7 @@ namespace EncryptPad
             "--pwd-fd <file-descriptor>            passphrase file descriptor\n"
             "--pwd-file <file>                     file with passphrase\n"
             "--cipher-algo <cipher-algo>           cipher algorithm (CAST5, AES, AES256, 3DES; default: AES256)\n"
-            "--compress-algo <compression-algo>    compression algorithm (ZIP, ZLIB, NONE; default: ZIP)\n"
+            "--compress-algo <compression-algo>    compression algorithm (ZIP, ZLIB, NONE; default: ZLIB)\n"
             "--s2k-digest-algo <s2k-digest-algo>   s2k digest algorithm (SHA1, SHA256; SHA512; default: SHA256)\n"
             "--s2k-count <s2k-count>               s2k iteration count\n"
             "--key-file-length                     key file random sequence length in bytes. Use with --generate-key. default: 64\n"
@@ -312,7 +312,7 @@ int main(int argc, char *argv[])
             cli_kind_t::cli_value_kind,
             cli_mode_t::cli_single_mode,
             "compression algorithm",
-            "ZIP"
+            "ZLIB"
         },
         {
             "s2k-digest-algo",

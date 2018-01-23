@@ -1273,9 +1273,7 @@ void MainWindow::startSave(const QString &fileName, std::string &kf_passphrase)
 {
     using namespace EncryptPad;
     EpadResult result = EpadResult::Success;
-#ifndef QT_NO_CURSOR
-    QApplication::setOverrideCursor(Qt::WaitCursor);
-#endif
+
     {
         QString str = textEdit->toPlainText();
         QByteArray byteArr;
@@ -1310,9 +1308,7 @@ void MainWindow::startSave(const QString &fileName, std::string &kf_passphrase)
                     &metadata, !kf_passphrase.empty() ? &kf_passphrase : nullptr);
         }
     }
-#ifndef QT_NO_CURSOR
-    QApplication::restoreOverrideCursor();
-#endif
+
     QString warningMessage;
     switch(result)
     {
