@@ -27,12 +27,9 @@ namespace EncryptPad
 {
     FILE *PlatformFOpen(const char *file_name, const char *mode)
     {
-#if defined(__APPLE__)
         return fopen(file_name, mode);
-#else
-        return fopen64(file_name, mode);
-#endif
     }
+
     FileHndl OpenInputLinux(const std::string &file_name)
     {
         if(file_name == "-")
@@ -56,7 +53,7 @@ namespace EncryptPad
 #if defined(__MINGW__) || defined(__MINGW32__)
         return WinFSeek(file, offset, origin);
 #else
-        return fseek(file.get(), 0, origin);
+        return fseeko(file.get(), offset, origin);
 #endif
     }
 
@@ -68,6 +65,7 @@ namespace EncryptPad
         return ftello(file.get());
 #endif
     }
+
     OpenFileResult OpenFile(const std::string &file_name, InPacketStreamFile &stm)
     {
 #if defined(__MINGW__) || defined(__MINGW32__)

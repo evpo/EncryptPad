@@ -496,8 +496,8 @@ namespace stlplus
     if (!path.empty() && is_separator(path[path.size()-1]))
       path.erase(path.size()-1,1);
     // now test if this thing exists using the built-in stat function and if so, is it a file
-    struct stat64 buf;
-    if (!(stat64(path.c_str(), &buf) == 0))
+    struct stat buf;
+    if (!(stat(path.c_str(), &buf) == 0))
       return false;
     // If the object is present, see if it is a file or file-like object
     // Note that devices are neither folders nor files
