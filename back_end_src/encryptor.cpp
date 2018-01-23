@@ -179,6 +179,7 @@ EpadResult Encryptor::Load(const std::string &fileName, SecureVector<byte> &cont
         if(length != static_cast<stream_length_type>(content.size()))
             return EpadResult::IOErrorInput;
 
+        mX2KeyLocation = x2KeyLocation;
         return EpadResult::Success;
     }
 
