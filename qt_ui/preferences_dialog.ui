@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>474</width>
-    <height>503</height>
+    <width>500</width>
+    <height>516</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -18,8 +18,8 @@
   </property>
   <property name="maximumSize">
    <size>
-    <width>474</width>
-    <height>503</height>
+    <width>500</width>
+    <height>600</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -43,20 +43,7 @@
      <property name="spacing">
       <number>10</number>
      </property>
-     <item row="9" column="0">
-      <widget class="QLabel" name="label_7">
-       <property name="toolTip">
-        <string>Libcurl command line parameters</string>
-       </property>
-       <property name="text">
-        <string>Parameters:</string>
-       </property>
-       <property name="buddy">
-        <cstring>uiLibcurlParameters</cstring>
-       </property>
-      </widget>
-     </item>
-     <item row="12" column="0" colspan="2">
+     <item row="13" column="0" colspan="2">
       <layout class="QHBoxLayout" name="horizontalLayout_4">
        <item>
         <widget class="QLabel" name="label_6">
@@ -69,6 +56,19 @@
         </widget>
        </item>
       </layout>
+     </item>
+     <item row="10" column="0">
+      <widget class="QLabel" name="label_7">
+       <property name="toolTip">
+        <string>Libcurl command line parameters</string>
+       </property>
+       <property name="text">
+        <string>Parameters:</string>
+       </property>
+       <property name="buddy">
+        <cstring>uiLibcurlParameters</cstring>
+       </property>
+      </widget>
      </item>
      <item row="0" column="0">
       <widget class="QLabel" name="label">
@@ -83,28 +83,28 @@
        </property>
       </widget>
      </item>
-     <item row="8" column="2">
+     <item row="9" column="2">
       <widget class="QPushButton" name="uiLibcurlBrowse">
        <property name="text">
         <string>Browse...</string>
        </property>
       </widget>
      </item>
-     <item row="7" column="0" colspan="3">
+     <item row="8" column="0" colspan="3">
       <widget class="Line" name="line_2">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
       </widget>
      </item>
-     <item row="6" column="1" colspan="2">
+     <item row="7" column="1" colspan="2">
       <widget class="QCheckBox" name="uiEnableBakFiles">
        <property name="text">
         <string>Enable BAK files</string>
        </property>
       </widget>
      </item>
-     <item row="8" column="1">
+     <item row="9" column="1">
       <widget class="QLineEdit" name="uiLibcurl"/>
      </item>
      <item row="0" column="1">
@@ -129,7 +129,7 @@
        </property>
       </widget>
      </item>
-     <item row="5" column="1" colspan="2">
+     <item row="6" column="1" colspan="2">
       <widget class="QCheckBox" name="uiLastUsedDirectory">
        <property name="toolTip">
         <string>Retain last used directory between EncryptPad sessions</string>
@@ -139,7 +139,7 @@
        </property>
       </widget>
      </item>
-     <item row="4" column="1">
+     <item row="5" column="1">
       <layout class="QHBoxLayout" name="layout_2">
        <property name="spacing">
         <number>0</number>
@@ -182,21 +182,21 @@
        </property>
       </widget>
      </item>
-     <item row="11" column="2">
+     <item row="12" column="2">
       <widget class="QPushButton" name="uiDefaultFileProperties">
        <property name="text">
         <string>Edit...</string>
        </property>
       </widget>
      </item>
-     <item row="3" column="0" colspan="3">
+     <item row="4" column="0" colspan="3">
       <widget class="Line" name="line">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
       </widget>
      </item>
-     <item row="8" column="0">
+     <item row="9" column="0">
       <widget class="QLabel" name="label_3">
        <property name="toolTip">
         <string>Path to libCURL executable</string>
@@ -234,7 +234,14 @@
        </property>
       </widget>
      </item>
-     <item row="4" column="0">
+     <item row="11" column="0" colspan="3">
+      <widget class="Line" name="line_3">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="0">
       <widget class="QLabel" name="label_2">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
@@ -250,21 +257,14 @@
        </property>
       </widget>
      </item>
-     <item row="12" column="2">
+     <item row="13" column="2">
       <widget class="QPushButton" name="uiEditKeyFileProperties">
        <property name="text">
         <string>Edit...</string>
        </property>
       </widget>
      </item>
-     <item row="10" column="0" colspan="3">
-      <widget class="Line" name="line_3">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
-     </item>
-     <item row="15" column="0" colspan="3">
+     <item row="16" column="0" colspan="3">
       <widget class="QDialogButtonBox" name="buttonBox">
        <property name="minimumSize">
         <size>
@@ -283,7 +283,7 @@
        </property>
       </widget>
      </item>
-     <item row="13" column="2">
+     <item row="14" column="2">
       <widget class="QComboBox" name="uiS2KResultsPoolSize">
        <property name="currentIndex">
         <number>0</number>
@@ -315,7 +315,7 @@
        </item>
       </widget>
      </item>
-     <item row="11" column="0" colspan="2">
+     <item row="12" column="0" colspan="2">
       <layout class="QHBoxLayout" name="horizontalLayout_2">
        <item>
         <widget class="QLabel" name="label_4">
@@ -329,7 +329,7 @@
        </item>
       </layout>
      </item>
-     <item row="13" column="0" colspan="2">
+     <item row="14" column="0" colspan="2">
       <layout class="QHBoxLayout" name="horizontalLayout_3">
        <item>
         <widget class="QLabel" name="label_5">
@@ -346,14 +346,14 @@
        </item>
       </layout>
      </item>
-     <item row="9" column="1" colspan="2">
+     <item row="10" column="1" colspan="2">
       <layout class="QHBoxLayout" name="horizontalLayout">
        <item>
         <widget class="QLineEdit" name="uiLibcurlParameters"/>
        </item>
       </layout>
      </item>
-     <item row="14" column="0" colspan="2">
+     <item row="15" column="0" colspan="2">
       <widget class="QLabel" name="label_8">
        <property name="text">
         <string>Key file random sequence length (bytes):</string>
@@ -363,7 +363,7 @@
        </property>
       </widget>
      </item>
-     <item row="14" column="2">
+     <item row="15" column="2">
       <widget class="QComboBox" name="uiKeyFileLength">
        <item>
         <property name="text">
@@ -397,6 +397,46 @@
        </property>
       </widget>
      </item>
+     <item row="3" column="1">
+      <layout class="QHBoxLayout" name="horizontalLayout_5">
+       <item>
+        <widget class="QSpinBox" name="uiTabSize">
+         <property name="minimum">
+          <number>1</number>
+         </property>
+         <property name="maximum">
+          <number>40</number>
+         </property>
+         <property name="value">
+          <number>4</number>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </item>
+     <item row="3" column="0">
+      <widget class="QLabel" name="label_9">
+       <property name="text">
+        <string>Tab size:</string>
+       </property>
+       <property name="buddy">
+        <cstring>uiTabSize</cstring>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
   </layout>
@@ -406,6 +446,7 @@
   <tabstop>uiSelectFont</tabstop>
   <tabstop>uiWordWrap</tabstop>
   <tabstop>uiWindowsEol</tabstop>
+  <tabstop>uiTabSize</tabstop>
   <tabstop>uiRecentFiles</tabstop>
   <tabstop>uiLastUsedDirectory</tabstop>
   <tabstop>uiEnableBakFiles</tabstop>
@@ -415,6 +456,7 @@
   <tabstop>uiDefaultFileProperties</tabstop>
   <tabstop>uiEditKeyFileProperties</tabstop>
   <tabstop>uiS2KResultsPoolSize</tabstop>
+  <tabstop>uiKeyFileLength</tabstop>
  </tabstops>
  <resources/>
  <connections>

@@ -103,6 +103,7 @@ namespace
         binder.Bind(ui.uiWindowsEol, value.windowsEol);
         binder.Bind(ui.uiS2KResultsPoolSize, value.s2kResultsPoolSize);
         binder.Bind(ui.uiKeyFileLength, value.kfKeyLength);
+        binder.Bind(ui.uiTabSize, value.tabSize);
     }
 
     void ParseComboBoxData(QComboBox *combo)

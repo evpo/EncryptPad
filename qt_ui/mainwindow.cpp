@@ -1123,6 +1123,8 @@ void MainWindow::onUpdatedPreferences()
     enc.SetLibcurlPath(preferences.libCurlPath.toStdString());
     enc.SetLibcurlParams(preferences.libCurlParameters.toStdString());
     textEdit->setFont(preferences.font);
+    QFontMetrics metrics(textEdit->font());
+    textEdit->setTabStopWidth(preferences.tabSize * metrics.width(' '));
     recent_files_service_.SetMaxFiles(preferences.recentFiles);
     resetZoom();
 

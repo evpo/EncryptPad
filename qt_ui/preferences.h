@@ -14,6 +14,7 @@ struct PersistentPreferences
     int recentFiles;
     int s2kResultsPoolSize;
     QFont font;
+    int tabSize;
     QString libCurlPath;
     QString libCurlParameters;
     int kfKeyLength;

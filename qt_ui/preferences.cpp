@@ -10,6 +10,7 @@ namespace
     const bool kDefaultenableBakFiles = true;
     const bool kDefaultWordWrap = true;
     const int kDefaultS2KResultsPoolSize = 8;
+    const int kDefaultTabSize = 4;
     const LibEncryptMsg::Compression kDefaultKeyFileCompression
         = LibEncryptMsg::Compression::Uncompressed;
 #if defined(__MINGW__) || defined(__MINGW32__)
@@ -129,6 +130,7 @@ namespace
         mapper.Map("key_file_iterations", preferences.keyFileProperties.iterations);
         mapper.Map("windows_eol", preferences.windowsEol);
         mapper.Map("key_file_key_length", preferences.kfKeyLength);
+        mapper.Map("tab_size", preferences.tabSize);
     }
 }
 
@@ -153,6 +155,7 @@ void SetDefaultPreferences(PersistentPreferences &preferences)
     preferences.keyFileProperties.iterations = EncryptPad::kDefaultIterations;
 
     preferences.font = QFontDatabase::systemFont(QFontDatabase::FixedFont);
+    preferences.tabSize = kDefaultTabSize;
 }
 
 
