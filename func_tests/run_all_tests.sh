@@ -6,7 +6,7 @@ set -o pipefail
 
 UNAME=$(uname)
 
-if [[ $UNAME == *MINGW* ]]; then
+if [[ $UNAME == *MINGW* || $UNAME == *Darwin* ]]; then
     GPG="gpg"
 else
     GPG="gpg2"
