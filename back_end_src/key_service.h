@@ -41,6 +41,11 @@ namespace EncryptPad
         {
             return key->length() == 0;
         }
+
+        KeyRecord():
+            key(std::unique_ptr<LibEncryptMsg::EncryptionKey>(new LibEncryptMsg::EncryptionKey()))
+        {
+        }
     };
 
     const int kDefaultKeyCount = 5;
