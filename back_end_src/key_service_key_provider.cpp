@@ -1,5 +1,5 @@
 #include "key_service_key_provider.h"
-#include "openpgp_conversions.h"
+#include "encryptmsg/openpgp_conversions.h"
 
 using namespace LibEncryptMsg;
 namespace EncryptPad

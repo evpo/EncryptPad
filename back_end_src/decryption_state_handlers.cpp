@@ -4,7 +4,7 @@
 #include "key_file_converter.h"
 #include "wad_reader_writer.h"
 #include "epad_result.h"
-#include "openpgp_conversions.h"
+#include "encryptmsg/openpgp_conversions.h"
 
 using namespace LibEncryptMsg;
 

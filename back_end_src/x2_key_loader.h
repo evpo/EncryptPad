@@ -21,7 +21,7 @@
 #include <string>
 #include "botan.h"
 #include "packet_typedef.h"
-#include "emsg_types.h"
+#include "encryptmsg/emsg_types.h"
 
 namespace EncryptPad
 {

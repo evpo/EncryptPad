@@ -33,8 +33,8 @@
 #include "version.h"
 #include "key_generation.h"
 #include "file_helper.h"
-#include "openpgp_conversions.h"
-#include "algo_spec.h"
+#include "encryptmsg/openpgp_conversions.h"
+#include "encryptmsg/algo_spec.h"
 #include "algo_defaults.h"
 #include "plog/Log.h"
 

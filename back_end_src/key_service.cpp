@@ -20,9 +20,9 @@
 #include "key_service.h"
 #include <algorithm>
 #include "assert.h"
-#include "algo_spec.h"
-#include "openpgp_conversions.h"
-#include "emsg_symmetric_key.h"
+#include "encryptmsg/algo_spec.h"
+#include "encryptmsg/openpgp_conversions.h"
+#include "encryptmsg/emsg_symmetric_key.h"
 
 using namespace LibEncryptMsg;
 

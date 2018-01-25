@@ -1,7 +1,7 @@
 #include "decryption_state_machine.h"
 #include "state_graph.h"
 #include "state_machine.h"
-#include "emsg_exception.h"
+#include "encryptmsg/emsg_exception.h"
 #include "decryption_state_handlers.h"
 #include "decryption_state_debug.h"
 

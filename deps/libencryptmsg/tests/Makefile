@@ -12,7 +12,7 @@ BOTANLIB := $(shell pkg-config --libs botan-2)
 BOTANCXX := $(shell pkg-config --cflags botan-2)
 LDLIBS += ../deps/gtest/googletest/build/libgtest.a $(BOTANLIB) -lpthread -lm
 CXXFLAGS += -I../deps/gtest/googletest/include -pthread -std=c++11 -Wall -Wextra
-CXXFLAGS += -I../include -I../include/internal -I../deps/stlplus/containers -I../deps/plog/include $(BOTANCXX)
+CXXFLAGS += -I../include/encryptmsg -I../include/internal -I../deps/stlplus/containers -I../deps/plog/include $(BOTANCXX)
 
 LDFLAGS += -Wall
 

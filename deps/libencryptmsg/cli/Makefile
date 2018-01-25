@@ -9,7 +9,7 @@ endif
 BOTANLIB := $(shell pkg-config --libs botan-2)
 BOTANCXX := $(shell pkg-config --cflags botan-2)
 CXXFLAGS += -Wall -Wextra -std=c++11 $(BOTANCXX)
-CXXFLAGS += -I../include -I../deps/plog/include
+CXXFLAGS += -I../include/encryptmsg -I../deps/plog/include
 LDFLAGS += -Wall
 LDLIBS += -lm $(BOTANLIB)
 

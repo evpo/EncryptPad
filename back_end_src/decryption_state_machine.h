@@ -1,11 +1,11 @@
 #pragma once
-#include "emsg_types.h"
+#include "encryptmsg/emsg_types.h"
 #include "packet_stream.h"
 #include "packet_composer.h"
 #include "decryption_state_machine.h"
 #include "state_machine_interface.h"
-#include "emsg_mem.h"
-#include "message_decryption.h"
+#include "encryptmsg/emsg_mem.h"
+#include "encryptmsg/message_decryption.h"
 #include "key_service_key_provider.h"
 #include <string>
 

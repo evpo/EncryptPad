@@ -23,7 +23,7 @@
 #include <string>
 #include "packet_typedef.h"
 #include "packet_stream.h"
-#include "emsg_types.h"
+#include "encryptmsg/emsg_types.h"
 
 namespace EncryptPad
 {

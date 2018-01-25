@@ -26,7 +26,7 @@
 #include <functional>
 #include "botan.h"
 #include "packet_typedef.h"
-#include "algo_spec.h"
+#include "encryptmsg/algo_spec.h"
 #include "algo_defaults.h"
 #include "packet_stream.h"
 #include "key_service.h"

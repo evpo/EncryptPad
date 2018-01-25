@@ -3,7 +3,7 @@ include ../deps/makefiles/platform.mak
 LIBRARIES += ../deps/state_machine ../deps/stlplus/containers ../deps/botan_1_openpgp_codec
 CXXFLAGS += -ggdb -std=c++11 -Wall -Wextra
 
-CXXFLAGS += -I./ -I../include -I../deps/plog/include $(BOTAN_CXXFLAGS)
+CXXFLAGS += -I./ -I../include/encryptmsg -I../deps/plog/include $(BOTAN_CXXFLAGS)
 ifneq ($(OVERRIDE_BOTAN_FLAGS),on)
 CXXFLAGS += $(shell pkg-config --cflags botan-2)
 endif

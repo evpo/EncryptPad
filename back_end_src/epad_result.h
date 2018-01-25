@@ -1,5 +1,5 @@
 #pragma once
-#include "emsg_types.h"
+#include "encryptmsg/emsg_types.h"
 
 namespace EncryptPad
 {

@@ -22,9 +22,9 @@
 #include <memory>
 #include <vector>
 #include "botan.h"
-#include "algo_spec.h"
+#include "encryptmsg/algo_spec.h"
 #include "packet_typedef.h"
-#include "emsg_types.h"
+#include "encryptmsg/emsg_types.h"
 
 namespace EncryptPad
 {

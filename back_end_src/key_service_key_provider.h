@@ -2,8 +2,8 @@
 #include <memory>
 #include <string>
 #include "key_service.h"
-#include "passphrase_provider.h"
-#include "algo_spec.h"
+#include "encryptmsg/passphrase_provider.h"
+#include "encryptmsg/algo_spec.h"
 
 namespace EncryptPad
 {

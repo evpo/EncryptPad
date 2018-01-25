@@ -1,5 +1,5 @@
 #pragma once
-#include "algo_spec.h"
+#include "encryptmsg/algo_spec.h"
 
 namespace EncryptPad
 {
