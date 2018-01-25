@@ -37,6 +37,7 @@
 #include "encryptmsg/algo_spec.h"
 #include "algo_defaults.h"
 #include "plog/Log.h"
+#include "encryptmsg_version.h"
 
 namespace EncryptPad
 {
@@ -45,9 +46,11 @@ namespace EncryptPad
 
     void PrintUsage(bool use_cout = false)
     {
+        std::string version = VER_PRODUCTNAME_STR " " VER_PRODUCTVERSION_STR;
+        version += "\n";
+        version += EncryptMsgVersion() + "\n\n";
+
         const char *usage =
-            VER_PRODUCTNAME_STR " " VER_PRODUCTVERSION_STR "\n"
-            "\n"
             "Usage: encryptcli <command> [options] [input-file] | [key-file]\n"
             "Utility to encrypt, decrypt OpenPGP files or generate key files.\n"
             "\n"
@@ -86,11 +89,11 @@ namespace EncryptPad
 
         if(use_cout)
         {
-            std::cout << usage << std::endl;
+            std::cout << version << usage << std::endl;
         }
         else
         {
-            std::cerr << usage << std::endl;
+            std::cerr << version << usage << std::endl;
         }
     }
 
