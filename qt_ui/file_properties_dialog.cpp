@@ -23,7 +23,7 @@
 #include <QtGlobal>
 #include <sstream>
 #include "common_definitions.h"
-#include "openpgp_conversions.h"
+#include "encryptmsg/openpgp_conversions.h"
 
 namespace
 {

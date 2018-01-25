@@ -240,7 +240,7 @@ TEST_F(InPacketStreamFixture, When_writing_to_OutPacketStreamCont_incrementally_
 
     //Assert
     ASSERT_EQ(20, out.GetCount());
-    ASSERT_GE(buffer.size(), 20);
+    ASSERT_GE(buffer.size(), static_cast<size_t>(20));
     ASSERT_STREQ("Hello Array 1234567", reinterpret_cast<const char*>(buffer.data()));
 }
 // end of PacketStream tests

@@ -1,7 +1,7 @@
 #include "preferences.h"
 #include <QFontDatabase>
-#include "openpgp_conversions.h"
-#include "algo_spec.h"
+#include "encryptmsg/openpgp_conversions.h"
+#include "encryptmsg/algo_spec.h"
 
 namespace
 {

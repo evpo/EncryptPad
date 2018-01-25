@@ -23,7 +23,7 @@
 #include <QFile>
 #include "ui_file_encryption_dialog.h"
 #include "file_name_helper.h"
-#include "algo_spec.h"
+#include "encryptmsg/algo_spec.h"
 #include "file_properties_dialog.h"
 #include "set_encryption_key.h"
 #include "file_encryption.h"

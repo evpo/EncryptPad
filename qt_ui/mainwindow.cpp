@@ -29,7 +29,7 @@
 #include "mainwindow.h"
 #include "key_generation.h"
 #include "file_encryption.h"
-#include "algo_spec.h"
+#include "encryptmsg/algo_spec.h"
 #include "file_properties_dialog.h"
 #include "os_api.h"
 #include "file_name_helper.h"
@@ -43,7 +43,7 @@
 #include "version.h"
 #include "plain_text_edit.h"
 #include "common_definitions.h"
-#include "openpgp_conversions.h"
+#include "encryptmsg/openpgp_conversions.h"
 
 typedef unsigned char byte;
 

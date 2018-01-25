@@ -22,7 +22,7 @@
 #include "gtest/gtest.h"
 #include "key_generation.h"
 #include "test_utilities.h"
-#include "algo_spec.h"
+#include "encryptmsg/algo_spec.h"
 #include "algo_defaults.h"
 
 using namespace EncryptPad;
