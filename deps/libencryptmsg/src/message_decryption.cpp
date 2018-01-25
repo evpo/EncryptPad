@@ -100,6 +100,7 @@ namespace LibEncryptMsg
             bool analyze_only_;
             std::unique_ptr<SymmetricKeyProvider> key_provider_;
             std::unique_ptr<PassphraseProvider> passphrase_provider_;
+            void ResetMessageConfig();
         public:
             void Start();
             void Start(const SafeVector &passphrase);
@@ -147,6 +148,7 @@ namespace LibEncryptMsg
         passphrase_provider_.reset(new KnownPassphraseProvider(std::move(data_uptr)));
         key_provider_.reset(new KeyFromPassphraseProvider(*passphrase_provider_));
         session_state_.key_provider = key_provider_.get();
+        ResetMessageConfig();
     }
 
     void MessageReaderImpl::Start(std::unique_ptr<SafeVector> passphrase)
@@ -154,6 +156,7 @@ namespace LibEncryptMsg
         passphrase_provider_.reset(new KnownPassphraseProvider(std::move(passphrase)));
         key_provider_.reset(new KeyFromPassphraseProvider(*passphrase_provider_));
         session_state_.key_provider = key_provider_.get();
+        ResetMessageConfig();
     }
 
     void MessageReaderImpl::Start(PassphraseProvider &passphrase_provider)
@@ -161,6 +164,7 @@ namespace LibEncryptMsg
         passphrase_provider_.reset(new PassThroughPassphraseProvider(passphrase_provider));
         key_provider_.reset(new KeyFromPassphraseProvider(*passphrase_provider_));
         session_state_.key_provider = key_provider_.get();
+        ResetMessageConfig();
     }
 
     // For known keys
@@ -168,6 +172,7 @@ namespace LibEncryptMsg
     {
         key_provider_.reset(new PassThroughKeyProvider(key_provider));
         session_state_.key_provider = key_provider_.get();
+        ResetMessageConfig();
     }
 
     void MessageReaderImpl::Start(const EncryptionKey &encryption_key)
@@ -175,12 +180,26 @@ namespace LibEncryptMsg
         std::unique_ptr<EncryptionKey> key_uptr(new EncryptionKey(encryption_key));
         key_provider_.reset(new KnownKeyProvider(std::move(key_uptr)));
         session_state_.key_provider = key_provider_.get();
+        ResetMessageConfig();
     }
 
     void MessageReaderImpl::Start(std::unique_ptr<EncryptionKey> encryption_key)
     {
         key_provider_.reset(new KnownKeyProvider(std::move(encryption_key)));
         session_state_.key_provider = key_provider_.get();
+        ResetMessageConfig();
+    }
+
+    void MessageReaderImpl::ResetMessageConfig()
+    {
+        // These values should be read from the file
+        session_state_.message_config.SetCipherAlgo(CipherAlgo::Unknown);
+        session_state_.message_config.SetHashAlgo(HashAlgo::Unknown);
+        session_state_.message_config.SetIterations(0);
+
+        // If there is no Compressed packet, compression is not set at all
+        // So we set it to Uncompressed now
+        session_state_.message_config.SetCompression(Compression::Uncompressed);
     }
 
     void MessageReaderImpl::Update(SafeVector &buf)
