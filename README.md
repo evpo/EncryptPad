@@ -67,6 +67,7 @@ EncryptPad is an application for viewing and editing symmetrically encrypted tex
 * Hash algorithms: **SHA-1, SHA-256, SHA-512**
 * Integrity protection: **SHA-1**
 * Compression: **ZLIB, ZIP**
+* **Large multi-gigabyte files** are supported
 
 <div id="supported-platforms"></div>
 
