@@ -1,3 +1,9 @@
+//**********************************************************************************
+//EncryptPad Copyright 2018 Evgeny Pokhilko 
+//<http://www.evpo.net/encryptpad>
+//
+//libencryptmsg is released under the Simplified BSD License (see license.txt)
+//**********************************************************************************
 #include "openpgp_conversions.h"
 #include "botan/pgp_s2k.h"
 

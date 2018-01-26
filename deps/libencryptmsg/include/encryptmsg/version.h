@@ -1,3 +1,9 @@
+//**********************************************************************************
+//EncryptPad Copyright 2018 Evgeny Pokhilko 
+//<http://www.evpo.net/encryptpad>
+//
+//libencryptmsg is released under the Simplified BSD License (see license.txt)
+//**********************************************************************************
 #pragma once
 #define VER_FILEVERSION             0,0,1,0
 #define VER_FILEVERSION_STR         "0.0.1.0"
