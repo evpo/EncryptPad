@@ -6,6 +6,16 @@ h2
 </style>
 ## Notes de version ##
 
+### Version 0.4.0.0
+
+* Support for large files. EncryptPad can now process disk images, backups and other types of multi-gigabyte files.
+* A progress bar and cancellation button in the file encryption dialogue.
+* Configuration of tab size in the text editor.
+* Botan has been updated to version 2.3
+* stlplus was updated to 3.15.
+* OpenPGP functionality has moved to its own library libencryptmsg
+* WAD format that is used for files encrypted with the persistent key file setting and double protection has changed. Files of this type that are larger than 64 kilobytes are not backward compatible and cannot be opened with 0.3.2.5. This does not apply to gpg and epd files with single encryption and without persistent key file.
+
 ### Version 0.3.2.5
 
 * Correctif de bogue : si un fichier EPD «&nbsp;phrase de passe seulement&nbsp&nbsp;» déchiffré comprenait moins de 4 caractères, le contenu était ignoré et EncryptPad produisait un fichier vide. Cela se produisait, car EncryptPad  s'attendait à trouver un marqueur IWAD de 4 caractères. Ces fichiers seront maintenant ouverts correctement.

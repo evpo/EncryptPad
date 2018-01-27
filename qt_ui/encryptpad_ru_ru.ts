@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="ru">
+<?xml version="1.0" ?><!DOCTYPE TS><TS language="ru" version="2.1">
 <context>
     <name>ConfirmPassphraseDialog</name>
     <message>
@@ -61,7 +59,7 @@
     <message>
         <location filename="file_encryption_dialog.ui" line="102"/>
         <source>Cancel</source>
-        <translation type="unfinished">Отменить</translation>
+        <translation>Отменить</translation>
     </message>
     <message>
         <location filename="file_encryption_dialog.ui" line="112"/>
@@ -235,7 +233,7 @@ Do you want to replace it?</source>
     <message>
         <location filename="file_encryption_dialog.cpp" line="420"/>
         <source>The job has been cancelled</source>
-        <translation type="unfinished"></translation>
+        <translation>Работа отменена</translation>
     </message>
     <message>
         <location filename="file_encryption_dialog.cpp" line="440"/>
@@ -256,13 +254,9 @@ Do you want to replace it?</source>
         <translation>Открытый Текст (*.txt)</translation>
     </message>
     <message>
-        <source>Encrypted Files (*.epd *.gpg *.cpad);; Plain Text (*.txt)</source>
-        <translation type="vanished">Шифрованные Файлы (*.epd *.gpg *.cpad);; Открытый Текст (*.txt)</translation>
-    </message>
-    <message>
         <location filename="file_name_helper.cpp" line="40"/>
         <source>Encrypted Files (*.epd *.gpg);; Plain Text (*.txt)</source>
-        <translation type="unfinished"></translation>
+        <translation>Шифрованные Файлы (*.epd *.gpg);; Открытый Текст (*.txt)</translation>
     </message>
     <message>
         <location filename="file_name_helper.cpp" line="41"/>
@@ -1158,7 +1152,7 @@ Do you want to replace it?</source>
     <message>
         <location filename="mainwindow.cpp" line="1636"/>
         <source>untitled</source>
-        <translation type="unfinished"></translation>
+        <translation>новый</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="1645"/>
@@ -1367,7 +1361,7 @@ Do you want to replace it?</source>
     <message>
         <location filename="preferences_dialog.ui" line="125"/>
         <source>[example: Monospace (Size: 12)]</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="138"/>
@@ -1445,7 +1439,7 @@ Do you want to replace it?</source>
     <message>
         <location filename="preferences_dialog.ui" line="433"/>
         <source>Tab size:</source>
-        <translation type="unfinished"></translation>
+        <translation>Размер таба:</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="135"/>
@@ -1463,13 +1457,9 @@ Do you want to replace it?</source>
         <translation>Шрифт...</translation>
     </message>
     <message>
-        <source> (Size: </source>
-        <translation type="vanished"> (Размер:</translation>
-    </message>
-    <message>
         <location filename="preferences_dialog.cpp" line="146"/>
         <source>(Size: </source>
-        <translation type="unfinished"></translation>
+        <translation> (Размер:</translation>
     </message>
     <message>
         <location filename="preferences_dialog.cpp" line="148"/>

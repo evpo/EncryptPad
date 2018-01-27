@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="fr">
+<?xml version="1.0" ?><!DOCTYPE TS><TS language="fr" version="2.1">
 <context>
     <name>ConfirmPassphraseDialog</name>
     <message>
@@ -61,7 +59,7 @@
     <message>
         <location filename="file_encryption_dialog.ui" line="102"/>
         <source>Cancel</source>
-        <translation type="unfinished">Annuler</translation>
+        <translation>Annuler</translation>
     </message>
     <message>
         <location filename="file_encryption_dialog.ui" line="112"/>
@@ -236,7 +234,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="file_encryption_dialog.cpp" line="420"/>
         <source>The job has been cancelled</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="file_encryption_dialog.cpp" line="440"/>
@@ -257,13 +255,9 @@ Souhaitez-vous le remplacer ?</translation>
         <translation>Texte en clair (*.txt)</translation>
     </message>
     <message>
-        <source>Encrypted Files (*.epd *.gpg *.cpad);; Plain Text (*.txt)</source>
-        <translation type="vanished">Fichiers chiffrés (*.epd *.gpg *.cpad);; Texte en clair (*.txt)</translation>
-    </message>
-    <message>
         <location filename="file_name_helper.cpp" line="40"/>
         <source>Encrypted Files (*.epd *.gpg);; Plain Text (*.txt)</source>
-        <translation type="unfinished"></translation>
+        <translation>Fichiers chiffrés (*.epd *.gpg);; Texte en clair (*.txt)</translation>
     </message>
     <message>
         <location filename="file_name_helper.cpp" line="41"/>
@@ -680,7 +674,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="mainwindow.cpp" line="656"/>
         <source>&lt;b&gt;EncryptPad %1 Beta&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;Minimalist secure text editor and binary encryptor that implements &lt;br/&gt;RFC 4880 Open PGP format: symmetrically encrypted, compressed and integrity protected. The editor can protect files with passphrases, key files or both.&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;GNU General Public License v2&lt;br/&gt;&lt;br/&gt;</source>
-        <translation>&lt;b&gt;EncryptPad %1 bêta&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;Un éditeur de texte sécurisé minimaliste et un outil de chiffrement binaire qui implémente &lt;br/&gt;le format RFC 4880 Open PGP : chiffré symétriquement, compressé et dont l&apos;intégrité est protégée. L&apos;éditeur peut protéger les fichiers par phrase de passe, fichier clé ou les deux.&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;Licence publique générale GNU v2&lt;br/&gt;&lt;br/&gt;</translation>
+        <translation>&lt;b&gt;EncryptPad %1 bêta&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;Un éditeur de texte sécurisé minimaliste et un outil de chiffrement binaire qui met en œuvre &lt;br/&gt;le format RFC 4880 d&apos;Open PGP : chiffré symétriquement, compressé et dont l&apos;intégrité est protégée. L&apos;éditeur peut protéger les fichiers par phrase de passe, fichier clé ou les deux.&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;Licence publique générale GNU v2&lt;br/&gt;&lt;br/&gt;</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="710"/>
@@ -1159,7 +1153,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="mainwindow.cpp" line="1636"/>
         <source>untitled</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="1645"/>
@@ -1446,7 +1440,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="preferences_dialog.ui" line="433"/>
         <source>Tab size:</source>
-        <translation type="unfinished"></translation>
+        <translation>Taille de tab :</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="135"/>
@@ -1464,13 +1458,9 @@ Souhaitez-vous le remplacer ?</translation>
         <translation>Police...</translation>
     </message>
     <message>
-        <source> (Size: </source>
-        <translation type="vanished">(Taille :</translation>
-    </message>
-    <message>
         <location filename="preferences_dialog.cpp" line="146"/>
         <source>(Size: </source>
-        <translation type="unfinished"></translation>
+        <translation>(Taille :</translation>
     </message>
     <message>
         <location filename="preferences_dialog.cpp" line="148"/>
