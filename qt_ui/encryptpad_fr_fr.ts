@@ -1157,17 +1157,22 @@ Souhaitez-vous le remplacer ?</translation>
         <translation>Taille de police :</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1642"/>
+        <location filename="mainwindow.cpp" line="1636"/>
+        <source>untitled</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="1645"/>
         <source>Key protected</source>
         <translation>Protégé par une clé</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1643"/>
+        <location filename="mainwindow.cpp" line="1646"/>
         <source>Key not set</source>
         <translation>Clé non définie</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1644"/>
+        <location filename="mainwindow.cpp" line="1647"/>
         <source>persistent</source>
         <translation>persistant</translation>
     </message>

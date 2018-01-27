@@ -1632,7 +1632,10 @@ void MainWindow::setCurrentFile(const QString &fileName)
 
     QString shownName = curFile;
     if (curFile.isEmpty())
-        shownName = "untitled.epd";
+    {
+        shownName = tr("untitled");
+        shownName += ".epd";
+    }
     setWindowFilePath(shownName);
     updateLineStatus();
 }

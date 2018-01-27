@@ -1156,17 +1156,22 @@ Do you want to replace it?</source>
         <translation>Размер шрифта: </translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1642"/>
+        <location filename="mainwindow.cpp" line="1636"/>
+        <source>untitled</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="1645"/>
         <source>Key protected</source>
         <translation>Защита ключом</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1643"/>
+        <location filename="mainwindow.cpp" line="1646"/>
         <source>Key not set</source>
         <translation>Ключ не установлен</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1644"/>
+        <location filename="mainwindow.cpp" line="1647"/>
         <source>persistent</source>
         <translation>сохранять путь</translation>
     </message>
