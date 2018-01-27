@@ -10,7 +10,7 @@
 
 namespace LibEncryptMsg
 {
-    class SessionState;
+    struct SessionState;
 
     // Context class provides state handlers with access to the input and output
     class Context : public LightStateMachine::StateMachineContext
