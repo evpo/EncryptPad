@@ -39,7 +39,7 @@ FORMS += \
     passphrase_generation_dialog.ui \
     find_dialog.ui
 
-win32: LIBS += -luserenv
+win32: LIBS += -static -luserenv
 
 LIBS += -L$$PWD/../deps/stlplus/portability/$$DEPS_SUBDIR \
      -L$$PWD/../back_end_src/$$DEPS_SUBDIR \
