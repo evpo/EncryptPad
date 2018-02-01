@@ -94,6 +94,22 @@ TEST_F(FileEncryptionFixture, When_text_encrypted_then_decrypted_It_is_the_same)
     ASSERT_EQ(text, ResultString());
 }
 
+TEST_F(FileEncryptionFixture, When_empty_string_encrypted_It_is_decrypted_as_empty)
+{
+    // Prepare
+    std::string text = "";
+    AssignBuffer(text);
+
+    // Act
+    EpadResult encrypt_result = EncryptBuffer(in_buffer_, enc_params_, out_buffer_, metadata_);
+    EpadResult decrypt_result = DecryptBuffer(out_buffer_, enc_params_, result_buffer_, metadata_);
+
+    // Assert
+    ASSERT_EQ(EpadResult::Success, encrypt_result);
+    ASSERT_EQ(EpadResult::Success, decrypt_result);
+    ASSERT_TRUE(ResultString().empty());
+}
+
 TEST_F(FileEncryptionFixture, When_two_chars_encrypted_without_compression_then_decrypted_They_are_the_same)
 {
     // Prepare

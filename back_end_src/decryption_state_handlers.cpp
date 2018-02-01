@@ -89,6 +89,12 @@ namespace EncryptPad
         c.SetResult(EpadResult::Success);
     }
 
+    bool IsEncryptedEmptyString(DecryptionContext &c)
+    {
+        return c.In().IsEOF() && c.GetFilterCount() == 1 && c.Buffer().empty() && c.PendingBuffer().empty()
+            && c.GetFormat() == Format::GPGOrNestedWad;
+    }
+
     bool ParseFormat_CanEnter(LightStateMachine::StateMachineContext &ctx)
     {
         auto &c = ToContext(ctx);
@@ -104,13 +110,19 @@ namespace EncryptPad
                 return false;
         }
 
-        return c.Buffer().size() > 0 || c.PendingBuffer().size() > 0;
+        return c.Buffer().size() > 0 || c.PendingBuffer().size() > 0 || IsEncryptedEmptyString(c);
     }
 
     void ParseFormat_OnEnter(LightStateMachine::StateMachineContext &ctx)
     {
         auto &c = ToContext(ctx);
         size_t required_bytes = c.GetFilterCount() == 1 ? 4 : 1;
+
+        if(IsEncryptedEmptyString(c))
+        {
+            c.SetFormat(Format::GPG);
+            return;
+        }
 
         c.PendingBuffer().insert(c.PendingBuffer().end(), c.Buffer().begin(), c.Buffer().end());
         c.Buffer().clear();

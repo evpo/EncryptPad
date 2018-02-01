@@ -88,8 +88,8 @@ namespace EncryptPad
         L(read_key_file, read_in);
         L(read_key_file, gpg);
 
-        L(gpg, read_in);
         L(gpg, parse_format);
+        L(gpg, read_in);
         L(gpg, wad_head);
         L(gpg, gpg);
         L(gpg, write_out);
