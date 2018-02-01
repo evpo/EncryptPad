@@ -5,23 +5,23 @@
         <location filename="confirm_passphrase_dialog.ui" line="26"/>
         <location filename="confirm_passphrase_dialog.cpp" line="43"/>
         <source>Set Passphrase</source>
-        <translation>Définir la phrase de passe</translation>
+        <translation>Définir une phrase de passe</translation>
     </message>
     <message>
         <location filename="confirm_passphrase_dialog.ui" line="55"/>
         <location filename="confirm_passphrase_dialog.ui" line="107"/>
         <source>Leave blank when passphrase is not needed</source>
-        <translation>Laisser vide si aucune phrase de passe n&apos;est souhaitée</translation>
+        <translation>Laisser vide si aucune phrase de passe n’est souhaitée</translation>
     </message>
     <message>
         <location filename="confirm_passphrase_dialog.ui" line="65"/>
         <source>&amp;Passphrase:</source>
-        <translation>&amp;Phrase de passe :</translation>
+        <translation>&amp;Phrase de passe :</translation>
     </message>
     <message>
         <location filename="confirm_passphrase_dialog.ui" line="91"/>
         <source>&amp;Confirmation:</source>
-        <translation>&amp;Confirmation :</translation>
+        <translation>&amp;Confirmation :</translation>
     </message>
     <message>
         <location filename="confirm_passphrase_dialog.ui" line="119"/>
@@ -69,7 +69,7 @@
     <message>
         <location filename="file_encryption_dialog.ui" line="118"/>
         <source>Format:</source>
-        <translation>Format :</translation>
+        <translation>Format :</translation>
     </message>
     <message>
         <location filename="file_encryption_dialog.ui" line="128"/>
@@ -80,12 +80,12 @@
     <message>
         <location filename="file_encryption_dialog.ui" line="148"/>
         <source>Output File:</source>
-        <translation>Fichier de sortie :</translation>
+        <translation>Fichier de sortie :</translation>
     </message>
     <message>
         <location filename="file_encryption_dialog.ui" line="170"/>
         <source>Input File:</source>
-        <translation>Fichier d&apos;entrée :</translation>
+        <translation>Fichier d’entrée :</translation>
     </message>
     <message>
         <location filename="file_encryption_dialog.ui" line="188"/>
@@ -115,7 +115,7 @@
     <message>
         <location filename="file_encryption_dialog.ui" line="231"/>
         <source>Key File Path:</source>
-        <translation>Chemin du fichier clé :</translation>
+        <translation>Chemin du fichier clé :</translation>
     </message>
     <message>
         <location filename="file_encryption_dialog.ui" line="244"/>
@@ -130,12 +130,12 @@
     <message>
         <location filename="file_encryption_dialog.ui" line="266"/>
         <source>Passphrase:</source>
-        <translation>Phrase de passe :</translation>
+        <translation>Phrase de passe :</translation>
     </message>
     <message>
         <location filename="file_encryption_dialog.ui" line="282"/>
         <source>Confirmation:</source>
-        <translation>Confirmation :</translation>
+        <translation>Confirmation :</translation>
     </message>
     <message>
         <location filename="file_encryption_dialog.ui" line="325"/>
@@ -150,7 +150,7 @@
     <message>
         <location filename="file_encryption_dialog.ui" line="359"/>
         <source>Encryption:</source>
-        <translation>Chiffrement :</translation>
+        <translation>Chiffrement :</translation>
     </message>
     <message>
         <location filename="file_encryption_dialog.ui" line="369"/>
@@ -175,7 +175,7 @@
     <message>
         <location filename="file_encryption_dialog.cpp" line="233"/>
         <source>Input File</source>
-        <translation>Fichier d&apos;entrée</translation>
+        <translation>Fichier d’entrée</translation>
     </message>
     <message>
         <location filename="file_encryption_dialog.cpp" line="250"/>
@@ -197,19 +197,19 @@
     <message>
         <location filename="file_encryption_dialog.cpp" line="302"/>
         <source>%1 does not exist.</source>
-        <translation>%1 n&apos;existe pas.</translation>
+        <translation>%1 n’existe pas.</translation>
     </message>
     <message>
         <location filename="file_encryption_dialog.cpp" line="311"/>
         <source>%1 already exists.
 Do you want to replace it?</source>
         <translation>%1 existe déjà.
-Souhaitez-vous le remplacer ?</translation>
+Souhaitez-vous le remplacer ?</translation>
     </message>
     <message>
         <location filename="file_encryption_dialog.cpp" line="371"/>
         <source>Cannot open the encryption key</source>
-        <translation>Impossible d&apos;ouvrir la clé de chiffrement</translation>
+        <translation>Impossible d’ouvrir la clé de chiffrement</translation>
     </message>
     <message>
         <location filename="file_encryption_dialog.cpp" line="378"/>
@@ -219,7 +219,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="file_encryption_dialog.cpp" line="385"/>
         <source>Cannot download the encryption key. CURL tool is not found.</source>
-        <translation>Impossible de télécharger la clé de chiffrement. L&apos;outil CURL est introuvable.</translation>
+        <translation>Impossible de télécharger la clé de chiffrement. L’outil CURL est introuvable.</translation>
     </message>
     <message>
         <location filename="file_encryption_dialog.cpp" line="392"/>
@@ -234,7 +234,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="file_encryption_dialog.cpp" line="420"/>
         <source>The job has been cancelled</source>
-        <translation type="unfinished"/>
+        <translation>Le travail a été annulé</translation>
     </message>
     <message>
         <location filename="file_encryption_dialog.cpp" line="440"/>
@@ -285,12 +285,12 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="file_properties_dialog.ui" line="55"/>
         <source>Algorithm:</source>
-        <translation>Algorithme :</translation>
+        <translation>Algorithme :</translation>
     </message>
     <message>
         <location filename="file_properties_dialog.ui" line="65"/>
         <source>Iterations:</source>
-        <translation>Itérations :</translation>
+        <translation>Itérations :</translation>
     </message>
     <message>
         <location filename="file_properties_dialog.ui" line="76"/>
@@ -319,7 +319,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="file_properties_dialog.ui" line="99"/>
         <source>Compression:</source>
-        <translation>Compression :</translation>
+        <translation>Compression :</translation>
     </message>
     <message>
         <location filename="file_properties_dialog.ui" line="110"/>
@@ -348,12 +348,12 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="file_properties_dialog.ui" line="137"/>
         <source>Salt:</source>
-        <translation>Sel :</translation>
+        <translation>Sel :</translation>
     </message>
     <message>
         <location filename="file_properties_dialog.ui" line="144"/>
         <source>Hash:</source>
-        <translation>Hachage :</translation>
+        <translation>Hachage :</translation>
     </message>
     <message>
         <location filename="file_properties_dialog.ui" line="176"/>
@@ -387,12 +387,12 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="find_and_replace.ui" line="34"/>
         <source>&amp;Replace with:</source>
-        <translation>&amp;Remplacer par :</translation>
+        <translation>&amp;Remplacer par :</translation>
     </message>
     <message>
         <location filename="find_and_replace.ui" line="44"/>
         <source>&amp;Find:</source>
-        <translation>&amp;Chercher :</translation>
+        <translation>&amp;Chercher :</translation>
     </message>
     <message>
         <location filename="find_and_replace.ui" line="54"/>
@@ -450,7 +450,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="find_dialog.ui" line="65"/>
         <source>&amp;Find:</source>
-        <translation>&amp;Chercher :</translation>
+        <translation>&amp;Chercher :</translation>
     </message>
     <message>
         <location filename="find_dialog.ui" line="89"/>
@@ -478,12 +478,12 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="get_passphrase_dialog.ui" line="49"/>
         <source>&amp;Passphrase:</source>
-        <translation>&amp;Phrase de passe :</translation>
+        <translation>&amp;Phrase de passe :</translation>
     </message>
     <message>
         <location filename="get_passphrase_dialog.ui" line="65"/>
         <source>Leave blank when passphrase is not needed</source>
-        <translation>Laisser vide si aucune phrase de passe n&apos;est souhaitée</translation>
+        <translation>Laisser vide si aucune phrase de passe n’est souhaitée</translation>
     </message>
 </context>
 <context>
@@ -496,17 +496,17 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="get_passphrase_or_key_dialog.ui" line="37"/>
         <source>Passphrase:</source>
-        <translation>Phrase de passe :</translation>
+        <translation>Phrase de passe :</translation>
     </message>
     <message>
         <location filename="get_passphrase_or_key_dialog.ui" line="47"/>
         <source>Key File:</source>
-        <translation>Fichier clé :</translation>
+        <translation>Fichier clé :</translation>
     </message>
     <message>
         <location filename="get_passphrase_or_key_dialog.ui" line="67"/>
         <source>Leave blank when passphrase is not needed</source>
-        <translation>Laisser vide si aucune phrase de passe n&apos;est souhaitée</translation>
+        <translation>Laisser vide si aucune phrase de passe n’est souhaitée</translation>
     </message>
     <message>
         <location filename="get_passphrase_or_key_dialog.ui" line="80"/>
@@ -530,17 +530,17 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="load_save_handler.cpp" line="53"/>
         <source>Cannot open the file because it does not exist</source>
-        <translation>Impossible d&apos;ouvrir le fichier, car il n&apos;existe pas</translation>
+        <translation>Impossible d’ouvrir le fichier, car il n’existe pas</translation>
     </message>
     <message>
         <location filename="load_save_handler.cpp" line="165"/>
         <source>GPG format does not support persistent key path.</source>
-        <translation>Le format GPG ne prend pas en charge les chemins de clé persistants.</translation>
+        <translation>Le format GPG ne prend pas en charge les chemins de clé persistantes.</translation>
     </message>
     <message>
         <location filename="load_save_handler.cpp" line="167"/>
         <source>Do you want to disable it?</source>
-        <translation>Souhaitez-vous le désactiver ?</translation>
+        <translation>Souhaitez-vous le désactiver ?</translation>
     </message>
     <message>
         <location filename="load_save_handler.cpp" line="183"/>
@@ -555,7 +555,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="load_save_handler.cpp" line="209"/>
         <source>Neither a key file nor passphrase is set. The file is going to be saved UNENCRYPTED.</source>
-        <translation>Aucun fichier clé ni phrase de passe n&apos;est défini. Le fichier sera enregistré SANS CHIFFREMENT.</translation>
+        <translation>Aucun fichier clé ni phrase de passe n’est défini. Le fichier sera enregistré SANS CHIFFREMENT.</translation>
     </message>
 </context>
 <context>
@@ -563,17 +563,17 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="mainwindow.cpp" line="166"/>
         <source>ln: %1 of %2</source>
-        <translation>Dans : %1 de %2</translation>
+        <translation>Dans : %1 de %2</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="167"/>
         <source>chars: %1</source>
-        <translation>caractères : %1</translation>
+        <translation>caractères : %1</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="186"/>
         <source>Passphrase not set</source>
-        <translation>La phrase de passe n&apos;est pas définie</translation>
+        <translation>La phrase de passe n’est pas définie</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="191"/>
@@ -584,12 +584,12 @@ Souhaitez-vous le remplacer ?</translation>
         <location filename="mainwindow.cpp" line="258"/>
         <location filename="mainwindow.cpp" line="274"/>
         <source>Cannot open &apos;%1&apos;</source>
-        <translation>Impossible d&apos;ouvrir « %1 »</translation>
+        <translation>Impossible d’ouvrir « %1 »</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="294"/>
         <source>Cannot open the encryption key</source>
-        <translation>Impossible d&apos;ouvrir la clé de chiffrement</translation>
+        <translation>Impossible d’ouvrir la clé de chiffrement</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="302"/>
@@ -599,7 +599,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="mainwindow.cpp" line="310"/>
         <source>Cannot download the encryption key. CURL tool is not found.</source>
-        <translation>Impossible de télécharger la clé de chiffrement. L&apos;outil CURL est introuvable.</translation>
+        <translation>Impossible de télécharger la clé de chiffrement. L’outil CURL est introuvable.</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="318"/>
@@ -624,7 +624,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="mainwindow.cpp" line="452"/>
         <source>The file has been modified by another program. Do you want to reload it and lose the changes made in this application?</source>
-        <translation>Le fichier a été modifié par un autre programme. Souhaitez-vous le recharger et perdre les modifications faites dans cette application ?</translation>
+        <translation>Le fichier a été modifié par un autre programme. Souhaitez-vous le recharger et perdre les modifications faites dans cette application ?</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="491"/>
@@ -649,7 +649,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="mainwindow.cpp" line="604"/>
         <source>You left the passphrase blank. The key file is going to be UNENCRYPTED. Do you want to continue?</source>
-        <translation>Vous avez laissé la phrase de passe vide. Le fichier clé NE SERA PAS CHIFFRÉ. Souhaitez-vous poursuivre ?</translation>
+        <translation>Vous avez laissé la phrase de passe vide. Le fichier clé NE SERA PAS CHIFFRÉ. Souhaitez-vous poursuivre ?</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="636"/>
@@ -664,22 +664,22 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="mainwindow.cpp" line="642"/>
         <source>Do you want to use the generated key for this file?</source>
-        <translation>Souhaitez-vous utiliser la clé générée pour ce fichier ?</translation>
+        <translation>Souhaitez-vous appliquer la clé générée à ce fichier ?</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="655"/>
         <source>About EncryptPad</source>
-        <translation>À propos d&apos;EncryptPad</translation>
+        <translation>À propos d’EncryptPad</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="656"/>
         <source>&lt;b&gt;EncryptPad %1 Beta&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;Minimalist secure text editor and binary encryptor that implements &lt;br/&gt;RFC 4880 Open PGP format: symmetrically encrypted, compressed and integrity protected. The editor can protect files with passphrases, key files or both.&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;GNU General Public License v2&lt;br/&gt;&lt;br/&gt;</source>
-        <translation>&lt;b&gt;EncryptPad %1 bêta&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;Un éditeur de texte sécurisé minimaliste et un outil de chiffrement binaire qui met en œuvre &lt;br/&gt;le format RFC 4880 d&apos;Open PGP : chiffré symétriquement, compressé et dont l&apos;intégrité est protégée. L&apos;éditeur peut protéger les fichiers par phrase de passe, fichier clé ou les deux.&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;Licence publique générale GNU v2&lt;br/&gt;&lt;br/&gt;</translation>
+        <translation>&lt;b&gt;EncryptPad %1 bêta&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;Un éditeur de texte sécurisé minimaliste et un outil de chiffrement binaire qui met en œuvre &lt;br/&gt;le format RFC 4880 d’Open PGP : chiffré symétriquement, compressé et dont l’intégrité est protégée. L’éditeur peut protéger les fichiers par phrase de passe, fichier clé ou les deux.&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;Licence publique générale GNU v2&lt;br/&gt;&lt;br/&gt;</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="710"/>
         <source>Do you want to apply the modified default file properties to this file?</source>
-        <translation>Souhaitez-vous appliquer à ce fichier les propriétés par défaut modifiées ?</translation>
+        <translation>Souhaitez-vous appliquer à ce fichier les propriétés par défaut modifiées ?</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="723"/>
@@ -764,7 +764,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="mainwindow.cpp" line="760"/>
         <source>Set &amp;Encryption Key...</source>
-        <translation>Définir la clé de &amp;chiffrement...</translation>
+        <translation>Définir une clé de &amp;chiffrement…</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="761"/>
@@ -789,7 +789,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="mainwindow.cpp" line="769"/>
         <source>Save without passphrase protected encryption. Encryption with file key only (if enabled).</source>
-        <translation>Enregistrer sans chiffrement protégé par phrase de passe. Chiffrement avec fichier clé seulement (si l&apos;option est activée).</translation>
+        <translation>Enregistrer sans chiffrement protégé par phrase de passe. Chiffrement avec fichier clé seulement (si l’option est activée).</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="772"/>
@@ -799,7 +799,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="mainwindow.cpp" line="775"/>
         <source>Exit the application</source>
-        <translation>Quitter l&apos;application</translation>
+        <translation>Quitter l’application</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="778"/>
@@ -952,7 +952,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="mainwindow.cpp" line="858"/>
         <source>Show the application&apos;s About box</source>
-        <translation>Afficher la boîte de dialogue À propos de l&apos;application</translation>
+        <translation>Afficher la boîte de dialogue À propos de l’application</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="862"/>
@@ -972,7 +972,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="mainwindow.cpp" line="867"/>
         <source>Application preferences</source>
-        <translation>Préférences de l&apos;application</translation>
+        <translation>Préférences de l’application</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="870"/>
@@ -992,7 +992,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="mainwindow.cpp" line="875"/>
         <source>&quot;Windows&quot; end of line: CR+LF</source>
-        <translation>Fin de ligne « Windows » : CR+LF</translation>
+        <translation>Fin de ligne « Windows » : CR+LF</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="970"/>
@@ -1072,17 +1072,17 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="mainwindow.cpp" line="1200"/>
         <source>Do you want to save your changes?</source>
-        <translation>Souhaitez-vous enregistrer vos changements ?</translation>
+        <translation>Souhaitez-vous enregistrer vos changements ?</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="1335"/>
         <source>Cannot save &apos;%1&apos;</source>
-        <translation>Impossible d&apos;enregistrer « %1 »</translation>
+        <translation>Impossible d’enregistrer « %1 »</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="1338"/>
         <source>Cannot open the specified encryption key</source>
-        <translation>Impossible d&apos;ouvrir la clé de chiffrement spécifiée</translation>
+        <translation>Impossible d’ouvrir la clé de chiffrement spécifiée</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="1341"/>
@@ -1092,7 +1092,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="mainwindow.cpp" line="1344"/>
         <source>Cannot download the encryption key. CURL tool is not found</source>
-        <translation>Impossible de télécharger la clé de chiffrement. L&apos;outil CURL est introuvable</translation>
+        <translation>Impossible de télécharger la clé de chiffrement. L’outil CURL est introuvable</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="1347"/>
@@ -1117,7 +1117,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="mainwindow.cpp" line="1378"/>
         <source>Cannot save file</source>
-        <translation>Impossible d&apos;enregistrer le fichier</translation>
+        <translation>Impossible d’enregistrer le fichier</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="1384"/>
@@ -1127,7 +1127,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="mainwindow.cpp" line="1552"/>
         <source>Line number:</source>
-        <translation>Numéro de ligne :</translation>
+        <translation>Numéro de ligne :</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="1572"/>
@@ -1137,7 +1137,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="mainwindow.cpp" line="1578"/>
         <source>Font size: %1</source>
-        <translation>Taille de police : %1</translation>
+        <translation>Taille de police : %1</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="1586"/>
@@ -1148,12 +1148,12 @@ Souhaitez-vous le remplacer ?</translation>
         <location filename="mainwindow.cpp" line="1592"/>
         <location filename="mainwindow.cpp" line="1607"/>
         <source>Font size: </source>
-        <translation>Taille de police :</translation>
+        <translation>Taille de police :</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="1636"/>
         <source>untitled</source>
-        <translation type="unfinished"/>
+        <translation>sans titre</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="1645"/>
@@ -1196,7 +1196,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="new_key_dialog.ui" line="73"/>
         <source>The repository is the &lt;b&gt;.encryptpad&lt;/b&gt; (&lt;b&gt;_encryptpad&lt;/b&gt; on Windows) directory in the user&apos;s home folder. If it does not exist, it will be created.</source>
-        <translation>Le dépôt est le répertoire &lt;b&gt;.encryptpad&lt;/b&gt; (&lt;b&gt;_encryptpad&lt;/b&gt; sous Windows) dans le dossier personnel de l&apos;utilisateur. S&apos;il n&apos;existe pas, il sera créé.</translation>
+        <translation>Le dépôt est le répertoire &lt;b&gt;.encryptpad&lt;/b&gt; (&lt;b&gt;_encryptpad&lt;/b&gt; sous Windows) dans le dossier personnel de l’utilisateur. S’il n’existe pas, il sera créé.</translation>
     </message>
     <message>
         <location filename="new_key_dialog.ui" line="83"/>
@@ -1224,7 +1224,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="passphrase_generation_dialog.ui" line="54"/>
         <source>Custom:</source>
-        <translation>Personnalisé :</translation>
+        <translation>Personnalisé :</translation>
     </message>
     <message>
         <location filename="passphrase_generation_dialog.ui" line="61"/>
@@ -1239,7 +1239,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="passphrase_generation_dialog.ui" line="81"/>
         <source>Symbols:</source>
-        <translation>Symboles :</translation>
+        <translation>Symboles :</translation>
     </message>
     <message>
         <location filename="passphrase_generation_dialog.ui" line="91"/>
@@ -1284,12 +1284,12 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="passphrase_generation_dialog.ui" line="271"/>
         <source>&amp;Length:</source>
-        <translation>&amp;Longueur :</translation>
+        <translation>&amp; Longueur :</translation>
     </message>
     <message>
         <location filename="passphrase_generation_dialog.ui" line="281"/>
         <source>Select &amp;Passphrase:</source>
-        <translation>Choisir une &amp;phrase de passe :</translation>
+        <translation>Choisir une &amp;phrase de passe :</translation>
     </message>
     <message>
         <location filename="passphrase_generation_dialog.ui" line="304"/>
@@ -1342,12 +1342,12 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="preferences_dialog.ui" line="51"/>
         <source>Key file encryption properties:</source>
-        <translation>Propriétés de chiffrement des fichiers clés :</translation>
+        <translation>Propriétés de chiffrement des fichiers clés :</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="82"/>
         <source>Font:</source>
-        <translation>Police :</translation>
+        <translation>Police :</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="89"/>
@@ -1383,33 +1383,33 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="preferences_dialog.ui" line="205"/>
         <source>Libcurl path:</source>
-        <translation>Chemin de libcurl :</translation>
+        <translation>Chemin de libcurl :</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="253"/>
         <source>Recent files:</source>
-        <translation>Fichiers récents :</translation>
+        <translation>Fichiers récents :</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="323"/>
         <source>Default file properties:</source>
-        <translation>Propriétés par défaut des fichiers :</translation>
+        <translation>Propriétés par défaut des fichiers :</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="337"/>
         <source>This controls how many times you can save without entering a passphrase</source>
-        <translation>Cette option contrôle le nombre d&apos;enregistrement sans saisir une phrase de passe</translation>
+        <translation>Cette option contrôle le nombre d’enregistrement sans saisir une phrase de passe</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="340"/>
         <source>S2K derivations from a passphrase:</source>
         <oldsource>Passphrase to key results pool size:</oldsource>
-        <translation>Dérivations S2K à partir d&apos;une phrase de passe :</translation>
+        <translation>Dérivations S2K à partir d’une phrase de passe :</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="359"/>
         <source>Key file random sequence length (bytes):</source>
-        <translation>Longueur de la séquence aléatoire du fichier clé (octets) :</translation>
+        <translation>Longueur de la séquence aléatoire du fichier clé (octets) :</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="370"/>
@@ -1435,22 +1435,22 @@ Souhaitez-vous le remplacer ?</translation>
         <location filename="preferences_dialog.ui" line="393"/>
         <location filename="preferences_dialog.ui" line="396"/>
         <source>&quot;Windows&quot; end of line: CR+LF</source>
-        <translation>Fin de ligne « Windows » : CR+LF</translation>
+        <translation>Fin de ligne « Windows » : CR+LF</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="433"/>
         <source>Tab size:</source>
-        <translation>Taille de tab :</translation>
+        <translation>Taille des onglets :</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="135"/>
         <source>Retain last used directory between EncryptPad sessions</source>
-        <translation>Mémoriser le dernier répertoire utilisé d&apos;une session d&apos;EncryptPad à l&apos;autre</translation>
+        <translation>Mémoriser le dernier répertoire utilisé d’une session d’EncryptPad à l’autre</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="202"/>
         <source>Path to libCURL executable</source>
-        <translation>Chemin de l&apos;exécutable libCURL</translation>
+        <translation>Chemin de l’exécutable libCURL</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="233"/>
@@ -1460,7 +1460,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="preferences_dialog.cpp" line="146"/>
         <source>(Size: </source>
-        <translation>(Taille :</translation>
+        <translation>(Taille :</translation>
     </message>
     <message>
         <location filename="preferences_dialog.cpp" line="148"/>
@@ -1488,7 +1488,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="set_key_dialog.ui" line="64"/>
         <source>Key &amp;Repository:</source>
-        <translation>&amp;Dépôt de clés :</translation>
+        <translation>&amp;Dépôt de clés :</translation>
     </message>
     <message>
         <location filename="set_key_dialog.ui" line="125"/>
@@ -1498,22 +1498,22 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="set_key_dialog.ui" line="150"/>
         <source>&amp;Key File Path:</source>
-        <translation>&amp;Chemin du fichier clé :</translation>
+        <translation>&amp;Chemin du fichier clé :</translation>
     </message>
     <message>
         <location filename="set_key_dialog.ui" line="160"/>
         <source>&amp;Persistent key location in the encrypted file</source>
-        <translation>&amp;Emplacement de clé persistant dans le fichier chiffré</translation>
+        <translation>&amp;Emplacement de clé persistante dans le fichier chiffré</translation>
     </message>
     <message>
         <location filename="set_key_dialog.ui" line="167"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The key repository is &lt;span style=&quot; font-weight:600;&quot;&gt;.encryptpad&lt;/span&gt; (&lt;b&gt;_encryptpad&lt;/b&gt; on Windows) directory in the user&apos;s profile. Select a key or specify a file name without path for the repository keys.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Le dépôt de clé est le répertoire &lt;span style=&quot; font-weight:600;&quot;&gt;.encryptpad&lt;/span&gt; (&lt;b&gt;_encryptpad&lt;/b&gt; sous Windows) dans le profile de l&apos;utilisateur. Choisir une clé ou spécifier un nom de fichier sans chemin pour les clés du dépôt.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Le dépôt de clé est le répertoire &lt;span style=&quot; font-weight:600;&quot;&gt;.encryptpad&lt;/span&gt; (&lt;b&gt;_encryptpad&lt;/b&gt; sous Windows) dans le profile de l’utilisateur. Choisir une clé ou spécifier un nom de fichier sans chemin pour les clés du dépôt.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="set_key_dialog.cpp" line="90"/>
         <source>Specify encryption key location</source>
-        <translation>Spécifier l&apos;emplacement de la clé de chiffrement</translation>
+        <translation>Spécifier l’emplacement de la clé de chiffrement</translation>
     </message>
 </context>
 <context>
@@ -1521,12 +1521,12 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="set_passphrase_dialog.cpp" line="30"/>
         <source>&amp;Passphrase:</source>
-        <translation>&amp;Phrase de passe :</translation>
+        <translation>&amp;Phrase de passe :</translation>
     </message>
     <message>
         <location filename="set_passphrase_dialog.cpp" line="35"/>
         <source>&amp;Confirmation:</source>
-        <translation>&amp;Confirmation :</translation>
+        <translation>&amp;Confirmation :</translation>
     </message>
     <message>
         <location filename="set_passphrase_dialog.cpp" line="44"/>
@@ -1542,7 +1542,7 @@ Souhaitez-vous le remplacer ?</translation>
         <location filename="set_passphrase_dialog.cpp" line="71"/>
         <location filename="set_passphrase_dialog.cpp" line="87"/>
         <source>Set Passphrase</source>
-        <translation>Définir la phrase de passe</translation>
+        <translation>Définir une phrase de passe</translation>
     </message>
     <message>
         <location filename="set_passphrase_dialog.cpp" line="88"/>
