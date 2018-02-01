@@ -195,6 +195,12 @@ void MainWindow::UpdateEncryptedPlainSwitch(bool encrypted)
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
+    if(isBusy)
+    {
+        event->ignore();
+        return;
+    }
+
     if (maybeSave()) {
         writeSettings();
         event->accept();
