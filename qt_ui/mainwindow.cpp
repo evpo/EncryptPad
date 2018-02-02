@@ -660,14 +660,14 @@ void MainWindow::about()
 {
    QMessageBox::about(this, tr("About EncryptPad"),
             tr("<b>EncryptPad %1 Beta</b><br/><br/>"
-               "Minimalist secure text editor and binary encryptor that implements <br/>"
+               "Minimalist secure text editor and binary encryptor that implements "
                "RFC 4880 Open PGP format: "
                "symmetrically encrypted, compressed and integrity protected. "
                "The editor can protect files with passphrases, key files or both.<br/><br/>"
                "%2<br/>"
                "GNU General Public License v2<br/><br/>"
                ).arg(VER_PRODUCTVERSION_STR).arg(VER_LEGALCOPYRIGHT_STR) +
-               QString("<a href=\"http://www.evpo.net/encryptpad\">http://www.evpo.net/encryptpad</a>"));
+               QString("<a href=\"https://www.evpo.net/encryptpad\">https://www.evpo.net/encryptpad</a>"));
 }
 
 void MainWindow::documentWasModified()

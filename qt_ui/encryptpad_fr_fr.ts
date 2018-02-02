@@ -581,592 +581,592 @@ Souhaitez-vous le remplacer ?</translation>
         <translation>Protégé par phrase de passe</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="258"/>
-        <location filename="mainwindow.cpp" line="274"/>
+        <location filename="mainwindow.cpp" line="264"/>
+        <location filename="mainwindow.cpp" line="280"/>
         <source>Cannot open &apos;%1&apos;</source>
         <translation>Impossible d’ouvrir « %1 »</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="294"/>
+        <location filename="mainwindow.cpp" line="300"/>
         <source>Cannot open the encryption key</source>
         <translation>Impossible d’ouvrir la clé de chiffrement</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="302"/>
+        <location filename="mainwindow.cpp" line="308"/>
         <source>The encryption key is invalid</source>
         <translation>La clé de chiffrement est invalide</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="310"/>
+        <location filename="mainwindow.cpp" line="316"/>
         <source>Cannot download the encryption key. CURL tool is not found.</source>
         <translation>Impossible de télécharger la clé de chiffrement. L’outil CURL est introuvable.</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="318"/>
+        <location filename="mainwindow.cpp" line="324"/>
         <source>Cannot download the key. CURL returned non zero exit code</source>
         <translation>Impossible de télécharger la clé. CURL a retourné un code de sortie différent de zéro</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="335"/>
+        <location filename="mainwindow.cpp" line="341"/>
         <source>Cannot load the file</source>
         <translation>Impossible de charger le fichier</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="383"/>
+        <location filename="mainwindow.cpp" line="389"/>
         <source>File loaded</source>
         <translation>Fichier chargé</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="449"/>
+        <location filename="mainwindow.cpp" line="455"/>
         <source>The file has been modified by another program. Do you want to reload it?</source>
         <translation>Le fichier a été modifié par un autre programme. Souhaitez-vous le recharger ?</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="452"/>
+        <location filename="mainwindow.cpp" line="458"/>
         <source>The file has been modified by another program. Do you want to reload it and lose the changes made in this application?</source>
         <translation>Le fichier a été modifié par un autre programme. Souhaitez-vous le recharger et perdre les modifications faites dans cette application ?</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="491"/>
+        <location filename="mainwindow.cpp" line="497"/>
         <source>Open File</source>
         <translation>Ouvrir un fichier</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="535"/>
+        <location filename="mainwindow.cpp" line="541"/>
         <source>Save File As</source>
         <translation>Enregistrer le fichier sous</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="562"/>
+        <location filename="mainwindow.cpp" line="568"/>
         <source>Cannot create the repository directory in HOME</source>
         <translation>Impossible de créer le répertoire dépôt dans le dossier personnel</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="596"/>
+        <location filename="mainwindow.cpp" line="602"/>
         <source>Passphrase for Key File</source>
         <translation>Phrase de passe du fichier clé</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="604"/>
+        <location filename="mainwindow.cpp" line="610"/>
         <source>You left the passphrase blank. The key file is going to be UNENCRYPTED. Do you want to continue?</source>
         <translation>Vous avez laissé la phrase de passe vide. Le fichier clé NE SERA PAS CHIFFRÉ. Souhaitez-vous poursuivre ?</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="636"/>
+        <location filename="mainwindow.cpp" line="642"/>
         <source>Cannot generate the key &apos;%1&apos; Check the path and permissions.</source>
         <translation>Impossible de générer la clé « %1 ». Vérifier le chemin et les droits.</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="638"/>
+        <location filename="mainwindow.cpp" line="644"/>
         <source>Cannot generate key</source>
         <translation>Impossible de générer la clé</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="642"/>
+        <location filename="mainwindow.cpp" line="648"/>
         <source>Do you want to use the generated key for this file?</source>
         <translation>Souhaitez-vous appliquer la clé générée à ce fichier ?</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="655"/>
+        <location filename="mainwindow.cpp" line="661"/>
         <source>About EncryptPad</source>
         <translation>À propos d’EncryptPad</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="656"/>
-        <source>&lt;b&gt;EncryptPad %1 Beta&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;Minimalist secure text editor and binary encryptor that implements &lt;br/&gt;RFC 4880 Open PGP format: symmetrically encrypted, compressed and integrity protected. The editor can protect files with passphrases, key files or both.&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;GNU General Public License v2&lt;br/&gt;&lt;br/&gt;</source>
-        <translation>&lt;b&gt;EncryptPad %1 bêta&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;Un éditeur de texte sécurisé minimaliste et un outil de chiffrement binaire qui met en œuvre &lt;br/&gt;le format RFC 4880 d’Open PGP : chiffré symétriquement, compressé et dont l’intégrité est protégée. L’éditeur peut protéger les fichiers par phrase de passe, fichier clé ou les deux.&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;Licence publique générale GNU v2&lt;br/&gt;&lt;br/&gt;</translation>
+        <location filename="mainwindow.cpp" line="662"/>
+        <source>&lt;b&gt;EncryptPad %1 Beta&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;Minimalist secure text editor and binary encryptor that implements RFC 4880 Open PGP format: symmetrically encrypted, compressed and integrity protected. The editor can protect files with passphrases, key files or both.&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;GNU General Public License v2&lt;br/&gt;&lt;br/&gt;</source>
+        <translation>&lt;b&gt;EncryptPad %1 bêta&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;Un éditeur de texte sécurisé minimaliste et un outil de chiffrement binaire qui met en œuvre le format RFC 4880 d’Open PGP : chiffré symétriquement, compressé et dont l’intégrité est protégée. L’éditeur peut protéger les fichiers par phrase de passe, fichier clé ou les deux.&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;Licence publique générale GNU v2&lt;br/&gt;&lt;br/&gt;</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="710"/>
+        <location filename="mainwindow.cpp" line="716"/>
         <source>Do you want to apply the modified default file properties to this file?</source>
         <translation>Souhaitez-vous appliquer à ce fichier les propriétés par défaut modifiées ?</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="723"/>
+        <location filename="mainwindow.cpp" line="729"/>
         <source>&amp;New</source>
         <translation>&amp;Nouveau</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="725"/>
+        <location filename="mainwindow.cpp" line="731"/>
         <source>Create a new file</source>
         <translation>Créer un nouveau fichier</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="728"/>
+        <location filename="mainwindow.cpp" line="734"/>
         <source>&amp;Open...</source>
         <translation>&amp;Ouvrir...</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="730"/>
+        <location filename="mainwindow.cpp" line="736"/>
         <source>Open an existing file</source>
         <translation>Ouvrir un fichier existant</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="733"/>
+        <location filename="mainwindow.cpp" line="739"/>
         <source>&amp;Save</source>
         <translation>&amp;Enregistrer</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="735"/>
+        <location filename="mainwindow.cpp" line="741"/>
         <source>Save the document to disk</source>
         <translation>Enregistrer le document sur le disque</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="738"/>
+        <location filename="mainwindow.cpp" line="744"/>
         <source>Save &amp;As...</source>
         <translation>Enregistrer &amp;sous...</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="740"/>
+        <location filename="mainwindow.cpp" line="746"/>
         <source>Save the document under a new name</source>
         <translation>Enregistrer le document sous un nouveau nom</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="743"/>
+        <location filename="mainwindow.cpp" line="749"/>
         <source>File &amp;Properties...</source>
         <translation>&amp;Propriétés des fichiers...</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="744"/>
+        <location filename="mainwindow.cpp" line="750"/>
         <source>Set file properties</source>
         <translation>Définir les propriétés des fichiers</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="747"/>
+        <location filename="mainwindow.cpp" line="753"/>
         <source>&amp;Close and Reset</source>
         <translation>&amp;Fermer et réinitialiser</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="749"/>
+        <location filename="mainwindow.cpp" line="755"/>
         <source>Close and reset security settings</source>
         <translation>Fermer et réinitialiser les paramètres de sécurité</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="752"/>
+        <location filename="mainwindow.cpp" line="758"/>
         <source>Generate Key...</source>
         <translation>Générer une clé...</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="753"/>
+        <location filename="mainwindow.cpp" line="759"/>
         <source>Generate a new key file</source>
         <translation>Générer un nouveau fichier clé</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="756"/>
+        <location filename="mainwindow.cpp" line="762"/>
         <source>Set &amp;Passphrase...</source>
         <translation>Définir une &amp;phrase de passe...</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="757"/>
+        <location filename="mainwindow.cpp" line="763"/>
         <source>Set passphrase for encryption and decryption</source>
         <translation>Définir une phrase de passe pour le chiffrement et le déchiffrement</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="760"/>
+        <location filename="mainwindow.cpp" line="766"/>
         <source>Set &amp;Encryption Key...</source>
         <translation>Définir une clé de &amp;chiffrement…</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="761"/>
+        <location filename="mainwindow.cpp" line="767"/>
         <source>Set encryption key file</source>
         <translation>Définir le fichier clé de chiffrement</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="764"/>
+        <location filename="mainwindow.cpp" line="770"/>
         <source>Clear &amp;Encryption Key</source>
         <translation>Effacer la &amp;clé de chiffrement</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="765"/>
+        <location filename="mainwindow.cpp" line="771"/>
         <source>Clear encryption key file. Passphrase only (if set).</source>
         <translation>Effacer la clé de chiffrement. Phrase de passe seulement (si définie).</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="768"/>
+        <location filename="mainwindow.cpp" line="774"/>
         <source>&amp;Clear Passphrase</source>
         <translation>&amp;Effacer la phrase de passe</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="769"/>
+        <location filename="mainwindow.cpp" line="775"/>
         <source>Save without passphrase protected encryption. Encryption with file key only (if enabled).</source>
         <translation>Enregistrer sans chiffrement protégé par phrase de passe. Chiffrement avec fichier clé seulement (si l’option est activée).</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="772"/>
+        <location filename="mainwindow.cpp" line="778"/>
         <source>E&amp;xit</source>
         <translation>&amp;Quitter</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="775"/>
+        <location filename="mainwindow.cpp" line="781"/>
         <source>Exit the application</source>
         <translation>Quitter l’application</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="778"/>
-        <location filename="mainwindow.cpp" line="780"/>
+        <location filename="mainwindow.cpp" line="784"/>
+        <location filename="mainwindow.cpp" line="786"/>
         <source>Undo</source>
         <translation>Rétablir</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="783"/>
-        <location filename="mainwindow.cpp" line="785"/>
+        <location filename="mainwindow.cpp" line="789"/>
+        <location filename="mainwindow.cpp" line="791"/>
         <source>Redo</source>
         <translation>Refaire</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="788"/>
+        <location filename="mainwindow.cpp" line="794"/>
         <source>Cu&amp;t</source>
         <translation>Cou&amp;per</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="790"/>
+        <location filename="mainwindow.cpp" line="796"/>
         <source>Cut the current selection&apos;s contents to the clipboard</source>
         <translation>Couper le contenu de la sélection actuelle vers le presse-papiers</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="794"/>
+        <location filename="mainwindow.cpp" line="800"/>
         <source>&amp;Copy</source>
         <translation>&amp;Copier</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="796"/>
+        <location filename="mainwindow.cpp" line="802"/>
         <source>Copy the current selection&apos;s contents to the clipboard</source>
         <translation>Copier le contenu de la sélection actuelle vers le presse-papiers</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="800"/>
+        <location filename="mainwindow.cpp" line="806"/>
         <source>&amp;Paste</source>
         <translation>&amp;Coller</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="802"/>
+        <location filename="mainwindow.cpp" line="808"/>
         <source>Paste the clipboard&apos;s contents into the current selection</source>
         <translation>Coller le contenu du presse-papiers dans la sélection actuelle</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="806"/>
+        <location filename="mainwindow.cpp" line="812"/>
         <source>&amp;Select All</source>
         <translation>&amp;Tout sélectionner</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="808"/>
+        <location filename="mainwindow.cpp" line="814"/>
         <source>Select all text</source>
         <translation>Sélectionner tout le texte</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="811"/>
+        <location filename="mainwindow.cpp" line="817"/>
         <source>&amp;Find...</source>
         <translation>&amp;Chercher...</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="813"/>
+        <location filename="mainwindow.cpp" line="819"/>
         <source>Find in text</source>
         <translation>Chercher dans le texte</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="816"/>
+        <location filename="mainwindow.cpp" line="822"/>
         <source>&amp;Go to...</source>
         <translation>&amp;Aller à...</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="817"/>
-        <location filename="mainwindow.cpp" line="1552"/>
+        <location filename="mainwindow.cpp" line="823"/>
+        <location filename="mainwindow.cpp" line="1558"/>
         <source>Go to</source>
         <translation>Aller à</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="821"/>
+        <location filename="mainwindow.cpp" line="827"/>
         <source>&amp;Generate Passphrase...</source>
         <translation>&amp;Générer une phrase de passe...</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="822"/>
+        <location filename="mainwindow.cpp" line="828"/>
         <source>Generate passphrase</source>
         <translation>Générer une phrase de passe</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="825"/>
+        <location filename="mainwindow.cpp" line="831"/>
         <source>&amp;Replace...</source>
         <translation>&amp;Remplacer...</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="827"/>
+        <location filename="mainwindow.cpp" line="833"/>
         <source>Find and replace text</source>
         <translation>Chercher et remplacer du texte</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="830"/>
+        <location filename="mainwindow.cpp" line="836"/>
         <source>Read Only</source>
         <translation>Lecture seulement</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="832"/>
+        <location filename="mainwindow.cpp" line="838"/>
         <source>Enable Read Only mode</source>
         <translation>Activer le mode lecture seule</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="837"/>
+        <location filename="mainwindow.cpp" line="843"/>
         <source>Word Wrap</source>
         <translation>Retour à la ligne automatique </translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="839"/>
+        <location filename="mainwindow.cpp" line="845"/>
         <source>Enable Word Wrap</source>
         <translation>Activer le retour à la ligne automatique </translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="842"/>
+        <location filename="mainwindow.cpp" line="848"/>
         <source>&amp;Zoom In</source>
         <translation>&amp;Zoom avant</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="844"/>
+        <location filename="mainwindow.cpp" line="850"/>
         <source>Zoom In</source>
         <translation>Zoom avant</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="847"/>
+        <location filename="mainwindow.cpp" line="853"/>
         <source>&amp;Zoom Out</source>
         <translation>&amp;Zoom arrière</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="849"/>
+        <location filename="mainwindow.cpp" line="855"/>
         <source>Zoom Out</source>
         <translation>Zoom arrière</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="852"/>
+        <location filename="mainwindow.cpp" line="858"/>
         <source>&amp;Reset Zoom</source>
         <translation>&amp;Réinitialiser le zoom</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="854"/>
+        <location filename="mainwindow.cpp" line="860"/>
         <source>Reset Zoom</source>
         <translation>Réinitialiser le zoom</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="857"/>
+        <location filename="mainwindow.cpp" line="863"/>
         <source>&amp;About...</source>
         <translation>À &amp;propos...</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="858"/>
+        <location filename="mainwindow.cpp" line="864"/>
         <source>Show the application&apos;s About box</source>
         <translation>Afficher la boîte de dialogue À propos de l’application</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="862"/>
+        <location filename="mainwindow.cpp" line="868"/>
         <source>About &amp;Qt</source>
         <translation>À propos de &amp;Qt</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="863"/>
+        <location filename="mainwindow.cpp" line="869"/>
         <source>Show the Qt library&apos;s About box</source>
         <translation>Afficher la boîte de dialogue À propos de la bibliothèque Qt</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="866"/>
+        <location filename="mainwindow.cpp" line="872"/>
         <source>&amp;Preferences...</source>
         <translation>&amp;Préférences...</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="867"/>
+        <location filename="mainwindow.cpp" line="873"/>
         <source>Application preferences</source>
         <translation>Préférences de l’application</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="870"/>
+        <location filename="mainwindow.cpp" line="876"/>
         <source>File Encryption...</source>
         <translation>Chiffrement du fichier...</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="871"/>
+        <location filename="mainwindow.cpp" line="877"/>
         <source>File encryption</source>
         <translation>Chiffrement du fichier</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="874"/>
+        <location filename="mainwindow.cpp" line="880"/>
         <source>Windows EOL</source>
         <translation>Fin de ligne Windows</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="875"/>
+        <location filename="mainwindow.cpp" line="881"/>
         <source>&quot;Windows&quot; end of line: CR+LF</source>
         <translation>Fin de ligne « Windows » : CR+LF</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="970"/>
+        <location filename="mainwindow.cpp" line="976"/>
         <source>End of file reached. Started from the top.</source>
         <translation>La fin du fichier a été atteinte. Commencement du début.</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="986"/>
+        <location filename="mainwindow.cpp" line="992"/>
         <source>Text not found.</source>
         <translation>Texte introuvable.</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1000"/>
+        <location filename="mainwindow.cpp" line="1006"/>
         <source>Text found.</source>
         <translation>Texte trouvé.</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1007"/>
+        <location filename="mainwindow.cpp" line="1013"/>
         <source>&amp;File</source>
         <translation>&amp;Fichier</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1024"/>
+        <location filename="mainwindow.cpp" line="1030"/>
         <source>&amp;Edit</source>
         <translation>&amp;Modifier</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1042"/>
+        <location filename="mainwindow.cpp" line="1048"/>
         <source>&amp;View</source>
         <translation>&amp;Affichage</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1051"/>
+        <location filename="mainwindow.cpp" line="1057"/>
         <source>En&amp;cryption</source>
         <translation>&amp;Chiffrement</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1059"/>
+        <location filename="mainwindow.cpp" line="1065"/>
         <source>&amp;Settings</source>
         <translation>&amp;Paramètres</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1062"/>
+        <location filename="mainwindow.cpp" line="1068"/>
         <source>&amp;Help</source>
         <translation>&amp;Aide</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1068"/>
+        <location filename="mainwindow.cpp" line="1074"/>
         <source>File</source>
         <translation>Fichier</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1079"/>
+        <location filename="mainwindow.cpp" line="1085"/>
         <source>Edit</source>
         <translation>Modifier</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1087"/>
+        <location filename="mainwindow.cpp" line="1093"/>
         <source>Encryption</source>
         <translation>Chiffrement</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1094"/>
+        <location filename="mainwindow.cpp" line="1100"/>
         <source>View</source>
         <translation>Affichage</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1104"/>
+        <location filename="mainwindow.cpp" line="1110"/>
         <source>Ready</source>
         <translation>Prêt</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1199"/>
+        <location filename="mainwindow.cpp" line="1205"/>
         <source>The document has been modified.</source>
         <translation>Le document a été modifié.</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1200"/>
+        <location filename="mainwindow.cpp" line="1206"/>
         <source>Do you want to save your changes?</source>
         <translation>Souhaitez-vous enregistrer vos changements ?</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1335"/>
+        <location filename="mainwindow.cpp" line="1341"/>
         <source>Cannot save &apos;%1&apos;</source>
         <translation>Impossible d’enregistrer « %1 »</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1338"/>
+        <location filename="mainwindow.cpp" line="1344"/>
         <source>Cannot open the specified encryption key</source>
         <translation>Impossible d’ouvrir la clé de chiffrement spécifiée</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1341"/>
+        <location filename="mainwindow.cpp" line="1347"/>
         <source>The specified encryption key is invalid</source>
         <translation>La clé de chiffrement spécifiée est invalide</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1344"/>
+        <location filename="mainwindow.cpp" line="1350"/>
         <source>Cannot download the encryption key. CURL tool is not found</source>
         <translation>Impossible de télécharger la clé de chiffrement. L’outil CURL est introuvable</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1347"/>
+        <location filename="mainwindow.cpp" line="1353"/>
         <source>Cannot download the encryption key. CURL returned non zero exit code</source>
         <translation>Impossible de télécharger la clé de chiffrement. CURL a retourné un code de sortie différent de zéro</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1354"/>
+        <location filename="mainwindow.cpp" line="1360"/>
         <source>Unknown encryption error</source>
         <translation>Erreur de chiffrement inconnue</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1358"/>
+        <location filename="mainwindow.cpp" line="1364"/>
         <source>Cannot create bak file</source>
         <translation>Impossible de créer le fichier bak</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1367"/>
+        <location filename="mainwindow.cpp" line="1373"/>
         <source>Unknown error</source>
         <translation>Erreur inconnue</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1378"/>
+        <location filename="mainwindow.cpp" line="1384"/>
         <source>Cannot save file</source>
         <translation>Impossible d’enregistrer le fichier</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1384"/>
+        <location filename="mainwindow.cpp" line="1390"/>
         <source>File saved</source>
         <translation>Fichier enregistré</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1552"/>
+        <location filename="mainwindow.cpp" line="1558"/>
         <source>Line number:</source>
         <translation>Numéro de ligne :</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1572"/>
+        <location filename="mainwindow.cpp" line="1578"/>
         <source>Maximum zoom</source>
         <translation>Zoom maximal</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1578"/>
+        <location filename="mainwindow.cpp" line="1584"/>
         <source>Font size: %1</source>
         <translation>Taille de police : %1</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1586"/>
+        <location filename="mainwindow.cpp" line="1592"/>
         <source>Minimum zoom</source>
         <translation>Zoom minimal</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1592"/>
-        <location filename="mainwindow.cpp" line="1607"/>
+        <location filename="mainwindow.cpp" line="1598"/>
+        <location filename="mainwindow.cpp" line="1613"/>
         <source>Font size: </source>
         <translation>Taille de police :</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1636"/>
+        <location filename="mainwindow.cpp" line="1642"/>
         <source>untitled</source>
         <translation>sans titre</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1645"/>
+        <location filename="mainwindow.cpp" line="1651"/>
         <source>Key protected</source>
         <translation>Protégé par une clé</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1646"/>
+        <location filename="mainwindow.cpp" line="1652"/>
         <source>Key not set</source>
         <translation>Clé non définie</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1647"/>
+        <location filename="mainwindow.cpp" line="1653"/>
         <source>persistent</source>
         <translation>persistant</translation>
     </message>
