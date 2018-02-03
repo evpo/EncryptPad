@@ -24,7 +24,7 @@ EncryptPad est maintenant en mode texte en clair non protégé. Elle fonctionne 
 
 ![Bouton «&nbsp;Générer une clé&nbsp;»](images/generate_key_tool_button.png)
 
-5\. Sélectionner le bouton radio «&nbsp;Clé dans le dépôt&nbsp;», saisir « ma_nouvelle_clé » dans la boîte de texte correspondante et cliquer sur OK.
+5\. Sélectionner le bouton radio «&nbsp;Clé dans le dépôt&nbsp;», saisir `ma_nouvelle_clé` dans la boîte de texte correspondante et cliquer sur OK.
 
 ![Boîte de dialogue «&nbsp;Générer une clé&nbsp;»](images/generate_key_dialog.png)
 
@@ -32,13 +32,13 @@ EncryptPad est maintenant en mode texte en clair non protégé. Elle fonctionne 
 
 ![Phrase de passe du fichier](images/set_passphrase_for_key.png)
 
-Saisir « MdpClé »
+Saisir `MdpClé`
 
 7\. Cliquer sur Oui pour utiliser le nouveau fichier clé pour chiffrer votre texte.
 
 ![Boîte de dialogue «&nbsp;Utiliser une nouvelle clé&nbsp;»](images/use_new_key_dialog.png)
 
-8\. Le fichier clé se trouve dans votre répertoire personnel sous « encryptpad ».
+8\. Le fichier clé se trouve dans votre répertoire personnel sous `encryptpad`.
 
 ![Clé dans l’explorateur Windows](images/key_in_explorer.png)
 
@@ -52,7 +52,7 @@ Voici le contenu du fichier (il sera différent pour vous, car la clé est aléa
     =bXn9
     -----END PGP MESSAGE-----
 
-C’est une séquence aléatoire en Base64 à partir de laquelle la clé de chiffrement est dérivée. Elle est chiffrée avec la phrase de passe du fichier clé que vous avez fournie et peut aussi être déchiffrée avec GnuGPG. Si [Gpg4Win](https://www.gpg4win.org/) est installé, vous pouvez cliquer à droite sur le fichier dans l’explorateur Windows et choisir «&nbsp;Plus d’options GpgEX&nbsp;» et «&nbsp;Déchiffrer&nbsp;». Saisir « MdpClé » comme phrase de passe et gpg déchiffrera le fichier et créera ma_nouvelle_clé_.key.out. Le contenu du fichier sera semblable à ce qui suit :
+C’est une séquence aléatoire en Base64 à partir de laquelle la clé de chiffrement est dérivée. Elle est chiffrée avec la phrase de passe du fichier clé que vous avez fournie et peut aussi être déchiffrée avec GnuGPG. Si [Gpg4Win](https://www.gpg4win.org/) est installé, vous pouvez cliquer à droite sur le fichier dans l’explorateur Windows et choisir «&nbsp;Plus d’options GpgEX&nbsp;» et «&nbsp;Déchiffrer&nbsp;». Saisir `MdpClé` comme phrase de passe et gpg déchiffrera le fichier et créera ma_nouvelle_clé_.key.out. Le contenu du fichier sera semblable à ce qui suit :
 
     T6/vlnb0aysdr+xUriwwwrC844iVImiG4T/sCgF+ETQ=
 
@@ -66,7 +66,7 @@ C’est une séquence aléatoire en Base64 à partir de laquelle la clé de chif
 
 ![Boîte de dialogue « Enregistrer sous »](images/save_as_dialog.png)
 
-Veuillez prendre note que le nom de fichier est maintenant « guerre et paix.gpg » dans la boîte de dialogue «&nbsp;Enregistrer sous&nbsp;».
+Veuillez prendre note que le nom de fichier est maintenant `guerre et paix.gpg` dans la boîte de dialogue «&nbsp;Enregistrer sous&nbsp;».
 
 11\. Le fichier a maintenant été enregistré sur le disque, chiffré avec le fichier clé généré. Voir l’état dans l’image ci-dessous.
 
@@ -74,7 +74,7 @@ Veuillez prendre note que le nom de fichier est maintenant « guerre et paix.gp
 
 ## Le fichier GPG sur le disque
 
-C’est un fichier OpenPGP. Vous pouvez l’envoyer à quelqu’un qui n’utilise pas EncryptPad. Il peut être déchiffré facilement avec [Gpg4Win](https://www.gpg4win.org/). Utiliser le contenu de ce fichier clé comme phrase de passe « T6/vlnb0aysdr+xUriwwwrC844iVImiG4T/sCgF+ETQ= » (voir étape 8).   
+C’est un fichier OpenPGP. Vous pouvez l’envoyer à quelqu’un qui n’utilise pas EncryptPad. Il peut être déchiffré facilement avec [Gpg4Win](https://www.gpg4win.org/). Utiliser le contenu de ce fichier clé comme phrase de passe `T6/vlnb0aysdr+xUriwwwrC844iVImiG4T/sCgF+ETQ=` (voir étape 8).   
 
 ![Kleopatra a déchiffré notre fichier](images/kleopatra_decrypted.png)
 
@@ -106,7 +106,7 @@ Sortie de la commande --list-packets du paquet GPG :
 
 Les fichiers sans chemin sont d’abord cherchés dans le répertoire d’EncryptPad, puis dans le dépôt du dossier personnel (voir le texte de l’image ci-dessus). Si votre clé ne se trouve pas dans le dépôt, vous pouvez indiquer le chemin complet vers votre clé. 
 
-L’«&nbsp;emplacement de clé persistante dans le fichier chiffré&nbsp;» n’est pas pris en charge pour les fichiers GPG (voir README.md). Laissez vide pour l’instant. À FAIRE : ajouter le lien vers le guide sur le double chiffrement EPD.
+`Emplacement de clé persistante dans le fichier chiffré` n’est pas pris en charge pour les fichiers GPG (voir README.md). Laissez vide pour l’instant. À FAIRE : ajouter le lien vers le guide sur le double chiffrement EPD.
 
 ## Ouvrir un autre fichier texte en clair
 

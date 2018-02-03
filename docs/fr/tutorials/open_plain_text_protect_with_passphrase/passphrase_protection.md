@@ -32,7 +32,7 @@ EncryptPad est maintenant en mode texte en clair non protégé. Elle fonctionne 
 
 Veuillez prendre note que le nom de fichier est maintenant « guerre et paix.gpg » dans la boîte de dialogue «&nbsp;Enregistrer sous&nbsp;».
 
-6\. Il vous sera demandé de saisir deux fois une phrase de passe. Saisir « MdpDémo » et cliquer sur OK
+6\. Il vous sera demandé de saisir deux fois une phrase de passe. Saisir `MdpDémo` et cliquer sur OK
 
 ![Définir une phrase de passe](images/set_passphrase.png)
 

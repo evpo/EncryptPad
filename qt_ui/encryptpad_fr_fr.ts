@@ -724,7 +724,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="mainwindow.cpp" line="749"/>
         <source>File &amp;Properties...</source>
-        <translation>&amp;Propriétés des fichiers...</translation>
+        <translation>&amp;Propriétés du fichiers…</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="750"/>

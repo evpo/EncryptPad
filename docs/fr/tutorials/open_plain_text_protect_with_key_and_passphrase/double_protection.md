@@ -24,7 +24,7 @@ EncryptPad est maintenant en mode texte en clair non protégé. Elle fonctionne 
 
 ![Bouton «&nbsp;Générer une clé&nbsp;»](images/generate_key_tool_button.png)
 
-5\. Sélectionner le bouton radio «&nbsp;Clé dans le dépôt&nbsp;», saisir « ma_nouvelle_clé » dans la boîte de texte correspondante et cliquer sur OK.
+5\. Sélectionner le bouton radio «&nbsp;Clé dans le dépôt&nbsp;», saisir `ma_nouvelle_clé` dans la boîte de texte correspondante et cliquer sur OK.
 
 ![Boîte de dialogue «&nbsp;Générer une clé&nbsp;»](images/generate_key_dialog.png)
 
@@ -32,19 +32,19 @@ EncryptPad est maintenant en mode texte en clair non protégé. Elle fonctionne 
 
 ![Phrase de passe du fichier clé](images/set_passphrase_for_key.png)
 
-Saisir « MdpClé »
+Saisir `MdpClé`
 
 7\. Cliquer sur Oui pour utiliser le nouveau fichier clé pour chiffrer votre texte.
 
 ![Boîte de dialogue «&nbsp;Utiliser une nouvelle clé&nbsp;»](images/use_new_key_dialog.png)
 
-8\. Le fichier clé se trouve dans votre répertoire personnel sous « encryptpad ».
+8\. Le fichier clé se trouve dans votre répertoire personnel sous `encryptpad`.
 
 ![Clé dans l’explorateur Windows](images/key_in_explorer.png)
 
 Voici le contenu du fichier (il sera différent pour vous, car la clé est aléatoire) :<br/> 
 
-« 91Oamyib4o+Tbry/4NzoFOWhWpIfQE0TyMHiYtnOK9w= »
+`91Oamyib4o+Tbry/4NzoFOWhWpIfQE0TyMHiYtnOK9w=`
 
 C’est une séquence aléatoire en Base64 à partir de laquelle la clé de chiffrement est dérivée.
 
@@ -58,9 +58,9 @@ C’est une séquence aléatoire en Base64 à partir de laquelle la clé de chif
 
 ![Boîte de dialogue «&nbsp;Enregistrer sous&nbsp;»](images/select_epd_in_save_as.png)
 
-Veuillez prendre note que le nom de fichier est maintenant « guerre et paix.epd » dans la boîte de dialogue «&nbsp;Enregistrer sous&nbsp;».
+Veuillez prendre note que le nom de fichier est maintenant `guerre et paix.epd` dans la boîte de dialogue «&nbsp;Enregistrer sous&nbsp;».
 
-11\. Il vous sera demandé de saisir une phrase de passer deux fois. Saisir « MdpDémo » pour cet exemple et cliquer sur OK.
+11\. Il vous sera demandé de saisir une phrase de passer deux fois. Saisir `MdpDémo` pour cet exemple et cliquer sur OK.
 
 ![Définir une phrase de passe](images/set_passphrase.png)
 
@@ -72,13 +72,13 @@ Veuillez prendre note que si vous laissez la phrase de passe vide et cliquez sur
 
 ## Emplacement de clé persistant dans le fichier chiffré
 
-Maintenant, si vous annulez la protection, fermez le fichier et le rouvrez, la phrase de passe et le fichier clé vous seront demandés. Il pourrait être fastidieux de saisir le chemin du fichier clé chaque fois, particulièrement s’il n’est pas dans le dépôt. Pour faciliter le tout, vous pouvez activer « Emplacement de clé persistante dans le fichier chiffré ». (cette fonction n’est prise en charge que pour le type de fichier EPD).
+Maintenant, si vous annulez la protection, fermez le fichier et le rouvrez, la phrase de passe et le fichier clé vous seront demandés. Il pourrait être fastidieux de saisir le chemin du fichier clé chaque fois, particulièrement s’il n’est pas dans le dépôt. Pour faciliter le tout, vous pouvez activer `Emplacement de clé persistante dans le fichier chiffré`. (cette fonction n’est prise en charge que pour le type de fichier EPD).
 
 13\. Cliquer sur le bouton «&nbsp;Définir la clé&nbsp;».
 
 ![Bouton «&nbsp;Définir la clé&nbsp;»](images/set_key_tool_button.png)
 
-14\. Activer « Emplacement de clé persistante dans le fichier chiffré » dans la boîte de dialogue «&nbsp;Définir la clé&nbsp;» et cliquer sur OK.
+14\. Activer `Emplacement de clé persistante dans le fichier chiffré` dans la boîte de dialogue «&nbsp;Définir la clé&nbsp;» et cliquer sur OK.
 
 ![Activer la clé persistente](images/enable_persist_key.png)
 
@@ -96,7 +96,7 @@ Si vous tentez d’ouvrir un fichier texte en clair maintenant, cela échouera a
 
 ![Impossible d’ouvrir le texte en clair](images/open_another_plain_text.png)
 
-EncryptPad pense que le fichier est chiffré avec une phrase de passe et un fichier clé, car son mode est « Protégé par une clé » et « Protégé par phrase de passe », comme vous pouvez le voir dans la barre d’état. Elle a tenté de déchiffrer le texte en clair et a échoué. Pour poursuivre l’ouverture du fichier, effacez la protection par phrase de passe et fichier clé en cliquant sur les boutons «&nbsp;Effacer la clé de chiffrement&nbsp;» et «&nbsp;Effacer la phrase de passe&nbsp;», ou mieux encore, en cliquant sur «&nbsp;Fermer et réinitialiser&nbsp;» ce qui fermera le fichier texte et réinitialisera les deux parties de la protection.
+EncryptPad pense que le fichier est chiffré avec une phrase de passe et un fichier clé, car son mode est `Protégé par une clé` et `Protégé par phrase de passe`, comme vous pouvez le voir dans la barre d’état. Elle a tenté de déchiffrer le texte en clair et a échoué. Pour poursuivre l’ouverture du fichier, effacez la protection par phrase de passe et fichier clé en cliquant sur les boutons «&nbsp;Effacer la clé de chiffrement&nbsp;» et «&nbsp;Effacer la phrase de passe&nbsp;», ou mieux encore, en cliquant sur «&nbsp;Fermer et réinitialiser&nbsp;» ce qui fermera le fichier texte et réinitialisera les deux parties de la protection.
 
 ![Effacer la clé ou Fermer et réinitialiser](images/clear_key_and_pwd_or_close_and_reset.png)
 
@@ -106,13 +106,13 @@ Vous pouvez maintenant ouvrir votre fichier texte en clair.
 
 Le fichier EPD est un fichier OpenPGP contenant un fichier [WAD](https://fr.wikipedia.org/wiki/.wad) qui contient un autre fichier OpenPGP. Il y a trois niveaux d’imbrication. Pour le démontrer, nous pouvons extraire le fichier chiffré sans utiliser EncryptPad.
 
-17\. Renommer le fichier «&nbsp;guerre et paix.epd&nbsp;» en «&nbsp;guerre et paix.gpg&nbsp;».
+17\. Renommer le fichier `guerre et paix.epd` en `guerre et paix.gpg`.
 
-18\. Déchiffrer le fichier avec [Gpg4Win](https://www.gpg4win.org/). Utilisez «&nbsp;MdpDémo&nbsp;» comme phrase de passe.
+18\. Déchiffrer le fichier avec [Gpg4Win](https://www.gpg4win.org/). Utilisez `MdpDémo` comme phrase de passe.
 
 ![Kleopatra a déchiffré notre fichier](images/kleopatra_decrypted.png)
 
-19\. Renommer le fichier produit par Kleopatra de «&nbsp;guerre et paix&nbsp;» en «&nbsp;guerre_et_paix.wad&nbsp;».
+19\. Renommer le fichier produit par Kleopatra de `guerre et paix` en `guerre_et_paix.wad`.
 
 20\. Pour la prochaine étape, il vous faut obtenir un outil pour travailler avec les fichiers WAD. Je recommande [Slade](https://github.com/sirjuddington/SLADE).
 
@@ -120,13 +120,13 @@ Le fichier EPD est un fichier OpenPGP contenant un fichier [WAD](https://fr.wiki
 
 ![Fenêtre de Slade](images/slade_window.png)
 
-Noter que le fichier «&nbsp;__X2_KEY&nbsp;» contient le nom de notre fichier clé «&nbsp;ma_nouvelle_clé.key&nbsp;». «&nbsp;_PAYLOAD&nbsp; » est le fichier OpenPGP chiffré avec le fichier clé. 
+Noter que le fichier `__X2_KEY` contient le nom de notre fichier clé `ma_nouvelle_clé.key`. `_PAYLOAD` est le fichier OpenPGP chiffré avec le fichier clé. 
 
-22\. Enregistrer «&nbsp;_PAYLOAD&nbsp;» sur le disque. Cliquer sur Entrée->Exporter et enregistrer le fichier sous **guerre et paix.gpg**. Écraser les fichiers existants que nous avons utilisés dans les étapes précédentes.
+22\. Enregistrer `PAYLOAD` sur le disque. Cliquer sur Entrée->Exporter et enregistrer le fichier sous **guerre et paix.gpg**. Écraser les fichiers existants que nous avons utilisés dans les étapes précédentes.
 
 ![Exportation Slade](images/slade_export.png)
 
-23\. Déchiffrer le fichier clé «&nbsp;ma_nouvelle_clé&nbsp;» avec [Gpg4Win](https://www.gpg4win.org/). Utiliser « &nbsp;MdpClé&nbsp;» comme phrase de passe.
+23\. Déchiffrer le fichier clé `ma_nouvelle_clé` avec [Gpg4Win](https://www.gpg4win.org/). Utiliser `MdpClé` comme phrase de passe.
 
 24\. Maintenant que nous avons la clé non chiffrée, déchiffrer le fichier de l’étape 22 avec [Gpg4Win](https://www.gpg4win.org/). Utiliser le contenu du fichier clé de l’étape 23 comme phrase de passe.
 

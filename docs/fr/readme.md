@@ -161,23 +161,23 @@ phrase de passe à l’utilisateur, chiffre la séquence générée et l’enreg
 Le format du fichier est OpenPGP. D’autres applications OpenPGP peuvent aussi créer et 
 ouvrir les fichiers clés EncryptPad comme les lignes de commande ci-dessous le démontrent.
 
-Quand EncryptPad génère un nouveau fichier clé, il est approximativement équivalent à la commande « gpg2 » suivante.
+Quand EncryptPad génère un nouveau fichier clé, il est approximativement équivalent à la commande `gpg2` suivante.
 
     pwmake 1024 | gpg2 -c --armor --cipher-algo AES256 > ~/.encryptpad/foo.key
 
-« pwmake » génère une séquence aléatoire que « gpg2 » chiffre à son tour. Il demandera la
+`pwmake` génère une séquence aléatoire que `gpg2` chiffre à son tour. Il demandera la
 phrase de passe pour chiffrer la séquence.
 
-Quand vous utilisez cette clé pour chiffrer « test3.txt », la commande « gpg » équivalente est comme suit :
+Quand vous utilisez cette clé pour chiffrer `test3.txt`, la commande `gpg` équivalente est comme suit :
 
     gpg2 --decrypt ~/.encryptpad/foo.key \
     | gpg2 --passphrase-fd 0 --batch -c --cipher-algo AES256 \
     -o /tmp/test3.txt.gpg /tmp/test3.txt
 
-Le premier processus « gpg2 » déchiffre « foo.key » et le dirige vers le descripteur 0 du second processus
-par un opérateur de transfert de données . « gpg2 » lit la séquence du descripteur avec « --passphrase-fd 0 ».
+Le premier processus `gpg2` déchiffre `foo.key` et le dirige vers le descripteur 0 du second processus
+par un opérateur de transfert de données . `gpg2` lit la séquence du descripteur avec `--passphrase-fd 0`.
 
-Quand EncryptPad ouvre le fichier chiffré protégé avec « foo.key », les commandes « gpg » équivalentes sont
+Quand EncryptPad ouvre le fichier chiffré protégé avec `foo.key`, les commandes `gpg` équivalentes sont
 
     gpg2 --decrypt ~/.encryptpad/foo.key \
     | gpg2 --passphrase-fd 0 --batch --decrypt \
@@ -195,7 +195,7 @@ Un fichier enregistré peut avoir trois structures différentes selon le mode de
 
 2. **Clé seulement** (une phrase de passe n’est pas définie, mais un fichier clé est utilisé pour la protection). Le fichier est un fichier WAD. [WAD](https://fr.wikipedia.org/wiki/.wad) est un format simple qui combine plusieurs fichiers binaires en un seul. Vous pouvez ouvrir un fichier WAD avec [Slade](http://slade.mancubus.net/). Il contient deux fichiers : 
     * Fichier OpenPGP chiffré avec la clé
-    * « __X2_KEY » est un fichier texte en clair contenant le chemin de la clé si « Emplacement de clé persistante dans le fichier chiffré » est activé. Autrement, il a une taille de zéro.
+    * `__X2_KEY` est un fichier texte en clair contenant le chemin de la clé si `Emplacement de clé persistante dans le fichier chiffré` est activé. Autrement, il a une taille de zéro.
 
 3. **Protégé par phrase de passe et clé**. Le fichier produit est un fichier OpenPGP contenant un fichier WAD tel que décrit en 2.
 
@@ -260,7 +260,7 @@ Installer les paquets AUR ci-dessous :
 - [botan-stable](https://aur.archlinux.org/packages/botan-stable/)<sup><small>AUR</small></sup>
 - [encryptpad](https://aur.archlinux.org/packages/encryptpad/)<sup><small>AUR</small></sup>
 
-« pacaur » installe « botan-stable » automatiquement comme dépendance d’« encryptpad ».
+`pacaur` installe `botan-stable` automatiquement comme dépendance d’`encryptpad`.
 
 <div id="install-on-ubuntu"></div>
 
@@ -281,7 +281,7 @@ Utiliser les commandes ci-dessous pour installer les paquets :
 
 Ci-dessous se trouvent les étapes pour vérifier les hachages SHA-1 des fichiers sources dans [Launchpad webupd8 PPA](https://launchpad.net/~nilarimogard/+archive/ubuntu/webupd8/+packages), utilisés pour construire les paquets. Vous devez idéalement être familier avec les PPA.
 
-1\. Télécharger un des fichiers « changes » ci-dessous selon votre version d’Ubuntu. La version du paquet était 0.3.2.5 au moment d’écrire ceci. Veuillez la remplacer avec la version la plus récente que vous installez.
+1\. Télécharger un des fichiers `changes` ci-dessous selon votre version d’Ubuntu. La version du paquet était 0.3.2.5 au moment d’écrire ceci. Veuillez la remplacer avec la version la plus récente que vous installez.
 
 - Yakkety
 
@@ -307,7 +307,7 @@ Ci-dessous se trouvent les étapes pour vérifier les hachages SHA-1 des fichie
     wget https://github.com/evpo/EncryptPad/releases/download/v0.3.2.5\
     /encryptpad0_3_2_5_webupd8_ppa_changes.tar.gz.asc
 
-3\. Obtenir et vérifier la clé de version « EncryptPad Release » :
+3\. Obtenir et vérifier la clé de version `EncryptPad Release` :
 
     gpg --recv-key 634BFC0CCC426C74389D89310F1CFF71A2813E85
 
@@ -340,7 +340,7 @@ Ci-dessous se trouvent les étapes pour vérifier les hachages SHA-1 des fichie
 
 ### Étapes
 
-1. Modifier la variable d’environnement de session **PATH** afin d’inclure l’ensemble d’outils Qt et Python. **mingw32-make**, **g++**, **qmake**, **python.exe** devraient se trouver dans le chemin de recherche globale de votre session bash Git. Personnellement, je modifie bash.bashrc et ajoute une ligne comme « PATH=$PATH:/c/Python35-32:... » afin de ne pas polluer la variable PATH à l’échelle du système.
+1. Modifier la variable d’environnement de session **PATH** afin d’inclure l’ensemble d’outils Qt et Python. **mingw32-make**, **g++**, **qmake**, **python.exe** devraient se trouver dans le chemin de recherche globale de votre session bash Git. Personnellement, je modifie bash.bashrc et ajoute une ligne comme `PATH=$PATH:/c/Python35-32:...` afin de ne pas polluer la variable PATH à l’échelle du système.
 
 2. Extraire les fichiers sources d’EncryptPad dans un répertoire.
 
@@ -372,8 +372,8 @@ C’est plus facile que de compiler sous Windows. Tout ce que vous avez à faire
 
     ./configure.sh --all --use-system-libs
 
-Compilation avec des liens dynamiques vers les bibliothèques. Elle utilise aussi « Botan » et « Zlib » installés sur le système plutôt
-que de compiler leur code source sous « deps ». Sous Ubuntu, installer les
+Compilation avec des liens dynamiques vers les bibliothèques. Elle utilise aussi `Botan` et `Zlib` installés sur le système plutôt
+que de compiler leur code source sous `deps`. Sous Ubuntu, installer les
 paquets « libbotan1.10-dev » et « zlib1g-dev » avant de compiler.
 
 <div id="build-on-fedora"></div>
@@ -430,7 +430,7 @@ Tous les téléchargements associés à EncryptPad sont signés avec la clé Ope
 
 `Empreinte de la clé = 634B FC0C CC42 6C74 389D  8931 0F1C FF71 A281 3E85`
 
-J’ai aussi un certificat de signature de code délivré par une autorité de certification (CA). Pour établir une connexion entre mon certificat CA et la clé OpenPGP ci-dessus, j’ai créé un exécutable signé avec le certificat CA contenant les empreintes et la clé OpenPGP. Vous trouverez « ca_signed_pgp_signing_instructions » dans les téléchargements. J’ai en fait créé un pont de confiance entre mon certificat CA et la clé OpenPGP.
+J’ai aussi un certificat de signature de code délivré par une autorité de certification (CA). Pour établir une connexion entre mon certificat CA et la clé OpenPGP ci-dessus, j’ai créé un exécutable signé avec le certificat CA contenant les empreintes et la clé OpenPGP. Vous trouverez `ca_signed_pgp_signing_instructions` dans les téléchargements. J’ai en fait créé un pont de confiance entre mon certificat CA et la clé OpenPGP.
 
  Il y a plusieurs raisons pour lesquelles je n’ai pas simplement utilisé le certificat CA :
 
@@ -444,7 +444,7 @@ J’ai aussi un certificat de signature de code délivré par une autorité de c
 
 1. Télécharger les paquets et leur signature OpenPGP.
 2. Importer la clé EncryptPad (Releases) dans votre trousseau GPG.
-3. S’assurer que c’est bien la clé EncryptPad (Releases) valide en vérifiant son empreinte avec « ca_signed_pgp_signing_instructions ».
+3. S’assurer que c’est bien la clé EncryptPad (Releases) valide en vérifiant son empreinte avec `ca_signed_pgp_signing_instructions`.
 4. Vérifier avec GPG les signatures des fichiers téléchargés.
 
 <div id="license"></div>
