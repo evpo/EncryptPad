@@ -409,14 +409,18 @@ namespace EncryptPad
         std::unique_ptr<RandomInStream> in = CreateInStream(file_in, fall_back_buffer);
         if(in.get() == nullptr)
             return EpadResult::IOErrorInput;
+	
+	EpadResult epad_result = EpadResult::None;
 
-        OutPacketStreamFile out;
-        if(OpenFile(file_out, out) != OpenFileResult::OK)
-        {
-            return EpadResult::IOErrorOutput;
-        }
+	{
+            OutPacketStreamFile out;
+            if(OpenFile(file_out, out) != OpenFileResult::OK)
+            {
+                return EpadResult::IOErrorOutput;
+	    }
 
-        EpadResult epad_result = EncryptStream(*in, encrypt_params, out, metadata);
+	    epad_result = EncryptStream(*in, encrypt_params, out, metadata);
+	}
 
         if(epad_result != EpadResult::Success && file_out != "-")
         {
@@ -447,11 +451,15 @@ namespace EncryptPad
         if(result != OpenFileResult::OK)
             return EpadResult::IOErrorInput;
 
-        OutPacketStreamFile out;
-        if(OpenFile(file_out, out) != OpenFileResult::OK)
-            return EpadResult::IOErrorOutput;
+	EpadResult epad_result = EpadResult::None;
 
-        EpadResult epad_result = DecryptStream(in, encrypt_params, out, metadata);
+	{
+            OutPacketStreamFile out;
+	    if(OpenFile(file_out, out) != OpenFileResult::OK)
+		    return EpadResult::IOErrorOutput;
+
+	    epad_result = DecryptStream(in, encrypt_params, out, metadata);
+	}
 
         if(epad_result != EpadResult::Success && file_out != "-")
             RemoveFile(file_out);
