@@ -61,7 +61,7 @@
      <item row="1" column="0">
       <widget class="QLabel" name="label">
        <property name="text">
-        <string>Key &amp;Repository:</string>
+        <string>Key &amp;repository:</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
@@ -147,7 +147,7 @@
         <string notr="true"/>
        </property>
        <property name="text">
-        <string>&amp;Key File Path:</string>
+        <string>&amp;Key file path:</string>
        </property>
        <property name="buddy">
         <cstring>uiKeyFilePath</cstring>

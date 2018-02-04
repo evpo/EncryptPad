@@ -145,7 +145,7 @@
            </size>
           </property>
           <property name="text">
-           <string>Output File:</string>
+           <string>Output file:</string>
           </property>
           <property name="buddy">
            <cstring>uiOutputFile</cstring>
@@ -167,7 +167,7 @@
            </size>
           </property>
           <property name="text">
-           <string>Input File:</string>
+           <string>Input file:</string>
           </property>
           <property name="buddy">
            <cstring>uiInputFile</cstring>
@@ -216,7 +216,7 @@
      <item row="4" column="0">
       <widget class="QGroupBox" name="uiKeyPathGroupBox">
        <property name="title">
-        <string>Key Path</string>
+        <string>Key path</string>
        </property>
        <layout class="QGridLayout" name="gridLayout_3">
         <item row="0" column="0">
@@ -228,7 +228,7 @@
            </size>
           </property>
           <property name="text">
-           <string>Key File Path:</string>
+           <string>Key file path:</string>
           </property>
           <property name="buddy">
            <cstring>uiKeyFilePath</cstring>

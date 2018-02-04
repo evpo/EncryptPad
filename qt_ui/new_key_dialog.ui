@@ -46,7 +46,7 @@
      <item row="0" column="0">
       <widget class="QRadioButton" name="uiCreate">
        <property name="text">
-        <string>&amp;Key Path</string>
+        <string>&amp;Key path</string>
        </property>
        <property name="checked">
         <bool>true</bool>
@@ -56,7 +56,7 @@
      <item row="2" column="0">
       <widget class="QRadioButton" name="uiCreateInRepository">
        <property name="text">
-        <string>Key In &amp;Repository</string>
+        <string>Key in &amp;repository</string>
        </property>
       </widget>
      </item>

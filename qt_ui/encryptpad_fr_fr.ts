@@ -79,12 +79,12 @@
     </message>
     <message>
         <location filename="file_encryption_dialog.ui" line="148"/>
-        <source>Output File:</source>
+        <source>Output file:</source>
         <translation>Fichier de sortie :</translation>
     </message>
     <message>
         <location filename="file_encryption_dialog.ui" line="170"/>
-        <source>Input File:</source>
+        <source>Input file:</source>
         <translation>Fichier d’entrée :</translation>
     </message>
     <message>
@@ -109,12 +109,12 @@
     </message>
     <message>
         <location filename="file_encryption_dialog.ui" line="219"/>
-        <source>Key Path</source>
+        <source>Key path</source>
         <translation>Chemin de la clé</translation>
     </message>
     <message>
         <location filename="file_encryption_dialog.ui" line="231"/>
-        <source>Key File Path:</source>
+        <source>Key file path:</source>
         <translation>Chemin du fichier clé :</translation>
     </message>
     <message>
@@ -1180,12 +1180,12 @@ Souhaitez-vous le remplacer ?</translation>
     </message>
     <message>
         <location filename="new_key_dialog.ui" line="49"/>
-        <source>&amp;Key Path</source>
+        <source>&amp;Key path</source>
         <translation>&amp;Chemin de la clé</translation>
     </message>
     <message>
         <location filename="new_key_dialog.ui" line="59"/>
-        <source>Key In &amp;Repository</source>
+        <source>Key in &amp;repository</source>
         <translation>Clé dans le &amp;dépôt</translation>
     </message>
     <message>
@@ -1278,7 +1278,7 @@ Souhaitez-vous le remplacer ?</translation>
     </message>
     <message>
         <location filename="passphrase_generation_dialog.ui" line="223"/>
-        <source>Insert &amp;All</source>
+        <source>Insert &amp;all</source>
         <translation>&amp;Tout insérer</translation>
     </message>
     <message>
@@ -1288,12 +1288,12 @@ Souhaitez-vous le remplacer ?</translation>
     </message>
     <message>
         <location filename="passphrase_generation_dialog.ui" line="281"/>
-        <source>Select &amp;Passphrase:</source>
+        <source>Select &amp;passphrase:</source>
         <translation>Choisir une &amp;phrase de passe :</translation>
     </message>
     <message>
         <location filename="passphrase_generation_dialog.ui" line="304"/>
-        <source>Limit Group Occurrence (1 to max chars)</source>
+        <source>Limit group occurrence (1 to max chars)</source>
         <translation>Limiter les occurrences par groupe (de 1 au maximum de caractères)</translation>
     </message>
     <message>
@@ -1487,7 +1487,7 @@ Souhaitez-vous le remplacer ?</translation>
     </message>
     <message>
         <location filename="set_key_dialog.ui" line="64"/>
-        <source>Key &amp;Repository:</source>
+        <source>Key &amp;repository:</source>
         <translation>&amp;Dépôt de clés :</translation>
     </message>
     <message>
@@ -1497,7 +1497,7 @@ Souhaitez-vous le remplacer ?</translation>
     </message>
     <message>
         <location filename="set_key_dialog.ui" line="150"/>
-        <source>&amp;Key File Path:</source>
+        <source>&amp;Key file path:</source>
         <translation>&amp;Chemin du fichier clé :</translation>
     </message>
     <message>

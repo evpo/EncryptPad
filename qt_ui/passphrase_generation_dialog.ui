@@ -220,7 +220,7 @@
        <item>
         <widget class="QPushButton" name="uiInsertAll">
          <property name="text">
-          <string>Insert &amp;All</string>
+          <string>Insert &amp;all</string>
          </property>
         </widget>
        </item>
@@ -278,7 +278,7 @@
      <item row="10" column="1">
       <widget class="QLabel" name="label_4">
        <property name="text">
-        <string>Select &amp;Passphrase:</string>
+        <string>Select &amp;passphrase:</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignCenter</set>
@@ -301,7 +301,7 @@
      <item row="2" column="1" colspan="2">
       <widget class="QLabel" name="label_3">
        <property name="text">
-        <string>Limit Group Occurrence (1 to max chars)</string>
+        <string>Limit group occurrence (1 to max chars)</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
