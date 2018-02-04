@@ -449,11 +449,14 @@ namespace EncryptPad
 
         OutPacketStreamFile out;
         if(OpenFile(file_out, out) != OpenFileResult::OK)
-        {
             return EpadResult::IOErrorOutput;
-        }
 
-        return DecryptStream(in, encrypt_params, out, metadata);
+        EpadResult epad_result = DecryptStream(in, encrypt_params, out, metadata);
+
+        if(epad_result != EpadResult::Success && file_out != "-")
+            RemoveFile(file_out);
+
+        return epad_result;
     }
 
     bool CheckIfPassphraseProtected(const std::string &file_name, bool &wad_file, std::string &key_file)
