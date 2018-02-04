@@ -432,7 +432,7 @@ Tous les téléchargements associés à EncryptPad sont signés avec la clé Ope
 
 J’ai aussi un certificat de signature de code délivré par une autorité de certification (CA). Pour établir une connexion entre mon certificat CA et la clé OpenPGP ci-dessus, j’ai créé un exécutable signé avec le certificat CA contenant les empreintes et la clé OpenPGP. Vous trouverez `ca_signed_pgp_signing_instructions` dans les téléchargements. J’ai en fait créé un pont de confiance entre mon certificat CA et la clé OpenPGP.
 
- Il y a plusieurs raisons pour lesquelles je n’ai pas simplement utilisé le certificat CA :
+Il y a plusieurs raisons pour lesquelles je n’ai pas simplement utilisé le certificat CA :
 
 1. EncryptPad est fondée sur la norme OpenPGP et la promeut.
 2. La signature OpenPGP est plus souple.

@@ -74,7 +74,7 @@ Veuillez prendre note que le nom de fichier est maintenant `guerre et paix.gpg` 
 
 ## Le fichier GPG sur le disque
 
-C’est un fichier OpenPGP. Vous pouvez l’envoyer à quelqu’un qui n’utilise pas EncryptPad. Il peut être déchiffré facilement avec [Gpg4Win](https://www.gpg4win.org/). Utiliser le contenu de ce fichier clé comme phrase de passe `T6/vlnb0aysdr+xUriwwwrC844iVImiG4T/sCgF+ETQ=` (voir étape 8).   
+C’est un fichier OpenPGP. Vous pouvez l’envoyer à quelqu’un qui n’utilise pas EncryptPad. Il peut être déchiffré facilement avec [Gpg4Win](https://www.gpg4win.org/). Utiliser le contenu de ce fichier clé comme phrase de passe `T6/vlnb0aysdr+xUriwwwrC844iVImiG4T/sCgF+ETQ=` (voir étape 8).
 
 ![Kleopatra a déchiffré notre fichier](images/kleopatra_decrypted.png)
 

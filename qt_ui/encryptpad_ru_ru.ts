@@ -80,7 +80,7 @@
     <message>
         <location filename="file_encryption_dialog.ui" line="148"/>
         <source>Output file:</source>
-        <translation>Выходной Файл:</translation>
+        <translation>Выходной файл:</translation>
     </message>
     <message>
         <location filename="file_encryption_dialog.ui" line="170"/>
@@ -1497,7 +1497,7 @@ Do you want to replace it?</source>
     <message>
         <location filename="set_key_dialog.ui" line="150"/>
         <source>&amp;Key file path:</source>
-        <translation>&amp;Путь Ключа:</translation>
+        <translation>&amp;Путь ключа:</translation>
     </message>
     <message>
         <location filename="set_key_dialog.ui" line="160"/>
