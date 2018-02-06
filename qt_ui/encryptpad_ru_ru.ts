@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="ru">
+<?xml version="1.0" ?><!DOCTYPE TS><TS language="ru" version="2.1">
 <context>
     <name>ConfirmPassphraseDialog</name>
     <message>
@@ -676,7 +674,7 @@ Do you want to replace it?</source>
         <location filename="mainwindow.cpp" line="662"/>
         <source>&lt;b&gt;EncryptPad %1 Beta&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;A minimalist secure text editor and file encryptor that implements RFC 4880 Open PGP format: symmetrically encrypted, compressed and integrity protected. The editor can protect files with passphrases, key files or both.&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;GNU General Public License v2&lt;br/&gt;&lt;br/&gt;</source>
         <oldsource>&lt;b&gt;EncryptPad %1 Beta&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;Minimalist secure text editor and binary encryptor that implements RFC 4880 Open PGP format: symmetrically encrypted, compressed and integrity protected. The editor can protect files with passphrases, key files or both.&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;GNU General Public License v2&lt;br/&gt;&lt;br/&gt;</oldsource>
-        <translation type="unfinished">&lt;b&gt;EncryptPad %1 Beta&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;Упрощенный и защищенный текстовый редактор который реализует RFC 4880 Open PGP формат: симметричное шифрование, архивация и проверка целостности. Редактор может защищать файлы паролями, файловыми ключами или обоими.&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;GNU General Public License v2&lt;br/&gt;&lt;br/&gt;</translation>
+        <translation>&lt;b&gt;EncryptPad %1 Beta&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;Упрощенный и защищенный текстовый редактор который реализует RFC 4880 Open PGP формат: симметричное шифрование, архивация и проверка целостности. Редактор может защищать файлы паролями, файловыми ключами или обоими.&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;GNU General Public License v2&lt;br/&gt;&lt;br/&gt;</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="716"/>
@@ -1364,7 +1362,7 @@ Do you want to replace it?</source>
     <message>
         <location filename="preferences_dialog.ui" line="125"/>
         <source>[example: Monospace (Size: 12)]</source>
-        <translation type="unfinished"></translation>
+        <translation>[example: Monospace (Size: 12)]</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="138"/>
