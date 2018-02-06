@@ -660,7 +660,7 @@ void MainWindow::about()
 {
    QMessageBox::about(this, tr("About EncryptPad"),
             tr("<b>EncryptPad %1 Beta</b><br/><br/>"
-               "Minimalist secure text editor and binary encryptor that implements "
+               "A minimalist secure text editor and file encryptor that implements "
                "RFC 4880 Open PGP format: "
                "symmetrically encrypted, compressed and integrity protected. "
                "The editor can protect files with passphrases, key files or both.<br/><br/>"
