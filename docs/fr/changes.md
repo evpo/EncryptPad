@@ -23,7 +23,7 @@ h2
 * Correctif de bogue : le paramètre `file` de la commande `encryptpad` ne prenait pas en charge les caractères non ASCII. C’est pourquoi il était impossible d’ouvrir un fichier directement à partir de l’explorateur Windows par un double-clic si le fichier était dans un répertoire dont le nom comprenait des caractères non ASCII.
 * Plus de propriétés dans les préférences afin de contrôler les paramètres de chiffrement par défaut : longueur de la séquence aléatoire du fichier clé, propriétés de chiffrement des fichiers clés, propriétés par défaut de chiffrement des fichiers (chiffre, S2K, itérations, compression), le nombre de clés de chiffrement à enregistrer ou à charger sans redemander la phrase de passe.
 * Correctif de bogue : si plusieurs EncryptPad étaient ouverts et que les préférences étaient mises à jour, lors de la fermeture le dernier EncryptPad écrasait les préférences modifiées dans les autres EncryptPad.
-* Dans la boîte de dialogue «&nbsp;Chiffrement du fichier&nbsp;», un bouton radio a été ajouté afin de choisir entre EPD et GPG. L’utilisateur devait précédemment modifier l’extension manuellement pour obtenir une sortie au format GPG.
+* Dans la boîte de dialogue Chiffrement du fichier, un bouton radio a été ajouté afin de choisir entre EPD et GPG. L’utilisateur devait précédemment modifier l’extension manuellement pour obtenir une sortie au format GPG.
 * Correctif de bogue : «&nbsp;Sel&nbsp;» était affiché dans la boîte de dialogue «&nbsp;Chiffrement du fichier&nbsp;» après le chiffrement ou le déchiffrement d’un fichier, ce qui n’était pas logique, car cela n’était pas relié au prochain chiffrement.
 * Il n’y a que 256 ensembles d’itérations S2K possibles. La boîte de dialogue des propriétés de fichier propose maintenant une zone combinée pour les lister tous. Il est plus simple de choisir soit le nombre maximal, soit le nombre minimal d’itérations.
 * Le nombre par défaut d’itérations a été porté à 1015808.
@@ -46,13 +46,13 @@ h2
 * Traduction en français.
 * Ajout de l’algorithme de hachage `SHA-512`.
 * Interpréteur de ligne de commande : encryptcli plantait avec une erreur de segmentation quand TTY n’était pas disponible. Il se ferme maintenant élégamment avec un code d’erreur.
-* Correctif de bogue : dans la boîte de dialogue «&nbsp;Chiffrement du fichier&nbsp;», quand la phrase de passe était effacée puis redéfinie, la phrase de passe était ignorée et le fichier était enregistré comme «&nbsp;clé seulement&nbsp;».
+* Correctif de bogue : dans la boîte de dialogue Chiffrement du fichier, quand la phrase de passe était effacée puis redéfinie, la phrase de passe était ignorée et le fichier était enregistré comme «&nbsp;clé seulement&nbsp;».
 * Correctif de bogue : dans le chiffrement des fichiers, les fichiers gpg étaient chiffrés avec le drapeau «&nbsp;t&nbsp;», ce qui entraînait la suppression de 0x0D octets quand GPG déchiffrait les fichiers, car il croyait que les fichiers étaient textuels. Le problème ne se produisait pas sous Windows ni quand EncryptPad était utilisé pour le déchiffrement. Cela ne se produisait que dans la direction EncryptPad vers GPG pour Linux/Unix.
 
 ### Version 0.3.2.2
 
-* Correctif de bogue : dans la boîte de dialogue «&nbsp;Chiffrement du fichier&nbsp;», lorsque la phrase de passe du fichier clé était erronée, un message n’en informait pas l’utilisateur.
-* Prise en charge des fichiers BAK. Lors d’une modification, un fichier bak n’est crée que lors du premier enregistrement.
+* Correctif de bogue : dans la boîte de dialogue Chiffrement du fichier, lorsque la phrase de passe du fichier clé était erronée, un message n’en informait pas l’utilisateur.
+* Prise en charge de fichiers bak. Lors d’une modification, un fichier .bak n’est crée que lors du premier enregistrement.
 * L’ordre des sections a été changé dans les nouveaux fichiers wad. Il est maintenant répertoire, clé, contenu. Cela n’affecte pas les fichiers wad existants.
 * encryptcli peut lire les phrases de passe des descripteurs de fichier
 * encryptcli peut lire de stdin et écrire vers stdout

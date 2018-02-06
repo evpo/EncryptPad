@@ -2,15 +2,15 @@
 
 ## Ouvrir un fichier texte en clair
 
-1\. Cliquer sur le bouton «&nbsp;Ouvrir un fichier&nbsp;».
+1\. Cliquer sur le bouton Ouvrir un fichier
 
-![Bouton «&nbsp;Ouvrir un fichier&nbsp;»](images/open_text_file.png)
+![Bouton Ouvrir un fichier](images/open_text_file.png)
 
-2\. Sélectionner le type de fichier «&nbsp;Texte en clair&nbsp;» et cliquer sur Enregistrer.
+2\. Sélectionner le type de fichier Texte en clair et cliquer sur Enregistrer
 
-![Type de fichier «&nbsp;Texte en clair»](images/open_file_dialog_text_file.png)
+![Type de fichier Texte en clair](images/open_file_dialog_text_file.png)
 
-3\. Le fichier texte en clair ouvert.
+3\. Le fichier texte en clair ouvert
 
 ![Fichier texte ouvert](images/text_file_opened.png)
 
@@ -20,13 +20,13 @@ EncryptPad est maintenant en mode texte en clair non protégé. Elle fonctionne 
 
 ## Générer un nouveau fichier
 
-4\. Cliquer sur le bouton «&nbsp;Générer une clé&nbsp;».
+4\. Cliquer sur le bouton Générer une clé
 
-![Bouton «&nbsp;Générer une clé&nbsp;»](images/generate_key_tool_button.png)
+![Bouton Générer une clé](images/generate_key_tool_button.png)
 
-5\. Sélectionner le bouton radio «&nbsp;Clé dans le dépôt&nbsp;», saisir `ma_nouvelle_clé` dans la boîte de texte correspondante et cliquer sur OK.
+5\. Sélectionner le bouton radio Clé dans le dépôt, saisir `ma_nouvelle_clé` dans la boîte de texte correspondante et cliquer sur OK.
 
-![Boîte de dialogue «&nbsp;Générer une clé&nbsp;»](images/generate_key_dialog.png)
+![Boîte de dialogue Générer une clé](images/generate_key_dialog.png)
 
 6\. Il vous sera demandé de saisir une phrase de passe pour protéger le fichier clé sur le disque.
 
@@ -36,7 +36,7 @@ Saisir `MdpClé`
 
 7\. Cliquer sur Oui pour utiliser le nouveau fichier clé pour chiffrer votre texte.
 
-![Boîte de dialogue «&nbsp;Utiliser une nouvelle clé&nbsp;»](images/use_new_key_dialog.png)
+![Boîte de dialogue Utiliser une nouvelle clé](images/use_new_key_dialog.png)
 
 8\. Le fichier clé se trouve dans votre répertoire personnel sous `encryptpad`.
 
@@ -50,15 +50,15 @@ C’est une séquence aléatoire en Base64 à partir de laquelle la clé de chif
 
 ## Protéger avec le fichier clé et enregistrer comme fichier GPG
 
-9\. Cliquer sur le bouton «&nbsp;Enregistrer sous&nbsp;».
+9\. Cliquer sur le bouton Enregistrer sous.
 
-![Bouton «&nbsp;Enregistrer sous&nbsp;»](images/save_as_tool_button.png)
+![Bouton Enregistrer sous](images/save_as_tool_button.png)
 
 10\. Sélectionner le type de fichier EncryptPad (\*.epd) et cliquer sur le bouton Enregistrer.
 
-![Boîte de dialogue «&nbsp;Enregistrer sous&nbsp;»](images/select_epd_in_save_as.png)
+![Boîte de dialogue Enregistrer sous](images/select_epd_in_save_as.png)
 
-Veuillez prendre note que le nom de fichier est maintenant `guerre et paix.epd` dans la boîte de dialogue «&nbsp;Enregistrer sous&nbsp;».
+Veuillez prendre note que le nom de fichier est maintenant `guerre et paix.epd` dans la boîte de dialogue Enregistrer sous.
 
 11\. Il vous sera demandé de saisir une phrase de passer deux fois. Saisir `MdpDémo` pour cet exemple et cliquer sur OK.
 
@@ -74,11 +74,11 @@ Veuillez prendre note que si vous laissez la phrase de passe vide et cliquez sur
 
 Maintenant, si vous annulez la protection, fermez le fichier et le rouvrez, la phrase de passe et le fichier clé vous seront demandés. Il pourrait être fastidieux de saisir le chemin du fichier clé chaque fois, particulièrement s’il n’est pas dans le dépôt. Pour faciliter le tout, vous pouvez activer `Emplacement de clé persistante dans le fichier chiffré`. (cette fonction n’est prise en charge que pour le type de fichier EPD).
 
-13\. Cliquer sur le bouton «&nbsp;Définir la clé&nbsp;».
+13\. Cliquer sur le bouton Définir la clé.
 
-![Bouton «&nbsp;Définir la clé&nbsp;»](images/set_key_tool_button.png)
+![Bouton Définir la clé](images/set_key_tool_button.png)
 
-14\. Activer `Emplacement de clé persistante dans le fichier chiffré` dans la boîte de dialogue «&nbsp;Définir la clé&nbsp;» et cliquer sur OK.
+14\. Activer `Emplacement de clé persistante dans le fichier chiffré` dans la boîte de dialogue Définir la clé et cliquer sur OK.
 
 ![Activer la clé persistente](images/enable_persist_key.png)
 
@@ -96,7 +96,7 @@ Si vous tentez d’ouvrir un fichier texte en clair maintenant, cela échouera a
 
 ![Impossible d’ouvrir le texte en clair](images/open_another_plain_text.png)
 
-EncryptPad pense que le fichier est chiffré avec une phrase de passe et un fichier clé, car son mode est `Protégé par une clé` et `Protégé par phrase de passe`, comme vous pouvez le voir dans la barre d’état. Elle a tenté de déchiffrer le texte en clair et a échoué. Pour poursuivre l’ouverture du fichier, effacez la protection par phrase de passe et fichier clé en cliquant sur les boutons «&nbsp;Effacer la clé de chiffrement&nbsp;» et «&nbsp;Effacer la phrase de passe&nbsp;», ou mieux encore, en cliquant sur «&nbsp;Fermer et réinitialiser&nbsp;» ce qui fermera le fichier texte et réinitialisera les deux parties de la protection.
+EncryptPad pense que le fichier est chiffré avec une phrase de passe et un fichier clé, car son mode est `Protégé par une clé` et `Protégé par phrase de passe`, comme vous pouvez le voir dans la barre d’état. Elle a tenté de déchiffrer le texte en clair et a échoué. Pour poursuivre l’ouverture du fichier, effacez la protection par phrase de passe et fichier clé en cliquant sur les boutons Effacer la clé de chiffrement et Effacer la phrase de passe, ou mieux encore, en cliquant sur Fermer et réinitialiser» ce qui fermera le fichier texte et réinitialisera les deux parties de la protection.
 
 ![Effacer la clé ou Fermer et réinitialiser](images/clear_key_and_pwd_or_close_and_reset.png)
 

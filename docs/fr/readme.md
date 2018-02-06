@@ -53,7 +53,7 @@ EncryptPad est une application de visualisation et d’édition de texte chiffr�
 * Un **générateur de phrases de passe** personnalisable aide à créer des phrases de passe aléatoires robustes.
 * Format de fichier compatible avec **OpenPGP**
 * **S2K itéré et salé**
-* **Les phrases de passe ne sont pas conservées en mémoire** pour être réutilisées, seulement les résultats S2K ([plus...](#passphrases-in-memory))
+* **Les phrases de passe ne sont pas conservées en mémoire** pour être réutilisées, seulement les résultats S2K ([plus…](#passphrases-in-memory))
 * Algorithmes de chiffrement : **CAST5, TripleDES, AES128, AES256**
 * Algorithmes de hachage : **SHA-1, SHA-256, SHA-512**
 * Protection de l’intégrité : **SHA-1**
@@ -340,7 +340,7 @@ Ci-dessous se trouvent les étapes pour vérifier les hachages SHA-1 des fichie
 
 ### Étapes
 
-1. Modifier la variable d’environnement de session **PATH** afin d’inclure l’ensemble d’outils Qt et Python. **mingw32-make**, **g++**, **qmake**, **python.exe** devraient se trouver dans le chemin de recherche globale de votre session bash Git. Personnellement, je modifie bash.bashrc et ajoute une ligne comme `PATH=$PATH:/c/Python35-32:...` afin de ne pas polluer la variable PATH à l’échelle du système.
+1. Modifier la variable d’environnement de session **PATH** afin d’inclure l’ensemble d’outils Qt et Python. **mingw32-make**, **g++**, **qmake**, **python.exe** devraient se trouver dans le chemin de recherche globale de votre session bash Git. Personnellement, je modifie bash.bashrc et ajoute une ligne comme `PATH=$PATH:/c/Python35-32:…` afin de ne pas polluer la variable PATH à l’échelle du système.
 
 2. Extraire les fichiers sources d’EncryptPad dans un répertoire.
 

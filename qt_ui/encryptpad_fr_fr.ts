@@ -75,7 +75,7 @@
         <location filename="file_encryption_dialog.ui" line="128"/>
         <location filename="file_encryption_dialog.ui" line="135"/>
         <source>Browse...</source>
-        <translation>Parcourir...</translation>
+        <translation>Parcourir…</translation>
     </message>
     <message>
         <location filename="file_encryption_dialog.ui" line="148"/>
@@ -120,7 +120,7 @@
     <message>
         <location filename="file_encryption_dialog.ui" line="244"/>
         <source>Select...</source>
-        <translation>Sélectionner...</translation>
+        <translation>Sélectionner…</translation>
     </message>
     <message>
         <location filename="file_encryption_dialog.ui" line="254"/>
@@ -145,7 +145,7 @@
     <message>
         <location filename="file_encryption_dialog.ui" line="346"/>
         <source>Parameters...</source>
-        <translation>Paramètres...</translation>
+        <translation>Paramètres…</translation>
     </message>
     <message>
         <location filename="file_encryption_dialog.ui" line="359"/>
@@ -407,7 +407,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="find_and_replace.ui" line="79"/>
         <source>Find Next</source>
-        <translation>Rechercher le suivant</translation>
+        <translation>Chercher le suivant</translation>
     </message>
     <message>
         <location filename="find_and_replace.ui" line="99"/>
@@ -455,7 +455,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="find_dialog.ui" line="89"/>
         <source>Find &amp;Next</source>
-        <translation>Rechercher le &amp;suivant</translation>
+        <translation>Chercher le &amp;suivant</translation>
     </message>
     <message>
         <location filename="find_dialog.ui" line="96"/>
@@ -512,7 +512,7 @@ Souhaitez-vous le remplacer ?</translation>
         <location filename="get_passphrase_or_key_dialog.ui" line="80"/>
         <location filename="get_passphrase_or_key_dialog.ui" line="105"/>
         <source>Select...</source>
-        <translation>Sélectionner...</translation>
+        <translation>Sélectionner…</translation>
     </message>
     <message>
         <location filename="get_passphrase_or_key_dialog.ui" line="108"/>
@@ -573,7 +573,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="mainwindow.cpp" line="186"/>
         <source>Passphrase not set</source>
-        <translation>La phrase de passe n’est pas définie</translation>
+        <translation>La phrase de passe n’est pas définie.</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="191"/>
@@ -674,7 +674,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="mainwindow.cpp" line="662"/>
         <source>&lt;b&gt;EncryptPad %1 Beta&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;Minimalist secure text editor and binary encryptor that implements RFC 4880 Open PGP format: symmetrically encrypted, compressed and integrity protected. The editor can protect files with passphrases, key files or both.&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;GNU General Public License v2&lt;br/&gt;&lt;br/&gt;</source>
-        <translation>&lt;b&gt;EncryptPad %1 bêta&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;Un éditeur de texte sécurisé minimaliste et un outil de chiffrement binaire qui met en œuvre le format RFC 4880 d’Open PGP : chiffré symétriquement, compressé et dont l’intégrité est protégée. L’éditeur peut protéger les fichiers par phrase de passe, fichier clé ou les deux.&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;Licence publique générale GNU v2&lt;br/&gt;&lt;br/&gt;</translation>
+        <translation>&lt;b&gt;EncryptPad %1 bêta&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;Un éditeur de texte sécurisé minimaliste et un outil de chiffrement de fichiers binaires qui met en œuvre le format RFC 4880 d’Open PGP : chiffré symétriquement, compressé et dont l’intégrité est protégée. L’éditeur peut protéger les fichiers par phrase de passe, fichier clé ou les deux.&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;Licence publique générale GNU v2&lt;br/&gt;&lt;br/&gt;</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="716"/>
@@ -694,7 +694,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="mainwindow.cpp" line="734"/>
         <source>&amp;Open...</source>
-        <translation>&amp;Ouvrir...</translation>
+        <translation>&amp;Ouvrir…</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="736"/>
@@ -714,7 +714,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="mainwindow.cpp" line="744"/>
         <source>Save &amp;As...</source>
-        <translation>Enregistrer &amp;sous...</translation>
+        <translation>Enregistrer &amp;sous…</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="746"/>
@@ -724,12 +724,12 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="mainwindow.cpp" line="749"/>
         <source>File &amp;Properties...</source>
-        <translation>&amp;Propriétés du fichiers…</translation>
+        <translation>&amp;Propriétés du fichier…</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="750"/>
         <source>Set file properties</source>
-        <translation>Définir les propriétés des fichiers</translation>
+        <translation>Définir les propriétés du fichier</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="753"/>
@@ -744,7 +744,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="mainwindow.cpp" line="758"/>
         <source>Generate Key...</source>
-        <translation>Générer une clé...</translation>
+        <translation>Générer une clé…</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="759"/>
@@ -754,7 +754,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="mainwindow.cpp" line="762"/>
         <source>Set &amp;Passphrase...</source>
-        <translation>Définir une &amp;phrase de passe...</translation>
+        <translation>Définir une &amp;phrase de passe…</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="763"/>
@@ -856,7 +856,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="mainwindow.cpp" line="817"/>
         <source>&amp;Find...</source>
-        <translation>&amp;Chercher...</translation>
+        <translation>&amp;Chercher…</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="819"/>
@@ -866,7 +866,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="mainwindow.cpp" line="822"/>
         <source>&amp;Go to...</source>
-        <translation>&amp;Aller à...</translation>
+        <translation>&amp;Aller à…</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="823"/>
@@ -877,7 +877,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="mainwindow.cpp" line="827"/>
         <source>&amp;Generate Passphrase...</source>
-        <translation>&amp;Générer une phrase de passe...</translation>
+        <translation>&amp;Générer une phrase de passe…</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="828"/>
@@ -887,7 +887,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="mainwindow.cpp" line="831"/>
         <source>&amp;Replace...</source>
-        <translation>&amp;Remplacer...</translation>
+        <translation>&amp;Remplacer…</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="833"/>
@@ -947,7 +947,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="mainwindow.cpp" line="863"/>
         <source>&amp;About...</source>
-        <translation>À &amp;propos...</translation>
+        <translation>À &amp;propos…</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="864"/>
@@ -967,7 +967,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="mainwindow.cpp" line="872"/>
         <source>&amp;Preferences...</source>
-        <translation>&amp;Préférences...</translation>
+        <translation>&amp;Préférences…</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="873"/>
@@ -977,7 +977,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="mainwindow.cpp" line="876"/>
         <source>File Encryption...</source>
-        <translation>Chiffrement du fichier...</translation>
+        <translation>Chiffrement du fichier…</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="877"/>
@@ -1153,7 +1153,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="mainwindow.cpp" line="1642"/>
         <source>untitled</source>
-        <translation>sans titre</translation>
+        <translation>Sans titre</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="1651"/>
@@ -1163,7 +1163,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="mainwindow.cpp" line="1652"/>
         <source>Key not set</source>
-        <translation>Clé non définie</translation>
+        <translation>La clé n’est pas définie</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="1653"/>
@@ -1201,7 +1201,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="new_key_dialog.ui" line="83"/>
         <source>Browse...</source>
-        <translation>Parcourir...</translation>
+        <translation>Parcourir…</translation>
     </message>
     <message>
         <location filename="new_key_dialog.ui" line="93"/>
@@ -1224,17 +1224,17 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="passphrase_generation_dialog.ui" line="54"/>
         <source>Custom:</source>
-        <translation>Personnalisé :</translation>
+        <translation>Personnalisée :</translation>
     </message>
     <message>
         <location filename="passphrase_generation_dialog.ui" line="61"/>
         <source>Lowercase a-z</source>
-        <translation>Minuscules a-z</translation>
+        <translation>Minuscules de a à z</translation>
     </message>
     <message>
         <location filename="passphrase_generation_dialog.ui" line="71"/>
         <source>Numbers 0-9</source>
-        <translation>Nombres 0-9</translation>
+        <translation>Nombres de 0 à 9</translation>
     </message>
     <message>
         <location filename="passphrase_generation_dialog.ui" line="81"/>
@@ -1264,12 +1264,12 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="passphrase_generation_dialog.ui" line="130"/>
         <source>Custom</source>
-        <translation>Personnalisé</translation>
+        <translation>Personnalisée</translation>
     </message>
     <message>
         <location filename="passphrase_generation_dialog.ui" line="165"/>
         <source>Uppercase A-Z</source>
-        <translation>Majuscules A-Z</translation>
+        <translation>Majuscules de A à Z</translation>
     </message>
     <message>
         <location filename="passphrase_generation_dialog.ui" line="216"/>
@@ -1294,7 +1294,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="passphrase_generation_dialog.ui" line="304"/>
         <source>Limit group occurrence (1 to max chars)</source>
-        <translation>Limiter les occurrences par groupe (de 1 au maximum de caractères)</translation>
+        <translation>Limiter les occurrences par groupe&lt;br/&gt;(de 1 au maximum de caractères.)</translation>
     </message>
     <message>
         <location filename="passphrase_generation_dialog.ui" line="314"/>
@@ -1352,12 +1352,12 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="preferences_dialog.ui" line="89"/>
         <source>Browse...</source>
-        <translation>Parcourir...</translation>
+        <translation>Parcourir…</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="103"/>
         <source>Enable BAK files</source>
-        <translation>Activer les fichiers BAK</translation>
+        <translation>Créer des fichiers .bak</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="125"/>
@@ -1378,7 +1378,7 @@ Souhaitez-vous le remplacer ?</translation>
         <location filename="preferences_dialog.ui" line="188"/>
         <location filename="preferences_dialog.ui" line="263"/>
         <source>Edit...</source>
-        <translation>Modifier...</translation>
+        <translation>Modifier…</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="205"/>
@@ -1455,12 +1455,12 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="preferences_dialog.ui" line="233"/>
         <source>Font...</source>
-        <translation>Police...</translation>
+        <translation>Police…</translation>
     </message>
     <message>
         <location filename="preferences_dialog.cpp" line="146"/>
         <source>(Size: </source>
-        <translation>(Taille :</translation>
+        <translation>(taille : </translation>
     </message>
     <message>
         <location filename="preferences_dialog.cpp" line="148"/>
@@ -1493,7 +1493,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="set_key_dialog.ui" line="125"/>
         <source>&amp;Browse...</source>
-        <translation>&amp;Parcourir...</translation>
+        <translation>&amp;Parcourir…</translation>
     </message>
     <message>
         <location filename="set_key_dialog.ui" line="150"/>

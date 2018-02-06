@@ -2,13 +2,13 @@
 
 ## Générer un nouveau fichier clé si vous souhaitez utiliser un fichier clé pour le chiffrement.
 
-1\. Cliquer sur le bouton «&nbsp;Générer une clé&nbsp;».
+1\. Cliquer sur le bouton Générer une clé.
 
-![Bouton «&nbsp;Générer une clé&nbsp;»](images/generate_key_tool_button.png)
+![Bouton Générer une clé](images/generate_key_tool_button.png)
 
-2\. Sélectionner le bouton radio «&nbsp;Clé dans le dépôt&nbsp;», saisir `ma_nouvelle_clé` dans la boîte de texte correspondante et cliquer sur OK.
+2\. Sélectionner le bouton radio Clé dans le dépôt, saisir `ma_nouvelle_clé` dans la boîte de texte correspondante et cliquer sur OK.
 
-![Boîte de dialogue « Générer une clé »](images/generate_key_dialog.png)
+![Boîte de dialogue Générer une clé](images/generate_key_dialog.png)
 
 3\. Il vous sera demandé de saisir une phrase de passe pour protéger le fichier clé sur le disque.
 
@@ -16,15 +16,15 @@
 
 4\. Cliquer sur **Non**, car cela s’applique à un texte et que nous chiffrons des fichiers binaires.
 
-![Boîte de dialogue «&nbsp;Utiliser une nouvelle clé&nbsp;»](images/use_new_key_dialog.png)
+![Boîte de dialogue Utiliser une nouvelle clé](images/use_new_key_dialog.png)
 
 ## Chiffrer un fichier binaire
 
-5\. Cliquer sur le bouton «&nbsp;Chiffrement du fichier&nbsp;».
+5\. Cliquer sur le bouton Chiffrement du fichier.
 
-![Bouton «&nbsp;Chiffrement du fichier&nbsp;»](images/file_encryption_tool_button.png)
+![Bouton Chiffrement du fichier](images/file_encryption_tool_button.png)
 
-6\. Cliquer sur «&nbsp;Parcourir...&nbsp;» pour sélectionner un fichier d’entrée.
+6\. Cliquer sur Parcourir… pour sélectionner un fichier d’entrée.
 
 ![Sélectionner un fichier d’entrée](images/select_input_file.png) 
 
@@ -34,9 +34,9 @@
 
 ![Renommé en gpg](images/renamed_to_gpg.png)
 
-8\. Si vous souhaitez utiliser un fichier clé, indiquez-le dans la zone de texte «&nbsp;Chemin du fichier clé&nbsp;» en cliquant sur le bouton «&nbsp;Sélectionner un fichier clé&nbsp;». Notez qu’une phrase de passe ou un fichier clé doit être utilisé pour le type GPG, mais pas les deux.
+8\. Si vous souhaitez utiliser un fichier clé, indiquez-le dans la zone de texte Chemin du fichier clé en cliquant sur le bouton Sélectionner un fichier clé. Notez qu’une phrase de passe ou un fichier clé doit être utilisé pour le type GPG, mais pas les deux.
 
-![Boîte de dialogue «&nbsp;Définir une clé&nbsp;»](images/set_key_dialog.png)
+![Boîte de dialogue Définir une clé](images/set_key_dialog.png)
 
 Les fichiers sans chemin sont d’abord cherchés dans le répertoire d’EncryptPad, puis dans le dépôt du dossier personnel (voir le texte de l’image ci-dessus). Si votre clé ne se trouve pas dans le dépôt, vous pouvez indiquer le chemin complet vers votre clé. 
 

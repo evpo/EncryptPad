@@ -5,23 +5,23 @@
         <location filename="confirm_passphrase_dialog.ui" line="26"/>
         <location filename="confirm_passphrase_dialog.cpp" line="43"/>
         <source>Set Passphrase</source>
-        <translation>设置密码</translation>
+        <translation>设置口令</translation>
     </message>
     <message>
         <location filename="confirm_passphrase_dialog.ui" line="55"/>
         <location filename="confirm_passphrase_dialog.ui" line="107"/>
         <source>Leave blank when passphrase is not needed</source>
-        <translation>如果不需要密码则留空</translation>
+        <translation>如果不需要口令则留空</translation>
     </message>
     <message>
         <location filename="confirm_passphrase_dialog.ui" line="65"/>
         <source>&amp;Passphrase:</source>
-        <translation>密码(&amp;P)：</translation>
+        <translation>口令(&amp;P)：</translation>
     </message>
     <message>
         <location filename="confirm_passphrase_dialog.ui" line="91"/>
         <source>&amp;Confirmation:</source>
-        <translation>确认密码(&amp;C)：</translation>
+        <translation>确认口令(&amp;C)：</translation>
     </message>
     <message>
         <location filename="confirm_passphrase_dialog.ui" line="119"/>
@@ -36,7 +36,7 @@
     <message>
         <location filename="confirm_passphrase_dialog.cpp" line="44"/>
         <source>The confirmation passphrase does not match</source>
-        <translation>两次输入的密码不一致</translation>
+        <translation>两次输入的口令不一致</translation>
     </message>
 </context>
 <context>
@@ -59,7 +59,7 @@
     <message>
         <location filename="file_encryption_dialog.ui" line="102"/>
         <source>Cancel</source>
-        <translation type="unfinished"/>
+        <translation>取消</translation>
     </message>
     <message>
         <location filename="file_encryption_dialog.ui" line="112"/>
@@ -125,12 +125,12 @@
     <message>
         <location filename="file_encryption_dialog.ui" line="254"/>
         <source>Passphrase</source>
-        <translation>密码</translation>
+        <translation>口令</translation>
     </message>
     <message>
         <location filename="file_encryption_dialog.ui" line="266"/>
         <source>Passphrase:</source>
-        <translation>密码：</translation>
+        <translation>口令：</translation>
     </message>
     <message>
         <location filename="file_encryption_dialog.ui" line="282"/>
@@ -192,7 +192,7 @@
     <message>
         <location filename="file_encryption_dialog.cpp" line="293"/>
         <source>Confirmation passphrase does not match.</source>
-        <translation>两次输入的密码不一致。</translation>
+        <translation>两次输入的口令不一致。</translation>
     </message>
     <message>
         <location filename="file_encryption_dialog.cpp" line="302"/>
@@ -229,12 +229,12 @@ Do you want to replace it?</source>
     <message>
         <location filename="file_encryption_dialog.cpp" line="407"/>
         <source>Invalid passphrase for key file</source>
-        <translation>对该密钥文件输入的密码不正确。</translation>
+        <translation>对该密钥文件输入的口令不正确。</translation>
     </message>
     <message>
         <location filename="file_encryption_dialog.cpp" line="420"/>
         <source>The job has been cancelled</source>
-        <translation type="unfinished"/>
+        <translation>任务已经被取消</translation>
     </message>
     <message>
         <location filename="file_encryption_dialog.cpp" line="440"/>
@@ -257,7 +257,7 @@ Do you want to replace it?</source>
     <message>
         <location filename="file_name_helper.cpp" line="40"/>
         <source>Encrypted Files (*.epd *.gpg);; Plain Text (*.txt)</source>
-        <translation type="unfinished"/>
+        <translation>加密的文件 (*.epd *.gpg);; 文本文件 (*.txt) </translation>
     </message>
     <message>
         <location filename="file_name_helper.cpp" line="41"/>
@@ -473,17 +473,17 @@ Do you want to replace it?</source>
     <message>
         <location filename="get_passphrase_dialog.ui" line="26"/>
         <source>Passphrase</source>
-        <translation>密码</translation>
+        <translation>口令</translation>
     </message>
     <message>
         <location filename="get_passphrase_dialog.ui" line="49"/>
         <source>&amp;Passphrase:</source>
-        <translation>密码(&amp;P)：</translation>
+        <translation>口令(&amp;P)：</translation>
     </message>
     <message>
         <location filename="get_passphrase_dialog.ui" line="65"/>
         <source>Leave blank when passphrase is not needed</source>
-        <translation>如果不需要密码则留空</translation>
+        <translation>如果不需要口令则留空</translation>
     </message>
 </context>
 <context>
@@ -491,12 +491,12 @@ Do you want to replace it?</source>
     <message>
         <location filename="get_passphrase_or_key_dialog.ui" line="14"/>
         <source>Passphrase or Key File</source>
-        <translation>请提供密码或者密钥文件</translation>
+        <translation>请提供口令或者密钥文件</translation>
     </message>
     <message>
         <location filename="get_passphrase_or_key_dialog.ui" line="37"/>
         <source>Passphrase:</source>
-        <translation>密码：</translation>
+        <translation>口令：</translation>
     </message>
     <message>
         <location filename="get_passphrase_or_key_dialog.ui" line="47"/>
@@ -506,7 +506,7 @@ Do you want to replace it?</source>
     <message>
         <location filename="get_passphrase_or_key_dialog.ui" line="67"/>
         <source>Leave blank when passphrase is not needed</source>
-        <translation>如果不需要密码则留空</translation>
+        <translation>如果不需要口令则留空</translation>
     </message>
     <message>
         <location filename="get_passphrase_or_key_dialog.ui" line="80"/>
@@ -525,7 +525,7 @@ Do you want to replace it?</source>
     <message>
         <location filename="load_save_handler.cpp" line="38"/>
         <source>Passphrase for Key File</source>
-        <translation>为密钥文件提供密码</translation>
+        <translation>为密钥文件提供口令</translation>
     </message>
     <message>
         <location filename="load_save_handler.cpp" line="53"/>
@@ -545,7 +545,7 @@ Do you want to replace it?</source>
     <message>
         <location filename="load_save_handler.cpp" line="183"/>
         <source>GPG format does not support double protection by passphrase and key file.</source>
-        <translation>GPG格式不支持密码与密钥文件的双重保护。</translation>
+        <translation>GPG格式不支持口令与密钥文件的双重保护。</translation>
     </message>
     <message>
         <location filename="load_save_handler.cpp" line="185"/>
@@ -555,7 +555,7 @@ Do you want to replace it?</source>
     <message>
         <location filename="load_save_handler.cpp" line="209"/>
         <source>Neither a key file nor passphrase is set. The file is going to be saved UNENCRYPTED.</source>
-        <translation>你还没有设置密码或者密钥文件。文件将会不被加密的存储。</translation>
+        <translation>你还没有设置口令或者密钥文件。文件将会不被加密的存储。</translation>
     </message>
 </context>
 <context>
@@ -573,12 +573,12 @@ Do you want to replace it?</source>
     <message>
         <location filename="mainwindow.cpp" line="186"/>
         <source>Passphrase not set</source>
-        <translation>未设置密码</translation>
+        <translation>未设置口令</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="191"/>
         <source>Passphrase protected</source>
-        <translation>密码保护的</translation>
+        <translation>口令保护的</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="264"/>
@@ -644,12 +644,12 @@ Do you want to replace it?</source>
     <message>
         <location filename="mainwindow.cpp" line="602"/>
         <source>Passphrase for Key File</source>
-        <translation>密钥文件的密码</translation>
+        <translation>密钥文件的口令</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="610"/>
         <source>You left the passphrase blank. The key file is going to be UNENCRYPTED. Do you want to continue?</source>
-        <translation>你还没有设置密码。密钥文件将会不被加密的存储。确认要继续吗？</translation>
+        <translation>你还没有设置口令。密钥文件将会不被加密的存储。确认要继续吗？</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="642"/>
@@ -674,7 +674,7 @@ Do you want to replace it?</source>
     <message>
         <location filename="mainwindow.cpp" line="662"/>
         <source>&lt;b&gt;EncryptPad %1 Beta&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;Minimalist secure text editor and binary encryptor that implements RFC 4880 Open PGP format: symmetrically encrypted, compressed and integrity protected. The editor can protect files with passphrases, key files or both.&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;GNU General Public License v2&lt;br/&gt;&lt;br/&gt;</source>
-        <translation>&lt;b&gt;EncryptPad %1 Beta&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;极简的加密文本编辑器。支持RFC 4880 Open PGP格式。支持使用密码和/或密钥文件进行加密。&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;GNU General Public License v2&lt;br/&gt;&lt;br/&gt;</translation>
+        <translation>&lt;b&gt;EncryptPad %1 Beta&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;极简的加密文本编辑器。支持RFC 4880 Open PGP格式。支持使用口令和/或密钥文件进行加密。&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;GNU General Public License v2&lt;br/&gt;&lt;br/&gt;</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="716"/>
@@ -754,12 +754,12 @@ Do you want to replace it?</source>
     <message>
         <location filename="mainwindow.cpp" line="762"/>
         <source>Set &amp;Passphrase...</source>
-        <translation>设置密码(&amp;P)……</translation>
+        <translation>设置口令(&amp;P)……</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="763"/>
         <source>Set passphrase for encryption and decryption</source>
-        <translation>为加密与解密用途设置密码</translation>
+        <translation>为加密与解密设置口令</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="766"/>
@@ -779,17 +779,17 @@ Do you want to replace it?</source>
     <message>
         <location filename="mainwindow.cpp" line="771"/>
         <source>Clear encryption key file. Passphrase only (if set).</source>
-        <translation>清除用于加密的密钥文件。这将只使用密码保护（如果设置的话）。</translation>
+        <translation>清除用于加密的密钥文件。这将只使用口令保护（如果设置的话）。</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="774"/>
         <source>&amp;Clear Passphrase</source>
-        <translation>清除密码(&amp;C)</translation>
+        <translation>清除口令(&amp;C)</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="775"/>
         <source>Save without passphrase protected encryption. Encryption with file key only (if enabled).</source>
-        <translation>停用密码保护。这将仅使用密钥文件来加密（如果启用的话）。</translation>
+        <translation>停用口令保护。这将仅使用密钥文件来加密（如果启用的话）。</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="778"/>
@@ -877,12 +877,12 @@ Do you want to replace it?</source>
     <message>
         <location filename="mainwindow.cpp" line="827"/>
         <source>&amp;Generate Passphrase...</source>
-        <translation>生成密码(&amp;G)……</translation>
+        <translation>生成口令(&amp;G)……</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="828"/>
         <source>Generate passphrase</source>
-        <translation>生成随机密码</translation>
+        <translation>生成随机口令</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="831"/>
@@ -1153,7 +1153,7 @@ Do you want to replace it?</source>
     <message>
         <location filename="mainwindow.cpp" line="1642"/>
         <source>untitled</source>
-        <translation type="unfinished"/>
+        <translation>无标题</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="1651"/>
@@ -1219,7 +1219,7 @@ Do you want to replace it?</source>
     <message>
         <location filename="passphrase_generation_dialog.ui" line="20"/>
         <source>Generate Passphrase</source>
-        <translation>生成密码</translation>
+        <translation>生成口令</translation>
     </message>
     <message>
         <location filename="passphrase_generation_dialog.ui" line="54"/>
@@ -1289,7 +1289,7 @@ Do you want to replace it?</source>
     <message>
         <location filename="passphrase_generation_dialog.ui" line="281"/>
         <source>Select &amp;passphrase:</source>
-        <translation>选择密码(&amp;P)：</translation>
+        <translation>选择口令(&amp;P)：</translation>
     </message>
     <message>
         <location filename="passphrase_generation_dialog.ui" line="304"/>
@@ -1309,17 +1309,17 @@ Do you want to replace it?</source>
     <message>
         <location filename="passphrase_generation_dialog.cpp" line="42"/>
         <source>7 passphrases</source>
-        <translation>7个密码</translation>
+        <translation>7个口令</translation>
     </message>
     <message>
         <location filename="passphrase_generation_dialog.cpp" line="43"/>
         <source>15 passphrases</source>
-        <translation>15个密码</translation>
+        <translation>15个口令</translation>
     </message>
     <message>
         <location filename="passphrase_generation_dialog.cpp" line="44"/>
         <source>25 passphrases</source>
-        <translation>25个密码</translation>
+        <translation>25个口令</translation>
     </message>
 </context>
 <context>
@@ -1398,13 +1398,13 @@ Do you want to replace it?</source>
     <message>
         <location filename="preferences_dialog.ui" line="337"/>
         <source>This controls how many times you can save without entering a passphrase</source>
-        <translation>这决定了你在不输入密码的情况下可以保存多少次</translation>
+        <translation>这决定了你在不再次输入口令的情况下可以保存多少次</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="340"/>
         <source>S2K derivations from a passphrase:</source>
         <oldsource>Passphrase to key results pool size:</oldsource>
-        <translation>密码到密钥结果缓冲区大小：</translation>
+        <translation>从口令生成的S2K衍生结果：</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="359"/>
@@ -1440,7 +1440,7 @@ Do you want to replace it?</source>
     <message>
         <location filename="preferences_dialog.ui" line="433"/>
         <source>Tab size:</source>
-        <translation type="unfinished"/>
+        <translation>制表符大小: </translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="135"/>
@@ -1460,7 +1460,7 @@ Do you want to replace it?</source>
     <message>
         <location filename="preferences_dialog.cpp" line="146"/>
         <source>(Size: </source>
-        <translation type="unfinished"/>
+        <translation>(大小: </translation>
     </message>
     <message>
         <location filename="preferences_dialog.cpp" line="148"/>
@@ -1521,12 +1521,12 @@ Do you want to replace it?</source>
     <message>
         <location filename="set_passphrase_dialog.cpp" line="30"/>
         <source>&amp;Passphrase:</source>
-        <translation>密码(&amp;P)：</translation>
+        <translation>口令(&amp;P)：</translation>
     </message>
     <message>
         <location filename="set_passphrase_dialog.cpp" line="35"/>
         <source>&amp;Confirmation:</source>
-        <translation>确认密码(&amp;C)：</translation>
+        <translation>确认口令(&amp;C)：</translation>
     </message>
     <message>
         <location filename="set_passphrase_dialog.cpp" line="44"/>
@@ -1542,12 +1542,12 @@ Do you want to replace it?</source>
         <location filename="set_passphrase_dialog.cpp" line="71"/>
         <location filename="set_passphrase_dialog.cpp" line="87"/>
         <source>Set Passphrase</source>
-        <translation>设置密码</translation>
+        <translation>设置口令</translation>
     </message>
     <message>
         <location filename="set_passphrase_dialog.cpp" line="88"/>
         <source>The confirmation passphrase does not match</source>
-        <translation>两次输入的密码不一致</translation>
+        <translation>两次输入的口令不一致</translation>
     </message>
 </context>
 </TS>
