@@ -28,6 +28,11 @@ namespace LibEncryptMsg
     public:
         PacketRWBase(SessionState &state, bool is_final_packet)
             :state_(state), is_final_packet_(is_final_packet){}
+
+        virtual ~PacketRWBase(){}
+        PacketRWBase(const PacketRWBase&) = delete;
+        PacketRWBase &operator=(const PacketRWBase&) = delete;
+
         // Reads packet body and writes its payload while setting metadata_out fields
         // Payload is the contained packets or empty if there are no packets inside
         EmsgResult Read(OutStream &out)

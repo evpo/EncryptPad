@@ -21,6 +21,11 @@ namespace LibEncryptMsg
             void Write(OutStream &out);
             void Finish(OutStream &out);
             InBufferStream &GetInStream();
+
+            virtual ~PacketWriter(){}
+            PacketWriter(const PacketWriter&) = delete;
+            PacketWriter &operator=(const PacketWriter&) = delete;
+
         protected:
             InBufferStream in_;
             InBufferStream out_;
