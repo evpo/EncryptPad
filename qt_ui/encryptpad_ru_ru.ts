@@ -1356,8 +1356,8 @@ Do you want to replace it?</source>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="103"/>
-        <source>Enable BAK files</source>
-        <translation>Включить BAK файлы</translation>
+        <source>Create .bak files</source>
+        <translation>Создавать .bak файлы</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="125"/>

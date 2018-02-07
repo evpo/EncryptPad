@@ -100,7 +100,7 @@
      <item row="7" column="1" colspan="2">
       <widget class="QCheckBox" name="uiEnableBakFiles">
        <property name="text">
-        <string>Enable BAK files</string>
+        <string>Create .bak files</string>
        </property>
       </widget>
      </item>
