@@ -19,6 +19,9 @@
 #   ifndef __ANDROID__
 #       include <iconv.h>
 #   endif
+#   ifdef __FreeBSD__
+#       include <pthread_np.h>
+#   endif
 #endif
 
 #ifdef _WIN32
@@ -83,8 +86,10 @@ namespace plog
         {
 #ifdef _WIN32
             return ::GetCurrentThreadId();
-#elif defined(__unix__)
+#elif defined(__linux__)
             return static_cast<unsigned int>(::syscall(__NR_gettid));
+#elif defined(__FreeBSD__)
+            return static_cast<unsigned int>(pthread_getthreadid_np());
 #elif defined(__APPLE__)
             return static_cast<unsigned int>(::syscall(SYS_thread_selfid));
 #endif
