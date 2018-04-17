@@ -1,7 +1,7 @@
 #include "test_helper.h"
 
 
-namespace LibEncryptMsg
+namespace EncryptMsg
 {
     namespace UnitTests
     {

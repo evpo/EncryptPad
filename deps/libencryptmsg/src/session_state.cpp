@@ -1,13 +1,13 @@
 //**********************************************************************************
-//EncryptPad Copyright 2018 Evgeny Pokhilko 
-//<http://www.evpo.net/encryptpad>
+//LibEncryptMsg Copyright 2018 Evgeny Pokhilko
+//<https://evpo.net/libencryptmsg>
 //
-//libencryptmsg is released under the Simplified BSD License (see license.txt)
+//LibEncryptMsg is released under the Simplified BSD License (see license.txt)
 //**********************************************************************************
 #include "session_state.h"
 #include "emsg_constants.h"
 
-namespace LibEncryptMsg
+namespace EncryptMsg
 {
     SessionState::SessionState()
         :packet_chain(kMaxPacketChainLength, PacketType::Unknown),

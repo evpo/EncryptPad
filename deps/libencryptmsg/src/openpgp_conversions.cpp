@@ -1,15 +1,15 @@
 //**********************************************************************************
-//EncryptPad Copyright 2018 Evgeny Pokhilko 
-//<http://www.evpo.net/encryptpad>
+//LibEncryptMsg Copyright 2018 Evgeny Pokhilko
+//<https://evpo.net/libencryptmsg>
 //
-//libencryptmsg is released under the Simplified BSD License (see license.txt)
+//LibEncryptMsg is released under the Simplified BSD License (see license.txt)
 //**********************************************************************************
 #include "openpgp_conversions.h"
 #include "botan/pgp_s2k.h"
 
 using namespace Botan;
 
-namespace LibEncryptMsg
+namespace EncryptMsg
 {
     size_t DecodeS2KIterations(uint8_t count)
     {

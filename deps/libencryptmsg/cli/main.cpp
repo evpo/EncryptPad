@@ -9,8 +9,8 @@
 
 using namespace std;
 using namespace stlplus;
-using namespace LibEncryptMsg::Cli;
-using namespace LibEncryptMsg;
+using namespace EncryptMsg::Cli;
+using namespace EncryptMsg;
 
 void PrintUsage()
 {

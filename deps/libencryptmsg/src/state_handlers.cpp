@@ -1,8 +1,8 @@
 //**********************************************************************************
-//EncryptPad Copyright 2018 Evgeny Pokhilko 
-//<http://www.evpo.net/encryptpad>
+//LibEncryptMsg Copyright 2018 Evgeny Pokhilko
+//<https://evpo.net/libencryptmsg>
 //
-//libencryptmsg is released under the Simplified BSD License (see license.txt)
+//LibEncryptMsg is released under the Simplified BSD License (see license.txt)
 //**********************************************************************************
 #include "state_handlers.h"
 #include <algorithm>
@@ -14,7 +14,7 @@ using namespace std;
 using namespace LightStateMachine;
 
 
-namespace LibEncryptMsg
+namespace EncryptMsg
 {
     Context &ToContext(StateMachineContext &ctx)
     {
@@ -150,7 +150,7 @@ namespace LibEncryptMsg
 
         auto &buffer_stack = state.buffer_stack;
         Botan::secure_vector<uint8_t> output;
-        auto out_stm = LibEncryptMsg::MakeOutStream(output);
+        auto out_stm = EncryptMsg::MakeOutStream(output);
 
         // it can be empty when finishing
         if(!buffer_stack.empty())

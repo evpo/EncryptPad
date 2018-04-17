@@ -1,8 +1,0 @@
-define OPENPGP_CODEC
-
-load_on auto
-
-<requires>
-crc24
-filters
-</requires>

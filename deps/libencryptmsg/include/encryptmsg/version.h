@@ -1,12 +1,12 @@
 //**********************************************************************************
-//EncryptPad Copyright 2018 Evgeny Pokhilko 
-//<http://www.evpo.net/encryptpad>
+//LibEncryptMsg Copyright 2018 Evgeny Pokhilko
+//<https://evpo.net/libencryptmsg>
 //
-//libencryptmsg is released under the Simplified BSD License (see license.txt)
+//LibEncryptMsg is released under the Simplified BSD License (see license.txt)
 //**********************************************************************************
 #pragma once
-#define VER_FILEVERSION             0,0,1,0
-#define VER_FILEVERSION_STR         "0.0.1.0"
+#define VER_FILEVERSION             0,1,0,1
+#define VER_FILEVERSION_STR         "0.1.0.1"
 
 #define VER_PRODUCTVERSION          VER_FILEVERSION
 #define VER_PRODUCTVERSION_STR      VER_FILEVERSION_STR
@@ -20,4 +20,4 @@
 #define VER_ORIGINALFILENAME_STR    ""
 #define VER_PRODUCTNAME_STR         "libencryptmsg"
 
-#define VER_COMPANYDOMAIN_STR       "www.evpo.net/encryptpad"
+#define VER_COMPANYDOMAIN_STR       "www.evpo.net/libencryptmsg"

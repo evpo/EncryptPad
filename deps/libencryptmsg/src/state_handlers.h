@@ -1,8 +1,8 @@
 //**********************************************************************************
-//EncryptPad Copyright 2018 Evgeny Pokhilko 
-//<http://www.evpo.net/encryptpad>
+//LibEncryptMsg Copyright 2018 Evgeny Pokhilko
+//<https://evpo.net/libencryptmsg>
 //
-//libencryptmsg is released under the Simplified BSD License (see license.txt)
+//LibEncryptMsg is released under the Simplified BSD License (see license.txt)
 //**********************************************************************************
 //
 // Handlers to various events occurring in the state machine
@@ -10,7 +10,7 @@
 #pragma once
 #include "context.h"
 
-namespace LibEncryptMsg
+namespace EncryptMsg
 {
     bool InitCanEnter(LightStateMachine::StateMachineContext &context);
     void InitOnEnter(LightStateMachine::StateMachineContext &context);

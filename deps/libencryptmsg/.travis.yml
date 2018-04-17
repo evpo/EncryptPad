@@ -1,0 +1,21 @@
+language: cpp
+os: linux
+compiler: gcc
+env: CONFIG=Debug
+
+install:
+    - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 50
+    - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-5 50
+    - ./ci/prepare.sh
+    - sudo make -j2 -C $HOME/botan install
+script:
+    - ./configure
+    - make
+    - make tests
+    - pushd ./bin/debug/ && ./encryptmsg-tests && popd
+addons:
+    apt:
+        sources:
+            - ubuntu-toolchain-r-test
+        packages:
+            - g++-5

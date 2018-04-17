@@ -1,8 +1,8 @@
 //**********************************************************************************
-//EncryptPad Copyright 2018 Evgeny Pokhilko 
-//<http://www.evpo.net/encryptpad>
+//LibEncryptMsg Copyright 2018 Evgeny Pokhilko
+//<https://evpo.net/libencryptmsg>
 //
-//libencryptmsg is released under the Simplified BSD License (see license.txt)
+//LibEncryptMsg is released under the Simplified BSD License (see license.txt)
 //**********************************************************************************
 #pragma once
 
@@ -15,7 +15,7 @@
 #include "message_config.h"
 #include "algo_spec.h"
 
-namespace LibEncryptMsg
+namespace EncryptMsg
 {
     class MessageReaderImpl;
 

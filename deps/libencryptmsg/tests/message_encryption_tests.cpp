@@ -14,7 +14,7 @@
 using namespace std;
 using namespace Botan;
 
-namespace LibEncryptMsg
+namespace EncryptMsg
 {
     namespace UnitTests
     {

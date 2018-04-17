@@ -1,14 +1,14 @@
 //**********************************************************************************
-//EncryptPad Copyright 2018 Evgeny Pokhilko 
-//<http://www.evpo.net/encryptpad>
+//LibEncryptMsg Copyright 2018 Evgeny Pokhilko
+//<https://evpo.net/libencryptmsg>
 //
-//libencryptmsg is released under the Simplified BSD License (see license.txt)
+//LibEncryptMsg is released under the Simplified BSD License (see license.txt)
 //**********************************************************************************
 #pragma once
 #include "state_machine_utility.h"
 #include "state_machine_interface.h"
 
-namespace LibEncryptMsg
+namespace EncryptMsg
 {
     struct SessionState;
 
@@ -19,7 +19,7 @@ namespace LibEncryptMsg
             SessionState *session_state_;
         public:
             Context();
-            LibEncryptMsg::SessionState &State();
-            void SetState(LibEncryptMsg::SessionState &session_state);
+            EncryptMsg::SessionState &State();
+            void SetState(EncryptMsg::SessionState &session_state);
     };
 }

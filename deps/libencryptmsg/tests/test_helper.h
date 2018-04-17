@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdint>
 
-namespace LibEncryptMsg
+namespace EncryptMsg
 {
     namespace UnitTests
     {

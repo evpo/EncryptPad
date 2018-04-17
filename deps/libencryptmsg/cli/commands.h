@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 
-namespace LibEncryptMsg
+namespace EncryptMsg
 {
     namespace Cli
     {

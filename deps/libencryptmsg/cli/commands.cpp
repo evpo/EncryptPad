@@ -7,7 +7,7 @@
 #include "emsg_symmetric_key.h"
 
 using namespace std;
-using namespace LibEncryptMsg;
+using namespace EncryptMsg;
 using namespace Botan;
 
 namespace
@@ -50,7 +50,7 @@ namespace
     };
 }
 
-namespace LibEncryptMsg
+namespace EncryptMsg
 {
     namespace Cli
     {

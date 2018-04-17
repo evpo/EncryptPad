@@ -1,8 +1,8 @@
 //**********************************************************************************
-//EncryptPad Copyright 2018 Evgeny Pokhilko 
-//<http://www.evpo.net/encryptpad>
+//LibEncryptMsg Copyright 2018 Evgeny Pokhilko
+//<https://evpo.net/libencryptmsg>
 //
-//libencryptmsg is released under the Simplified BSD License (see license.txt)
+//LibEncryptMsg is released under the Simplified BSD License (see license.txt)
 //**********************************************************************************
 #include "packet_writer.h"
 #include <memory>
@@ -16,7 +16,7 @@
 using namespace std;
 using SafeVector = Botan::secure_vector<uint8_t>;
 
-namespace LibEncryptMsg
+namespace EncryptMsg
 {
     void WriteLength(OutStream &stm, size_t len)
     {

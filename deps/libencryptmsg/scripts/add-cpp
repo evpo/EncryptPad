@@ -15,7 +15,7 @@ fi
 cat >src/${1}.cpp <<EOF
 #include "${1}.h"
 
-namespace LibEncryptMsg
+namespace EncryptMsg
 {
 
 }
@@ -25,7 +25,7 @@ EOF
 cat >include/${1}.h <<EOF
 #pragma once
 
-namespace LibEncryptMsg
+namespace EncryptMsg
 {
 
 }

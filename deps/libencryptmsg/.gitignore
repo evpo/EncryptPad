@@ -1,0 +1,9 @@
+deps
+build
+bin
+MINGW-*
+GNULINUX-*
+MACOS-*
+*.swp
+*.log
+cscope.out

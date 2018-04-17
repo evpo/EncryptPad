@@ -1,0 +1,137 @@
+#!/bin/bash
+
+set -e
+set -o pipefail
+
+function print-usage()
+{
+cat <<EOM
+USAGE: configure [options]
+--help               this help information
+
+build options:
+--debug-mode         enable debug info and disable optimizations
+--static             build the static library
+--depsdir=DIR        directory with build dependencies (default: deps)
+
+installation options:
+--prefix=DIR         set the install prefix
+--libdir=DIR         set the library install dir
+--includedir=DIR     set the include file install dir
+EOM
+}
+
+VERSION=0.0.1
+DEBUG_MODE=false
+PREFIX=/usr/local
+LIBDIR=lib
+INCLUDEDIR=include
+STATIC_MODE=false
+DEPSDIR=deps
+
+while [[ $# > 0 ]]
+do
+    case $1 in
+        --debug-mode)
+            DEBUG_MODE=true
+            ;;
+        --static)
+            STATIC_MODE=true
+            ;;
+        --prefix=*)
+            PREFIX=${1#--prefix=}
+            ;;
+        --libdir=*)
+            LIBDIR=${1#--libdir=}
+            ;;
+        --includedir=*)
+            INCLUDEDIR=${1#--includedir=}
+            ;;
+        --depsdir=*)
+            DEPSDIR=${1#--depsdir=}
+            ;;
+        --help)
+            print-usage
+            exit 0
+            ;;
+        *)
+            ;;
+    esac
+    shift
+done
+
+echo -n "pkg-config version: "
+if ! pkg-config --version ; then
+    echo "pkg-config is not found"
+    exit -1
+fi
+
+if ! pkg-config --exists botan-2; then
+    echo "pkg-config: package botan-2 is not found"
+    exit -1
+fi
+
+mkdir -p build
+cat > build/config.mak << EOM
+PREFIX=$PREFIX
+LIBDIR=$LIBDIR
+INCLUDEDIR=$INCLUDEDIR
+DEBUG_MODE=$DEBUG_MODE
+STATIC_MODE=$STATIC_MODE
+VERSION=$VERSION
+DEPSDIR=$DEPSDIR
+EOM
+
+cat > build/libencryptmsg.pc << EOM
+prefix=$PREFIX
+libdir=$PREFIX/$LIBDIR
+includedir=$PREFIX/$INCLUDEDIR/libencryptmsg
+
+Name: libencryptmsg
+Description: Symmetric encryption OpenPGP library
+Version: $VERSION
+
+Libs: -L\${libdir} -lencryptmsg
+Cflags: -I\${includedir}
+EOM
+
+if [[ $DEBUG_MODE != true ]]; then
+    RELEASE=on
+fi
+
+if [[ $STATIC_MODE == true ]]; then
+    pushd build > /dev/null
+
+    SUBDIR=$(cat <<EOM | make -s -f -
+RELEASE=$RELEASE
+include ../deps/makefiles/platform.mak
+all::
+	@echo \$(SUBDIR)
+EOM
+)
+
+    LIBRARIES=$(cat <<EOM | make -s -C ../src -f -
+.DEFAULT_GOAL := default
+RELEASE=$RELEASE
+include ./Makefile
+default::
+	@echo \$(LIBRARIES)
+EOM
+)
+    LIBRARIES+=" ."
+
+    # echo "SUBDIR=$SUBDIR"
+    # echo "LIBRARIES=$LIBRARIES"
+
+    for L in $LIBRARIES
+    do
+        LIB=../src/$L
+        find $LIB -maxdepth 1 -name '*.cpp' -printf '%f\n' | while read line
+        do
+            echo "ALL_OBJ += $LIB/${SUBDIR}/${line/%.cpp/.o}"
+        done
+
+    done > all_obj.mak
+    popd > /dev/null
+fi
+

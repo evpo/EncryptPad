@@ -1,8 +1,8 @@
 //**********************************************************************************
-//EncryptPad Copyright 2018 Evgeny Pokhilko 
-//<http://www.evpo.net/encryptpad>
+//LibEncryptMsg Copyright 2018 Evgeny Pokhilko
+//<https://evpo.net/libencryptmsg>
 //
-//libencryptmsg is released under the Simplified BSD License (see license.txt)
+//LibEncryptMsg is released under the Simplified BSD License (see license.txt)
 //**********************************************************************************
 #include "emsg_symmetric_key.h"
 #include "botan/auto_rng.h"
@@ -10,7 +10,7 @@
 #include "emsg_constants.h"
 #include "openpgp_conversions.h"
 
-namespace LibEncryptMsg
+namespace EncryptMsg
 {
     Salt GenerateRandomSalt()
     {

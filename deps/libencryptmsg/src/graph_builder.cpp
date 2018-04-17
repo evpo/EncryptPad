@@ -1,8 +1,8 @@
 //**********************************************************************************
-//EncryptPad Copyright 2018 Evgeny Pokhilko 
-//<http://www.evpo.net/encryptpad>
+//LibEncryptMsg Copyright 2018 Evgeny Pokhilko
+//<https://evpo.net/libencryptmsg>
 //
-//libencryptmsg is released under the Simplified BSD License (see license.txt)
+//LibEncryptMsg is released under the Simplified BSD License (see license.txt)
 //**********************************************************************************
 #include "graph_builder.h"
 #include <memory>
@@ -11,7 +11,7 @@
 
 using namespace LightStateMachine;
 
-namespace LibEncryptMsg
+namespace EncryptMsg
 {
     int ToInt(StateID state_id)
     {

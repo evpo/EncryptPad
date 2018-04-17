@@ -1,4 +1,5 @@
-#include ../deps/makefiles/platform.mak
+include ../build/config.mak
+include ../$(DEPSDIR)/makefiles/platform.mak
 
 LIBRARIES += ../src ../deps/state_machine ../deps/stlplus/subsystems ../deps/stlplus/containers ../deps/stlplus/portability
 
