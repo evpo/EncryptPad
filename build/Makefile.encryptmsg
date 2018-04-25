@@ -1,26 +1,27 @@
 CRYPT_ROOT=..
-LIB_DIR=$(CRYPT_ROOT)/deps/libencryptmsg
+ENCRYPTMSG_DIR=$(CRYPT_ROOT)/deps/libencryptmsg
 
-include ../deps/makefiles/platform.mak
+include $(CRYPT_ROOT)/deps/makefiles/platform.mak
 
 ifneq ($(WINDOWS),on)
-BOTANLIB=$(BOTAN_DIR)/libbotan-2.a
+	ENCRYPTMSG_LIB=$(ENCRYPTMSG_DIR)/$(SUBDIR)/libencryptmsg.a
 else
-BOTANLIB=$(BOTAN_DIR)/botan.lib
+	ENCRYPTMSG_LIB=$(ENCRYPTMSG_DIR)/$(SUBDIR)/encryptmsg.dll
 endif
 
-ifeq ($(UNIX),on)
-PARAMS=
-else ifeq ($(PLATFORM),MACOS)
-PARAMS=--cc=clang
-else
-PARAMS=--cpu=x86_32
+ifneq ($(RELEASE),on)
+	PARAMS += --debug-mode
 endif
 
-all:: $(BOTANLIB)
-$(BOTANLIB):
-	cd $(BOTAN_DIR) && ./configure.py $(PARAMS) --amalgamation --disable-shared --with-zlib --enable-modules aes,pbkdf2,auto_rng,compression
-#--with-bzip2
-	$(MAKE) -C $(BOTAN_DIR) libs
+ifeq ($(USE_SYSTEM_LIBS),on)
+	PARAMS += --botandir=../botan
+endif
+
+all: $(ENCRYPTMSG_LIB)
+
+$(ENCRYPTMSG_LIB):
+	cd $(ENCRYPTMSG_DIR) && ./configure $(PARAMS) --depsdir=.. --static
+	$(MAKE) -C $(ENCRYPTMSG_DIR)
+
 clean:
-	$(MAKE) -C $(BOTAN_DIR) clean
+	$(MAKE) -C $(ENCRYPTMSG_DIR) clean
