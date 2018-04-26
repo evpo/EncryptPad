@@ -13,7 +13,7 @@ ifneq ($(RELEASE),on)
 	PARAMS += --debug-mode
 endif
 
-ifeq ($(USE_SYSTEM_LIBS),on)
+ifneq ($(USE_SYSTEM_LIBS),on)
 	PARAMS += --botandir=../botan
 endif
 
