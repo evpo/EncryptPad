@@ -46,7 +46,7 @@ LIBS += -L$$PWD/../deps/stlplus/portability/$$DEPS_SUBDIR \
      -lback_end_src -lportability \
      -L$$PWD/../deps/libencryptmsg/src/$$DEPS_SUBDIR \
      -L$$PWD/../deps/state_machine/$$DEPS_SUBDIR \
-     -L$$PWD/../deps/libencryptmsg/deps/botan_1_openpgp_codec/$$DEPS_SUBDIR \
+     -L$$PWD/../deps/botan_1_openpgp_codec/$$DEPS_SUBDIR \
      -lsrc \
      -lstate_machine \
      -lbotan_1_openpgp_codec
