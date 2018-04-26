@@ -38,7 +38,7 @@ namespace EncryptPad
 
     struct DecryptionSession
     {
-        LibEncryptMsg::MessageReader reader;
+        EncryptMsg::MessageReader reader;
         KeyServiceKeyProvider key_provider;
 
         //These are only for memory management
@@ -70,8 +70,8 @@ namespace EncryptPad
             OutStream &out_;
             const EncryptParams &encrypt_params_;
             PacketMetadata &metadata_;
-            LibEncryptMsg::SafeVector buffer_;
-            LibEncryptMsg::SafeVector pending_buffer_;
+            EncryptMsg::SafeVector buffer_;
+            EncryptMsg::SafeVector pending_buffer_;
             std::unique_ptr<DecryptionSession> passphrase_session_;
             std::unique_ptr<DecryptionSession> key_file_session_;
             ProgressEvent progress_event_;
@@ -141,12 +141,12 @@ namespace EncryptPad
                 format_ = format;
             }
 
-            LibEncryptMsg::SafeVector &Buffer()
+            EncryptMsg::SafeVector &Buffer()
             {
                 return buffer_;
             }
 
-            LibEncryptMsg::SafeVector &PendingBuffer()
+            EncryptMsg::SafeVector &PendingBuffer()
             {
                 return pending_buffer_;
             }

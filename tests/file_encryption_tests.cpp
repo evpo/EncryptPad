@@ -25,7 +25,7 @@
 #include "algo_defaults.h"
 
 using namespace EncryptPad;
-using namespace LibEncryptMsg;
+using namespace EncryptMsg;
 using namespace Botan;
 
 

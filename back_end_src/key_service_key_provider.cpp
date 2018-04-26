@@ -1,7 +1,7 @@
 #include "key_service_key_provider.h"
 #include "encryptmsg/openpgp_conversions.h"
 
-using namespace LibEncryptMsg;
+using namespace EncryptMsg;
 namespace EncryptPad
 {
     KeyServiceKeyProvider::KeyServiceKeyProvider(KeyService *key_service, const std::string *passphrase):
@@ -10,11 +10,11 @@ namespace EncryptPad
     {
     }
 
-    std::unique_ptr<LibEncryptMsg::EncryptionKey> KeyServiceKeyProvider::GetKey(
-            LibEncryptMsg::CipherAlgo cipher_algo,
-            LibEncryptMsg::HashAlgo hash_algo,
+    std::unique_ptr<EncryptMsg::EncryptionKey> KeyServiceKeyProvider::GetKey(
+            EncryptMsg::CipherAlgo cipher_algo,
+            EncryptMsg::HashAlgo hash_algo,
             uint8_t iterations,
-            LibEncryptMsg::Salt salt,
+            EncryptMsg::Salt salt,
             std::string description,
             bool &cancelled)
     {

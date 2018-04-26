@@ -12,13 +12,23 @@ USAGE: configure [options]
 build options:
 --debug-mode         enable debug info and disable optimizations
 --static             build the static library
---depsdir=DIR        directory with build dependencies (default: deps)
+--depsdir=DIR        the directory with build dependencies (default: deps)
+--botandir=DIR       the directory with prebuilt botan (if not specified, pkg-config is used)
 
 installation options:
 --prefix=DIR         set the install prefix
 --libdir=DIR         set the library install dir
 --includedir=DIR     set the include file install dir
 EOM
+}
+
+function abs() {
+    if [[ -d $1 ]]; then
+        echo "$(cd $1 && pwd)"
+    else
+        echo "Directory is not found: $1" 1>&2
+        exit -1
+    fi
 }
 
 VERSION=0.0.1
@@ -28,6 +38,7 @@ LIBDIR=lib
 INCLUDEDIR=include
 STATIC_MODE=false
 DEPSDIR=deps
+BOTANDIR=
 
 while [[ $# > 0 ]]
 do
@@ -50,6 +61,9 @@ do
         --depsdir=*)
             DEPSDIR=${1#--depsdir=}
             ;;
+        --botandir=*)
+            BOTANDIR=${1#--botandir=}
+            ;;
         --help)
             print-usage
             exit 0
@@ -60,15 +74,25 @@ do
     shift
 done
 
-echo -n "pkg-config version: "
-if ! pkg-config --version ; then
-    echo "pkg-config is not found"
-    exit -1
+if [[ -z $BOTANDIR ]]; then
+    echo -n "pkg-config version: "
+    if ! pkg-config --version ; then
+        echo "pkg-config is not found"
+        exit -1
+    fi
+
+    if ! pkg-config --exists botan-2; then
+        echo "pkg-config: package botan-2 is not found"
+        exit -1
+    fi
 fi
 
-if ! pkg-config --exists botan-2; then
-    echo "pkg-config: package botan-2 is not found"
-    exit -1
+if [[ -n $BOTANDIR ]]; then
+    BOTANDIR=$(abs $BOTANDIR)
+fi
+
+if [[ -n $DEPSDIR ]]; then
+    DEPSDIR=$(abs $DEPSDIR)
 fi
 
 mkdir -p build
@@ -80,7 +104,9 @@ DEBUG_MODE=$DEBUG_MODE
 STATIC_MODE=$STATIC_MODE
 VERSION=$VERSION
 DEPSDIR=$DEPSDIR
+BOTANDIR=$BOTANDIR
 EOM
+
 
 cat > build/libencryptmsg.pc << EOM
 prefix=$PREFIX
@@ -100,17 +126,17 @@ if [[ $DEBUG_MODE != true ]]; then
 fi
 
 if [[ $STATIC_MODE == true ]]; then
-    pushd build > /dev/null
+    pushd src >/dev/null
 
-    SUBDIR=$(cat <<EOM | make -s -f -
+SUBDIR=$(cat <<EOM | make -s -f -
 RELEASE=$RELEASE
-include ../deps/makefiles/platform.mak
-all::
+include ${DEPSDIR}/makefiles/platform.mak
+all:
 	@echo \$(SUBDIR)
 EOM
 )
 
-    LIBRARIES=$(cat <<EOM | make -s -C ../src -f -
+LIBRARIES=$(cat <<EOM | make -s -f -
 .DEFAULT_GOAL := default
 RELEASE=$RELEASE
 include ./Makefile
@@ -120,18 +146,15 @@ EOM
 )
     LIBRARIES+=" ."
 
-    # echo "SUBDIR=$SUBDIR"
-    # echo "LIBRARIES=$LIBRARIES"
-
     for L in $LIBRARIES
     do
-        LIB=../src/$L
+        LIB=$L
         find $LIB -maxdepth 1 -name '*.cpp' -printf '%f\n' | while read line
         do
-            echo "ALL_OBJ += $LIB/${SUBDIR}/${line/%.cpp/.o}"
+            echo "ALL_OBJ += $(abs $LIB)/${SUBDIR}/${line/%.cpp/.o}"
         done
 
-    done > all_obj.mak
+    done > ../build/all_obj.mak
     popd > /dev/null
 fi
 

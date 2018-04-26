@@ -1,4 +1,5 @@
-GTEST_DIR = ../deps/gtest/googletest
+include ../build/config.mak
+GTEST_DIR = $(DEPSDIR)/gtest/googletest
 TARGET_DIR = $(GTEST_DIR)/build
 
 MKDIR_P := mkdir -p

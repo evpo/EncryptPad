@@ -7,7 +7,7 @@
 
 namespace EncryptPad
 {
-    class KeyServiceKeyProvider : public LibEncryptMsg::SymmetricKeyProvider
+    class KeyServiceKeyProvider : public EncryptMsg::SymmetricKeyProvider
     {
         private:
             KeyService *key_service_;
@@ -15,11 +15,11 @@ namespace EncryptPad
         public:
             KeyServiceKeyProvider(KeyService *key_service, const std::string *passphrase);
 
-            std::unique_ptr<LibEncryptMsg::EncryptionKey> GetKey(
-                    LibEncryptMsg::CipherAlgo cipher_algo,
-                    LibEncryptMsg::HashAlgo hash_algo,
+            std::unique_ptr<EncryptMsg::EncryptionKey> GetKey(
+                    EncryptMsg::CipherAlgo cipher_algo,
+                    EncryptMsg::HashAlgo hash_algo,
                     uint8_t iterations,
-                    LibEncryptMsg::Salt salt,
+                    EncryptMsg::Salt salt,
                     std::string description,
                     bool &cancelled) override;
     };

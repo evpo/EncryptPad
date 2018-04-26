@@ -9,7 +9,7 @@ install:
     - ./ci/prepare.sh
     - sudo make -j2 -C $HOME/botan install
 script:
-    - ./configure
+    - ./configure --debug-mode
     - make
     - make tests
     - pushd ./bin/debug/ && ./encryptmsg-tests && popd

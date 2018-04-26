@@ -34,7 +34,7 @@ cli : src
 lib: src
 
 static: src
-	$(MAKE) -C build -f ../scripts/static.mak RELEASE=$(RELEASE)
+	$(MAKE) -C build -f ../tools/static.mak RELEASE=$(RELEASE)
 
 shared:
 	mkdir -p bin/$(CONFIG_DIR)
@@ -60,5 +60,5 @@ clean:
 	$(MAKE) -C $(DEPSDIR)/state_machine clean RELEASE=$(RELEASE)
 	$(MAKE) -C test_assets clean RELEASE=$(RELEASE)
 ifeq ($(STATIC_MODE),true)
-	$(MAKE) -C build -f ../scripts/static.mak clean RELEASE=$(RELEASE)
+	$(MAKE) -C build -f ../tools/static.mak clean RELEASE=$(RELEASE)
 endif

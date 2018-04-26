@@ -104,14 +104,14 @@ namespace EncryptPad
     struct PacketMetadata
     {
         unsigned int iterations;
-        LibEncryptMsg::Compression compression;
-        LibEncryptMsg::CipherAlgo cipher_algo;
-        LibEncryptMsg::HashAlgo hash_algo;
+        EncryptMsg::Compression compression;
+        EncryptMsg::CipherAlgo cipher_algo;
+        EncryptMsg::HashAlgo hash_algo;
         std::string file_name;
         FileDate file_date;
         bool is_binary;
         bool cannot_use_wad;
-        LibEncryptMsg::Salt salt;
+        EncryptMsg::Salt salt;
 
         // Key file
         std::string key_file;
@@ -119,7 +119,7 @@ namespace EncryptPad
         bool persist_key_path;
 
         PacketMetadata()
-            :iterations(0), compression(LibEncryptMsg::Compression::Unknown), cipher_algo(LibEncryptMsg::CipherAlgo::Unknown), hash_algo(LibEncryptMsg::HashAlgo::Unknown), 
+            :iterations(0), compression(EncryptMsg::Compression::Unknown), cipher_algo(EncryptMsg::CipherAlgo::Unknown), hash_algo(EncryptMsg::HashAlgo::Unknown), 
             file_name(), file_date(0), is_binary(false), cannot_use_wad(false), salt(), key_file(), key_only(false), persist_key_path(false)
         {
         }

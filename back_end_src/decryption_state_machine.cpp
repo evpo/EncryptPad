@@ -6,7 +6,7 @@
 #include "decryption_state_debug.h"
 
 using namespace LightStateMachine;
-using namespace LibEncryptMsg;
+using namespace EncryptMsg;
 
 namespace EncryptPad
 {

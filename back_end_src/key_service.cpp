@@ -24,7 +24,7 @@
 #include "encryptmsg/openpgp_conversions.h"
 #include "encryptmsg/emsg_symmetric_key.h"
 
-using namespace LibEncryptMsg;
+using namespace EncryptMsg;
 
 namespace EncryptPad
 {
@@ -67,7 +67,7 @@ namespace EncryptPad
         return **it;
     }
 
-    const KeyRecord &KeyService::GetKeyForLoading(const std::vector<uint8_t> &salt, int iterations, LibEncryptMsg::HashAlgo hash_algo) const
+    const KeyRecord &KeyService::GetKeyForLoading(const std::vector<uint8_t> &salt, int iterations, EncryptMsg::HashAlgo hash_algo) const
     {
         if(hash_algo != hash_algo_)
             return EmptyRecord();
@@ -81,8 +81,8 @@ namespace EncryptPad
         return **it;
     }
 
-    const KeyRecord &KeyService::ChangePassphrase(const std::string &passphrase_str, LibEncryptMsg::HashAlgo hash_algo, unsigned key_size,
-            int iterations, LibEncryptMsg::Salt salt)
+    const KeyRecord &KeyService::ChangePassphrase(const std::string &passphrase_str, EncryptMsg::HashAlgo hash_algo, unsigned key_size,
+            int iterations, EncryptMsg::Salt salt)
     {
         using namespace Botan;
 
@@ -102,7 +102,7 @@ namespace EncryptPad
             key_record->used = true;
             key_record->iterations = iterations;
             key_record->salt = salt;
-            key_record->key = LibEncryptMsg::GenerateEncryptionKey(
+            key_record->key = EncryptMsg::GenerateEncryptionKey(
                     passphrase, key_size, hash_algo, encoded_iterations, key_record->salt);
             key_records_.push_back(key_record);
             ret_val = key_record.get();
@@ -119,7 +119,7 @@ namespace EncryptPad
             key_record->used = false;
             key_record->iterations = iterations;
             key_record->salt = newSalt;
-            key_record->key = LibEncryptMsg::GenerateEncryptionKey(
+            key_record->key = EncryptMsg::GenerateEncryptionKey(
                     passphrase, key_size, hash_algo, encoded_iterations, key_record->salt);
             key_records_.push_back(key_record);
         }

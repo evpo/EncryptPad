@@ -38,7 +38,7 @@ namespace EncryptPad
         BakFileMoveFailed,
     };
 
-    inline EpadResult ToEpadResult(LibEncryptMsg::EmsgResult emsg_result)
+    inline EpadResult ToEpadResult(EncryptMsg::EmsgResult emsg_result)
     {
         return static_cast<EpadResult>(emsg_result);
     }

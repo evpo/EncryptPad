@@ -101,7 +101,7 @@ namespace EncryptPad
         metadata.cipher_algo = kDefaultCipherAlgo;
         metadata.iterations = iterations;
         // Key file is too small for compression
-        metadata.compression = LibEncryptMsg::Compression::Uncompressed;
+        metadata.compression = EncryptMsg::Compression::Uncompressed;
         metadata.hash_algo = kDefaultHashAlgo;
         return metadata;
     }

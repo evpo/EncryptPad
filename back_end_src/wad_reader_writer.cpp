@@ -33,7 +33,7 @@
 // #define ASSERT(x) assert(x) 
 // #endif
 
-using namespace LibEncryptMsg;
+using namespace EncryptMsg;
 
 namespace
 {

@@ -20,7 +20,7 @@
 #include "packet_typedef.h"
 #include "assert.h"
 
-using namespace LibEncryptMsg;
+using namespace EncryptMsg;
 
 namespace EncryptPad
 {

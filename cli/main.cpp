@@ -102,10 +102,10 @@ namespace EncryptPad
         std::transform(str.begin(), str.end(), str.begin(), ::toupper);
     }
 
-    LibEncryptMsg::CipherAlgo ParseCipherAlgo(std::string str)
+    EncryptMsg::CipherAlgo ParseCipherAlgo(std::string str)
     {
         using namespace EncryptPad;
-        using namespace LibEncryptMsg;
+        using namespace EncryptMsg;
 
         StringToUpper(str);
         if(str == "CAST5")
@@ -130,10 +130,10 @@ namespace EncryptPad
         }
     }
 
-    LibEncryptMsg::HashAlgo ParseHashAlgo(std::string str)
+    EncryptMsg::HashAlgo ParseHashAlgo(std::string str)
     {
         using namespace EncryptPad;
-        using namespace LibEncryptMsg;
+        using namespace EncryptMsg;
         StringToUpper(str);
         if(str == "SHA1")
         {
@@ -153,10 +153,10 @@ namespace EncryptPad
         }
     }
 
-    LibEncryptMsg::Compression ParseCompression(std::string str)
+    EncryptMsg::Compression ParseCompression(std::string str)
     {
         using namespace EncryptPad;
-        using namespace LibEncryptMsg;
+        using namespace EncryptMsg;
         StringToUpper(str);
         if(str == "ZIP")
         {
@@ -596,7 +596,7 @@ int main(int argc, char *argv[])
             std::cerr << "s2k-count: '" << s2k_count_str << "' is invalid" << std::endl;
             exit(1);
         }
-        s2k_count = LibEncryptMsg::DecodeS2KIterations(LibEncryptMsg::EncodeS2KIterations(s2k_count));
+        s2k_count = EncryptMsg::DecodeS2KIterations(EncryptMsg::EncodeS2KIterations(s2k_count));
     }
 
     if(!passphrase_fd_str.empty())

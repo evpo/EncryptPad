@@ -5,7 +5,7 @@
 #include "file_encryption.h"
 
 using namespace Botan;
-using namespace LibEncryptMsg;
+using namespace EncryptMsg;
 
 namespace EncryptPad
 {

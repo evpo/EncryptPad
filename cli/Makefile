@@ -1,6 +1,6 @@
 include ../deps/makefiles/platform.mak
 
-LIBRARIES += ../back_end_src ../deps/state_machine ../deps/libencryptmsg/deps/botan_1_openpgp_codec ../deps/stlplus/subsystems ../deps/stlplus/containers ../deps/stlplus/portability
+LIBRARIES += ../back_end_src ../deps/state_machine ../deps/botan_1_openpgp_codec ../deps/stlplus/subsystems ../deps/stlplus/containers ../deps/stlplus/portability
 
 ifneq ($(RELEASE),on)
 CXXFLAGS += -ggdb
@@ -22,7 +22,7 @@ CXXFLAGS += -Wall -Wextra
 LDFLAGS += -Wall
 LDLIBS += ../deps/libencryptmsg/src/$(SUBDIR)/libsrc.a
 
-CXXFLAGS += -I../deps/libencryptmsg/include -I../deps/libencryptmsg/deps/plog/include
+CXXFLAGS += -I../deps/libencryptmsg/include -I../deps/plog/include
 
 ifneq ($(USE_SYSTEM_LIBS),on)
 LDLIBS += $(BOTANLIBFILE) ../deps/zlib/libz.a -lpthread $(LIBDL)

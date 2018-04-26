@@ -31,8 +31,8 @@ namespace EncryptPad
 
     struct KeyRecord
     {
-        std::unique_ptr<LibEncryptMsg::EncryptionKey> key;
-        LibEncryptMsg::Salt salt;
+        std::unique_ptr<EncryptMsg::EncryptionKey> key;
+        EncryptMsg::Salt salt;
         int iterations;
 
         bool used;
@@ -43,7 +43,7 @@ namespace EncryptPad
         }
 
         KeyRecord():
-            key(std::unique_ptr<LibEncryptMsg::EncryptionKey>(new LibEncryptMsg::EncryptionKey()))
+            key(std::unique_ptr<EncryptMsg::EncryptionKey>(new EncryptMsg::EncryptionKey()))
         {
         }
     };
@@ -61,7 +61,7 @@ namespace EncryptPad
 
         int key_count_;
 
-        LibEncryptMsg::HashAlgo hash_algo_;
+        EncryptMsg::HashAlgo hash_algo_;
         int key_size_;
 
         KeyRecord empty_record_;
@@ -82,7 +82,7 @@ namespace EncryptPad
             return key_size_;
         }
 
-        LibEncryptMsg::HashAlgo get_hash_algo() const
+        EncryptMsg::HashAlgo get_hash_algo() const
         {
             return hash_algo_;
         }
@@ -104,8 +104,8 @@ namespace EncryptPad
         // Clears all previous keys and generates new keys from passphrase with different salts, 
         // one of them has the salt from the parameter.
         // Returns the key with the salt from the parameter. This key is also marked as used.
-        const KeyRecord &ChangePassphrase(const std::string &passphrase, LibEncryptMsg::HashAlgo hash_algo, unsigned key_size,
-                int iterations, LibEncryptMsg::Salt salt = LibEncryptMsg::Salt());
+        const KeyRecord &ChangePassphrase(const std::string &passphrase, EncryptMsg::HashAlgo hash_algo, unsigned key_size,
+                int iterations, EncryptMsg::Salt salt = EncryptMsg::Salt());
 
         // Returns a key generated from the current passphrase and marks it as used so it is not used for saving again. 
         // When all key_count_ keys have been used, it returns an empty record and all keys are deleted.
@@ -113,7 +113,7 @@ namespace EncryptPad
 
         // Check if we have this key in the storage
         // If we don't have it, we need to regenerate new keys. Call ChangePassphrase.
-        const KeyRecord &GetKeyForLoading(const std::vector<uint8_t> &salt, int iterations, LibEncryptMsg::HashAlgo hash_algo) const;
+        const KeyRecord &GetKeyForLoading(const std::vector<uint8_t> &salt, int iterations, EncryptMsg::HashAlgo hash_algo) const;
 
     private:
         const KeyRecord &EmptyRecord() const;

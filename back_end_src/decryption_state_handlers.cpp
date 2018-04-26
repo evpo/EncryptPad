@@ -6,7 +6,7 @@
 #include "epad_result.h"
 #include "encryptmsg/openpgp_conversions.h"
 
-using namespace LibEncryptMsg;
+using namespace EncryptMsg;
 
 namespace EncryptPad
 {
@@ -234,7 +234,7 @@ namespace EncryptPad
 
     void GPG_OnEnter(LightStateMachine::StateMachineContext &ctx)
     {
-        using namespace LibEncryptMsg;
+        using namespace EncryptMsg;
         auto &c = ToContext(ctx);
         MessageReader *reader = nullptr;
         bool is_key_file_session = false;

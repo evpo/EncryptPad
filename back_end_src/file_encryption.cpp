@@ -36,7 +36,7 @@
 #include "decryption_state_machine.h"
 #include "epad_result.h"
 
-using namespace LibEncryptMsg;
+using namespace EncryptMsg;
 namespace
 {
     using namespace EncryptPad;

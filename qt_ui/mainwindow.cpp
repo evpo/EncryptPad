@@ -401,7 +401,7 @@ void MainWindow::UpdateStatus(const QString &text)
 bool MainWindow::newFile()
 {
     using namespace EncryptPad;
-    using namespace LibEncryptMsg;
+    using namespace EncryptMsg;
     if (maybeSave()) {
         textEdit->clear();
         setCurrentFile("");
