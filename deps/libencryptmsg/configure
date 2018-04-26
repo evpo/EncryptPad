@@ -128,7 +128,7 @@ fi
 if [[ $STATIC_MODE == true ]]; then
     pushd src >/dev/null
 
-SUBDIR=$(cat <<EOM | make -s -f -
+SUBDIR=$(cat <<EOM | make -s --no-print-directory -f -
 RELEASE=$RELEASE
 include ${DEPSDIR}/makefiles/platform.mak
 all:
@@ -136,7 +136,7 @@ all:
 EOM
 )
 
-LIBRARIES=$(cat <<EOM | make -s -f -
+LIBRARIES=$(cat <<EOM | make -s --no-print-directory -f -
 .DEFAULT_GOAL := default
 RELEASE=$RELEASE
 include ./Makefile
