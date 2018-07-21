@@ -51,6 +51,8 @@ LIBS += -L$$PWD/../deps/stlplus/portability/$$DEPS_SUBDIR \
      -lstate_machine \
      -lbotan_1_openpgp_codec
 
+# the line below is required for mingw wine
+win32: LIBS += -lgdi32 -lkernel32 -luser32
 win32: BOTANFILE = $$PWD/../deps/botan/botan.lib -fstack-protector
 unix: BOTANFILE = -L$$PWD/../deps/botan -lbotan-2
 
@@ -60,6 +62,8 @@ unix: BOTANFILE = -L$$PWD/../deps/botan -lbotan-2
     BOTANLIB = $$system(pkg-config --libs botan-2)
     LIBS += $$BOTANLIB -lz
 }
+# this line is required in mingw wine
+win32: LIBS += -lWs2_32
 
 !USE_SYSTEM_LIBS {
     INCLUDEPATH += $$PWD/../deps/botan/build/include
