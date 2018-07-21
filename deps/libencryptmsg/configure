@@ -155,7 +155,7 @@ EOM
             if [[ ${LIB:1:1} != ":" ]]; then
                 LIB=$(abs $LIB)
             fi
-            echo "ALL_OBJ += $(abs $LIB)/${SUBDIR}/${line/%.cpp/.o}"
+            echo "ALL_OBJ += ${LIB}/${SUBDIR}/${line/%.cpp/.o}"
         done
 
     done > ../build/all_obj.mak
