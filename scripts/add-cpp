@@ -1,8 +1,8 @@
 #!/bin/bash
 
-if [ $# != 1 ]
+if [ $# != 2 ]
 then
-    echo "$0 <base-file-name>"
+    echo "$0 <path> <base-file-name>"
     exit -1
 fi
 
@@ -12,8 +12,11 @@ then
     exit -1
 fi
 
-cat >back_end_src/${1}.cpp <<EOF
-#include "${1}.h"
+path=$1
+base_file_name=$2
+
+cat >${path}/${base_file_name}.cpp <<EOF
+#include "${base_file_name}.h"
 
 namespace EncryptPad
 {
@@ -22,7 +25,7 @@ namespace EncryptPad
 
 EOF
 
-cat >back_end_src/${1}.h <<EOF
+cat >${path}/${base_file_name}.h <<EOF
 #pragma once
 
 namespace EncryptPad
