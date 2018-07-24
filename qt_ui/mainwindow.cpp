@@ -44,17 +44,12 @@
 #include "plain_text_edit.h"
 #include "common_definitions.h"
 #include "encryptmsg/openpgp_conversions.h"
+#include "repository.h"
 
 typedef unsigned char byte;
 
-namespace 
+namespace
 {
-#if defined(__MINGW__) || defined(__MINGW32__)
-    const char *kRepositoryDirName = "_encryptpad";
-#else
-    const char *kRepositoryDirName = ".encryptpad";
-#endif
-
     const char *kConfigFileName = "encryptpad.ini";
 
     void SetDefaultMetadataValues(EncryptPad::PacketMetadata &metadata, const EncryptPad::PacketMetadata &defaultMetadata)
@@ -557,10 +552,9 @@ bool MainWindow::saveAs()
 
 QString MainWindow::accessRepositoryPath(const QString &fileName)
 {
-    QDir dir(QDir::home());
+    QString dirPath = QString::fromStdString(EncryptPad::GetRepositoryPath());
 
-    if(!(dir.cd(tr(kRepositoryDirName)) ||
-         (dir.mkdir(kRepositoryDirName) && dir.cd(kRepositoryDirName))))
+    if(dirPath.isEmpty())
     {
         QMessageBox::warning(
                     this,
@@ -569,6 +563,7 @@ QString MainWindow::accessRepositoryPath(const QString &fileName)
         return QString();
     }
 
+    QDir dir(dirPath);
     return dir.filePath(fileName);
 }
 

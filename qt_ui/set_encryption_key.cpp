@@ -21,15 +21,10 @@
 #include <QFileSystemModel>
 #include <QDir>
 #include "set_key_dialog.h"
+#include "repository.h"
 
 namespace EncryptPad
 {
-    #if defined(__MINGW__) || defined(__MINGW32__)
-        const char *kRepositoryDirName = "_encryptpad";
-    #else
-        const char *kRepositoryDirName = ".encryptpad";
-    #endif
-
     bool SetEncryptionKey(QWidget *parent, const QString &key_file_path, bool persist_key_path,
                           FileRequestService &file_request_service, EncryptionKeySelectionResult &result_out)
     {
@@ -37,17 +32,18 @@ namespace EncryptPad
         SetKeyDialog dlg(parent, file_request_service);
         dlg.SetIsKeyPathPersistent(persist_key_path);
         dlg.SetKeyFilePath(key_file_path);
-        QDir dir(QDir::home());
-        if(dir.cd(kRepositoryDirName))
+        QString repositoryPath = QString::fromStdString(GetRepositoryPath());
+        if(!repositoryPath.isEmpty())
         {
-            model.setRootPath(dir.path());
+            model.setRootPath(repositoryPath);
             QStringList list;
             list.push_back(QString("*.key"));
             model.setNameFilters(list);
             model.setNameFilterDisables(false);
-            auto index = model.index(dir.path());
+            auto index = model.index(repositoryPath);
             dlg.SetRepositoryListModel(model, index);
         }
+
         if(dlg.exec() == QDialog::Rejected)
             return false;
 

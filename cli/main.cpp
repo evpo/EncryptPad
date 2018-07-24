@@ -38,6 +38,7 @@
 #include "algo_defaults.h"
 #include "plog/Log.h"
 #include "encryptmsg_version.h"
+#include "repository.h"
 
 namespace EncryptPad
 {
@@ -358,6 +359,9 @@ int main(int argc, char *argv[])
         PrintUsage();
         exit(1);
     }
+
+    if(argc > 0)
+        InitializeRepositoryPath(std::string(argv[0]));
 
     bool encrypt = false;
     bool decrypt = false;

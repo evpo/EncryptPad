@@ -27,6 +27,7 @@
 #include <string>
 #include "mainwindow.h"
 #include "application.h"
+#include "repository.h"
 
 namespace
 {
@@ -126,6 +127,8 @@ int main(int argc, char *argv[])
 
     Application app(argc, argv);
     CommandArguments arguments = parseArguments(app);
+    assert(argc >= 1);
+    EncryptPad::InitializeRepositoryPath(argv[0]);
 
     QStringList userLangs;
     if(arguments.language.isEmpty())

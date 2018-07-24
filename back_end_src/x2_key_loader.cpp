@@ -19,25 +19,16 @@
 //**********************************************************************************
 #include "x2_key_loader.h"
 #include <fstream>
+#include "file_system.hpp"
 #include "curl_loader.h"
 #include "os_api.h"
 #include "packet_typedef.h"
 #include "epad_utilities.h"
+#include "repository.h"
 
 using namespace std;
 using namespace Botan;
 using namespace EncryptMsg;
-
-namespace 
-{
-#if defined(__APPLE__) || defined(unix) || defined(__unix__) || defined(__unix)
-    const char *keyStorageDirectory = "~/.encryptpad";
-    const char *directorySeparator = "/";
-#elif defined(__MINGW32__) || defined(_MSC_VER)
-    const char *keyStorageDirectory = "%USERPROFILE%\\_encryptpad";
-    const char *directorySeparator = "\\";
-#endif
-}
 
 namespace EncryptPad
 {
@@ -68,16 +59,17 @@ namespace EncryptPad
 
         std::string path = ExpandVariables(file_name);
 
-        if (!LoadStringFromFile(path, key))
+        if (LoadStringFromFile(path, key))
+            return EpadResult::Success;
+
+        // It does not contain directories
+        if (stlplus::folder_part(path).empty())
         {
-            if (path.find(directorySeparator) == std::string::npos)
-            {
-                std::string keyStoragePath = std::string(keyStorageDirectory) + directorySeparator + path;
-                return LoadKeyFromFile(keyStoragePath, std::string(), std::string(), key);
-            }
-            return EpadResult::IOErrorKeyFile;
+            std::string keyStoragePath = stlplus::create_filespec(GetRepositoryPath(), path);
+            if(LoadStringFromFile(keyStoragePath, key))
+               return EpadResult::Success;
         }
 
-        return EpadResult::Success;
+        return EpadResult::IOErrorKeyFile;
     }
 }
