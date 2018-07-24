@@ -12,6 +12,7 @@
 -I./deps/libencryptmsg/include
 -I./deps/libencryptmsg/src
 -I./deps/state_machine
+-I./deps/plog/include
 -I./deps/libencryptmsg/deps/plog/include
 -I./build/qt_build
 -I/usr/include/qt5
