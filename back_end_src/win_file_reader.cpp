@@ -33,12 +33,13 @@ namespace
 {
     void Multi2Wide(const std::string &multi, std::wstring &wide)
     {
+        wide.clear();
         int len = MultiByteToWideChar(CP_UTF8, 0, multi.c_str(), -1, 
-                nullptr, 0);
+                NULL, 0);
         if(!len)
             return;
 
-        wide.resize(len, 0);
+        wide.resize(len - 1, 0);
         MultiByteToWideChar(CP_UTF8, 0, multi.data(), multi.size(),
                 &wide[0], wide.size());
     }
@@ -53,7 +54,7 @@ namespace
         int len = WideCharToMultiByte(CP_UTF8, 0, &wide[0], static_cast<int>(wide.size()), 
                 NULL, 0, NULL, NULL);
 
-        multi.resize(len, 0);
+        multi.resize(len - 1, 0);
 
         WideCharToMultiByte(CP_UTF8, 0, &wide[0], static_cast<int>(wide.size()), 
                 &multi[0], len, NULL, NULL);
@@ -67,10 +68,16 @@ namespace EncryptPad
         std::wstring wide;
         Multi2Wide(path, wide);
 
-        wchar_t buffer[MAX_PATH];
-        ExpandEnvironmentStringsW(wide.c_str(), buffer, MAX_PATH);
+        std::wstring buffer;
+        buffer.resize(MAX_PATH);
+        DWORD size = ExpandEnvironmentStringsW(wide.c_str(), &buffer[0], buffer.size());
+        while(size == buffer.size())
+        {
+            buffer.resize(buffer.size() * 2);
+            size = ExpandEnvironmentStringsW(wide.c_str(), &buffer[0], buffer.size());
+        }
+        buffer.resize(size);
         wide = buffer;
-
         std::string multi;
         Wide2Multi(wide, multi);
         return multi;

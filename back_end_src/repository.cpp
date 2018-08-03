@@ -29,7 +29,7 @@ namespace EncryptPad
         else
         {
             repository_path = stlplus::create_filespec(
-                    stlplus::folder_home(),
+                    stlplus::folder_user_profile(),
                     repository_dir_name);
 
             if(!stlplus::folder_exists(repository_path) && !stlplus::folder_create(repository_path))
