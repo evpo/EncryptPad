@@ -107,6 +107,8 @@ namespace stlplus
   std::string folder_current_full(void);
   // get the home folder - $HOME or %HOMEDRIVE%%HOMEPATH%
   std::string folder_home(void);
+  // get the user profile folder -  $HOME or %USERPROFILE%
+  std::string folder_user_profile(void);
   // go down a level in the folder hierarchy
   std::string folder_down(const std::string& folder, const std::string& subfolder);
   // go up a level in the folder hierarchy
