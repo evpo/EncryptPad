@@ -79,6 +79,7 @@ unix:QMAKE_CXXFLAGS += -D_FILE_OFFSET_BITS=64
 INCLUDEPATH += $$PWD/../deps/stlplus/portability
 INCLUDEPATH += $$PWD/../back_end_src
 INCLUDEPATH += $$PWD/../deps/libencryptmsg/include
+INCLUDEPATH += $$PWD/../deps/plog/include
 
 SOURCES += \
     application.cpp \

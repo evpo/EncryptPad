@@ -707,7 +707,7 @@ namespace stlplus
 #ifdef MSWINDOWS
       std::wstring buffer;
       Multi2Wide(directory, buffer);
-      return CreateDirectoryW(buffer.c_str(),NULL) == 0;
+      return CreateDirectoryW(buffer.c_str(),NULL) != 0;
 #else
     return mkdir(directory.c_str(), 0777) == 0;
 #endif

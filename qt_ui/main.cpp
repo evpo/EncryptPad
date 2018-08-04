@@ -28,6 +28,7 @@
 #include "mainwindow.h"
 #include "application.h"
 #include "repository.h"
+#include "plog/Log.h"
 
 namespace
 {
@@ -124,6 +125,8 @@ bool loadTranslatorResource(Application &app, QTranslator &translator, const QSt
 int main(int argc, char *argv[])
 {
     Q_INIT_RESOURCE(EncryptPad);
+    // plog::init(plog::debug, "epad.log");
+    // LOG_INFO << "Log instance started";
 
     Application app(argc, argv);
     CommandArguments arguments = parseArguments(app);
