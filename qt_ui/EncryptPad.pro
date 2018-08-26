@@ -68,7 +68,7 @@ win32: LIBS += -lWs2_32
 !USE_SYSTEM_LIBS {
     INCLUDEPATH += $$PWD/../deps/botan/build/include
     unix: LIBS += -ldl
-    macos: LIBS += -framework Security
+    macx: LIBS += -framework Security
 } else {
     BOTANCXX = $$system(pkg-config --cflags botan-2)
     QMAKE_CXXFLAGS += $$BOTANCXX

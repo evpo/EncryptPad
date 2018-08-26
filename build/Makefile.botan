@@ -19,7 +19,7 @@ endif
 
 all:: $(BOTANLIB)
 $(BOTANLIB):
-	cd $(BOTAN_DIR) && ./configure.py $(PARAMS) --amalgamation --disable-shared --with-zlib --enable-modules aes,pbkdf2,auto_rng,compression
+	cd $(BOTAN_DIR) && ./configure.py $(PARAMS) --amalgamation --disable-shared --with-zlib --cpu=x86_64 --enable-modules aes,pbkdf2,auto_rng,compression
 #--with-bzip2
 	$(MAKE) -C $(BOTAN_DIR) libs
 clean:

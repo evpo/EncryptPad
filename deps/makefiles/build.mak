@@ -45,6 +45,7 @@ endif
 
 ifeq ($(PLATFORM),MACOS)
 CXX := clang -m64
+CXX += -stdlib=libc++
 endif
 
 # need to build PIC on some platforms in order to use code in shared libraries
@@ -68,8 +69,14 @@ ifeq ($(STATIC),on)
 # switch on static linking with C/C++ runtimes
 LDFLAGS += -static-libgcc -static-libstdc++
 else
+
 # dynamic linking options - create a linker dependency on C++ runtime
+ifeq ($(PLATFORM),MACOS)
+LDLAST += -lc++
+else
 LDLAST += -lstdc++
+endif
+
 endif
 
 ################################################################################
