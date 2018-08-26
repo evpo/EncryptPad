@@ -149,13 +149,10 @@ EOM
     for L in $LIBRARIES
     do
         LIB=$L
-        find $LIB -maxdepth 1 -name '*.cpp' -printf '%f\n' | while read line
+        find $LIB -maxdepth 1 -name '*.cpp' | while read line
         do
-            # check if we are in mingw. absolute path starts from letter and colon
-            if [[ ${LIB:1:1} != ":" ]]; then
-                LIB=$(abs $LIB)
-            fi
-            echo "ALL_OBJ += ${LIB}/${SUBDIR}/${line/%.cpp/.o}"
+            line=${line##*/}
+            echo "ALL_OBJ += $(abs $LIB)/${SUBDIR}/${line/%.cpp/.o}"
         done
 
     done > ../build/all_obj.mak
