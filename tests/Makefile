@@ -40,6 +40,10 @@ LDLIBS += $(BOTANLIB) -lz
 CXXFLAGS += $(BOTANCXX)
 endif
 
+ifeq ($(PLATFORM),MACOS)
+LDLIBS += -framework Security
+endif
+
 LDFLAGS += -Wall
 
 ifeq ($(RELEASE),on)
