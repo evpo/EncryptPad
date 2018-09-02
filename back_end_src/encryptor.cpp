@@ -27,8 +27,6 @@ using namespace EncryptPadEncryptor;
 using namespace EncryptPad;
 using namespace Botan;
 
-const size_t kBufferSize = 1024;
-
 void Encryptor::SetLibcurlParams(const std::string &params)
 {
     mLibcurlParams = params;
