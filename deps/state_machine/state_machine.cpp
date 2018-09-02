@@ -23,10 +23,6 @@ namespace
     {
         LOG_DEBUG << "SM:" << state_machine_name << ": " << str;
     }
-#else
-    void DebugPrintState(std::string state_machine_name, std::string str)
-    {
-    }
 #endif
 }
 
