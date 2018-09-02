@@ -306,32 +306,32 @@ namespace EncryptPad
         EOFHandlerBase *eof_handler_;
     protected:
 
-        virtual stream_length_type DoGetCount() const
+        virtual stream_length_type DoGetCount() const override
         {
             return count_;
         }
 
-        virtual void DoSetCount(stream_length_type count)
+        virtual void DoSetCount(stream_length_type count) override
         {
             count_ = count;
         }
 
-        virtual void DoSetEOFHandler(EOFHandlerBase *eof_handler)
+        virtual void DoSetEOFHandler(EOFHandlerBase *eof_handler) override
         {
             eof_handler_ = eof_handler;
         }
 
-        virtual EOFHandlerBase *DoGetEOFHandler()
+        virtual EOFHandlerBase *DoGetEOFHandler() override
         {
             return eof_handler_;
         }
 
-        virtual bool DoIsEOF() const
+        virtual bool DoIsEOF() const override
         {
             return (!count_ || pos_ == end_);
         }
 
-        virtual int DoGet()
+        virtual int DoGet() override
         {
             if(!count_ && eof_handler_)
             {
