@@ -14,6 +14,10 @@ ifeq ($(RELEASE),on)
 CXXFLAGS += -ggdb
 endif
 
+ifeq ($(WINDOWS),on)
+LDFLAGS += -static
+endif
+
 CXXFLAGS += -I../deps/libencryptmsg/include
 CXXFLAGS += -I../deps/plog/include
 
@@ -23,7 +27,7 @@ CXXFLAGS += -I../deps/gtest/googletest/include -pthread -std=c++11 -Wall -Wextra
 LDLIBS += ../deps/libencryptmsg/src/$(SUBDIR)/libsrc.a
 
 ifeq ($(WINDOWS),on)
-LDFLAGS += -lgdi32 -lkernel32 -luser32
+LDLIBS += -lgdi32 -lkernel32 -luser32
 BOTANLIBFILE = ../deps/botan/botan.lib -fstack-protector
 else
 BOTANLIBFILE = ../deps/botan/libbotan-2.a -lm
