@@ -9,18 +9,21 @@ the library.
 Fuzzing with libFuzzer
 ------------------------
 
-To fuzz with libFuzzer (http://llvm.org/docs/LibFuzzer.html), you'll first
+To fuzz with libFuzzer (https://llvm.org/docs/LibFuzzer.html), you'll first
 need to compile libFuzzer::
 
-  $ svn co http://llvm.org/svn/llvm-project/compiler-rt/trunk/lib/fuzzer libFuzzer
+  $ svn co https://llvm.org/svn/llvm-project/compiler-rt/trunk/lib/fuzzer libFuzzer
   $ cd libFuzzer && clang -c -g -O2 -std=c++11 *.cpp
   $ ar cr libFuzzer.a libFuzzer/*.o
 
 Then build the fuzzers::
 
   $ ./configure.py --cc=clang --build-fuzzer=libfuzzer --unsafe-fuzzer-mode \
-        --cc-abi-flags='-fsanitize=address,undefined -fsanitize-coverage=edge,indirect-calls,8bit-counters -fno-sanitize-recover=undefined'
+        --enable-sanitizers=coverage,address,undefined
   $ make fuzzers
+
+Enabling 'coverage' sanitizer flags is required for libFuzzer to work.
+Address sanitizer and undefined sanitizer are optional.
 
 The fuzzer binaries will be in `build/fuzzer`. Simply pick one and run it, optionally
 also passing a directory containing corpus inputs.
@@ -38,9 +41,8 @@ To fuzz with AFL (http://lcamtuf.coredump.cx/afl/)::
   $ ./configure.py --with-sanitizers --build-fuzzer=afl --unsafe-fuzzer-mode --cc-bin=afl-g++
   $ make fuzzers
 
-For AFL, `--with-sanitizers` is optional.
-
-You can also use `afl-clang-fast++` or `afl-clang++`.
+For AFL sanitizers are optional. You can also use `afl-clang-fast++`
+or `afl-clang++`, be sure to set `--cc=clang` also.
 
 The fuzzer binaries will be in `build/fuzzer`. To run them you need to
 run under `afl-fuzz`::
@@ -59,7 +61,7 @@ To run it against Botan's server::
 
   $ ./configure.py --with-sanitizers
   $ make botan
-  $ ./src/scripts/run_tls_fuzzer.py ./botan ./botan-ci-tools
+  $ ./src/scripts/run_tls_attacker.py ./botan ./botan-ci-tools
 
 Output and logs from the fuzzer are placed into `/tmp`. See the
 TLS-Attacker documentation for more information about how to use this

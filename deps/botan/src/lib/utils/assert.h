@@ -1,6 +1,6 @@
 /*
 * Runtime assertion checking
-* (C) 2010 Jack Lloyd
+* (C) 2010,2018 Jack Lloyd
 *     2017 Simon Warta (Kullo GmbH)
 *
 * Botan is released under the Simplified BSD License (see license.txt)
@@ -9,18 +9,33 @@
 #ifndef BOTAN_ASSERTION_CHECKING_H_
 #define BOTAN_ASSERTION_CHECKING_H_
 
+#include <botan/build.h>
 #include <botan/compiler.h>
 
 namespace Botan {
 
 /**
 * Called when an assertion fails
+* Throws an Exception object
 */
-BOTAN_NORETURN void BOTAN_PUBLIC_API(2,0) assertion_failure(const char* expr_str,
-                                 const char* assertion_made,
-                                 const char* func,
-                                 const char* file,
-                                 int line);
+BOTAN_NORETURN void BOTAN_PUBLIC_API(2,0)
+   assertion_failure(const char* expr_str,
+                     const char* assertion_made,
+                     const char* func,
+                     const char* file,
+                     int line);
+
+/**
+* Called when an invalid argument is used
+* Throws Invalid_Argument
+*/
+BOTAN_NORETURN void BOTAN_UNSTABLE_API throw_invalid_argument(const char* message,
+                                                              const char* func,
+                                                              const char* file);
+
+
+#define BOTAN_ARG_CHECK(expr, msg)                                      \
+   do { if(!(expr)) Botan::throw_invalid_argument(msg, BOTAN_CURRENT_FUNCTION, __FILE__); } while(0)
 
 /**
 * Make an assertion
@@ -86,6 +101,16 @@ BOTAN_NORETURN void BOTAN_PUBLIC_API(2,0) assertion_failure(const char* expr_str
                                   __FILE__,                \
                                   __LINE__);               \
    } while(0)
+
+#if defined(BOTAN_ENABLE_DEBUG_ASSERTS)
+
+#define BOTAN_DEBUG_ASSERT(expr) BOTAN_ASSERT_NOMSG(expr)
+
+#else
+
+#define BOTAN_DEBUG_ASSERT(expr) do {} while(0)
+
+#endif
 
 /**
 * Mark variable as unused. Takes between 1 and 9 arguments and marks all as unused,

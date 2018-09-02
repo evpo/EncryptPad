@@ -2,23 +2,12 @@ macro_name XLC
 
 binary_name xlC
 
-output_to_option "-o "
-add_include_dir_option -I
-add_lib_dir_option -L
-add_lib_option -l
-
-compile_flags "-c"
-debug_info_flags "-g"
 optimization_flags "-O2"
 
 lang_flags "-std=c++11"
 
-makefile_style gmake
-
-<mach_opt>
-power8   -> "-qarch=pwr8"
-power9   -> "-qarch=pwr9"
-</mach_opt>
+visibility_build_flags "-fvisibility=hidden"
+visibility_attribute '__attribute__((visibility("default")))'
 
 <isa_flags>
 altivec -> "-qaltivec"
@@ -27,3 +16,9 @@ altivec -> "-qaltivec"
 <so_link_commands>
 default -> "$(CXX) -qmkshrobj"
 </so_link_commands>
+
+<sanitizers>
+default   -> "-qcheck=all"
+address   -> "-qcheck=bounds:stackclobber:unset"
+undefined -> "-qcheck=nullptr:divzero"
+</sanitizers>

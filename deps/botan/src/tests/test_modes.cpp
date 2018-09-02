@@ -7,13 +7,13 @@
 
 #include "tests.h"
 
-#if defined(BOTAN_HAS_MODES)
+#if defined(BOTAN_HAS_CIPHER_MODES)
    #include <botan/cipher_mode.h>
 #endif
 
 namespace Botan_Tests {
 
-#if defined(BOTAN_HAS_MODES)
+#if defined(BOTAN_HAS_CIPHER_MODES)
 
 class Cipher_Mode_Tests final : public Text_Based_Test
    {
@@ -28,10 +28,10 @@ class Cipher_Mode_Tests final : public Text_Based_Test
 
       Test::Result run_one_test(const std::string& algo, const VarMap& vars) override
          {
-         const std::vector<uint8_t> key      = get_req_bin(vars, "Key");
-         const std::vector<uint8_t> nonce    = get_opt_bin(vars, "Nonce");
-         const std::vector<uint8_t> input    = get_req_bin(vars, "In");
-         const std::vector<uint8_t> expected = get_req_bin(vars, "Out");
+         const std::vector<uint8_t> key      = vars.get_req_bin("Key");
+         const std::vector<uint8_t> nonce    = vars.get_opt_bin("Nonce");
+         const std::vector<uint8_t> input    = vars.get_req_bin("In");
+         const std::vector<uint8_t> expected = vars.get_req_bin("Out");
 
          Test::Result result(algo);
 
@@ -45,9 +45,9 @@ class Cipher_Mode_Tests final : public Text_Based_Test
 
          for(auto&& provider_ask : providers)
             {
-            std::unique_ptr<Botan::Cipher_Mode> enc(Botan::get_cipher_mode(
+            std::unique_ptr<Botan::Cipher_Mode> enc(Botan::Cipher_Mode::create(
                   algo, Botan::ENCRYPTION, provider_ask));
-            std::unique_ptr<Botan::Cipher_Mode> dec(Botan::get_cipher_mode(
+            std::unique_ptr<Botan::Cipher_Mode> dec(Botan::Cipher_Mode::create(
                   algo, Botan::DECRYPTION, provider_ask));
 
             if(!enc || !dec)
@@ -60,6 +60,34 @@ class Cipher_Mode_Tests final : public Text_Based_Test
             result.test_eq("name", enc->name(), algo);
 
             result.test_eq("mode not authenticated", enc->authenticated(), false);
+
+            if(algo.find("/CBC") != std::string::npos)
+               {
+               // can't test equal due to CBC padding
+               result.test_lte("output_length", enc->output_length(input.size()), expected.size());
+               result.test_gte("output_length", dec->output_length(expected.size()), input.size());
+               }
+            else
+               {
+               // assume all other modes are not expanding (currently true)
+               result.test_eq("output_length", enc->output_length(input.size()), expected.size());
+               result.test_eq("output_length", dec->output_length(expected.size()), input.size());
+               }
+
+            // FFI currently requires this, so assure it is true for all modes
+            result.test_gte("enc buffer sizes ok", enc->update_granularity(), enc->minimum_final_size());
+            result.test_gte("dec buffer sizes ok", dec->update_granularity(), dec->minimum_final_size());
+
+            result.confirm("default nonce size is allowed",
+                           enc->valid_nonce_length(enc->default_nonce_length()));
+            result.confirm("default nonce size is allowed",
+                           dec->valid_nonce_length(dec->default_nonce_length()));
+
+            // Test that disallowed nonce sizes result in an exception
+            const size_t large_nonce_size = 65000;
+            result.test_eq("Large nonce not allowed", enc->valid_nonce_length(large_nonce_size), false);
+            result.test_throws("Large nonce causes exception",
+                               [&enc,large_nonce_size]() { enc->start(nullptr, large_nonce_size); });
 
             // Test to make sure reset() resets what we need it to
             enc->set_key(mutate_vec(key));
@@ -170,9 +198,9 @@ class Cipher_Mode_IV_Carry_Tests final : public Test
 
 #if defined(BOTAN_HAS_MODE_CBC) && defined(BOTAN_HAS_AES)
          std::unique_ptr<Botan::Cipher_Mode> enc(
-            Botan::get_cipher_mode("AES-128/CBC/PKCS7", Botan::ENCRYPTION));
+            Botan::Cipher_Mode::create("AES-128/CBC/PKCS7", Botan::ENCRYPTION));
          std::unique_ptr<Botan::Cipher_Mode> dec(
-            Botan::get_cipher_mode("AES-128/CBC/PKCS7", Botan::DECRYPTION));
+            Botan::Cipher_Mode::create("AES-128/CBC/PKCS7", Botan::DECRYPTION));
 
          const std::vector<uint8_t> key(16, 0xAA);
          const std::vector<uint8_t> iv(16, 0xAA);
@@ -223,9 +251,9 @@ class Cipher_Mode_IV_Carry_Tests final : public Test
          Test::Result result("CFB IV carry");
 #if defined(BOTAN_HAS_MODE_CFB) && defined(BOTAN_HAS_AES)
          std::unique_ptr<Botan::Cipher_Mode> enc(
-            Botan::get_cipher_mode("AES-128/CFB(8)", Botan::ENCRYPTION));
+            Botan::Cipher_Mode::create("AES-128/CFB(8)", Botan::ENCRYPTION));
          std::unique_ptr<Botan::Cipher_Mode> dec(
-            Botan::get_cipher_mode("AES-128/CFB(8)", Botan::DECRYPTION));
+            Botan::Cipher_Mode::create("AES-128/CFB(8)", Botan::DECRYPTION));
 
          const std::vector<uint8_t> key(16, 0xAA);
          const std::vector<uint8_t> iv(16, 0xAB);
@@ -272,9 +300,9 @@ class Cipher_Mode_IV_Carry_Tests final : public Test
 #if defined(BOTAN_HAS_CTR_BE) && defined(BOTAN_HAS_AES)
 
          std::unique_ptr<Botan::Cipher_Mode> enc(
-            Botan::get_cipher_mode("AES-128/CTR-BE", Botan::ENCRYPTION));
+            Botan::Cipher_Mode::create("AES-128/CTR-BE", Botan::ENCRYPTION));
          std::unique_ptr<Botan::Cipher_Mode> dec(
-            Botan::get_cipher_mode("AES-128/CTR-BE", Botan::DECRYPTION));
+            Botan::Cipher_Mode::create("AES-128/CTR-BE", Botan::DECRYPTION));
 
          const std::vector<uint8_t> key =
             Botan::hex_decode("2B7E151628AED2A6ABF7158809CF4F3C");

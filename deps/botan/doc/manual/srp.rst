@@ -1,9 +1,9 @@
 Secure Remote Password
 ========================================
 
-The library contains an implementation of the :wikipedia:`SRP-6a
-password based key exchange protocol
-<Secure_remote_password_protocol>` in ``srp6.h``.
+The library contains an implementation of the
+`SRP6-a <http://srp.stanford.edu/design.html>`_ password authenticated
+key exchange protocol in ``srp6.h``.
 
 A SRP client provides what is called a SRP *verifier* to the server.
 This verifier is based on a password, but the password cannot be
@@ -24,7 +24,7 @@ example "modp/srp/2048".
 .. cpp:function:: BigInt generate_srp6_verifier( \
           const std::string& identifier, \
           const std::string& password, \
-          const std::vector<byte>& salt, \
+          const std::vector<uint8_t>& salt, \
           const std::string& group_id, \
           const std::string& hash_id)
 
@@ -54,7 +54,7 @@ example "modp/srp/2048".
                const std::string& password, \
                const std::string& group_id, \
                const std::string& hash_id, \
-               const std::vector<byte>& salt, \
+               const std::vector<uint8_t>& salt, \
                const BigInt& B, \
                RandomNumberGenerator& rng)
 

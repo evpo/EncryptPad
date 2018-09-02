@@ -1,8 +1,8 @@
 /*
 * TLS Extensions
-* (C) 2011,2012,2016 Jack Lloyd
-*     2016 Juraj Somorovsky
-*     2016 Matthias Gierlings
+* (C) 2011,2012,2016,2018 Jack Lloyd
+* (C) 2016 Juraj Somorovsky
+* (C) 2016 Matthias Gierlings
 *
 * Botan is released under the Simplified BSD License (see license.txt)
 */
@@ -10,8 +10,9 @@
 #ifndef BOTAN_TLS_EXTENSIONS_H_
 #define BOTAN_TLS_EXTENSIONS_H_
 
+#include <botan/tls_algos.h>
 #include <botan/secmem.h>
-#include <botan/ocsp.h>
+#include <botan/x509_dn.h>
 #include <vector>
 #include <string>
 #include <map>
@@ -28,7 +29,7 @@ enum Handshake_Extension_Type {
    TLSEXT_CERT_STATUS_REQUEST    = 5,
 
    TLSEXT_CERTIFICATE_TYPES      = 9,
-   TLSEXT_USABLE_ELLIPTIC_CURVES = 10,
+   TLSEXT_SUPPORTED_GROUPS       = 10,
    TLSEXT_EC_POINT_FORMATS       = 11,
    TLSEXT_SRP_IDENTIFIER         = 12,
    TLSEXT_SIGNATURE_ALGORITHMS   = 13,
@@ -46,7 +47,7 @@ enum Handshake_Extension_Type {
 /**
 * Base class representing a TLS extension of some kind
 */
-class Extension
+class BOTAN_UNSTABLE_API Extension
    {
    public:
       /**
@@ -225,34 +226,35 @@ class Session_Ticket final : public Extension
       std::vector<uint8_t> m_ticket;
    };
 
+
 /**
-* Supported Elliptic Curves Extension (RFC 4492)
+* Supported Groups Extension (RFC 7919)
 */
-class Supported_Elliptic_Curves final : public Extension
+class Supported_Groups final : public Extension
    {
    public:
       static Handshake_Extension_Type static_type()
-         { return TLSEXT_USABLE_ELLIPTIC_CURVES; }
+         { return TLSEXT_SUPPORTED_GROUPS; }
 
       Handshake_Extension_Type type() const override { return static_type(); }
 
-      static std::string curve_id_to_name(uint16_t id);
-      static uint16_t name_to_curve_id(const std::string& name);
-
-      const std::vector<std::string>& curves() const { return m_curves; }
+      std::vector<Group_Params> ec_groups() const;
+      std::vector<Group_Params> dh_groups() const;
 
       std::vector<uint8_t> serialize() const override;
 
-      explicit Supported_Elliptic_Curves(const std::vector<std::string>& curves) :
-         m_curves(curves) {}
+      explicit Supported_Groups(const std::vector<Group_Params>& groups);
 
-      Supported_Elliptic_Curves(TLS_Data_Reader& reader,
-                                uint16_t extension_size);
+      Supported_Groups(TLS_Data_Reader& reader,
+                       uint16_t extension_size);
 
-      bool empty() const override { return m_curves.empty(); }
+      bool empty() const override { return m_groups.empty(); }
    private:
-      std::vector<std::string> m_curves;
+      std::vector<Group_Params> m_groups;
    };
+
+// previously Supported Elliptic Curves Extension (RFC 4492)
+//using Supported_Elliptic_Curves = Supported_Groups;
 
 /**
 * Supported Point Formats Extension (RFC 4492)
@@ -298,33 +300,19 @@ class Signature_Algorithms final : public Extension
 
       Handshake_Extension_Type type() const override { return static_type(); }
 
-      static std::string hash_algo_name(uint8_t code);
-      static uint8_t hash_algo_code(const std::string& name);
-
-      static std::string sig_algo_name(uint8_t code);
-      static uint8_t sig_algo_code(const std::string& name);
-
-      // [(hash,sig),(hash,sig),...]
-      const std::vector<std::pair<std::string, std::string>>&
-      supported_signature_algorthms() const
-         {
-         return m_supported_algos;
-         }
+      const std::vector<Signature_Scheme>& supported_schemes() const { return m_schemes; }
 
       std::vector<uint8_t> serialize() const override;
 
-      bool empty() const override { return false; }
+      bool empty() const override { return m_schemes.empty(); }
 
-      Signature_Algorithms(const std::vector<std::string>& hashes,
-                           const std::vector<std::string>& sig_algos);
-
-      explicit Signature_Algorithms(const std::vector<std::pair<std::string, std::string>>& algos) :
-         m_supported_algos(algos) {}
+      explicit Signature_Algorithms(const std::vector<Signature_Scheme>& schemes) :
+         m_schemes(schemes) {}
 
       Signature_Algorithms(TLS_Data_Reader& reader,
                            uint16_t extension_size);
    private:
-      std::vector<std::pair<std::string, std::string>> m_supported_algos;
+      std::vector<Signature_Scheme> m_schemes;
    };
 
 /**
@@ -424,6 +412,30 @@ class Certificate_Status_Request final : public Extension
    };
 
 /**
+* Unknown extensions are deserialized as this type
+*/
+class BOTAN_UNSTABLE_API Unknown_Extension final : public Extension
+   {
+   public:
+      Unknown_Extension(Handshake_Extension_Type type,
+                        TLS_Data_Reader& reader,
+                        uint16_t extension_size);
+
+      std::vector<uint8_t> serialize() const override; // always fails
+
+      const std::vector<uint8_t>& value() { return m_value; }
+
+      bool empty() const override { return false; }
+
+      Handshake_Extension_Type type() const override { return m_type; }
+
+   private:
+      Handshake_Extension_Type m_type;
+      std::vector<uint8_t> m_value;
+
+   };
+
+/**
 * Represents a block of extensions in a hello message
 */
 class BOTAN_UNSTABLE_API Extensions final
@@ -434,13 +446,7 @@ class BOTAN_UNSTABLE_API Extensions final
       template<typename T>
       T* get() const
          {
-         Handshake_Extension_Type type = T::static_type();
-
-         auto i = m_extensions.find(type);
-
-         if(i != m_extensions.end())
-            return dynamic_cast<T*>(i->second.get());
-         return nullptr;
+         return dynamic_cast<T*>(get(T::static_type()));
          }
 
       template<typename T>
@@ -454,9 +460,25 @@ class BOTAN_UNSTABLE_API Extensions final
          m_extensions[extn->type()].reset(extn);
          }
 
+      Extension* get(Handshake_Extension_Type type) const
+         {
+         auto i = m_extensions.find(type);
+
+         if(i != m_extensions.end())
+            return i->second.get();
+         return nullptr;
+         }
+
       std::vector<uint8_t> serialize() const;
 
       void deserialize(TLS_Data_Reader& reader);
+
+      /**
+      * Remvoe an extension from this extensions object, if it exists.
+      * Returns true if the extension existed (and thus is now removed),
+      * otherwise false (the extension wasn't set in the first place).
+      */
+      bool remove_extension(Handshake_Extension_Type typ);
 
       Extensions() = default;
 

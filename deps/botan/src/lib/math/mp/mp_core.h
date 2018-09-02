@@ -10,15 +10,13 @@
 #ifndef BOTAN_MP_CORE_OPS_H_
 #define BOTAN_MP_CORE_OPS_H_
 
-#include <botan/bigint.h>
-#include <botan/mp_types.h>
+#include <botan/types.h>
 
 namespace Botan {
 
-/*
-* The size of the word type, in bits
-*/
-const size_t MP_WORD_BITS = BOTAN_MP_WORD_BITS;
+const word MP_WORD_MASK = ~static_cast<word>(0);
+const word MP_WORD_TOP_BIT = static_cast<word>(1) << (8*sizeof(word) - 1);
+const word MP_WORD_MAX = MP_WORD_MASK;
 
 /*
 * If cond == 0, does nothing.
@@ -29,18 +27,27 @@ BOTAN_TEST_API
 void bigint_cnd_swap(word cnd, word x[], word y[], size_t size);
 
 /*
-* If cond > 0 adds x[0:size] to y[0:size] and returns carry
+* If cond > 0 adds x[0:size] and y[0:size] and returns carry
 * Runs in constant time
 */
 BOTAN_TEST_API
 word bigint_cnd_add(word cnd, word x[], const word y[], size_t size);
 
 /*
-* If cond > 0 subs x[0:size] to y[0:size] and returns borrow
+* If cond > 0 subtracts x[0:size] and y[0:size] and returns borrow
 * Runs in constant time
 */
 BOTAN_TEST_API
 word bigint_cnd_sub(word cnd, word x[], const word y[], size_t size);
+
+/*
+* Equivalent to
+*   bigint_cnd_add( mask, x, y, size);
+*   bigint_cnd_sub(~mask, x, y, size);
+*
+* Mask must be either 0 or all 1 bits
+*/
+void bigint_cnd_addsub(word mask, word x[], const word y[], size_t size);
 
 /*
 * 2s complement absolute value
@@ -97,6 +104,22 @@ word bigint_sub3(word z[],
                  const word x[], size_t x_size,
                  const word y[], size_t y_size);
 
+/**
+* Return abs(x-y), ie if x >= y, then compute z = x - y
+* Otherwise compute z = y - x
+* No borrow is possible since the result is always >= 0
+*
+* Returns 1 if x >= y or 0 if x < y
+* @param z output array of at least N words
+* @param x input array of N words
+* @param y input array of N words
+* @param N length of x and y
+* @param ws array of at least 2*N words
+*/
+word bigint_sub_abs(word z[],
+                    const word x[], const word y[], size_t N,
+                    word ws[]);
+
 /*
 * Shift Operations
 */
@@ -127,31 +150,19 @@ void bigint_linmul3(word z[], const word x[], size_t x_size, word y);
 * @param p_size size of p
 * @param p_dash Montgomery value
 * @param workspace array of at least 2*(p_size+1) words
+* @param ws_size size of workspace in words
 */
 void bigint_monty_redc(word z[],
                        const word p[], size_t p_size,
                        word p_dash,
-                       word workspace[]);
-
-/*
-* Montgomery Multiplication
-*/
-void bigint_monty_mul(BigInt& z, const BigInt& x, const BigInt& y,
-                      const word p[], size_t p_size, word p_dash,
-                      word workspace[]);
-
-/*
-* Montgomery Squaring
-*/
-void bigint_monty_sqr(BigInt& z, const BigInt& x,
-                      const word p[], size_t p_size, word p_dash,
-                      word workspace[]);
+                       word workspace[],
+                       size_t ws_size);
 
 /**
-* Compare x and y
+* Compare x and y returning early
 */
 int32_t bigint_cmp(const word x[], size_t x_size,
-                  const word y[], size_t y_size);
+                   const word y[], size_t y_size);
 
 /**
 * Compute ((n1<<bits) + n0) / d
@@ -171,25 +182,27 @@ void bigint_comba_mul6(word z[12], const word x[6], const word y[6]);
 void bigint_comba_mul8(word z[16], const word x[8], const word y[8]);
 void bigint_comba_mul9(word z[18], const word x[9], const word y[9]);
 void bigint_comba_mul16(word z[32], const word x[16], const word y[16]);
+void bigint_comba_mul24(word z[48], const word x[24], const word y[24]);
 
 void bigint_comba_sqr4(word out[8], const word in[4]);
 void bigint_comba_sqr6(word out[12], const word in[6]);
 void bigint_comba_sqr8(word out[16], const word in[8]);
 void bigint_comba_sqr9(word out[18], const word in[9]);
 void bigint_comba_sqr16(word out[32], const word in[16]);
+void bigint_comba_sqr24(word out[48], const word in[24]);
 
 /*
 * High Level Multiplication/Squaring Interfaces
 */
-void bigint_mul(BigInt& z, const BigInt& x, const BigInt& y, word workspace[]);
 
 void bigint_mul(word z[], size_t z_size,
                 const word x[], size_t x_size, size_t x_sw,
                 const word y[], size_t y_size, size_t y_sw,
-                word workspace[]);
+                word workspace[], size_t ws_size);
 
-void bigint_sqr(word z[], size_t z_size, word workspace[],
-                const word x[], size_t x_size, size_t x_sw);
+void bigint_sqr(word z[], size_t z_size,
+                const word x[], size_t x_size, size_t x_sw,
+                word workspace[], size_t ws_size);
 
 }
 

@@ -7,29 +7,29 @@ The base class ``RandomNumberGenerator`` is in the header ``botan/rng.h``.
 
 The major interfaces are
 
-.. cpp:function:: void RandomNumberGenerator::randomize(byte* output_array, size_t length)
+.. cpp:function:: void RandomNumberGenerator::randomize(uint8_t* output_array, size_t length)
 
   Places *length* random bytes into the provided buffer.
 
-.. cpp:function:: void RandomNumberGenerator::add_entropy(const byte* data, size_t length)
+.. cpp:function:: void RandomNumberGenerator::add_entropy(const uint8_t* data, size_t length)
 
   Incorporates provided data into the state of the PRNG, if at all
   possible.  This works for most RNG types, including the system and
   TPM RNGs. But if the RNG doesn't support this operation, the data is
   dropped, no error is indicated.
 
-.. cpp:function:: void RandomNumberGenerator::randomize_with_input(byte* data, size_t length, \
-    const byte* ad, size_t ad_len)
+.. cpp:function:: void RandomNumberGenerator::randomize_with_input(uint8_t* data, size_t length, \
+    const uint8_t* ad, size_t ad_len)
 
   Like randomize, but first incorporates the additional input field
   into the state of the RNG. The additional input could be anything which
-  parameterizes this request.
+  parameterizes this request. Not all RNG types accept additional inputs.
 
-.. cpp:function:: void RandomNumberGenerator::randomize_with_ts_input(byte* data, size_t length)
+.. cpp:function:: void RandomNumberGenerator::randomize_with_ts_input(uint8_t* data, size_t length)
 
   Creates a buffer with some timestamp values and calls ``randomize_with_input``
 
-.. cpp:function:: byte RandomNumberGenerator::next_byte()
+.. cpp:function:: uint8_t RandomNumberGenerator::next_byte()
 
   Generates a single random byte and returns it. Note that calling this
   function several times is much slower than calling ``randomize`` once
@@ -67,7 +67,8 @@ AutoSeeded_RNG
 AutoSeeded_RNG is type naming a 'best available' userspace PRNG. The
 exact definition of this has changed over time and may change in the
 future, fortunately there is no compatability concerns when changing
-such an RNG.
+any RNG since the only expectation is it produces bits
+indistinguishable from random.
 
 Note well: like most other classes in Botan, it is not safe to share
 an instance of ``AutoSeeded_RNG`` among multiple threads without
@@ -90,6 +91,13 @@ This RNG composes two primitives thought to be secure (ChaCha and HMAC) in a
 simple and well studied way (the extract-then-expand paradigm), but is still an
 ad-hoc and non-standard construction. It is included because it is roughly 20x
 faster then HMAC_DRBG, and certain applications need access to a very fast RNG.
+
+RDRAND_RNG
+^^^^^^^^^^^^^^^^^
+
+This RNG type directly calls the x86 ``rdrand`` instruction. If the instruction
+is not available it will throw at runtime, you can check beforehand by calling
+``Botan::CPUID::has_rdrand()``.
 
 TPM_RNG
 ^^^^^^^^^^^^^^^^^
@@ -139,5 +147,7 @@ spawns a new child process himself. If the PID wrapped around, the
 second child process may get assigned the process ID of it's 
 grandparent and the fork safety can not be ensured.
 
-Therefore, it is strongly recommended to explicitly reseed the
-random generator after forking a new process.
+Therefore, it is strongly recommended to explicitly reseed any
+userspace random generators after forking a new process. If this is
+not possible in your application, prefer using the system PRNG
+instead.

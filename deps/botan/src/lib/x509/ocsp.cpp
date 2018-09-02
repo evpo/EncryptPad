@@ -32,18 +32,18 @@ void decode_optional_list(BER_Decoder& ber,
    {
    BER_Object obj = ber.get_next_object();
 
-   if(obj.type_tag != tag || obj.class_tag != (CONTEXT_SPECIFIC | CONSTRUCTED))
+   if(obj.is_a(tag, ASN1_Tag(CONTEXT_SPECIFIC | CONSTRUCTED)) == false)
       {
       ber.push_back(obj);
       return;
       }
 
-   BER_Decoder list(obj.value);
+   BER_Decoder list(obj);
 
    while(list.more_items())
       {
       BER_Object certbits = list.get_next_object();
-      X509_Certificate cert(unlock(certbits.value));
+      X509_Certificate cert(certbits.bits(), certbits.length());
       output.push_back(std::move(cert));
       }
    }
@@ -68,7 +68,8 @@ Request::Request(const X509_Certificate& issuer_cert,
 
 std::vector<uint8_t> Request::BER_encode() const
    {
-   return DER_Encoder().start_cons(SEQUENCE)
+   std::vector<uint8_t> output;
+   DER_Encoder(output).start_cons(SEQUENCE)
         .start_cons(SEQUENCE)
           .start_explicit(0)
             .encode(static_cast<size_t>(0)) // version #
@@ -79,7 +80,9 @@ std::vector<uint8_t> Request::BER_encode() const
               .end_cons()
             .end_cons()
           .end_cons()
-      .end_cons().get_contents_unlocked();
+      .end_cons();
+
+   return output;
    }
 
 std::string Request::base64_encode() const
@@ -87,9 +90,16 @@ std::string Request::base64_encode() const
    return Botan::base64_encode(BER_encode());
    }
 
+Response::Response(Certificate_Status_Code status)
+   {
+   m_dummy_response_status = status;
+   }
+
 Response::Response(const uint8_t response_bits[], size_t response_bits_len) :
    m_response_bits(response_bits, response_bits + response_bits_len)
    {
+   m_dummy_response_status = Certificate_Status_Code::OCSP_RESPONSE_INVALID;
+
    BER_Decoder response_outer = BER_Decoder(m_response_bits).start_cons(SEQUENCE);
 
    size_t resp_status = 0;
@@ -143,12 +153,15 @@ Response::Response(const uint8_t response_bits[], size_t response_bits_len) :
 
 Certificate_Status_Code Response::verify_signature(const X509_Certificate& issuer) const
    {
+   if (m_responses.empty())
+      return m_dummy_response_status;
+      
    try
       {
       std::unique_ptr<Public_Key> pub_key(issuer.subject_public_key());
 
       const std::vector<std::string> sig_info =
-         split_on(OIDS::lookup(m_sig_algo.oid), '/');
+         split_on(OIDS::lookup(m_sig_algo.get_oid()), '/');
 
       if(sig_info.size() != 2 || sig_info[0] != pub_key->algo_name())
          return Certificate_Status_Code::OCSP_RESPONSE_INVALID;
@@ -172,6 +185,9 @@ Certificate_Status_Code Response::verify_signature(const X509_Certificate& issue
 Certificate_Status_Code Response::check_signature(const std::vector<Certificate_Store*>& trusted_roots,
                                                   const std::vector<std::shared_ptr<const X509_Certificate>>& ee_cert_path) const
    {
+   if (m_responses.empty())
+      return m_dummy_response_status;
+
    std::shared_ptr<const X509_Certificate> signing_cert;
 
    for(size_t i = 0; i != trusted_roots.size(); ++i)
@@ -253,6 +269,9 @@ Certificate_Status_Code Response::status_for(const X509_Certificate& issuer,
                                              const X509_Certificate& subject,
                                              std::chrono::system_clock::time_point ref_time) const
    {
+   if (m_responses.empty())
+      return m_dummy_response_status;
+
    for(const auto& response : m_responses)
       {
       if(response.certid().is_id_for(issuer, subject))
@@ -283,7 +302,8 @@ Certificate_Status_Code Response::status_for(const X509_Certificate& issuer,
 Response online_check(const X509_Certificate& issuer,
                       const BigInt& subject_serial,
                       const std::string& ocsp_responder,
-                      Certificate_Store* trusted_roots)
+                      Certificate_Store* trusted_roots,
+                      std::chrono::milliseconds timeout)
    {
    if(ocsp_responder.empty())
       throw Invalid_Argument("No OCSP responder specified");
@@ -292,7 +312,9 @@ Response online_check(const X509_Certificate& issuer,
 
    auto http = HTTP::POST_sync(ocsp_responder,
                                "application/ocsp-request",
-                               req.BER_encode());
+                               req.BER_encode(),
+                               1,
+                               timeout);
 
    http.throw_unless_ok();
 
@@ -312,7 +334,8 @@ Response online_check(const X509_Certificate& issuer,
 
 Response online_check(const X509_Certificate& issuer,
                       const X509_Certificate& subject,
-                      Certificate_Store* trusted_roots)
+                      Certificate_Store* trusted_roots,
+                      std::chrono::milliseconds timeout)
    {
    if(subject.issuer_dn() != issuer.subject_dn())
       throw Invalid_Argument("Invalid cert pair to OCSP::online_check (mismatched issuer,subject args?)");
@@ -320,7 +343,8 @@ Response online_check(const X509_Certificate& issuer,
    return online_check(issuer,
                        BigInt::decode(subject.serial_number()),
                        subject.ocsp_responder(),
-                       trusted_roots);
+                       trusted_roots,
+                       timeout);
    }
 
 #endif

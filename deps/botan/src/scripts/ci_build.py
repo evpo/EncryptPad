@@ -62,25 +62,34 @@ def determine_flags(target, target_os, target_cpu, target_cc, cc_bin, ccache, ro
     if target_cpu != None:
         flags += ['--cpu=%s' % (target_cpu)]
 
+    if target in ['shared', 'mini-shared']:
+        flags += ['--disable-static']
+
     if target in ['static', 'mini-static', 'fuzzers'] or target_os in ['ios', 'mingw']:
         flags += ['--disable-shared']
 
     if target in ['mini-static', 'mini-shared']:
         flags += ['--minimized-build', '--enable-modules=system_rng,sha2_32,sha2_64,aes']
 
-    if target == 'static':
-        # Arbitrarily test amalgamation on static lib builds
+    if target == 'shared' and target_os != 'osx':
+        # Enabling amalgamation build for shared is somewhat arbitrary, but we want to test it
+        # somewhere. In addition the majority of the Windows builds are shared, and MSVC is
+        # much faster compiling via the amalgamation than individual files.
         flags += ['--amalgamation']
 
     if target in ['bsi', 'nist']:
-        flags += ['--module-policy=%s' % (target)]
+        # Arbitrarily test disable static on module policy builds
+        # tls is optional for bsi/nist but add it so verify tests work with these minimized configs
+        flags += ['--module-policy=%s' % (target),
+                  '--enable-modules=tls',
+                  '--disable-static']
 
     if target == 'docs':
-        flags += ['--with-doxygen', '--with-sphinx']
+        flags += ['--with-doxygen', '--with-sphinx', '--with-rst2man']
         test_cmd = None
 
     if target == 'coverage':
-        flags += ['--with-coverage-info']
+        flags += ['--with-coverage-info', '--test-mode']
     if target == 'valgrind':
         flags += ['--with-valgrind']
         test_prefix = ['valgrind', '--error-exitcode=9', '-v', '--leak-check=full', '--show-reachable=yes']
@@ -103,10 +112,7 @@ def determine_flags(target, target_os, target_cpu, target_cc, cc_bin, ccache, ro
         flags += ['--disable-modules=locking_allocator']
 
     if target == 'parallel':
-        if target_cc == 'gcc':
-            flags += ['--with-cilkplus']
-        else:
-            flags += ['--with-openmp']
+        flags += ['--with-openmp']
 
     if target == 'sonar':
         if target_os != 'linux' or target_cc != 'clang':
@@ -125,12 +131,12 @@ def determine_flags(target, target_os, target_cpu, target_cc, cc_bin, ccache, ro
             if target == 'cross-arm32':
                 flags += ['--cpu=armv7', '--cc-abi-flags=-arch armv7 -arch armv7s -stdlib=libc++']
             elif target == 'cross-arm64':
-                flags += ['--cpu=armv8-a', '--cc-abi-flags=-arch arm64 -stdlib=libc++']
+                flags += ['--cpu=arm64', '--cc-abi-flags=-arch arm64 -stdlib=libc++']
             else:
                 raise Exception("Unknown cross target '%s' for iOS" % (target))
         elif target == 'cross-win32':
-            flags += ['--cpu=x86_32', '--cc-abi-flags=-static']
             cc_bin = 'i686-w64-mingw32-g++'
+            flags += ['--cpu=x86_32', '--cc-abi-flags=-static', '--ar-command=i686-w64-mingw32-ar']
             test_cmd = [os.path.join(root_dir, 'botan-test.exe')]
             # No runtime prefix required for Wine
         else:
@@ -142,7 +148,7 @@ def determine_flags(target, target_os, target_cpu, target_cc, cc_bin, ccache, ro
                 cc_bin = 'arm-linux-gnueabihf-g++'
                 test_prefix = ['qemu-arm', '-L', '/usr/arm-linux-gnueabihf/']
             elif target == 'cross-arm64':
-                flags += ['--cpu=armv8-a']
+                flags += ['--cpu=aarch64']
                 cc_bin = 'aarch64-linux-gnu-g++'
                 test_prefix = ['qemu-aarch64', '-L', '/usr/aarch64-linux-gnu/']
             elif target == 'cross-ppc32':
@@ -164,6 +170,8 @@ def determine_flags(target, target_os, target_cpu, target_cc, cc_bin, ccache, ro
         if target_os == 'osx':
             # Test Boost on OS X
             flags += ['--with-boost']
+            # Travis has 10.12 as default image
+            flags += ['--with-os-features=getentropy']
         elif target_os == 'linux':
             flags += ['--with-lzma']
 
@@ -202,8 +210,10 @@ def run_cmd(cmd, root_dir):
 
     start = time.time()
 
+    cmd = [os.path.expandvars(elem) for elem in cmd]
     sub_env = os.environ.copy()
     sub_env['LD_LIBRARY_PATH'] = root_dir
+    sub_env['PYTHONPATH'] = os.path.join(root_dir, 'src/python')
 
     redirect_stdout = None
     if len(cmd) > 3 and cmd[-2] == '>':
@@ -219,7 +229,9 @@ def run_cmd(cmd, root_dir):
 
     if proc.returncode != 0:
         print("Command failed with error code %d" % (proc.returncode))
-        sys.exit(proc.returncode)
+
+        if cmd[0] not in ['lcov']:
+            sys.exit(proc.returncode)
 
 def parse_args(args):
     """
@@ -281,6 +293,7 @@ def have_prog(prog):
         exe_file = os.path.join(path, prog)
         if os.path.exists(exe_file) and os.access(exe_file, os.X_OK):
             return True
+    return False
 
 def main(args=None):
     # pylint: disable=too-many-branches,too-many-statements,too-many-locals,too-many-return-statements
@@ -339,7 +352,7 @@ def main(args=None):
     root_dir = options.root_dir
 
     if os.access(root_dir, os.R_OK) != True:
-        raise Exception('Bad root dir setting, dir %s not readable', root_dir)
+        raise Exception('Bad root dir setting, dir %s not readable' % (root_dir))
 
     cmds = []
 
@@ -361,7 +374,13 @@ def main(args=None):
             'src/python/botan2.py',
             'src/scripts/ci_build.py',
             'src/scripts/install.py',
+            'src/scripts/dist.py',
+            'src/scripts/cleanup.py',
+            'src/scripts/build_docs.py',
             'src/scripts/website.py',
+            'src/scripts/bench.py',
+            'src/scripts/test_python.py',
+            'src/scripts/test_cli.py',
             'src/scripts/python_unittests.py',
             'src/scripts/python_unittests_unix.py']
 
@@ -416,22 +435,24 @@ def main(args=None):
                          os.path.join(root_dir, 'fuzzer_corpus'),
                          os.path.join(root_dir, 'build/fuzzer')])
 
-        if target in ['static', 'shared'] and options.os != 'windows':
+        if target in ['shared', 'coverage'] and options.os != 'windows':
             botan_exe = os.path.join(root_dir, 'botan-cli.exe' if options.os == 'windows' else 'botan')
-            cmds.append([py_interp,
-                         os.path.join(root_dir, 'src/scripts/cli_tests.py'),
-                         botan_exe])
 
-        botan_py = os.path.join(root_dir, 'src/python/botan2.py')
+            test_scripts = ['cli_tests.py', 'test_cli.py']
+            for script in test_scripts:
+                cmds.append([py_interp, os.path.join(root_dir, 'src/scripts', script),
+                             botan_exe])
+
+        python_tests = os.path.join(root_dir, 'src/scripts/test_python.py')
 
         if target in ['shared', 'coverage']:
 
             if use_python2:
-                cmds.append(['python2', botan_py])
+                cmds.append(['python2', '-b', python_tests])
             if use_python3:
-                cmds.append(['python3', botan_py])
+                cmds.append(['python3', '-b', python_tests])
 
-        if target == 'shared':
+        if target in ['shared', 'static', 'bsi', 'nist']:
             cmds.append(make_cmd + ['install'])
 
         if target in ['sonar']:
@@ -440,10 +461,10 @@ def main(args=None):
             cmds.append(['llvm-cov', 'show', './botan-test',
                          '-instr-profile=botan.profdata',
                          '>', 'build/cov_report.txt'])
-            sonar_config = os.path.join(root_dir, os.path.join(root_dir, 'src/build-data/sonar-project.properties'))
+            sonar_config = os.path.join(root_dir, os.path.join(root_dir, 'src/configs/sonar-project.properties'))
             cmds.append(['sonar-scanner',
                          '-Dproject.settings=%s' % (sonar_config),
-                         '-Dsonar.login=%s' % (os.getenv('SONAR_TOKEN'))])
+                         '-Dsonar.login=$SONAR_TOKEN'])
 
         if target in ['coverage']:
 
@@ -466,7 +487,7 @@ def main(args=None):
             if have_prog('coverage'):
                 cmds.append(['coverage', 'run', '--branch',
                              '--rcfile', os.path.join(root_dir, 'src/configs/coverage.rc'),
-                             botan_py])
+                             python_tests])
 
             if have_prog('codecov'):
                 # If codecov exists assume we are on Travis and report to codecov.io
@@ -474,6 +495,9 @@ def main(args=None):
             else:
                 # Otherwise generate a local HTML report
                 cmds.append(['genhtml', cov_file, '--output-directory', 'lcov-out'])
+
+        cmds.append(make_cmd + ['clean'])
+        cmds.append(make_cmd + ['distclean'])
 
     for cmd in cmds:
         if options.dry_run:

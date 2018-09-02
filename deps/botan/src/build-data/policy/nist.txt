@@ -59,6 +59,12 @@ sha2_32_armv8
 
 # modes
 clmul
+clmul_ssse3
+pmull
+
+# hash
+sha2_32_x86
+sha2_32_armv8
 
 # entropy sources
 darwin_secrandom
@@ -100,8 +106,8 @@ sm4
 shacal2
 shacal2_x86
 shacal2_simd
-threefish
-threefish_avx2
+threefish_512
+threefish_512_avx2
 twofish
 xtea
 

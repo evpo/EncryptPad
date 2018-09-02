@@ -98,7 +98,7 @@ def run_sphinx(botan_dir, tmp_dir, output_dir):
 def main(args):
     parser = optparse.OptionParser()
 
-    parser.add_option('--output-dir', default=None,
+    parser.add_option('-o', '--output-dir', default=None,
                       help="Where to write output")
 
     (options, args) = parser.parse_args(args)
@@ -146,6 +146,10 @@ def main(args):
 
     for f in ['doc/pgpkey.txt', 'license.txt']:
         shutil.copy(os.path.join(botan_dir, f), output_dir)
+
+    favicon = open(os.path.join(output_dir, 'favicon.ico'), 'w')
+    # Create an empty favicon.ico file so it gets cached by browsers
+    favicon.close()
 
     shutil.rmtree(tmp_dir)
 

@@ -8,13 +8,16 @@
 
 #include "cli.h"
 
-#if defined(BOTAN_HAS_TLS) && defined(BOTAN_TARGET_OS_HAS_SOCKETS)
+#if defined(BOTAN_HAS_TLS) && defined(BOTAN_TARGET_OS_HAS_FILESYSTEM) && \
+   (defined(BOTAN_TARGET_OS_HAS_SOCKETS) || defined(BOTAN_TARGET_OS_HAS_WINSOCK2))
 
 #include <botan/tls_client.h>
 #include <botan/tls_policy.h>
 #include <botan/x509path.h>
 #include <botan/ocsp.h>
 #include <botan/hex.h>
+#include <botan/parsing.h>
+#include <fstream>
 
 #if defined(BOTAN_HAS_TLS_SQLITE3_SESSION_MANAGER)
    #include <botan/tls_session_manager_sqlite.h>
@@ -23,43 +26,7 @@
 #include <string>
 #include <memory>
 
-#if defined(BOTAN_TARGET_OS_IS_WINDOWS)
-#include <winsock2.h>
-#include <WS2tcpip.h>
-
-int close(int fd)
-   {
-   return ::closesocket(fd);
-   }
-
-int read(int s, void* buf, size_t len)
-   {
-   return ::recv(s, reinterpret_cast<char*>(buf), static_cast<int>(len), 0);
-   }
-
-int send(int s, const uint8_t* buf, size_t len, int flags)
-   {
-   return ::send(s, reinterpret_cast<const char*>(buf), static_cast<int>(len), flags);
-   }
-
-#define STDIN_FILENO _fileno(stdin)
-typedef size_t ssize_t;
-#else
-#include <sys/types.h>
-#include <sys/time.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <netdb.h>
-#include <unistd.h>
-#include <errno.h>
-#include <fcntl.h>
-#endif
-
-#if !defined(MSG_NOSIGNAL)
-   #define MSG_NOSIGNAL 0
-#endif
-
+#include "socket_utils.h"
 #include "credentials.h"
 
 namespace Botan_CLI {
@@ -70,30 +37,25 @@ class TLS_Client final : public Command, public Botan::TLS::Callbacks
       TLS_Client()
          : Command("tls_client host --port=443 --print-certs --policy= "
                    "--tls1.0 --tls1.1 --tls1.2 "
+                   "--skip-system-cert-store --trusted-cas= "
                    "--session-db= --session-db-pass= --next-protocols= --type=tcp")
          {
-#if defined(BOTAN_TARGET_OS_IS_WINDOWS)
-         WSAData wsa_data;
-         WORD wsa_version = MAKEWORD(2, 2);
-
-         if(::WSAStartup(wsa_version, &wsa_data) != 0)
-            {
-            throw CLI_Error("WSAStartup() failed: " + std::to_string(WSAGetLastError()));
-            }
-
-         if(LOBYTE(wsa_data.wVersion) != 2 || HIBYTE(wsa_data.wVersion) != 2)
-            {
-            ::WSACleanup();
-            throw CLI_Error("Could not find a usable version of Winsock.dll");
-            }
-#endif
+         init_sockets();
          }
 
       ~TLS_Client()
          {
-#if defined(BOTAN_TARGET_OS_IS_WINDOWS)
-         ::WSACleanup();
-#endif
+         stop_sockets();
+         }
+
+      std::string group() const override
+         {
+         return "tls";
+         }
+
+      std::string description() const override
+         {
+         return "Connect to a host using TLS/DTLS";
          }
 
       void go() override
@@ -103,6 +65,13 @@ class TLS_Client final : public Command, public Botan::TLS::Callbacks
          std::unique_ptr<Botan::TLS::Session_Manager> session_mgr;
 
          const std::string sessions_db = get_arg("session-db");
+         const std::string host = get_arg("host");
+         const uint16_t port = get_arg_sz("port");
+         const std::string transport = get_arg("type");
+         const std::string next_protos = get_arg("next-protocols");
+         std::string policy_file = get_arg("policy");
+         const bool use_system_cert_store = flag_set("skip-system-cert-store") == false;
+         const std::string trusted_CAs = get_arg("trusted-cas");
 
          if(!sessions_db.empty())
             {
@@ -118,8 +87,6 @@ class TLS_Client final : public Command, public Botan::TLS::Callbacks
             {
             session_mgr.reset(new Botan::TLS::Session_Manager_In_Memory(rng()));
             }
-
-         std::string policy_file = get_arg("policy");
 
          std::unique_ptr<Botan::TLS::Policy> policy;
 
@@ -138,13 +105,6 @@ class TLS_Client final : public Command, public Botan::TLS::Callbacks
             {
             policy.reset(new Botan::TLS::Policy);
             }
-
-         Basic_Credentials_Manager creds;
-
-         const std::string host = get_arg("host");
-         const uint16_t port = get_arg_sz("port");
-         const std::string transport = get_arg("type");
-         const std::string next_protos = get_arg("next-protocols");
 
          if(transport != "tcp" && transport != "udp")
             {
@@ -178,6 +138,8 @@ class TLS_Client final : public Command, public Botan::TLS::Callbacks
             {
             hostname = host;
             }
+
+         Basic_Credentials_Manager creds(use_system_cert_store, trusted_CAs);
 
          Botan::TLS::Client client(*this, *session_mgr, creds, *policy, rng(),
                                    Botan::TLS::Server_Information(hostname, port),
@@ -279,7 +241,8 @@ class TLS_Client final : public Command, public Botan::TLS::Callbacks
    private:
       int connect_to_host(const std::string& host, uint16_t port, bool tcp)
          {
-         addrinfo hints = {};
+         addrinfo hints;
+         std::memset(&hints, 0, sizeof(hints));
          hints.ai_family = AF_UNSPEC;
          hints.ai_socktype = tcp ? SOCK_STREAM : SOCK_DGRAM;
          addrinfo* res, *rp = nullptr;
@@ -438,7 +401,6 @@ class TLS_Client final : public Command, public Botan::TLS::Callbacks
             }
          }
 
-   private:
       int m_sockfd = -1;
    };
 

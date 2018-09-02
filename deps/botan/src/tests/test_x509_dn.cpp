@@ -6,14 +6,14 @@
 
 #include "tests.h"
 
-#if defined(BOTAN_HAS_ASN1)
+#if defined(BOTAN_HAS_X509_CERTIFICATES)
    #include <botan/x509_dn.h>
    #include <botan/ber_dec.h>
 #endif
 
 namespace Botan_Tests {
 
-#if defined(BOTAN_HAS_ASN1)
+#if defined(BOTAN_HAS_X509_CERTIFICATES)
 class X509_DN_Comparisons_Tests final : public Text_Based_Test
    {
    public:
@@ -21,8 +21,8 @@ class X509_DN_Comparisons_Tests final : public Text_Based_Test
 
       Test::Result run_one_test(const std::string& type, const VarMap& vars) override
          {
-         const std::vector<uint8_t> dn_bits1 = get_req_bin(vars, "DN1");
-         const std::vector<uint8_t> dn_bits2 = get_req_bin(vars, "DN2");
+         const std::vector<uint8_t> dn_bits1 = vars.get_req_bin("DN1");
+         const std::vector<uint8_t> dn_bits2 = vars.get_req_bin("DN2");
          const bool dn_same = (type == "Equal");
 
          Test::Result result("X509_DN comparisons");

@@ -47,14 +47,83 @@ class Test_Error final : public Botan::Exception
       explicit Test_Error(const std::string& what) : Exception("Test error", what) {}
    };
 
-class Provider_Filter final
+class Test_Options
    {
    public:
-      Provider_Filter() {}
-      void set(const std::string& provider) { m_provider = provider; }
-      std::vector<std::string> filter(const std::vector<std::string>&) const;
+      Test_Options() = default;
+
+      Test_Options(const std::vector<std::string>& requested_tests,
+                   const std::string& data_dir,
+                   const std::string& pkcs11_lib,
+                   const std::string& provider,
+                   const std::string& drbg_seed,
+                   size_t test_runs,
+                   bool verbose,
+                   bool log_success,
+                   bool run_online_tests,
+                   bool run_long_tests,
+                   bool abort_on_first_fail,
+                   bool undefined_behavior_allowed) :
+         m_requested_tests(requested_tests),
+         m_data_dir(data_dir),
+         m_pkcs11_lib(pkcs11_lib),
+         m_provider(provider),
+         m_drbg_seed(drbg_seed),
+         m_test_runs(test_runs),
+         m_verbose(verbose),
+         m_log_success(log_success),
+         m_run_online_tests(run_online_tests),
+         m_run_long_tests(run_long_tests),
+         m_abort_on_first_fail(abort_on_first_fail),
+         m_undefined_behavior_allowed(undefined_behavior_allowed)
+         {}
+
+      const std::vector<std::string>& requested_tests() const
+         { return m_requested_tests; }
+
+      const std::string& data_dir() const { return m_data_dir; }
+
+      const std::string& pkcs11_lib() const { return m_pkcs11_lib; }
+
+      const std::string& provider() const { return m_provider; }
+
+      const std::string& drbg_seed() const { return m_drbg_seed; }
+
+      size_t test_runs() const { return m_test_runs; }
+
+      bool log_success() const { return m_log_success; }
+
+      bool run_online_tests() const { return m_run_online_tests; }
+
+      bool run_long_tests() const { return m_run_long_tests; }
+
+      bool abort_on_first_fail() const { return m_abort_on_first_fail; }
+
+      bool verbose() const { return m_verbose; }
+
+      bool undefined_behavior_allowed() const
+         {
+#if defined(BOTAN_HAS_SANITIZER_UNDEFINED)
+         return m_undefined_behavior_allowed;
+#else
+         BOTAN_UNUSED(m_undefined_behavior_allowed);
+         return true;
+#endif
+         }
+
    private:
+      std::vector<std::string> m_requested_tests;
+      std::string m_data_dir;
+      std::string m_pkcs11_lib;
       std::string m_provider;
+      std::string m_drbg_seed;
+      size_t m_test_runs;
+      bool m_verbose;
+      bool m_log_success;
+      bool m_run_online_tests;
+      bool m_run_long_tests;
+      bool m_abort_on_first_fail;
+      bool m_undefined_behavior_allowed;
    };
 
 /*
@@ -97,7 +166,8 @@ class Test
                {
                return m_who;
                }
-            std::string result_string(bool verbose) const;
+
+            std::string result_string() const;
 
             static Result Failure(const std::string& who,
                                   const std::string& what)
@@ -191,6 +261,15 @@ class Test
                   out << " produced unexpected result '" << produced << "' expected '" << expected << "'";
                   return test_failure(out.str());
                   }
+               }
+
+            template<typename T>
+            bool test_not_null(const std::string& what, T* ptr)
+               {
+               if(ptr == nullptr)
+                  return test_failure(what + " was null");
+               else
+                  return test_success(what + " was not null");
                }
 
             bool test_eq(const std::string& what, const char* produced, const char* expected);
@@ -354,11 +433,10 @@ class Test
             Registration(const std::string& name, Test* test);
          };
 
-      virtual std::vector<Test::Result> run() = 0;
       virtual ~Test() = default;
-      virtual std::vector<std::string> possible_providers(const std::string&);
+      virtual std::vector<Test::Result> run() = 0;
 
-      static std::vector<Test::Result> run_test(const std::string& what, bool fail_if_missing);
+      virtual std::vector<std::string> possible_providers(const std::string&);
 
       static std::map<std::string, std::unique_ptr<Test>>& global_registry();
 
@@ -398,40 +476,73 @@ class Test
          return r;
          }
 
-      static void setup_tests(bool log_succcss,
-                              bool run_online_tests,
-                              bool run_long_tests,
-                              const std::string& data_dir,
-                              const std::string& pkcs11_lib,
-                              const Botan_Tests::Provider_Filter& pf,
-                              Botan::RandomNumberGenerator* rng);
+      static void set_test_options(const Test_Options& opts);
 
-      static bool log_success();
-      static bool run_online_tests();
-      static bool run_long_tests();
-      static std::string pkcs11_lib();
-      static std::vector<std::string> provider_filter(const std::vector<std::string>&);
+      static void set_test_rng(std::unique_ptr<Botan::RandomNumberGenerator> rng);
 
-      static const std::string& data_dir();
+      static const Test_Options& options() { return m_opts; }
+
+      static bool run_long_tests() { return options().run_long_tests(); }
+      static const std::string& data_dir() { return options().data_dir(); }
+      static const std::string& pkcs11_lib() { return options().pkcs11_lib(); }
+
+      static std::string temp_file_name(const std::string& basename);
+
+      static std::vector<std::string> provider_filter(const std::vector<std::string>& providers);
+
+      static std::string read_data_file(const std::string& path);
+      static std::vector<uint8_t> read_binary_data_file(const std::string& path);
 
       static Botan::RandomNumberGenerator& rng();
       static std::string random_password();
       static uint64_t timestamp(); // nanoseconds arbitrary epoch
 
    private:
-      static std::string m_data_dir;
-      static Botan::RandomNumberGenerator* m_test_rng;
-      static bool m_log_success, m_run_online_tests, m_run_long_tests;
-      static std::string m_pkcs11_lib;
-      static Botan_Tests::Provider_Filter m_provider_filter;
+      static Test_Options m_opts;
+      static std::unique_ptr<Botan::RandomNumberGenerator> m_test_rng;
    };
 
 /*
 * Register the test with the runner
 */
 #define BOTAN_REGISTER_TEST(type, Test_Class) \
-   namespace { Test::Registration reg_ ## Test_Class ## _tests(type, new Test_Class); } \
-   BOTAN_FORCE_SEMICOLON
+   Test::Registration reg_ ## Test_Class ## _tests(type, new Test_Class)
+
+class VarMap
+   {
+   public:
+      void clear() { m_vars.clear(); }
+
+      void add(const std::string& key, const std::string& value)
+         {
+         m_vars[key] = value;
+         }
+
+      bool has_key(const std::string& key) const
+         {
+         return m_vars.count(key) == 1;
+         }
+
+      bool get_req_bool(const std::string& key) const;
+
+      std::vector<uint8_t> get_req_bin(const std::string& key) const;
+      std::vector<uint8_t> get_opt_bin(const std::string& key) const;
+
+#if defined(BOTAN_HAS_BIGINT)
+      Botan::BigInt get_req_bn(const std::string& key) const;
+      Botan::BigInt get_opt_bn(const std::string& key, const Botan::BigInt& def_value) const;
+#endif
+
+      std::string get_req_str(const std::string& key) const;
+      std::string get_opt_str(const std::string& key,
+                              const std::string& def_value) const;
+
+      size_t get_req_sz(const std::string& key) const;
+      size_t get_opt_sz(const std::string& key, const size_t def_value) const;
+
+   private:
+      std::unordered_map<std::string, std::string> m_vars;
+   };
 
 /*
 * A test based on reading an input file which contains key/value pairs
@@ -441,8 +552,8 @@ class Test
 * Calls run_one_test with the variables set. If an ini-style [header]
 * is used in the file, then header will be set to that value. This allows
 * splitting up tests between [valid] and [invalid] tests, or different
-* related algorithms tested in the same file. Use the protected get_XXX
-* functions to retrieve formatted values from the VarMap
+* related algorithms tested in the same file. Use the get_XXX functions
+* on VarMap to retrieve formatted values.
 *
 * If most of your tests are text-based but you find yourself with a few
 * odds-and-ends tests that you want to do, override run_final_tests which
@@ -462,7 +573,6 @@ class Text_Based_Test : public Test
 
       std::vector<Test::Result> run() override;
    protected:
-      typedef std::unordered_map<std::string, std::string> VarMap;
       std::string get_next_line();
 
       virtual Test::Result run_one_test(const std::string& header,
@@ -476,23 +586,6 @@ class Text_Based_Test : public Test
          return std::vector<Test::Result>();
          }
 
-      bool get_req_bool(const VarMap& vars, const std::string& key) const;
-
-      std::vector<uint8_t> get_req_bin(const VarMap& vars, const std::string& key) const;
-      std::vector<uint8_t> get_opt_bin(const VarMap& vars, const std::string& key) const;
-
-#if defined(BOTAN_HAS_BIGINT)
-      Botan::BigInt get_req_bn(const VarMap& vars, const std::string& key) const;
-      Botan::BigInt get_opt_bn(const VarMap& vars, const std::string& key, const Botan::BigInt& def_value) const;
-#endif
-
-      std::string get_req_str(const VarMap& vars, const std::string& key) const;
-      std::string get_opt_str(const VarMap& vars,
-                              const std::string& key,
-                              const std::string& def_value) const;
-
-      size_t get_req_sz(const VarMap& vars, const std::string& key) const;
-      size_t get_opt_sz(const VarMap& vars, const std::string& key, const size_t def_value) const;
    private:
       std::string m_data_src;
       std::set<std::string> m_required_keys;

@@ -1,5 +1,5 @@
 <defines>
-UTIL_FUNCTIONS -> 20161127
+UTIL_FUNCTIONS -> 20171003
 </defines>
 
 load_on always
@@ -25,8 +25,8 @@ stl_compatibility.h
 </header:public>
 
 <header:internal>
-barrier.h
 bit_ops.h
+codec_base.h
 ct_utils.h
 donna128.h
 filesystem.h
@@ -34,15 +34,8 @@ os_utils.h
 prefetch.h
 rounding.h
 safeint.h
-semaphore.h
 stl_util.h
 </header:internal>
-
-<libs>
-linux -> rt
-mingw -> ws2_32
-windows -> ws2_32.lib
-</libs>
 
 <requires>
 cpuid

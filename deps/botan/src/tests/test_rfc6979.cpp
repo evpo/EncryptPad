@@ -8,9 +8,8 @@
 
 #if defined(BOTAN_HAS_RFC6979_GENERATOR)
    #include <botan/rfc6979.h>
+   #include <botan/hash.h>
 #endif
-
-#include <botan/hash.h>
 
 namespace Botan_Tests {
 
@@ -25,10 +24,10 @@ class RFC6979_KAT_Tests final : public Text_Based_Test
 
       Test::Result run_one_test(const std::string& hash, const VarMap& vars) override
          {
-         const BigInt Q = get_req_bn(vars, "Q");
-         const BigInt X = get_req_bn(vars, "X");
-         const BigInt H = get_req_bn(vars, "H");
-         const BigInt K = get_req_bn(vars, "K");
+         const BigInt Q = vars.get_req_bn("Q");
+         const BigInt X = vars.get_req_bn("X");
+         const BigInt H = vars.get_req_bn("H");
+         const BigInt K = vars.get_req_bn("K");
 
          Test::Result result("RFC 6979 nonce generation");
 

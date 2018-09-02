@@ -40,7 +40,7 @@ Channel::Channel(Callbacks& callbacks,
 
 Channel::Channel(output_fn out,
                  data_cb app_data_cb,
-                 alert_cb alert_cb,
+                 alert_cb recv_alert_cb,
                  handshake_cb hs_cb,
                  handshake_msg_cb hs_msg_cb,
                  Session_Manager& session_manager,
@@ -49,7 +49,13 @@ Channel::Channel(output_fn out,
                  bool is_datagram,
                  size_t io_buf_sz) :
     m_is_datagram(is_datagram),
-    m_compat_callbacks(new Compat_Callbacks(out, app_data_cb, alert_cb, hs_cb, hs_msg_cb)),
+    m_compat_callbacks(new Compat_Callbacks(
+                          /*
+                          this Channel constructor is also deprecated so its ok that it
+                          relies on a deprecated API
+                          */
+                          Compat_Callbacks::SILENCE_DEPRECATION_WARNING::PLEASE,
+                          out, app_data_cb, recv_alert_cb, hs_cb, hs_msg_cb)),
     m_callbacks(*m_compat_callbacks.get()),
     m_session_manager(session_manager),
     m_policy(policy),
@@ -109,6 +115,11 @@ std::vector<X509_Certificate> Channel::peer_cert_chain() const
    if(auto active = active_state())
       return get_peer_cert_chain(*active);
    return std::vector<X509_Certificate>();
+   }
+
+bool Channel::save_session(const Session& session)
+   {
+   return callbacks().tls_session_established(session);
    }
 
 Handshake_State& Channel::create_handshake_state(Protocol_Version version)
@@ -189,7 +200,7 @@ void Channel::change_cipher_spec_reader(Connection_Side side)
    BOTAN_ASSERT(pending && pending->server_hello(),
                 "Have received server hello");
 
-   if(pending->server_hello()->compression_method() != NO_COMPRESSION)
+   if(pending->server_hello()->compression_method() != 0)
       throw Internal_Error("Negotiated unknown compression algorithm");
 
    sequence_numbers().new_read_cipher_state();
@@ -218,7 +229,7 @@ void Channel::change_cipher_spec_writer(Connection_Side side)
    BOTAN_ASSERT(pending && pending->server_hello(),
                 "Have received server hello");
 
-   if(pending->server_hello()->compression_method() != NO_COMPRESSION)
+   if(pending->server_hello()->compression_method() != 0)
       throw Internal_Error("Negotiated unknown compression algorithm");
 
    sequence_numbers().new_write_cipher_state();
@@ -303,8 +314,7 @@ size_t Channel::received_data(const uint8_t input[], size_t input_size)
                         raw_input,
                         record,
                         m_sequence_numbers.get(),
-                        std::bind(&TLS::Channel::read_cipher_state_epoch, this,
-                                  std::placeholders::_1));
+                        [this](uint16_t epoch) { return read_cipher_state_epoch(epoch); });
 
          BOTAN_ASSERT(consumed > 0, "Got to eat something");
 
@@ -503,7 +513,7 @@ void Channel::send_record_array(uint16_t epoch, uint8_t type, const uint8_t inpu
    * An empty record also works but apparently some implementations do
    * not like this (https://bugzilla.mozilla.org/show_bug.cgi?id=665814)
    *
-   * See http://www.openssl.org/~bodo/tls-cbc.txt for background.
+   * See https://www.openssl.org/~bodo/tls-cbc.txt for background.
    */
 
    auto cipher_state = write_cipher_state_epoch(epoch);
@@ -548,7 +558,7 @@ void Channel::send(const uint8_t buf[], size_t buf_size)
 
 void Channel::send(const std::string& string)
    {
-   this->send(reinterpret_cast<const uint8_t*>(string.c_str()), string.size());
+   this->send(cast_char_ptr_to_uint8(string.data()), string.size());
    }
 
 void Channel::send_alert(const Alert& alert)

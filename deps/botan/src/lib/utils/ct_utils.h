@@ -88,9 +88,11 @@ inline T expand_mask(T x)
    T r = x;
    // First fold r down to a single bit
    for(size_t i = 1; i != sizeof(T)*8; i *= 2)
-      r |= r >> i;
+      {
+      r = r | static_cast<T>(r >> i);
+      }
    r &= 1;
-   r = ~(r - 1);
+   r = static_cast<T>(~(r - 1));
    return r;
    }
 
@@ -103,7 +105,19 @@ inline T expand_top_bit(T a)
 template<typename T>
 inline T select(T mask, T from0, T from1)
    {
-   return (from0 & mask) | (from1 & ~mask);
+   return static_cast<T>((from0 & mask) | (from1 & ~mask));
+   }
+
+template<typename T>
+inline T select2(T mask0, T val0, T mask1, T val1, T val2)
+   {
+   return select<T>(mask0, val0, select<T>(mask1, val1, val2));
+   }
+
+template<typename T>
+inline T select3(T mask0, T val0, T mask1, T val1, T mask2, T val2, T val3)
+   {
+   return select2<T>(mask0, val0, mask1, val1, select<T>(mask2, val2, val3));
    }
 
 template<typename PredT, typename ValT>
@@ -115,7 +129,7 @@ inline ValT val_or_zero(PredT pred_val, ValT val)
 template<typename T>
 inline T is_zero(T x)
    {
-   return ~expand_mask(x);
+   return static_cast<T>(~expand_mask(x));
    }
 
 template<typename T>
@@ -127,7 +141,7 @@ inline T is_equal(T x, T y)
 template<typename T>
 inline T is_less(T a, T b)
    {
-   return expand_top_bit(a ^ ((a^b) | ((a-b)^a)));
+   return expand_top_bit<T>(a ^ ((a^b) | ((a-b)^a)));
    }
 
 template<typename T>
@@ -137,11 +151,11 @@ inline T is_lte(T a, T b)
    }
 
 template<typename T>
-inline void conditional_copy_mem(T value,
-                                 T* to,
-                                 const T* from0,
-                                 const T* from1,
-                                 size_t elems)
+inline T conditional_copy_mem(T value,
+                              T* to,
+                              const T* from0,
+                              const T* from1,
+                              size_t elems)
    {
    const T mask = CT::expand_mask(value);
 
@@ -149,6 +163,8 @@ inline void conditional_copy_mem(T value,
       {
       to[i] = CT::select(mask, from0[i], from1[i]);
       }
+
+   return mask;
    }
 
 template<typename T>
@@ -173,7 +189,7 @@ inline secure_vector<uint8_t> strip_leading_zeros(const uint8_t in[], size_t len
 
    for(size_t i = 0; i != length; ++i)
       {
-      only_zeros &= CT::is_zero(in[i]);
+      only_zeros = only_zeros & CT::is_zero<uint8_t>(in[i]);
       leading_zeros += CT::select<uint8_t>(only_zeros, 1, 0);
       }
 

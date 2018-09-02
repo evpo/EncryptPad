@@ -14,7 +14,6 @@ import logging
 import optparse # pylint: disable=deprecated-module
 import os
 import shutil
-import string
 import sys
 import subprocess
 
@@ -148,41 +147,22 @@ def main(args):
     with open(os.path.join(options.build_dir, 'build_config.json')) as f:
         cfg = json.load(f)
 
-    def process_template(template_str):
-        class PercentSignTemplate(string.Template):
-            delimiter = '%'
-
-        try:
-            template = PercentSignTemplate(template_str)
-            return template.substitute(cfg)
-        except KeyError as e:
-            raise Exception('Unbound var %s in template' % (e))
-        except Exception as e:
-            raise Exception('Exception %s in template' % (e))
-
     ver_major = int(cfg['version_major'])
     ver_minor = int(cfg['version_minor'])
     ver_patch = int(cfg['version_patch'])
     target_os = cfg['os']
     build_shared_lib = bool(cfg['build_shared_lib'])
+    build_static_lib = bool(cfg['build_static_lib'])
+    out_dir = cfg['out_dir']
 
     bin_dir = os.path.join(options.prefix, options.bindir)
     lib_dir = os.path.join(options.prefix, options.libdir)
-    target_doc_dir = os.path.join(options.prefix,
-                                  options.docdir,
-                                  'botan-%d.%d.%d' % (ver_major, ver_minor, ver_patch))
     target_include_dir = os.path.join(options.prefix,
                                       options.includedir,
                                       'botan-%d' % (ver_major),
                                       'botan')
 
-    out_dir = process_template('%{out_dir}')
-    if target_os == "windows":
-        app_exe = 'botan-cli.exe'
-    else:
-        app_exe = process_template('botan%{program_suffix}')
-
-    for d in [options.prefix, lib_dir, bin_dir, target_doc_dir, target_include_dir]:
+    for d in [options.prefix, lib_dir, bin_dir, target_include_dir]:
         makedirs(prepend_destdir(d))
 
     build_include_dir = os.path.join(options.build_dir, 'include', 'botan')
@@ -199,20 +179,21 @@ def main(args):
         copy_file(os.path.join(build_external_include_dir, include),
                   prepend_destdir(os.path.join(target_include_dir, include)))
 
-    static_lib = process_template('%{lib_prefix}%{libname}.%{static_suffix}')
-    copy_file(os.path.join(out_dir, static_lib),
-              prepend_destdir(os.path.join(lib_dir, os.path.basename(static_lib))))
+    if build_static_lib or target_os == 'windows':
+        static_lib = cfg['static_lib_name']
+        copy_file(os.path.join(out_dir, static_lib),
+                  prepend_destdir(os.path.join(lib_dir, os.path.basename(static_lib))))
 
     if build_shared_lib:
         if target_os == "windows":
-            libname = process_template('%{libname}')
+            libname = cfg['libname']
             soname_base = libname + '.dll'
             copy_executable(os.path.join(out_dir, soname_base),
                             prepend_destdir(os.path.join(lib_dir, soname_base)))
         else:
-            soname_patch = process_template('%{soname_patch}')
-            soname_abi = process_template('%{soname_abi}')
-            soname_base = process_template('%{soname_base}')
+            soname_patch = cfg['soname_patch']
+            soname_abi = cfg['soname_abi']
+            soname_base = cfg['soname_base']
 
             copy_executable(os.path.join(out_dir, soname_patch),
                             prepend_destdir(os.path.join(lib_dir, soname_patch)))
@@ -226,8 +207,7 @@ def main(args):
                 finally:
                     os.chdir(prev_cwd)
 
-    copy_executable(os.path.join(out_dir, app_exe),
-                    prepend_destdir(os.path.join(bin_dir, app_exe)))
+    copy_executable(cfg['cli_exe'], prepend_destdir(os.path.join(bin_dir, cfg['cli_exe_name'])))
 
     # On Darwin, if we are using shared libraries and we install, we should fix
     # up the library name, otherwise the botan command won't work; ironically
@@ -235,13 +215,13 @@ def main(args):
     # that would be correct for installation to one that lets us run it from
     # the build directory
     if target_os == 'darwin' and build_shared_lib:
-        soname_abi = process_template('%{soname_abi}')
+        soname_abi = cfg['soname_abi']
 
         subprocess.check_call(['install_name_tool',
                                '-change',
                                os.path.join('@executable_path', soname_abi),
                                os.path.join(lib_dir, soname_abi),
-                               os.path.join(bin_dir, app_exe)])
+                               os.path.join(bin_dir, cfg['cli_exe_name'])])
 
     if 'botan_pkgconfig' in cfg:
         pkgconfig_dir = os.path.join(options.prefix, options.libdir, options.pkgconfigdir)
@@ -249,26 +229,37 @@ def main(args):
         copy_file(cfg['botan_pkgconfig'],
                   prepend_destdir(os.path.join(pkgconfig_dir, os.path.basename(cfg['botan_pkgconfig']))))
 
-    if 'ffi' in cfg['mod_list'].split('\n'):
+    if 'ffi' in cfg['mod_list']:
         for ver in cfg['python_version'].split(','):
             py_lib_path = os.path.join(lib_dir, 'python%s' % (ver), 'site-packages')
             logging.debug('Installing python module to %s' % (py_lib_path))
             makedirs(prepend_destdir(py_lib_path))
 
             py_dir = cfg['python_dir']
-            for py in os.listdir(py_dir):
-                copy_file(os.path.join(py_dir, py), prepend_destdir(os.path.join(py_lib_path, py)))
 
-    shutil.rmtree(prepend_destdir(target_doc_dir), True)
-    shutil.copytree(cfg['doc_output_dir'], prepend_destdir(target_doc_dir))
+            copy_file(os.path.join(py_dir, 'botan2.py'),
+                      prepend_destdir(os.path.join(py_lib_path, 'botan2.py')))
 
-    for f in [f for f in os.listdir(cfg['doc_dir']) if f.endswith('.txt')]:
-        copy_file(os.path.join(cfg['doc_dir'], f), prepend_destdir(os.path.join(target_doc_dir, f)))
+    if cfg['with_documentation']:
+        target_doc_dir = os.path.join(options.prefix, options.docdir,
+                                      'botan-%d.%d.%d' % (ver_major, ver_minor, ver_patch))
 
-    copy_file(os.path.join(cfg['base_dir'], 'license.txt'),
-              prepend_destdir(os.path.join(target_doc_dir, 'license.txt')))
-    copy_file(os.path.join(cfg['base_dir'], 'news.rst'),
-              prepend_destdir(os.path.join(target_doc_dir, 'news.txt')))
+        shutil.rmtree(prepend_destdir(target_doc_dir), True)
+        shutil.copytree(cfg['doc_output_dir'], prepend_destdir(target_doc_dir))
+
+        copy_file(os.path.join(cfg['base_dir'], 'license.txt'),
+                  prepend_destdir(os.path.join(target_doc_dir, 'license.txt')))
+        copy_file(os.path.join(cfg['base_dir'], 'news.rst'),
+                  prepend_destdir(os.path.join(target_doc_dir, 'news.txt')))
+        for f in [f for f in os.listdir(cfg['doc_dir']) if f.endswith('.txt')]:
+            copy_file(os.path.join(cfg['doc_dir'], f), prepend_destdir(os.path.join(target_doc_dir, f)))
+
+        if cfg['with_rst2man']:
+            man1_dir = prepend_destdir(os.path.join(options.prefix, os.path.join(cfg['mandir'], 'man1')))
+            makedirs(man1_dir)
+
+            copy_file(os.path.join(cfg['build_dir'], 'botan.1'),
+                      os.path.join(man1_dir, 'botan.1'))
 
     logging.info('Botan %s installation complete', cfg['version'])
     return 0

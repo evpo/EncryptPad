@@ -16,7 +16,7 @@
 
 namespace Botan_CLI {
 
-class TLS_All_Policy : public Botan::TLS::Policy
+class TLS_All_Policy final : public Botan::TLS::Policy
    {
    public:
       std::vector<std::string> allowed_ciphers() const override
@@ -88,6 +88,16 @@ class TLS_Ciphersuites final : public Command
             }
          }
 
+      std::string group() const override
+         {
+         return "tls";
+         }
+
+      std::string description() const override
+         {
+         return "Lists all ciphersuites for a policy and TLS version";
+         }
+
       void go() override
          {
          const std::string policy_type = get_arg("policy");
@@ -100,9 +110,13 @@ class TLS_Ciphersuites final : public Command
             {
             policy.reset(new Botan::TLS::Policy);
             }
-         else if(policy_type == "suiteb")
+         else if(policy_type == "suiteb_128")
             {
             policy.reset(new Botan::TLS::NSA_Suite_B_128);
+            }
+         else if(policy_type == "suiteb_192")
+            {
+            policy.reset(new Botan::TLS::NSA_Suite_B_192);
             }
          else if(policy_type == "strict")
             {
@@ -114,13 +128,8 @@ class TLS_Ciphersuites final : public Command
             }
          else
             {
-            std::ifstream policy_file(policy_type);
-            if(!policy_file.good())
-               {
-               throw CLI_Error("Error TLS policy '" + policy_type + "' is neither a file nor a known policy type");
-               }
-
-            policy.reset(new Botan::TLS::Text_Policy(policy_file));
+            const std::string policy_txt = slurp_file_as_str(policy_type);
+            policy.reset(new Botan::TLS::Text_Policy(policy_txt));
             }
 
          for(uint16_t suite_id : policy->ciphersuite_list(version, with_srp))
@@ -138,6 +147,16 @@ class TLS_Client_Hello_Reader final : public Command
    public:
       TLS_Client_Hello_Reader()
          : Command("tls_client_hello --hex input") {}
+
+      std::string group() const override
+         {
+         return "tls";
+         }
+
+      std::string description() const override
+         {
+         return "Parse a TLS client hello message";
+         }
 
       void go() override
          {
@@ -174,21 +193,18 @@ class TLS_Client_Hello_Reader final : public Command
             }
 
          // Assume the handshake header is there, strip it
-         if(input[0] != 1)
+         if(input[0] == 1)
             {
-            error_output() << "Input message is not a TLS client hello\n";
-            return;
+            const size_t hs_len = Botan::make_uint32(0, input[1], input[2], input[3]);
+
+            if(input.size() != hs_len + 4)
+               {
+               error_output() << "Handshake layer length invalid\n";
+               return;
+               }
+
+            input = std::vector<uint8_t>(input.begin() + 4, input.end());
             }
-
-         const size_t hs_len = Botan::make_uint32(0, input[1], input[2], input[3]);
-
-         if(input.size() != hs_len + 4)
-            {
-            error_output() << "Handshake layer length invalid\n";
-            return;
-            }
-
-         input = std::vector<uint8_t>(input.begin() + 4, input.end());
 
          try
             {
@@ -216,14 +232,14 @@ class TLS_Client_Hello_Reader final : public Command
 
          oss << "Supported signature schemes: ";
 
-         if(hello.supported_algos().empty())
+         if(hello.signature_schemes().empty())
             {
             oss << "Did not send signature_algorithms extension\n";
             }
          else
             {
-            for(auto&& hash_and_sig : hello.supported_algos())
-               oss << hash_and_sig.second << '+' << hash_and_sig.first << ' ';
+            for(Botan::TLS::Signature_Scheme scheme : hello.signature_schemes())
+               oss << sig_scheme_to_string(scheme) << " ";
             oss << "\n";
             }
 

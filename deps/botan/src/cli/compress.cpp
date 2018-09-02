@@ -8,6 +8,7 @@
 
 #if defined(BOTAN_HAS_COMPRESSION)
    #include <botan/compression.h>
+   #include <fstream>
 #endif
 
 namespace Botan_CLI {
@@ -38,6 +39,16 @@ class Compress final : public Command
          return input_fsname + "." + suffix_info->second;
          }
 
+      std::string group() const override
+         {
+         return "compression";
+         }
+
+      std::string description() const override
+         {
+         return "Compress a given file";
+         }
+
       void go() override
          {
          const std::string comp_type = get_arg("type");
@@ -63,7 +74,7 @@ class Compress final : public Command
 
          const std::string out_file = output_filename(in_file, comp_type);
          std::ofstream out(out_file, std::ios::binary);
-         if(!in.good())
+         if(!out.good())
             {
             throw CLI_IO_Error("writing", out_file);
             }
@@ -75,17 +86,17 @@ class Compress final : public Command
          while(in.good())
             {
             buf.resize(buf_size);
-            in.read(reinterpret_cast<char*>(&buf[0]), buf.size());
+            in.read(reinterpret_cast<char*>(buf.data()), buf.size());
             buf.resize(in.gcount());
 
             compress->update(buf);
 
-            out.write(reinterpret_cast<const char*>(&buf[0]), buf.size());
+            out.write(reinterpret_cast<const char*>(buf.data()), buf.size());
             }
 
          buf.clear();
          compress->finish(buf);
-         out.write(reinterpret_cast<const char*>(&buf[0]), buf.size());
+         out.write(reinterpret_cast<const char*>(buf.data()), buf.size());
          out.close();
          }
    };
@@ -109,6 +120,16 @@ class Decompress final : public Command
 
          out_file = in_file.substr(0, last_dot);
          suffix = in_file.substr(last_dot + 1, std::string::npos);
+         }
+
+      std::string group() const override
+         {
+         return "compression";
+         }
+
+      std::string description() const override
+         {
+         return "Decompress a given compressed archive";
          }
 
       void go() override
@@ -147,17 +168,17 @@ class Decompress final : public Command
          while(in.good())
             {
             buf.resize(buf_size);
-            in.read(reinterpret_cast<char*>(&buf[0]), buf.size());
+            in.read(reinterpret_cast<char*>(buf.data()), buf.size());
             buf.resize(in.gcount());
 
             decompress->update(buf);
 
-            out.write(reinterpret_cast<const char*>(&buf[0]), buf.size());
+            out.write(reinterpret_cast<const char*>(buf.data()), buf.size());
             }
 
          buf.clear();
          decompress->finish(buf);
-         out.write(reinterpret_cast<const char*>(&buf[0]), buf.size());
+         out.write(reinterpret_cast<const char*>(buf.data()), buf.size());
          out.close();
          }
    };

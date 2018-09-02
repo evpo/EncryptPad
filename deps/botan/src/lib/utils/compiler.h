@@ -13,7 +13,7 @@
 #define BOTAN_UTIL_COMPILER_FLAGS_H_
 
 /* Should we use GCC-style inline assembler? */
-#if !defined(BOTAN_USE_GCC_INLINE_ASM) && (defined(__GNUC__) || defined(__xlc__))
+#if !defined(BOTAN_USE_GCC_INLINE_ASM) && (defined(__GNUC__) || defined(__xlc__) || defined(__SUNPRO_CC))
   #define BOTAN_USE_GCC_INLINE_ASM 1
 #endif
 
@@ -69,7 +69,7 @@
 /*
 * Define BOTAN_FUNC_ISA
 */
-#if defined(__GNUG__) || (BOTAN_CLANG_VERSION > 38)
+#if (defined(__GNUG__) && !defined(__clang__)) || (BOTAN_CLANG_VERSION > 38)
   #define BOTAN_FUNC_ISA(isa) __attribute__ ((target(isa)))
 #else
   #define BOTAN_FUNC_ISA(isa)
@@ -137,7 +137,7 @@
 /*
 * Define BOTAN_CURRENT_FUNCTION
 */
-#if defined(_MSC_VER)
+#if defined(BOTAN_BUILD_COMPILER_IS_MSVC_2013)
   #define BOTAN_CURRENT_FUNCTION __FUNCTION__
 #else
   #define BOTAN_CURRENT_FUNCTION __func__
@@ -155,6 +155,15 @@
 #endif
 
 /*
+* Define BOTAN_CONSTEXPR (for MSVC 2013)
+*/
+#if defined(BOTAN_BUILD_COMPILER_IS_MSVC_2013)
+  #define BOTAN_CONSTEXPR /**/
+#else
+  #define BOTAN_CONSTEXPR constexpr
+#endif
+
+/*
 * Define BOTAN_ALIGNAS (for MSVC 2013)
 */
 #if defined(BOTAN_BUILD_COMPILER_IS_MSVC_2013)
@@ -168,9 +177,7 @@
 */
 #if !defined(BOTAN_PARALLEL_FOR)
 
-#if defined(BOTAN_TARGET_HAS_CILKPLUS)
-  #define BOTAN_PARALLEL_FOR _Cilk_for
-#elif defined(BOTAN_TARGET_HAS_OPENMP)
+#if defined(BOTAN_TARGET_HAS_OPENMP)
   #define BOTAN_PARALLEL_FOR _Pragma("omp parallel for") for
 #else
   #define BOTAN_PARALLEL_FOR for
@@ -183,40 +190,12 @@
 */
 #if !defined(BOTAN_PARALLEL_SIMD_FOR)
 
-#if defined(BOTAN_TARGET_HAS_CILKPLUS)
-  #define BOTAN_PARALLEL_SIMD_FOR _Pragma("simd") for
-#elif defined(BOTAN_TARGET_HAS_OPENMP)
+#if defined(BOTAN_TARGET_HAS_OPENMP)
   #define BOTAN_PARALLEL_SIMD_FOR _Pragma("omp simd") for
 #elif defined(BOTAN_BUILD_COMPILER_IS_GCC) && (BOTAN_GCC_VERSION >= 490)
   #define BOTAN_PARALLEL_SIMD_FOR _Pragma("GCC ivdep") for
 #else
   #define BOTAN_PARALLEL_SIMD_FOR for
-#endif
-
-#endif
-
-/*
-* Define BOTAN_PARALLEL_SPAWN
-*/
-#if !defined(BOTAN_PARALLEL_SPAWN)
-
-#if defined(BOTAN_TARGET_HAS_CILKPLUS)
-  #define BOTAN_PARALLEL_SPAWN _Cilk_spawn
-#else
-  #define BOTAN_PARALLEL_SPAWN
-#endif
-
-#endif
-
-/*
-* Define BOTAN_PARALLEL_SYNC
-*/
-#if !defined(BOTAN_PARALLEL_SYNC)
-
-#if defined(BOTAN_TARGET_HAS_CILKPLUS)
-  #define BOTAN_PARALLEL_SYNC _Cilk_sync
-#else
-  #define BOTAN_PARALLEL_SYNC BOTAN_FORCE_SEMICOLON
 #endif
 
 #endif

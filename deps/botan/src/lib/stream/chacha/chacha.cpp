@@ -6,6 +6,7 @@
 */
 
 #include <botan/chacha.h>
+#include <botan/exceptn.h>
 #include <botan/loadstor.h>
 #include <botan/cpuid.h>
 
@@ -13,8 +14,8 @@ namespace Botan {
 
 ChaCha::ChaCha(size_t rounds) : m_rounds(rounds)
    {
-   if(m_rounds != 8 && m_rounds != 12 && m_rounds != 20)
-      throw Invalid_Argument("ChaCha only supports 8, 12 or 20 rounds");
+   BOTAN_ARG_CHECK(m_rounds == 8 || m_rounds == 12 || m_rounds == 20,
+                   "ChaCha only supports 8, 12 or 20 rounds");
    }
 
 std::string ChaCha::provider() const
@@ -49,12 +50,12 @@ void ChaCha::chacha_x4(uint8_t output[64*4], uint32_t input[16], size_t rounds)
              x08 = input[ 8], x09 = input[ 9], x10 = input[10], x11 = input[11],
              x12 = input[12], x13 = input[13], x14 = input[14], x15 = input[15];
 
-#define CHACHA_QUARTER_ROUND(a, b, c, d)        \
-      do {                                      \
-      a += b; d ^= a; d = rotate_left(d, 16);   \
-      c += d; b ^= c; b = rotate_left(b, 12);   \
-      a += b; d ^= a; d = rotate_left(d, 8);    \
-      c += d; b ^= c; b = rotate_left(b, 7);    \
+#define CHACHA_QUARTER_ROUND(a, b, c, d) \
+      do {                               \
+      a += b; d ^= a; d = rotl<16>(d);   \
+      c += d; b ^= c; b = rotl<12>(b);   \
+      a += b; d ^= a; d = rotl<8>(d);    \
+      c += d; b ^= c; b = rotl<7>(b);    \
       } while(0)
 
       for(size_t r = 0; r != rounds / 2; ++r)
@@ -116,6 +117,8 @@ void ChaCha::chacha_x4(uint8_t output[64*4], uint32_t input[16], size_t rounds)
 */
 void ChaCha::cipher(const uint8_t in[], uint8_t out[], size_t length)
    {
+   verify_key_set(m_state.empty() == false);
+
    while(length >= m_buffer.size() - m_position)
       {
       xor_buf(out, in, &m_buffer[m_position], m_buffer.size() - m_position);
@@ -220,10 +223,7 @@ std::string ChaCha::name() const
 
 void ChaCha::seek(uint64_t offset)
    {
-   if (m_state.size() == 0 && m_buffer.size() == 0)
-      {
-      throw Invalid_State("You have to setup the stream cipher (key and iv)");
-      }
+   verify_key_set(m_state.empty() == false);
 
    // Find the block offset
    uint64_t counter = offset / 64;

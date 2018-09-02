@@ -1,16 +1,73 @@
 /*
-* (C) 2014,2015 Jack Lloyd
+* (C) 2014,2015,2018 Jack Lloyd
 *
 * Botan is released under the Simplified BSD License (see license.txt)
 */
 
 #include "tests.h"
 
-#include <botan/hash.h>
+#if defined(BOTAN_HAS_HASH)
+   #include <botan/hash.h>
+#endif
 
 namespace Botan_Tests {
 
+#if defined(BOTAN_HAS_HASH)
+
 namespace {
+
+class Invalid_Hash_Name_Tests final : public Test
+   {
+   public:
+      std::vector<Test::Result> run() override
+         {
+         Test::Result result("Invalid HashFunction names");
+         test_invalid_name(result, "NonExistentHash");
+         test_invalid_name(result, "Blake2b(9)", "Bad output bits size for Blake2b");
+         test_invalid_name(result, "Comb4P(MD5,MD5)", "Comb4P: Must use two distinct hashes");
+         test_invalid_name(result, "Comb4P(MD5,SHA-256)", "Comb4P: Incompatible hashes MD5 and SHA-256");
+         test_invalid_name(result, "Tiger(168)", "Tiger: Illegal hash output size: 168");
+         test_invalid_name(result, "Tiger(20,2)", "Tiger: Invalid number of passes: 2");
+         test_invalid_name(result, "Keccak-1600(160)", "Keccak_1600: Invalid output length 160");
+         test_invalid_name(result, "SHA-3(160)", "SHA_3: Invalid output length 160");
+
+         return {result};
+         }
+
+   private:
+      void test_invalid_name(Result& result,
+                             const std::string& name,
+                             const std::string& expected_msg = "") const
+         {
+         try
+            {
+            auto hash = Botan::HashFunction::create_or_throw(name);
+            result.test_failure("Was successfully able to create " + name);
+            }
+         catch(Botan::Invalid_Argument& e)
+            {
+            const std::string msg = e.what();
+            const std::string full_msg = "Invalid argument " + expected_msg;
+            result.test_eq("expected error message", msg, full_msg);
+            }
+         catch(Botan::Lookup_Error& e)
+            {
+            const std::string algo_not_found_msg = "Unavailable Hash " + name;
+            const std::string msg = e.what();
+            result.test_eq("expected error message", msg, algo_not_found_msg);
+            }
+         catch(std::exception& e)
+            {
+            result.test_failure("some unknown exception", e.what());
+            }
+         catch(...)
+            {
+            result.test_failure("some unknown exception");
+            }
+         }
+   };
+
+BOTAN_REGISTER_TEST("invalid_name_hash", Invalid_Hash_Name_Tests);
 
 class Hash_Function_Tests final : public Text_Based_Test
    {
@@ -24,8 +81,8 @@ class Hash_Function_Tests final : public Text_Based_Test
 
       Test::Result run_one_test(const std::string& algo, const VarMap& vars) override
          {
-         const std::vector<uint8_t> input    = get_req_bin(vars, "In");
-         const std::vector<uint8_t> expected = get_req_bin(vars, "Out");
+         const std::vector<uint8_t> input    = vars.get_req_bin("In");
+         const std::vector<uint8_t> expected = vars.get_req_bin("Out");
 
          Test::Result result(algo);
 
@@ -68,7 +125,6 @@ class Hash_Function_Tests final : public Text_Based_Test
 
             result.test_eq(provider, "hashing after clear", hash->final(), expected);
 
-            // TODO: feed in random pieces to fully test buffering
             if(input.size() > 5)
                {
                hash->update(input[0]);
@@ -77,7 +133,17 @@ class Hash_Function_Tests final : public Text_Based_Test
                // verify fork copy doesn't affect original computation
                fork->update(&input[1], input.size() - 2);
 
-               hash->update(&input[1], input.size() - 1);
+               size_t so_far = 1;
+               while(so_far < input.size())
+                  {
+                  size_t take = Test::rng().next_byte() % (input.size() - so_far);
+
+                  if(input.size() - so_far == 1)
+                     take = 1;
+
+                  hash->update(&input[so_far], take);
+                  so_far += take;
+                  }
                result.test_eq(provider, "hashing split", hash->final(), expected);
 
                fork->update(&input[input.size() - 1], 1);
@@ -99,5 +165,7 @@ class Hash_Function_Tests final : public Text_Based_Test
 BOTAN_REGISTER_TEST("hash", Hash_Function_Tests);
 
 }
+
+#endif
 
 }

@@ -28,8 +28,8 @@ Extension* make_extension(TLS_Data_Reader& reader, uint16_t code, uint16_t size)
          return new SRP_Identifier(reader, size);
 #endif
 
-      case TLSEXT_USABLE_ELLIPTIC_CURVES:
-         return new Supported_Elliptic_Curves(reader, size);
+      case TLSEXT_SUPPORTED_GROUPS:
+         return new Supported_Groups(reader, size);
 
       case TLSEXT_CERT_STATUS_REQUEST:
          return new Certificate_Status_Request(reader, size);
@@ -59,7 +59,8 @@ Extension* make_extension(TLS_Data_Reader& reader, uint16_t code, uint16_t size)
          return new Session_Ticket(reader, size);
       }
 
-   return nullptr; // not known
+   return new Unknown_Extension(static_cast<Handshake_Extension_Type>(code),
+                                reader, size);
    }
 
 }
@@ -82,10 +83,7 @@ void Extensions::deserialize(TLS_Data_Reader& reader)
                                           extension_code,
                                           extension_size);
 
-         if(extn)
-            this->add(extn);
-         else // unknown/unhandled extension
-            reader.discard_next(extension_size);
+         this->add(extn);
          }
       }
    }
@@ -124,12 +122,34 @@ std::vector<uint8_t> Extensions::serialize() const
    return buf;
    }
 
+bool Extensions::remove_extension(Handshake_Extension_Type typ)
+   {
+   auto i = m_extensions.find(typ);
+   if(i == m_extensions.end())
+      return false;
+   m_extensions.erase(i);
+   return true;
+   }
+
 std::set<Handshake_Extension_Type> Extensions::extension_types() const
    {
    std::set<Handshake_Extension_Type> offers;
    for(auto i = m_extensions.begin(); i != m_extensions.end(); ++i)
       offers.insert(i->first);
    return offers;
+   }
+
+Unknown_Extension::Unknown_Extension(Handshake_Extension_Type type,
+                                     TLS_Data_Reader& reader,
+                                     uint16_t extension_size) :
+   m_type(type),
+   m_value(reader.get_fixed<uint8_t>(extension_size))
+   {
+   }
+
+std::vector<uint8_t> Unknown_Extension::serialize() const
+   {
+   throw Invalid_State("Cannot encode an unknown TLS extension");
    }
 
 Server_Name_Indicator::Server_Name_Indicator(TLS_Data_Reader& reader,
@@ -178,7 +198,7 @@ std::vector<uint8_t> Server_Name_Indicator::serialize() const
    buf.push_back(get_byte(1, static_cast<uint16_t>(name_len)));
 
    buf += std::make_pair(
-      reinterpret_cast<const uint8_t*>(m_sni_host_name.data()),
+      cast_char_ptr_to_uint8(m_sni_host_name.data()),
       m_sni_host_name.size());
 
    return buf;
@@ -197,9 +217,7 @@ std::vector<uint8_t> SRP_Identifier::serialize() const
    {
    std::vector<uint8_t> buf;
 
-   const uint8_t* srp_bytes =
-      reinterpret_cast<const uint8_t*>(m_srp_identifier.data());
-
+   const uint8_t* srp_bytes = cast_char_ptr_to_uint8(m_srp_identifier.data());
    append_tls_length_value(buf, srp_bytes, m_srp_identifier.size(), 1);
 
    return buf;
@@ -266,7 +284,7 @@ std::vector<uint8_t> Application_Layer_Protocol_Notification::serialize() const
          throw TLS_Exception(Alert::INTERNAL_ERROR, "ALPN name too long");
       if(p != "")
          append_tls_length_value(buf,
-                                 reinterpret_cast<const uint8_t*>(p.data()),
+                                 cast_char_ptr_to_uint8(p.data()),
                                  p.size(),
                                  1);
       }
@@ -277,74 +295,39 @@ std::vector<uint8_t> Application_Layer_Protocol_Notification::serialize() const
    return buf;
    }
 
-std::string Supported_Elliptic_Curves::curve_id_to_name(uint16_t id)
+Supported_Groups::Supported_Groups(const std::vector<Group_Params>& groups) : m_groups(groups)
    {
-   switch(id)
+   }
+
+std::vector<Group_Params> Supported_Groups::ec_groups() const
+   {
+   std::vector<Group_Params> ec;
+   for(auto g : m_groups)
       {
-      case 23:
-         return "secp256r1";
-      case 24:
-         return "secp384r1";
-      case 25:
-         return "secp521r1";
-      case 26:
-         return "brainpool256r1";
-      case 27:
-         return "brainpool384r1";
-      case 28:
-         return "brainpool512r1";
-
-#if defined(BOTAN_HAS_CURVE_25519)
-      case 29:
-         return "x25519";
-#endif
-
-#if defined(BOTAN_HOUSE_ECC_CURVE_NAME)
-      case BOTAN_HOUSE_ECC_CURVE_TLS_ID:
-         return BOTAN_HOUSE_ECC_CURVE_NAME;
-#endif
-
-      default:
-         return ""; // something we don't know or support
+      if(group_param_is_dh(g) == false)
+         ec.push_back(g);
       }
+   return ec;
    }
 
-uint16_t Supported_Elliptic_Curves::name_to_curve_id(const std::string& name)
+std::vector<Group_Params> Supported_Groups::dh_groups() const
    {
-   if(name == "secp256r1")
-      return 23;
-   if(name == "secp384r1")
-      return 24;
-   if(name == "secp521r1")
-      return 25;
-   if(name == "brainpool256r1")
-      return 26;
-   if(name == "brainpool384r1")
-      return 27;
-   if(name == "brainpool512r1")
-      return 28;
-
-#if defined(BOTAN_HAS_CURVE_25519)
-   if(name == "x25519")
-      return 29;
-#endif
-
-#if defined(BOTAN_HOUSE_ECC_CURVE_NAME)
-   if(name == BOTAN_HOUSE_ECC_CURVE_NAME)
-      return BOTAN_HOUSE_ECC_CURVE_TLS_ID;
-#endif
-
-   // Unknown/unavailable EC curves are ignored
-   return 0;
+   std::vector<Group_Params> dh;
+   for(auto g : m_groups)
+      {
+      if(group_param_is_dh(g) == true)
+         dh.push_back(g);
+      }
+   return dh;
    }
 
-std::vector<uint8_t> Supported_Elliptic_Curves::serialize() const
+std::vector<uint8_t> Supported_Groups::serialize() const
    {
    std::vector<uint8_t> buf(2);
 
-   for(size_t i = 0; i != m_curves.size(); ++i)
+   for(auto g : m_groups)
       {
-      const uint16_t id = name_to_curve_id(m_curves[i]);
+      const uint16_t id = static_cast<uint16_t>(g);
 
       if(id > 0)
          {
@@ -359,26 +342,21 @@ std::vector<uint8_t> Supported_Elliptic_Curves::serialize() const
    return buf;
    }
 
-Supported_Elliptic_Curves::Supported_Elliptic_Curves(TLS_Data_Reader& reader,
-                                                     uint16_t extension_size)
+Supported_Groups::Supported_Groups(TLS_Data_Reader& reader,
+                                   uint16_t extension_size)
    {
-   uint16_t len = reader.get_uint16_t();
+   const uint16_t len = reader.get_uint16_t();
 
    if(len + 2 != extension_size)
-      throw Decoding_Error("Inconsistent length field in elliptic curve list");
+      throw Decoding_Error("Inconsistent length field in supported groups list");
 
    if(len % 2 == 1)
-      throw Decoding_Error("Elliptic curve list of strange size");
+      throw Decoding_Error("Supported groups list of strange size");
 
-   len /= 2;
-
-   for(size_t i = 0; i != len; ++i)
+   for(size_t i = 0; i != len / 2; ++i)
       {
       const uint16_t id = reader.get_uint16_t();
-      const std::string name = curve_id_to_name(id);
-
-      if(!name.empty())
-         m_curves.push_back(name);
+      m_groups.push_back(static_cast<Group_Params>(id));
       }
    }
 
@@ -424,104 +402,24 @@ Supported_Point_Formats::Supported_Point_Formats(TLS_Data_Reader& reader,
       }
    }
 
-std::string Signature_Algorithms::hash_algo_name(uint8_t code)
-   {
-   switch(code)
-      {
-      // code 1 is MD5 - ignore it
-
-      case 2:
-         return "SHA-1";
-
-      // code 3 is SHA-224
-
-      case 4:
-         return "SHA-256";
-      case 5:
-         return "SHA-384";
-      case 6:
-         return "SHA-512";
-      default:
-         return "";
-      }
-   }
-
-uint8_t Signature_Algorithms::hash_algo_code(const std::string& name)
-   {
-   if(name == "SHA-1")
-      return 2;
-
-   if(name == "SHA-256")
-      return 4;
-
-   if(name == "SHA-384")
-      return 5;
-
-   if(name == "SHA-512")
-      return 6;
-
-   throw Internal_Error("Unknown hash ID " + name + " for signature_algorithms");
-   }
-
-std::string Signature_Algorithms::sig_algo_name(uint8_t code)
-   {
-   switch(code)
-      {
-      case 1:
-         return "RSA";
-      case 2:
-         return "DSA";
-      case 3:
-         return "ECDSA";
-      default:
-         return "";
-      }
-   }
-
-uint8_t Signature_Algorithms::sig_algo_code(const std::string& name)
-   {
-   if(name == "RSA")
-      return 1;
-
-   if(name == "DSA")
-      return 2;
-
-   if(name == "ECDSA")
-      return 3;
-
-   throw Internal_Error("Unknown sig ID " + name + " for signature_algorithms");
-   }
-
 std::vector<uint8_t> Signature_Algorithms::serialize() const
    {
-   std::vector<uint8_t> buf(2);
+   std::vector<uint8_t> buf;
 
-   for(size_t i = 0; i != m_supported_algos.size(); ++i)
+   const uint16_t len = m_schemes.size() * 2;
+
+   buf.push_back(get_byte(0, len));
+   buf.push_back(get_byte(1, len));
+
+   for(Signature_Scheme scheme : m_schemes)
       {
-      try
-         {
-         const uint8_t hash_code = hash_algo_code(m_supported_algos[i].first);
-         const uint8_t sig_code = sig_algo_code(m_supported_algos[i].second);
+      const uint16_t scheme_code = static_cast<uint16_t>(scheme);
 
-         buf.push_back(hash_code);
-         buf.push_back(sig_code);
-         }
-      catch(...)
-         {}
+      buf.push_back(get_byte(0, scheme_code));
+      buf.push_back(get_byte(1, scheme_code));
       }
 
-   buf[0] = get_byte(0, static_cast<uint16_t>(buf.size()-2));
-   buf[1] = get_byte(1, static_cast<uint16_t>(buf.size()-2));
-
    return buf;
-   }
-
-Signature_Algorithms::Signature_Algorithms(const std::vector<std::string>& hashes,
-                                           const std::vector<std::string>& sigs)
-   {
-   for(size_t i = 0; i != hashes.size(); ++i)
-      for(size_t j = 0; j != sigs.size(); ++j)
-         m_supported_algos.push_back(std::make_pair(hashes[i], sigs[j]));
    }
 
 Signature_Algorithms::Signature_Algorithms(TLS_Data_Reader& reader,
@@ -529,32 +427,16 @@ Signature_Algorithms::Signature_Algorithms(TLS_Data_Reader& reader,
    {
    uint16_t len = reader.get_uint16_t();
 
-   if(len + 2 != extension_size)
+   if(len + 2 != extension_size || len % 2 == 1 || len == 0)
+      {
       throw Decoding_Error("Bad encoding on signature algorithms extension");
+      }
 
    while(len)
       {
-      const uint8_t hash_code = reader.get_byte();
-      const uint8_t sig_code = reader.get_byte();
+      const uint16_t scheme_code = reader.get_uint16_t();
+      m_schemes.push_back(static_cast<Signature_Scheme>(scheme_code));
       len -= 2;
-
-      if(sig_code == 0)
-         {
-         /*
-         RFC 5247 7.4.1.4.1 explicitly prohibits anonymous (0) signature code in
-         the client hello. ("It MUST NOT appear in this extension.")
-         */
-         throw TLS_Exception(Alert::DECODE_ERROR, "Client sent ANON signature");
-         }
-
-      const std::string hash_name = hash_algo_name(hash_code);
-      const std::string sig_name = sig_algo_name(sig_code);
-
-      // If not something we know, ignore it completely
-      if(hash_name.empty() || sig_name.empty())
-         continue;
-
-      m_supported_algos.push_back(std::make_pair(hash_name, sig_name));
       }
    }
 

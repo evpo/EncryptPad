@@ -10,23 +10,15 @@
 #include <botan/cpuid.h>
 #include <botan/exceptn.h>
 #include <botan/mem_ops.h>
-#include <chrono>
 
-#if defined(BOTAN_HAS_BOOST_ASIO)
-  /*
-  * We don't need serial port support anyway, and asking for it
-  * causes macro conflicts with Darwin's termios.h when this
-  * file is included in the amalgamation. GH #350
-  */
-  #define BOOST_ASIO_DISABLE_SERIAL_PORT
-  #include <boost/asio.hpp>
-#endif
+#include <chrono>
+#include <cstdlib>
 
 #if defined(BOTAN_TARGET_OS_HAS_EXPLICIT_BZERO)
   #include <string.h>
 #endif
 
-#if defined(BOTAN_TARGET_OS_TYPE_IS_UNIX)
+#if defined(BOTAN_TARGET_OS_HAS_POSIX1)
   #include <sys/types.h>
   #include <sys/resource.h>
   #include <sys/mman.h>
@@ -34,266 +26,12 @@
   #include <setjmp.h>
   #include <unistd.h>
   #include <errno.h>
-
-#if !defined(BOTAN_HAS_BOOST_ASIO)
-  #include <sys/socket.h>
-  #include <netinet/in.h>
-  #include <netdb.h>
-#endif
-
-#elif defined(BOTAN_TARGET_OS_TYPE_IS_WINDOWS)
+#elif defined(BOTAN_TARGET_OS_HAS_WIN32)
   #define NOMINMAX 1
-#if !defined(BOTAN_HAS_BOOST_ASIO)
-  #include <winsock2.h>
-  #include <ws2tcpip.h>
-#endif
   #include <windows.h>
 #endif
 
 namespace Botan {
-
-namespace {
-
-#if defined(BOTAN_HAS_BOOST_ASIO)
-
-class Asio_Socket final : public OS::Socket
-   {
-   public:
-      Asio_Socket(const std::string& hostname, const std::string& service) :
-         m_tcp(m_io)
-         {
-         boost::asio::ip::tcp::resolver resolver(m_io);
-         boost::asio::ip::tcp::resolver::query query(hostname, service);
-         boost::asio::connect(m_tcp, resolver.resolve(query));
-         }
-
-      void write(const uint8_t buf[], size_t len) override
-         {
-         boost::asio::write(m_tcp, boost::asio::buffer(buf, len));
-         }
-
-      size_t read(uint8_t buf[], size_t len) override
-         {
-         boost::system::error_code error;
-         size_t got = m_tcp.read_some(boost::asio::buffer(buf, len), error);
-
-         if(error)
-            {
-            if(error == boost::asio::error::eof)
-               return 0;
-            throw boost::system::system_error(error); // Some other error.
-            }
-
-         return got;
-         }
-
-   private:
-      boost::asio::io_service m_io;
-      boost::asio::ip::tcp::socket m_tcp;
-   };
-
-#elif defined(BOTAN_TARGET_OS_TYPE_IS_WINDOWS)
-
-class Winsock_Socket final : public OS::Socket
-   {
-   public:
-      Winsock_Socket(const std::string& hostname, const std::string& service)
-         {
-         WSAData wsa_data;
-         WORD wsa_version = MAKEWORD(2, 2);
-
-         if (::WSAStartup(wsa_version, &wsa_data) != 0)
-            {
-            throw Exception("WSAStartup() failed: " + std::to_string(WSAGetLastError()));
-            }
-
-         if (LOBYTE(wsa_data.wVersion) != 2 || HIBYTE(wsa_data.wVersion) != 2)
-            {
-            ::WSACleanup();
-            throw Exception("Could not find a usable version of Winsock.dll");
-            }
-
-         addrinfo hints;
-         ::memset(&hints, 0, sizeof(addrinfo));
-         hints.ai_family = AF_UNSPEC;
-         hints.ai_socktype = SOCK_STREAM;
-         addrinfo* res;
-
-         if(::getaddrinfo(hostname.c_str(), service.c_str(), &hints, &res) != 0)
-            {
-            throw Exception("Name resolution failed for " + hostname);
-            }
-
-         for(addrinfo* rp = res; (m_socket == INVALID_SOCKET) && (rp != nullptr); rp = rp->ai_next)
-            {
-            m_socket = ::socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
-
-            // unsupported socket type?
-            if(m_socket == INVALID_SOCKET)
-               continue;
-
-            if(::connect(m_socket, rp->ai_addr, rp->ai_addrlen) != 0)
-               {
-               ::closesocket(m_socket);
-               m_socket = INVALID_SOCKET;
-               continue;
-               }
-            }
-
-         ::freeaddrinfo(res);
-
-         if(m_socket == INVALID_SOCKET)
-            {
-            throw Exception("Connecting to " + hostname +
-                            " for service " + service + " failed");
-            }
-         }
-
-      ~Winsock_Socket()
-         {
-         ::closesocket(m_socket);
-         m_socket = INVALID_SOCKET;
-         ::WSACleanup();
-         }
-
-      void write(const uint8_t buf[], size_t len) override
-         {
-         size_t sent_so_far = 0;
-         while(sent_so_far != len)
-            {
-            const size_t left = len - sent_so_far;
-            int sent = ::send(m_socket,
-                              reinterpret_cast<const char*>(buf + sent_so_far),
-                              static_cast<int>(left),
-                              0);
-
-            if(sent == SOCKET_ERROR)
-               throw Exception("Socket write failed with error " +
-                               std::to_string(::WSAGetLastError()));
-            else
-               sent_so_far += static_cast<size_t>(sent);
-            }
-         }
-
-      size_t read(uint8_t buf[], size_t len) override
-         {
-         int got = ::recv(m_socket,
-                          reinterpret_cast<char*>(buf),
-                          static_cast<int>(len), 0);
-
-         if(got == SOCKET_ERROR)
-            throw Exception("Socket read failed with error " +
-                            std::to_string(::WSAGetLastError()));
-         return static_cast<size_t>(got);
-         }
-
-   private:
-      SOCKET m_socket = INVALID_SOCKET;
-   };
-
-#elif defined(BOTAN_TARGET_OS_TYPE_IS_UNIX)
-class BSD_Socket final : public OS::Socket
-   {
-   public:
-      BSD_Socket(const std::string& hostname, const std::string& service)
-         {
-         addrinfo hints;
-         ::memset(&hints, 0, sizeof(addrinfo));
-         hints.ai_family = AF_UNSPEC;
-         hints.ai_socktype = SOCK_STREAM;
-         addrinfo* res;
-
-         if(::getaddrinfo(hostname.c_str(), service.c_str(), &hints, &res) != 0)
-            {
-            throw Exception("Name resolution failed for " + hostname);
-            }
-
-         m_fd = -1;
-
-         for(addrinfo* rp = res; (m_fd < 0) && (rp != nullptr); rp = rp->ai_next)
-            {
-            m_fd = ::socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
-
-            if(m_fd < 0)
-               {
-               // unsupported socket type?
-               continue;
-               }
-
-            if(::connect(m_fd, rp->ai_addr, rp->ai_addrlen) != 0)
-               {
-               ::close(m_fd);
-               m_fd = -1;
-               continue;
-               }
-            }
-
-         ::freeaddrinfo(res);
-
-         if(m_fd < 0)
-            {
-            throw Exception("Connecting to " + hostname +
-                            " for service " + service + " failed");
-            }
-         }
-
-      ~BSD_Socket()
-         {
-         ::close(m_fd);
-         m_fd = -1;
-         }
-
-      void write(const uint8_t buf[], size_t len) override
-         {
-         size_t sent_so_far = 0;
-         while(sent_so_far != len)
-            {
-            const size_t left = len - sent_so_far;
-            ssize_t sent = ::write(m_fd, &buf[sent_so_far], left);
-            if(sent < 0)
-               throw Exception("Socket write failed with error '" +
-                               std::string(::strerror(errno)) + "'");
-            else
-               sent_so_far += static_cast<size_t>(sent);
-            }
-         }
-
-      size_t read(uint8_t buf[], size_t len) override
-         {
-         ssize_t got = ::read(m_fd, buf, len);
-
-         if(got < 0)
-            throw Exception("Socket read failed with error '" +
-                            std::string(::strerror(errno)) + "'");
-         return static_cast<size_t>(got);
-         }
-
-   private:
-      int m_fd;
-   };
-
-#endif
-
-}
-
-std::unique_ptr<OS::Socket>
-OS::open_socket(const std::string& hostname,
-                const std::string& service)
-   {
-#if defined(BOTAN_HAS_BOOST_ASIO)
-   return std::unique_ptr<OS::Socket>(new Asio_Socket(hostname, service));
-
-#elif defined(BOTAN_TARGET_OS_TYPE_IS_WINDOWS)
-   return std::unique_ptr<OS::Socket>(new Winsock_Socket(hostname, service));
-
-#elif defined(BOTAN_TARGET_OS_TYPE_IS_UNIX)
-   return std::unique_ptr<OS::Socket>(new BSD_Socket(hostname, service));
-
-#else
-   // No sockets for you
-   return std::unique_ptr<Socket>();
-#endif
-   }
 
 // Not defined in OS namespace for historical reasons
 void secure_scrub_memory(void* ptr, size_t n)
@@ -325,11 +63,11 @@ void secure_scrub_memory(void* ptr, size_t n)
 
 uint32_t OS::get_process_id()
    {
-#if defined(BOTAN_TARGET_OS_TYPE_IS_UNIX)
+#if defined(BOTAN_TARGET_OS_HAS_POSIX1)
    return ::getpid();
-#elif defined(BOTAN_TARGET_OS_IS_WINDOWS) || defined(BOTAN_TARGET_OS_IS_MINGW)
+#elif defined(BOTAN_TARGET_OS_HAS_WIN32)
    return ::GetCurrentProcessId();
-#elif defined(BOTAN_TARGET_OS_TYPE_IS_UNIKERNEL) || defined(BOTAN_TARGET_OS_IS_LLVM)
+#elif defined(BOTAN_TARGET_OS_IS_INCLUDEOS) || defined(BOTAN_TARGET_OS_IS_LLVM)
    return 0; // truly no meaningful value
 #else
    #error "Missing get_process_id"
@@ -340,7 +78,7 @@ uint64_t OS::get_processor_timestamp()
    {
    uint64_t rtc = 0;
 
-#if defined(BOTAN_TARGET_OS_HAS_QUERY_PERF_COUNTER)
+#if defined(BOTAN_TARGET_OS_HAS_WIN32)
    LARGE_INTEGER tv;
    ::QueryPerformanceCounter(&tv);
    rtc = tv.QuadPart;
@@ -357,16 +95,19 @@ uint64_t OS::get_processor_timestamp()
       }
 
 #elif defined(BOTAN_TARGET_ARCH_IS_PPC64)
-   uint32_t rtc_low = 0, rtc_high = 0;
-   asm volatile("mftbu %0; mftb %1" : "=r" (rtc_high), "=r" (rtc_low));
 
-   /*
-   qemu-ppc seems to not support mftb instr, it always returns zero.
-   If both time bases are 0, assume broken and return another clock.
-   */
-   if(rtc_high > 0 || rtc_low > 0)
+   for(;;)
       {
-      rtc = (static_cast<uint64_t>(rtc_high) << 32) | rtc_low;
+      uint32_t rtc_low = 0, rtc_high = 0, rtc_high2 = 0;
+      asm volatile("mftbu %0" : "=r" (rtc_high));
+      asm volatile("mftb %0" : "=r" (rtc_low));
+      asm volatile("mftbu %0" : "=r" (rtc_high2));
+
+      if(rtc_high == rtc_high2)
+	 {
+         rtc = (static_cast<uint64_t>(rtc_high) << 32) | rtc_low;
+         break;
+	 }
       }
 
 #elif defined(BOTAN_TARGET_ARCH_IS_ALPHA)
@@ -456,9 +197,27 @@ uint64_t OS::get_system_timestamp_ns()
    return std::chrono::duration_cast<std::chrono::nanoseconds>(now).count();
    }
 
+size_t OS::system_page_size()
+   {
+#if defined(BOTAN_TARGET_OS_HAS_POSIX1)
+   long p = ::sysconf(_SC_PAGESIZE);
+   if(p > 1)
+      return static_cast<size_t>(p);
+   else
+      return 4096;
+#elif defined(BOTAN_TARGET_OS_HAS_VIRTUAL_LOCK)
+   SYSTEM_INFO sys_info;
+   ::GetSystemInfo(&sys_info);
+   return sys_info.dwPageSize;
+#endif
+
+   // default value
+   return 4096;
+   }
+
 size_t OS::get_memory_locking_limit()
    {
-#if defined(BOTAN_TARGET_OS_HAS_POSIX_MLOCK)
+#if defined(BOTAN_TARGET_OS_HAS_POSIX1)
    /*
    * Linux defaults to only 64 KiB of mlockable memory per process
    * (too small) but BSDs offer a small fraction of total RAM (more
@@ -473,7 +232,7 @@ size_t OS::get_memory_locking_limit()
    /*
    * Allow override via env variable
    */
-   if(const char* env = ::getenv("BOTAN_MLOCK_POOL_SIZE"))
+   if(const char* env = std::getenv("BOTAN_MLOCK_POOL_SIZE"))
       {
       try
          {
@@ -507,16 +266,12 @@ size_t OS::get_memory_locking_limit()
    return 0;
 #endif
 
-#elif defined(BOTAN_TARGET_OS_HAS_VIRTUAL_LOCK) && defined(BOTAN_BUILD_COMPILER_IS_MSVC)
+#elif defined(BOTAN_TARGET_OS_HAS_VIRTUAL_LOCK)
    SIZE_T working_min = 0, working_max = 0;
-   DWORD working_flags = 0;
-   if(!::GetProcessWorkingSetSizeEx(::GetCurrentProcess(), &working_min, &working_max, &working_flags))
+   if(!::GetProcessWorkingSetSize(::GetCurrentProcess(), &working_min, &working_max))
       {
       return 0;
       }
-
-   SYSTEM_INFO sSysInfo;
-   ::GetSystemInfo(&sSysInfo);
 
    // According to Microsoft MSDN:
    // The maximum number of pages that a process can lock is equal to the number of pages in its minimum working set minus a small overhead
@@ -524,7 +279,7 @@ size_t OS::get_memory_locking_limit()
    // But the information in the book seems to be inaccurate/outdated
    // I've tested this on Windows 8.1 x64, Windows 10 x64 and Windows 7 x86
    // On all three OS the value is 11 instead of 8
-   size_t overhead = sSysInfo.dwPageSize * 11ULL;
+   size_t overhead = OS::system_page_size() * 11ULL;
    if(working_min > overhead)
       {
       size_t lockable_bytes = working_min - overhead;
@@ -544,7 +299,7 @@ size_t OS::get_memory_locking_limit()
 
 void* OS::allocate_locked_pages(size_t length)
    {
-#if defined(BOTAN_TARGET_OS_HAS_POSIX_MLOCK)
+#if defined(BOTAN_TARGET_OS_HAS_POSIX1)
 
 #if !defined(MAP_NOCORE)
    #define MAP_NOCORE 0
@@ -570,16 +325,18 @@ void* OS::allocate_locked_pages(size_t length)
    ::madvise(ptr, length, MADV_DONTDUMP);
 #endif
 
+#if defined(BOTAN_TARGET_OS_HAS_POSIX_MLOCK)
    if(::mlock(ptr, length) != 0)
       {
       ::munmap(ptr, length);
       return nullptr; // failed to lock
       }
+#endif
 
    ::memset(ptr, 0, length);
 
    return ptr;
-#elif defined BOTAN_TARGET_OS_HAS_VIRTUAL_LOCK
+#elif defined(BOTAN_TARGET_OS_HAS_VIRTUAL_LOCK)
    LPVOID ptr = ::VirtualAlloc(nullptr, length, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
    if(!ptr)
       {
@@ -604,11 +361,15 @@ void OS::free_locked_pages(void* ptr, size_t length)
    if(ptr == nullptr || length == 0)
       return;
 
-#if defined(BOTAN_TARGET_OS_HAS_POSIX_MLOCK)
+#if defined(BOTAN_TARGET_OS_HAS_POSIX1)
    secure_scrub_memory(ptr, length);
+
+#if defined(BOTAN_TARGET_OS_HAS_POSIX_MLOCK)
    ::munlock(ptr, length);
+#endif
+
    ::munmap(ptr, length);
-#elif defined BOTAN_TARGET_OS_HAS_VIRTUAL_LOCK
+#elif defined(BOTAN_TARGET_OS_HAS_VIRTUAL_LOCK)
    secure_scrub_memory(ptr, length);
    ::VirtualUnlock(ptr, length);
    ::VirtualFree(ptr, 0, MEM_RELEASE);
@@ -618,14 +379,14 @@ void OS::free_locked_pages(void* ptr, size_t length)
 #endif
    }
 
-#if defined(BOTAN_TARGET_OS_TYPE_IS_UNIX)
+#if defined(BOTAN_TARGET_OS_HAS_POSIX1)
 namespace {
 
 static ::sigjmp_buf g_sigill_jmp_buf;
 
 void botan_sigill_handler(int)
    {
-   ::siglongjmp(g_sigill_jmp_buf, /*non-zero return value*/1);
+   siglongjmp(g_sigill_jmp_buf, /*non-zero return value*/1);
    }
 
 }
@@ -635,7 +396,7 @@ int OS::run_cpu_instruction_probe(std::function<int ()> probe_fn)
    {
    volatile int probe_result = -3;
 
-#if defined(BOTAN_TARGET_OS_TYPE_IS_UNIX)
+#if defined(BOTAN_TARGET_OS_HAS_POSIX1)
    struct sigaction old_sigaction;
    struct sigaction sigaction;
 
@@ -648,7 +409,7 @@ int OS::run_cpu_instruction_probe(std::function<int ()> probe_fn)
    if(rc != 0)
       throw Exception("run_cpu_instruction_probe sigaction failed");
 
-   rc = ::sigsetjmp(g_sigill_jmp_buf, /*save sigs*/1);
+   rc = sigsetjmp(g_sigill_jmp_buf, /*save sigs*/1);
 
    if(rc == 0)
       {

@@ -1,6 +1,6 @@
 /*
 * Number Theory Functions
-* (C) 1999-2011,2016 Jack Lloyd
+* (C) 1999-2011,2016,2018 Jack Lloyd
 *
 * Botan is released under the Simplified BSD License (see license.txt)
 */
@@ -8,9 +8,12 @@
 #include <botan/numthry.h>
 #include <botan/pow_mod.h>
 #include <botan/reducer.h>
+#include <botan/monty.h>
+#include <botan/rng.h>
 #include <botan/internal/bit_ops.h>
 #include <botan/internal/mp_core.h>
 #include <botan/internal/ct_utils.h>
+#include <botan/internal/monty_exp.h>
 #include <algorithm>
 
 namespace Botan {
@@ -46,26 +49,32 @@ size_t low_zero_bits(const BigInt& n)
 */
 BigInt gcd(const BigInt& a, const BigInt& b)
    {
-   if(a.is_zero() || b.is_zero()) return 0;
-   if(a == 1 || b == 1)           return 1;
+   if(a.is_zero() || b.is_zero())
+      return 0;
+   if(a == 1 || b == 1)
+      return 1;
 
-   BigInt x = a, y = b;
-   x.set_sign(BigInt::Positive);
-   y.set_sign(BigInt::Positive);
-   size_t shift = std::min(low_zero_bits(x), low_zero_bits(y));
+   BigInt X[2] = { a, b };
+   X[0].set_sign(BigInt::Positive);
+   X[1].set_sign(BigInt::Positive);
 
-   x >>= shift;
-   y >>= shift;
+   const size_t shift = std::min(low_zero_bits(X[0]), low_zero_bits(X[1]));
 
-   while(x.is_nonzero())
+   X[0] >>= shift;
+   X[1] >>= shift;
+
+   while(X[0].is_nonzero())
       {
-      x >>= low_zero_bits(x);
-      y >>= low_zero_bits(y);
-      if(x >= y) { x -= y; x >>= 1; }
-      else       { y -= x; y >>= 1; }
+      X[0] >>= low_zero_bits(X[0]);
+      X[1] >>= low_zero_bits(X[1]);
+
+      const uint8_t sel = static_cast<uint8_t>(X[0] >= X[1]);
+
+      X[sel^1] -= X[sel];
+      X[sel^1] >>= 1;
       }
 
-   return (y << shift);
+   return (X[1] << shift);
    }
 
 /*
@@ -82,7 +91,7 @@ with n <= k <= 2n
 Returns k
 
 "The Montgomery Modular Inverse - Revisited" Çetin Koç, E. Savas
-http://citeseerx.ist.psu.edu/viewdoc/citations?doi=10.1.1.75.8377
+https://citeseerx.ist.psu.edu/viewdoc/citations?doi=10.1.1.75.8377
 
 A const time implementation of this algorithm is described in
 "Constant Time Modular Inversion" Joppe W. Bos
@@ -128,7 +137,7 @@ size_t almost_montgomery_inverse(BigInt& result,
 
    if(r >= p)
       {
-      r = r - p;
+      r -= p;
       }
 
    result = p - r;
@@ -157,6 +166,8 @@ BigInt ct_inverse_mod_odd_modulus(const BigInt& n, const BigInt& mod)
       throw Invalid_Argument("ct_inverse_mod_odd_modulus: arguments must be non-negative");
    if(mod < 3 || mod.is_even())
       throw Invalid_Argument("Bad modulus to ct_inverse_mod_odd_modulus");
+   if(n >= mod)
+      throw Invalid_Argument("ct_inverse_mod_odd_modulus n >= mod not supported");
 
    /*
    This uses a modular inversion algorithm designed by Niels Möller
@@ -171,7 +182,7 @@ BigInt ct_inverse_mod_odd_modulus(const BigInt& n, const BigInt& mod)
    Software Polynomial Multiplication on ARM Processors using the NEON Engine"
    by Danilo Câmara, Conrado P. L. Gouvêa, Julio López, and Ricardo
    Dahab in LNCS 8182
-      http://conradoplg.cryptoland.net/files/2010/12/mocrysen13.pdf
+      https://conradoplg.cryptoland.net/files/2010/12/mocrysen13.pdf
 
    Thanks to Niels for creating the algorithm, explaining some things
    about it, and the reference to the paper.
@@ -284,8 +295,21 @@ BigInt inverse_mod(const BigInt& n, const BigInt& mod)
    if(n.is_zero() || (n.is_even() && mod.is_even()))
       return 0; // fast fail checks
 
-   if(mod.is_odd())
+   if(mod.is_odd() && n < mod)
       return ct_inverse_mod_odd_modulus(n, mod);
+
+   return inverse_euclid(n, mod);
+   }
+
+BigInt inverse_euclid(const BigInt& n, const BigInt& mod)
+   {
+   if(mod.is_zero())
+      throw BigInt::DivideByZero();
+   if(mod.is_negative() || n.is_negative())
+      throw Invalid_Argument("inverse_mod: arguments must be non-negative");
+
+   if(n.is_zero() || (n.is_even() && mod.is_even()))
+      return 0; // fast fail checks
 
    BigInt u = mod, v = n;
    BigInt A = 1, B = 0, C = 0, D = 1;
@@ -373,6 +397,18 @@ word monty_inverse(word input)
 */
 BigInt power_mod(const BigInt& base, const BigInt& exp, const BigInt& mod)
    {
+   if(mod.is_negative() || mod == 1)
+      {
+      return 0;
+      }
+
+   if(base.is_zero() || mod.is_zero())
+      {
+      if(exp.is_zero())
+         return 1;
+      return 0;
+      }
+
    Power_Mod pow_mod(mod);
 
    /*
@@ -414,16 +450,27 @@ bool mr_witness(BigInt&& y,
       if(y == 1) // found a non-trivial square root
          return true;
 
-      if(y == n_minus_1) // -1, trivial square root, so give up
+      /*
+      -1 is the trivial square root of unity, so ``a`` is not a
+      witness for this number - give up
+      */
+      if(y == n_minus_1)
          return false;
       }
 
-   return true; // fails Fermat test
+   return true; // is a witness
    }
 
 size_t mr_test_iterations(size_t n_bits, size_t prob, bool random)
    {
    const size_t base = (prob + 2) / 2; // worst case 4^-t error rate
+
+   /*
+   * If the candidate prime was maliciously constructed, we can't rely
+   * on arguments based on p being random.
+   */
+   if(random == false)
+      return base;
 
    /*
    * For randomly chosen numbers we can use the estimates from
@@ -432,25 +479,30 @@ size_t mr_test_iterations(size_t n_bits, size_t prob, bool random)
    * These values are derived from the inequality for p(k,t) given on
    * the second page.
    */
-   if(random && prob <= 80)
+   if(prob <= 128)
       {
       if(n_bits >= 1536)
-         return 2; // < 2^-89
+         return 4; // < 2^-133
       if(n_bits >= 1024)
-         return 4; // < 2^-89
+         return 6; // < 2^-133
       if(n_bits >= 512)
-         return 5; // < 2^-80
+         return 12; // < 2^-129
       if(n_bits >= 256)
-         return 11; // < 2^-80
+         return 29; // < 2^-128
       }
 
+   /*
+   If the user desires a smaller error probability than we have
+   precomputed error estimates for, just fall back to using the worst
+   case error rate.
+   */
    return base;
    }
 
 }
 
 /*
-* Test for primaility using Miller-Rabin
+* Test for primality using Miller-Rabin
 */
 bool is_prime(const BigInt& n, RandomNumberGenerator& rng,
               size_t prob, bool is_random)
@@ -468,20 +520,43 @@ bool is_prime(const BigInt& n, RandomNumberGenerator& rng,
       return std::binary_search(PRIMES, PRIMES + PRIME_TABLE_SIZE, num);
       }
 
-   const size_t test_iterations = mr_test_iterations(n.bits(), prob, is_random);
+   const size_t test_iterations =
+      mr_test_iterations(n.bits(), prob, is_random && rng.is_seeded());
 
    const BigInt n_minus_1 = n - 1;
    const size_t s = low_zero_bits(n_minus_1);
+   const BigInt nm1_s = n_minus_1 >> s;
+   const size_t n_bits = n.bits();
 
-   Fixed_Exponent_Power_Mod pow_mod(n_minus_1 >> s, n);
-   Modular_Reducer reducer(n);
+   const Modular_Reducer mod_n(n);
+   auto monty_n = std::make_shared<Montgomery_Params>(n, mod_n);
+
+   const size_t powm_window = 4;
 
    for(size_t i = 0; i != test_iterations; ++i)
       {
-      const BigInt a = BigInt::random_integer(rng, 2, n_minus_1);
-      BigInt y = pow_mod(a);
+      BigInt a;
 
-      if(mr_witness(std::move(y), reducer, n_minus_1, s))
+      if(rng.is_seeded())
+         {
+         a = BigInt::random_integer(rng, 2, n_minus_1);
+         }
+      else
+         {
+         /*
+         * If passed a null RNG just use 2,3,5, ... as bases
+         *
+         * This is not ideal but in certain circumstances we need to
+         * test for primality but have no RNG available.
+         */
+         a = PRIMES[i];
+         }
+
+      auto powm_a_n = monty_precompute(monty_n, a, powm_window);
+
+      BigInt y = monty_execute(*powm_a_n, nm1_s, n_bits);
+
+      if(mr_witness(std::move(y), mod_n, n_minus_1, s))
          return false;
       }
 

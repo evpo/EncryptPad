@@ -10,28 +10,28 @@
 
 namespace Botan {
 
+#if defined(BOTAN_HAS_STREAM_CIPHER)
+
 StreamCipher_Filter::StreamCipher_Filter(StreamCipher* cipher) :
-   m_buffer(DEFAULT_BUFFERSIZE),
+   m_buffer(BOTAN_DEFAULT_BUFFER_SIZE),
    m_cipher(cipher)
    {
    }
 
 StreamCipher_Filter::StreamCipher_Filter(StreamCipher* cipher, const SymmetricKey& key) :
-   m_buffer(DEFAULT_BUFFERSIZE),
-   m_cipher(cipher)
+   StreamCipher_Filter(cipher)
    {
    m_cipher->set_key(key);
    }
 
 StreamCipher_Filter::StreamCipher_Filter(const std::string& sc_name) :
-   m_buffer(DEFAULT_BUFFERSIZE),
+   m_buffer(BOTAN_DEFAULT_BUFFER_SIZE),
    m_cipher(StreamCipher::create_or_throw(sc_name))
    {
    }
 
 StreamCipher_Filter::StreamCipher_Filter(const std::string& sc_name, const SymmetricKey& key) :
-   m_buffer(DEFAULT_BUFFERSIZE),
-   m_cipher(StreamCipher::create_or_throw(sc_name))
+   StreamCipher_Filter(sc_name)
    {
    m_cipher->set_key(key);
    }
@@ -48,6 +48,10 @@ void StreamCipher_Filter::write(const uint8_t input[], size_t length)
       }
    }
 
+#endif
+
+#if defined(BOTAN_HAS_HASH)
+
 Hash_Filter::Hash_Filter(const std::string& hash_name, size_t len) :
    m_hash(HashFunction::create_or_throw(hash_name)),
    m_out_len(len)
@@ -62,6 +66,9 @@ void Hash_Filter::end_msg()
    else
       send(output);
    }
+#endif
+
+#if defined(BOTAN_HAS_MAC)
 
 MAC_Filter::MAC_Filter(const std::string& mac_name, size_t len) :
    m_mac(MessageAuthenticationCode::create_or_throw(mac_name)),
@@ -70,8 +77,7 @@ MAC_Filter::MAC_Filter(const std::string& mac_name, size_t len) :
    }
 
 MAC_Filter::MAC_Filter(const std::string& mac_name, const SymmetricKey& key, size_t len) :
-   m_mac(MessageAuthenticationCode::create_or_throw(mac_name)),
-   m_out_len(len)
+   MAC_Filter(mac_name, len)
    {
    m_mac->set_key(key);
    }
@@ -84,5 +90,7 @@ void MAC_Filter::end_msg()
    else
       send(output);
    }
+
+#endif
 
 }

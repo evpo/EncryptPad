@@ -29,10 +29,10 @@ class Message_Auth_Tests final : public Text_Based_Test
 
       Test::Result run_one_test(const std::string& algo, const VarMap& vars) override
          {
-         const std::vector<uint8_t> key      = get_req_bin(vars, "Key");
-         const std::vector<uint8_t> input    = get_req_bin(vars, "In");
-         const std::vector<uint8_t> expected = get_req_bin(vars, "Out");
-         const std::vector<uint8_t> iv       = get_opt_bin(vars, "IV");
+         const std::vector<uint8_t> key      = vars.get_req_bin("Key");
+         const std::vector<uint8_t> input    = vars.get_req_bin("In");
+         const std::vector<uint8_t> expected = vars.get_req_bin("Out");
+         const std::vector<uint8_t> iv       = vars.get_opt_bin("IV");
 
          Test::Result result(algo);
 
@@ -40,7 +40,7 @@ class Message_Auth_Tests final : public Text_Based_Test
 
          if(providers.empty())
             {
-            result.note_missing("block cipher " + algo);
+            result.note_missing("MAC " + algo);
             return result;
             }
 
@@ -59,6 +59,17 @@ class Message_Auth_Tests final : public Text_Based_Test
             result.test_is_nonempty("provider", provider);
             result.test_eq(provider, mac->name(), algo);
 
+            try
+               {
+               std::vector<uint8_t> buf(128);
+               mac->update(buf.data(), buf.size());
+               result.test_failure("Was able to MAC without a key being set");
+               }
+            catch(Botan::Invalid_State&)
+               {
+               result.test_success("Trying to MAC with no key set fails");
+               }
+
             mac->set_key(key);
             mac->start(iv);
 
@@ -68,6 +79,7 @@ class Message_Auth_Tests final : public Text_Based_Test
 
             // Test to make sure clear() resets what we need it to
             mac->set_key(key);
+            mac->start(iv);
             mac->update("some discarded input");
             mac->clear();
 
@@ -81,9 +93,10 @@ class Message_Auth_Tests final : public Text_Based_Test
             result.confirm("Clone has different pointer", mac.get() != clone.get());
             result.test_eq("Clone has same name", mac->name(), clone->name());
             clone->set_key(key);
+            clone->start(iv);
             clone->update(Test::rng().random_vec(32));
 
-            result.test_eq(provider + " correct mac", mac->verify_mac(expected.data(), expected.size()), true);
+            result.test_eq(provider + " verify mac", mac->verify_mac(expected.data(), expected.size()), true);
 
             if(input.size() > 2)
                {
@@ -105,6 +118,30 @@ class Message_Auth_Tests final : public Text_Based_Test
                mac->update(input[ input.size() - 1 ]);
 
                result.test_eq(provider + " split mac", mac->verify_mac(expected.data(), expected.size()), true);
+               }
+
+            mac->clear();
+
+            try
+               {
+               std::vector<uint8_t> buf(128);
+               mac->update(buf.data(), buf.size());
+               result.test_failure("Was able to MAC without a key being set");
+               }
+            catch(Botan::Invalid_State&)
+               {
+               result.test_success("Trying to MAC with no key set (after clear) fails");
+               }
+
+            try
+               {
+               std::vector<uint8_t> buf(mac->output_length());
+               mac->final(buf.data());
+               result.test_failure("Was able to MAC without a key being set");
+               }
+            catch(Botan::Invalid_State&)
+               {
+               result.test_success("Trying to MAC with no key set (after clear) fails");
                }
             }
 

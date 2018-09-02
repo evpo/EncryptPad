@@ -30,11 +30,14 @@ class HashFunction;
 class RandomNumberGenerator;
 enum Cipher_Dir : int;
 
-class OpenSSL_Error final : public Exception
+class BOTAN_PUBLIC_API(2,0) OpenSSL_Error final : public Exception
    {
    public:
       OpenSSL_Error(const std::string& what) :
          Exception(what + " failed: " + ERR_error_string(ERR_get_error(), nullptr)) {}
+
+      OpenSSL_Error(const std::string& what, int err) :
+         Exception(what + " failed: " + ERR_error_string(err, nullptr)) {}
    };
 
 /* Block Ciphers */

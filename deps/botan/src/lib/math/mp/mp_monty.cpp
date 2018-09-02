@@ -7,113 +7,129 @@
 * Botan is released under the Simplified BSD License (see license.txt)
 */
 
-#include <botan/bigint.h>
 #include <botan/internal/mp_core.h>
+#include <botan/internal/mp_monty.h>
 #include <botan/internal/mp_madd.h>
 #include <botan/internal/mp_asmi.h>
 #include <botan/internal/ct_utils.h>
 #include <botan/mem_ops.h>
+#include <botan/exceptn.h>
 
 namespace Botan {
 
+namespace {
+
 /*
-* Montgomery Reduction Algorithm
+* Montgomery reduction - product scanning form
+*
+* https://www.iacr.org/archive/ches2005/006.pdf
+* https://eprint.iacr.org/2013/882.pdf
+* https://www.microsoft.com/en-us/research/wp-content/uploads/1996/01/j37acmon.pdf
 */
-void bigint_monty_redc(word z[],
-                       const word p[], size_t p_size,
-                       word p_dash, word ws[])
+void bigint_monty_redc_generic(word z[], size_t z_size,
+                               const word p[], size_t p_size, word p_dash,
+                               word ws[])
    {
-   const size_t z_size = 2*(p_size+1);
+   word w2 = 0, w1 = 0, w0 = 0;
 
-   CT::poison(z, z_size);
-   CT::poison(p, p_size);
-   CT::poison(ws, 2*(p_size+1));
+   w0 = z[0];
 
-   const size_t blocks_of_8 = p_size - (p_size % 8);
+   ws[0] = w0 * p_dash;
+
+   word3_muladd(&w2, &w1, &w0, ws[0], p[0]);
+
+   w0 = w1;
+   w1 = w2;
+   w2 = 0;
+
+   for(size_t i = 1; i != p_size; ++i)
+      {
+      for(size_t j = 0; j < i; ++j)
+         {
+         word3_muladd(&w2, &w1, &w0, ws[j], p[i-j]);
+         }
+
+      word3_add(&w2, &w1, &w0, z[i]);
+
+      ws[i] = w0 * p_dash;
+
+      word3_muladd(&w2, &w1, &w0, ws[i], p[0]);
+
+      w0 = w1;
+      w1 = w2;
+      w2 = 0;
+      }
 
    for(size_t i = 0; i != p_size; ++i)
       {
-      word* z_i = z + i;
-
-      const word y = z_i[0] * p_dash;
-
-      /*
-      bigint_linmul3(ws, p, p_size, y);
-      bigint_add2(z_i, z_size - i, ws, p_size+1);
-      */
-
-      word carry = 0;
-
-      for(size_t j = 0; j != blocks_of_8; j += 8)
-         carry = word8_madd3(z_i + j, p + j, y, carry);
-
-      for(size_t j = blocks_of_8; j != p_size; ++j)
-         z_i[j] = word_madd3(p[j], y, z_i[j], &carry);
-
-      word z_sum = z_i[p_size] + carry;
-      carry = (z_sum < z_i[p_size]);
-      z_i[p_size] = z_sum;
-
-      for(size_t j = p_size + 1; j < z_size - i; ++j)
+      for(size_t j = i + 1; j != p_size; ++j)
          {
-         z_i[j] += carry;
-         carry = carry & !z_i[j];
+         word3_muladd(&w2, &w1, &w0, ws[j], p[p_size + i-j]);
          }
+
+      word3_add(&w2, &w1, &w0, z[p_size+i]);
+
+      ws[i] = w0;
+      w0 = w1;
+      w1 = w2;
+      w2 = 0;
       }
+
+   word3_add(&w2, &w1, &w0, z[z_size-1]);
+
+   ws[p_size] = w0;
+   ws[p_size+1] = w1;
 
    /*
    * The result might need to be reduced mod p. To avoid a timing
    * channel, always perform the subtraction. If in the compution
    * of x - p a borrow is required then x was already < p.
    *
-   * x - p starts at ws[0] and is p_size+1 bytes long
-   * x starts at ws[p_size+1] and is also p_size+1 bytes log
-   * (that's the copy_mem)
+   * x starts at ws[0] and is p_size+1 bytes long.
+   * x - p starts at ws[p_size+1] and is also p_size+1 bytes log
    *
    * Select which address to copy from indexing off of the final
    * borrow.
    */
 
+   // word borrow = bigint_sub3(ws + p_size + 1, ws, p_size + 1, p, p_size);
    word borrow = 0;
    for(size_t i = 0; i != p_size; ++i)
-      ws[i] = word_sub(z[p_size + i], p[i], &borrow);
+      ws[p_size + 1 + i] = word_sub(ws[i], p[i], &borrow);
+   ws[2*p_size+1] = word_sub(ws[p_size], 0, &borrow);
 
-   ws[p_size] = word_sub(z[p_size+p_size], 0, &borrow);
-
-   copy_mem(ws + p_size + 1, z + p_size, p_size + 1);
-
-   CT::conditional_copy_mem(borrow, z, ws + (p_size + 1), ws, (p_size + 1));
-   clear_mem(z + p_size + 1, z_size - p_size - 1);
-
-   CT::unpoison(z, z_size);
-   CT::unpoison(p, p_size);
-   CT::unpoison(ws, 2*(p_size+1));
+   CT::conditional_copy_mem(borrow, z, ws, ws + (p_size + 1), (p_size + 1));
+   clear_mem(z + p_size, z_size - p_size - 2);
 
    // This check comes after we've used it but that's ok here
    CT::unpoison(&borrow, 1);
    BOTAN_ASSERT(borrow == 0 || borrow == 1, "Expected borrow");
    }
 
-void bigint_monty_mul(BigInt& z, const BigInt& x, const BigInt& y,
-                      const word p[], size_t p_size, word p_dash,
-                      word ws[])
+}
+
+void bigint_monty_redc(word z[],
+                       const word p[], size_t p_size, word p_dash,
+                       word ws[], size_t ws_size)
    {
-   bigint_mul(z, x, y, &ws[0]);
+   const size_t z_size = 2*(p_size+1);
 
-   bigint_monty_redc(z.mutable_data(),
-                     p, p_size, p_dash,
-                     ws);
-   }
+   BOTAN_ARG_CHECK(ws_size >= z_size, "workspace too small");
 
-void bigint_monty_sqr(BigInt& z, const BigInt& x, const word p[],
-                      size_t p_size, word p_dash, word ws[])
-   {
-   bigint_sqr(z.mutable_data(), z.size(), &ws[0],
-              x.data(), x.size(), x.sig_words());
-
-   bigint_monty_redc(z.mutable_data(),
-                     p, p_size, p_dash,
-                     ws);
+   if(p_size == 4)
+      bigint_monty_redc_4(z, p, p_dash, ws);
+   else if(p_size == 6)
+      bigint_monty_redc_6(z, p, p_dash, ws);
+   else if(p_size == 8)
+      bigint_monty_redc_8(z, p, p_dash, ws);
+   else if(p_size == 16)
+      bigint_monty_redc_16(z, p, p_dash, ws);
+   else if(p_size == 24)
+      bigint_monty_redc_24(z, p, p_dash, ws);
+   else if(p_size == 32)
+      bigint_monty_redc_32(z, p, p_dash, ws);
+   else
+      bigint_monty_redc_generic(z, z_size, p, p_size, p_dash, ws);
    }
 
 }

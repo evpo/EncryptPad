@@ -2,6 +2,7 @@
 * TLS Hello Request and Client Hello Messages
 * (C) 2004-2011,2015,2016 Jack Lloyd
 *     2016 Matthias Gierlings
+*     2017 Harry Reimann, Rohde & Schwarz Cybersecurity
 *
 * Botan is released under the Simplified BSD License (see license.txt)
 */
@@ -9,7 +10,10 @@
 #include <botan/tls_messages.h>
 #include <botan/tls_alert.h>
 #include <botan/tls_exceptn.h>
+#include <botan/tls_callbacks.h>
 #include <botan/rng.h>
+#include <botan/hash.h>
+
 #include <botan/internal/tls_reader.h>
 #include <botan/internal/tls_session_key.h>
 #include <botan/internal/tls_handshake_io.h>
@@ -27,10 +31,14 @@ enum {
 };
 
 std::vector<uint8_t> make_hello_random(RandomNumberGenerator& rng,
-                                    const Policy& policy)
+                                       const Policy& policy)
    {
    std::vector<uint8_t> buf(32);
    rng.randomize(buf.data(), buf.size());
+
+   std::unique_ptr<HashFunction> sha256 = HashFunction::create_or_throw("SHA-256");
+   sha256->update(buf);
+   sha256->final(buf);
 
    if(policy.include_time_in_hello_random())
       {
@@ -74,6 +82,7 @@ std::vector<uint8_t> Hello_Request::serialize() const
 Client_Hello::Client_Hello(Handshake_IO& io,
                            Handshake_Hash& hash,
                            const Policy& policy,
+                           Callbacks& cb,
                            RandomNumberGenerator& rng,
                            const std::vector<uint8_t>& reneg_info,
                            const Client_Hello::Settings& client_settings,
@@ -81,7 +90,7 @@ Client_Hello::Client_Hello(Handshake_IO& io,
    m_version(client_settings.protocol_version()),
    m_random(make_hello_random(rng, policy)),
    m_suites(policy.ciphersuite_list(m_version, !client_settings.srp_identifier().empty())),
-   m_comp_methods(policy.compression())
+   m_comp_methods(1)
    {
    BOTAN_ASSERT(policy.acceptable_protocol_version(client_settings.protocol_version()),
                 "Our policy accepts the version we are offering");
@@ -92,7 +101,6 @@ Client_Hello::Client_Hello(Handshake_IO& io,
    */
    m_extensions.add(new Extended_Master_Secret);
    m_extensions.add(new Session_Ticket());
-   m_extensions.add(new Certificate_Status_Request);
 
    if(policy.negotiate_encrypt_then_mac())
       m_extensions.add(new Encrypt_then_MAC);
@@ -100,14 +108,14 @@ Client_Hello::Client_Hello(Handshake_IO& io,
    m_extensions.add(new Renegotiation_Extension(reneg_info));
    m_extensions.add(new Server_Name_Indicator(client_settings.hostname()));
 
-   m_extensions.add(new Certificate_Status_Request({}, {}));
+   if(policy.support_cert_status_message())
+      m_extensions.add(new Certificate_Status_Request({}, {}));
 
    if(reneg_info.empty() && !next_protocols.empty())
       m_extensions.add(new Application_Layer_Protocol_Notification(next_protocols));
 
    if(m_version.supports_negotiable_signature_algorithms())
-      m_extensions.add(new Signature_Algorithms(policy.allowed_signature_hashes(),
-                                                policy.allowed_signature_methods()));
+      m_extensions.add(new Signature_Algorithms(policy.allowed_signature_schemes()));
 
    if(m_version.is_datagram_protocol())
       m_extensions.add(new SRTP_Protection_Profiles(policy.srtp_profiles()));
@@ -121,16 +129,16 @@ Client_Hello::Client_Hello(Handshake_IO& io,
       }
 #endif
 
-   m_extensions.add(new Supported_Elliptic_Curves(policy.allowed_ecc_curves()));
+   std::unique_ptr<Supported_Groups> supported_groups(new Supported_Groups(policy.key_exchange_groups()));
 
-   if(!policy.allowed_ecc_curves().empty())
+   if(supported_groups->ec_groups().size() > 0)
       {
       m_extensions.add(new Supported_Point_Formats(policy.use_ecc_point_compression()));
       }
 
-   if(m_version.supports_negotiable_signature_algorithms())
-      m_extensions.add(new Signature_Algorithms(policy.allowed_signature_hashes(),
-                                                policy.allowed_signature_methods()));
+   m_extensions.add(supported_groups.release());
+
+   cb.tls_modify_extensions(m_extensions, CLIENT);
 
    if(policy.send_fallback_scsv(client_settings.protocol_version()))
       m_suites.push_back(TLS_FALLBACK_SCSV);
@@ -144,6 +152,7 @@ Client_Hello::Client_Hello(Handshake_IO& io,
 Client_Hello::Client_Hello(Handshake_IO& io,
                            Handshake_Hash& hash,
                            const Policy& policy,
+                           Callbacks& cb,
                            RandomNumberGenerator& rng,
                            const std::vector<uint8_t>& reneg_info,
                            const Session& session,
@@ -152,13 +161,10 @@ Client_Hello::Client_Hello(Handshake_IO& io,
    m_session_id(session.session_id()),
    m_random(make_hello_random(rng, policy)),
    m_suites(policy.ciphersuite_list(m_version, (session.srp_identifier() != ""))),
-   m_comp_methods(policy.compression())
+   m_comp_methods(1)
    {
    if(!value_exists(m_suites, session.ciphersuite_code()))
       m_suites.push_back(session.ciphersuite_code());
-
-   if(!value_exists(m_comp_methods, session.compression_method()))
-      m_comp_methods.push_back(session.compression_method());
 
    /*
    We always add the EMS extension, even if not used in the original session.
@@ -166,17 +172,19 @@ Client_Hello::Client_Hello(Handshake_IO& io,
    attempt and upgrade us to a new session with the EMS protection.
    */
    m_extensions.add(new Extended_Master_Secret);
-   m_extensions.add(new Certificate_Status_Request);
 
    m_extensions.add(new Renegotiation_Extension(reneg_info));
    m_extensions.add(new Server_Name_Indicator(session.server_info().hostname()));
    m_extensions.add(new Session_Ticket(session.session_ticket()));
-   m_extensions.add(new Supported_Elliptic_Curves(policy.allowed_ecc_curves()));
 
-   if(!policy.allowed_ecc_curves().empty())
+   std::unique_ptr<Supported_Groups> supported_groups(new Supported_Groups(policy.key_exchange_groups()));
+
+   if(supported_groups->ec_groups().size() > 0)
       {
       m_extensions.add(new Supported_Point_Formats(policy.use_ecc_point_compression()));
       }
+
+   m_extensions.add(supported_groups.release());
 
    if(session.supports_encrypt_then_mac())
       m_extensions.add(new Encrypt_then_MAC);
@@ -191,11 +199,12 @@ Client_Hello::Client_Hello(Handshake_IO& io,
 #endif
 
    if(m_version.supports_negotiable_signature_algorithms())
-      m_extensions.add(new Signature_Algorithms(policy.allowed_signature_hashes(),
-                                                policy.allowed_signature_methods()));
+      m_extensions.add(new Signature_Algorithms(policy.allowed_signature_schemes()));
 
    if(reneg_info.empty() && !next_protocols.empty())
       m_extensions.add(new Application_Layer_Protocol_Notification(next_protocols));
+
+   cb.tls_modify_extensions(m_extensions, CLIENT);
 
    hash.update(io.send(*this));
    }
@@ -307,26 +316,30 @@ bool Client_Hello::offered_suite(uint16_t ciphersuite) const
    return false;
    }
 
-std::vector<std::pair<std::string, std::string>> Client_Hello::supported_algos() const
+std::vector<Signature_Scheme> Client_Hello::signature_schemes() const
    {
+   std::vector<Signature_Scheme> schemes;
+
    if(Signature_Algorithms* sigs = m_extensions.get<Signature_Algorithms>())
-      return sigs->supported_signature_algorthms();
-   return std::vector<std::pair<std::string, std::string>>();
+      {
+      schemes = sigs->supported_schemes();
+      }
+
+   return schemes;
    }
 
-std::set<std::string> Client_Hello::supported_sig_algos() const
+std::vector<Group_Params> Client_Hello::supported_ecc_curves() const
    {
-   std::set<std::string> sig;
-   for(auto&& hash_and_sig : supported_algos())
-      sig.insert(hash_and_sig.second);
-   return sig;
+   if(Supported_Groups* groups = m_extensions.get<Supported_Groups>())
+      return groups->ec_groups();
+   return std::vector<Group_Params>();
    }
 
-std::vector<std::string> Client_Hello::supported_ecc_curves() const
+std::vector<Group_Params> Client_Hello::supported_dh_groups() const
    {
-   if(Supported_Elliptic_Curves* ecc = m_extensions.get<Supported_Elliptic_Curves>())
-      return ecc->curves();
-   return std::vector<std::string>();
+   if(Supported_Groups* groups = m_extensions.get<Supported_Groups>())
+      return groups->dh_groups();
+   return std::vector<Group_Params>();
    }
 
 bool Client_Hello::prefers_compressed_ec_points() const

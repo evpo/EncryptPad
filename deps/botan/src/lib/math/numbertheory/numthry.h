@@ -84,7 +84,17 @@ BigInt BOTAN_PUBLIC_API(2,0) square(const BigInt& x);
 * Not const time
 */
 BigInt BOTAN_PUBLIC_API(2,0) inverse_mod(const BigInt& x,
-                             const BigInt& modulus);
+                                         const BigInt& modulus);
+
+/**
+* Modular inversion using extended binary Euclidian algorithm
+* @param x a positive integer
+* @param modulus a positive integer
+* @return y st (x*y) % modulus == 1 or 0 if no such value
+* Not const time
+*/
+BigInt BOTAN_PUBLIC_API(2,5) inverse_euclid(const BigInt& x,
+                                            const BigInt& modulus);
 
 /**
 * Const time modular inversion
@@ -164,9 +174,9 @@ size_t BOTAN_PUBLIC_API(2,0) low_zero_bits(const BigInt& x);
 * @return true if all primality tests passed, otherwise false
 */
 bool BOTAN_PUBLIC_API(2,0) is_prime(const BigInt& n,
-                        RandomNumberGenerator& rng,
-                        size_t prob = 56,
-                        bool is_random = false);
+                                    RandomNumberGenerator& rng,
+                                    size_t prob = 56,
+                                    bool is_random = false);
 
 inline bool quick_check_prime(const BigInt& n, RandomNumberGenerator& rng)
    { return is_prime(n, rng, 32); }
@@ -179,18 +189,37 @@ inline bool verify_prime(const BigInt& n, RandomNumberGenerator& rng)
 
 
 /**
-* Randomly generate a prime
+* Randomly generate a prime suitable for discrete logarithm parameters
 * @param rng a random number generator
 * @param bits how large the resulting prime should be in bits
 * @param coprime a positive integer that (prime - 1) should be coprime to
 * @param equiv a non-negative number that the result should be
                equivalent to modulo equiv_mod
 * @param equiv_mod the modulus equiv should be checked against
+* @param prob use test so false positive is bounded by 1/2**prob
 * @return random prime with the specified criteria
 */
 BigInt BOTAN_PUBLIC_API(2,0) random_prime(RandomNumberGenerator& rng,
-                              size_t bits, const BigInt& coprime = 1,
-                              size_t equiv = 1, size_t equiv_mod = 2);
+                                          size_t bits,
+                                          const BigInt& coprime = 0,
+                                          size_t equiv = 1,
+                                          size_t equiv_mod = 2,
+                                          size_t prob = 128);
+
+/**
+* Generate a prime suitable for RSA p/q
+* @param keygen_rng a random number generator
+* @param prime_test_rng a random number generator
+* @param bits how large the resulting prime should be in bits (must be >= 512)
+* @param coprime a positive integer that (prime - 1) should be coprime to
+* @param prob use test so false positive is bounded by 1/2**prob
+* @return random prime with the specified criteria
+*/
+BigInt BOTAN_PUBLIC_API(2,7) generate_rsa_prime(RandomNumberGenerator& keygen_rng,
+                                                RandomNumberGenerator& prime_test_rng,
+                                                size_t bits,
+                                                const BigInt& coprime,
+                                                size_t prob = 128);
 
 /**
 * Return a 'safe' prime, of the form p=2*q+1 with q prime
@@ -199,7 +228,7 @@ BigInt BOTAN_PUBLIC_API(2,0) random_prime(RandomNumberGenerator& rng,
 * @return prime randomly chosen from safe primes of length bits
 */
 BigInt BOTAN_PUBLIC_API(2,0) random_safe_prime(RandomNumberGenerator& rng,
-                                   size_t bits);
+                                               size_t bits);
 
 /**
 * Generate DSA parameters using the FIPS 186 kosherizer

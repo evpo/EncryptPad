@@ -1,6 +1,7 @@
 /*
 * Text-Based TLS Policy
 * (C) 2016,2017 Jack Lloyd
+*     2017 Harry Reimann, Rohde & Schwarz Cybersecurity
 *
 * Botan is released under the Simplified BSD License (see license.txt)
 */
@@ -37,11 +38,6 @@ std::vector<std::string> Text_Policy::allowed_key_exchange_methods() const
 std::vector<std::string> Text_Policy::allowed_signature_methods() const
    {
    return get_list("signature_methods", Policy::allowed_signature_methods());
-   }
-
-std::vector<std::string> Text_Policy::allowed_ecc_curves() const
-   {
-   return get_list("ecc_curves", Policy::allowed_ecc_curves());
    }
 
 bool Text_Policy::use_ecc_point_compression() const
@@ -88,6 +84,7 @@ bool Text_Policy::allow_client_initiated_renegotiation() const
    {
    return get_bool("allow_client_initiated_renegotiation", Policy::allow_client_initiated_renegotiation());
    }
+
 bool Text_Policy::allow_server_initiated_renegotiation() const
    {
    return get_bool("allow_server_initiated_renegotiation", Policy::allow_server_initiated_renegotiation());
@@ -103,9 +100,58 @@ bool Text_Policy::negotiate_encrypt_then_mac() const
    return get_bool("negotiate_encrypt_then_mac", Policy::negotiate_encrypt_then_mac());
    }
 
-std::string Text_Policy::dh_group() const
+bool Text_Policy::support_cert_status_message() const
    {
-   return get_str("dh_group", Policy::dh_group());
+   return get_bool("support_cert_status_message", Policy::support_cert_status_message());
+   }
+
+std::vector<Group_Params> Text_Policy::key_exchange_groups() const
+   {
+   std::string group_str = get_str("key_exchange_groups");
+
+   if(group_str.empty())
+      {
+      // fall back to previously used name
+      group_str = get_str("groups");
+      }
+
+   if(group_str.empty())
+      {
+      return Policy::key_exchange_groups();
+      }
+
+   std::vector<Group_Params> groups;
+   for(std::string group_name : split_on(group_str, ' '))
+      {
+      Group_Params group_id = group_param_from_string(group_name);
+
+      if(group_id == Group_Params::NONE)
+         {
+         try
+            {
+            size_t consumed = 0;
+            unsigned long ll_id = std::stoul(group_name, &consumed, 0);
+            if(consumed != group_name.size())
+               continue; // some other cruft
+
+            const uint16_t id = static_cast<uint16_t>(ll_id);
+
+            if(id != ll_id)
+               continue; // integer too large
+
+            group_id = static_cast<Group_Params>(id);
+            }
+         catch(...)
+            {
+            continue;
+            }
+         }
+
+      if(group_id != Group_Params::NONE)
+         groups.push_back(group_id);
+      }
+
+   return groups;
    }
 
 size_t Text_Policy::minimum_ecdh_group_size() const
@@ -250,6 +296,17 @@ std::string Text_Policy::get_str(const std::string& key, const std::string& def)
       }
 
    return i->second;
+   }
+
+bool Text_Policy::set_value(const std::string& key, const std::string& val, bool overwrite)
+   {
+   auto i = m_kv.find(key);
+
+   if(overwrite == false && i != m_kv.end())
+      return false;
+
+   m_kv.insert(i, std::make_pair(key, val));
+   return true;
    }
 
 }

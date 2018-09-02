@@ -17,7 +17,7 @@ namespace Botan_Tests {
 
 namespace {
 
-#if defined(BOTAN_HAS_X509_CERTIFICATES) && defined(BOTAN_HAS_RSA)
+#if defined(BOTAN_HAS_X509_CERTIFICATES) && defined(BOTAN_HAS_RSA) && defined(BOTAN_HAS_EMSA_PKCS1) && defined(BOTAN_TARGET_OS_HAS_FILESYSTEM)
 
 class Name_Constraint_Tests final : public Test
    {
@@ -65,8 +65,8 @@ class Name_Constraint_Tests final : public Test
 
          for(const auto& t : test_cases)
             {
-            Botan::X509_Certificate root(Test::data_file("name_constraint/" + std::get<0>(t)));
-            Botan::X509_Certificate sub(Test::data_file("name_constraint/" + std::get<1>(t)));
+            Botan::X509_Certificate root(Test::data_file("x509/name_constraint/" + std::get<0>(t)));
+            Botan::X509_Certificate sub(Test::data_file("x509/name_constraint/" + std::get<1>(t)));
             Botan::Certificate_Store_In_Memory trusted;
             Test::Result result("X509v3 Name Constraints: " + std::get<1>(t));
 

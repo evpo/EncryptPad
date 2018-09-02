@@ -1,3 +1,11 @@
 <defines>
-HTTP_UTIL -> 20131128
+HTTP_UTIL -> 20171003
 </defines>
+
+<header:public>
+http_util.h
+</header:public>
+
+<requires>
+socket
+</requires>

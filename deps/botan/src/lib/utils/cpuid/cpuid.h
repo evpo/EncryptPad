@@ -98,6 +98,7 @@ class BOTAN_PUBLIC_API(2,1) CPUID final
          CPUID_RDTSC_BIT   = (1ULL << 10),
          CPUID_BMI2_BIT    = (1ULL << 11),
          CPUID_ADX_BIT     = (1ULL << 12),
+         CPUID_BMI1_BIT    = (1ULL << 13),
 
          // Crypto-specific ISAs
          CPUID_AESNI_BIT   = (1ULL << 16),
@@ -108,7 +109,8 @@ class BOTAN_PUBLIC_API(2,1) CPUID final
 #endif
 
 #if defined(BOTAN_TARGET_CPU_IS_PPC_FAMILY)
-         CPUID_ALTIVEC_BIT = (1ULL << 0),
+         CPUID_ALTIVEC_BIT    = (1ULL << 0),
+         CPUID_PPC_CRYPTO_BIT = (1ULL << 1),
 #endif
 
 #if defined(BOTAN_TARGET_CPU_IS_ARM_FAMILY)
@@ -128,6 +130,13 @@ class BOTAN_PUBLIC_API(2,1) CPUID final
       */
       static bool has_altivec()
          { return has_cpuid_bit(CPUID_ALTIVEC_BIT); }
+
+      /**
+      * Check if the processor supports POWER8 crypto extensions
+      */
+      static bool has_ppc_crypto()
+         { return has_cpuid_bit(CPUID_PPC_CRYPTO_BIT); }
+
 #endif
 
 #if defined(BOTAN_TARGET_CPU_IS_ARM_FAMILY)
@@ -207,6 +216,12 @@ class BOTAN_PUBLIC_API(2,1) CPUID final
          { return has_cpuid_bit(CPUID_AVX512F_BIT); }
 
       /**
+      * Check if the processor supports BMI1
+      */
+      static bool has_bmi1()
+         { return has_cpuid_bit(CPUID_BMI1_BIT); }
+
+      /**
       * Check if the processor supports BMI2
       */
       static bool has_bmi2()
@@ -270,7 +285,9 @@ class BOTAN_PUBLIC_API(2,1) CPUID final
          {
          if(g_processor_features == 0)
             initialize();
-         return ((g_processor_features & static_cast<uint64_t>(elem)) != 0);
+
+         const uint64_t elem64 = static_cast<uint64_t>(elem);
+         return ((g_processor_features & elem64) == elem64);
          }
 
       static std::vector<CPUID::CPUID_bits> bit_from_string(const std::string& tok);

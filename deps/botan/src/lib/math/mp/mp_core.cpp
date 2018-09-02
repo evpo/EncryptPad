@@ -25,8 +25,8 @@ void bigint_cnd_swap(word cnd, word x[], word y[], size_t size)
 
    for(size_t i = 0; i != size; ++i)
       {
-      word a = x[i];
-      word b = y[i];
+      const word a = x[i];
+      const word b = y[i];
       x[i] = CT::select(mask, b, a);
       y[i] = CT::select(mask, a, b);
       }
@@ -41,14 +41,22 @@ word bigint_cnd_add(word cnd, word x[], const word y[], size_t size)
    const word mask = CT::expand_mask(cnd);
 
    word carry = 0;
-   for(size_t i = 0; i != size; ++i)
+
+   const size_t blocks = size - (size % 8);
+   word z[8] = { 0 };
+
+   for(size_t i = 0; i != blocks; i += 8)
       {
-      /*
-      Here we are relying on asm version of word_add being
-      a single addcl or equivalent. Fix this.
-      */
-      const word z = word_add(x[i], y[i], &carry);
-      x[i] = CT::select(mask, z, x[i]);
+      carry = word8_add3(z, x + i, y + i, carry);
+
+      for(size_t j = 0; j != 8; ++j)
+         x[i+j] = CT::select(mask, z[j], x[i+j]);
+      }
+
+   for(size_t i = blocks; i != size; ++i)
+      {
+      z[0] = word_add(x[i], y[i], &carry);
+      x[i] = CT::select(mask, z[0], x[i]);
       }
 
    return carry & mask;
@@ -63,13 +71,53 @@ word bigint_cnd_sub(word cnd, word x[], const word y[], size_t size)
    const word mask = CT::expand_mask(cnd);
 
    word carry = 0;
-   for(size_t i = 0; i != size; ++i)
+
+   const size_t blocks = size - (size % 8);
+   word z[8] = { 0 };
+
+   for(size_t i = 0; i != blocks; i += 8)
       {
-      const word z = word_sub(x[i], y[i], &carry);
-      x[i] = CT::select(mask, z, x[i]);
+      carry = word8_sub3(z, x + i, y + i, carry);
+
+      for(size_t j = 0; j != 8; ++j)
+         x[i+j] = CT::select(mask, z[j], x[i+j]);
+      }
+
+   for(size_t i = blocks; i != size; ++i)
+      {
+      z[0] = word_sub(x[i], y[i], &carry);
+      x[i] = CT::select(mask, z[0], x[i]);
       }
 
    return carry & mask;
+   }
+
+void bigint_cnd_addsub(word mask, word x[], const word y[], size_t size)
+   {
+   const size_t blocks = size - (size % 8);
+
+   word carry = 0;
+   word borrow = 0;
+
+   word t0[8] = { 0 };
+   word t1[8] = { 0 };
+
+   for(size_t i = 0; i != blocks; i += 8)
+      {
+      carry = word8_add3(t0, x + i, y + i, carry);
+      borrow = word8_sub3(t1, x + i, y + i, borrow);
+
+      for(size_t j = 0; j != 8; ++j)
+         x[i+j] = CT::select(mask, t0[j], t1[j]);
+      }
+
+   for(size_t i = blocks; i != size; ++i)
+      {
+      const word a = word_add(x[i], y[i], &carry);
+      const word s = word_sub(x[i], y[i], &borrow);
+
+      x[i] = CT::select(mask, a, s);
+      }
    }
 
 void bigint_cnd_abs(word cnd, word x[], size_t size)
@@ -137,8 +185,7 @@ word bigint_add3_nc(word z[], const word x[], size_t x_size,
 */
 void bigint_add2(word x[], size_t x_size, const word y[], size_t y_size)
    {
-   if(bigint_add2_nc(x, x_size, y, y_size))
-      x[x_size] += 1;
+   x[x_size] += bigint_add2_nc(x, x_size, y, y_size);
    }
 
 /*
@@ -147,7 +194,7 @@ void bigint_add2(word x[], size_t x_size, const word y[], size_t y_size)
 void bigint_add3(word z[], const word x[], size_t x_size,
                            const word y[], size_t y_size)
    {
-   z[(x_size > y_size ? x_size : y_size)] +=
+   z[x_size > y_size ? x_size : y_size] +=
       bigint_add3_nc(z, x, x_size, y, y_size);
    }
 
@@ -190,6 +237,37 @@ void bigint_sub2_rev(word x[],  const word y[], size_t y_size)
       x[i] = word_sub(y[i], x[i], &borrow);
 
    BOTAN_ASSERT(!borrow, "y must be greater than x");
+   }
+
+word bigint_sub_abs(word z[],
+                    const word x[], const word y[], size_t N,
+                    word ws[])
+   {
+   // Subtract in both direction then conditional copy out the result
+
+   word* ws0 = ws;
+   word* ws1 = ws + N;
+
+   word borrow0 = 0;
+   word borrow1 = 0;
+
+   const size_t blocks = N - (N % 8);
+
+   for(size_t i = 0; i != blocks; i += 8)
+      {
+      borrow0 = word8_sub3(ws0 + i, x + i, y + i, borrow0);
+      borrow1 = word8_sub3(ws1 + i, y + i, x + i, borrow1);
+      }
+
+   for(size_t i = blocks; i != N; ++i)
+      {
+      ws0[i] = word_sub(x[i], y[i], &borrow0);
+      ws1[i] = word_sub(y[i], x[i], &borrow1);
+      }
+
+   word mask = CT::conditional_copy_mem(borrow1, z, ws0, ws1, N);
+
+   return CT::select<word>(mask, 0, 1);
    }
 
 /*
@@ -270,7 +348,7 @@ void bigint_shl1(word x[], size_t x_size, size_t word_shift, size_t bit_shift)
          {
          word temp = x[j];
          x[j] = (temp << bit_shift) | carry;
-         carry = (temp >> (MP_WORD_BITS - bit_shift));
+         carry = (temp >> (BOTAN_MP_WORD_BITS - bit_shift));
          }
       }
    }
@@ -302,19 +380,19 @@ void bigint_shr1(word x[], size_t x_size, size_t word_shift, size_t bit_shift)
          {
          word w = x[top-1];
          x[top-1] = (w >> bit_shift) | carry;
-         carry = (w << (MP_WORD_BITS - bit_shift));
+         carry = (w << (BOTAN_MP_WORD_BITS - bit_shift));
 
          w = x[top-2];
          x[top-2] = (w >> bit_shift) | carry;
-         carry = (w << (MP_WORD_BITS - bit_shift));
+         carry = (w << (BOTAN_MP_WORD_BITS - bit_shift));
 
          w = x[top-3];
          x[top-3] = (w >> bit_shift) | carry;
-         carry = (w << (MP_WORD_BITS - bit_shift));
+         carry = (w << (BOTAN_MP_WORD_BITS - bit_shift));
 
          w = x[top-4];
          x[top-4] = (w >> bit_shift) | carry;
-         carry = (w << (MP_WORD_BITS - bit_shift));
+         carry = (w << (BOTAN_MP_WORD_BITS - bit_shift));
 
          top -= 4;
          }
@@ -323,7 +401,7 @@ void bigint_shr1(word x[], size_t x_size, size_t word_shift, size_t bit_shift)
          {
          word w = x[top-1];
          x[top-1] = (w >> bit_shift) | carry;
-         carry = (w << (MP_WORD_BITS - bit_shift));
+         carry = (w << (BOTAN_MP_WORD_BITS - bit_shift));
 
          top--;
          }
@@ -345,7 +423,7 @@ void bigint_shl2(word y[], const word x[], size_t x_size,
          {
          word w = y[j];
          y[j] = (w << bit_shift) | carry;
-         carry = (w >> (MP_WORD_BITS - bit_shift));
+         carry = (w >> (BOTAN_MP_WORD_BITS - bit_shift));
          }
       }
    }
@@ -367,7 +445,7 @@ void bigint_shr2(word y[], const word x[], size_t x_size,
          {
          word w = y[j-1];
          y[j-1] = (w >> bit_shift) | carry;
-         carry = (w << (MP_WORD_BITS - bit_shift));
+         carry = (w << (BOTAN_MP_WORD_BITS - bit_shift));
          }
       }
    }
@@ -376,7 +454,7 @@ void bigint_shr2(word y[], const word x[], size_t x_size,
 * Compare two MP integers
 */
 int32_t bigint_cmp(const word x[], size_t x_size,
-                  const word y[], size_t y_size)
+                   const word y[], size_t y_size)
    {
    if(x_size < y_size) { return (-bigint_cmp(y, y_size, x, x_size)); }
 
@@ -407,17 +485,17 @@ word bigint_divop(word n1, word n0, word d)
       throw Invalid_Argument("bigint_divop divide by zero");
 
 #if defined(BOTAN_HAS_MP_DWORD)
-   return ((static_cast<dword>(n1) << MP_WORD_BITS) | n0) / d;
+   return ((static_cast<dword>(n1) << BOTAN_MP_WORD_BITS) | n0) / d;
 #else
 
    word high = n1 % d, quotient = 0;
 
-   for(size_t i = 0; i != MP_WORD_BITS; ++i)
+   for(size_t i = 0; i != BOTAN_MP_WORD_BITS; ++i)
       {
       word high_top_bit = (high & MP_WORD_TOP_BIT);
 
       high <<= 1;
-      high |= (n0 >> (MP_WORD_BITS-1-i)) & 1;
+      high |= (n0 >> (BOTAN_MP_WORD_BITS-1-i)) & 1;
       quotient <<= 1;
 
       if(high_top_bit || high >= d)
@@ -436,10 +514,14 @@ word bigint_divop(word n1, word n0, word d)
 */
 word bigint_modop(word n1, word n0, word d)
    {
+#if defined(BOTAN_HAS_MP_DWORD)
+   return ((static_cast<dword>(n1) << BOTAN_MP_WORD_BITS) | n0) % d;
+#else
    word z = bigint_divop(n1, n0, d);
    word dummy = 0;
    z = word_madd2(z, d, &dummy);
    return (n0-z);
+#endif
    }
 
 }

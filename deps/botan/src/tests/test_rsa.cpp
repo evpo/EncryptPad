@@ -18,6 +18,23 @@ namespace {
 
 #if defined(BOTAN_HAS_RSA)
 
+std::unique_ptr<Botan::Private_Key> load_rsa_private_key(const VarMap& vars)
+   {
+   const BigInt p = vars.get_req_bn("P");
+   const BigInt q = vars.get_req_bn("Q");
+   const BigInt e = vars.get_req_bn("E");
+
+   return std::unique_ptr<Botan::Private_Key>(new Botan::RSA_PrivateKey(p, q, e));
+   }
+
+std::unique_ptr<Botan::Public_Key> load_rsa_public_key(const VarMap& vars)
+   {
+   const BigInt n = vars.get_req_bn("N");
+   const BigInt e = vars.get_req_bn("E");
+
+   return std::unique_ptr<Botan::Public_Key>(new Botan::RSA_PublicKey(n, e));
+   }
+
 class RSA_ES_KAT_Tests final : public PK_Encryption_Decryption_Test
    {
    public:
@@ -26,16 +43,30 @@ class RSA_ES_KAT_Tests final : public PK_Encryption_Decryption_Test
               "RSA",
               "pubkey/rsaes.vec",
               "E,P,Q,Msg,Ciphertext",
-              "Padding,Nonce") {}
+              "Nonce") {}
 
       std::unique_ptr<Botan::Private_Key> load_private_key(const VarMap& vars) override
          {
-         const BigInt p = get_req_bn(vars, "P");
-         const BigInt q = get_req_bn(vars, "Q");
-         const BigInt e = get_req_bn(vars, "E");
+         return load_rsa_private_key(vars);
+         }
+   };
 
-         std::unique_ptr<Botan::Private_Key> key(new Botan::RSA_PrivateKey(p, q, e));
-         return key;
+class RSA_Decryption_KAT_Tests final : public PK_Decryption_Test
+   {
+   public:
+      RSA_Decryption_KAT_Tests() :
+         PK_Decryption_Test("RSA",
+                            "pubkey/rsa_decrypt.vec",
+                            "E,P,Q,Ciphertext,Msg") {}
+
+      bool clear_between_callbacks() const override
+         {
+         return false;
+         }
+
+      std::unique_ptr<Botan::Private_Key> load_private_key(const VarMap& vars) override
+         {
+         return load_rsa_private_key(vars);
          }
    };
 
@@ -50,12 +81,7 @@ class RSA_KEM_Tests final : public PK_KEM_Test
 
       std::unique_ptr<Botan::Private_Key> load_private_key(const VarMap& vars) override
          {
-         const BigInt p = get_req_bn(vars, "P");
-         const BigInt q = get_req_bn(vars, "Q");
-         const BigInt e = get_req_bn(vars, "E");
-
-         std::unique_ptr<Botan::Private_Key> key(new Botan::RSA_PrivateKey(p, q, e));
-         return key;
+         return load_rsa_private_key(vars);
          }
 
    };
@@ -68,7 +94,7 @@ class RSA_Signature_KAT_Tests final : public PK_Signature_Generation_Test
               "RSA",
               "pubkey/rsa_sig.vec",
               "E,P,Q,Msg,Signature",
-              "Padding,Nonce") {}
+              "Nonce") {}
 
       std::string default_padding(const VarMap&) const override
          {
@@ -77,12 +103,7 @@ class RSA_Signature_KAT_Tests final : public PK_Signature_Generation_Test
 
       std::unique_ptr<Botan::Private_Key> load_private_key(const VarMap& vars) override
          {
-         const BigInt p = get_req_bn(vars, "P");
-         const BigInt q = get_req_bn(vars, "Q");
-         const BigInt e = get_req_bn(vars, "E");
-
-         std::unique_ptr<Botan::Private_Key> key(new Botan::RSA_PrivateKey(p, q, e));
-         return key;
+         return load_rsa_private_key(vars);
          }
    };
 
@@ -96,10 +117,10 @@ class RSA_PSS_KAT_Tests final : public PK_Signature_Generation_Test
               "P,Q,E,Hash,Nonce,Msg,Signature",
               "") {}
 
-      std::string default_padding(const VarMap& var) const override
+      std::string default_padding(const VarMap& vars) const override
          {
-         const std::string hash_name = get_req_str(var, "Hash");
-         const size_t salt_size = get_req_bin(var, "Nonce").size();
+         const std::string hash_name = vars.get_req_str("Hash");
+         const size_t salt_size = vars.get_req_bin("Nonce").size();
          return "PSSR(" + hash_name + ",MGF1," + std::to_string(salt_size) + ")";
          }
 
@@ -110,12 +131,7 @@ class RSA_PSS_KAT_Tests final : public PK_Signature_Generation_Test
 
       std::unique_ptr<Botan::Private_Key> load_private_key(const VarMap& vars) override
          {
-         const BigInt p = get_req_bn(vars, "P");
-         const BigInt q = get_req_bn(vars, "Q");
-         const BigInt e = get_req_bn(vars, "E");
-
-         std::unique_ptr<Botan::Private_Key> key(new Botan::RSA_PrivateKey(p, q, e));
-         return key;
+         return load_rsa_private_key(vars);
          }
    };
 
@@ -129,10 +145,10 @@ class RSA_PSS_Raw_KAT_Tests final : public PK_Signature_Generation_Test
               "P,Q,E,Hash,Nonce,Msg,Signature",
               "") {}
 
-      std::string default_padding(const VarMap& var) const override
+      std::string default_padding(const VarMap& vars) const override
          {
-         const std::string hash_name = get_req_str(var, "Hash");
-         const size_t salt_size = get_req_bin(var, "Nonce").size();
+         const std::string hash_name = vars.get_req_str("Hash");
+         const size_t salt_size = vars.get_req_bin("Nonce").size();
          return "PSSR_Raw(" + hash_name + ",MGF1," + std::to_string(salt_size) + ")";
          }
 
@@ -143,12 +159,7 @@ class RSA_PSS_Raw_KAT_Tests final : public PK_Signature_Generation_Test
 
       std::unique_ptr<Botan::Private_Key> load_private_key(const VarMap& vars) override
          {
-         const BigInt p = get_req_bn(vars, "P");
-         const BigInt q = get_req_bn(vars, "Q");
-         const BigInt e = get_req_bn(vars, "E");
-
-         std::unique_ptr<Botan::Private_Key> key(new Botan::RSA_PrivateKey(p, q, e));
-         return key;
+         return load_rsa_private_key(vars);
          }
    };
 
@@ -159,8 +170,7 @@ class RSA_Signature_Verify_Tests final : public PK_Signature_Verification_Test
          : PK_Signature_Verification_Test(
               "RSA",
               "pubkey/rsa_verify.vec",
-              "E,N,Msg,Signature",
-              "Padding")  {}
+              "E,N,Msg,Signature") {}
 
       std::string default_padding(const VarMap&) const override
          {
@@ -169,11 +179,7 @@ class RSA_Signature_Verify_Tests final : public PK_Signature_Verification_Test
 
       std::unique_ptr<Botan::Public_Key> load_public_key(const VarMap& vars) override
          {
-         const BigInt n = get_req_bn(vars, "N");
-         const BigInt e = get_req_bn(vars, "E");
-
-         std::unique_ptr<Botan::Public_Key> key(new Botan::RSA_PublicKey(n, e));
-         return key;
+         return load_rsa_public_key(vars);
          }
    };
 
@@ -184,7 +190,7 @@ class RSA_Signature_Verify_Invalid_Tests final : public PK_Signature_NonVerifica
          : PK_Signature_NonVerification_Test(
               "RSA",
               "pubkey/rsa_invalid.vec",
-              "Padding,E,N,Msg,InvalidSignature") {}
+              "E,N,Msg,InvalidSignature") {}
 
       std::string default_padding(const VarMap&) const override
          {
@@ -193,10 +199,7 @@ class RSA_Signature_Verify_Invalid_Tests final : public PK_Signature_NonVerifica
 
       std::unique_ptr<Botan::Public_Key> load_public_key(const VarMap& vars) override
          {
-         const BigInt n = get_req_bn(vars, "N");
-         const BigInt e = get_req_bn(vars, "E");
-         std::unique_ptr<Botan::Public_Key> key(new Botan::RSA_PublicKey(n, e));
-         return key;
+         return load_rsa_public_key(vars);
          }
    };
 
@@ -241,7 +244,7 @@ class RSA_Blinding_Tests final : public Test
          for(size_t i = 1; i <= BOTAN_BLINDING_REINIT_INTERVAL * 6; ++i)
             {
             std::vector<uint8_t> input(16);
-            input[input.size() - 1] = static_cast<uint8_t>(i);
+            input[input.size() - 1] = static_cast<uint8_t>(i | 1);
 
             signer.update(input);
 
@@ -265,9 +268,16 @@ class RSA_Blinding_Tests final : public Test
 
          Botan::PK_Encryptor_EME encryptor(rsa, Test::rng(), "Raw");   // don't try this at home
 
-         // test blinding reinit interval
-         // Seed Fixed_Output_RNG only with enough bytes for the initial blinder initialization
-         Botan_Tests::Fixed_Output_RNG fixed_rng(Botan::unlock(Test::rng().random_vec(rsa.get_n().bytes())));
+         /*
+         Test blinding reinit interval
+
+         Seed Fixed_Output_RNG only with enough bytes for the initial
+         blinder initialization plus the exponent blinding bits which
+         is 2*64 bits per operation.
+         */
+         const size_t rng_bytes = rsa.get_n().bytes() + (2*8*BOTAN_BLINDING_REINIT_INTERVAL);
+
+         Botan_Tests::Fixed_Output_RNG fixed_rng(Botan::unlock(Test::rng().random_vec(rng_bytes)));
          Botan::PK_Decryptor_EME decryptor(rsa, fixed_rng, "Raw", "base");
 
          for(size_t i = 1; i <= BOTAN_BLINDING_REINIT_INTERVAL ; ++i)
@@ -301,6 +311,7 @@ class RSA_Blinding_Tests final : public Test
    };
 
 BOTAN_REGISTER_TEST("rsa_encrypt", RSA_ES_KAT_Tests);
+BOTAN_REGISTER_TEST("rsa_decrypt", RSA_Decryption_KAT_Tests);
 BOTAN_REGISTER_TEST("rsa_sign", RSA_Signature_KAT_Tests);
 BOTAN_REGISTER_TEST("rsa_pss", RSA_PSS_KAT_Tests);
 BOTAN_REGISTER_TEST("rsa_pss_raw", RSA_PSS_Raw_KAT_Tests);

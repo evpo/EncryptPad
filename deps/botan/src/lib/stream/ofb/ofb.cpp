@@ -6,6 +6,7 @@
 */
 
 #include <botan/ofb.h>
+#include <botan/exceptn.h>
 
 namespace Botan {
 
@@ -66,6 +67,6 @@ void OFB::set_iv(const uint8_t iv[], size_t iv_len)
 
 void OFB::seek(uint64_t)
    {
-   throw Exception("OFB does not support seeking");
+   throw Not_Implemented("OFB does not support seeking");
    }
 }

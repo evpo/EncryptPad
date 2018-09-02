@@ -7,7 +7,6 @@
 
 #include <botan/dh.h>
 #include <botan/internal/pk_ops_impl.h>
-#include <botan/workfactor.h>
 #include <botan/pow_mod.h>
 #include <botan/blinding.h>
 
@@ -41,17 +40,16 @@ DH_PrivateKey::DH_PrivateKey(RandomNumberGenerator& rng,
 
    if(x_arg == 0)
       {
-      const BigInt& p = group_p();
-      m_x.randomize(rng, dl_exponent_size(p.bits()));
+      const size_t exp_bits = grp.exponent_bits();
+      m_x.randomize(rng, exp_bits);
+      m_y = m_group.power_g_p(m_x, exp_bits);
       }
    else
       {
       m_x = x_arg;
-      }
 
-   if(m_y == 0)
-      {
-      m_y = power_mod(group_g(), m_x, group_p());
+      if(m_y == 0)
+         m_y = m_group.power_g_p(m_x, grp.p_bits());
       }
    }
 
@@ -62,8 +60,10 @@ DH_PrivateKey::DH_PrivateKey(const AlgorithmIdentifier& alg_id,
                              const secure_vector<uint8_t>& key_bits) :
    DL_Scheme_PrivateKey(alg_id, key_bits, DL_Group::ANSI_X9_42)
    {
-   if(m_y == 0)
-      m_y = power_mod(group_g(), m_x, group_p());
+   if(m_y.is_zero())
+      {
+      m_y = m_group.power_g_p(m_x, m_group.p_bits());
+      }
    }
 
 /*
@@ -103,14 +103,16 @@ class DH_KA_Operation final : public PK_Ops::Key_Agreement_with_KDF
 
 secure_vector<uint8_t> DH_KA_Operation::raw_agree(const uint8_t w[], size_t w_len)
    {
-   BigInt input = BigInt::decode(w, w_len);
+   BigInt v = BigInt::decode(w, w_len);
 
-   if(input <= 1 || input >= m_p - 1)
+   if(v <= 1 || v >= m_p - 1)
       throw Invalid_Argument("DH agreement - invalid key provided");
 
-   BigInt r = m_blinder.unblind(m_powermod_x_p(m_blinder.blind(input)));
+   v = m_blinder.blind(v);
+   v = m_powermod_x_p(v);
+   v = m_blinder.unblind(v);
 
-   return BigInt::encode_1363(r, m_p.bytes());
+   return BigInt::encode_1363(v, m_p.bytes());
    }
 
 }

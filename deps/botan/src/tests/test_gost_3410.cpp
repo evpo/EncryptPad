@@ -24,13 +24,24 @@ class GOST_3410_2001_Verification_Tests final : public PK_Signature_Verification
       GOST_3410_2001_Verification_Tests() : PK_Signature_Verification_Test(
             "GOST 34.10-2001",
             "pubkey/gost_3410_verify.vec",
-            "Group,Pubkey,Hash,Msg,Signature") {}
+            "P,A,B,Gx,Gy,Order,Cofactor,Px,Py,Hash,Msg,Signature") {}
 
       std::unique_ptr<Botan::Public_Key> load_public_key(const VarMap& vars) override
          {
-         const std::string group_id = get_req_str(vars, "Group");
-         Botan::EC_Group group(Botan::OIDS::lookup(group_id));
-         const Botan::PointGFp public_point = Botan::OS2ECP(get_req_bin(vars, "Pubkey"), group.get_curve());
+         const BigInt p = vars.get_req_bn("P");
+         const BigInt a = vars.get_req_bn("A");
+         const BigInt b = vars.get_req_bn("B");
+         const BigInt Gx = vars.get_req_bn("Gx");
+         const BigInt Gy = vars.get_req_bn("Gy");
+         const BigInt order = vars.get_req_bn("Order");
+         const BigInt cofactor = vars.get_req_bn("Cofactor");
+
+         const BigInt Px = vars.get_req_bn("Px");
+         const BigInt Py = vars.get_req_bn("Py");
+
+         Botan::EC_Group group(p, a, b, Gx, Gy, order, cofactor);
+
+         const Botan::PointGFp public_point = group.point(Px, Py);
 
          std::unique_ptr<Botan::Public_Key> key(new Botan::GOST_3410_PublicKey(group, public_point));
          return key;
@@ -38,7 +49,10 @@ class GOST_3410_2001_Verification_Tests final : public PK_Signature_Verification
 
       std::string default_padding(const VarMap& vars) const override
          {
-         return "EMSA1(" + get_req_str(vars, "Hash") + ")";
+         const std::string hash = vars.get_req_str("Hash");
+         if(hash == "Raw")
+            return hash;
+         return "EMSA1(" + hash + ")";
          }
    };
 
@@ -48,13 +62,23 @@ class GOST_3410_2001_Signature_Tests final : public PK_Signature_Generation_Test
       GOST_3410_2001_Signature_Tests() : PK_Signature_Generation_Test(
             "GOST 34.10-2001",
             "pubkey/gost_3410_sign.vec",
-            "Group,Privkey,Hash,Nonce,Msg,Signature") {}
+            "P,A,B,Gx,Gy,Order,X,Cofactor,Hash,Nonce,Msg,Signature") {}
 
       std::unique_ptr<Botan::Private_Key> load_private_key(const VarMap& vars) override
          {
-         const std::string group_id = get_req_str(vars, "Group");
-         const BigInt x = get_req_bn(vars, "Privkey");
-         Botan::EC_Group group(Botan::OIDS::lookup(group_id));
+         const BigInt p = vars.get_req_bn("P");
+         const BigInt a = vars.get_req_bn("A");
+         const BigInt b = vars.get_req_bn("B");
+         const BigInt Gx = vars.get_req_bn("Gx");
+         const BigInt Gy = vars.get_req_bn("Gy");
+         const BigInt order = vars.get_req_bn("Order");
+         const BigInt cofactor = vars.get_req_bn("Cofactor");
+
+         const BigInt x = vars.get_req_bn("X");
+
+         const Botan::OID oid("1.3.6.1.4.1.25258.2");
+
+         Botan::EC_Group group(p, a, b, Gx, Gy, order, cofactor, oid);
 
          std::unique_ptr<Botan::Private_Key> key(new Botan::GOST_3410_PrivateKey(Test::rng(), group, x));
          return key;
@@ -62,7 +86,10 @@ class GOST_3410_2001_Signature_Tests final : public PK_Signature_Generation_Test
 
       std::string default_padding(const VarMap& vars) const override
          {
-         return "EMSA1(" + get_req_str(vars, "Hash") + ")";
+         const std::string hash = vars.get_req_str("Hash");
+         if(hash == "Raw")
+            return hash;
+         return "EMSA1(" + hash + ")";
          }
 
       Botan::RandomNumberGenerator* test_rng(const std::vector<uint8_t>& nonce) const override

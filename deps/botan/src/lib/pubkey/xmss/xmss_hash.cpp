@@ -2,7 +2,7 @@
  * XMSS Hash
  * A collection of pseudorandom hash functions required for XMSS and WOTS
  * computations.
- * (C) 2016 Matthias Gierlings
+ * (C) 2016,2017 Matthias Gierlings
  *
  * Botan is released under the Simplified BSD License (see license.txt)
  **/
@@ -18,8 +18,8 @@ XMSS_Hash::XMSS_Hash(const XMSS_Hash& hash)
    }
 
 XMSS_Hash::XMSS_Hash(const std::string& h_func_name) :
-   m_hash_func_name(h_func_name),
-   m_hash(HashFunction::create(h_func_name))
+   m_hash(HashFunction::create(h_func_name)),
+   m_hash_func_name(h_func_name)
    {
    if(!m_hash)
       throw Lookup_Error("XMSS cannot use hash " + h_func_name +
@@ -54,11 +54,6 @@ void XMSS_Hash::h_msg_init(const secure_vector<uint8_t>& randomness,
    m_msg_hash->update(randomness);
    m_msg_hash->update(root);
    m_msg_hash->update(index_bytes);
-   }
-
-void XMSS_Hash::h_msg_update(const secure_vector<uint8_t>& data)
-   {
-   m_msg_hash->update(data);
    }
 
 void XMSS_Hash::h_msg_update(const uint8_t data[], size_t size)

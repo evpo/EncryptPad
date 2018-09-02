@@ -10,113 +10,184 @@ signature on the certificate, which is placed there by some authority
 the certificate really "owns" the private key corresponding to the
 public key in the certificate.
 
-The major certificate format in use today is X.509v3, used for instance
-in the :doc:`tls` protocol. A X.509 certificate is represented by
+The major certificate format in use today is X.509v3, used for instance in the
+:doc:`tls` protocol. A X.509 certificate is represented by the class
+``X509_Certificate``. The data of an X.509 certificate is stored as a
+``shared_ptr`` to a structure containing the decoded information. So copying
+``X509_Certificate`` objects is quite cheap.
+
 
 .. cpp:class:: X509_Certificate
 
- .. cpp:function:: Public_Key* subject_public_key() const
+  .. cpp:function:: X509_Certificate(const std::string& filename)
 
-     Returns the public key of the subject
+     Load a certificate from a file. PEM or DER is accepted.
 
- .. cpp:function:: X509_DN issuer_dn() const
+  .. cpp:function:: X509_Certificate(const std::vector<uint8_t>& in)
 
-     Returns the distinguished name (DN) of the certificate's issuer
+     Load a certificate from a byte string.
 
- .. cpp:function:: X509_DN subject_dn() const
+  .. cpp:function:: X509_Certificate(DataSource& source)
 
-     Returns the distinguished name (DN) of the certificate's subject
+     Load a certificate from an abstract ``DataSource``.
 
- .. cpp:function:: std::string start_time() const
+  .. cpp:function:: X509_DN subject_dn() const
+
+     Returns the distinguished name (DN) of the certificate's subject. This is
+     the primary place where information about the subject of the certificate is
+     stored. However "modern" information that doesn't fit in the X.500
+     framework, such as DNS name, email, IP address, or XMPP address, appears
+     instead in the subject alternative name.
+
+  .. cpp:function:: X509_DN issuer_dn() const
+
+     Returns the distinguished name (DN) of the certificate's issuer, ie the CA
+     that issued this certificate.
+
+  .. cpp:function:: const AlternativeName& subject_alt_name() const
+
+      Return the subjects alternative name. This is used to store
+      values like associated URIs, DNS addresses, and email addresses.
+
+  .. cpp:function:: const AlternativeName& issuer_alt_name() const
+
+      Return alternative names for the issuer.
+
+  .. cpp:function:: std::unique_ptr<Public_Key> load_subject_public_key() const
+
+     Deserialize the stored public key and return a new object. This
+     might throw, if it happens that the public key object stored in
+     the certificate is malformed in some way, or in the case that the
+     public key algorithm used is not supported by the library.
+
+     See :ref:`serializing_public_keys` for more information about what to do
+     with the returned object. It may be any type of key, in principle, though
+     RSA and ECDSA are most common.
+
+  .. cpp:function:: std::vector<uint8_t> subject_public_key_bits() const
+
+     Return the binary encoding of the subject public key. This value (or a hash of
+     it) is used in various protocols, eg for public key pinning.
+
+  .. cpp:function:: AlgorithmIdentifier subject_public_key_algo() const
+
+     Return an algorithm identifier that identifies the algorithm used in the
+     subject's public key.
+
+  .. cpp:function:: std::vector<uint8_t> serial_number() const
+
+     Return the certificates serial number. The tuple of issuer DN and
+     serial number should be unique.
+
+  .. cpp:function:: std::vector<uint8> raw_subject_dn() const
+
+     Return the binary encoding of the subject DN.
+
+  .. cpp:function:: std::vector<uint8> raw_issuer_dn() const
+
+     Return the binary encoding of the issuer DN.
+
+  .. cpp:function:: X509_Time not_before() const
 
      Returns the point in time the certificate becomes valid
 
- .. cpp:function:: std::string end_time() const
+  .. cpp:function:: X509_Time not_after() const
 
      Returns the point in time the certificate expires
 
- .. cpp:function:: Extensions v3_extensions() const
+  .. cpp:function:: const Extensions& v3_extensions() const
 
-     Returns all extensions of this certificate
+     Returns all extensions of this certificate. You can use this
+     to examine any extension data associated with the certificate,
+     including custom extensions the library doesn't know about.
 
-When working with certificates, the main class to remember is
-``X509_Certificate``. You can read an object of this type, but you
-can't create one on the fly; a CA object is necessary for making a new
-certificate. So for the most part, you only have to worry about
-reading them in, verifying the signatures, and getting the bits of
-data in them (most commonly the public key, and the information about
-the user of that key). An X.509v3 certificate can contain a literally
-infinite number of items related to all kinds of things. Botan doesn't
-support a lot of them, because nobody uses them and they're an
-impossible mess to work with. This section only documents the most
-commonly used ones of the ones that are supported; for the rest, read
-``x509cert.h`` and ``asn1_obj.h`` (which has the definitions of
-various common ASN.1 constructs used in X.509).
+  .. cpp:function:: std::vector<uint8_t> authority_key_id() const
 
-So what's in an X.509 certificate?
------------------------------------
+      Return the authority key id, if set. This is an arbitrary string; in the
+      issuing certificate this will be the subject key id.
 
-Obviously, you want to be able to get the public key. This is achieved
-by calling the member function ``subject_public_key``, which will
-return a ``Public_Key``\*. As to what to do with this, read about
-``load_key`` in :ref:`serializing_public_keys`. In the general case,
-this could be any kind of public key, though 99% of the time it will
-be an RSA key. However, Diffie-Hellman, DSA, and ECDSA keys are also
-supported, so be careful about how you treat this. It is also a wise
-idea to examine the value returned by ``constraints``, to see what
-uses the public key is approved for.
+  .. cpp:function:: std::vector<uint8_t> subject_key_id() const
 
-The second major piece of information you'll want is the
-name/email/etc of the person to whom this certificate is
-assigned. Here is where things get a little nasty. X.509v3 has two
-(well, mostly just two...) different places where you can stick
-information about the user: the *subject* field, and in an extension
-called *subjectAlternativeName*. The *subject* field is supposed to
-only included the following information: country, organization, an
-organizational sub-unit name, and a so-called common name. The common
-name is usually the name of the person, or it could be a title
-associated with a position of some sort in the organization. It may
-also include fields for state/province and locality. What a locality
-is, nobody knows, but it's usually given as a city name.
+      Return the subject key id, if set.
 
-Botan doesn't currently support any of the Unicode variants used in
-ASN.1 (UTF-8, UCS-2, and UCS-4), any of which could be used for the
-fields in the DN. This could be problematic, particularly in Asia and
-other areas where non-ASCII characters are needed for most names. The
-UTF-8 and UCS-2 string types *are* accepted (in fact, UTF-8 is used
-when encoding much of the time), but if any of the characters included
-in the string are not in ISO 8859-1 (ie 0 ... 255), an exception will
-get thrown. Currently the ``ASN1_String`` type holds its data as ISO
-8859-1 internally (regardless of local character set); this would have
-to be changed to hold UCS-2 or UCS-4 in order to support Unicode
-(also, many interfaces in the X.509 code would have to accept or
-return a ``std::wstring`` instead of a ``std::string``).
+  .. cpp:function:: bool allowed_extended_usage(const OID& usage) const
 
-Like the distinguished names, subject alternative names can contain a lot of
-things that Botan will flat out ignore (most of which you would likely never
-want to use). However, there are three very useful pieces of information that
-this extension might hold: an email address (mailbox@example.com), a DNS name
-(somehost.example.com), or a URI (http://www.example.com).
+      Return true if and only if the usage OID appears in the extended key usage
+      extension. Also will return true if the extended key usage extension is
+      not used in the current certificate.
 
-So, how to get the information? Call ``subject_info`` with the name of
-the piece of information you want, and it will return a
-``std::string`` that is either empty (signifying that the certificate
-doesn't have this information), or has the information
-requested. There are several names for each possible item, but the
-most easily readable ones are: "Name", "Country", "Organization",
-"Organizational Unit", "Locality", "State", "RFC822", "URI", and
-"DNS". These values are returned as a ``std::string``.
+  .. cpp:function: std::vector<OID> extended_key_usage() const
 
-You can also get information about the issuer of the certificate in the same
-way, using ``issuer_info``.
+      Return the list of extended key usages. May be empty.
+
+  .. cpp:function:: std::string fingerprint(const std::string& hash_fn = "SHA-1") const
+
+      Return a fingerprint for the certificate, which is basically just a hash
+      of the binary contents. Normally SHA-1 or SHA-256 is used, but any hash
+      function is allowed.
+
+  .. cpp:function:: Key_Constraints constraints() const
+
+      Returns either an enumeration listing key constraints (what the
+      associated key can be used for) or ``NO_CONSTRAINTS`` if the
+      relevent extension was not included. Example values are
+      ``DIGITAL_SIGNATURE`` and ``KEY_CERT_SIGN``. More than one value
+      might be specified.
+
+  .. cpp:function:: bool matches_dns_name(const std::string& name) const
+
+      Check if the certificate's subject alternative name DNS fields
+      match ``name``. This function also handles wildcard certificates.
+
+  .. cpp:function:: std::string to_string() const
+
+      Returns a free-form human readable string describing the certificate.
+
+X.509 Distinguished Names
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. cpp:class:: X509_DN
+
+  .. cpp:function:: bool has_field(const std::string& attr) const
+
+      Returns true if ``get_attribute`` or ``get_first_attribute`` will return a value.
+
+  .. cpp:function:: std::vector<std::string> get_attribute(const std::string& attr) const
+
+      Return all attributes associated with a certain attribute type.
+
+  .. cpp:function:: std::string get_first_attribute(const std::string& attr) const
+
+      Like ``get_attribute`` but returns just the first attribute, or
+      empty if the DN has no attribute of the specified type.
+
+  .. cpp:function:: std::multimap<OID, std::string> get_attributes() const
+
+      Get all attributes of the DN. The OID maps to a DN component such as
+      2.5.4.10 ("Organization"), and the strings are UTF-8 encoded.
+
+  .. cpp:function:: std::multimap<std::string, std::string> contents() const
+
+      Similar to ``get_attributes``, but the OIDs are decoded to strings.
+
+  .. cpp:function:: void add_attribute(const std::string& key, const std::string& val)
+
+      Add an attribute to a DN.
+
+  .. cpp:function:: void add_attribute(const OID& oid, const std::string& val)
+
+      Add an attribute to a DN using an OID instead of string-valued attribute type.
+
+The ``X509_DN`` type also supports iostream extraction and insertion operators,
+for formatted input and output.
 
 X.509v3 Extensions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-X.509v3 specifies a large number of possible extensions. Botan
-supports some, but by no means all of them.
-The following listing lists which X.509v3 extensions are supported
-and notes areas where there may be problems with the handling.
+X.509v3 specifies a large number of possible extensions. Botan supports some,
+but by no means all of them. The following listing lists which X.509v3
+extensions are supported and notes areas where there may be problems with the
+handling.
 
  - Key Usage and Extended Key Usage: No problems known.
 
@@ -153,17 +224,22 @@ functions are provided to search them.
 
 .. note::
 
-  Validation of custom extensions during path validation
-  is currently not supported.
+  Validation of custom extensions during path validation is currently not supported.
 
 .. cpp:class:: Extensions
 
  .. cpp:function:: void add(Certificate_Extension* extn, bool critical = false)
 
-     Adds a new extension to the list. ``critical`` specifies whether the extension
-     should be marked as critical.
+     Adds a new extension to the extensions object. If an extension of the same
+     type already exists, ``extn`` will replace it. If ``critical`` is true the
+     extension will be marked as critical in the encoding.
 
- .. cpp:function:: replace(Certificate_Extension* extn, bool critical = false)
+ .. cpp:function:: bool add_new(Certificate_Extension* extn, bool critical = false)
+
+    Like ``add`` but an existing extension will not be replaced. Returns true if the
+    extension was used, false if an extension of the same type was already in place.
+
+ .. cpp:function:: void replace(Certificate_Extension* extn, bool critical = false)
 
      Adds an extension to the list or replaces it, if the same
      extension was already added
@@ -185,13 +261,13 @@ functions are provided to search them.
      criticality flag. Only contains the supported extension types
      listed above.
 
- .. cpp:function:: std::map<OID, std::pair<std::vector<byte>, bool>> extensions_raw() const
+ .. cpp:function:: std::map<OID, std::pair<std::vector<uint8_t>, bool>> extensions_raw() const
 
      Returns the list of extensions as raw, encoded bytes
      together with the corresponding criticality flag.
      Contains all extensions, known as well as unknown extensions.
 
-Revocation Lists
+Certificate Revocation Lists
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 It will occasionally happen that a certificate must be revoked before
@@ -222,22 +298,7 @@ with
 
 .. cpp:function:: void Certificate_Store::add_crl(const X509_CRL& crl)
 
-and all future verifications will take into account the certificates
-listed.
-
-Reading Certificates
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-``X509_Certificate`` has two constructors, each of which takes a source of
-data; a filename to read, and a ``DataSource&``::
-
-   X509_Certificate cert1("cert1.pem");
-
-   /* This file contains two certificates, concatenated */
-   DataSource_Stream in("certs2_and_3.pem");
-
-   X509_Certificate cert2(in); // read the first cert
-   X509_Certificate cert3(in); // read the second cert
+and all future verifications will take into account the provided CRL.
 
 Certificate Stores
 ----------------------------------------
@@ -259,7 +320,7 @@ The certificate lookup methods are ``find_cert`` (by Subject
 Distinguished Name and optional Subject Key Identifier) and
 ``find_cert_by_pubkey_sha1`` (by SHA-1 hash of the certificate's
 public key). The Subject Distinguished Name is given as a ``X509_DN``,
-while the SKID parameter takes a ``std::vector<byte>`` containing
+while the SKID parameter takes a ``std::vector<uint8_t>`` containing
 the subject key identifier in raw binary. Both lookup methods are
 mandatory to implement.
 
@@ -315,9 +376,9 @@ later.
 SQL-backed Certificate Stores
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The SQL-backed certificate stores store all objects in an SQL
-database. They also additionally provide private key storage
-and revocation of individual certificates.
+The SQL-backed certificate stores store all objects in an SQL database. They
+also additionally provide private key storage and revocation of individual
+certificates.
 
 .. cpp:class:: Certificate_Store_In_SQL
 
@@ -336,7 +397,6 @@ and revocation of individual certificates.
 
      Removes ``cert`` from the store. Returns `false` if the certificate could not
      be found and `true` if removal was successful.
-
 
  .. cpp:function:: std::shared_ptr<const Private_Key> find_key(const X509_Certificate&) const
 
@@ -370,8 +430,10 @@ and revocation of individual certificates.
      Generates CRLs for all certificates marked as revoked.
      A CRL is returned for each unique issuer DN.
 
-Botan currently only provides one SQL-backed certificate store using
-sqlite.
+The ``Certificate_Store_In_SQL`` class operates on an abstract ``SQL_Database``
+object. If support for sqlite3 was enabled at build time, Botan includes an
+implementation of this interface for sqlite3, and a subclass of
+``Certificate_Store_In_SQL`` which creates or opens a sqlite3 database.
 
 .. cpp:class:: Certificate_Store_In_SQLite
 
@@ -488,7 +550,7 @@ step. The two constructors are:
     and, if `minimum_key_strength` is less than or equal to 80, then
     SHA-1 signatures will also be accepted.
 
-Certificate Authorities
+Creating New Certificates
 ---------------------------------
 
 A CA is represented by the type ``X509_CA``, which can be found in
@@ -505,6 +567,21 @@ a CA object is done by the following constructor:
 The private ``key`` is the private key corresponding to the public key in the
 CA's certificate. ``hash_fn`` is the name of the hash function to use
 for signing, e.g., `SHA-256`. ``rng`` is queried for random during signing.
+
+There is an alternative constructor that lets you set additional options, namely
+the padding scheme that will be used by the X509_CA object to sign certificates
+and certificate revocation lists. If the padding is not set explicitly, the CA
+will use the padding scheme that was used when signing the CA certificate.
+
+.. cpp:function:: X509_CA::X509_CA(const X509_Certificate& cert, \
+                                   const Private_Key& key, \
+                                   const std::map<std::string,std::string>& opts, \
+                                   const std::string& hash_fn, \
+                                   RandomNumberGenerator& rng)
+
+The only option valid at this moment is "padding". The supported padding schemes
+can be found in src/lib/pubkey/padding.cpp. Some alternative names for the
+padding schemes are understood, as well.
 
 Requests for new certificates are supplied to a CA in the form of PKCS
 #10 certificate requests (called a ``PKCS10_Request`` object in
@@ -536,10 +613,9 @@ be issued. To generate a new, empty CRL, just call
 .. cpp:function:: X509_CRL X509_CA::new_crl(RandomNumberGenerator& rng, \
                                             uint32_t next_update = 0)
 
-  This function will return a new, empty CRL. The
-  ``next_update`` parameter is the number of seconds before
-  the CRL expires. If it is set to the (default) value of zero, then a
-  reasonable default (currently 7 days) will be used.
+  This function will return a new, empty CRL. The ``next_update`` parameter is
+  the number of seconds before the CRL expires. If it is set to the (default)
+  value of zero, then a reasonable default (currently 7 days) will be used.
 
 On the other hand, you may have issued a CRL before. In that case, you will
 want to issue a new CRL that contains all previously revoked
@@ -558,7 +634,7 @@ The ``CRL_Entry`` type is a structure that contains, at a minimum, the serial
 number of the revoked certificate. As serial numbers are never repeated, the
 pairing of an issuer and a serial number (should) distinctly identify any
 certificate. In this case, we represent the serial number as a
-``secure_vector<byte>`` called ``serial``. There are two additional (optional)
+``secure_vector<uint8_t>`` called ``serial``. There are two additional (optional)
 values, an enumeration called ``CRL_Code`` that specifies the reason for
 revocation (``reason``), and an object that represents the time that the
 certificate became invalid (if this information is known).
@@ -602,6 +678,20 @@ This function acts quite similarly to
 transmit it to a CA, who signs it and returns a freshly minted X.509
 certificate.
 
+.. cpp:function:: PKCS10_Request PKCS10_Request::create(const Private_Key& key, \
+                                   const X509_DN& subject_dn, \
+                                   const Extensions& extensions, \
+                                   const std::string& hash_fn, \
+                                   RandomNumberGenerator& rng, \
+                                   const std::string& padding_scheme = "", \
+                                   const std::string& challenge = "")
+
+  This function (added in 2.5) is similar to ``create_cert_req`` but allows
+  specifying all the parameters directly. In fact ``create_cert_req`` just
+  creates the DN and extensions from the options, then uses this call to
+  actually create the ``PKCS10_Request`` object.
+
+
 Certificate Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -644,6 +734,15 @@ to want to use is to create (or request) a CA certificate, which can
 be done by calling the member function ``CA_key``. This should only be
 used when needed.
 
+Moreover, you can specify the padding scheme to be used when digital signatures
+are computed by calling function ``set_padding_scheme`` with a string
+representing the padding scheme. This way, you can control the padding scheme
+for self-signed certificates and PKCS #10 requests. The padding scheme used by
+a CA when building a certificate or a certificate revocation list can be set in
+the ``X509_CA`` constructor. The supported padding schemes can be found in
+src/lib/pubkey/padding.cpp. Some alternative names for the padding schemes are
+understood, as well.
+
 Other constraints can be set by calling the member functions
 ``add_constraints`` and ``add_ex_constraints``. The first takes a
 ``Key_Constraints`` value, and replaces any previously set value. If
@@ -670,13 +769,9 @@ are named "PKIX.ServerAuth" (for TLS server authentication),
 times - each new OID will be added to the list to include in the
 certificate.
 
-Lastly, you can add any X.509v3 extensions in the `extensions`
-member. This is really only useful if you want to encode custom
-extensions in the certificate. Most users probably won't need this.
-Note that extensions added this way will be overwritten by an
-``X509_CA`` if also added by the ``X509_CA`` itself. This currently
-includes the Basic Constraints, Key Usage, Authority Key ID, Subject
-Key ID, Subject Alternative Name and Extended Key Usage extension.
+Lastly, you can add any X.509v3 extensions in the `extensions` member, which is
+useful if you want to encode a custom extension, or encode an extension in a way
+differently from how Botan defaults.
 
 OCSP Requests
 ----------------------------------------
@@ -709,7 +804,7 @@ the subject's issuing certificate.
 
       Variant of the above, using serial number from ``subject_cert``.
 
- .. cpp:function:: std::vector<byte> BER_encode() const
+ .. cpp:function:: std::vector<uint8_t> BER_encode() const
 
       Encode the current OCSP request as a binary string.
 
@@ -780,7 +875,7 @@ for certificate status information.
 
      This field is optional in OCSP responses, and may not be set.
 
-  .. cpp:function:: const std::vector<byte>& raw_bits() const
+  .. cpp:function:: const std::vector<uint8_t>& raw_bits() const
 
      Return the entire raw ASN.1 blob (for debugging or specialized decoding needs)
 

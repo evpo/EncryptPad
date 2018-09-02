@@ -8,7 +8,6 @@
 
 #include <botan/dsa.h>
 #include <botan/keypair.h>
-#include <botan/pow_mod.h>
 #include <botan/reducer.h>
 #include <botan/rng.h>
 #include <botan/internal/pk_ops_impl.h>
@@ -16,10 +15,6 @@
 #if defined(BOTAN_HAS_RFC6979_GENERATOR)
   #include <botan/emsa.h>
   #include <botan/rfc6979.h>
-#endif
-
-#if defined(BOTAN_TARGET_OS_HAS_THREADS)
-  #include <future>
 #endif
 
 namespace Botan {
@@ -43,18 +38,18 @@ DSA_PrivateKey::DSA_PrivateKey(RandomNumberGenerator& rng,
    m_group = grp;
 
    if(x_arg == 0)
-      m_x = BigInt::random_integer(rng, 2, group_q() - 1);
+      m_x = BigInt::random_integer(rng, 2, group_q());
    else
       m_x = x_arg;
 
-   m_y = power_mod(group_g(), m_x, group_p());
+   m_y = m_group.power_g_p(m_x, m_group.q_bits());
    }
 
 DSA_PrivateKey::DSA_PrivateKey(const AlgorithmIdentifier& alg_id,
                                const secure_vector<uint8_t>& key_bits) :
    DL_Scheme_PrivateKey(alg_id, key_bits, DL_Group::ANSI_X9_57)
    {
-   m_y = power_mod(group_g(), m_x, group_p());
+   m_y = m_group.power_g_p(m_x, m_group.q_bits());
    }
 
 /*
@@ -79,66 +74,73 @@ namespace {
 class DSA_Signature_Operation final : public PK_Ops::Signature_with_EMSA
    {
    public:
-      DSA_Signature_Operation(const DSA_PrivateKey& dsa, const std::string& emsa) :
+      DSA_Signature_Operation(const DSA_PrivateKey& dsa,
+                              const std::string& emsa,
+                              RandomNumberGenerator& rng) :
          PK_Ops::Signature_with_EMSA(emsa),
-         m_q(dsa.group_q()),
-         m_x(dsa.get_x()),
-         m_powermod_g_p(dsa.group_g(), dsa.group_p()),
-         m_mod_q(dsa.group_q())
+         m_group(dsa.get_group()),
+         m_x(dsa.get_x())
          {
 #if defined(BOTAN_HAS_RFC6979_GENERATOR)
          m_rfc6979_hash = hash_for_emsa(emsa);
 #endif
+
+         m_b = BigInt::random_integer(rng, 2, dsa.group_q());
+         m_b_inv = m_group.inverse_mod_q(m_b);
          }
 
-      size_t max_input_bits() const override { return m_q.bits(); }
+      size_t max_input_bits() const override { return m_group.get_q().bits(); }
 
       secure_vector<uint8_t> raw_sign(const uint8_t msg[], size_t msg_len,
                                    RandomNumberGenerator& rng) override;
    private:
-      const BigInt& m_q;
+      const DL_Group m_group;
       const BigInt& m_x;
-      Fixed_Base_Power_Mod m_powermod_g_p;
-      Modular_Reducer m_mod_q;
 #if defined(BOTAN_HAS_RFC6979_GENERATOR)
       std::string m_rfc6979_hash;
 #endif
+
+      BigInt m_b, m_b_inv;
    };
 
 secure_vector<uint8_t>
 DSA_Signature_Operation::raw_sign(const uint8_t msg[], size_t msg_len,
                                   RandomNumberGenerator& rng)
    {
-   BigInt i(msg, msg_len);
+   const BigInt& q = m_group.get_q();
 
-   while(i >= m_q)
-      i -= m_q;
+   BigInt m(msg, msg_len, m_group.q_bits());
+
+   while(m >= q)
+      m -= q;
 
 #if defined(BOTAN_HAS_RFC6979_GENERATOR)
    BOTAN_UNUSED(rng);
-   const BigInt k = generate_rfc6979_nonce(m_x, m_q, i, m_rfc6979_hash);
+   const BigInt k = generate_rfc6979_nonce(m_x, q, m, m_rfc6979_hash);
 #else
-   const BigInt k = BigInt::random_integer(rng, 1, m_q);
+   const BigInt k = BigInt::random_integer(rng, 1, q);
 #endif
 
-#if defined(BOTAN_TARGET_OS_HAS_THREADS)
-   auto future_r = std::async(std::launch::async,
-                              [&]() { return m_mod_q.reduce(m_powermod_g_p(k)); });
+   const BigInt k_inv = m_group.inverse_mod_q(k);
 
-   BigInt s = inverse_mod(k, m_q);
-   const BigInt r = future_r.get();
-#else
-   BigInt s = inverse_mod(k, m_q);
-   const BigInt r = m_mod_q.reduce(m_powermod_g_p(k));
-#endif
+   const BigInt r = m_group.mod_q(m_group.power_g_p(k, m_group.q_bits()));
 
-   s = m_mod_q.multiply(s, mul_add(m_x, r, i));
+   /*
+   * Blind the input message and compute x*r+m as (x*r*b + m*b)/b
+   */
+   m_b = m_group.square_mod_q(m_b);
+   m_b_inv = m_group.square_mod_q(m_b_inv);
+
+   m = m_group.multiply_mod_q(m_b, m);
+   const BigInt xr = m_group.multiply_mod_q(m_b, m_x, r);
+
+   const BigInt s = m_group.multiply_mod_q(m_b_inv, k_inv, m_group.mod_q(xr+m));
 
    // With overwhelming probability, a bug rather than actual zero r/s
-   BOTAN_ASSERT(s != 0, "invalid s");
-   BOTAN_ASSERT(r != 0, "invalid r");
+   if(r.is_zero() || s.is_zero())
+      throw Internal_Error("Computed zero r/s during DSA signature");
 
-   return BigInt::encode_fixed_length_int_pair(r, s, m_q.bytes());
+   return BigInt::encode_fixed_length_int_pair(r, s, q.bytes());
    }
 
 /**
@@ -150,54 +152,46 @@ class DSA_Verification_Operation final : public PK_Ops::Verification_with_EMSA
       DSA_Verification_Operation(const DSA_PublicKey& dsa,
                                  const std::string& emsa) :
          PK_Ops::Verification_with_EMSA(emsa),
-         m_q(dsa.group_q()), m_y(dsa.get_y()), m_powermod_g_p{Fixed_Base_Power_Mod(dsa.group_g(), dsa.group_p())},
-         m_powermod_y_p{Fixed_Base_Power_Mod(m_y, dsa.group_p())}, m_mod_p{Modular_Reducer(dsa.group_p())},
-         m_mod_q{Modular_Reducer(dsa.group_q())}
-         {}
+         m_group(dsa.get_group()),
+         m_y(dsa.get_y())
+         {
+         }
 
-      size_t max_input_bits() const override { return m_q.bits(); }
+      size_t max_input_bits() const override { return m_group.get_q().bits(); }
 
       bool with_recovery() const override { return false; }
 
       bool verify(const uint8_t msg[], size_t msg_len,
                   const uint8_t sig[], size_t sig_len) override;
    private:
-      const BigInt& m_q;
+      const DL_Group m_group;
       const BigInt& m_y;
-
-      Fixed_Base_Power_Mod m_powermod_g_p, m_powermod_y_p;
-      Modular_Reducer m_mod_p, m_mod_q;
    };
 
 bool DSA_Verification_Operation::verify(const uint8_t msg[], size_t msg_len,
                                         const uint8_t sig[], size_t sig_len)
    {
-   if(sig_len != 2*m_q.bytes() || msg_len > m_q.bytes())
+   const BigInt& q = m_group.get_q();
+   const size_t q_bytes = q.bytes();
+
+   if(sig_len != 2*q_bytes || msg_len > q_bytes)
       return false;
 
-   BigInt r(sig, m_q.bytes());
-   BigInt s(sig + m_q.bytes(), m_q.bytes());
-   BigInt i(msg, msg_len);
+   BigInt r(sig, q_bytes);
+   BigInt s(sig + q_bytes, q_bytes);
+   BigInt i(msg, msg_len, q.bits());
 
-   if(r <= 0 || r >= m_q || s <= 0 || s >= m_q)
+   if(r <= 0 || r >= q || s <= 0 || s >= q)
       return false;
 
-   s = inverse_mod(s, m_q);
+   s = inverse_mod(s, q);
 
-#if defined(BOTAN_TARGET_OS_HAS_THREADS)
-   auto future_s_i = std::async(std::launch::async,
-      [&]() { return m_powermod_g_p(m_mod_q.multiply(s, i)); });
+   const BigInt sr = m_group.multiply_mod_q(s, r);
+   const BigInt si = m_group.multiply_mod_q(s, i);
 
-   BigInt s_r = m_powermod_y_p(m_mod_q.multiply(s, r));
-   BigInt s_i = future_s_i.get();
-#else
-   BigInt s_r = m_powermod_y_p(m_mod_q.multiply(s, r));
-   BigInt s_i = m_powermod_g_p(m_mod_q.multiply(s, i));
-#endif
+   s = m_group.multi_exponentiate(si, m_y, sr);
 
-   s = m_mod_p.multiply(s_i, s_r);
-
-   return (m_mod_q.reduce(s) == r);
+   return (m_group.mod_q(s) == r);
    }
 
 }
@@ -212,12 +206,12 @@ DSA_PublicKey::create_verification_op(const std::string& params,
    }
 
 std::unique_ptr<PK_Ops::Signature>
-DSA_PrivateKey::create_signature_op(RandomNumberGenerator& /*rng*/,
+DSA_PrivateKey::create_signature_op(RandomNumberGenerator& rng,
                                     const std::string& params,
                                     const std::string& provider) const
    {
    if(provider == "base" || provider.empty())
-      return std::unique_ptr<PK_Ops::Signature>(new DSA_Signature_Operation(*this, params));
+      return std::unique_ptr<PK_Ops::Signature>(new DSA_Signature_Operation(*this, params, rng));
    throw Provider_Not_Found(algo_name(), provider);
    }
 

@@ -17,8 +17,8 @@ inline void SHACAL2_Fwd(uint32_t A, uint32_t B, uint32_t C, uint32_t& D,
                         uint32_t E, uint32_t F, uint32_t G, uint32_t& H,
                         uint32_t RK)
    {
-   const uint32_t A_rho = rotate_right(A, 2) ^ rotate_right(A, 13) ^ rotate_right(A, 22);
-   const uint32_t E_rho = rotate_right(E, 6) ^ rotate_right(E, 11) ^ rotate_right(E, 25);
+   const uint32_t A_rho = rotr<2>(A) ^ rotr<13>(A) ^ rotr<22>(A);
+   const uint32_t E_rho = rotr<6>(E) ^ rotr<11>(E) ^ rotr<25>(E);
 
    H += E_rho + ((E & F) ^ (~E & G)) + RK;
    D += H;
@@ -29,8 +29,8 @@ inline void SHACAL2_Rev(uint32_t A, uint32_t B, uint32_t C, uint32_t& D,
                         uint32_t E, uint32_t F, uint32_t G, uint32_t& H,
                         uint32_t RK)
    {
-   const uint32_t A_rho = rotate_right(A, 2) ^ rotate_right(A, 13) ^ rotate_right(A, 22);
-   const uint32_t E_rho = rotate_right(E, 6) ^ rotate_right(E, 11) ^ rotate_right(E, 25);
+   const uint32_t A_rho = rotr<2>(A) ^ rotr<13>(A) ^ rotr<22>(A);
+   const uint32_t E_rho = rotr<6>(E) ^ rotr<11>(E) ^ rotr<25>(E);
 
    H -= A_rho + ((A & B) | ((A | B) & C));
    D -= H;
@@ -44,6 +44,8 @@ inline void SHACAL2_Rev(uint32_t A, uint32_t B, uint32_t C, uint32_t& D,
 */
 void SHACAL2::encrypt_n(const uint8_t in[], uint8_t out[], size_t blocks) const
    {
+   verify_key_set(m_RK.empty() == false);
+
 #if defined(BOTAN_HAS_SHACAL2_X86)
    if(CPUID::has_intel_sha())
       {
@@ -99,6 +101,8 @@ void SHACAL2::encrypt_n(const uint8_t in[], uint8_t out[], size_t blocks) const
 */
 void SHACAL2::decrypt_n(const uint8_t in[], uint8_t out[], size_t blocks) const
    {
+   verify_key_set(m_RK.empty() == false);
+
 #if defined(BOTAN_HAS_SHACAL2_SIMD)
    if(CPUID::has_simd_32())
       {
@@ -175,8 +179,8 @@ void SHACAL2::key_schedule(const uint8_t key[], size_t len)
 
    for(size_t i = 16; i != 64; ++i)
       {
-      const uint32_t sigma0_15 = rotate_right(m_RK[i-15], 7) ^ rotate_right(m_RK[i-15], 18) ^ (m_RK[i-15] >> 3);
-      const uint32_t sigma1_2  = rotate_right(m_RK[i-2], 17) ^ rotate_right(m_RK[i-2], 19)  ^ (m_RK[i-2] >> 10);
+      const uint32_t sigma0_15 = rotr< 7>(m_RK[i-15]) ^ rotr<18>(m_RK[i-15]) ^ (m_RK[i-15] >> 3);
+      const uint32_t sigma1_2  = rotr<17>(m_RK[i- 2]) ^ rotr<19>(m_RK[i- 2]) ^ (m_RK[i- 2] >> 10);
       m_RK[i] = m_RK[i-16] + sigma0_15 + m_RK[i-7] + sigma1_2;
       }
 

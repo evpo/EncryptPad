@@ -11,7 +11,7 @@
 * National Security Research Institute, KOREA. Aaram Yun's implementation is based on
 * the 8-bit implementation by Jin Hong. The source files are available in ARIA.zip from
 * the Korea Internet & Security Agency website.
-* <A HREF="http://tools.ietf.org/html/rfc5794">RFC 5794, A Description of the ARIA Encryption Algorithm</A>,
+* <A HREF="https://tools.ietf.org/html/rfc5794">RFC 5794, A Description of the ARIA Encryption Algorithm</A>,
 * <A HREF="http://seed.kisa.or.kr/iwt/ko/bbs/EgovReferenceList.do?bbsId=BBSMSTR_000000000002">Korea
 * Internet & Security Agency homepage</A>
 */
@@ -183,7 +183,7 @@ inline void ARIA_FO(uint32_t& T0, uint32_t& T1, uint32_t& T2, uint32_t& T3)
    T1 ^= T2;
 
    T1 = ((T1 << 8) & 0xFF00FF00) | ((T1 >> 8) & 0x00FF00FF);
-   T2 = rotate_right(T2, 16);
+   T2 = rotr<16>(T2);
    T3 = reverse_bytes(T3);
 
    T1 ^= T2;
@@ -205,7 +205,7 @@ inline void ARIA_FE(uint32_t& T0, uint32_t& T1, uint32_t& T2, uint32_t& T3)
    T1 ^= T2;
 
    T3 = ((T3 << 8) & 0xFF00FF00) | ((T3 >> 8) & 0x00FF00FF);
-   T0 = rotate_right(T0, 16);
+   T0 = rotr<16>(T0);
    T1 = reverse_bytes(T1);
 
    T1 ^= T2;
@@ -220,9 +220,6 @@ inline void ARIA_FE(uint32_t& T0, uint32_t& T1, uint32_t& T2, uint32_t& T3)
 void transform(const uint8_t in[], uint8_t out[], size_t blocks,
                const secure_vector<uint32_t>& KS)
    {
-   if(KS.empty())
-      throw Invalid_State("ARIA key was not set");
-
    // Hit every cache line of S1 and S2
    const size_t cache_line_size = CPUID::cache_line_size();
 
@@ -411,9 +408,9 @@ void key_schedule(secure_vector<uint32_t>& ERK,
       {
       for(size_t j = 0; j != 4; ++j)
          {
-         DRK[i+j] = rotate_right(DRK[i+j], 8) ^
-                    rotate_right(DRK[i+j], 16) ^
-                    rotate_right(DRK[i+j], 24);
+         DRK[i+j] = rotr<8>(DRK[i+j]) ^
+                    rotr<16>(DRK[i+j]) ^
+                    rotr<24>(DRK[i+j]);
          }
 
       DRK[i+1] ^= DRK[i+2]; DRK[i+2] ^= DRK[i+3];
@@ -421,7 +418,7 @@ void key_schedule(secure_vector<uint32_t>& ERK,
       DRK[i+2] ^= DRK[i+0]; DRK[i+1] ^= DRK[i+2];
 
       DRK[i+1] = ((DRK[i+1] << 8) & 0xFF00FF00) | ((DRK[i+1] >> 8) & 0x00FF00FF);
-      DRK[i+2] = rotate_right(DRK[i+2], 16);
+      DRK[i+2] = rotr<16>(DRK[i+2]);
       DRK[i+3] = reverse_bytes(DRK[i+3]);
 
       DRK[i+1] ^= DRK[i+2]; DRK[i+2] ^= DRK[i+3];
@@ -436,31 +433,37 @@ void key_schedule(secure_vector<uint32_t>& ERK,
 
 void ARIA_128::encrypt_n(const uint8_t in[], uint8_t out[], size_t blocks) const
    {
+   verify_key_set(m_ERK.size() > 0);
    ARIA_F::transform(in, out, blocks, m_ERK);
    }
 
 void ARIA_192::encrypt_n(const uint8_t in[], uint8_t out[], size_t blocks) const
    {
+   verify_key_set(m_ERK.size() > 0);
    ARIA_F::transform(in, out, blocks, m_ERK);
    }
 
 void ARIA_256::encrypt_n(const uint8_t in[], uint8_t out[], size_t blocks) const
    {
+   verify_key_set(m_ERK.size() > 0);
    ARIA_F::transform(in, out, blocks, m_ERK);
    }
 
 void ARIA_128::decrypt_n(const uint8_t in[], uint8_t out[], size_t blocks) const
    {
+   verify_key_set(m_DRK.size() > 0);
    ARIA_F::transform(in, out, blocks, m_DRK);
    }
 
 void ARIA_192::decrypt_n(const uint8_t in[], uint8_t out[], size_t blocks) const
    {
+   verify_key_set(m_DRK.size() > 0);
    ARIA_F::transform(in, out, blocks, m_DRK);
    }
 
 void ARIA_256::decrypt_n(const uint8_t in[], uint8_t out[], size_t blocks) const
    {
+   verify_key_set(m_DRK.size() > 0);
    ARIA_F::transform(in, out, blocks, m_DRK);
    }
 

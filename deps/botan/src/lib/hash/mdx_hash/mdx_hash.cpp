@@ -19,11 +19,12 @@ MDx_HashFunction::MDx_HashFunction(size_t block_len,
                                    bool bit_end,
                                    size_t cnt_size) :
    m_buffer(block_len),
+   m_count(0),
+   m_position(0),
    BIG_BYTE_ENDIAN(byte_end),
    BIG_BIT_ENDIAN(bit_end),
    COUNT_SIZE(cnt_size)
    {
-   m_count = m_position = 0;
    }
 
 /*
@@ -70,9 +71,8 @@ void MDx_HashFunction::add_data(const uint8_t input[], size_t length)
 */
 void MDx_HashFunction::final_result(uint8_t output[])
    {
+   clear_mem(&m_buffer[m_position], m_buffer.size() - m_position);
    m_buffer[m_position] = (BIG_BIT_ENDIAN ? 0x80 : 0x01);
-   for(size_t i = m_position+1; i != m_buffer.size(); ++i)
-      m_buffer[i] = 0;
 
    if(m_position >= m_buffer.size() - COUNT_SIZE)
       {

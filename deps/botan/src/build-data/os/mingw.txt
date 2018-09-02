@@ -1,13 +1,8 @@
-os_type windows
 
 program_suffix .exe
 obj_suffix o
 static_suffix a
 
-building_shared_supported no
-
-ar_command "ar crs"
-ar_needs_ranlib yes
 
 install_root /mingw
 header_dir include
@@ -16,15 +11,14 @@ doc_dir share/doc
 
 <aliases>
 msys
-mingw32
+mingw32.*
 </aliases>
 
 <target_features>
-cryptgenrandom
-loadlibrary
-mkgmtime
-win32_virtual_lock
-win32_get_systemtime
+win32
+rtlgenrandom
+virtual_lock
+
 threads
 filesystem
 </target_features>

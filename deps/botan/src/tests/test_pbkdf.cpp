@@ -14,6 +14,10 @@
    #include <botan/pgp_s2k.h>
 #endif
 
+#if defined(BOTAN_HAS_SCRYPT)
+   #include <botan/scrypt.h>
+#endif
+
 namespace Botan_Tests {
 
 namespace {
@@ -26,11 +30,11 @@ class PBKDF_KAT_Tests final : public Text_Based_Test
 
       Test::Result run_one_test(const std::string& pbkdf_name, const VarMap& vars) override
          {
-         const size_t iterations = get_req_sz(vars, "Iterations");
-         const std::vector<uint8_t> salt = get_req_bin(vars, "Salt");
-         const std::string passphrase = get_req_str(vars, "Passphrase");
-         const std::vector<uint8_t> expected = get_req_bin(vars, "Output");
-         const size_t outlen = get_opt_sz(vars, "OutputLen", expected.size());
+         const size_t iterations = vars.get_req_sz("Iterations");
+         const std::vector<uint8_t> salt = vars.get_req_bin("Salt");
+         const std::string passphrase = vars.get_req_str("Passphrase");
+         const std::vector<uint8_t> expected = vars.get_req_bin("Output");
+         const size_t outlen = vars.get_opt_sz("OutputLen", expected.size());
 
          Test::Result result(pbkdf_name);
          std::unique_ptr<Botan::PBKDF> pbkdf(Botan::PBKDF::create(pbkdf_name));
@@ -54,6 +58,43 @@ class PBKDF_KAT_Tests final : public Text_Based_Test
    };
 
 BOTAN_REGISTER_TEST("pbkdf", PBKDF_KAT_Tests);
+
+#endif
+
+#if defined(BOTAN_HAS_SCRYPT)
+
+class Scrypt_KAT_Tests final : public Text_Based_Test
+   {
+   public:
+      Scrypt_KAT_Tests() : Text_Based_Test("scrypt.vec", "Passphrase,Salt,N,R,P,Output") {}
+
+      Test::Result run_one_test(const std::string&, const VarMap& vars) override
+         {
+         const size_t N = vars.get_req_sz("N");
+         const size_t R = vars.get_req_sz("R");
+         const size_t P = vars.get_req_sz("P");
+         const std::vector<uint8_t> salt = vars.get_req_bin("Salt");
+         const std::string passphrase = vars.get_req_str("Passphrase");
+         const std::vector<uint8_t> expected = vars.get_req_bin("Output");
+
+         Test::Result result("scrypt");
+
+         if(N >= 1048576 && Test::run_long_tests() == false)
+            return result;
+
+         std::vector<uint8_t> output(expected.size());
+         Botan::scrypt(output.data(), output.size(),
+                       passphrase, salt.data(), salt.size(),
+                       N, R, P);
+
+         result.test_eq("derived key", output, expected);
+
+         return result;
+         }
+
+   };
+
+BOTAN_REGISTER_TEST("scrypt", Scrypt_KAT_Tests);
 
 #endif
 

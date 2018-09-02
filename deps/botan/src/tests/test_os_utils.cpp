@@ -7,7 +7,6 @@
 
 #include "tests.h"
 #include <botan/internal/os_utils.h>
-#include <thread>
 
 // For __ud2 intrinsic
 #if defined(BOTAN_TARGET_COMPILER_IS_MSVC)
@@ -56,8 +55,8 @@ class OS_Utils_Tests final : public Test
 
          result.test_eq("PID same across calls", static_cast<size_t>(pid1), static_cast<size_t>(pid2));
 
-#if defined(BOTAN_TARGET_OS_TYPE_IS_UNIKERNEL)
-         result.test_eq("PID is zero on unikernel systems", pid1, 0);
+#if defined(BOTAN_TARGET_OS_IS_INCLUDEOS) || defined(BOTAN_TARGET_OS_IS_LLVM)
+         result.test_eq("PID is expected to be zero on this platform", pid1, 0);
 #else
          result.test_ne("PID is non-zero on systems with processes", pid1, 0);
 #endif
@@ -67,24 +66,22 @@ class OS_Utils_Tests final : public Test
 
       Test::Result test_get_processor_timestamp()
          {
-         // TODO better tests
          Test::Result result("OS::get_processor_timestamp");
 
          const uint64_t proc_ts1 = Botan::OS::get_processor_timestamp();
 
-         // do something that consumes a little time
-         std::this_thread::sleep_for(std::chrono::milliseconds(50));
-
-         uint64_t proc_ts2 = Botan::OS::get_processor_timestamp();
-
          if(proc_ts1 == 0)
             {
+            const uint64_t proc_ts2 = Botan::OS::get_processor_timestamp();
             result.test_is_eq("Disabled processor timestamp stays at zero", proc_ts1, proc_ts2);
+            return result;
             }
-         else
-            {
-            result.confirm("Processor timestamp does not duplicate", proc_ts1 != proc_ts2);
-            }
+
+         size_t counts = 0;
+         while(counts < 100 && (Botan::OS::get_processor_timestamp() == proc_ts1))
+            ++counts;
+
+         result.test_lt("CPU cycle counter eventually changes value", counts, 10);
 
          return result;
          }

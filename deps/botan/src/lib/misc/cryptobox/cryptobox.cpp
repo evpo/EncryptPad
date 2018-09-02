@@ -76,7 +76,7 @@ std::string encrypt(const uint8_t input[], size_t input_len,
    const uint8_t* iv = mk + CIPHER_KEY_LEN + MAC_KEY_LEN;
 
    // Now encrypt and authenticate
-   std::unique_ptr<Cipher_Mode> ctr(get_cipher_mode("Serpent/CTR-BE", ENCRYPTION));
+   std::unique_ptr<Cipher_Mode> ctr = Cipher_Mode::create_or_throw("Serpent/CTR-BE", ENCRYPTION);
    ctr->set_key(cipher_key, CIPHER_KEY_LEN);
    ctr->start(iv, CIPHER_IV_LEN);
    ctr->finish(out_buf, CRYPTOBOX_HEADER_LEN);
@@ -142,7 +142,7 @@ decrypt_bin(const uint8_t input[], size_t input_len,
    if(!constant_time_compare(computed_mac.data(), box_mac, MAC_OUTPUT_LEN))
       throw Decoding_Error("CryptoBox integrity failure");
 
-   std::unique_ptr<Cipher_Mode> ctr(get_cipher_mode("Serpent/CTR-BE", DECRYPTION));
+   std::unique_ptr<Cipher_Mode> ctr(Cipher_Mode::create_or_throw("Serpent/CTR-BE", DECRYPTION));
    ctr->set_key(cipher_key, CIPHER_KEY_LEN);
    ctr->start(iv, CIPHER_IV_LEN);
    ctr->finish(ciphertext, CRYPTOBOX_HEADER_LEN);
@@ -154,7 +154,7 @@ decrypt_bin(const uint8_t input[], size_t input_len,
 secure_vector<uint8_t> decrypt_bin(const std::string& input,
                                    const std::string& passphrase)
    {
-   return decrypt_bin(reinterpret_cast<const uint8_t*>(input.data()),
+   return decrypt_bin(cast_char_ptr_to_uint8(input.data()),
                       input.size(),
                       passphrase);
    }
@@ -164,14 +164,14 @@ std::string decrypt(const uint8_t input[], size_t input_len,
    {
    const secure_vector<uint8_t> bin = decrypt_bin(input, input_len, passphrase);
 
-   return std::string(reinterpret_cast<const char*>(&bin[0]),
+   return std::string(cast_uint8_ptr_to_char(&bin[0]),
                       bin.size());
    }
 
 std::string decrypt(const std::string& input,
                     const std::string& passphrase)
    {
-   return decrypt(reinterpret_cast<const uint8_t*>(input.data()),
+   return decrypt(cast_char_ptr_to_uint8(input.data()),
                   input.size(), passphrase);
    }
 

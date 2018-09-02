@@ -1,5 +1,5 @@
 /*
-* (C) 2010,2014,2015 Jack Lloyd
+* (C) 2010,2014,2015,2018 Jack Lloyd
 * (C) 2017 René Korthaus, Rohde & Schwarz Cybersecurity
 *
 * Botan is released under the Simplified BSD License (see license.txt)
@@ -7,7 +7,7 @@
 
 #include "cli.h"
 
-#if defined(BOTAN_HAS_X509_CERTIFICATES)
+#if defined(BOTAN_HAS_X509_CERTIFICATES) && defined(BOTAN_TARGET_OS_HAS_FILESYSTEM)
 
 #include <botan/certstor.h>
 #include <botan/pk_keys.h>
@@ -17,6 +17,7 @@
 #include <botan/x509path.h>
 #include <botan/x509self.h>
 #include <botan/data_src.h>
+#include <botan/parsing.h>
 
 #if defined(BOTAN_HAS_OCSP)
    #include <botan/ocsp.h>
@@ -29,13 +30,25 @@ class Sign_Cert final : public Command
    public:
       Sign_Cert()
          : Command("sign_cert --ca-key-pass= --hash=SHA-256 "
-                   "--duration=365 ca_cert ca_key pkcs10_req") {}
+                   "--duration=365 --emsa= ca_cert ca_key pkcs10_req") {}
+
+      std::string group() const override
+         {
+         return "x509";
+         }
+
+      std::string description() const override
+         {
+         return "Create a CA-signed X.509 certificate from a PKCS #10 CSR";
+         }
 
       void go() override
          {
          Botan::X509_Certificate ca_cert(get_arg("ca_cert"));
          std::unique_ptr<Botan::Private_Key> key;
          const std::string pass = get_arg("ca-key-pass");
+         const std::string emsa = get_arg("emsa");
+         const std::string hash = get_arg("hash");
 
          if(!pass.empty())
             {
@@ -51,7 +64,11 @@ class Sign_Cert final : public Command
             throw CLI_Error("Failed to load key from " + get_arg("ca_key"));
             }
 
-         Botan::X509_CA ca(ca_cert, *key, get_arg("hash"), rng());
+         std::map<std::string, std::string> options;
+         if(emsa.empty() == false)
+            options["padding"] = emsa;
+
+         Botan::X509_CA ca(ca_cert, *key, options, hash, rng());
 
          Botan::PKCS10_Request req(get_arg("pkcs10_req"));
 
@@ -74,11 +91,25 @@ BOTAN_REGISTER_COMMAND("sign_cert", Sign_Cert);
 class Cert_Info final : public Command
    {
    public:
-      Cert_Info() : Command("cert_info --ber file") {}
+      Cert_Info() : Command("cert_info --fingerprint file") {}
+
+      std::string group() const override
+         {
+         return "x509";
+         }
+
+      std::string description() const override
+         {
+         return "Parse X.509 certificate and display data fields";
+         }
 
       void go() override
          {
-         Botan::DataSource_Stream in(get_arg("file"), flag_set("ber"));
+         const std::string arg_file = get_arg("file");
+
+         std::vector<uint8_t> data = slurp_file(get_arg("file"));
+
+         Botan::DataSource_Memory in(data);
 
          while(!in.end_of_data())
             {
@@ -95,6 +126,9 @@ class Cert_Info final : public Command
                   // to_string failed - report the exception and continue
                   output() << "X509_Certificate::to_string failed: " << e.what() << "\n";
                   }
+
+               if(flag_set("fingerprint"))
+                  output() << "Fingerprint: " << cert.fingerprint("SHA-256") << std::endl;
                }
             catch(Botan::Exception& e)
                {
@@ -114,16 +148,27 @@ BOTAN_REGISTER_COMMAND("cert_info", Cert_Info);
 class OCSP_Check final : public Command
    {
    public:
-      OCSP_Check() : Command("ocsp_check subject issuer") {}
+      OCSP_Check() : Command("ocsp_check --timeout=3000 subject issuer") {}
+
+      std::string group() const override
+         {
+         return "x509";
+         }
+
+      std::string description() const override
+         {
+         return "Verify an X.509 certificate against the issuers OCSP responder";
+         }
 
       void go() override
          {
          Botan::X509_Certificate subject(get_arg("subject"));
          Botan::X509_Certificate issuer(get_arg("issuer"));
+         std::chrono::milliseconds timeout(get_arg_sz("timeout"));
 
          Botan::Certificate_Store_In_Memory cas;
          cas.add_certificate(issuer);
-         Botan::OCSP::Response resp = Botan::OCSP::online_check(issuer, subject, &cas);
+         Botan::OCSP::Response resp = Botan::OCSP::online_check(issuer, subject, &cas, timeout);
 
          auto status = resp.status_for(issuer, subject, std::chrono::system_clock::now());
 
@@ -146,6 +191,16 @@ class Cert_Verify final : public Command
    {
    public:
       Cert_Verify() : Command("cert_verify subject *ca_certs") {}
+
+      std::string group() const override
+         {
+         return "x509";
+         }
+
+      std::string description() const override
+         {
+         return "Verify if the passed X.509 certificate passes path validation";
+         }
 
       void go() override
          {
@@ -182,7 +237,17 @@ class Gen_Self_Signed final : public Command
    public:
       Gen_Self_Signed()
          : Command("gen_self_signed key CN --country= --dns= "
-                   "--organization= --email= --key-pass= --ca --hash=SHA-256") {}
+                   "--organization= --email= --days=365 --key-pass= --ca --hash=SHA-256 --emsa= --der") {}
+
+      std::string group() const override
+         {
+         return "x509";
+         }
+
+      std::string description() const override
+         {
+         return "Generate a self signed X.509 certificate";
+         }
 
       void go() override
          {
@@ -193,13 +258,21 @@ class Gen_Self_Signed final : public Command
             throw CLI_Error("Failed to load key from " + get_arg("key"));
             }
 
-         Botan::X509_Cert_Options opts;
+         const size_t days = get_arg_sz("days");
+
+         Botan::X509_Cert_Options opts("", days * 24 * 60 * 60);
 
          opts.common_name  = get_arg("CN");
          opts.country      = get_arg("country");
          opts.organization = get_arg("organization");
          opts.email        = get_arg("email");
-         opts.dns          = get_arg("dns");
+         opts.more_dns = Botan::split_on(get_arg("dns"), ',');
+         const bool der_format = flag_set("der");
+
+         std::string emsa = get_arg("emsa");
+
+         if(emsa.empty() == false)
+            opts.set_padding_scheme(emsa);
 
          if(flag_set("ca"))
             {
@@ -208,7 +281,13 @@ class Gen_Self_Signed final : public Command
 
          Botan::X509_Certificate cert = Botan::X509::create_self_signed_cert(opts, *key, get_arg("hash"), rng());
 
-         output() << cert.PEM_encode();
+         if(der_format)
+            {
+            auto der = cert.BER_encode();
+            output().write(reinterpret_cast<const char*>(der.data()), der.size());
+            }
+         else
+            output() << cert.PEM_encode();
          }
    };
 
@@ -219,7 +298,17 @@ class Generate_PKCS10 final : public Command
    public:
       Generate_PKCS10()
          : Command("gen_pkcs10 key CN --country= --organization= "
-                   "--email= --key-pass= --hash=SHA-256") {}
+                   "--email= --dns= --ext-ku= --key-pass= --hash=SHA-256 --emsa=") {}
+
+      std::string group() const override
+         {
+         return "x509";
+         }
+
+      std::string description() const override
+         {
+         return "Generate a PKCS #10 certificate signing request (CSR)";
+         }
 
       void go() override
          {
@@ -236,6 +325,17 @@ class Generate_PKCS10 final : public Command
          opts.country      = get_arg("country");
          opts.organization = get_arg("organization");
          opts.email        = get_arg("email");
+         opts.more_dns     = Botan::split_on(get_arg("dns"), ',');
+
+         for(std::string ext_ku : Botan::split_on(get_arg("ext-ku"), ','))
+            {
+            opts.add_ex_constraint(ext_ku);
+            }
+
+         std::string emsa = get_arg("emsa");
+
+         if(emsa.empty() == false)
+            opts.set_padding_scheme(emsa);
 
          Botan::PKCS10_Request req = Botan::X509::create_cert_req(opts, *key, get_arg("hash"), rng());
 

@@ -66,17 +66,23 @@ class ECIES_ECDH_KA_Operation final : public PK_Ops::Key_Agreement_with_KDF
 
       secure_vector<uint8_t> raw_agree(const uint8_t w[], size_t w_len) override
          {
-         const CurveGFp& curve = m_key.domain().get_curve();
-         PointGFp point = OS2ECP(w, w_len, curve);
-         Blinded_Point_Multiply blinder(point, m_key.domain().get_order());
-         PointGFp S = blinder.blinded_multiply(m_key.private_value(), m_rng);
-         BOTAN_ASSERT(S.on_the_curve(), "ECDH agreed value was on the curve");
-         return BigInt::encode_1363(S.get_affine_x(), curve.get_p().bytes());
+         const EC_Group& group = m_key.domain();
+
+         PointGFp input_point = group.OS2ECP(w, w_len);
+         input_point.randomize_repr(m_rng);
+
+         const PointGFp S = group.blinded_var_point_multiply(
+            input_point, m_key.private_value(), m_rng, m_ws);
+
+         if(S.on_the_curve() == false)
+            throw Internal_Error("ECDH agreed value was not on the curve");
+         return BigInt::encode_1363(S.get_affine_x(), group.get_p_bytes());
          }
 
    private:
       ECIES_PrivateKey m_key;
       RandomNumberGenerator& m_rng;
+      std::vector<BigInt> m_ws;
    };
 
 std::unique_ptr<PK_Ops::Key_Agreement>
@@ -162,7 +168,7 @@ SymmetricKey ECIES_KA_Operation::derive_secret(const std::vector<uint8_t>& eph_p
       }
 
    // ISO 18033: encryption step f / decryption step h
-   secure_vector<uint8_t> other_public_key_bin = EC2OSP(other_point, static_cast<uint8_t>(m_params.compression_type()));
+   std::vector<uint8_t> other_public_key_bin = other_point.encode(m_params.compression_type());
     // Note: the argument `m_params.secret_length()` passed for `key_len` will only be used by providers because
    // "Raw" is passed to the `PK_Key_Agreement` if the implementation of botan is used.
    const SymmetricKey peh = m_ka.derive_key(m_params.domain().get_order().bytes(), other_public_key_bin.data(), other_public_key_bin.size());
@@ -194,7 +200,7 @@ ECIES_System_Params::ECIES_System_Params(const EC_Group& domain, const std::stri
    m_mac_keylen(mac_key_len)
    {
    // ISO 18033: "At most one of CofactorMode, OldCofactorMode, and CheckMode may be 1."
-   if(cofactor_mode() + old_cofactor_mode() + check_mode() > 1)
+   if(size_t(cofactor_mode()) + size_t(old_cofactor_mode()) + size_t(check_mode()) > 1)
       {
       throw Invalid_Argument("ECIES: only one of cofactor_mode, old_cofactor_mode and check_mode can be set");
       }
@@ -215,12 +221,7 @@ std::unique_ptr<MessageAuthenticationCode> ECIES_System_Params::create_mac() con
 
 std::unique_ptr<Cipher_Mode> ECIES_System_Params::create_cipher(Botan::Cipher_Dir direction) const
    {
-   Cipher_Mode* cipher = get_cipher_mode(m_dem_spec, direction);
-   if(cipher == nullptr)
-      {
-      throw Algorithm_Not_Found(m_dem_spec);
-      }
-   return std::unique_ptr<Cipher_Mode>(cipher);
+   return Cipher_Mode::create_or_throw(m_dem_spec, direction);
    }
 
 
@@ -241,8 +242,7 @@ ECIES_Encryptor::ECIES_Encryptor(const PK_Key_Agreement_Key& private_key,
       {
       // ISO 18033: step d 
       // convert only if necessary; m_eph_public_key_bin has been initialized with the uncompressed format
-      m_eph_public_key_bin = unlock(EC2OSP(OS2ECP(m_eph_public_key_bin, m_params.domain().get_curve()),
-                                           static_cast<uint8_t>(ecies_params.compression_type())));
+      m_eph_public_key_bin = m_params.domain().OS2ECP(m_eph_public_key_bin).encode(ecies_params.compression_type());
       }
    }
 
@@ -311,7 +311,7 @@ ECIES_Decryptor::ECIES_Decryptor(const PK_Key_Agreement_Key& key,
    // ISO 18033: "If v > 1 and CheckMode = 0, then we must have gcd(u, v) = 1." (v = index, u= order)
    if(!ecies_params.check_mode())
       {
-      Botan::BigInt cofactor = m_params.domain().get_cofactor();
+      const Botan::BigInt& cofactor = m_params.domain().get_cofactor();
       if(cofactor > 1 && Botan::gcd(cofactor, m_params.domain().get_order()) != 1)
          {
          throw Invalid_Argument("ECIES: gcd of cofactor and order must be 1 if check_mode is 0");
@@ -324,7 +324,7 @@ ECIES_Decryptor::ECIES_Decryptor(const PK_Key_Agreement_Key& key,
 */
 secure_vector<uint8_t> ECIES_Decryptor::do_decrypt(uint8_t& valid_mask, const uint8_t in[], size_t in_len) const
    {
-   size_t point_size = m_params.domain().get_curve().get_p().bytes();
+   size_t point_size = m_params.domain().get_p_bytes();
    if(m_params.compression_type() != PointGFp::COMPRESSED)
       {
       point_size *= 2;		// uncompressed and hybrid contains x AND y
@@ -345,7 +345,7 @@ secure_vector<uint8_t> ECIES_Decryptor::do_decrypt(uint8_t& valid_mask, const ui
    const std::vector<uint8_t> mac_data(in + in_len - mac->output_length(), in + in_len);
 
    // ISO 18033: step a
-   PointGFp other_public_key = OS2ECP(other_public_key_bin, m_params.domain().get_curve());
+   PointGFp other_public_key = m_params.domain().OS2ECP(other_public_key_bin);
 
    // ISO 18033: step b
    if(m_params.check_mode() && !other_public_key.on_the_curve())

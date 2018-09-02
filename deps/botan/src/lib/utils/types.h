@@ -59,7 +59,7 @@ namespace Botan {
 *        @ref sm2_enc.h "SM2"
 * <dt>Public Key Signature Schemes<dd>
 *        @ref dsa.h "DSA", @ref ecdsa.h "ECDSA", @ref ecgdsa.h "ECGDSA", @ref eckcdsa.h "ECKCDSA",
-*        @ref gost_3410.h "GOST 34.10-2001", @ref sm2.h "SM2"
+*        @ref gost_3410.h "GOST 34.10-2001", @ref sm2.h "SM2", @ref xmss.h "XMSS"
 * <dt>Key Agreement<dd>
 *        @ref dh.h "DH", @ref ecdh.h "ECDH"
 * <dt>Compression<dd>
@@ -92,10 +92,17 @@ using u32bit = std::uint32_t;
 using u64bit = std::uint64_t;
 using s32bit = std::int32_t;
 
-/**
-* A default buffer size; typically a memory page
-*/
-static const size_t DEFAULT_BUFFERSIZE = BOTAN_DEFAULT_BUFFER_SIZE;
+#if (BOTAN_MP_WORD_BITS == 8)
+  typedef uint8_t word;
+#elif (BOTAN_MP_WORD_BITS == 16)
+  typedef uint16_t word;
+#elif (BOTAN_MP_WORD_BITS == 32)
+  typedef uint32_t word;
+#elif (BOTAN_MP_WORD_BITS == 64)
+  typedef uint64_t word;
+#else
+  #error BOTAN_MP_WORD_BITS must be 8, 16, 32, or 64
+#endif
 
 }
 

@@ -56,7 +56,7 @@ class System_RNG_EntropySource final : public Entropy_Source
          return poll_bits;
          }
 
-      std::string name() const override { return system_rng().name(); }
+      std::string name() const override { return "system_rng"; }
    };
 
 }
@@ -123,6 +123,7 @@ std::unique_ptr<Entropy_Source> Entropy_Source::create(const std::string& name)
       }
 #endif
 
+   BOTAN_UNUSED(name);
    return std::unique_ptr<Entropy_Source>();
    }
 

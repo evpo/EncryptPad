@@ -12,7 +12,7 @@
 *
 * (C) 2016 Juraj Somorovsky - juraj.somorovsky@hackmanit.de
 * (C) 2017 Neverhub
-* (C) 2017 Jack Lloyd
+* (C) 2017,2018 Jack Lloyd
 *
 * Botan is released under the Simplified BSD License (see license.txt)
 */
@@ -20,7 +20,25 @@
 #include "cli.h"
 #include <botan/hex.h>
 #include <sstream>
+#include <fstream>
+
 #include <botan/internal/os_utils.h>
+
+#if defined(BOTAN_HAS_BIGINT)
+   #include <botan/bigint.h>
+#endif
+
+#if defined(BOTAN_HAS_NUMBERTHEORY)
+   #include <botan/numthry.h>
+#endif
+
+#if defined(BOTAN_HAS_ECC_GROUP)
+   #include <botan/ec_group.h>
+#endif
+
+#if defined(BOTAN_HAS_DL_GROUP)
+   #include <botan/dl_group.h>
+#endif
 
 #if defined(BOTAN_HAS_SYSTEM_RNG)
    #include <botan/system_rng.h>
@@ -41,9 +59,8 @@
 #endif
 
 #if defined(BOTAN_HAS_ECDSA)
+   #include <botan/pubkey.h>
    #include <botan/ecdsa.h>
-   #include <botan/reducer.h>
-   #include <botan/numthry.h>
 #endif
 
 namespace Botan_CLI {
@@ -61,7 +78,10 @@ class Timing_Test
                                       size_t warmup_runs,
                                       size_t measurement_runs);
 
-      virtual std::vector<uint8_t> prepare_input(std::string input) = 0;
+      virtual std::vector<uint8_t> prepare_input(std::string input)
+         {
+         return Botan::hex_decode(input);
+         }
 
       virtual ticks measure_critical_function(std::vector<uint8_t> input) = 0;
 
@@ -89,7 +109,7 @@ class Timing_Test
 
 #if defined(BOTAN_HAS_RSA) && defined(BOTAN_HAS_EME_PKCS1v15) && defined(BOTAN_HAS_EME_RAW)
 
-class Bleichenbacker_Timing_Test : public Timing_Test
+class Bleichenbacker_Timing_Test final : public Timing_Test
    {
    public:
       Bleichenbacker_Timing_Test(size_t keysize)
@@ -133,7 +153,7 @@ class Bleichenbacker_Timing_Test : public Timing_Test
 * Padding (OAEP) as Standardized in PKCS #1 v2.0" James Manger
 * http://archiv.infsec.ethz.ch/education/fs08/secsem/Manger01.pdf
 */
-class Manger_Timing_Test : public Timing_Test
+class Manger_Timing_Test final : public Timing_Test
    {
    public:
       Manger_Timing_Test(size_t keysize)
@@ -181,13 +201,15 @@ class Manger_Timing_Test : public Timing_Test
 /*
 * Test handling of countermeasure to the Lucky13 attack
 */
-class Lucky13_Timing_Test : public Timing_Test
+class Lucky13_Timing_Test final : public Timing_Test
    {
    public:
       Lucky13_Timing_Test(const std::string& mac_name, size_t mac_keylen)
          : m_mac_algo(mac_name)
          , m_mac_keylen(mac_keylen)
-         , m_dec("AES-128", 16, m_mac_algo, m_mac_keylen, true, false) {}
+         , m_dec(Botan::BlockCipher::create_or_throw("AES-128"),
+                 Botan::MessageAuthenticationCode::create_or_throw("HMAC(" + m_mac_algo + ")"),
+                 16, m_mac_keylen, true, false) {}
 
       std::vector<uint8_t> prepare_input(std::string input) override;
       ticks measure_critical_function(std::vector<uint8_t> input) override;
@@ -204,7 +226,7 @@ std::vector<uint8_t> Lucky13_Timing_Test::prepare_input(std::string input)
    const std::vector<uint8_t> key(16);
    const std::vector<uint8_t> iv(16);
 
-   std::unique_ptr<Botan::Cipher_Mode> enc(Botan::get_cipher_mode("AES-128/CBC/NoPadding", Botan::ENCRYPTION));
+   std::unique_ptr<Botan::Cipher_Mode> enc(Botan::Cipher_Mode::create("AES-128/CBC/NoPadding", Botan::ENCRYPTION));
    enc->set_key(key);
    enc->start(iv);
    Botan::secure_vector<uint8_t> buf(input_vector.begin(), input_vector.end());
@@ -240,46 +262,133 @@ ticks Lucky13_Timing_Test::measure_critical_function(std::vector<uint8_t> input)
 
 #if defined(BOTAN_HAS_ECDSA)
 
-class ECDSA_Timing_Test : public Timing_Test
+class ECDSA_Timing_Test final : public Timing_Test
    {
    public:
       ECDSA_Timing_Test(std::string ecgroup);
 
-      std::vector<uint8_t> prepare_input(std::string input) override;
       ticks measure_critical_function(std::vector<uint8_t> input) override;
 
    private:
+      const Botan::EC_Group m_group;
       const Botan::ECDSA_PrivateKey m_privkey;
-      const Botan::BigInt m_order;
-      Botan::Blinded_Point_Multiply m_base_point;
-      const Botan::BigInt m_x;
-      const Botan::Modular_Reducer m_mod_order;
+      const Botan::BigInt& m_x;
+      std::vector<Botan::BigInt> m_ws;
    };
 
 ECDSA_Timing_Test::ECDSA_Timing_Test(std::string ecgroup)
-   : m_privkey(Timing_Test::timing_test_rng(), Botan::EC_Group(ecgroup))
-   , m_order(m_privkey.domain().get_order())
-   , m_base_point(m_privkey.domain().get_base_point(), m_order)
+   : m_group(ecgroup)
+   , m_privkey(Timing_Test::timing_test_rng(), m_group)
    , m_x(m_privkey.private_value())
-   , m_mod_order(m_order) {}
-
-std::vector<uint8_t> ECDSA_Timing_Test::prepare_input(std::string input)
-   {
-   const std::vector<uint8_t> input_vector = Botan::hex_decode(input);
-   return input_vector;
-   }
+   {}
 
 ticks ECDSA_Timing_Test::measure_critical_function(std::vector<uint8_t> input)
    {
    const Botan::BigInt k(input.data(), input.size());
-   const Botan::BigInt msg(Timing_Test::timing_test_rng(), m_order.bits());
+   const Botan::BigInt msg(5); // fixed message to minimize noise
 
    ticks start = get_ticks();
 
    //The following ECDSA operations involve and should not leak any information about k.
-   const Botan::PointGFp k_times_P = m_base_point.blinded_multiply(k, Timing_Test::timing_test_rng());
-   const Botan::BigInt r = m_mod_order.reduce(k_times_P.get_affine_x());
-   const Botan::BigInt s = m_mod_order.multiply(inverse_mod(k, m_order), mul_add(m_x, r, msg));
+
+   const Botan::BigInt k_inv = m_group.inverse_mod_order(k);
+   const Botan::PointGFp k_times_P = m_group.blinded_base_point_multiply(k, Timing_Test::timing_test_rng(), m_ws);
+   const Botan::BigInt r = m_group.mod_order(k_times_P.get_affine_x());
+   const Botan::BigInt s = m_group.multiply_mod_order(k_inv, mul_add(m_x, r, msg));
+
+   BOTAN_UNUSED(r, s);
+
+   ticks end = get_ticks();
+
+   return (end - start);
+   }
+
+#endif
+
+#if defined(BOTAN_HAS_ECC_GROUP)
+
+class ECC_Mul_Timing_Test final : public Timing_Test
+   {
+   public:
+      ECC_Mul_Timing_Test(std::string ecgroup) :
+         m_group(ecgroup)
+         {}
+
+      ticks measure_critical_function(std::vector<uint8_t> input) override;
+
+   private:
+      const Botan::EC_Group m_group;
+      std::vector<Botan::BigInt> m_ws;
+   };
+
+ticks ECC_Mul_Timing_Test::measure_critical_function(std::vector<uint8_t> input)
+   {
+   const Botan::BigInt k(input.data(), input.size());
+
+   ticks start = get_ticks();
+
+   const Botan::PointGFp k_times_P = m_group.blinded_base_point_multiply(k, Timing_Test::timing_test_rng(), m_ws);
+
+   ticks end = get_ticks();
+
+   return (end - start);
+   }
+
+#endif
+
+#if defined(BOTAN_HAS_DL_GROUP)
+
+class Powmod_Timing_Test final : public Timing_Test
+   {
+   public:
+      Powmod_Timing_Test(const std::string& dl_group) : m_group(dl_group)
+         {
+         }
+
+      ticks measure_critical_function(std::vector<uint8_t> input) override;
+   private:
+      Botan::DL_Group m_group;
+   };
+
+ticks Powmod_Timing_Test::measure_critical_function(std::vector<uint8_t> input)
+   {
+   const Botan::BigInt x(input.data(), input.size());
+   const size_t max_x_bits = m_group.p_bits();
+
+   ticks start = get_ticks();
+
+   const Botan::BigInt g_x_p = m_group.power_g_p(x, max_x_bits);
+
+   ticks end = get_ticks();
+
+   return (end - start);
+   }
+
+#endif
+
+#if defined(BOTAN_HAS_NUMBERTHEORY)
+
+class Invmod_Timing_Test final : public Timing_Test
+   {
+   public:
+      Invmod_Timing_Test(size_t p_bits)
+         {
+         m_p = Botan::random_prime(timing_test_rng(), p_bits);
+         }
+
+      ticks measure_critical_function(std::vector<uint8_t> input) override;
+
+   private:
+      Botan::BigInt m_p;
+   };
+
+ticks Invmod_Timing_Test::measure_critical_function(std::vector<uint8_t> input)
+   {
+   const Botan::BigInt k(input.data(), input.size());
+
+   ticks start = get_ticks();
+
+   const Botan::BigInt inv = inverse_mod(k, m_p);
 
    ticks end = get_ticks();
 
@@ -335,12 +444,22 @@ std::vector<std::vector<ticks>> Timing_Test::execute_evaluation(
    return all_results;
    }
 
-class Timing_Test_Command : public Command
+class Timing_Test_Command final : public Command
    {
    public:
       Timing_Test_Command()
          : Command("timing_test test_type --test-data-file= --test-data-dir=src/tests/data/timing "
                    "--warmup-runs=1000 --measurement-runs=10000") {}
+
+      std::string group() const override
+         {
+         return "misc";
+         }
+
+      std::string description() const override
+         {
+         return "Run various timing side channel tests";
+         }
 
       void go() override
          {
@@ -363,23 +482,7 @@ class Timing_Test_Command : public Command
             filename = test_data_dir + "/" + test_type + ".vec";
             }
 
-         std::vector<std::string> lines;
-
-            {
-            std::ifstream infile(filename);
-            if(infile.good() == false)
-               {
-               throw CLI_Error("Error reading test data from '" + filename + "'");
-               }
-            std::string line;
-            while(std::getline(infile, line))
-               {
-               if(line.size() > 0 && line.at(0) != '#')
-                  {
-                  lines.push_back(line);
-                  }
-               }
-            }
+         std::vector<std::string> lines = read_testdata(filename);
 
          std::vector<std::vector<ticks>> results = test->execute_evaluation(lines, warmup_runs, measurement_runs);
 
@@ -396,20 +499,42 @@ class Timing_Test_Command : public Command
          output() << oss.str();
          }
    private:
+
+      std::vector<std::string> read_testdata(const std::string& filename)
+         {
+         std::vector<std::string> lines;
+         std::ifstream infile(filename);
+         if(infile.good() == false)
+            {
+            throw CLI_Error("Error reading test data from '" + filename + "'");
+            }
+         std::string line;
+         while(std::getline(infile, line))
+            {
+            if(line.size() > 0 && line.at(0) != '#')
+               {
+               lines.push_back(line);
+               }
+            }
+         return lines;
+         }
+
       std::unique_ptr<Timing_Test> lookup_timing_test(const std::string& test_type);
 
       std::string help_text() const override
          {
          // TODO check feature macros
          return (Command::help_text() +
-                 "\ntest_type can take on values " +
-                 "bleichenbacher " +
+                 "\ntest_type can take on values "
+                 "bleichenbacher "
                  "manger "
-                 "ecdsa " +
-                 "lucky13sha1sec3 " +
-                 "lucky13sha256sec3 " +
-                 "lucky13sec4sha1 " +
-                 "lucky13sec4sha256 " +
+                 "ecdsa "
+                 "ecc_mul "
+                 "inverse_mod "
+                 "pow_mod "
+                 "lucky13sec3 "
+                 "lucky13sec4sha1 "
+                 "lucky13sec4sha256 "
                  "lucky13sec4sha384 "
                 );
          }
@@ -440,16 +565,37 @@ std::unique_ptr<Timing_Test> Timing_Test_Command::lookup_timing_test(const std::
       }
 #endif
 
+#if defined(BOTAN_HAS_ECC_GROUP)
+   if(test_type == "ecc_mul")
+      {
+      return std::unique_ptr<Timing_Test>(new ECC_Mul_Timing_Test("brainpool512r1"));
+      }
+#endif
+
+#if defined(BOTAN_HAS_NUMBERTHEORY)
+   if(test_type == "inverse_mod")
+      {
+      return std::unique_ptr<Timing_Test>(new Invmod_Timing_Test(512));
+      }
+#endif
+
+#if defined(BOTAN_HAS_DL_GROUP)
+   if(test_type == "pow_mod")
+      {
+      return std::unique_ptr<Timing_Test>(new Powmod_Timing_Test("modp/ietf/1024"));
+      }
+#endif
+
 #if defined(BOTAN_HAS_TLS_CBC)
-   if(test_type == "lucky13sha1sec3" || test_type == "lucky13sha1sec4")
+   if(test_type == "lucky13sec3" || test_type == "lucky13sec4sha1")
       {
       return std::unique_ptr<Timing_Test>(new Lucky13_Timing_Test("SHA-1", 20));
       }
-   if(test_type == "lucky13sha256sec3" || test_type == "lucky13sha256sec4")
+   if(test_type == "lucky13sec4sha256")
       {
       return std::unique_ptr<Timing_Test>(new Lucky13_Timing_Test("SHA-256", 32));
       }
-   if(test_type == "lucky13sha384")
+   if(test_type == "lucky13sec4sha384")
       {
       return std::unique_ptr<Timing_Test>(new Lucky13_Timing_Test("SHA-384", 48));
       }

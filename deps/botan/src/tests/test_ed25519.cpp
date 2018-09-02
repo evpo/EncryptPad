@@ -20,18 +20,47 @@ namespace {
 
 #if defined(BOTAN_HAS_ED25519)
 
+class Ed25519_Verification_Tests : public PK_Signature_Verification_Test
+   {
+   public:
+      Ed25519_Verification_Tests() : PK_Signature_Verification_Test(
+         "Ed25519",
+         "pubkey/ed25519_verify.vec",
+         "Pubkey,Msg,Signature", "Valid") {}
+
+      bool clear_between_callbacks() const override
+         {
+         return false;
+         }
+
+      std::unique_ptr<Botan::Public_Key> load_public_key(const VarMap& vars) override
+         {
+         const std::vector<uint8_t> pubkey = vars.get_req_bin("Pubkey");
+
+         std::unique_ptr<Botan::Ed25519_PublicKey> key(new Botan::Ed25519_PublicKey(pubkey));
+
+         return std::unique_ptr<Botan::Public_Key>(key.release());
+
+         }
+   };
+
 class Ed25519_Signature_Tests final : public PK_Signature_Generation_Test
    {
    public:
       Ed25519_Signature_Tests() : PK_Signature_Generation_Test(
             "Ed25519",
             "pubkey/ed25519.vec",
-            "Privkey,Pubkey,Hash,Msg,Signature") {}
+            "Privkey,Pubkey,Msg,Signature") {}
+
+      bool clear_between_callbacks() const override
+         {
+         return false;
+         }
 
       std::unique_ptr<Botan::Private_Key> load_private_key(const VarMap& vars) override
          {
-         const std::vector<uint8_t> privkey = get_req_bin(vars, "Privkey");
-         const std::vector<uint8_t> pubkey = get_req_bin(vars, "Pubkey");
+         const std::vector<uint8_t> privkey = vars.get_req_bin("Privkey");
+         const std::vector<uint8_t> pubkey = vars.get_req_bin("Pubkey");
 
          Botan::secure_vector<uint8_t> seed(privkey.begin(), privkey.end());
 
@@ -41,11 +70,6 @@ class Ed25519_Signature_Tests final : public PK_Signature_Generation_Test
             throw Test_Error("Invalid Ed25519 key in test data");
 
          return std::unique_ptr<Botan::Private_Key>(key.release());
-         }
-
-      std::string default_padding(const VarMap& vars) const override
-         {
-         return get_opt_str(vars, "Hash", "Pure");
          }
    };
 
@@ -87,6 +111,7 @@ class Ed25519_Curdle_Format_Tests final : public Test
          }
    };
 
+BOTAN_REGISTER_TEST("ed25519_verify", Ed25519_Verification_Tests);
 BOTAN_REGISTER_TEST("ed25519_sign", Ed25519_Signature_Tests);
 BOTAN_REGISTER_TEST("ed25519_curdle", Ed25519_Curdle_Format_Tests);
 

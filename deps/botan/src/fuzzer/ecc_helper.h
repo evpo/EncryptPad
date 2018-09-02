@@ -8,7 +8,6 @@
 #define ECC_HELPERS_H_
 
 #include "fuzzers.h"
-#include <botan/curve_gfp.h>
 #include <botan/ec_group.h>
 #include <botan/reducer.h>
 
@@ -25,32 +24,45 @@ void check_ecc_math(const Botan::EC_Group& group,
    {
    // These depend only on the group, which is also static
    static const Botan::PointGFp base_point = group.get_base_point();
-   static Botan::Blinded_Point_Multiply blind(base_point, group.get_order(), 4);
+
+   // This is shared across runs to reduce overhead
+   static std::vector<Botan::BigInt> ws(Botan::PointGFp::WORKSPACE_SIZE);
 
    const size_t hlen = len / 2;
    const Botan::BigInt a = Botan::BigInt::decode(in, hlen);
    const Botan::BigInt b = Botan::BigInt::decode(in + hlen, len - hlen);
-
    const Botan::BigInt c = a + b;
 
-   const Botan::PointGFp P = base_point * a;
-   const Botan::PointGFp Q = base_point * b;
-   const Botan::PointGFp R = base_point * c;
-
-   const Botan::PointGFp A1 = P + Q;
-   const Botan::PointGFp A2 = Q + P;
-
-   FUZZER_ASSERT_EQUAL(A1, A2);
-
-   const Botan::PointGFp P1 = blind.blinded_multiply(a, fuzzer_rng());
-   const Botan::PointGFp Q1 = blind.blinded_multiply(b, fuzzer_rng());
-   const Botan::PointGFp R1 = blind.blinded_multiply(c, fuzzer_rng());
+   const Botan::PointGFp P1 = base_point * a;
+   const Botan::PointGFp Q1 = base_point * b;
+   const Botan::PointGFp R1 = base_point * c;
 
    const Botan::PointGFp S1 = P1 + Q1;
-   const Botan::PointGFp S2 = Q1 + P1;
+   const Botan::PointGFp T1 = Q1 + P1;
+
+   FUZZER_ASSERT_EQUAL(S1, R1);
+   FUZZER_ASSERT_EQUAL(T1, R1);
+
+   const Botan::PointGFp P2 = group.blinded_base_point_multiply(a, fuzzer_rng(), ws);
+   const Botan::PointGFp Q2 = group.blinded_base_point_multiply(b, fuzzer_rng(), ws);
+   const Botan::PointGFp R2 = group.blinded_base_point_multiply(c, fuzzer_rng(), ws);
+   const Botan::PointGFp S2 = P2 + Q2;
+   const Botan::PointGFp T2 = Q2 + P2;
+
+   FUZZER_ASSERT_EQUAL(S2, R2);
+   FUZZER_ASSERT_EQUAL(T2, R2);
+
+   const Botan::PointGFp P3 = group.blinded_var_point_multiply(base_point, a, fuzzer_rng(), ws);
+   const Botan::PointGFp Q3 = group.blinded_var_point_multiply(base_point, b, fuzzer_rng(), ws);
+   const Botan::PointGFp R3 = group.blinded_var_point_multiply(base_point, c, fuzzer_rng(), ws);
+   const Botan::PointGFp S3 = P3 + Q3;
+   const Botan::PointGFp T3 = Q3 + P3;
+
+   FUZZER_ASSERT_EQUAL(S3, R3);
+   FUZZER_ASSERT_EQUAL(T3, R3);
 
    FUZZER_ASSERT_EQUAL(S1, S2);
-   FUZZER_ASSERT_EQUAL(S1, A1);
+   FUZZER_ASSERT_EQUAL(S1, S3);
    }
 
 }

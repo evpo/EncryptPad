@@ -26,7 +26,7 @@ is recommend for new applications.
 
 .. cpp:function:: OctetString PBKDF::derive_key( \
    size_t output_len, const std::string& passphrase, \
-   const byte* salt, size_t salt_len, \
+   const uint8_t* salt, size_t salt_len, \
    size_t iterations) const
 
    Computes a key from *passphrase* and the *salt* (of length
@@ -46,14 +46,26 @@ is recommend for new applications.
    PBKDF* pbkdf = get_pbkdf("PBKDF2(SHA-256)");
    AutoSeeded_RNG rng;
 
-   secure_vector<byte> salt = rng.random_vec(16);
+   secure_vector<uint8_t> salt = rng.random_vec(16);
    OctetString aes256_key = pbkdf->derive_key(32, "password",
                                               &salt[0], salt.size(),
                                               10000);
 
+PBKDF1
+------------
+
+PBKDF1 is an old scheme that can only produce an output length at most
+as long as the hash function. It is deprecated and will be removed in
+a future release.
+
+PBKDF2
+------------
+
+PBKDF2 is a the "standard" password derivation scheme, widely
+implemented in many different libraries.
 
 OpenPGP S2K
-----------------------------------------
+-------------
 
 There are some oddities about OpenPGP's S2K algorithms that are
 documented here. For one thing, it uses the iteration count in a
@@ -74,3 +86,36 @@ be about right). Using both a reasonably sized salt and a large
 iteration count is highly recommended to prevent password guessing
 attempts.
 
+Scrypt
+----------
+
+Scrypt is a relatively newer design which is "memory hard" - in
+addition to requiring large amounts of CPU power it uses a large block
+of memory to compute the hash. This makes brute force attacks using
+ASICs substantially more expensive.
+
+Currently Scrypt uses a different interface from the standard PBKDF
+functions. This will be remedied in a future major release which
+redesigns the PBKDF interfaces.
+
+.. cpp:function:: void scrypt(uint8_t output[], size_t output_len, \
+                              const std::string& password, \
+                              const uint8_t salt[], size_t salt_len, \
+                              size_t N, size_t r, size_t p)
+
+   Computes the Scrypt using the password and salt, and produces an output
+   of arbitrary length.
+
+   The N, r, p parameters control how much work and memory Scrypt
+   uses.  N is the primary control of the workfactor, and must be a
+   power of 2. For interactive logins use 32768, for protection of
+   secret keys or backups use 1048576.
+
+   The r parameter controls how 'wide' the internal hashing operation
+   is. It also increases the amount of memory that is used. Values
+   from 1 to 8 are reasonable.
+
+   Setting p parameter to greater than one splits up the work in a way
+   that up to p processors can work in parallel.
+
+   As a general recommendation, use N=32768, r=8, p=1

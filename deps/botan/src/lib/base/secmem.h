@@ -40,6 +40,22 @@ class secure_allocator
       secure_allocator(const secure_allocator&) = default;
       secure_allocator& operator=(const secure_allocator&) = default;
       ~secure_allocator() = default;
+
+      template <typename U>
+      struct rebind
+         {
+         typedef secure_allocator<U> other;
+         };
+
+      void construct(value_type* mem, const value_type& value)
+         {
+         std::_Construct(mem, value);
+         }
+
+      void destroy(value_type* mem)
+         {
+         std::_Destroy(mem);
+         }
 #else
       secure_allocator() BOTAN_NOEXCEPT = default;
       secure_allocator(const secure_allocator&) BOTAN_NOEXCEPT = default;
@@ -89,8 +105,9 @@ size_t buffer_insert(std::vector<T, Alloc>& buf,
                      const T input[],
                      size_t input_length)
    {
+   BOTAN_ASSERT_NOMSG(buf_offset <= buf.size());
    const size_t to_copy = std::min(input_length, buf.size() - buf_offset);
-   if (to_copy > 0)
+   if(to_copy > 0)
       {
       copy_mem(&buf[buf_offset], input, to_copy);
       }
@@ -102,8 +119,9 @@ size_t buffer_insert(std::vector<T, Alloc>& buf,
                      size_t buf_offset,
                      const std::vector<T, Alloc2>& input)
    {
+   BOTAN_ASSERT_NOMSG(buf_offset <= buf.size());
    const size_t to_copy = std::min(input.size(), buf.size() - buf_offset);
-   if (to_copy > 0)
+   if(to_copy > 0)
       {
       copy_mem(&buf[buf_offset], input.data(), to_copy);
       }
@@ -117,7 +135,7 @@ operator+=(std::vector<T, Alloc>& out,
    {
    const size_t copy_offset = out.size();
    out.resize(out.size() + in.size());
-   if (in.size() > 0)
+   if(in.size() > 0)
       {
       copy_mem(&out[copy_offset], in.data(), in.size());
       }
@@ -137,7 +155,7 @@ std::vector<T, Alloc>& operator+=(std::vector<T, Alloc>& out,
    {
    const size_t copy_offset = out.size();
    out.resize(out.size() + in.second);
-   if (in.second > 0)
+   if(in.second > 0)
       {
       copy_mem(&out[copy_offset], in.first, in.second);
       }
@@ -150,7 +168,7 @@ std::vector<T, Alloc>& operator+=(std::vector<T, Alloc>& out,
    {
    const size_t copy_offset = out.size();
    out.resize(out.size() + in.second);
-   if (in.second > 0)
+   if(in.second > 0)
       {
       copy_mem(&out[copy_offset], in.first, in.second);
       }

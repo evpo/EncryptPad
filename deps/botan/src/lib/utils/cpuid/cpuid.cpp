@@ -46,6 +46,7 @@ std::string CPUID::to_string()
    CPUID_PRINT(avx512f);
 
    CPUID_PRINT(rdtsc);
+   CPUID_PRINT(bmi1);
    CPUID_PRINT(bmi2);
    CPUID_PRINT(adx);
 
@@ -58,6 +59,7 @@ std::string CPUID::to_string()
 
 #if defined(BOTAN_TARGET_CPU_IS_PPC_FAMILY)
    CPUID_PRINT(altivec);
+   CPUID_PRINT(ppc_crypto);
 #endif
 
 #if defined(BOTAN_TARGET_CPU_IS_ARM_FAMILY)
@@ -92,6 +94,7 @@ void CPUID::initialize()
 
 #endif
 
+   g_endian_status = runtime_check_endian();
    g_processor_features |= CPUID::CPUID_INITIALIZED_BIT;
    }
 
@@ -142,6 +145,12 @@ CPUID::bit_from_string(const std::string& tok)
    if(tok == "avx2")
       return {Botan::CPUID::CPUID_AVX2_BIT};
    if(tok == "sha")
+      return {Botan::CPUID::CPUID_SHA_BIT};
+   if(tok == "bmi2")
+      return {Botan::CPUID::CPUID_BMI2_BIT};
+   if(tok == "adx")
+      return {Botan::CPUID::CPUID_ADX_BIT};
+   if(tok == "intel_sha")
       return {Botan::CPUID::CPUID_SHA_BIT};
 
 #elif defined(BOTAN_TARGET_CPU_IS_PPC_FAMILY)

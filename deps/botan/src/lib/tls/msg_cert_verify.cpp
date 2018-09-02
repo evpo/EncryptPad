@@ -1,6 +1,7 @@
 /*
 * Certificate Verify Message
 * (C) 2004,2006,2011,2012 Jack Lloyd
+*     2017 Harry Reimann, Rohde & Schwarz Cybersecurity
 *
 * Botan is released under the Simplified BSD License (see license.txt)
 */
@@ -27,11 +28,11 @@ Certificate_Verify::Certificate_Verify(Handshake_IO& io,
    BOTAN_ASSERT_NONNULL(priv_key);
 
    std::pair<std::string, Signature_Format> format =
-      state.choose_sig_format(*priv_key, m_hash_algo, m_sig_algo, true, policy);
+      state.choose_sig_format(*priv_key, m_scheme, true, policy);
 
-   PK_Signer signer(*priv_key, rng, format.first, format.second);
-
-   m_signature = signer.sign_message(state.hash().get_contents(), rng);
+   m_signature =
+      state.callbacks().tls_sign_message(*priv_key, rng, format.first, format.second,
+                                         state.hash().get_contents());
 
    state.hash().update(io.send(*this));
    }
@@ -46,8 +47,7 @@ Certificate_Verify::Certificate_Verify(const std::vector<uint8_t>& buf,
 
    if(version.supports_negotiable_signature_algorithms())
       {
-      m_hash_algo = Signature_Algorithms::hash_algo_name(reader.get_byte());
-      m_sig_algo = Signature_Algorithms::sig_algo_name(reader.get_byte());
+      m_scheme = static_cast<Signature_Scheme>(reader.get_uint16_t());
       }
 
    m_signature = reader.get_range<uint8_t>(2, 0, 65535);
@@ -60,10 +60,11 @@ std::vector<uint8_t> Certificate_Verify::serialize() const
    {
    std::vector<uint8_t> buf;
 
-   if(!m_hash_algo.empty() && !m_sig_algo.empty())
+   if(m_scheme != Signature_Scheme::NONE)
       {
-      buf.push_back(Signature_Algorithms::hash_algo_code(m_hash_algo));
-      buf.push_back(Signature_Algorithms::sig_algo_code(m_sig_algo));
+      const uint16_t scheme_code = static_cast<uint16_t>(m_scheme);
+      buf.push_back(get_byte(0, scheme_code));
+      buf.push_back(get_byte(1, scheme_code));
       }
 
    const uint16_t sig_len = static_cast<uint16_t>(m_signature.size());
@@ -86,13 +87,11 @@ bool Certificate_Verify::verify(const X509_Certificate& cert,
    policy.check_peer_key_acceptable(*key);
 
    std::pair<std::string, Signature_Format> format =
-      state.parse_sig_format(*key.get(), m_hash_algo, m_sig_algo,
-                             true, policy);
-
-   PK_Verifier verifier(*key, format.first, format.second);
+      state.parse_sig_format(*key.get(), m_scheme, true, policy);
 
    const bool signature_valid =
-      verifier.verify_message(state.hash().get_contents(), m_signature);
+      state.callbacks().tls_verify_message(*key, format.first, format.second,
+                                           state.hash().get_contents(), m_signature);
 
 #if defined(BOTAN_UNSAFE_FUZZER_MODE)
    return true;

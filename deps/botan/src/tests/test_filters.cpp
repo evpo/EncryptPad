@@ -57,6 +57,7 @@ class Filter_Tests final : public Test
          results.push_back(test_pipe_cbc());
          results.push_back(test_pipe_cfb());
          results.push_back(test_pipe_compress());
+         results.push_back(test_pipe_compress_bzip2());
          results.push_back(test_pipe_codec());
          results.push_back(test_fork());
          results.push_back(test_chain());
@@ -139,7 +140,14 @@ class Filter_Tests final : public Test
          Test::Result result("DataSinkFlush");
 
 #if defined(BOTAN_HAS_CODEC_FILTERS) && defined(BOTAN_TARGET_OS_HAS_FILESYSTEM)
-         const std::string tmp_name("botan_test_data_src_sink_flush.tmp");
+
+         const std::string tmp_name = Test::temp_file_name("botan_test_data_src_sink_flush.tmp");
+         if(tmp_name.empty())
+            {
+            result.test_failure("Failed to create temporary file");
+            return result;
+            }
+
          std::ofstream outfile(tmp_name);
 
          Botan::Pipe pipe(new Botan::Hex_Decoder, new Botan::DataSink_Stream(outfile));
@@ -199,7 +207,9 @@ class Filter_Tests final : public Test
          Botan::Pipe pipe;
 
          pipe.append(nullptr); // ignored
+         pipe.append_filter(nullptr); // ignored
          pipe.prepend(nullptr); // ignored
+         pipe.prepend_filter(nullptr); // ignored
          pipe.pop(); // empty pipe, so ignored
 
          std::unique_ptr<Botan::Filter> queue_filter(new Botan::SecureQueue);
@@ -213,11 +223,26 @@ class Filter_Tests final : public Test
                             "Invalid argument Pipe::prepend: SecureQueue cannot be used",
                             [&]() { pipe.prepend(queue_filter.get()); });
 
+         pipe.append_filter(new Botan::BitBucket); // succeeds
+         pipe.pop();
+
+         pipe.prepend_filter(new Botan::BitBucket); // succeeds
+         pipe.pop();
+
          pipe.start_msg();
 
          std::unique_ptr<Botan::Filter> filter(new Botan::BitBucket);
 
          // now inside a message, cannot modify pipe structure
+
+         result.test_throws("pipe error",
+                            "Cannot call Pipe::append_filter after start_msg",
+                            [&]() { pipe.append_filter(filter.get()); });
+
+         result.test_throws("pipe error",
+                            "Cannot call Pipe::prepend_filter after start_msg",
+                            [&]() { pipe.prepend_filter(filter.get()); });
+
          result.test_throws("pipe error",
                             "Cannot append to a Pipe while it is processing",
                             [&]() { pipe.append(filter.get()); });
@@ -231,6 +256,14 @@ class Filter_Tests final : public Test
                             [&]() { pipe.pop(); });
 
          pipe.end_msg();
+
+         result.test_throws("pipe error",
+                            "Cannot call Pipe::append_filter after start_msg",
+                            [&]() { pipe.append_filter(filter.get()); });
+
+         result.test_throws("pipe error",
+                            "Cannot call Pipe::prepend_filter after start_msg",
+                            [&]() { pipe.prepend_filter(filter.get()); });
 
          result.test_throws("pipe error",
                             "Invalid argument Pipe::read: Invalid message number 100",
@@ -249,7 +282,16 @@ class Filter_Tests final : public Test
 
 #if defined(BOTAN_HAS_CODEC_FILTERS) && defined(BOTAN_HAS_HMAC) && defined(BOTAN_HAS_SHA2_32)
          const Botan::SymmetricKey key("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
-         Botan::Pipe pipe(new Botan::MAC_Filter("HMAC(SHA-256)", key, 12),
+
+         Botan::Keyed_Filter* mac_filter = new Botan::MAC_Filter("HMAC(SHA-256)", key, 12);
+
+         mac_filter->set_iv(Botan::InitializationVector()); // ignored
+
+         result.test_throws("Keyed_Filter::set_iv throws if not implemented",
+                            "Invalid argument IV length 1 is invalid for HMAC(SHA-256)",
+                            [mac_filter]() { mac_filter->set_iv(Botan::InitializationVector("AA")); });
+
+         Botan::Pipe pipe(mac_filter,
                           new Botan::Base64_Encoder);
 
          pipe.process_msg("Hi");
@@ -388,7 +430,7 @@ class Filter_Tests final : public Test
 
 #if defined(BOTAN_HAS_AES) && defined(BOTAN_HAS_MODE_CBC) && defined(BOTAN_HAS_CIPHER_MODE_PADDING)
          Botan::Cipher_Mode_Filter* cipher =
-            new Botan::Cipher_Mode_Filter(Botan::get_cipher_mode("AES-128/CBC/PKCS7", Botan::ENCRYPTION));
+            new Botan::Cipher_Mode_Filter(Botan::Cipher_Mode::create("AES-128/CBC/PKCS7", Botan::ENCRYPTION));
 
          result.test_eq("Cipher filter name", cipher->name(), "AES-128/CBC/PKCS7");
 
@@ -423,7 +465,7 @@ class Filter_Tests final : public Test
          result.test_eq("Ciphertext3", ciphertext3, "1241B9976F73051BCF809525D6E86C25");
 
          Botan::Cipher_Mode_Filter* dec_cipher =
-            new Botan::Cipher_Mode_Filter(Botan::get_cipher_mode("AES-128/CBC/PKCS7", Botan::DECRYPTION));
+            new Botan::Cipher_Mode_Filter(Botan::Cipher_Mode::create("AES-128/CBC/PKCS7", Botan::DECRYPTION));
          pipe.append(dec_cipher);
          dec_cipher->set_key(Botan::SymmetricKey("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"));
          dec_cipher->set_iv(Botan::InitializationVector("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB"));
@@ -449,7 +491,7 @@ class Filter_Tests final : public Test
 
       Test::Result test_pipe_compress()
          {
-         Test::Result result("Pipe");
+         Test::Result result("Pipe compress zlib");
 
 #if defined(BOTAN_HAS_ZLIB)
 
@@ -470,6 +512,40 @@ class Filter_Tests final : public Test
 
          std::unique_ptr<Botan::Decompression_Filter> decomp_f(new Botan::Decompression_Filter("zlib"));
          result.test_eq("Decompressor name", decomp_f->name(), "Zlib_Decompression");
+         pipe.append(decomp_f.release());
+         pipe.pop(); // remove compressor
+
+         pipe.process_msg(compr);
+
+         std::string decomp = pipe.read_all_as_string(1);
+         result.test_eq("Decompressed ok", decomp, input_str);
+#endif
+
+         return result;
+         }
+
+      Test::Result test_pipe_compress_bzip2()
+         {
+         Test::Result result("Pipe compress bzip2");
+
+#if defined(BOTAN_HAS_BZIP2)
+
+         std::unique_ptr<Botan::Compression_Filter> comp_f(new Botan::Compression_Filter("bzip2", 9));
+
+         result.test_eq("Compressor filter name", comp_f->name(), "Bzip2_Compression");
+         Botan::Pipe pipe(comp_f.release());
+
+         const std::string input_str = "foo\n";
+
+         pipe.start_msg();
+         pipe.write(input_str);
+         pipe.end_msg();
+
+         auto compr = pipe.read_all(0);
+         // Here the output is actually longer than the input as input is so short
+
+         std::unique_ptr<Botan::Decompression_Filter> decomp_f(new Botan::Decompression_Filter("bzip2"));
+         result.test_eq("Decompressor name", decomp_f->name(), "Bzip2_Decompression");
          pipe.append(decomp_f.release());
          pipe.pop(); // remove compressor
 
@@ -606,10 +682,20 @@ class Filter_Tests final : public Test
          Test::Result result("Filter Chain");
 
 #if defined(BOTAN_HAS_CODEC_FILTERS) && defined(BOTAN_HAS_SHA2_32) && defined(BOTAN_HAS_SHA2_64)
+
+         Botan::Filter* filters[2] = {
+            new Botan::Hash_Filter("SHA-256"),
+            new Botan::Hex_Encoder
+         };
+
+         std::unique_ptr<Botan::Chain> chain(new Botan::Chain(filters, 2));
+
+         result.test_eq("Chain has a name", chain->name(), "Chain");
+
          std::unique_ptr<Botan::Fork> fork(
             new Botan::Fork(
-               new Botan::Chain(new Botan::Hash_Filter("SHA-256"), new Botan::Hex_Encoder),
-               new Botan::Chain(new Botan::Hash_Filter("SHA-512-256"), new Botan::Hex_Encoder)
+               chain.release(),
+               new Botan::Chain(new Botan::Hash_Filter("SHA-512-256", 19), new Botan::Hex_Encoder)
             ));
 
          result.test_eq("Fork has a name", fork->name(), "Fork");
@@ -622,7 +708,7 @@ class Filter_Tests final : public Test
          result.test_eq("Hash 1", pipe.read_all_as_string(0),
                         "C00862D1C6C1CF7C1B49388306E7B3C1BB79D8D6EC978B41035B556DBB3797DF");
          result.test_eq("Hash 2", pipe.read_all_as_string(1),
-                        "610480FFA82F24F6926544B976FE387878E3D973C03DFD591C2E9896EFB903E0");
+                        "610480FFA82F24F6926544B976FE387878E3D9");
 #endif
 
          return result;
@@ -661,7 +747,7 @@ class Filter_Tests final : public Test
          {
          Test::Result result("Threaded_Fork");
 
-#if defined(BOTAN_TARGET_OS_HAS_THREADS) && defined(BOTAN_HAS_CODEC_FILTERS) && defined(BOTAN_HAS_SHA2_32)
+#if defined(BOTAN_HAS_THREAD_UTILS) && defined(BOTAN_HAS_CODEC_FILTERS) && defined(BOTAN_HAS_SHA2_32)
          Botan::Pipe pipe(new Botan::Threaded_Fork(new Botan::Hex_Encoder, new Botan::Base64_Encoder));
 
          result.test_eq("Message count", pipe.message_count(), 0);

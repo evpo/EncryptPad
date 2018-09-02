@@ -38,7 +38,7 @@ def parse_version_file(version_path):
             results[key] = val
     return results
 
-version_info = parse_version_file('../../../version.txt')
+version_info = parse_version_file('../../build-data/version.txt')
 
 version_major = version_info['release_major']
 version_minor = version_info['release_minor']
@@ -48,27 +48,7 @@ is_website_build = check_for_tag('website')
 
 needs_sphinx = '1.1'
 
-extensions = ['sphinx.ext.extlinks']
-
 templates_path = ['templates']
-
-files_dir = 'https://botan.randombit.net/releases'
-
-extlinks = {
-    'wikipedia': ('https://en.wikipedia.org/wiki/%s', ''),
-    'botan-devel': ('https://lists.randombit.net/pipermail/botan-devel/%s.html', None),
-
-    'cve': ('https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-%s', 'CVE-'),
-
-    'tgz': (files_dir + '/Botan-%s.tgz', 'tar/gz for '),
-    'tgz_sig': (files_dir + '/Botan-%s.tgz.asc', 'tar/gz sig '),
-
-    'installer_x86_32': (files_dir + '/win32/botan-%s-x86_32.exe', 'x86-32 '),
-    'installer_x86_64': (files_dir + '/win32/botan-%s-x86_64.exe', 'x86-64 '),
-
-    'installer_sig_x86_32': (files_dir + '/win32/botan-%s-x86_32.exe.asc', None),
-    'installer_sig_x86_64': (files_dir + '/win32/botan-%s-x86_64.exe.asc', None),
-}
 
 source_suffix = '.rst'
 
@@ -233,3 +213,7 @@ latex_show_urls = 'inline'
 
 # If false, no module index is generated.
 latex_domain_indices = False
+
+latex_elements = {
+    'printindex': '\\footnotesize\\raggedright\\printindex'
+}

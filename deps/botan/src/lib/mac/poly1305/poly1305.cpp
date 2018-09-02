@@ -72,11 +72,11 @@ void poly1305_blocks(secure_vector<uint64_t>& X, const uint8_t *m, size_t blocks
       uint128_t d2 = uint128_t(h0) * r2 + uint128_t(h1) * r1 + uint128_t(h2) * r0;
 
       /* (partial) h %= p */
-      uint64_t        c = carry_shift(d0, 44); h0 = d0 & 0xfffffffffff;
-      d1 += c;      c = carry_shift(d1, 44); h1 = d1 & 0xfffffffffff;
-      d2 += c;      c = carry_shift(d2, 42); h2 = d2 & 0x3ffffffffff;
-      h0  += c * 5; c = carry_shift(h0, 44); h0 = h0 & 0xfffffffffff;
-      h1  += c;
+      uint64_t     c = carry_shift(d0, 44); h0 = d0 & 0xfffffffffff;
+      d1 += c;     c = carry_shift(d1, 44); h1 = d1 & 0xfffffffffff;
+      d2 += c;     c = carry_shift(d2, 42); h2 = d2 & 0x3ffffffffff;
+      h0 += c * 5; c = carry_shift(h0, 44); h0 = h0 & 0xfffffffffff;
+      h1 += c;
 
       m += 16;
       }
@@ -155,7 +155,7 @@ void Poly1305::key_schedule(const uint8_t key[], size_t)
 
 void Poly1305::add_data(const uint8_t input[], size_t length)
    {
-   BOTAN_ASSERT_EQUAL(m_poly.size(), 8, "Initialized");
+   verify_key_set(m_poly.size() == 8);
 
    if(m_buf_pos)
       {
@@ -182,7 +182,7 @@ void Poly1305::add_data(const uint8_t input[], size_t length)
 
 void Poly1305::final_result(uint8_t out[])
    {
-   BOTAN_ASSERT_EQUAL(m_poly.size(), 8, "Initialized");
+   verify_key_set(m_poly.size() == 8);
 
    if(m_buf_pos != 0)
       {

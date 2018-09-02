@@ -6,6 +6,7 @@
 */
 
 #include <botan/tls_ciphersuite.h>
+#include <botan/exceptn.h>
 #include <botan/parsing.h>
 #include <botan/block_cipher.h>
 #include <botan/stream_cipher.h>
@@ -16,6 +17,26 @@ namespace Botan {
 
 namespace TLS {
 
+size_t Ciphersuite::nonce_bytes_from_handshake() const
+   {
+   switch(m_nonce_format)
+      {
+      case Nonce_Format::CBC_MODE:
+         {
+         if(cipher_algo() == "3DES")
+            return 8;
+         else
+            return 16;
+         }
+      case Nonce_Format::AEAD_IMPLICIT_4:
+         return 4;
+      case Nonce_Format::AEAD_XOR_12:
+         return 12;
+      }
+
+   throw Invalid_State("In Ciphersuite::nonce_bytes_from_handshake invalid enum value");
+   }
+
 bool Ciphersuite::is_scsv(uint16_t suite)
    {
    // TODO: derive from IANA file in script
@@ -24,19 +45,27 @@ bool Ciphersuite::is_scsv(uint16_t suite)
 
 bool Ciphersuite::psk_ciphersuite() const
    {
-   return (kex_algo() == "PSK" ||
-           kex_algo() == "DHE_PSK" ||
-           kex_algo() == "ECDHE_PSK");
+   return kex_method() == Kex_Algo::PSK ||
+          kex_method() == Kex_Algo::DHE_PSK ||
+          kex_method() == Kex_Algo::ECDHE_PSK;
    }
 
 bool Ciphersuite::ecc_ciphersuite() const
    {
-   return (sig_algo() == "ECDSA" || kex_algo() == "ECDH" || kex_algo() == "ECDHE_PSK");
+   return kex_method() == Kex_Algo::ECDH ||
+          kex_method() == Kex_Algo::ECDHE_PSK ||
+          auth_method() == Auth_Method::ECDSA;
    }
 
 bool Ciphersuite::cbc_ciphersuite() const
    {
    return (mac_algo() != "AEAD");
+   }
+
+bool Ciphersuite::signature_used() const
+   {
+   return auth_method() != Auth_Method::ANONYMOUS &&
+          auth_method() != Auth_Method::IMPLICIT;
    }
 
 Ciphersuite Ciphersuite::by_id(uint16_t suite)
@@ -122,44 +151,44 @@ bool Ciphersuite::is_usable() const
          return false;
       }
 
-   if(kex_algo() == "SRP_SHA")
+   if(kex_method() == Kex_Algo::SRP_SHA)
       {
 #if !defined(BOTAN_HAS_SRP6)
       return false;
 #endif
       }
-   else if(kex_algo() == "ECDH" || kex_algo() == "ECDHE_PSK")
+   else if(kex_method() == Kex_Algo::ECDH || kex_method() == Kex_Algo::ECDHE_PSK)
       {
 #if !defined(BOTAN_HAS_ECDH)
       return false;
 #endif
       }
-   else if(kex_algo() == "DH" || kex_algo() == "DHE_PSK")
+   else if(kex_method() == Kex_Algo::DH || kex_method() == Kex_Algo::DHE_PSK)
       {
 #if !defined(BOTAN_HAS_DIFFIE_HELLMAN)
       return false;
 #endif
       }
-   else if(kex_algo() == "CECPQ1")
+   else if(kex_method() == Kex_Algo::CECPQ1)
       {
 #if !defined(BOTAN_HAS_CECPQ1)
       return false;
 #endif
       }
 
-   if(sig_algo() == "DSA")
+   if(auth_method() == Auth_Method::DSA)
       {
 #if !defined(BOTAN_HAS_DSA)
       return false;
 #endif
       }
-   else if(sig_algo() == "ECDSA")
+   else if(auth_method() == Auth_Method::ECDSA)
       {
 #if !defined(BOTAN_HAS_ECDSA)
       return false;
 #endif
       }
-   else if(sig_algo() == "RSA")
+   else if(auth_method() == Auth_Method::RSA)
       {
 #if !defined(BOTAN_HAS_RSA)
       return false;

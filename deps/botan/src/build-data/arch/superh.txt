@@ -1,5 +1,4 @@
-<submodels>
-sh2
-sh3
+
+<aliases>
 sh4
-</submodels>
+</aliases>

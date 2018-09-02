@@ -6,6 +6,7 @@
 */
 
 #include <botan/salsa20.h>
+#include <botan/exceptn.h>
 #include <botan/loadstor.h>
 
 namespace Botan {
@@ -14,10 +15,10 @@ namespace {
 
 #define SALSA20_QUARTER_ROUND(x1, x2, x3, x4)    \
    do {                                          \
-      x2 ^= rotate_left(x1 + x4,  7);            \
-      x3 ^= rotate_left(x2 + x1,  9);            \
-      x4 ^= rotate_left(x3 + x2, 13);            \
-      x1 ^= rotate_left(x4 + x3, 18);            \
+      x2 ^= rotl<7>(x1 + x4);                    \
+      x3 ^= rotl<9>(x2 + x1);                    \
+      x4 ^= rotl<13>(x3 + x2);                   \
+      x1 ^= rotl<18>(x4 + x3);                   \
    } while(0)
 
 /*
@@ -26,9 +27,9 @@ namespace {
 void hsalsa20(uint32_t output[8], const uint32_t input[16])
    {
    uint32_t x00 = input[ 0], x01 = input[ 1], x02 = input[ 2], x03 = input[ 3],
-          x04 = input[ 4], x05 = input[ 5], x06 = input[ 6], x07 = input[ 7],
-          x08 = input[ 8], x09 = input[ 9], x10 = input[10], x11 = input[11],
-          x12 = input[12], x13 = input[13], x14 = input[14], x15 = input[15];
+            x04 = input[ 4], x05 = input[ 5], x06 = input[ 6], x07 = input[ 7],
+            x08 = input[ 8], x09 = input[ 9], x10 = input[10], x11 = input[11],
+            x12 = input[12], x13 = input[13], x14 = input[14], x15 = input[15];
 
    for(size_t i = 0; i != 10; ++i)
       {
@@ -53,17 +54,22 @@ void hsalsa20(uint32_t output[8], const uint32_t input[16])
    output[7] = x09;
    }
 
+}
+
 /*
 * Generate Salsa20 cipher stream
 */
-void salsa20(uint8_t output[64], const uint32_t input[16])
+//static
+void Salsa20::salsa_core(uint8_t output[64], const uint32_t input[16], size_t rounds)
    {
-   uint32_t x00 = input[ 0], x01 = input[ 1], x02 = input[ 2], x03 = input[ 3],
-          x04 = input[ 4], x05 = input[ 5], x06 = input[ 6], x07 = input[ 7],
-          x08 = input[ 8], x09 = input[ 9], x10 = input[10], x11 = input[11],
-          x12 = input[12], x13 = input[13], x14 = input[14], x15 = input[15];
+   BOTAN_ASSERT_NOMSG(rounds % 2 == 0);
 
-   for(size_t i = 0; i != 10; ++i)
+   uint32_t x00 = input[ 0], x01 = input[ 1], x02 = input[ 2], x03 = input[ 3],
+            x04 = input[ 4], x05 = input[ 5], x06 = input[ 6], x07 = input[ 7],
+            x08 = input[ 8], x09 = input[ 9], x10 = input[10], x11 = input[11],
+            x12 = input[12], x13 = input[13], x14 = input[14], x15 = input[15];
+
+   for(size_t i = 0; i != rounds / 2; ++i)
       {
       SALSA20_QUARTER_ROUND(x00, x04, x08, x12);
       SALSA20_QUARTER_ROUND(x05, x09, x13, x01);
@@ -94,8 +100,6 @@ void salsa20(uint8_t output[64], const uint32_t input[16])
    store_le(x15 + input[15], output + 4 * 15);
    }
 
-}
-
 #undef SALSA20_QUARTER_ROUND
 
 /*
@@ -103,13 +107,15 @@ void salsa20(uint8_t output[64], const uint32_t input[16])
 */
 void Salsa20::cipher(const uint8_t in[], uint8_t out[], size_t length)
    {
+   verify_key_set(m_state.empty() == false);
+
    while(length >= m_buffer.size() - m_position)
       {
       xor_buf(out, in, &m_buffer[m_position], m_buffer.size() - m_position);
       length -= (m_buffer.size() - m_position);
       in += (m_buffer.size() - m_position);
       out += (m_buffer.size() - m_position);
-      salsa20(m_buffer.data(), m_state.data());
+      salsa_core(m_buffer.data(), m_state.data(), 20);
 
       ++m_state[8];
       m_state[9] += (m_state[8] == 0);
@@ -207,7 +213,7 @@ void Salsa20::set_iv(const uint8_t iv[], size_t length)
    m_state[8] = 0;
    m_state[9] = 0;
 
-   salsa20(m_buffer.data(), m_state.data());
+   salsa_core(m_buffer.data(), m_state.data(), 20);
    ++m_state[8];
    m_state[9] += (m_state[8] == 0);
 
@@ -232,8 +238,23 @@ void Salsa20::clear()
    m_position = 0;
    }
 
-void Salsa20::seek(uint64_t)
+void Salsa20::seek(uint64_t offset)
    {
-   throw Not_Implemented("Salsa20::seek");
+   verify_key_set(m_state.empty() == false);
+
+   // Find the block offset
+   const uint64_t counter = offset / 64;
+   uint8_t counter8[8];
+   store_le(counter, counter8);
+
+   m_state[8]  = load_le<uint32_t>(counter8, 0);
+   m_state[9] += load_le<uint32_t>(counter8, 1);
+
+   salsa_core(m_buffer.data(), m_state.data(), 20);
+
+   ++m_state[8];
+   m_state[9] += (m_state[8] == 0);
+
+   m_position = offset % 64;
    }
 }

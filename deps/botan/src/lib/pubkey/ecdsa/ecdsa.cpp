@@ -2,7 +2,7 @@
 * ECDSA implemenation
 * (C) 2007 Manuel Hartl, FlexSecure GmbH
 *     2007 Falko Strenzke, FlexSecure GmbH
-*     2008-2010,2015,2016 Jack Lloyd
+*     2008-2010,2015,2016,2018 Jack Lloyd
 *     2016 René Korthaus
 *
 * Botan is released under the Simplified BSD License (see license.txt)
@@ -10,6 +10,7 @@
 
 #include <botan/ecdsa.h>
 #include <botan/internal/pk_ops_impl.h>
+#include <botan/internal/point_mul.h>
 #include <botan/keypair.h>
 #include <botan/reducer.h>
 #include <botan/emsa.h>
@@ -50,54 +51,71 @@ class ECDSA_Signature_Operation final : public PK_Ops::Signature_with_EMSA
    public:
 
       ECDSA_Signature_Operation(const ECDSA_PrivateKey& ecdsa,
-                                const std::string& emsa) :
+                                const std::string& emsa,
+                                RandomNumberGenerator& rng) :
          PK_Ops::Signature_with_EMSA(emsa),
-         m_order(ecdsa.domain().get_order()),
-         m_base_point(ecdsa.domain().get_base_point(), m_order),
-         m_x(ecdsa.private_value()),
-         m_mod_order(m_order)
+         m_group(ecdsa.domain()),
+         m_x(ecdsa.private_value())
          {
 #if defined(BOTAN_HAS_RFC6979_GENERATOR)
          m_rfc6979_hash = hash_for_emsa(emsa);
 #endif
+
+         m_b = m_group.random_scalar(rng);
+         m_b_inv = m_group.inverse_mod_order(m_b);
          }
 
-      size_t max_input_bits() const override { return m_order.bits(); }
+      size_t max_input_bits() const override { return m_group.get_order_bits(); }
 
       secure_vector<uint8_t> raw_sign(const uint8_t msg[], size_t msg_len,
-                                   RandomNumberGenerator& rng) override;
+                                      RandomNumberGenerator& rng) override;
 
    private:
-      const BigInt& m_order;
-      Blinded_Point_Multiply m_base_point;
+      const EC_Group m_group;
       const BigInt& m_x;
-      Modular_Reducer m_mod_order;
+
 #if defined(BOTAN_HAS_RFC6979_GENERATOR)
       std::string m_rfc6979_hash;
 #endif
+
+      std::vector<BigInt> m_ws;
+
+      BigInt m_b, m_b_inv;
    };
 
 secure_vector<uint8_t>
 ECDSA_Signature_Operation::raw_sign(const uint8_t msg[], size_t msg_len,
                                     RandomNumberGenerator& rng)
    {
-   const BigInt m(msg, msg_len);
+   BigInt m(msg, msg_len, m_group.get_order_bits());
 
 #if defined(BOTAN_HAS_RFC6979_GENERATOR)
-   const BigInt k = generate_rfc6979_nonce(m_x, m_order, m, m_rfc6979_hash);
+   const BigInt k = generate_rfc6979_nonce(m_x, m_group.get_order(), m, m_rfc6979_hash);
 #else
-   const BigInt k = BigInt::random_integer(rng, 1, m_order);
+   const BigInt k = m_group.random_scalar(rng);
 #endif
 
-   const PointGFp k_times_P = m_base_point.blinded_multiply(k, rng);
-   const BigInt r = m_mod_order.reduce(k_times_P.get_affine_x());
-   const BigInt s = m_mod_order.multiply(inverse_mod(k, m_order), mul_add(m_x, r, m));
+   const BigInt r = m_group.mod_order(
+      m_group.blinded_base_point_multiply_x(k, rng, m_ws));
+
+   const BigInt k_inv = m_group.inverse_mod_order(k);
+
+   /*
+   * Blind the input message and compute x*r+m as (x*r*b + m*b)/b
+   */
+   m_b = m_group.square_mod_order(m_b);
+   m_b_inv = m_group.square_mod_order(m_b_inv);
+
+   m = m_group.multiply_mod_order(m_b, m);
+   const BigInt xr = m_group.multiply_mod_order(m_x, m_b, r);
+
+   const BigInt s = m_group.multiply_mod_order(k_inv, xr + m, m_b_inv);
 
    // With overwhelming probability, a bug rather than actual zero r/s
-   BOTAN_ASSERT(s != 0, "invalid s");
-   BOTAN_ASSERT(r != 0, "invalid r");
+   if(r.is_zero() || s.is_zero())
+      throw Internal_Error("During ECDSA signature generated zero r/s");
 
-   return BigInt::encode_fixed_length_int_pair(r, s, m_order.bytes());
+   return BigInt::encode_fixed_length_int_pair(r, s, m_group.get_order_bytes());
    }
 
 /**
@@ -109,52 +127,46 @@ class ECDSA_Verification_Operation final : public PK_Ops::Verification_with_EMSA
       ECDSA_Verification_Operation(const ECDSA_PublicKey& ecdsa,
                                    const std::string& emsa) :
          PK_Ops::Verification_with_EMSA(emsa),
-         m_base_point(ecdsa.domain().get_base_point()),
-         m_public_point(ecdsa.public_point()),
-         m_order(ecdsa.domain().get_order()),
-         m_mod_order(m_order)
+         m_group(ecdsa.domain()),
+         m_gy_mul(m_group.get_base_point(), ecdsa.public_point())
          {
-         //m_public_point.precompute_multiples();
          }
 
-      size_t max_input_bits() const override { return m_order.bits(); }
+      size_t max_input_bits() const override { return m_group.get_order_bits(); }
 
       bool with_recovery() const override { return false; }
 
       bool verify(const uint8_t msg[], size_t msg_len,
                   const uint8_t sig[], size_t sig_len) override;
    private:
-      const PointGFp& m_base_point;
-      const PointGFp& m_public_point;
-      const BigInt& m_order;
-      // FIXME: should be offered by curve
-      Modular_Reducer m_mod_order;
+      const EC_Group m_group;
+      const PointGFp_Multi_Point_Precompute m_gy_mul;
    };
 
 bool ECDSA_Verification_Operation::verify(const uint8_t msg[], size_t msg_len,
                                           const uint8_t sig[], size_t sig_len)
    {
-   if(sig_len != m_order.bytes()*2)
+   if(sig_len != m_group.get_order_bytes() * 2)
       return false;
 
-   BigInt e(msg, msg_len);
+   const BigInt e(msg, msg_len, m_group.get_order_bits());
 
-   BigInt r(sig, sig_len / 2);
-   BigInt s(sig + sig_len / 2, sig_len / 2);
+   const BigInt r(sig, sig_len / 2);
+   const BigInt s(sig + sig_len / 2, sig_len / 2);
 
-   if(r <= 0 || r >= m_order || s <= 0 || s >= m_order)
+   if(r <= 0 || r >= m_group.get_order() || s <= 0 || s >= m_group.get_order())
       return false;
 
-   BigInt w = inverse_mod(s, m_order);
+   const BigInt w = m_group.inverse_mod_order(s);
 
-   const BigInt u1 = m_mod_order.reduce(e * w);
-   const BigInt u2 = m_mod_order.reduce(r * w);
-   const PointGFp R = multi_exponentiate(m_base_point, u1, m_public_point, u2);
+   const BigInt u1 = m_group.multiply_mod_order(m_group.mod_order(e), w);
+   const BigInt u2 = m_group.multiply_mod_order(r, w);
+   const PointGFp R = m_gy_mul.multi_exp(u1, u2);
 
    if(R.is_zero())
       return false;
 
-   const BigInt v = m_mod_order.reduce(R.get_affine_x());
+   const BigInt v = m_group.mod_order(R.get_affine_x());
    return (v == r);
    }
 
@@ -201,7 +213,7 @@ ECDSA_PublicKey::create_verification_op(const std::string& params,
    }
 
 std::unique_ptr<PK_Ops::Signature>
-ECDSA_PrivateKey::create_signature_op(RandomNumberGenerator& /*rng*/,
+ECDSA_PrivateKey::create_signature_op(RandomNumberGenerator& rng,
                                       const std::string& params,
                                       const std::string& provider) const
    {
@@ -236,7 +248,7 @@ ECDSA_PrivateKey::create_signature_op(RandomNumberGenerator& /*rng*/,
 #endif
 
    if(provider == "base" || provider.empty())
-      return std::unique_ptr<PK_Ops::Signature>(new ECDSA_Signature_Operation(*this, params));
+      return std::unique_ptr<PK_Ops::Signature>(new ECDSA_Signature_Operation(*this, params, rng));
 
    throw Provider_Not_Found(algo_name(), provider);
    }

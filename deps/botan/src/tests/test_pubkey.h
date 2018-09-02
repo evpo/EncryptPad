@@ -76,6 +76,10 @@ class PK_Signature_Verification_Test : public PK_Test
                                      const std::string& optional_keys = "")
          : PK_Test(algo, test_src, required_keys, optional_keys) {}
 
+      virtual Botan::Signature_Format sig_format() const;
+
+      virtual bool test_random_invalid_sigs() const { return true; }
+
       virtual std::unique_ptr<Botan::Public_Key> load_public_key(const VarMap& vars) = 0;
    private:
       Test::Result run_one_test(const std::string& header, const VarMap& vars) override final;
@@ -119,6 +123,26 @@ class PK_Encryption_Decryption_Test : public PK_Test
       virtual Botan::RandomNumberGenerator* test_rng(const std::vector<uint8_t>& nonce) const
          {
          return new Fixed_Output_RNG(nonce);
+         }
+
+   private:
+      Test::Result run_one_test(const std::string& header, const VarMap& vars) override final;
+   };
+
+class PK_Decryption_Test : public PK_Test
+   {
+   public:
+      PK_Decryption_Test(const std::string& algo,
+                         const std::string& test_src,
+                         const std::string& required_keys,
+                         const std::string& optional_keys = "")
+         : PK_Test(algo, test_src, required_keys, optional_keys) {}
+
+      virtual std::unique_ptr<Botan::Private_Key> load_private_key(const VarMap& vars) = 0;
+
+      std::string default_padding(const VarMap&) const override
+         {
+         return "Raw";
          }
 
    private:

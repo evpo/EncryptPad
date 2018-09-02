@@ -102,6 +102,42 @@ inline size_t ctz(T n)
    return 8*sizeof(T);
    }
 
+#if defined(BOTAN_BUILD_COMPILER_IS_GCC) || defined(BOTAN_BUILD_COMPILER_IS_CLANG)
+
+template<>
+inline size_t ctz(uint32_t n)
+   {
+   if(n == 0)
+      return 32;
+   return __builtin_ctz(n);
+   }
+
+template<>
+inline size_t ctz(uint64_t n)
+   {
+   if(n == 0)
+      return 64;
+   return __builtin_ctzll(n);
+   }
+
+template<>
+inline size_t high_bit(uint32_t x)
+   {
+   if(x == 0)
+      return 0;
+   return (32 - __builtin_clz(x));
+   }
+
+template<>
+inline size_t high_bit(uint64_t x)
+   {
+   if(x == 0)
+      return 0;
+   return (64 - __builtin_clzll(x));
+   }
+
+#endif
+
 template<typename T>
 size_t ceil_log2(T x)
    {

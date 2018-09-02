@@ -27,9 +27,9 @@ class Curve25519_Sclarmult_Tests final : public Text_Based_Test
 
       Test::Result run_one_test(const std::string&, const VarMap& vars) override
          {
-         const std::vector<uint8_t> secret    = get_req_bin(vars, "Secret");
-         const std::vector<uint8_t> basepoint = get_req_bin(vars, "Basepoint");
-         const std::vector<uint8_t> expected  = get_req_bin(vars, "Out");
+         const std::vector<uint8_t> secret    = vars.get_req_bin("Secret");
+         const std::vector<uint8_t> basepoint = vars.get_req_bin("Basepoint");
+         const std::vector<uint8_t> expected  = vars.get_req_bin("Out");
 
          std::vector<uint8_t> got(32);
          Botan::curve25519_donna(got.data(), secret.data(), basepoint.data());
@@ -40,6 +40,34 @@ class Curve25519_Sclarmult_Tests final : public Text_Based_Test
          }
    };
 BOTAN_REGISTER_TEST("curve25519_scalar", Curve25519_Sclarmult_Tests);
+
+class Curve25519_Agreement_Tests final : public PK_Key_Agreement_Test
+   {
+   public:
+      Curve25519_Agreement_Tests() : PK_Key_Agreement_Test(
+         "X25519",
+         "pubkey/x25519.vec",
+         "Secret,CounterKey,K") {}
+
+      std::string default_kdf(const VarMap&) const override
+         {
+         return "Raw";
+         }
+
+      std::unique_ptr<Botan::Private_Key> load_our_key(const std::string&,
+                                                       const VarMap& vars) override
+         {
+         const std::vector<uint8_t> secret_vec = vars.get_req_bin("Secret");
+         Botan::secure_vector<uint8_t> secret(secret_vec.begin(), secret_vec.end());
+         return std::unique_ptr<Botan::Private_Key>(new Botan::Curve25519_PrivateKey(secret));
+         }
+
+      std::vector<uint8_t> load_their_key(const std::string&, const VarMap& vars) override
+         {
+         return vars.get_req_bin("CounterKey");
+         }
+   };
+BOTAN_REGISTER_TEST("curve25519_agreement", Curve25519_Agreement_Tests);
 
 class Curve25519_Roundtrip_Test final : public Test
    {
@@ -55,11 +83,11 @@ class Curve25519_Roundtrip_Test final : public Test
             Botan::Curve25519_PrivateKey a_priv_gen(Test::rng());
             Botan::Curve25519_PrivateKey b_priv_gen(Test::rng());
 
+#if defined(BOTAN_HAS_AES) && defined(BOTAN_HAS_AEAD_GCM)
+            // Then serialize to encrypted storage
+
             const std::string a_pass = "alice pass";
             const std::string b_pass = "bob pass";
-
-            // Then serialize to encrypted storage
-#if defined(BOTAN_HAS_AES) && defined(BOTAN_HAS_GCM)
             const auto pbe_time = std::chrono::milliseconds(10);
             const std::string a_priv_pem = Botan::PKCS8::PEM_encode(a_priv_gen, Test::rng(), a_pass, pbe_time);
             const std::string b_priv_pem = Botan::PKCS8::PEM_encode(b_priv_gen, Test::rng(), b_pass, pbe_time);

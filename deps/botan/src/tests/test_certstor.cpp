@@ -22,7 +22,7 @@ namespace Botan_Tests {
 
 namespace {
 
-#if defined(BOTAN_HAS_CERTSTOR_SQL) && defined(BOTAN_HAS_RSA)
+#if defined(BOTAN_HAS_CERTSTOR_SQL) && defined(BOTAN_HAS_RSA) && defined(BOTAN_TARGET_OS_HAS_FILESYSTEM)
 
 struct CertificateAndKey
    {
@@ -216,6 +216,73 @@ Test::Result test_certstor_sqlite3_all_subjects_test(const std::vector<Certifica
       }
    }
 
+Test::Result test_certstor_sqlite3_find_all_certs_test(const std::vector<CertificateAndKey>& certsandkeys)
+   {
+   Test::Result result("Certificate Store SQLITE3 - Find all certs");
+   try
+      {
+      auto& rng = Test::rng();
+      const std::string passwd(reinterpret_cast<const char*>(rng.random_vec(8).data()), 8);
+      // Just create a database in memory for testing (https://sqlite.org/inmemorydb.html)
+      Botan::Certificate_Store_In_SQLite store(":memory:", passwd, rng);
+
+      for(const auto& a : certsandkeys)
+         {
+         store.insert_cert(a.certificate);
+         }
+
+      for(const auto& a : certsandkeys)
+         {
+         auto res_vec = store.find_all_certs(a.certificate.subject_dn(), a.certificate.subject_key_id());
+         if(res_vec.size() != 1)
+            {
+            result.test_failure("SQLITE all lookup error");
+            return result;
+            }
+         else
+            {
+            std::stringstream a_ss;
+            a_ss << a.certificate.subject_dn();
+            std::stringstream res_ss;
+            res_ss << res_vec.at(0)->subject_dn();
+            result.test_eq("Check subject " + a_ss.str(), a_ss.str(), res_ss.str());
+            }
+         }
+
+      Botan::X509_Certificate same_dn_1 = Botan::X509_Certificate(
+         "./src/tests/data/x509/bsi/cert_path_common_14/cert_path_common_14_sub_ca.ca.pem.crt");
+      Botan::X509_Certificate same_dn_2 = Botan::X509_Certificate(
+         "./src/tests/data/x509/bsi/cert_path_common_14/cert_path_common_14_wrong_sub_ca.ca.pem.crt");
+
+      store.insert_cert(same_dn_1);
+      store.insert_cert(same_dn_2);
+      auto res_vec = store.find_all_certs(same_dn_1.subject_dn(), {});
+
+      if(res_vec.size() != 2)
+         {
+         result.test_failure("SQLITE all lookup error (duplicate) " + std::to_string(res_vec.size()));
+         return result;
+         }
+      else
+         {
+         std::stringstream cert_ss;
+         cert_ss << same_dn_1.subject_dn();
+         std::stringstream res_ss;
+         res_ss << res_vec.at(0)->subject_dn();
+         result.test_eq("Check subject " + cert_ss.str(), cert_ss.str(), res_ss.str());
+         res_ss.str("");
+         res_ss << res_vec.at(1)->subject_dn();
+         result.test_eq("Check subject " + cert_ss.str(), cert_ss.str(), res_ss.str());
+         }
+      }
+   catch(const std::exception& e)
+      {
+      result.test_failure(e.what());
+      return result;
+      }
+   return result;
+   }
+
 #endif
 
 Test::Result test_certstor_find_hash_subject(const std::vector<CertificateAndKey>& certsandkeys)
@@ -262,12 +329,46 @@ Test::Result test_certstor_find_hash_subject(const std::vector<CertificateAndKey
       }
    }
 
+Test::Result test_certstor_load_allcert()
+   {
+   Test::Result result("Certificate Store - Load every cert of every files");
+   // test_dir_bundled dir should contain only one file with 2 certificates 
+   // concatenated (ValidCert and root)
+   const std::string test_dir_bundled = Test::data_dir() + "/x509/misc/bundledcertdir";
+
+   try
+      {
+      result.test_note("load certs from dir: " + test_dir_bundled);
+      // Certificate_Store_In_Memory constructor loads every cert of every files of the dir.
+      Botan::Certificate_Store_In_Memory store(test_dir_bundled);
+      
+      // X509_Certificate constructor loads only the first certificate found in the file.
+      Botan::X509_Certificate root_cert(Test::data_dir() + "/x509/x509test/root.pem");
+      Botan::X509_Certificate valid_cert(Test::data_dir() + "/x509/x509test/ValidCert.pem");
+      std::vector<uint8_t> key_id;
+      result.confirm("Root cert found", store.find_cert(root_cert.subject_dn(), key_id) != nullptr);
+      result.confirm("ValidCert found", store.find_cert(valid_cert.subject_dn(), key_id) != nullptr);
+      return result;
+      }
+   catch(std::exception& e)
+      {
+      result.test_failure(e.what());
+      return result;
+      }
+   }
+
 class Certstor_Tests final : public Test
    {
    public:
       std::vector<Test::Result> run() override
          {
-         const std::string test_dir = Test::data_dir() + "/certstor";
+         if(Botan::has_filesystem_impl() == false)
+            {
+            return {Test::Result::Note("Certificate Store",
+                                       "Skipping due to missing filesystem access")};
+            }
+
+         const std::string test_dir = Test::data_dir() + "/x509/certstor";
          struct CertificateAndKeyFilenames
             {
             const std::string certificate;
@@ -281,18 +382,6 @@ class Certstor_Tests final : public Test
                {"cert5a.crt", "key05.pem"},
                {"cert5b.crt", "key06.pem"},
             };
-
-         try
-            {
-            // Do nothing, just test filesystem access
-            Botan::get_files_recursive(test_dir);
-            }
-         catch(Botan::No_Filesystem_Access&)
-            {
-            Test::Result result("Certificate Store");
-            result.test_note("Skipping due to missing filesystem access");
-            return {result};
-            }
 
          const std::vector<std::string> all_files = Botan::get_files_recursive(test_dir);
 
@@ -325,10 +414,12 @@ class Certstor_Tests final : public Test
          std::vector<Test::Result> results;
 
          results.push_back(test_certstor_find_hash_subject(certsandkeys));
+         results.push_back(test_certstor_load_allcert());
 #if defined(BOTAN_HAS_CERTSTOR_SQLITE3)
          results.push_back(test_certstor_sqlite3_insert_find_remove_test(certsandkeys));
          results.push_back(test_certstor_sqlite3_crl_test(certsandkeys));
          results.push_back(test_certstor_sqlite3_all_subjects_test(certsandkeys));
+         results.push_back(test_certstor_sqlite3_find_all_certs_test(certsandkeys));
 #endif
          return results;
          }

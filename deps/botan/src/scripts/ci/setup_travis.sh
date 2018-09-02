@@ -56,7 +56,7 @@ if [ "$TRAVIS_OS_NAME" = "linux" ]; then
         (cd /home/travis/bin && ln -s gcov-4.8 gcov)
 
         pip install --user coverage
-        pip install --user codecov
+        pip install --user codecov==2.0.10
 
     elif [ "$BUILD_MODE" = "sonar" ]; then
         sudo apt-get -qq update
@@ -73,14 +73,18 @@ if [ "$TRAVIS_OS_NAME" = "linux" ]; then
 
     elif [ "$BUILD_MODE" = "docs" ]; then
         sudo apt-get -qq update
-        sudo apt-get install doxygen
+        sudo apt-get install doxygen python-docutils
 
         # The version of Sphinx in 14.04 is too old (1.2.2) and does not support
         # all C++ features used in the manual. Install python-requests to avoid
         # problem in Ubuntu packaged version, see
         # http://stackoverflow.com/questions/32779919/no-module-named-for-requests
-        sudo apt-get remove python-requests python-openssl
-        sudo pip install requests sphinx pyopenssl
+        #
+        # Reinstall roman due to https://github.com/sphinx-doc/sphinx/issues/5022
+        #
+
+        sudo apt-get remove python-requests python-openssl python-roman
+        sudo pip install requests pyopenssl roman sphinx
     fi
 
 elif [ "$TRAVIS_OS_NAME" = "osx" ]; then

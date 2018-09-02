@@ -5,8 +5,14 @@ PK_PADDING -> 20131128
 load_on auto
 
 <requires>
+asn1
 rng
+pubkey
 </requires>
+
+<header:internal>
+padding.h
+</header:internal>
 
 <header:public>
 eme.h

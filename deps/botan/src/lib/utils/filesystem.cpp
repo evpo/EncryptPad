@@ -13,14 +13,14 @@
   #include <filesystem>
 #elif defined(BOTAN_HAS_BOOST_FILESYSTEM)
   #include <boost/filesystem.hpp>
-#elif defined(BOTAN_TARGET_OS_HAS_READDIR)
+#elif defined(BOTAN_TARGET_OS_HAS_POSIX1)
   #include <sys/types.h>
   #include <sys/stat.h>
   #include <dirent.h>
   #include <deque>
   #include <memory>
   #include <functional>
-#elif defined(BOTAN_TARGET_OS_TYPE_IS_WINDOWS)
+#elif defined(BOTAN_TARGET_OS_HAS_WIN32)
   #define NOMINMAX 1
   #define _WINSOCKAPI_ // stop windows.h including winsock.h
   #include <windows.h>
@@ -35,17 +35,21 @@ namespace {
 #if defined(BOTAN_TARGET_OS_HAS_STL_FILESYSTEM_MSVC) && defined(BOTAN_BUILD_COMPILER_IS_MSVC)
 std::vector<std::string> impl_stl_filesystem(const std::string& dir)
    {
+#if (_MSVC_LANG >= 201703L)
+   using namespace std::filesystem;
+#else
    using namespace std::tr2::sys;
+#endif
 
    std::vector<std::string> out;
 
    path p(dir);
 
-   if (is_directory(p))
+   if(is_directory(p))
       {
-      for (recursive_directory_iterator itr(p), end; itr != end; ++itr)
+      for(recursive_directory_iterator itr(p), end; itr != end; ++itr)
          {
-         if (is_regular_file(itr->path()))
+         if(is_regular_file(itr->path()))
             {
             out.push_back(itr->path().string());
             }
@@ -74,7 +78,8 @@ std::vector<std::string> impl_boost_filesystem(const std::string& dir_path)
    return out;
 }
 
-#elif defined(BOTAN_TARGET_OS_HAS_READDIR)
+#elif defined(BOTAN_TARGET_OS_HAS_POSIX1)
+
 std::vector<std::string> impl_readdir(const std::string& dir_path)
    {
    std::vector<std::string> out;
@@ -113,7 +118,7 @@ std::vector<std::string> impl_readdir(const std::string& dir_path)
    return out;
    }
 
-#elif defined(BOTAN_TARGET_OS_TYPE_IS_WINDOWS)
+#elif defined(BOTAN_TARGET_OS_HAS_WIN32)
 
 std::vector<std::string> impl_win32(const std::string& dir_path)
    {
@@ -126,8 +131,8 @@ std::vector<std::string> impl_win32(const std::string& dir_path)
       const std::string cur_path = dir_list[0];
       dir_list.pop_front();
 
-      WIN32_FIND_DATA find_data;
-      HANDLE dir = ::FindFirstFile((cur_path + "/*").c_str(), &find_data);
+      WIN32_FIND_DATAA find_data;
+      HANDLE dir = ::FindFirstFileA((cur_path + "/*").c_str(), &find_data);
 
       if(dir != INVALID_HANDLE_VALUE)
          {
@@ -147,7 +152,7 @@ std::vector<std::string> impl_win32(const std::string& dir_path)
                out.push_back(full_path);
                }
             }
-         while(::FindNextFile(dir, &find_data));
+         while(::FindNextFileA(dir, &find_data));
          }
 
       ::FindClose(dir);
@@ -159,6 +164,21 @@ std::vector<std::string> impl_win32(const std::string& dir_path)
 
 }
 
+bool has_filesystem_impl()
+   {
+#if defined(BOTAN_TARGET_OS_HAS_STL_FILESYSTEM_MSVC) && defined(BOTAN_BUILD_COMPILER_IS_MSVC)
+   return true;
+#elif defined(BOTAN_HAS_BOOST_FILESYSTEM)
+   return true;
+#elif defined(BOTAN_TARGET_OS_HAS_POSIX1)
+   return true;
+#elif defined(BOTAN_TARGET_OS_HAS_WIN32)
+   return true;
+#else
+   return false;
+#endif
+   }
+
 std::vector<std::string> get_files_recursive(const std::string& dir)
    {
    std::vector<std::string> files;
@@ -167,9 +187,9 @@ std::vector<std::string> get_files_recursive(const std::string& dir)
    files = impl_stl_filesystem(dir);
 #elif defined(BOTAN_HAS_BOOST_FILESYSTEM)
    files = impl_boost_filesystem(dir);
-#elif defined(BOTAN_TARGET_OS_HAS_READDIR)
+#elif defined(BOTAN_TARGET_OS_HAS_POSIX1)
    files = impl_readdir(dir);
-#elif defined(BOTAN_TARGET_OS_TYPE_IS_WINDOWS)
+#elif defined(BOTAN_TARGET_OS_HAS_WIN32)
    files = impl_win32(dir);
 #else
    BOTAN_UNUSED(dir);

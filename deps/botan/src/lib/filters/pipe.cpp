@@ -40,7 +40,10 @@ Pipe::Pipe(Filter* f1, Filter* f2, Filter* f3, Filter* f4) :
 */
 Pipe::Pipe(std::initializer_list<Filter*> args)
    {
-   init();
+   m_outputs.reset(new Output_Buffers);
+   m_pipe = nullptr;
+   m_default_read = 0;
+   m_inside_msg = false;
 
    for(auto i = args.begin(); i != args.end(); ++i)
       do_append(*i);
@@ -52,17 +55,6 @@ Pipe::Pipe(std::initializer_list<Filter*> args)
 Pipe::~Pipe()
    {
    destruct(m_pipe);
-   }
-
-/*
-* Initialize the Pipe
-*/
-void Pipe::init()
-   {
-   m_outputs.reset(new Output_Buffers);
-   m_pipe = nullptr;
-   m_default_read = 0;
-   m_inside_msg = false;
    }
 
 /*
@@ -133,7 +125,7 @@ void Pipe::process_msg(const std::vector<uint8_t>& input)
 */
 void Pipe::process_msg(const std::string& input)
    {
-   process_msg(reinterpret_cast<const uint8_t*>(input.data()), input.length());
+   process_msg(cast_char_ptr_to_uint8(input.data()), input.length());
    }
 
 /*
@@ -214,6 +206,27 @@ void Pipe::append(Filter* filter)
    do_append(filter);
    }
 
+void Pipe::append_filter(Filter* filter)
+   {
+   if(m_outputs->message_count() != 0)
+      throw Invalid_State("Cannot call Pipe::append_filter after start_msg");
+
+   do_append(filter);
+   }
+
+void Pipe::prepend(Filter* filter)
+   {
+   do_prepend(filter);
+   }
+
+void Pipe::prepend_filter(Filter* filter)
+   {
+   if(m_outputs->message_count() != 0)
+      throw Invalid_State("Cannot call Pipe::prepend_filter after start_msg");
+
+   do_prepend(filter);
+   }
+
 /*
 * Append a Filter to the Pipe
 */
@@ -238,7 +251,7 @@ void Pipe::do_append(Filter* filter)
 /*
 * Prepend a Filter to the Pipe
 */
-void Pipe::prepend(Filter* filter)
+void Pipe::do_prepend(Filter* filter)
    {
    if(m_inside_msg)
       throw Invalid_State("Cannot prepend to a Pipe while it is processing");

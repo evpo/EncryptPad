@@ -6,15 +6,22 @@
 */
 
 #include <botan/gost_28147.h>
+#include <botan/exceptn.h>
 #include <botan/loadstor.h>
 
 namespace Botan {
 
 uint8_t GOST_28147_89_Params::sbox_entry(size_t row, size_t col) const
    {
-   uint8_t x = m_sboxes[4 * col + (row / 2)];
-
+   const uint8_t x = m_sboxes[4 * col + (row / 2)];
    return (row % 2 == 0) ? (x >> 4) : (x & 0x0F);
+   }
+
+uint8_t GOST_28147_89_Params::sbox_pair(size_t row, size_t col) const
+   {
+   const uint8_t x = m_sboxes[4 * (col % 16) + row];
+   const uint8_t y = m_sboxes[4 * (col / 16) + row];
+   return (x >> 4) | (y << 4);
    }
 
 GOST_28147_89_Params::GOST_28147_89_Params(const std::string& n) : m_name(n)
@@ -53,13 +60,14 @@ GOST_28147_89_Params::GOST_28147_89_Params(const std::string& n) : m_name(n)
 GOST_28147_89::GOST_28147_89(const GOST_28147_89_Params& param) : m_SBOX(1024)
    {
    // Convert the parallel 4x4 sboxes into larger word-based sboxes
-   for(size_t i = 0; i != 4; ++i)
-      for(size_t j = 0; j != 256; ++j)
-         {
-         const uint32_t T = (param.sbox_entry(2*i  , j % 16)) |
-                          (param.sbox_entry(2*i+1, j / 16) << 4);
-         m_SBOX[256*i+j] = rotate_left(T, (11+8*i) % 32);
-         }
+
+   for(size_t i = 0; i != 256; ++i)
+      {
+      m_SBOX[i    ] = rotl<11, uint32_t>(param.sbox_pair(0, i));
+      m_SBOX[i+256] = rotl<19, uint32_t>(param.sbox_pair(1, i));
+      m_SBOX[i+512] = rotl<27, uint32_t>(param.sbox_pair(2, i));
+      m_SBOX[i+768] = rotl< 3, uint32_t>(param.sbox_pair(3, i));
+      }
    }
 
 std::string GOST_28147_89::name() const
@@ -104,6 +112,8 @@ std::string GOST_28147_89::name() const
 */
 void GOST_28147_89::encrypt_n(const uint8_t in[], uint8_t out[], size_t blocks) const
    {
+   verify_key_set(m_EK.empty() == false);
+
    for(size_t i = 0; i != blocks; ++i)
       {
       uint32_t N1 = load_le<uint32_t>(in, 0);
@@ -134,6 +144,8 @@ void GOST_28147_89::encrypt_n(const uint8_t in[], uint8_t out[], size_t blocks) 
 */
 void GOST_28147_89::decrypt_n(const uint8_t in[], uint8_t out[], size_t blocks) const
    {
+   verify_key_set(m_EK.empty() == false);
+
    for(size_t i = 0; i != blocks; ++i)
       {
       uint32_t N1 = load_le<uint32_t>(in, 0);

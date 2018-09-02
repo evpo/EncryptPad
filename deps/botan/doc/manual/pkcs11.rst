@@ -18,11 +18,12 @@ or HSM specific code for each device they want to support.
 
      The Botan PKCS#11 interface is implemented against version v2.40 of the standard.
 
-Botan wraps the C PKCS#11 API to provide a C++ PKCS#11 interface. This is done in two
-levels of abstraction: a low level API (see :ref:`pkcs11_low_level`) and a high level API (see :ref:`pkcs11_high_level`). The low level API provides
-access to all functions that are specified by the standard. The high level API represents
-an object oriented approach to use PKCS#11 compatible devices but only provides a subset
-of the functions described in the standard.
+Botan wraps the C PKCS#11 API to provide a C++ PKCS#11 interface. This is done
+in two levels of abstraction: a low level API (see :ref:`pkcs11_low_level`) and
+a high level API (see :ref:`pkcs11_high_level`). The low level API provides
+access to all functions that are specified by the standard. The high level API
+represents an object oriented approach to use PKCS#11 compatible devices but
+only provides a subset of the functions described in the standard.
 
 To use the PKCS#11 implementation the ``pkcs11`` module has to be enabled.
 
@@ -90,9 +91,9 @@ to call the method twice in order to determine the number of elements first.
 
 Another example is the :cpp:func:`C_InitPIN` overload:
 
-   .. cpp:function:: template<typename Talloc> bool C_InitPIN( SessionHandle session, const std::vector<byte, TAlloc>& pin, ReturnValue* return_value = ThrowException ) const
+   .. cpp:function:: template<typename Talloc> bool C_InitPIN( SessionHandle session, const std::vector<uint8_t, TAlloc>& pin, ReturnValue* return_value = ThrowException ) const
 
-The templated ``pin`` parameter allows to pass the PIN as a ``std::vector<byte>`` or a ``secure_vector<byte>``.
+The templated ``pin`` parameter allows to pass the PIN as a ``std::vector<uint8_t>`` or a ``secure_vector<uint8_t>``.
 If used with a ``secure_vector`` it is assured that the memory is securely erased when the ``pin`` object is no longer needed.
 
 Error Handling
@@ -434,11 +435,11 @@ Attributes can be set in an :cpp:class:`AttributeContainer` by various ``add_`` 
 
       Add a string attribute (e.g. :c:macro:`CKA_LABEL` / :cpp:enumerator:`AttributeType::Label`).
 
-   .. cpp:function:: void AttributeContainer::add_binary(AttributeType attribute, const byte* value, size_t length)
+   .. cpp:function:: void AttributeContainer::add_binary(AttributeType attribute, const uint8_t* value, size_t length)
 
       Add a binary attribute (e.g. :c:macro:`CKA_ID` / :cpp:enumerator:`AttributeType::Id`).
 
-   .. cpp:function:: template<typename TAlloc> void AttributeContainer::add_binary(AttributeType attribute, const std::vector<byte, TAlloc>& binary)
+   .. cpp:function:: template<typename TAlloc> void AttributeContainer::add_binary(AttributeType attribute, const std::vector<uint8_t, TAlloc>& binary)
 
       Add a binary attribute by passing a ``vector``/``secure_vector`` (e.g. :c:macro:`CKA_ID` / :cpp:enumerator:`AttributeType::Id`).
 
@@ -510,11 +511,11 @@ Following constructors are defined:
 
 The other methods are:
 
-   .. cpp:function:: secure_vector<byte> get_attribute_value(AttributeType attribute) const
+   .. cpp:function:: secure_vector<uint8_t> get_attribute_value(AttributeType attribute) const
 
       Returns the value of the given attribute (using :cpp:func:`C_GetAttributeValue`)
 
-   .. cpp:function:: void set_attribute_value(AttributeType attribute, const secure_vector<byte>& value) const
+   .. cpp:function:: void set_attribute_value(AttributeType attribute, const secure_vector<uint8_t>& value) const
 
       Sets the given value for the attribute (using :cpp:func:`C_SetAttributeValue`)
 
@@ -536,11 +537,11 @@ And static methods to search for objects:
 
       Searches for all objects of the given type using the label (:c:macro:`CKA_LABEL`).
 
-   .. cpp:function:: template<typename T> static std::vector<T> search(Session& session, const std::vector<byte>& id)
+   .. cpp:function:: template<typename T> static std::vector<T> search(Session& session, const std::vector<uint8_t>& id)
 
       Searches for all objects of the given type using the id (:c:macro:`CKA_ID`).
 
-   .. cpp:function:: template<typename T> static std::vector<T> search(Session& session, const std::string& label, const std::vector<byte>& id)
+   .. cpp:function:: template<typename T> static std::vector<T> search(Session& session, const std::string& label, const std::vector<uint8_t>& id)
 
       Searches for all objects of the given type using the label (:c:macro:`CKA_LABEL`) and id (:c:macro:`CKA_ID`).
 
@@ -814,7 +815,7 @@ and import: :cpp:class:`EC_PrivateKeyGenerationProperties` and :cpp:class:`EC_Pr
       This constructor can be used to import an existing ECDSA private key with the :cpp:class:`EC_PrivateKeyImportProperties`
       passed in ``props`` to the token.
 
-   .. cpp:function:: PKCS11_ECDSA_PrivateKey(Session& session, const std::vector<byte>& ec_params, const EC_PrivateKeyGenerationProperties& props)
+   .. cpp:function:: PKCS11_ECDSA_PrivateKey(Session& session, const std::vector<uint8_t>& ec_params, const EC_PrivateKeyGenerationProperties& props)
 
       This constructor can be used to generate a new ECDSA private key with the :cpp:class:`EC_PrivateKeyGenerationProperties`
       passed in ``props`` on the token. The ``ec_params`` parameter is the DER-encoding of an
@@ -965,7 +966,7 @@ property classes. One for key generation and one for import: :cpp:class:`EC_Priv
       This constructor can be used to import an existing ECDH private key with the :cpp:class:`EC_PrivateKeyImportProperties`
       passed in ``props`` to the token.
 
-   .. cpp:function:: PKCS11_ECDH_PrivateKey(Session& session, const std::vector<byte>& ec_params, const EC_PrivateKeyGenerationProperties& props)
+   .. cpp:function:: PKCS11_ECDH_PrivateKey(Session& session, const std::vector<uint8_t>& ec_params, const EC_PrivateKeyGenerationProperties& props)
 
       This constructor can be used to generate a new ECDH private key with the :cpp:class:`EC_PrivateKeyGenerationProperties`
       passed in ``props`` on the token. The ``ec_params`` parameter is the DER-encoding of an
@@ -1091,11 +1092,11 @@ implements the :cpp:class:`Hardware_RNG` interface.
 
       A PKCS#11 :cpp:class:`Session` must be passed to instantiate a ``PKCS11_RNG``.
 
-   .. cpp:function:: void randomize(Botan::byte output[], std::size_t length) override
+   .. cpp:function:: void randomize(uint8_t output[], std::size_t length) override
 
       Calls :cpp:func:`C_GenerateRandom` to generate random data.
 
-   .. cpp:function:: void add_entropy(const Botan::byte in[], std::size_t length) override
+   .. cpp:function:: void add_entropy(const uint8_t in[], std::size_t length) override
 
       Calls :cpp:func:`C_SeedRandom` to add entropy to the random generation function of the token/middleware.
 
@@ -1242,3 +1243,157 @@ also possible to execute only a subset with the following arguments:
 - pkcs11-session
 - pkcs11-slot
 - pkcs11-x509
+
+The following PIN and SO-PIN/PUK values are used in tests:
+
+- PIN 123456
+- SO-PIN/PUK 12345678
+
+ .. warning::
+
+   Unlike the CardOS (4.4, 5.0, 5.3), the aforementioned SO-PIN/PUK is
+   inappropriate for Gemalto (IDPrime MD 3840) cards, as it must be a byte array
+   of length 24. For this reason some of the tests for Gemalto card involving
+   SO-PIN will fail.  You run into a risk of exceding login attempts and as a
+   result locking your card!  Currently, specifying pin via command-line option
+   is not implemented, and therefore the desired PIN must be modified in the
+   header src/tests/test_pkcs11.h:
+
+   .. code-block:: cpp
+
+      // SO PIN is expected to be set to "12345678" prior to running the tests
+      const std::string SO_PIN = "12345678";
+      const auto SO_PIN_SECVEC = Botan::PKCS11::secure_string(SO_PIN.begin(), SO_PIN.end());
+
+
+Tested/Supported Smartcards
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+You are very welcome to contribute your own test results for other testing environments or other cards.
+
+
+Test results
+
++-------------------------------------+-------------------------------------------+---------------------------------------------------+---------------------------------------------------+---------------------------------------------------+---------------------------------------------------+
+|  Smartcard                          | Status                                    | OS                                                | Midleware                                         |   Botan                                           | Errors                                            |
++=====================================+===========================================+===================================================+===================================================+===================================================+===================================================+
+| CardOS 4.4                          | mostly works                              | Windows 10, 64-bit, version 1709                  | API Version 5.4.9.77 (Cryptoki v2.11)             |  2.4.0, Cryptoki v2.40                            | [50]_                                             |
++-------------------------------------+-------------------------------------------+---------------------------------------------------+---------------------------------------------------+---------------------------------------------------+---------------------------------------------------+
+| CardOS 5.0                          | mostly works                              | Windows 10, 64-bit, version 1709                  | API Version 5.4.9.77 (Cryptoki v2.11)             |  2.4.0, Cryptoki v2.40                            | [51]_                                             |
++-------------------------------------+-------------------------------------------+---------------------------------------------------+---------------------------------------------------+---------------------------------------------------+---------------------------------------------------+
+| CardOS 5.3                          | mostly works                              | Windows 10, 64-bit, version 1709                  | API Version 5.4.9.77 (Cryptoki v2.11)             |  2.4.0, Cryptoki v2.40                            | [52]_                                             |
++-------------------------------------+-------------------------------------------+---------------------------------------------------+---------------------------------------------------+---------------------------------------------------+---------------------------------------------------+
+| Gemalto IDPrime MD 3840             | mostly works                              | Windows 10, 64-bit, version 1709                  | IDGo 800, v1.2.4 (Cryptoki v2.20)                 |  2.4.0, Cryptoki v2.40                            | [53]_                                             |
++-------------------------------------+-------------------------------------------+---------------------------------------------------+---------------------------------------------------+---------------------------------------------------+---------------------------------------------------+
+| SoftHSM 2.3.0 (OpenSSL 1.0.2g)      | works                                     | Windows 10, 64-bit, version 1709                  | Cryptoki v2.40                                    |  2.4.0, Cryptoki v2.40                            |                                                   |
++-------------------------------------+-------------------------------------------+---------------------------------------------------+---------------------------------------------------+---------------------------------------------------+---------------------------------------------------+
+
+.. [50] Failing operations for CardOS 4.4:
+
+ - object_copy [20]_
+
+ - rsa_privkey_export [21]_
+ - rsa_generate_private_key [22]_
+ - rsa_sign_verify [23]_
+
+ - ecdh_privkey_import [3]_
+ - ecdh_privkey_export [2]_
+ - ecdh_pubkey_import [4]_
+ - ecdh_pubkey_export [4]_
+ - ecdh_generate_private_key [3]_
+ - ecdh_generate_keypair [3]_
+ - ecdh_derive [3]_
+
+ - ecdsa_privkey_import [3]_
+ - ecdsa_privkey_export [2]_
+ - ecdsa_pubkey_import [4]_
+ - ecdsa_pubkey_export [4]_
+ - ecdsa_generate_private_key  [3]_
+ - ecdsa_generate_keypair  [3]_
+ - ecdsa_sign_verify  [3]_
+
+ - rng_add_entropy [5]_
+
+
+.. [51] Failing operations for CardOS 5.0
+
+ - object_copy [20]_
+
+ - rsa_privkey_export [21]_
+ - rsa_generate_private_key [22]_
+ - rsa_sign_verify [23]_
+
+ - ecdh_privkey_export [2]_
+ - ecdh_pubkey_import [4]_
+ - ecdh_generate_private_key [32]_
+ - ecdh_generate_keypair [3]_
+ - ecdh_derive [33]_
+
+ - ecdsa_privkey_export [2]_
+ - ecdsa_generate_private_key  [30]_
+ - ecdsa_generate_keypair  [30]_
+ - ecdsa_sign_verify  [30]_
+
+ - rng_add_entropy [5]_
+
+.. [52] Failing operations for CardOS 5.3
+
+ - object_copy [20]_
+
+ - rsa_privkey_export [21]_
+ - rsa_generate_private_key [22]_
+ - rsa_sign_verify [23]_
+
+ - ecdh_privkey_export [2]_
+ - ecdh_pubkey_import [6]_
+ - ecdh_pubkey_export [6]_
+ - ecdh_generate_private_key [30]_
+ - ecdh_generate_keypair [31]_
+ - ecdh_derive [30]_
+
+ - ecdsa_privkey_export [2]_
+ - ecdsa_pubkey_import [6]_
+ - ecdsa_pubkey_export [6]_
+ - ecdsa_generate_private_key  [31]_
+ - ecdsa_generate_keypair  [31]_
+ - ecdsa_sign_verify  [34]_
+
+ - rng_add_entropy [5]_
+
+.. [53] Failing operations for Gemalto IDPrime MD 3840
+
+ - session_login_logout [2]_
+ - session_info [2]_
+ - set_pin [2]_
+ - initialize [2]_
+ - change_so_pin [2]_
+
+ - object_copy [20]_
+
+ - rsa_generate_private_key [7]_
+ - rsa_encrypt_decrypt [8]_
+ - rsa_sign_verify [2]_
+
+ - rng_add_entropy [5]_
+
+Error descriptions
+
+.. [1] CKR_TEMPLATE_INCOMPLETE (0xD0=208)
+.. [2] CKR_ARGUMENTS_BAD (0x7=7)
+.. [3] CKR_MECHANISM_INVALID (0x70=112)
+.. [4] CKR_FUNCTION_NOT_SUPPORTED (0x54=84)
+.. [5] CKR_RANDOM_SEED_NOT_SUPPORTED (0x120=288)
+.. [6] CKM_X9_42_DH_KEY_PAIR_GEN | CKR_DEVICE_ERROR (0x30=48)
+.. [7] CKR_TEMPLATE_INCONSISTENT (0xD1=209)
+.. [8] CKR_ENCRYPTED_DATA_INVALID | CKM_SHA256_RSA_PKCS (0x40=64)
+
+.. [20] Test fails due to unsupported copy function (CKR_FUNCTION_NOT_SUPPORTED)
+.. [21] Generating private key for extraction with property extractable fails (CKR_ARGUMENTS_BAD)
+.. [22] Generate rsa private key operation fails (CKR_TEMPLATE_INCOMPLETE)
+.. [23] Raw RSA sign-verify fails (CKR_MECHANISM_INVALID)
+
+.. [30] Invalid argument Decoding error: BER: Value truncated
+.. [31] Invalid argument Decoding error: BER: Length field is to large
+.. [32] Invalid argument OS2ECP: Unknown format type 155
+.. [33] Invalid argument OS2ECP: Unknown format type 92
+.. [34] Invalid argument OS2ECP: Unknown format type 57

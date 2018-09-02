@@ -56,7 +56,7 @@ secure_vector<uint8_t> PKCS8_for_openssl(const EC_PrivateKey& ec)
       .raw_bytes(ec.domain().DER_encode(EC_DOMPAR_ENC_OID))
       .end_cons()
       .start_cons(ASN1_Tag(1), PRIVATE)
-      .encode(EC2OSP(pub_key, PointGFp::UNCOMPRESSED), BIT_STRING)
+      .encode(pub_key.encode(PointGFp::UNCOMPRESSED), BIT_STRING)
       .end_cons()
       .end_cons()
       .get_contents();
@@ -147,7 +147,7 @@ class OpenSSL_ECDSA_Verification_Operation final : public PK_Ops::Verification_w
          if(!::EC_KEY_set_group(m_ossl_ec.get(), grp.get()))
             throw OpenSSL_Error("EC_KEY_set_group");
 
-         const secure_vector<uint8_t> enc = EC2OSP(ecdsa.public_point(), PointGFp::UNCOMPRESSED);
+         const std::vector<uint8_t> enc = ecdsa.public_point().encode(PointGFp::UNCOMPRESSED);
          const uint8_t* enc_ptr = enc.data();
          EC_KEY* key_ptr = m_ossl_ec.get();
          if(!::o2i_ECPublicKey(&key_ptr, &enc_ptr, enc.size()))
@@ -185,7 +185,18 @@ class OpenSSL_ECDSA_Verification_Operation final : public PK_Ops::Verification_w
 
          const int res = ECDSA_do_verify(msg, msg_len, sig.get(), m_ossl_ec.get());
          if(res < 0)
+            {
+            int err = ERR_get_error();
+#if defined(EC_R_BAD_SIGNATURE)
+            if(ERR_GET_REASON(err) != EC_R_BAD_SIGNATURE)
+               throw OpenSSL_Error("ECDSA_do_verify", err);
+#elif defined(ECDSA_R_BAD_SIGNATURE)
+            if(ERR_GET_REASON(err) != ECDSA_R_BAD_SIGNATURE)
+               throw OpenSSL_Error("ECDSA_do_verify", err);
+#else
             throw OpenSSL_Error("ECDSA_do_verify");
+#endif
+            }
          return (res == 1);
          }
 
@@ -251,7 +262,7 @@ class OpenSSL_ECDSA_Signing_Operation final : public PK_Ops::Signature_with_EMSA
 std::unique_ptr<PK_Ops::Verification>
 make_openssl_ecdsa_ver_op(const ECDSA_PublicKey& key, const std::string& params)
    {
-   const int nid = OpenSSL_EC_nid_for(key.domain().get_oid());
+   const int nid = OpenSSL_EC_nid_for(key.domain().get_curve_oid());
    if(nid < 0)
       {
       throw Lookup_Error("OpenSSL ECDSA does not support this curve");
@@ -262,7 +273,7 @@ make_openssl_ecdsa_ver_op(const ECDSA_PublicKey& key, const std::string& params)
 std::unique_ptr<PK_Ops::Signature>
 make_openssl_ecdsa_sig_op(const ECDSA_PrivateKey& key, const std::string& params)
    {
-   const int nid = OpenSSL_EC_nid_for(key.domain().get_oid());
+   const int nid = OpenSSL_EC_nid_for(key.domain().get_curve_oid());
    if(nid < 0)
       {
       throw Lookup_Error("OpenSSL ECDSA does not support this curve");
@@ -333,7 +344,7 @@ class OpenSSL_ECDH_KA_Operation final : public PK_Ops::Key_Agreement_with_KDF
 std::unique_ptr<PK_Ops::Key_Agreement>
 make_openssl_ecdh_ka_op(const ECDH_PrivateKey& key, const std::string& params)
    {
-   const int nid = OpenSSL_EC_nid_for(key.domain().get_oid());
+   const int nid = OpenSSL_EC_nid_for(key.domain().get_curve_oid());
    if(nid < 0)
       {
       throw Lookup_Error("OpenSSL ECDH does not support this curve");

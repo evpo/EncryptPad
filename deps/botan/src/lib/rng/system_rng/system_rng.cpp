@@ -1,17 +1,17 @@
 /*
 * System RNG
-* (C) 2014,2015,2017 Jack Lloyd
+* (C) 2014,2015,2017,2018 Jack Lloyd
 *
 * Botan is released under the Simplified BSD License (see license.txt)
 */
 
 #include <botan/system_rng.h>
 
-#if defined(BOTAN_TARGET_OS_HAS_CRYPTGENRANDOM)
-   #define NOMINMAX 1
-   #define _WINSOCKAPI_ // stop windows.h including winsock.h
-   #include <windows.h>
-   #include <wincrypt.h>
+#if defined(BOTAN_TARGET_OS_HAS_RTLGENRANDOM)
+  #include <botan/dyn_load.h>
+  #define NOMINMAX 1
+  #define _WINSOCKAPI_ // stop windows.h including winsock.h
+  #include <windows.h>
 
 #elif defined(BOTAN_TARGET_OS_HAS_CRYPTO_NG)
    #include <bcrypt.h>
@@ -19,7 +19,7 @@
 #elif defined(BOTAN_TARGET_OS_HAS_ARC4RANDOM)
    #include <stdlib.h>
 
-#else
+#elif defined(BOTAN_TARGET_OS_HAS_DEV_RANDOM)
    #include <sys/types.h>
    #include <sys/stat.h>
    #include <fcntl.h>
@@ -31,43 +31,36 @@ namespace Botan {
 
 namespace {
 
-#if defined(BOTAN_TARGET_OS_HAS_CRYPTGENRANDOM)
+#if defined(BOTAN_TARGET_OS_HAS_RTLGENRANDOM)
 
 class System_RNG_Impl final : public RandomNumberGenerator
    {
    public:
-      System_RNG_Impl()
+      System_RNG_Impl() : m_advapi("advapi32.dll")
          {
-         if(!CryptAcquireContext(&m_prov, nullptr, nullptr,
-                                 BOTAN_SYSTEM_RNG_CRYPTOAPI_PROV_TYPE, CRYPT_VERIFYCONTEXT))
-            throw Exception("System_RNG failed to acquire crypto provider");
-         }
-
-      ~System_RNG_Impl()
-         {
-         ::CryptReleaseContext(m_prov, 0);
+         // This throws if the function is not found
+         m_rtlgenrandom = m_advapi.resolve<RtlGenRandom_fptr>("SystemFunction036");
          }
 
       void randomize(uint8_t buf[], size_t len) override
          {
-         ::CryptGenRandom(m_prov, static_cast<DWORD>(len), buf);
+         bool success = m_rtlgenrandom(buf, len) == TRUE;
+         if(!success)
+            throw Exception("RtlGenRandom failed");
          }
 
-      void add_entropy(const uint8_t in[], size_t length) override
-         {
-         /*
-         There is no explicit ConsumeRandom, but all values provided in
-         the call are incorporated into the state.
-         */
-         std::vector<uint8_t> buf(in, in + length);
-         ::CryptGenRandom(m_prov, static_cast<DWORD>(buf.size()), buf.data());
-         }
-
+      void add_entropy(const uint8_t[], size_t) override { /* ignored */ }
       bool is_seeded() const override { return true; }
-      void clear() override {}
-      std::string name() const override { return "cryptoapi"; }
+      void clear() override { /* not possible */ }
+      std::string name() const override { return "RtlGenRandom"; }
    private:
-      HCRYPTPROV m_prov;
+      // Use type BYTE instead of BOOLEAN because of a naming conflict
+      // https://msdn.microsoft.com/en-us/library/windows/desktop/aa387694(v=vs.85).aspx
+      // https://msdn.microsoft.com/en-us/library/windows/desktop/aa383751(v=vs.85).aspx
+      using RtlGenRandom_fptr = BYTE (NTAPI *)(PVOID, ULONG);
+
+      Dynamically_Loaded_Library m_advapi;
+      RtlGenRandom_fptr m_rtlgenrandom;
    };
 
 #elif defined(BOTAN_TARGET_OS_HAS_CRYPTO_NG)
@@ -91,7 +84,9 @@ class System_RNG_Impl final : public RandomNumberGenerator
 
       void randomize(uint8_t buf[], size_t len) override
          {
-         ::BCryptGenRandom(m_prov, static_cast<PUCHAR>(buf), static_cast<ULONG>(len), 0);
+         NTSTATUS ret = ::BCryptGenRandom(m_prov, static_cast<PUCHAR>(buf), static_cast<ULONG>(len), 0);
+         if(ret != STATUS_SUCCESS)
+            throw Exception("System_RNG call to BCryptGenRandom failed");
          }
 
       void add_entropy(const uint8_t in[], size_t length) override
@@ -103,7 +98,7 @@ class System_RNG_Impl final : public RandomNumberGenerator
          }
 
       bool is_seeded() const override { return true; }
-      void clear() override {}
+      void clear() override { /* not possible */ }
       std::string name() const override { return "crypto_ng"; }
    private:
       BCRYPT_ALG_HANDLE m_handle;
@@ -123,11 +118,11 @@ class System_RNG_Impl final : public RandomNumberGenerator
 
       void add_entropy(const uint8_t[], size_t) override { /* ignored */ }
       bool is_seeded() const override { return true; }
-      void clear() override {}
+      void clear() override { /* not possible */ }
       std::string name() const override { return "arc4random"; }
    };
 
-#else
+#elif defined(BOTAN_TARGET_OS_HAS_DEV_RANDOM)
 
 // Read a random device
 
@@ -162,7 +157,7 @@ class System_RNG_Impl final : public RandomNumberGenerator
       void randomize(uint8_t buf[], size_t len) override;
       void add_entropy(const uint8_t in[], size_t length) override;
       bool is_seeded() const override { return true; }
-      void clear() override {}
+      void clear() override { /* not possible */ }
       std::string name() const override { return BOTAN_SYSTEM_RNG_DEVICE; }
    private:
       int m_fd;

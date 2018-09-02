@@ -28,10 +28,10 @@ std::unique_ptr<HashFunction> SHA_256::copy_state() const
 * even though it is much faster if inlined.
 */
 #define SHA2_32_F(A, B, C, D, E, F, G, H, M1, M2, M3, M4, magic) do {               \
-   uint32_t A_rho = rotate_right(A, 2) ^ rotate_right(A, 13) ^ rotate_right(A, 22); \
-   uint32_t E_rho = rotate_right(E, 6) ^ rotate_right(E, 11) ^ rotate_right(E, 25); \
-   uint32_t M2_sigma = rotate_right(M2, 17) ^ rotate_right(M2, 19) ^ (M2 >> 10);    \
-   uint32_t M4_sigma = rotate_right(M4, 7) ^ rotate_right(M4, 18) ^ (M4 >> 3);      \
+   uint32_t A_rho = rotr<2>(A) ^ rotr<13>(A) ^ rotr<22>(A); \
+   uint32_t E_rho = rotr<6>(E) ^ rotr<11>(E) ^ rotr<25>(E); \
+   uint32_t M2_sigma = rotr<17>(M2) ^ rotr<19>(M2) ^ (M2 >> 10);    \
+   uint32_t M4_sigma = rotr<7>(M4) ^ rotr<18>(M4) ^ (M4 >> 3);      \
    H += magic + E_rho + ((E & F) ^ (~E & G)) + M1;                                  \
    D += H;                                                                          \
    H += A_rho + ((A & B) | ((A | B) & C));                                          \
@@ -51,6 +51,13 @@ void SHA_256::compress_digest(secure_vector<uint32_t>& digest,
       }
 #endif
 
+#if defined(BOTAN_HAS_SHA2_32_X86_BMI2)
+   if(CPUID::has_bmi2())
+      {
+      return SHA_256::compress_digest_x86_bmi2(digest, input, blocks);
+      }
+#endif
+
 #if defined(BOTAN_HAS_SHA2_32_ARMV8)
    if(CPUID::has_arm_sha2())
       {
@@ -59,8 +66,8 @@ void SHA_256::compress_digest(secure_vector<uint32_t>& digest,
 #endif
 
    uint32_t A = digest[0], B = digest[1], C = digest[2],
-          D = digest[3], E = digest[4], F = digest[5],
-          G = digest[6], H = digest[7];
+            D = digest[3], E = digest[4], F = digest[5],
+            G = digest[6], H = digest[7];
 
    for(size_t i = 0; i != blocks; ++i)
       {
@@ -97,6 +104,7 @@ void SHA_256::compress_digest(secure_vector<uint32_t>& digest,
       SHA2_32_F(D, E, F, G, H, A, B, C, W13, W11, W06, W14, 0x80DEB1FE);
       SHA2_32_F(C, D, E, F, G, H, A, B, W14, W12, W07, W15, 0x9BDC06A7);
       SHA2_32_F(B, C, D, E, F, G, H, A, W15, W13, W08, W00, 0xC19BF174);
+
       SHA2_32_F(A, B, C, D, E, F, G, H, W00, W14, W09, W01, 0xE49B69C1);
       SHA2_32_F(H, A, B, C, D, E, F, G, W01, W15, W10, W02, 0xEFBE4786);
       SHA2_32_F(G, H, A, B, C, D, E, F, W02, W00, W11, W03, 0x0FC19DC6);
@@ -113,6 +121,7 @@ void SHA_256::compress_digest(secure_vector<uint32_t>& digest,
       SHA2_32_F(D, E, F, G, H, A, B, C, W13, W11, W06, W14, 0xD5A79147);
       SHA2_32_F(C, D, E, F, G, H, A, B, W14, W12, W07, W15, 0x06CA6351);
       SHA2_32_F(B, C, D, E, F, G, H, A, W15, W13, W08, W00, 0x14292967);
+
       SHA2_32_F(A, B, C, D, E, F, G, H, W00, W14, W09, W01, 0x27B70A85);
       SHA2_32_F(H, A, B, C, D, E, F, G, W01, W15, W10, W02, 0x2E1B2138);
       SHA2_32_F(G, H, A, B, C, D, E, F, W02, W00, W11, W03, 0x4D2C6DFC);
@@ -129,6 +138,7 @@ void SHA_256::compress_digest(secure_vector<uint32_t>& digest,
       SHA2_32_F(D, E, F, G, H, A, B, C, W13, W11, W06, W14, 0xD6990624);
       SHA2_32_F(C, D, E, F, G, H, A, B, W14, W12, W07, W15, 0xF40E3585);
       SHA2_32_F(B, C, D, E, F, G, H, A, W15, W13, W08, W00, 0x106AA070);
+
       SHA2_32_F(A, B, C, D, E, F, G, H, W00, W14, W09, W01, 0x19A4C116);
       SHA2_32_F(H, A, B, C, D, E, F, G, W01, W15, W10, W02, 0x1E376C08);
       SHA2_32_F(G, H, A, B, C, D, E, F, W02, W00, W11, W03, 0x2748774C);

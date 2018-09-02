@@ -33,6 +33,17 @@ BOTAN_PUBLIC_API(2,3) BOTAN_MALLOC_FN void* allocate_memory(size_t elems, size_t
 BOTAN_PUBLIC_API(2,3) void deallocate_memory(void* p, size_t elems, size_t elem_size);
 
 /**
+* Ensure the allocator is initialized
+*/
+void initialize_allocator();
+
+class Allocator_Initializer
+   {
+   public:
+      Allocator_Initializer() { initialize_allocator(); }
+   };
+
+/**
 * Scrub memory contents in a way that a compiler should not elide,
 * using some system specific technique. Note that this function might
 * not zero the memory (for example, in some hypothetical
@@ -117,6 +128,26 @@ inline void set_mem(T* ptr, size_t n, uint8_t val)
       }
    }
 
+inline const uint8_t* cast_char_ptr_to_uint8(const char* s)
+   {
+   return reinterpret_cast<const uint8_t*>(s);
+   }
+
+inline const char* cast_uint8_ptr_to_char(const uint8_t* b)
+   {
+   return reinterpret_cast<const char*>(b);
+   }
+
+inline uint8_t* cast_char_ptr_to_uint8(char* s)
+   {
+   return reinterpret_cast<uint8_t*>(s);
+   }
+
+inline char* cast_uint8_ptr_to_char(uint8_t* b)
+   {
+   return reinterpret_cast<char*>(b);
+   }
+
 /**
 * Memory comparison, input insensitive
 * @param p1 a pointer to an array
@@ -140,9 +171,33 @@ template<typename T> inline bool same_mem(const T* p1, const T* p2, size_t n)
 * @param in the read-only input buffer
 * @param length the length of the buffers
 */
-BOTAN_PUBLIC_API(2,3) void xor_buf(uint8_t out[],
-                       const uint8_t in[],
-                       size_t length);
+inline void xor_buf(uint8_t out[],
+                    const uint8_t in[],
+                    size_t length)
+   {
+   while(length >= 16)
+      {
+      uint64_t x0, x1, y0, y1;
+      std::memcpy(&x0, in, 8);
+      std::memcpy(&x1, in + 8, 8);
+      std::memcpy(&y0, out, 8);
+      std::memcpy(&y1, out + 8, 8);
+
+      y0 ^= x0;
+      y1 ^= x1;
+      std::memcpy(out, &y0, 8);
+      std::memcpy(out + 8, &y1, 8);
+      out += 16; in += 16; length -= 16;
+      }
+
+   while(length > 0)
+      {
+      out[0] ^= in[0];
+      out += 1;
+      in += 1;
+      length -= 1;
+      }
+   }
 
 /**
 * XOR arrays. Postcondition out[i] = in[i] ^ in2[i] forall i = 0...length
@@ -151,10 +206,29 @@ BOTAN_PUBLIC_API(2,3) void xor_buf(uint8_t out[],
 * @param in2 the second output buffer
 * @param length the length of the three buffers
 */
-BOTAN_PUBLIC_API(2,3) void xor_buf(uint8_t out[],
-                       const uint8_t in[],
-                       const uint8_t in2[],
-                       size_t length);
+inline void xor_buf(uint8_t out[],
+                    const uint8_t in[],
+                    const uint8_t in2[],
+                    size_t length)
+   {
+   while(length >= 16)
+      {
+      uint64_t x0, x1, y0, y1;
+      std::memcpy(&x0, in, 8);
+      std::memcpy(&x1, in + 8, 8);
+      std::memcpy(&y0, in2, 8);
+      std::memcpy(&y1, in2 + 8, 8);
+
+      x0 ^= y0;
+      x1 ^= y1;
+      std::memcpy(out, &x0, 8);
+      std::memcpy(out + 8, &x1, 8);
+      out += 16; in += 16; in2 += 16; length -= 16;
+      }
+
+   for(size_t i = 0; i != length; ++i)
+      out[i] = in[i] ^ in2[i];
+   }
 
 template<typename Alloc, typename Alloc2>
 void xor_buf(std::vector<uint8_t, Alloc>& out,

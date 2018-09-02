@@ -1,14 +1,19 @@
-os_type unix
 
-building_shared_supported no
+soname_suffix "so"
+
 install_root /boot
 header_dir develop/headers
 lib_dir system/lib
 doc_dir system/documentation
 
+use_stack_protector no
+
 <target_features>
-gettimeofday
-gmtime_r
+posix1
+clock_gettime
+dev_random
+
+sockets
 threads
 filesystem
 </target_features>

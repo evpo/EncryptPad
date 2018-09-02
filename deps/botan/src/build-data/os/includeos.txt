@@ -1,7 +1,4 @@
-os_type unikernel
-
-building_shared_supported no
-
 <target_features>
-includeos_rng
+posix1
+dev_random
 </target_features>

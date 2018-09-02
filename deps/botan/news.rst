@@ -1,6 +1,455 @@
 Release Notes
 ========================================
 
+Version 2.7.0, 2018-07-02
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+* CVE-2018-12435 Avoid a side channel in ECDSA signature generation (GH #1604)
+
+* Avoid a side channel in RSA key generation due to use of a non-constant time
+  gcd algorithm. (GH #1542 #1556)
+
+* Optimize prime generation, especially improving RSA key generation. (GH #1542)
+
+* Make Karatsuba multiplication, Montgomery field operations, Barrett reduction
+  and Montgomery exponentiation const time (GH #1540 #1606 #1609 #1610)
+
+* Optimizations for elliptic curve operations especially improving reductions
+  and inversions modulo NIST primes (GH #1534 #1538 #1545 #1546 #1547 #1550)
+
+* Add 24 word wide Comba multiplication, improving 3072-bit RSA and DH by ~25%.
+  (GH #1564)
+
+* Unroll Montgomery reduction for specific sizes (GH #1603)
+
+* Improved performance of signature verification in ECGDSA, ECKCDSA,
+  SM2 and GOST by 10-15%.
+
+* XMSS optimizations (GH #1583 #1585)
+
+* Fix an error that meant XMSS would only sign half as many signatures as is
+  allowed (GH #1582)
+
+* Add support for base32 encoding/decoding (GH #1541)
+
+* Add BMI2 optimized version of SHA-256, 40% faster on Skylake (GH #1584)
+
+* Allow the year to be up to 2200 in ASN.1 time objects. Previously this
+  was limited to 2100. (GH #1536)
+
+* Add support for Scrypt password hashing (GH #1570)
+
+* Add support for using Scrypt for private key encryption (GH #1574)
+
+* Optimizations for DES/3DES, approx 50% faster when used in certain modes such
+  as CBC decrypt or CTR.
+
+* XMSS signature verification did not check that the signature was of
+  the expected length which could lead to a crash. (GH #1537)
+
+* The bcrypt variants 2b and 2y are now supported.
+
+* Support for 192-bit Suite B TLS profile is now implemented, as the 128-bit
+  Suite B is since 2015 not allowed anymore.
+
+* Previously botan allowed GCM to be used with an empty nonce, which is not
+  allowed by the specification. Now such nonces are rejected.
+
+* Avoid problems on Windows when compiling in Unicode mode (GH #1615 #1616)
+
+* Previously for ASN.1 encoded signatures (eg ECDSA) Botan would accept any
+  valid BER encoding. Now only the single valid DER encoding is accepted.
+
+* Correct an error that could in rare cases cause an internal error exception
+  when doing computations with the P-224 curve.
+
+* Optimizations to reduce allocations/copies during DER encoding and BER
+  decoding (GH #1571 #1572 #1600)
+
+* Botan generates X.509 subject key IDs by hashing the public key with whatever
+  hash function is being used to sign the certificate. However especially for
+  SHA-512 this caused SKIDs that were far longer than necessary. Now all SKIDs
+  are truncated to 192 bits.
+
+* In the test suite use ``mkstemp`` to create temporary files instead of
+  creating them in the current working directory. (GH #1533 #1530)
+
+* It is now possible to safely override ``CXX`` when invoking make in addition
+  to when ``configure.py`` is run. (GH #1579)
+
+* OIDs for Camellia and SM4 in CBC and GCM mode are now defined, making it
+  possible to use this algorithms for private key encryption.
+
+* Avoid creating symlinks to the shared object on OpenBSD (#1535)
+
+* The ``factor`` command runs much faster on larger inputs now.
+
+* Support for Windows Phone/UWP was deprecated starting in 2.5. This deprecation
+  has been reversed as it seems UWP is still actively used. (GH #1586 #1587)
+
+* Support for Visual C++ 2013 is deprecated, and will be removed in Jan 2019.
+
+* Added support for GCC's --sysroot option to configure.py for cross-compiling.
+
+Version 2.6.0, 2018-04-10
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+* CVE-2018-9860 Fix a bug decrypting TLS CBC ciphertexts which could
+  for a malformed ciphertext cause the decryptor to read and HMAC an
+  additional 64K bytes of data which is not part of the record. This
+  could cause a crash if the read went into unmapped memory. No
+  information leak or out of bounds write occurs.
+
+* Add support for OAEP labels (GH #1508)
+
+* RSA signing is about 15% faster (GH #1523) and RSA verification is
+  about 50% faster.
+
+* Add exponent blinding to RSA (GH #1523)
+
+* Add ``Cipher_Mode::create`` and ``AEAD_Mode::create`` (GH #1527)
+
+* Fix bug in TLS server introduced in 2.5 which caused connection to
+  fail if the client offered any signature algorithm not known to the
+  server (for example RSA/SHA-224).
+
+* Fix a bug in inline asm that would with GCC 7.3 cause incorrect
+  computations and an infinite loop during the tests. (GH #1524 #1529)
+
+Version 2.5.0, 2018-04-02
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+* Fix error in certificate wildcard matching (CVE-2018-9127), where a
+  wildcard cert for ``b*.example.com`` would be accepted as a match for
+  any host with name ``*b*.example.com`` (GH #1519)
+
+* Add support for RSA-PSS signatures in TLS (GH #1285)
+
+* Ed25519 certificates are now supported (GH #1501)
+
+* Many optimizations in ECC operations. ECDSA signatures are 8-10 times faster.
+  ECDSA verification is about twice as fast. ECDH key agreement is 3-4 times
+  faster. (GH #1457 #1478)
+
+* Implement product scanning Montgomery reduction, which improves Diffie-Hellman
+  and RSA performance by 10 to 20% on most platforms. (GH #1472)
+
+* DSA signing and verification performance has improved by 30-50%.
+
+* Add a new Credentials_Manager callback that specifies which CAs the server
+  has indicated it trusts (GH #1395 fixing #1261)
+
+* Add new TLS::Callbacks methods that allow creating or removing extensions,
+  as well as examining extensions sent by the peer (GH #1394 #1186)
+
+* Add new TLS::Callbacks methods that allow an application to
+  negotiate use of custom elliptic curves. (GH #1448)
+
+* Add ability to create custom elliptic curves (GH #1441 #1444)
+
+* Add support for POWER8 AES instructions (GH #1459 #1393 #1206)
+
+* Fix DSA/ECDSA handling of hashes longer than the group order (GH #1502 #986)
+
+* The default encoding of ECC public keys has changed from compressed
+  to uncompressed point representation. This improves compatability with
+  some common software packages including Golang's standard library.
+  (GH #1480 #1483)
+
+* It is now possible to create DNs with custom components. (GH #1490 #1492)
+
+* It is now possible to specify the serial number of created certificates,
+  instead of using the default 128-bit random integer. (GH #1489 #1491)
+
+* Change DL_Group and EC_Group to store their data as shared_ptr for
+  fast copying. Also both classes precompute additional useful values
+  (eg for modular reductions). (GH #1435 #1454)
+
+* On Windows platforms RtlGenRandom is now used in preference to CryptoAPI
+  or CryptoNG libraries. (GH #1494)
+
+* Make it possible for PKCS10 requests to include custom extensions. This also
+  makes it possible to use muliple SubjectAlternativeNames of a single type in
+  a request, which was previously not possible. (GH #1429 #1428)
+
+* Add new optimized interface for FE1 format preserving encryption. By caching a
+  number of values computed in the course of the FPE calculation, it provides a
+  6-7x speedup versus the old API. (GH #1469)
+
+* Add DSA and ElGamal keygen functions to FFI (#1426)
+
+* Add ``Pipe::prepend_filter`` to replace deprecated ``Pipe::prepend`` (GH #1402)
+
+* Fix a memory leak in the OpenSSL block cipher integration, introduced in 2.2.0
+
+* Use an improved algorithm for generating safe primes which is several tens of
+  times faster. Also, fix a bug in the prime sieving algorithm which caused
+  standard prime generation (like for RSA keys) to be slower than necessary.
+  (GH #1413 #1411)
+
+* Correct the return value of ``PK_Encryptor::maximum_input_size`` which
+  reported a much too small value (GH #1410)
+
+* Remove use of CPU specific optimization flags, instead the user should set
+  these via CXXFLAGS if desired. (GH #1392)
+
+* Resolve an issue that would cause a crash in the tests if they were run on
+  a machine without SSE2/NEON/VMX instructions. (GH #1495)
+
+* The Python module now tries to load DLLs from a list of names and
+  uses the first one which successfully loads and indicates it
+  supports the desired API level. (GH #1497)
+
+* Various minor optimizations for SHA-3 (GH #1433 #1434)
+
+* The output of ``botan --help`` has been improved (GH #1387)
+
+* Add ``--der-format`` flag to command line utils, making it possible verify
+  DSA/ECDSA signatures generated by OpenSSL command line (GH #1409)
+
+* Add support for ``--library-suffix`` option to ``configure.py`` (GH #1405 #1404)
+
+* Use feature flags to enable/disable system specific code (GH #1378)
+
+* Add ``--msvc-runtime`` option to allow using static runtime (GH #1499 #210)
+
+* Add ``--enable-sanitizers=`` option to allow specifying which sanitizers to
+  enable. The existing ``--with-sanitizers`` option just enables some default
+  set which is known to work with the minimum required compiler versions.
+
+* Use either ``rst2man`` or ``rst2man.py`` for generating man page as
+  distributions differ on where this program is installed (GH #1516)
+
+* The threefish module has been renamed threefish_512 since that is the
+  algorithm it provides. (GH #1477)
+
+* The Perl XS based wrapper has been removed, as it was unmaintained and
+  broken. (GH #1412)
+
+* The sqlite3 encryption patch under ``contrib`` has been removed. It
+  is still maintained by the original author at
+  https://github.com/OlivierJG/botansqlite3
+
+* Support for Windows Phone is deprecated.
+
+Version 2.4.0, 2018-01-08
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+* Several build improvements requested by downstream packagers, including the
+  ability to disable building the static library. All makefile constructs that
+  were specific to nmake or GNU make have been eliminated, thus the option
+  ``--makefile-style`` which was previously used to select the makefile type has
+  also been removed. (GH #1230 #1237 #1300 #1318 #1319 #1324 #1325 #1346)
+
+* Support for negotiating the DH group as specified in RFC 7919 is now available
+  in TLS (GH #1263)
+
+* Support for ARIA-GCM ciphersuites are now available in TLS. They are disabled
+  by default. (GH #1284)
+
+* Add support for generating and verifying X.509 objects (certificates, CRLs,
+  etc) using RSA-PSS signatures (GH #1270 and #1368)
+
+* Add support for AES key wrapping with padding, as specified in RFC 5649 and
+  NIST SP 800-38F (GH #1301)
+
+* OCSP requests made during certificate verification had the potential to hang
+  forever. Now the sockets are non-blocking and a timeout is enforced. (GH #1360
+  fixing GH #1326)
+
+* Add ``Public_Key::fingerprint_public`` which allows fingerprinting the public key.
+  The previously available ``Private_Key::fingerprint`` is deprecated, now
+  ``Private_Key::fingerprint_private`` should be used if this is required.
+  (GH #1357)
+
+* ECC certificates generated by Botan used an invalid encoding for the
+  parameters field, which was rejected by some certificate validation libraries
+  notably BouncyCastle. (GH #1367)
+
+* Loading an ECC key which used OID encoding for the domain parameters, then
+  saving it, would result in a key using the explicit parameters encoding.
+  Now the OID encoding is retained. (GH #1365)
+
+* Correct various problems in certificate path validation that arose when
+  multiple paths could be constructed leading to a trusted root but due to
+  other constraints only some of them validated. (GH #1363)
+
+* It is now possible for certificate validation to return warning indicators,
+  such as that the distinguished name is not within allowed limits or that a
+  certificate with a negative serial number was observed. (GH #1363 #1359)
+
+* XMSS signatures now are multi-threaded for improved performance (GH #1267)
+
+* Fix a bug that caused the TLS peer cert list to be empty on a resumed session.
+  (GH #1303 #1342)
+
+* Increase the maximum HMAC key length from 512 bytes to 4096 bytes. This allows
+  using a DH key exchange in TLS with a group greater than 4096 bits. (GH #1316)
+
+* Fix a bug in the TLS server where, on receiving an SSLv3 client hello, it
+  would attempt to negotiate TLS v1.2. Now a protocol_version alert is sent.
+  Found with tlsfuzzer. (GH #1316)
+
+* Fix several bugs related to sending the wrong TLS alert type in various error
+  scenarios, caught with tlsfuzzer.
+
+* Add support for a ``tls_http_server`` command line utility which responds to
+  simple GET requests. This is useful for testing against a browser, or various
+  TLS test tools which expect the underlying protocol to be HTTP. (GH #1315)
+
+* Add an interface for generic PSK data stores, as well as an implementation
+  which encrypts stored values with AES key wrapping. (GH #1302)
+
+* Optimize GCM mode on systems both with and without carryless multiply
+  support. This includes a new base case implementation (still constant time), a
+  new SSSE3 implementation for systems with SSSE3 but not clmul, and better
+  algorithms for systems with clmul and pmull. (GH #1253 #1263)
+
+* Various optimizations for OCB, CFB, CTR, SM3, SM4, GMAC, BLAKE2b, Blowfish,
+  Twofish, CAST-128, and CRC24 (GH #1281)
+
+* Salsa20 now supports the seek operation.
+
+* Add ``EC_Group::known_named_groups`` (GH #1339)
+
+* Symmetric algorithms (block ciphers, stream ciphers, MACs) now verify that a
+  key was set before accepting data. Previously attempting to use an unkeyed
+  object would instead result in either a crash or invalid outputs. (GH #1279)
+
+* The X509 certificate, CRL and PKCS10 types have been heavily refactored
+  internally. Previously all data of these types was serialized to strings, then
+  in the event a more complicated data structure (such as X509_DN) was needed,
+  it would be recreated from the string representation. However the round trip
+  process was not perfect and could cause fields to become lost. This approach
+  is no longer used, fixing several bugs (GH #1010 #1089 #1242 #1252). The
+  internal data is now stored in a ``shared_ptr``, so copying such objects is
+  now very cheap. (GH #884)
+
+* ASN.1 string objects previously held their contents as ISO 8859-1 codepoints.
+  However this led to certificates which contained strings outside of this
+  character set (eg in Cyrillic, Greek, or Chinese) being rejected. Now the
+  strings are always converted to UTF-8, which allows representing any
+  character. In addition, UCS-4 strings are now supported.
+  (GH #1113 #1250 #1287 #1289)
+
+* It is now possible to create an uninitialized X509_Certificate object. Such an
+  object will throw if any attempt to access its members is made. (GH #1335)
+
+* In BER decoder, avoid unbounded stack recursion when parsing nested indefinite
+  length values. Now at most 16 nested indefinite length values are accepted,
+  anything deeper resulting in a decoding error.  (GH #1304 OSS-Fuzz 4353).
+
+* A new ASN.1 printer API allows generating a string representation of arbitrary
+  BER data. This is used in the ``asn1print`` command line utility and may be
+  useful in other applications, for instance for debugging.
+
+* New functions for bit rotations that distinguish rotating by a compile-time
+  constant vs a runtime variable rotation. This allows better optimizations in
+  both cases. Notably performance of CAST-128 and CAST-256 are substantially
+  improved. (GH #1247)
+
+* TLS CBC ciphersuites now are implemented using the standard CBC code, instead
+  of reimplementing CBC inside the TLS stack. This allows for parallel
+  decryption of TLS CBC ciphertexts, and improves performance especially when
+  using AES hardware support. (GH #1269)
+
+* Add callbacks to make it possible for an application using TLS to provide
+  custom implementations of signature schemes, eg when offloading the
+  computations to another device. (GH #1332)
+
+* Use a direct calculation for calendar computations instead of relying on
+  non-portable operating system interfaces. (GH #1336)
+
+* Fix a bug in the amalgamation generation which could cause build failures on
+  some systems including macOS. (GH #1264 #1265)
+
+* A particular code sequence in TLS handshake would always (with an ECC
+  ciphersuite) result in an exception being thrown and then caught.  This has
+  changed so no exception is thrown. (GH #1275)
+
+* The code for byteswapping has been improved for ARMv7 and for Windows x86-64
+  systems using MSVC. (GH #1274)
+
+* The GMAC class no longer derives from GHASH. This should not cause any
+  noticeable change for applications. (GH #1253)
+
+* The base implementation of AES now uses a single 4K table, instead of 4 such
+  tables. This offers a significant improvement against cache-based side
+  channels without hurting performance too much. In addition the table is now
+  guaranteed to be aligned on a cache line, which ensures the additional
+  countermeasure of reading each cache line works as expected. (GH #1255)
+
+* In TLS client resumption, avoid sending a OCSP stapling request. This caused
+  resumption failures with some servers. (GH #1276)
+
+* The overhead of making a call through the FFI layer has been reduced.
+
+* The IDs for SHA-3 PKCSv1.5 signatures added in 2.3.0 were incorrect. They have
+  been changed to use the correct encoding, and a test added to ensure such
+  errors do not recur.
+
+* Counter mode allows setting a configurable width of the counter. Previously it
+  was allowed for a counter of even 8 bits wide, which would mean the keystream
+  would repeat after just 256 blocks. Now it requires the width be at least 32
+  bits. The only way this feature could be used was by manually constructing a
+  ``CTR_BE`` object and setting the second parameter to something in the range
+  of 1 to 3.
+
+* A new mechanism for formatting ASN.1 data is included in ``asn1_print.h``.
+  This is the same functionality used by the command line ``asn1print`` util,
+  now cleaned up and moved to the library.
+
+* Add ``Pipe::append_filter``. This is like the existing (deprecated)
+  ``Pipe::append``, the difference being that ``append_filter`` only
+  allows modification before the first call to ``start_msg``. (GH #1306 #1307)
+
+* The size of ASN1_Tag is increased to 32 bits. This avoids a problem
+  with UbSan (GH #751)
+
+* Fix a bug affecting bzip2 compression. In certain circumstances, compression
+  would fail with ``BZ_SEQUENCE_ERROR`` due to calling bzlib in an way it does
+  not support. (GH #1308 #1309)
+
+* In 2.3.0, final annotations were added to many classes including the TLS
+  policies (like ``Strict_Policy`` and ``BSI_TR_02102_2``). However it is
+  reasonable and useful for an application to derive from one of these policies, so
+  as to create an application specific policy that is based on a library-provided
+  policy, but with a few tweaks. So the final annotations have been removed on
+  these classes. (GH #1292)
+
+* A new option ``--with-pdf`` enables building a PDF copy of the handbook.
+  (GH #1337)
+
+* A new option ``--with-rst2man`` enables building a man page for the
+  command line util using Docutils rst2man. (GH #1349)
+
+* Support for NEON is now enabled under Clang.
+
+* Now the compiler version is detected using the preprocessor, instead of trying
+  to parse the output of the compiler's version string, which was subject to
+  problems with localization. (GH #1358)
+
+* By default the gzip compressor will not include a timestamp in the header.
+  The timestamp can be set by passing it to the ``Gzip_Compression``
+  constructor.
+
+* Resolve a performance regression on Windows involving the system stats
+  entropy source. (GH #1369)
+
+* Add an OID for RIPEMD-160
+
+* Fixes for CMake build (GH #1251)
+
+* Avoid some signed overflow warnings (GH #1220 #1245)
+
+* As upstream support for Native Client has been deprecated by Google, support
+  is now also deprecated in Botan and will be removed in a future release.
+
+* The Perl-XS wrapper has not been maintained in many years. It is now deprecated,
+  and if no attempts are made to revive it, it will be removed in a future release.
+
+* Support for building on IRIX has been removed.
+
 Version 2.3.0, 2017-10-02
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -4742,11 +5191,11 @@ Version 0.7.8, 2002-02-28
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 * More capabilities for Pipe, inspired by SysV STREAMS, including peeking,
-    better buffering, and stack ops. NOT BACKWARDS COMPATIBLE: SEE DOCUMENTATION
+  better buffering, and stack ops. NOT BACKWARDS COMPATIBLE: SEE DOCUMENTATION
 * Added a BufferingFilter class
 * Added popen() based EntropySource for generic Unix systems (unix_rnd)
 * Moved 'devrand' module into main distribution (ent_file.h), renamed to
-    File_EntropySource, and changed interface somewhat.
+  File_EntropySource, and changed interface somewhat.
 * Made Randpool somewhat more conservative and also 25% faster
 * Minor fixes and updates for the configure script
 * Added some tweaks for memory allocation

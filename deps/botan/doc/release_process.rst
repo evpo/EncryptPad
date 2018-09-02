@@ -32,27 +32,45 @@ complete and that the version number in ``version.txt`` is correct.
 Update the release date in the release notes and change the entry for
 the appropriate branch in ``readme.rst`` to point to the new release.
 
-Check in these changes (alone, with no other modifications) with a
-checkin message along the lines of "Update for X.Y.Z release", then
-tag the release with the version in git (eg tag '2.6.13', no prefix).
+Now check in, and backport changes to the release branch::
+
+  $ git commit readme.rst news.rst -m "Update for 2.6.13 release"
+  $ git checkout release-2
+  $ git merge master
+  $ git tag 2.6.13
 
 Build The Release Tarballs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The release script is ``src/scripts/dist.py`` and must be
-run from a git workspace.
+The release script is ``src/scripts/dist.py`` and must be run from a
+git workspace.
 
- $ src/scripts/dist.py 2.6.13
+  $ src/scripts/dist.py 2.6.13
 
 One useful option is ``--output-dir``, which specifies where the
 output will be placed.
 
-The ``--pgp-key-id`` option is used to specifiy a PGP keyid. If set,
+Now do a final build/test of the released tarball.
+
+The ``--pgp-key-id`` option is used to specify a PGP keyid. If set,
 the script assumes that it can execute GnuPG and will attempt to
 create signatures for the tarballs. The default value is ``EFBADFBC``,
 which is the official signing key. You can use ``--pgp-key-id=none``
 to avoid creating any signature, though official distributed releases
 *should not* be released without signatures.
+
+The releases served on the official site are taken from the contents
+in a git repository::
+
+  $ git checkout git@botan.randombit.net:/srv/git/botan-releases.git
+  $ src/scripts/dist.py 2.6.13 --output-dir=botan-releases
+  $ cd botan-releases
+  $ sha256sum Botan-2.6.13.tgz >> sha256sums.txt
+  $ git add .
+  $ git commit -m "Release version 2.6.13"
+  $ git push origin master
+
+A cron job updates the live site every 10 minutes.
 
 Build The Windows Installer
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -73,8 +91,16 @@ tool. If all goes well it will produce an executable with a name like
 Update The Website
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The website content is created by ``src/scripts/website.sh``.
-Currently refreshing the website is a manual process.
+The website content is created by ``src/scripts/website.py``.
+
+The website is mirrored automatically from a git repository which must be updated::
+
+  $ git checkout git@botan.randombit.net:/srv/git/botan-website.git
+  $ ./src/scripts/website.py --output botan-website
+  $ cd botan-website
+  $ git add .
+  $ git commit -m "Update for 2.6.13"
+  $ git push origin master
 
 Announce The Release
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

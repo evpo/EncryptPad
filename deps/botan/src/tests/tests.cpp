@@ -23,6 +23,11 @@
    #include <botan/point_gfp.h>
 #endif
 
+#if defined(BOTAN_TARGET_OS_HAS_POSIX1)
+   #include <stdlib.h>
+   #include <unistd.h>
+#endif
+
 namespace Botan_Tests {
 
 Test::Registration::Registration(const std::string& name, Test* test)
@@ -136,7 +141,7 @@ bool Test::Result::test_throws(const std::string& what, const std::string& expec
 
 bool Test::Result::test_success(const std::string& note)
    {
-   if(Test::log_success())
+   if(Test::options().log_success())
       {
       test_note(note);
       }
@@ -159,6 +164,11 @@ void Test::Result::test_failure(const std::string& what, const uint8_t buf[], si
 bool Test::Result::test_failure(const std::string& err)
    {
    m_fail_log.push_back(err);
+
+   if(Test::options().abort_on_first_fail() && m_who != "Failing Test")
+      {
+      std::abort();
+      }
    return false;
    }
 
@@ -405,8 +415,10 @@ std::string Test::format_time(uint64_t ns)
    return o.str();
    }
 
-std::string Test::Result::result_string(bool verbose) const
+std::string Test::Result::result_string() const
    {
+   const bool verbose = Test::options().verbose();
+
    if(tests_run() == 0 && !verbose)
       {
       return "";
@@ -458,22 +470,6 @@ std::string Test::Result::result_string(bool verbose) const
    return report.str();
    }
 
-std::vector<std::string> Provider_Filter::filter(const std::vector<std::string>& in) const
-   {
-   if(m_provider.empty())
-      {
-      return in;
-      }
-   for(auto&& provider : in)
-      {
-      if(provider == m_provider)
-         {
-         return std::vector<std::string> { provider };
-         }
-      }
-   return std::vector<std::string> {};
-   }
-
 // static Test:: functions
 //static
 std::map<std::string, std::unique_ptr<Test>>& Test::global_registry()
@@ -507,68 +503,88 @@ Test* Test::get_test(const std::string& test_name)
    }
 
 //static
-std::vector<Test::Result> Test::run_test(const std::string& test_name, bool fail_if_missing)
+std::string Test::temp_file_name(const std::string& basename)
    {
-   std::vector<Test::Result> results;
+   // TODO add a --tmp-dir option to the tests to specify where these files go
 
-   try
+#if defined(BOTAN_TARGET_OS_HAS_POSIX1)
+
+   // POSIX only calls for 6 'X' chars but OpenBSD allows arbitrary amount
+   std::string mkstemp_basename = "/tmp/" + basename + ".XXXXXXXXXX";
+
+   int fd = ::mkstemp(&mkstemp_basename[0]);
+
+   // error
+   if(fd < 0)
       {
-      if(Test* test = get_test(test_name))
-         {
-         std::vector<Test::Result> test_results = test->run();
-         results.insert(results.end(), test_results.begin(), test_results.end());
-         }
-      else
-         {
-         Test::Result result(test_name);
-         if(fail_if_missing)
-            {
-            result.test_failure("Test missing or unavailable");
-            }
-         else
-            {
-            result.test_note("Test missing or unavailable");
-            }
-         results.push_back(result);
-         }
-      }
-   catch(std::exception& e)
-      {
-      results.push_back(Test::Result::Failure(test_name, e.what()));
-      }
-   catch(...)
-      {
-      results.push_back(Test::Result::Failure(test_name, "unknown exception"));
+      return "";
       }
 
-   return results;
+   ::close(fd);
+
+   return mkstemp_basename;
+#else
+   // For now just create the temp in the current working directory
+   return basename;
+#endif
+   }
+
+std::string Test::read_data_file(const std::string& path)
+   {
+   const std::string fsname = Test::data_file(path);
+   std::ifstream file(fsname.c_str());
+   if(!file.good())
+      {
+      throw Test_Error("Error reading from " + fsname);
+      }
+
+   return std::string((std::istreambuf_iterator<char>(file)),
+                      std::istreambuf_iterator<char>());
+   }
+
+std::vector<uint8_t> Test::read_binary_data_file(const std::string& path)
+   {
+   const std::string fsname = Test::data_file(path);
+   std::ifstream file(fsname.c_str(), std::ios::binary);
+   if(!file.good())
+      {
+      throw Test_Error("Error reading from " + fsname);
+      }
+
+   std::vector<uint8_t> contents;
+
+   while(file.good())
+      {
+      std::vector<uint8_t> buf(4096);
+      file.read(reinterpret_cast<char*>(buf.data()), buf.size());
+      size_t got = file.gcount();
+
+      if(got == 0 && file.eof())
+         {
+         break;
+         }
+
+      contents.insert(contents.end(), buf.data(), buf.data() + got);
+      }
+
+   return contents;
    }
 
 // static member variables of Test
-Botan::RandomNumberGenerator* Test::m_test_rng = nullptr;
-std::string Test::m_data_dir;
-bool Test::m_log_success = false;
-bool Test::m_run_online_tests = false;
-bool Test::m_run_long_tests = false;
-std::string Test::m_pkcs11_lib;
-Botan_Tests::Provider_Filter Test::m_provider_filter;
+
+Test_Options Test::m_opts;
+std::unique_ptr<Botan::RandomNumberGenerator> Test::m_test_rng;
 
 //static
-void Test::setup_tests(bool log_success,
-                       bool run_online,
-                       bool run_long,
-                       const std::string& data_dir,
-                       const std::string& pkcs11_lib,
-                       const Botan_Tests::Provider_Filter& pf,
-                       Botan::RandomNumberGenerator* rng)
+void Test::set_test_options(const Test_Options& opts)
    {
-   m_data_dir = data_dir;
-   m_log_success = log_success;
-   m_run_online_tests = run_online;
-   m_run_long_tests = run_long;
-   m_test_rng = rng;
-   m_pkcs11_lib = pkcs11_lib;
-   m_provider_filter = pf;
+   m_opts = opts;
+   }
+
+//static
+void Test::set_test_rng(std::unique_ptr<Botan::RandomNumberGenerator> rng)
+   {
+   m_test_rng.reset(rng.release());
    }
 
 //static
@@ -578,39 +594,20 @@ std::string Test::data_file(const std::string& what)
    }
 
 //static
-const std::string& Test::data_dir()
-   {
-   return m_data_dir;
-   }
-
-//static
-bool Test::log_success()
-   {
-   return m_log_success;
-   }
-
-//static
-bool Test::run_online_tests()
-   {
-   return m_run_online_tests;
-   }
-
-//static
-bool Test::run_long_tests()
-   {
-   return m_run_long_tests;
-   }
-
-//static
-std::string Test::pkcs11_lib()
-   {
-   return m_pkcs11_lib;
-   }
-
-//static
 std::vector<std::string> Test::provider_filter(const std::vector<std::string>& in)
    {
-   return m_provider_filter.filter(in);
+   if(m_opts.provider().empty())
+      {
+      return in;
+      }
+   for(auto&& provider : in)
+      {
+      if(provider == m_opts.provider())
+         {
+         return std::vector<std::string> { provider };
+         }
+      }
+   return std::vector<std::string> {};
    }
 
 //static
@@ -618,7 +615,7 @@ Botan::RandomNumberGenerator& Test::rng()
    {
    if(!m_test_rng)
       {
-      throw Test_Error("No usable RNG in build, and this test requires an RNG");
+      throw Test_Error("Test requires RNG but no RNG set with Test::set_test_rng");
       }
    return *m_test_rng;
    }
@@ -629,29 +626,11 @@ std::string Test::random_password()
    return Botan::hex_encode(Test::rng().random_vec(len));
    }
 
-Text_Based_Test::Text_Based_Test(const std::string& data_src,
-                                 const std::string& required_keys_str,
-                                 const std::string& optional_keys_str) :
-   m_data_src(data_src)
-   {
-   if(required_keys_str.empty())
-      {
-      throw Test_Error("Invalid test spec");
-      }
-
-   std::vector<std::string> required_keys = Botan::split_on(required_keys_str, ',');
-   std::vector<std::string> optional_keys = Botan::split_on(optional_keys_str, ',');
-
-   m_required_keys.insert(required_keys.begin(), required_keys.end());
-   m_optional_keys.insert(optional_keys.begin(), optional_keys.end());
-   m_output_key = required_keys.at(required_keys.size() - 1);
-   }
-
-std::vector<uint8_t> Text_Based_Test::get_req_bin(const VarMap& vars,
+std::vector<uint8_t> VarMap::get_req_bin(
       const std::string& key) const
    {
-   auto i = vars.find(key);
-   if(i == vars.end())
+   auto i = m_vars.find(key);
+   if(i == m_vars.end())
       {
       throw Test_Error("Test missing variable " + key);
       }
@@ -660,29 +639,28 @@ std::vector<uint8_t> Text_Based_Test::get_req_bin(const VarMap& vars,
       {
       return Botan::hex_decode(i->second);
       }
-   catch(std::exception&)
+   catch(std::exception& e)
       {
-      throw Test_Error("Test invalid hex input '" + i->second + "'" +
-                       + " for key " + key);
+      std::ostringstream oss;
+      oss << "Bad input '" << i->second << "'" << " for key " << key << " - " << e.what();
+      throw Test_Error(oss.str());
       }
    }
 
-std::string Text_Based_Test::get_opt_str(const VarMap& vars,
-      const std::string& key, const std::string& def_value) const
-
+std::string VarMap::get_opt_str(const std::string& key, const std::string& def_value) const
    {
-   auto i = vars.find(key);
-   if(i == vars.end())
+   auto i = m_vars.find(key);
+   if(i == m_vars.end())
       {
       return def_value;
       }
    return i->second;
    }
 
-bool Text_Based_Test::get_req_bool(const VarMap& vars, const std::string& key) const
+bool VarMap::get_req_bool( const std::string& key) const
    {
-   auto i = vars.find(key);
-   if(i == vars.end())
+   auto i = m_vars.find(key);
+   if(i == m_vars.end())
       {
       throw Test_Error("Test missing variable " + key);
       }
@@ -701,31 +679,31 @@ bool Text_Based_Test::get_req_bool(const VarMap& vars, const std::string& key) c
       }
    }
 
-size_t Text_Based_Test::get_req_sz(const VarMap& vars, const std::string& key) const
+size_t VarMap::get_req_sz( const std::string& key) const
    {
-   auto i = vars.find(key);
-   if(i == vars.end())
+   auto i = m_vars.find(key);
+   if(i == m_vars.end())
       {
       throw Test_Error("Test missing variable " + key);
       }
    return Botan::to_u32bit(i->second);
    }
 
-size_t Text_Based_Test::get_opt_sz(const VarMap& vars, const std::string& key, const size_t def_value) const
+size_t VarMap::get_opt_sz( const std::string& key, const size_t def_value) const
    {
-   auto i = vars.find(key);
-   if(i == vars.end())
+   auto i = m_vars.find(key);
+   if(i == m_vars.end())
       {
       return def_value;
       }
    return Botan::to_u32bit(i->second);
    }
 
-std::vector<uint8_t> Text_Based_Test::get_opt_bin(const VarMap& vars,
+std::vector<uint8_t> VarMap::get_opt_bin(
       const std::string& key) const
    {
-   auto i = vars.find(key);
-   if(i == vars.end())
+   auto i = m_vars.find(key);
+   if(i == m_vars.end())
       {
       return std::vector<uint8_t>();
       }
@@ -741,10 +719,10 @@ std::vector<uint8_t> Text_Based_Test::get_opt_bin(const VarMap& vars,
       }
    }
 
-std::string Text_Based_Test::get_req_str(const VarMap& vars, const std::string& key) const
+std::string VarMap::get_req_str( const std::string& key) const
    {
-   auto i = vars.find(key);
-   if(i == vars.end())
+   auto i = m_vars.find(key);
+   if(i == m_vars.end())
       {
       throw Test_Error("Test missing variable " + key);
       }
@@ -752,11 +730,11 @@ std::string Text_Based_Test::get_req_str(const VarMap& vars, const std::string& 
    }
 
 #if defined(BOTAN_HAS_BIGINT)
-Botan::BigInt Text_Based_Test::get_req_bn(const VarMap& vars,
+Botan::BigInt VarMap::get_req_bn(
       const std::string& key) const
    {
-   auto i = vars.find(key);
-   if(i == vars.end())
+   auto i = m_vars.find(key);
+   if(i == m_vars.end())
       {
       throw Test_Error("Test missing variable " + key);
       }
@@ -771,13 +749,12 @@ Botan::BigInt Text_Based_Test::get_req_bn(const VarMap& vars,
       }
    }
 
-Botan::BigInt Text_Based_Test::get_opt_bn(const VarMap& vars,
-      const std::string& key,
-      const Botan::BigInt& def_value) const
+Botan::BigInt VarMap::get_opt_bn(const std::string& key,
+                                 const Botan::BigInt& def_value) const
 
    {
-   auto i = vars.find(key);
-   if(i == vars.end())
+   auto i = m_vars.find(key);
+   if(i == m_vars.end())
       {
       return def_value;
       }
@@ -792,6 +769,24 @@ Botan::BigInt Text_Based_Test::get_opt_bn(const VarMap& vars,
       }
    }
 #endif
+
+Text_Based_Test::Text_Based_Test(const std::string& data_src,
+                                 const std::string& required_keys_str,
+                                 const std::string& optional_keys_str) :
+   m_data_src(data_src)
+   {
+   if(required_keys_str.empty())
+      {
+      throw Test_Error("Invalid test spec");
+      }
+
+   std::vector<std::string> required_keys = Botan::split_on(required_keys_str, ',');
+   std::vector<std::string> optional_keys = Botan::split_on(optional_keys_str, ',');
+
+   m_required_keys.insert(required_keys.begin(), required_keys.end());
+   m_optional_keys.insert(optional_keys.begin(), optional_keys.end());
+   m_output_key = required_keys.at(required_keys.size() - 1);
+   }
 
 std::string Text_Based_Test::get_next_line()
    {
@@ -976,7 +971,7 @@ std::vector<Test::Result> Text_Based_Test::run()
          results.push_back(Test::Result::Failure(header_or_name,
                                                  test_id + " failed unknown key " + key));
 
-      vars[key] = val;
+      vars.add(key, val);
 
       if(key == m_output_key)
          {
@@ -1046,6 +1041,8 @@ std::vector<Test::Result> Text_Based_Test::run()
       results.push_back(Test::Result::Failure(header_or_name,
                                               "run_final_tests exception " + std::string(e.what())));
       }
+
+   m_first = true;
 
    return results;
    }

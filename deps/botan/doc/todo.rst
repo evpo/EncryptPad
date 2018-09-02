@@ -10,6 +10,7 @@ Request a new feature by opening a pull request to update this file.
 Ciphers, Hashes, PBKDF
 ----------------------------------------
 
+* Stiched AES-NI GCM mode
 * Bitsliced AES or Camellia
 * Compressed tables for AES
 * AES using vector permutes for NEON or AltiVec
@@ -19,46 +20,43 @@ Ciphers, Hashes, PBKDF
 * XSalsa20-Poly1305 AEAD compatible with NaCl
 * ASCON 1.2 (CAESAR)
 * NORX-64 3.0 (CAESAR)
-* scrypt PBKDF
 * Argon2 PBKDF (draft-irtf-cfrg-argon2)
 * bcrypt PBKDF
 * Skein-MAC
 * PMAC
 * Extend Cascade_Cipher to support arbitrary number of ciphers
 * EME* tweakable block cipher (https://eprint.iacr.org/2004/125.pdf)
+* FFX format preserving encryption (NIST 800-38G)
 
 Public Key Crypto, Math
 ----------------------------------------
 
+* Abstract representation of ECC point elements to allow specific
+  implementations of the field arithmetic depending upon the curve.
 * Curves for pairings (BN-256 is widely implemented)
 * Identity based encryption
 * BBS group signatures
 * Paillier homomorphic cryptosystem
+* Socialist Millionaires Protocol
 * Hashing onto an elliptic curve
+* SPAKE2+ (draft-irtf-cfrg-spake2)
 * SPHINCS-256
 * X448 and Ed448
 * FHMQV
 * Use GLV decomposition to speed up secp256k1 operations
-* Support mixed hashes and non-empty param strings in OAEP
 * wNAF ECC point multiply
 * Recover ECDSA public key from signature/message pair (GH #664)
-* Fast new implementations/algorithms for ECC point operations,
-  Montgomery multiplication, multi-exponentiation, ...
-* Some PK operations, especially RSA, have extensive computations per
-  operation setup but many of the computed values depend only on the
-  key and could be shared across operation objects.
 
 Utility Functions
 ------------------
 
-* base58 and base32 encoding
+* base58 encoding
 
 Multiparty Protocols
 ----------------------
 
 * Distributed key generation for DL, RSA
 * Threshold signing, decryption
-* Socialist Millionaires Protocol
 
 External Providers, Hardware Support
 ----------------------------------------
@@ -69,7 +67,7 @@ External Providers, Hardware Support
 * /dev/crypto provider (ciphers, hashes)
 * Windows CryptoAPI provider (ciphers, hashes, RSA)
 * Apple CommonCrypto
-* POWER8 crypto extensions (AES, SHA-2)
+* POWER8 crypto extensions (SHA-2, GCM)
 * Better TPM support: NVRAM, PCR measurements, sealing
 * Intel SGX support
 
@@ -87,7 +85,6 @@ TLS
 * Certificate pinning (using TACK?)
 * Certificate Transparency
 * TLS supplemental authorization data (RFC 4680, RFC 5878)
-* OpenPGP authentication (RFC 5081)
 * DTLS-SCTP (RFC 6083)
 * Perspectives (http://perspectives-project.org/)
 * Support for server key stored in TPM or PKCS #11
@@ -104,13 +101,17 @@ PKIX
 * OCSP responder logic
 * X.509 attribute certificates (RFC 5755)
 * Support generating/verifying XMSS certificates
-* Roughtime client (https://roughtime.googlesource.com/roughtime/)
 
 New Protocols / Formats
 ----------------------------------------
 
+* ORAM (Circuit-ORAM, Path-ORAM, ??)
+* Roughtime client (https://roughtime.googlesource.com/roughtime/)
+* PKCS7 / Cryptographic Message Syntax
+* PKCS12 / PFX
 * NaCl compatible cryptobox functions
 * Off-The-Record v3 https://otr.cypherpunks.ca/
+* Fernet symmetric encryption (https://cryptography.io/en/latest/fernet/)
 * Some useful subset of OpenPGP
   - Subset #1: symmetrically encrypted files
 
@@ -140,6 +141,7 @@ Compat Headers
 FFI and Bindings
 ----------------------------------------
 
+* Expose FPE
 * Expose compression
 * Expose more of X.509 (CRLs, OCSP, cert signing, etc)
 * Expose TLS
@@ -163,6 +165,7 @@ Build/Test
   debug info during CI
 * Run the TPM tests against an emulator
   (https://github.com/PeterHuewe/tpm-emulator)
+* Add clang-tidy, clang-analyzer, cppcheck to CI
 
 FIPS 140 Build
 ---------------------------------------
@@ -172,7 +175,7 @@ FIPS 140 Build
   plus wrapping the appropriate functions for self-tests and so on. This creates a
   library in FIPS 140 validated form (since there is no 'crypto' anymore from
   Botan, just the ASN.1 parser, TLS library, PKI etc all of which FIPS 140 does
-  not care about) without the enourmous hassle and expense of actually having to
+  not care about) without the enormous hassle and expense of actually having to
   maintain a FIPS validation on Botan. Email Jack if you are interested in this.
 
 CLI
@@ -180,11 +183,8 @@ CLI
 
 * Change `tls_server` to be a tty<->socket app, like `tls_client` is,
   instead of a bogus echo server.
-* Add a basic HTTP server mode to tls_server, as some tools like
-  https://github.com/tomato42/tlsfuzzer require this.
 * `encrypt` / `decrypt` tools providing password and/or public key
   based file encryption
-* Make help output more helpful
 
 Documentation
 ----------------------------------------
@@ -192,5 +192,3 @@ Documentation
 * X.509 certs, path validation
 * Specific docs covering one major topic (RSA, ECDSA, AES/GCM, ...)
 * Some howto style docs (setting up CA, ...)
-* List each cipher, hash, etc, describe its usage, and give the
-  header file and BOTAN_HAS_X macro associated with it.

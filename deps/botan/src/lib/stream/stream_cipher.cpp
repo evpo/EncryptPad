@@ -7,6 +7,7 @@
 
 #include <botan/stream_cipher.h>
 #include <botan/scan_name.h>
+#include <botan/exceptn.h>
 
 #if defined(BOTAN_HAS_CHACHA)
   #include <botan/chacha.h>
@@ -44,12 +45,16 @@ std::unique_ptr<StreamCipher> StreamCipher::create(const std::string& algo_spec,
    const SCAN_Name req(algo_spec);
 
 #if defined(BOTAN_HAS_CTR_BE)
-   if(req.algo_name() == "CTR-BE" && req.arg_count() == 1)
+   if((req.algo_name() == "CTR-BE" || req.algo_name() == "CTR") && req.arg_count_between(1,2))
       {
       if(provider.empty() || provider == "base")
          {
-         if(auto c = BlockCipher::create(req.arg(0)))
-            return std::unique_ptr<StreamCipher>(new CTR_BE(c.release()));
+         auto cipher = BlockCipher::create(req.arg(0));
+         if(cipher)
+            {
+            size_t ctr_size = req.arg_as_integer(1, cipher->block_size());
+            return std::unique_ptr<StreamCipher>(new CTR_BE(cipher.release(), ctr_size));
+            }
          }
       }
 #endif
@@ -59,6 +64,12 @@ std::unique_ptr<StreamCipher> StreamCipher::create(const std::string& algo_spec,
       {
       if(provider.empty() || provider == "base")
          return std::unique_ptr<StreamCipher>(new ChaCha(req.arg_as_integer(0, 20)));
+      }
+
+   if(req.algo_name() == "ChaCha20")
+      {
+      if(provider.empty() || provider == "base")
+         return std::unique_ptr<StreamCipher>(new ChaCha(20));
       }
 #endif
 

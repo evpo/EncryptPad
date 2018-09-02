@@ -577,12 +577,12 @@ uint64_t F_SLOW(uint64_t v, uint64_t K)
    const uint64_t x = v ^ K;
 
    const uint8_t t1 = SBOX[get_byte(0, x)];
-   const uint8_t t2 = rotate_left(SBOX[get_byte(1, x)], 1);
-   const uint8_t t3 = rotate_left(SBOX[get_byte(2, x)], 7);
-   const uint8_t t4 = SBOX[rotate_left(get_byte(3, x), 1)];
-   const uint8_t t5 = rotate_left(SBOX[get_byte(4, x)], 1);
-   const uint8_t t6 = rotate_left(SBOX[get_byte(5, x)], 7);
-   const uint8_t t7 = SBOX[rotate_left(get_byte(6, x), 1)];
+   const uint8_t t2 = rotl<1>(SBOX[get_byte(1, x)]);
+   const uint8_t t3 = rotl<7>(SBOX[get_byte(2, x)]);
+   const uint8_t t4 = SBOX[rotl<1>(get_byte(3, x))];
+   const uint8_t t5 = rotl<1>(SBOX[get_byte(4, x)]);
+   const uint8_t t6 = rotl<7>(SBOX[get_byte(5, x)]);
+   const uint8_t t7 = SBOX[rotl<1>(get_byte(6, x))];
    const uint8_t t8 = SBOX[get_byte(7, x)];
 
    const uint8_t y1 = t1 ^ t3 ^ t4 ^ t6 ^ t7 ^ t8;
@@ -613,13 +613,13 @@ inline uint64_t F(uint64_t v, uint64_t K)
 
 inline uint64_t FL(uint64_t v, uint64_t K)
    {
-   uint32_t x1 = (v >> 32);
-   uint32_t x2 = (v & 0xFFFFFFFF);
+   uint32_t x1 = static_cast<uint32_t>(v >> 32);
+   uint32_t x2 = static_cast<uint32_t>(v & 0xFFFFFFFF);
 
-   const uint32_t k1 = (K >> 32);
-   const uint32_t k2 = (K & 0xFFFFFFFF);
+   const uint32_t k1 = static_cast<uint32_t>(K >> 32);
+   const uint32_t k2 = static_cast<uint32_t>(K & 0xFFFFFFFF);
 
-   x2 ^= rotate_left(x1 & k1, 1);
+   x2 ^= rotl<1>(x1 & k1);
    x1 ^= (x2 | k2);
 
    return ((static_cast<uint64_t>(x1) << 32) | x2);
@@ -627,14 +627,14 @@ inline uint64_t FL(uint64_t v, uint64_t K)
 
 inline uint64_t FLINV(uint64_t v, uint64_t K)
    {
-   uint32_t x1 = (v >> 32);
-   uint32_t x2 = (v & 0xFFFFFFFF);
+   uint32_t x1 = static_cast<uint32_t>(v >> 32);
+   uint32_t x2 = static_cast<uint32_t>(v & 0xFFFFFFFF);
 
-   const uint32_t k1 = (K >> 32);
-   const uint32_t k2 = (K & 0xFFFFFFFF);
+   const uint32_t k1 = static_cast<uint32_t>(K >> 32);
+   const uint32_t k2 = static_cast<uint32_t>(K & 0xFFFFFFFF);
 
    x1 ^= (x2 | k2);
-   x2 ^= rotate_left(x1 & k1, 1);
+   x2 ^= rotl<1>(x1 & k1);
 
    return ((static_cast<uint64_t>(x1) << 32) | x2);
    }
@@ -723,7 +723,7 @@ void decrypt(const uint8_t in[], uint8_t out[], size_t blocks,
 
 uint64_t left_rot_hi(uint64_t h, uint64_t l, size_t shift)
    {
-   return (h << shift) | ((l >> (64-shift)));
+   return (h << shift) | (l >> (64-shift));
    }
 
 uint64_t left_rot_lo(uint64_t h, uint64_t l, size_t shift)
@@ -854,31 +854,37 @@ void key_schedule(secure_vector<uint64_t>& SK, const uint8_t key[], size_t lengt
 
 void Camellia_128::encrypt_n(const uint8_t in[], uint8_t out[], size_t blocks) const
    {
+   verify_key_set(m_SK.empty() == false);
    Camellia_F::encrypt(in, out, blocks, m_SK, 9);
    }
 
 void Camellia_192::encrypt_n(const uint8_t in[], uint8_t out[], size_t blocks) const
    {
+   verify_key_set(m_SK.empty() == false);
    Camellia_F::encrypt(in, out, blocks, m_SK, 12);
    }
 
 void Camellia_256::encrypt_n(const uint8_t in[], uint8_t out[], size_t blocks) const
    {
+   verify_key_set(m_SK.empty() == false);
    Camellia_F::encrypt(in, out, blocks, m_SK, 12);
    }
 
 void Camellia_128::decrypt_n(const uint8_t in[], uint8_t out[], size_t blocks) const
    {
+   verify_key_set(m_SK.empty() == false);
    Camellia_F::decrypt(in, out, blocks, m_SK, 9);
    }
 
 void Camellia_192::decrypt_n(const uint8_t in[], uint8_t out[], size_t blocks) const
    {
+   verify_key_set(m_SK.empty() == false);
    Camellia_F::decrypt(in, out, blocks, m_SK, 12);
    }
 
 void Camellia_256::decrypt_n(const uint8_t in[], uint8_t out[], size_t blocks) const
    {
+   verify_key_set(m_SK.empty() == false);
    Camellia_F::decrypt(in, out, blocks, m_SK, 12);
    }
 

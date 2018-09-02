@@ -10,12 +10,15 @@
 #if defined(BOTAN_HAS_PUBLIC_KEY_CRYPTO)
 
 #include <botan/base64.h>
+#include <botan/hex.h>
 
 #include <botan/pk_keys.h>
 #include <botan/x509_key.h>
 #include <botan/pk_algs.h>
 #include <botan/pkcs8.h>
 #include <botan/pubkey.h>
+#include <botan/workfactor.h>
+#include <botan/data_src.h>
 
 #if defined(BOTAN_HAS_DL_GROUP)
    #include <botan/dl_group.h>
@@ -31,6 +34,16 @@ class PK_Keygen final : public Command
    {
    public:
       PK_Keygen() : Command("keygen --algo=RSA --params= --passphrase= --pbe= --pbe-millis=300 --der-out") {}
+
+      std::string group() const override
+         {
+         return "pubkey";
+         }
+
+      std::string description() const override
+         {
+         return "Generate a PKCS #8 private key";
+         }
 
       void go() override
          {
@@ -78,6 +91,8 @@ class PK_Keygen final : public Command
 
 BOTAN_REGISTER_COMMAND("keygen", PK_Keygen);
 
+#if defined(BOTAN_TARGET_OS_HAS_FILESYSTEM)
+
 namespace {
 
 std::string algo_default_emsa(const std::string& key)
@@ -98,10 +113,50 @@ std::string algo_default_emsa(const std::string& key)
 
 }
 
+class PK_Fingerprint final : public Command
+   {
+   public:
+      PK_Fingerprint() : Command("fingerprint --algo=SHA-256 *keys") {}
+
+      std::string group() const override
+         {
+         return "pubkey";
+         }
+
+      std::string description() const override
+         {
+         return "Calculate a public key fingerprint";
+         }
+
+      void go() override
+         {
+         const std::string hash_algo = get_arg("algo");
+
+         for(std::string key_file : get_arg_list("keys"))
+            {
+            std::unique_ptr<Botan::Public_Key> key(Botan::X509::load_key(key_file));
+
+            output() << key_file << ": " << key->fingerprint_public(hash_algo) << "\n";
+            }
+         }
+   };
+
+BOTAN_REGISTER_COMMAND("fingerprint", PK_Fingerprint);
+
 class PK_Sign final : public Command
    {
    public:
-      PK_Sign() : Command("sign --passphrase= --hash=SHA-256 --emsa= key file") {}
+      PK_Sign() : Command("sign --der-format --passphrase= --hash=SHA-256 --emsa= --provider= key file") {}
+
+      std::string group() const override
+         {
+         return "pubkey";
+         }
+
+      std::string description() const override
+         {
+         return "Sign arbitrary data";
+         }
 
       void go() override
          {
@@ -119,7 +174,12 @@ class PK_Sign final : public Command
          const std::string sig_padding =
             get_arg_or("emsa", algo_default_emsa(key->algo_name())) + "(" + get_arg("hash") + ")";
 
-         Botan::PK_Signer signer(*key, rng(), sig_padding);
+         const Botan::Signature_Format format =
+            flag_set("der-format") ? Botan::DER_SEQUENCE : Botan::IEEE_1363;
+
+         const std::string provider = get_arg("provider");
+
+         Botan::PK_Signer signer(*key, rng(), sig_padding, format, provider);
 
          auto onData = [&signer](const uint8_t b[], size_t l)
             {
@@ -136,7 +196,17 @@ BOTAN_REGISTER_COMMAND("sign", PK_Sign);
 class PK_Verify final : public Command
    {
    public:
-      PK_Verify() : Command("verify --hash=SHA-256 --emsa= pubkey file signature") {}
+      PK_Verify() : Command("verify --der-format --hash=SHA-256 --emsa= pubkey file signature") {}
+
+      std::string group() const override
+         {
+         return "pubkey";
+         }
+
+      std::string description() const override
+         {
+         return "Verify the authenticity of the given file with the provided signature";
+         }
 
       void go() override
          {
@@ -149,7 +219,10 @@ class PK_Verify final : public Command
          const std::string sig_padding =
             get_arg_or("emsa", algo_default_emsa(key->algo_name())) + "(" + get_arg("hash") + ")";
 
-         Botan::PK_Verifier verifier(*key, sig_padding);
+         const Botan::Signature_Format format =
+            flag_set("der-format") ? Botan::DER_SEQUENCE : Botan::IEEE_1363;
+
+         Botan::PK_Verifier verifier(*key, sig_padding, format);
          auto onData = [&verifier](const uint8_t b[], size_t l)
             {
             verifier.update(b, l);
@@ -167,113 +240,36 @@ class PK_Verify final : public Command
 
 BOTAN_REGISTER_COMMAND("verify", PK_Verify);
 
-#if defined(BOTAN_HAS_ECC_GROUP)
-
-class EC_Group_Info final : public Command
-   {
-   public:
-      EC_Group_Info() : Command("ec_group_info --pem name") {}
-
-      void go() override
-         {
-         Botan::EC_Group group(get_arg("name"));
-
-         if(flag_set("pem"))
-            {
-            output() << group.PEM_encode();
-            }
-         else
-            {
-            output() << "P = " << std::hex << group.get_curve().get_p() << "\n"
-                     << "A = " << std::hex << group.get_curve().get_a() << "\n"
-                     << "B = " << std::hex << group.get_curve().get_b() << "\n"
-                     << "G = " << group.get_base_point().get_affine_x() << ","
-                     << group.get_base_point().get_affine_y() << "\n";
-            }
-
-         }
-   };
-
-BOTAN_REGISTER_COMMAND("ec_group_info", EC_Group_Info);
-
-#endif
-
-#if defined(BOTAN_HAS_DL_GROUP)
-
-class DL_Group_Info final : public Command
-   {
-   public:
-      DL_Group_Info() : Command("dl_group_info --pem name") {}
-
-      void go() override
-         {
-         Botan::DL_Group group(get_arg("name"));
-
-         if(flag_set("pem"))
-            {
-            output() << group.PEM_encode(Botan::DL_Group::ANSI_X9_42_DH_PARAMETERS);
-            }
-         else
-            {
-            output() << "P = " << std::hex << group.get_p() << "\n"
-                     << "G = " << group.get_g() << "\n";
-            }
-
-         }
-   };
-
-BOTAN_REGISTER_COMMAND("dl_group_info", DL_Group_Info);
-
-class Gen_DL_Group final : public Command
-   {
-   public:
-      Gen_DL_Group() : Command("gen_dl_group --pbits=1024 --qbits=0 --type=subgroup") {}
-
-      void go() override
-         {
-         const size_t pbits = get_arg_sz("pbits");
-
-         const std::string type = get_arg("type");
-
-         if(type == "strong")
-            {
-            Botan::DL_Group grp(rng(), Botan::DL_Group::Strong, pbits);
-            output() << grp.PEM_encode(Botan::DL_Group::ANSI_X9_42);
-            }
-         else if(type == "subgroup")
-            {
-            Botan::DL_Group grp(rng(), Botan::DL_Group::Prime_Subgroup, pbits, get_arg_sz("qbits"));
-            output() << grp.PEM_encode(Botan::DL_Group::ANSI_X9_42);
-            }
-         else
-            {
-            throw CLI_Usage_Error("Invalid DL type '" + type + "'");
-            }
-         }
-   };
-
-BOTAN_REGISTER_COMMAND("gen_dl_group", Gen_DL_Group);
-
-#endif
-
 class PKCS8_Tool final : public Command
    {
    public:
       PKCS8_Tool() : Command("pkcs8 --pass-in= --pub-out --der-out --pass-out= --pbe= --pbe-millis=300 key") {}
 
+      std::string group() const override
+         {
+         return "pubkey";
+         }
+
+      std::string description() const override
+         {
+         return "Open a PKCS #8 formatted key";
+         }
+
       void go() override
          {
-         std::unique_ptr<Botan::Private_Key> key;
-         std::string pass_in = get_arg("pass-in");
+         const std::string pass_in = get_arg("pass-in");
 
-         if (pass_in.empty())
-         {
-            key.reset(Botan::PKCS8::load_key(get_arg("key"), rng()));
-         }
+         Botan::DataSource_Memory key_src(slurp_file(get_arg("key")));
+         std::unique_ptr<Botan::Private_Key> key;
+
+         if(pass_in.empty())
+            {
+            key.reset(Botan::PKCS8::load_key(key_src, rng()));
+            }
          else
-         {
-            key.reset(Botan::PKCS8::load_key(get_arg("key"), rng(), pass_in));
-         }
+            {
+            key.reset(Botan::PKCS8::load_key(key_src, rng(), pass_in));
+            }
 
          const std::chrono::milliseconds pbe_millis(get_arg_sz("pbe-millis"));
          const std::string pbe = get_arg("pbe");
@@ -321,6 +317,192 @@ class PKCS8_Tool final : public Command
    };
 
 BOTAN_REGISTER_COMMAND("pkcs8", PKCS8_Tool);
+
+#endif
+
+#if defined(BOTAN_HAS_ECC_GROUP)
+
+class EC_Group_Info final : public Command
+   {
+   public:
+      EC_Group_Info() : Command("ec_group_info --pem name") {}
+
+      std::string group() const override
+         {
+         return "pubkey";
+         }
+
+      std::string description() const override
+         {
+         return "Print raw elliptic curve domain parameters of the standarized curve name";
+         }
+
+      void go() override
+         {
+         Botan::EC_Group group(get_arg("name"));
+
+         if(flag_set("pem"))
+            {
+            output() << group.PEM_encode();
+            }
+         else
+            {
+            output() << "P = " << std::hex << group.get_p() << "\n"
+                     << "A = " << std::hex << group.get_a() << "\n"
+                     << "B = " << std::hex << group.get_b() << "\n"
+                     << "N = " << std::hex << group.get_order() << "\n"
+                     << "G = " << group.get_g_x() << "," << group.get_g_y() << "\n";
+            }
+
+         }
+   };
+
+BOTAN_REGISTER_COMMAND("ec_group_info", EC_Group_Info);
+
+#endif
+
+#if defined(BOTAN_HAS_DL_GROUP)
+
+class DL_Group_Info final : public Command
+   {
+   public:
+      DL_Group_Info() : Command("dl_group_info --pem name") {}
+
+      std::string group() const override
+         {
+         return "pubkey";
+         }
+
+      std::string description() const override
+         {
+         return "Print raw Diffie-Hellman parameters (p,g) of the standarized DH group name";
+         }
+
+      void go() override
+         {
+         Botan::DL_Group group(get_arg("name"));
+
+         if(flag_set("pem"))
+            {
+            output() << group.PEM_encode(Botan::DL_Group::ANSI_X9_42_DH_PARAMETERS);
+            }
+         else
+            {
+            output() << "P = " << std::hex << group.get_p() << "\n"
+                     << "G = " << group.get_g() << "\n";
+            }
+
+         }
+   };
+
+BOTAN_REGISTER_COMMAND("dl_group_info", DL_Group_Info);
+
+class PK_Workfactor final : public Command
+   {
+   public:
+      PK_Workfactor() : Command("pk_workfactor --type=rsa bits") {}
+
+      std::string group() const override
+         {
+         return "pubkey";
+         }
+
+      std::string description() const override
+         {
+         return "Provide estimate of strength of public key based on size";
+         }
+
+      void go() override
+         {
+         const size_t bits = get_arg_sz("bits");
+         const std::string type = get_arg("type");
+
+         if(type == "rsa")
+            output() << Botan::if_work_factor(bits) << "\n";
+         else if(type == "dl")
+            output() << Botan::dl_work_factor(bits) << "\n";
+         else if(type == "dl_exp")
+            output() << Botan::dl_exponent_size(bits) << "\n";
+         else
+            throw CLI_Usage_Error("Unknown type for pk_workfactor");
+         }
+   };
+
+BOTAN_REGISTER_COMMAND("pk_workfactor", PK_Workfactor);
+
+class Gen_DL_Group final : public Command
+   {
+   public:
+      Gen_DL_Group() : Command("gen_dl_group --pbits=1024 --qbits=0 --seed= --type=subgroup") {}
+
+      std::string group() const override
+         {
+         return "pubkey";
+         }
+
+      std::string description() const override
+         {
+         return "Generate ANSI X9.42 encoded Diffie-Hellman group parameters";
+         }
+
+      void go() override
+         {
+         const size_t pbits = get_arg_sz("pbits");
+         const size_t qbits = get_arg_sz("qbits");
+
+         const std::string type = get_arg("type");
+         const std::string seed_str = get_arg("seed");
+
+         if(type == "strong")
+            {
+            if(seed_str.size() > 0)
+               throw CLI_Usage_Error("Seed only supported for DSA param gen");
+            Botan::DL_Group grp(rng(), Botan::DL_Group::Strong, pbits);
+            output() << grp.PEM_encode(Botan::DL_Group::ANSI_X9_42);
+            }
+         else if(type == "subgroup")
+            {
+            if(seed_str.size() > 0)
+               throw CLI_Usage_Error("Seed only supported for DSA param gen");
+            Botan::DL_Group grp(rng(), Botan::DL_Group::Prime_Subgroup, pbits, qbits);
+            output() << grp.PEM_encode(Botan::DL_Group::ANSI_X9_42);
+            }
+         else if(type == "dsa")
+            {
+            size_t dsa_qbits = qbits;
+            if(dsa_qbits == 0)
+               {
+               if(pbits == 1024)
+                  dsa_qbits = 160;
+               else if(pbits == 2048 || pbits == 3072)
+                  dsa_qbits = 256;
+               else
+                  throw CLI_Usage_Error("Invalid DSA p/q sizes");
+               }
+
+            if(seed_str.empty())
+               {
+               Botan::DL_Group grp(rng(), Botan::DL_Group::DSA_Kosherizer, pbits, dsa_qbits);
+               output() << grp.PEM_encode(Botan::DL_Group::ANSI_X9_42);
+               }
+            else
+               {
+               const std::vector<uint8_t> seed = Botan::hex_decode(seed_str);
+               Botan::DL_Group grp(rng(), seed, pbits, dsa_qbits);
+               output() << grp.PEM_encode(Botan::DL_Group::ANSI_X9_42);
+               }
+
+            }
+         else
+            {
+            throw CLI_Usage_Error("Invalid DL type '" + type + "'");
+            }
+         }
+   };
+
+BOTAN_REGISTER_COMMAND("gen_dl_group", Gen_DL_Group);
+
+#endif
 
 }
 

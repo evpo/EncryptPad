@@ -2,13 +2,14 @@
 * Policies for TLS
 * (C) 2004-2010,2012,2015,2016 Jack Lloyd
 *     2016 Christian Mainka
+*     2017 Harry Reimann, Rohde & Schwarz Cybersecurity
 *
 * Botan is released under the Simplified BSD License (see license.txt)
 */
 
 #include <botan/tls_policy.h>
 #include <botan/tls_ciphersuite.h>
-#include <botan/tls_magic.h>
+#include <botan/tls_algos.h>
 #include <botan/tls_exceptn.h>
 #include <botan/internal/stl_util.h>
 #include <botan/pk_keys.h>
@@ -17,6 +18,24 @@
 namespace Botan {
 
 namespace TLS {
+
+std::vector<Signature_Scheme> Policy::allowed_signature_schemes() const
+   {
+   std::vector<Signature_Scheme> schemes;
+
+   for(Signature_Scheme scheme : all_signature_schemes())
+      {
+      const bool sig_allowed = allowed_signature_method(signature_algorithm_of_scheme(scheme));
+      const bool hash_allowed = allowed_signature_hash(hash_function_of_scheme(scheme));
+
+      if(sig_allowed && hash_allowed)
+         {
+         schemes.push_back(scheme);
+         }
+      }
+
+   return schemes;
+   }
 
 std::vector<std::string> Policy::allowed_ciphers() const
    {
@@ -32,6 +51,8 @@ std::vector<std::string> Policy::allowed_ciphers() const
       //"AES-128/CCM(8)",
       //"Camellia-256/GCM",
       //"Camellia-128/GCM",
+      //"ARIA-256/GCM",
+      //"ARIA-128/GCM",
       "AES-256",
       "AES-128",
       //"Camellia-256",
@@ -86,7 +107,8 @@ std::vector<std::string> Policy::allowed_signature_methods() const
       "ECDSA",
       "RSA",
       //"DSA",
-      //"" (anon)
+      //"IMPLICIT",
+      //"ANONYMOUS" (anon)
       };
    }
 
@@ -100,49 +122,63 @@ bool Policy::allowed_signature_hash(const std::string& sig_hash) const
    return value_exists(allowed_signature_hashes(), sig_hash);
    }
 
-std::vector<std::string> Policy::allowed_ecc_curves() const
-   {
-   // Default list is ordered by performance
-
-   return {
-      "x25519",
-      "secp256r1",
-      "secp521r1",
-      "secp384r1",
-      "brainpool256r1",
-      "brainpool384r1",
-      "brainpool512r1",
-      };
-   }
-
-bool Policy::allowed_ecc_curve(const std::string& curve) const
-   {
-   return value_exists(allowed_ecc_curves(), curve);
-   }
-
 bool Policy::use_ecc_point_compression() const
    {
    return false;
    }
 
-/*
-* Choose an ECC curve to use
-*/
-std::string Policy::choose_curve(const std::vector<std::string>& curve_names) const
+Group_Params Policy::choose_key_exchange_group(const std::vector<Group_Params>& peer_groups) const
    {
-   const std::vector<std::string> our_curves = allowed_ecc_curves();
+   if(peer_groups.empty())
+      return Group_Params::NONE;
 
-   for(size_t i = 0; i != our_curves.size(); ++i)
-      if(value_exists(curve_names, our_curves[i]))
-         return our_curves[i];
+   const std::vector<Group_Params> our_groups = key_exchange_groups();
 
-   return ""; // no shared curve
+   for(auto g : our_groups)
+      {
+      if(value_exists(peer_groups, g))
+         return g;
+      }
+
+   return Group_Params::NONE;
    }
 
-std::string Policy::dh_group() const
+Group_Params Policy::default_dh_group() const
    {
-   // We offer 2048 bit DH because we can
-   return "modp/ietf/2048";
+   /*
+   * Return the first listed or just default to 2048
+   */
+   for(auto g : key_exchange_groups())
+      {
+      if(group_param_is_dh(g))
+         return g;
+      }
+
+   return Group_Params::FFDHE_2048;
+   }
+
+std::vector<Group_Params> Policy::key_exchange_groups() const
+   {
+   // Default list is ordered by performance
+   return {
+
+#if defined(BOTAN_HAS_CURVE_25519)
+      Group_Params::X25519,
+#endif
+
+      Group_Params::SECP256R1,
+      Group_Params::BRAINPOOL256R1,
+      Group_Params::SECP384R1,
+      Group_Params::BRAINPOOL384R1,
+      Group_Params::SECP521R1,
+      Group_Params::BRAINPOOL512R1,
+
+      Group_Params::FFDHE_2048,
+      Group_Params::FFDHE_3072,
+      Group_Params::FFDHE_4096,
+      Group_Params::FFDHE_6144,
+      Group_Params::FFDHE_8192,
+      };
    }
 
 size_t Policy::minimum_dh_group_size() const
@@ -227,14 +263,6 @@ void Policy::check_peer_key_acceptable(const Public_Key& public_key) const
                            std::to_string(expected_keylength));
    }
 
-/*
-* Return allowed compression algorithms
-*/
-std::vector<uint8_t> Policy::compression() const
-   {
-   return std::vector<uint8_t>{ NO_COMPRESSION };
-   }
-
 uint32_t Policy::session_ticket_lifetime() const
    {
    return 86400; // ~1 day
@@ -282,9 +310,10 @@ Protocol_Version Policy::latest_supported_version(bool datagram) const
       }
    }
 
-bool Policy::acceptable_ciphersuite(const Ciphersuite&) const
+bool Policy::acceptable_ciphersuite(const Ciphersuite& ciphersuite) const
    {
-   return true;
+   return value_exists(allowed_ciphers(), ciphersuite.cipher_algo()) &&
+          value_exists(allowed_macs(), ciphersuite.mac_algo());
    }
 
 bool Policy::allow_client_initiated_renegotiation() const { return false; }
@@ -299,6 +328,7 @@ bool Policy::include_time_in_hello_random() const { return true; }
 bool Policy::hide_unknown_users() const { return false; }
 bool Policy::server_uses_own_ciphersuite_preferences() const { return true; }
 bool Policy::negotiate_encrypt_then_mac() const { return true; }
+bool Policy::support_cert_status_message() const { return true; }
 
 // 1 second initial timeout, 60 second max - see RFC 6347 sec 4.2.4.1
 size_t Policy::dtls_initial_timeout() const { return 1*1000; }
@@ -328,7 +358,7 @@ class Ciphersuite_Preference_Ordering final
 
       bool operator()(const Ciphersuite& a, const Ciphersuite& b) const
          {
-         if(a.kex_algo() != b.kex_algo())
+         if(a.kex_method() != b.kex_method())
             {
             for(size_t i = 0; i != m_kex.size(); ++i)
                {
@@ -358,7 +388,7 @@ class Ciphersuite_Preference_Ordering final
                return true;
             }
 
-         if(a.sig_algo() != b.sig_algo())
+         if(a.auth_method() != b.auth_method())
             {
             for(size_t i = 0; i != m_sigs.size(); ++i)
                {
@@ -389,7 +419,7 @@ class Ciphersuite_Preference_Ordering final
 }
 
 std::vector<uint16_t> Policy::ciphersuite_list(Protocol_Version version,
-                                             bool have_srp) const
+                                               bool have_srp) const
    {
    const std::vector<std::string> ciphers = allowed_ciphers();
    const std::vector<std::string> macs = allowed_macs();
@@ -409,7 +439,7 @@ std::vector<uint16_t> Policy::ciphersuite_list(Protocol_Version version,
          continue;
 
       // Are we doing SRP?
-      if(!have_srp && suite.kex_algo() == "SRP_SHA")
+      if(!have_srp && suite.kex_method() == Kex_Algo::SRP_SHA)
          continue;
 
       if(!version.supports_aead_modes())
@@ -435,7 +465,7 @@ std::vector<uint16_t> Policy::ciphersuite_list(Protocol_Version version,
       if(!value_exists(sigs, suite.sig_algo()))
          {
          // allow if it's an empty sig algo and we want to use PSK
-         if(suite.sig_algo() != "" || !suite.psk_ciphersuite())
+         if(suite.auth_method() != Auth_Method::IMPLICIT || !suite.psk_ciphersuite())
             continue;
          }
 
@@ -444,8 +474,11 @@ std::vector<uint16_t> Policy::ciphersuite_list(Protocol_Version version,
       removal of x25519 from the ECC curve list as equivalent to
       saying they do not trust CECPQ1
       */
-      if(suite.kex_algo() == "CECPQ1" && allowed_ecc_curve("x25519") == false)
-         continue;
+      if(suite.kex_method() == Kex_Algo::CECPQ1)
+         {
+         if(value_exists(key_exchange_groups(), Group_Params::X25519) == false)
+            continue;
+         }
 
       // OK, consider it
       ciphersuites.push_back(suite);
@@ -481,6 +514,20 @@ void print_vec(std::ostream& o,
    o << '\n';
    }
 
+void print_vec(std::ostream& o,
+               const char* key,
+               const std::vector<Group_Params>& v)
+   {
+   o << key << " = ";
+   for(size_t i = 0; i != v.size(); ++i)
+      {
+      o << group_param_to_string(v[i]);
+      if(i != v.size() - 1)
+         o << ' ';
+      }
+   o << '\n';
+   }
+
 void print_bool(std::ostream& o,
                 const char* key, bool b)
    {
@@ -501,7 +548,7 @@ void Policy::print(std::ostream& o) const
    print_vec(o, "signature_hashes", allowed_signature_hashes());
    print_vec(o, "signature_methods", allowed_signature_methods());
    print_vec(o, "key_exchange_methods", allowed_key_exchange_methods());
-   print_vec(o, "ecc_curves", allowed_ecc_curves());
+   print_vec(o, "key_exchange_groups", key_exchange_groups());
 
    print_bool(o, "allow_insecure_renegotiation", allow_insecure_renegotiation());
    print_bool(o, "include_time_in_hello_random", include_time_in_hello_random());
@@ -509,8 +556,8 @@ void Policy::print(std::ostream& o) const
    print_bool(o, "hide_unknown_users", hide_unknown_users());
    print_bool(o, "server_uses_own_ciphersuite_preferences", server_uses_own_ciphersuite_preferences());
    print_bool(o, "negotiate_encrypt_then_mac", negotiate_encrypt_then_mac());
+   print_bool(o, "support_cert_status_message", support_cert_status_message());
    o << "session_ticket_lifetime = " << session_ticket_lifetime() << '\n';
-   o << "dh_group = " << dh_group() << '\n';
    o << "minimum_dh_group_size = " << minimum_dh_group_size() << '\n';
    o << "minimum_ecdh_group_size = " << minimum_ecdh_group_size() << '\n';
    o << "minimum_rsa_bits = " << minimum_rsa_bits() << '\n';

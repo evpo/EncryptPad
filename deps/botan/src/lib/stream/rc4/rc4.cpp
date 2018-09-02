@@ -15,6 +15,8 @@ namespace Botan {
 */
 void RC4::cipher(const uint8_t in[], uint8_t out[], size_t length)
    {
+   verify_key_set(m_state.empty() == false);
+
    while(length >= m_buffer.size() - m_position)
       {
       xor_buf(out, in, &m_buffer[m_position], m_buffer.size() - m_position);
@@ -91,9 +93,12 @@ void RC4::key_schedule(const uint8_t key[], size_t length)
 */
 std::string RC4::name() const
    {
-   if(m_SKIP == 0)   return "RC4";
-   if(m_SKIP == 256) return "MARK-4";
-   else            return "RC4_skip(" + std::to_string(m_SKIP) + ")";
+   if(m_SKIP == 0)
+      return "RC4";
+   else if(m_SKIP == 256)
+      return "MARK-4";
+   else
+      return "RC4(" + std::to_string(m_SKIP) + ")";
    }
 
 /*
@@ -113,6 +118,6 @@ RC4::RC4(size_t s) : m_SKIP(s) {}
 
 void RC4::seek(uint64_t)
    {
-   throw Exception("RC4 does not support seeking");
+   throw Not_Implemented("RC4 does not support seeking");
    }
 }

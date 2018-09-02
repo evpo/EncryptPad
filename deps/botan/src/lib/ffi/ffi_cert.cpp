@@ -18,7 +18,7 @@ BOTAN_FFI_DECLARE_STRUCT(botan_x509_cert_struct, Botan::X509_Certificate, 0x8F62
 
 int botan_x509_cert_load_file(botan_x509_cert_t* cert_obj, const char* cert_path)
    {
-   return ffi_guard_thunk(BOTAN_CURRENT_FUNCTION, [=]() {
+   return ffi_guard_thunk(BOTAN_CURRENT_FUNCTION, [=]() -> int {
       if(!cert_obj || !cert_path)
          return BOTAN_FFI_ERROR_NULL_POINTER;
 
@@ -34,7 +34,7 @@ int botan_x509_cert_load_file(botan_x509_cert_t* cert_obj, const char* cert_path
 
 int botan_x509_cert_load(botan_x509_cert_t* cert_obj, const uint8_t cert_bits[], size_t cert_bits_len)
    {
-   return ffi_guard_thunk(BOTAN_CURRENT_FUNCTION, [=]() {
+   return ffi_guard_thunk(BOTAN_CURRENT_FUNCTION, [=]() -> int {
       if(!cert_obj || !cert_bits)
          return BOTAN_FFI_ERROR_NULL_POINTER;
 
@@ -48,14 +48,14 @@ int botan_x509_cert_load(botan_x509_cert_t* cert_obj, const uint8_t cert_bits[],
 
 int botan_x509_cert_get_public_key(botan_x509_cert_t cert, botan_pubkey_t* key)
    {
-   return ffi_guard_thunk(BOTAN_CURRENT_FUNCTION, [=]() {
+   return ffi_guard_thunk(BOTAN_CURRENT_FUNCTION, [=]() -> int {
       if(key == nullptr)
          return BOTAN_FFI_ERROR_NULL_POINTER;
 
       *key = nullptr;
 
 #if defined(BOTAN_HAS_RSA)
-      std::unique_ptr<Botan::Public_Key> publicKey(safe_get(cert).subject_public_key());
+      std::unique_ptr<Botan::Public_Key> publicKey = safe_get(cert).load_subject_public_key();
       *key = new botan_pubkey_struct(publicKey.release());
       return BOTAN_FFI_SUCCESS;
 #else
@@ -100,12 +100,12 @@ int botan_x509_cert_destroy(botan_x509_cert_t cert)
 
 int botan_x509_cert_get_time_starts(botan_x509_cert_t cert, char out[], size_t* out_len)
    {
-   return BOTAN_FFI_DO(Botan::X509_Certificate, cert, c, { return write_str_output(out, out_len, c.start_time()); });
+   return BOTAN_FFI_DO(Botan::X509_Certificate, cert, c, { return write_str_output(out, out_len, c.not_before().to_string()); });
    }
 
 int botan_x509_cert_get_time_expires(botan_x509_cert_t cert, char out[], size_t* out_len)
    {
-   return BOTAN_FFI_DO(Botan::X509_Certificate, cert, c, { return write_str_output(out, out_len, c.end_time()); });
+   return BOTAN_FFI_DO(Botan::X509_Certificate, cert, c, { return write_str_output(out, out_len, c.not_after().to_string()); });
    }
 
 int botan_x509_cert_get_serial_number(botan_x509_cert_t cert, uint8_t out[], size_t* out_len)
@@ -131,6 +131,15 @@ int botan_x509_cert_get_subject_key_id(botan_x509_cert_t cert, uint8_t out[], si
 int botan_x509_cert_get_public_key_bits(botan_x509_cert_t cert, uint8_t out[], size_t* out_len)
    {
    return BOTAN_FFI_DO(Botan::X509_Certificate, cert, c, { return write_vec_output(out, out_len, c.subject_public_key_bits()); });
+   }
+
+int botan_x509_cert_hostname_match(botan_x509_cert_t cert, const char* hostname)
+   {
+   if(hostname == nullptr)
+      return BOTAN_FFI_ERROR_NULL_POINTER;
+
+   return BOTAN_FFI_DO(Botan::X509_Certificate, cert, c,
+                       { return c.matches_dns_name(hostname) ? 0 : -1; });
    }
 
 }

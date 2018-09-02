@@ -62,6 +62,33 @@ how to provide the cleanest API for such users would be most welcome.
 #include <stddef.h>
 
 /**
+* Error codes
+*/
+enum BOTAN_FFI_ERROR {
+   BOTAN_FFI_SUCCESS = 0,
+   BOTAN_FFI_INVALID_VERIFIER = 1,
+
+   BOTAN_FFI_ERROR_INVALID_INPUT = -1,
+   BOTAN_FFI_ERROR_BAD_MAC = -2,
+
+   BOTAN_FFI_ERROR_INSUFFICIENT_BUFFER_SPACE = -10,
+   BOTAN_FFI_ERROR_EXCEPTION_THROWN = -20,
+   BOTAN_FFI_ERROR_BAD_FLAG = -30,
+   BOTAN_FFI_ERROR_NULL_POINTER = -31,
+   BOTAN_FFI_ERROR_BAD_PARAMETER = -32,
+   BOTAN_FFI_ERROR_NOT_IMPLEMENTED = -40,
+   BOTAN_FFI_ERROR_INVALID_OBJECT = -50,
+
+   BOTAN_FFI_ERROR_UNKNOWN_ERROR = -100,
+};
+
+/**
+* Convert an error code into a string. Returns "Unknown error"
+* if the error code is not a known one.
+*/
+const char* botan_error_description(int err);
+
+/**
 * Return the version of the currently supported FFI API. This is
 * expressed in the form YYYYMMDD of the release date of this version
 * of the API.
@@ -99,58 +126,6 @@ BOTAN_PUBLIC_API(2,0) uint32_t botan_version_patch();
 * an integer, or 0 if an unreleased version
 */
 BOTAN_PUBLIC_API(2,0) uint32_t botan_version_datestamp();
-
-/*
-* Error handling
-*
-* Some way of exporting these values to other languages would be useful
-
-
- THIS FUNCTION ASSUMES BOTH ARGUMENTS ARE LITERAL STRINGS
- so it retains only the pointers and does not make a copy.
-
-int botan_make_error(const char* msg, const char* func, int line);
-* This value is returned to callers ^^
-
- normally called like
-   return botan_make_error(BOTAN_ERROR_STRING_NOT_IMPLEMENTED, BOTAN_FUNCTION, __LINE__);
-
-// This would seem to require both saving the message permanently
-catch(std::exception& e) {
-return botan_make_error_from_transient_string(e.what(), BOTAN_FUNCTION, __LINE__);
-}
-
-#define botan_make_error_inf(s) return botan_make_error(s, BOTAN_FUNCTION, __LINE__);
-
-Easier to return a const char* from each function directly? However,
-
-catch(std::exception& e) { return e.what(); }
-
-doesn't exactly work well either!
-
-*
-* Later call:
-* const char* botan_get_error_str(int);
-* To recover the msg, func, and line
-
-*/
-#define BOTAN_FFI_SUCCESS (0)
-
-#define BOTAN_FFI_INVALID_VERIFIER (1)
-
-#define BOTAN_FFI_ERROR_INVALID_INPUT (-1)
-#define BOTAN_FFI_ERROR_BAD_MAC (-2)
-
-#define BOTAN_FFI_ERROR_INSUFFICIENT_BUFFER_SPACE (-10)
-#define BOTAN_FFI_ERROR_EXCEPTION_THROWN (-20)
-#define BOTAN_FFI_ERROR_BAD_FLAG (-30)
-#define BOTAN_FFI_ERROR_NULL_POINTER (-31)
-#define BOTAN_FFI_ERROR_BAD_PARAMETER (-32)
-#define BOTAN_FFI_ERROR_NOT_IMPLEMENTED (-40)
-
-#define BOTAN_FFI_ERROR_UNKNOWN_ERROR (-100)
-
-//const char* botan_error_description(int err);
 
 /**
 * Returns 0 if x[0..len] == y[0..len], or otherwise -1
@@ -702,6 +677,56 @@ BOTAN_PUBLIC_API(2,0) int botan_privkey_create_ecdh(botan_privkey_t* key, botan_
 BOTAN_PUBLIC_API(2,0) int botan_privkey_create_mceliece(botan_privkey_t* key, botan_rng_t rng, size_t n, size_t t);
 BOTAN_PUBLIC_API(2,0) int botan_privkey_create_dh(botan_privkey_t* key, botan_rng_t rng, const char* param);
 
+
+/*
+ * Generates DSA key pair. Gives to a caller control over key length
+ * and order of a subgroup 'q'.
+ *
+ * @param   key   handler to the resulting key
+ * @param   rng   initialized PRNG
+ * @param   pbits length of the key in bits. Must be between in range (1024, 3072)
+ *          and multiple of 64. Bit size of the prime 'p'
+ * @param   qbits order of the subgroup. Must be in range (160, 256) and multiple
+ *          of 8
+ *
+ * @returns BOTAN_FFI_SUCCESS Success, `key' initialized with DSA key
+ * @returns BOTAN_FFI_ERROR_NULL_POINTER  either `key' or `rng' is NULL
+ * @returns BOTAN_FFI_ERROR_BAD_PARAMETER unexpected value for either `pbits' or
+ *          `qbits'
+ * @returns BOTAN_FFI_ERROR_NOT_IMPLEMENTED functionality not implemented
+ *
+-------------------------------------------------------------------------------- */
+BOTAN_PUBLIC_API(2,5) int botan_privkey_create_dsa(
+                                botan_privkey_t* key,
+                                botan_rng_t rng,
+                                size_t pbits,
+                                size_t qbits);
+
+/*
+ * Generates ElGamal key pair. Caller has a control over key length
+ * and order of a subgroup 'q'. Function is able to use two types of
+ * primes:
+ *    * if pbits-1 == qbits then safe primes are used for key generation
+ *    * otherwise generation uses group of prime order
+ *
+ * @param   key   handler to the resulting key
+ * @param   rng   initialized PRNG
+ * @param   pbits length of the key in bits. Must be at least 1024
+ * @param   qbits order of the subgroup. Must be at least 160
+ *
+ * @returns BOTAN_FFI_SUCCESS Success, `key' initialized with DSA key
+ * @returns BOTAN_FFI_ERROR_NULL_POINTER  either `key' or `rng' is NULL
+ * @returns BOTAN_FFI_ERROR_BAD_PARAMETER unexpected value for either `pbits' or
+ *          `qbits'
+ * @returns BOTAN_FFI_ERROR_NOT_IMPLEMENTED functionality not implemented
+ *
+-------------------------------------------------------------------------------- */
+BOTAN_PUBLIC_API(2,5) int botan_privkey_create_elgamal(
+                            botan_privkey_t* key,
+                            botan_rng_t rng,
+                            size_t pbits,
+                            size_t qbits);
+
 /*
 * Input currently assumed to be PKCS #8 structure;
 * Set password to NULL to indicate no encryption expected
@@ -1149,6 +1174,12 @@ enum botan_x509_cert_key_constraints {
 };
 
 BOTAN_PUBLIC_API(2,0) int botan_x509_cert_allowed_usage(botan_x509_cert_t cert, unsigned int key_usage);
+
+/**
+* Check if the certificate matches the specified hostname via alternative name or CN match.
+* RFC 5280 wildcards also supported.
+*/
+BOTAN_PUBLIC_API(2,5) int botan_x509_cert_hostname_match(botan_x509_cert_t cert, const char* hostname);
 
 /**
  * Key wrapping as per RFC 3394

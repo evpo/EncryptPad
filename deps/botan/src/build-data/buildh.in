@@ -6,8 +6,8 @@
 * '%{command_line}'
 *
 * Target
-*  - Compiler: %{cxx} %{cxx_abi_flags} %{cc_compile_flags}
-*  - Arch: %{submodel}/%{arch}
+*  - Compiler: %{cxx} %{cxx_abi_flags} %{cc_lang_flags} %{cc_compile_flags}
+*  - Arch: %{arch}
 *  - OS: %{os}
 */
 
@@ -24,8 +24,13 @@
 
 /* How many bits per limb in a BigInt */
 #define BOTAN_MP_WORD_BITS %{mp_bits}
-%{unsafe_fuzzer_mode_define}
-%{fuzzer_type}
+
+%{if fuzzer_mode}
+#define BOTAN_UNSAFE_FUZZER_MODE
+%{endif}
+%{if fuzzer_type}
+#define BOTAN_FUZZER_IS_%{fuzzer_type}
+%{endif}
 
 #define BOTAN_INSTALL_PREFIX R"(%{prefix})"
 #define BOTAN_INSTALL_HEADER_DIR "%{includedir}/botan-%{version_major}"
@@ -38,26 +43,75 @@
 #endif
 
 /* Target identification and feature test macros */
-%{target_os_defines}
 
-%{target_cpu_defines}
+#define BOTAN_TARGET_OS_IS_%{os_name|upper}
 
-%{target_compiler_defines}
+%{for os_features}
+#define BOTAN_TARGET_OS_HAS_%{i|upper}
+%{endfor}
+
+#define BOTAN_BUILD_COMPILER_IS_%{cc_macro}
+
+%{for sanitizer_types}
+#define BOTAN_HAS_SANITIZER_%{i|upper}
+%{endfor}
+
+%{if test_mode}
+#define BOTAN_TEST_MODE
+%{endif}
+
+#define BOTAN_TARGET_ARCH_IS_%{arch|upper}
+%{if endian}
+#define BOTAN_TARGET_CPU_IS_%{endian|upper}_ENDIAN
+%{endif}
+%{if cpu_family}
+#define BOTAN_TARGET_CPU_IS_%{cpu_family|upper}_FAMILY
+%{endif}
+%{if cpu_is_64bit}
+#define BOTAN_TARGET_CPU_HAS_NATIVE_64BIT
+%{endif}
+
+%{for cpu_features}
+#define BOTAN_TARGET_SUPPORTS_%{i|upper}
+%{endfor}
+
+%{if with_valgrind}
+#define BOTAN_HAS_VALGRIND
+%{endif}
+
+%{if with_openmp}
+#define BOTAN_TARGET_HAS_OPENMP
+%{endif}
+
+%{if with_debug_asserts}
+#define BOTAN_ENABLE_DEBUG_ASSERTS
+%{endif}
 
 /*
 * Module availability definitions
 */
-%{module_defines}
+%{for module_defines}
+#define BOTAN_HAS_%{i}
+%{endfor}
 
 /*
 * Local/misc configuration options (if any) follow
 */
 %{local_config}
-%{house_ecc_curve_defines}
 
 /*
 * Things you can edit (but probably shouldn't)
 */
+
+#if !defined(BOTAN_DEPRECATED_PUBLIC_MEMBER_VARIABLES)
+
+  #if defined(BOTAN_NO_DEPRECATED)
+     #define BOTAN_DEPRECATED_PUBLIC_MEMBER_VARIABLES private
+  #else
+     #define BOTAN_DEPRECATED_PUBLIC_MEMBER_VARIABLES public
+  #endif
+
+#endif
 
 /* How much to allocate for a buffer of no particular size */
 #define BOTAN_DEFAULT_BUFFER_SIZE 1024
@@ -82,19 +136,6 @@
 #define BOTAN_USE_VOLATILE_MEMSET_FOR_ZERO 1
 
 /*
-* If enabled the ECC implementation will use scalar blinding with order.bits()/2
-* bit long masks.
-*/
-#define BOTAN_POINTGFP_USE_SCALAR_BLINDING 1
-
-/*
-* Set number of bits used to generate mask for blinding the
-* representation of an ECC point. Set to zero to disable this
-* side-channel countermeasure.
-*/
-#define BOTAN_POINTGFP_RANDOMIZE_BLINDING_BITS 80
-
-/*
 * Normally blinding is performed by choosing a random starting point (plus
 * its inverse, of a form appropriate to the algorithm being blinded), and
 * then choosing new blinding operands by successive squaring of both
@@ -105,7 +146,7 @@
 * periodically reinitializes the sequence. This value specifies how often
 * a new sequence should be started.
 */
-#define BOTAN_BLINDING_REINIT_INTERVAL 32
+#define BOTAN_BLINDING_REINIT_INTERVAL 64
 
 /*
 * Userspace RNGs like HMAC_DRBG will reseed after a specified number
@@ -113,6 +154,7 @@
 */
 #define BOTAN_RNG_DEFAULT_RESEED_INTERVAL 1024
 #define BOTAN_RNG_RESEED_POLL_BITS 256
+
 #define BOTAN_RNG_AUTO_RESEED_TIMEOUT std::chrono::milliseconds(10)
 #define BOTAN_RNG_RESEED_DEFAULT_TIMEOUT std::chrono::milliseconds(50)
 
@@ -134,14 +176,6 @@
 * These control the RNG used by the system RNG interface
 */
 #define BOTAN_SYSTEM_RNG_DEVICE "/dev/urandom"
-#define BOTAN_SYSTEM_RNG_CRYPTOAPI_PROV_TYPE PROV_RSA_FULL
-
-/*
-* These paramaters control how many bytes to read from the system
-* PRNG, and how long to block if applicable.
-*
-* Timeout is ignored on Windows as CryptGenRandom doesn't block
-*/
 #define BOTAN_SYSTEM_RNG_POLL_DEVICES { "/dev/urandom", "/dev/random", "/dev/srandom" }
 
 /*
@@ -152,9 +186,13 @@
 */
 #define BOTAN_ENTROPY_PROC_FS_PATH "/proc"
 
+/*
+* These paramaters control how many bytes to read from the system
+* PRNG, and how long to block if applicable. The timeout only applies
+* to reading /dev/urandom and company.
+*/
 #define BOTAN_SYSTEM_RNG_POLL_REQUEST 64
 #define BOTAN_SYSTEM_RNG_POLL_TIMEOUT_MS 20
-
 
 /*
 How many times to read from the RDRAND/RDSEED RNGs.
@@ -199,10 +237,6 @@ Each read generates 32 bits of output
   // Otherwise, no hash found: leave BOTAN_AUTO_RNG_HMAC undefined
 
 #endif
-
-// Append to macros living outside of functions, so that invocations must end with a semicolon.
-// The struct is only declared to force the semicolon, it is never defined.
-#define BOTAN_FORCE_SEMICOLON struct BOTAN_DUMMY_STRUCT
 
 // Check for a common build problem:
 

@@ -1,6 +1,7 @@
 /*
 * Certificate Store
 * (C) 1999-2010,2013 Jack Lloyd
+* (C) 2017 Fabian Weissberg, Rohde & Schwarz Cybersecurity
 *
 * Botan is released under the Simplified BSD License (see license.txt)
 */
@@ -8,6 +9,7 @@
 #include <botan/certstor.h>
 #include <botan/internal/filesystem.h>
 #include <botan/hash.h>
+#include <botan/data_src.h>
 
 namespace Botan {
 
@@ -64,6 +66,28 @@ Certificate_Store_In_Memory::find_cert(const X509_DN& subject_dn,
    return nullptr;
    }
 
+std::vector<std::shared_ptr<const X509_Certificate>> Certificate_Store_In_Memory::find_all_certs(
+      const X509_DN& subject_dn,
+      const std::vector<uint8_t>& key_id) const
+   {
+   std::vector<std::shared_ptr<const X509_Certificate>> matches;
+
+   for(const auto& cert : m_certs)
+      {
+      if(key_id.size())
+         {
+         std::vector<uint8_t> skid = cert->subject_key_id();
+
+         if(skid.size() && skid != key_id) // no match
+            continue;
+         }
+
+      if(cert->subject_dn() == subject_dn)
+         matches.push_back(cert);
+      }
+
+   return matches;
+   }
 
 std::shared_ptr<const X509_Certificate>
 Certificate_Store_In_Memory::find_cert_by_pubkey_sha1(const std::vector<uint8_t>& key_hash) const
@@ -158,11 +182,29 @@ Certificate_Store_In_Memory::Certificate_Store_In_Memory(const std::string& dir)
       return;
 
    std::vector<std::string> maybe_certs = get_files_recursive(dir);
+
+   if(maybe_certs.empty())
+      {
+      maybe_certs.push_back(dir);
+      }
+
    for(auto&& cert_file : maybe_certs)
       {
       try
          {
-         m_certs.push_back(std::make_shared<X509_Certificate>(cert_file));
+         DataSource_Stream src(cert_file, true);
+         while(!src.end_of_data())
+            {
+            try
+               {
+               m_certs.push_back(std::make_shared<X509_Certificate>(src));
+               }
+            catch(std::exception&)
+               {
+               // stop searching for other certificate at first exception
+               break;
+               }
+            }
          }
       catch(std::exception&)
          {

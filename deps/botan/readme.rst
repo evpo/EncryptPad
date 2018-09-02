@@ -5,13 +5,13 @@ Botan (Japanese for peony) is a cryptography library written in C++11
 and released under the permissive `Simplified BSD
 <https://botan.randombit.net/license.txt>`_ license.
 
-Botan's goal is to be the best option for cryptography in new C++ code by
-offering the tools necessary to implement a range of practical systems, such as
-TLS/DTLS, PKIX certificate handling, PKCS#11 and TPM hardware support, password
-hashing, and post quantum crypto schemes. In addition to the C++, botan has a
-C89 API specifically designed to be easy to call from other languages. A Python
-binding using ctypes calling the C89 API is included.
-
+Botan's goal is to be the best option for cryptography in C++ by offering the
+tools necessary to implement a range of practical systems, such as TLS/DTLS,
+X.509 certificates, modern AEAD ciphers, PKCS#11 and TPM hardware support,
+password hashing, and post quantum crypto schemes. Botan also has a C89 API
+specifically designed to be easy to call from other languages. A Python binding
+using ctypes is included, and several other `language bindings
+<https://github.com/randombit/botan/wiki/Language-Bindings>`_ are available.
 Find the full feature list below.
 
 Development is coordinated on `GitHub <https://github.com/randombit/botan>`_
@@ -37,14 +37,10 @@ https://keybase.io/jacklloyd, and some public PGP key servers.
 For all the details on building the library, read the
 `users manual <https://botan.randombit.net/manual>`_, but basically::
 
-  $ ./configure.py --help
-  $ ./configure.py [probably some options]
+  $ ./configure.py
   $ make
   $ ./botan-test
-  # lots of output...
-  Tests all ok
-  $ ./botan
-  # shows available commands
+  ...
   $ make install
 
 Botan can also be built into a single-file amalgamation for easy inclusion into
@@ -70,9 +66,9 @@ external build systems, see the manual for details.
     :target: https://scan.coverity.com/projects/624
     :alt: Coverity results
 
-.. image:: https://sonarqube.com/api/badges/gate?key=botan
-    :target: https://sonarqube.com/dashboard/index/botan
-    :alt: Sonarqube analysis
+.. image:: https://sonarcloud.io/api/project_badges/measure?project=botan&metric=ncloc
+    :target: https://sonarcloud.io/dashboard/index/botan
+    :alt: Sonarcloud analysis
 
 .. image:: https://bestpractices.coreinfrastructure.org/projects/531/badge
     :target: https://bestpractices.coreinfrastructure.org/projects/531
@@ -91,28 +87,28 @@ All releases are signed with a
         Key fingerprint = 621D AF64 11E1 851C 4CF9  A2E1 6211 EBF1 EFBA DFBC
   uid                  Botan Distribution Key
 
-Some distributions such as Arch, Fedora and Debian include packages
-for Botan. However these are often out of date; using the latest
-source release is recommended.
+Some `distributions <https://github.com/randombit/botan/wiki/Distros>`_
+such as Arch, Fedora and Debian include packages for Botan. However
+these are often out of date; using the latest source release is recommended.
 
 Current Stable Release
 ----------------------------------------
 
-Version 2 requires a C++11 compiler; GCC 4.8 and later, Clang 3.5 and
-later, and MSVC 2015 are regularly tested.
+Version 2 requires a C++11 compiler; GCC 4.8 and later, Clang 3.8 and later, and
+MSVC 2015/2017 are regularly tested. New releases of Botan 2 are made on a
+quarterly basis.
 
 The latest 2.x release is
-`2.3.0 <https://botan.randombit.net/releases/Botan-2.3.0.tgz>`_
-`(sig) <https://botan.randombit.net/releases/Botan-2.3.0.tgz.asc>`_
-released on 2017-10-02
+`2.7.0 <https://botan.randombit.net/releases/Botan-2.7.0.tgz>`_
+`(sig) <https://botan.randombit.net/releases/Botan-2.7.0.tgz.asc>`_
+released on 2018-07-02
 
-Old Stable Release
+Old Release
 ----------------------------------------
 
-The 1.10 branch is the last version of the library written in C++98 and is still
-the most commonly packaged version. It is no longer supported except for
-critical security updates (with all support ending on 2018-1-1), and the
-developers do not recommend its use anymore.
+The 1.10 branch is the last version of the library written in C++98. It is no
+longer supported except for critical security updates (with all support ending
+in December 2018), and the developers do not recommend its use anymore.
 
 The latest 1.10 release is
 `1.10.17 <https://botan.randombit.net/releases/Botan-1.10.17.tgz>`_
@@ -131,8 +127,8 @@ Transport Layer Security (TLS) Protocol
   side only right now), encrypt-then-mac CBC, and extended master secret.
 * Supports authentication using preshared keys (PSK) or passwords (SRP)
 * Supports record encryption with ChaCha20Poly1305, AES/OCB, AES/GCM, AES/CCM,
-  Camellia/GCM, and legacy CBC ciphersuites with AES, Camellia, SEED, or 3DES.
-* Key exchange using Diffie-Hellman, ECDH, RSA, or CECPQ1
+  Camellia/GCM as well as legacy CBC ciphersuites.
+* Key exchange using CECPQ1, ECDH, FFDHE, or RSA
 
 Public Key Infrastructure
 ----------------------------------------
@@ -177,25 +173,11 @@ Other Useful Things
 * Simple compression API wrapping zlib, bzip2, and lzma libraries
 * RNG wrappers for system RNG and hardware RNGs
 * HMAC_DRBG and entropy collection system for userspace RNGs
-* PBKDF2 password based key derivation
+* Password based key derivation functions PBKDF2 and Scrypt
 * Password hashing function bcrypt and passhash9 (custom PBKDF scheme)
 * SRP-6a password authenticated key exchange
 * Key derivation functions including HKDF, KDF2, SP 800-108, SP 800-56A, SP 800-56C
 * HOTP and TOTP algorithms
 * Format preserving encryption scheme FE1
 * Threshold secret sharing
-* RFC 3394 AES key wrap
-
-Recommended Algorithms
-----------------------------------------
-
-* For encryption of network traffic use TLS v1.2
-* Packet encryption: AES-256/GCM, AES-256/OCB, Serpent/OCB, or ChaCha20Poly1305
-* General hash function: BLAKE2b, SHA-2, SHA-3, or Skein-512
-* Message authentication or PRF: HMAC with SHA-256
-* Key derivation function: KDF2 or HKDF
-* Public Key Encryption: RSA, 2048+ bit keys, with OAEP/SHA-256
-* Public Key Signatures: RSA, 2048+ bit keys with PSS/SHA-512,
-  or ECDSA using P-256/SHA-256 or P-521/SHA-512
-* Key Agreement: ECDH using P-256 or X25519. If you are concerned
-  about quantum computers, combine ECC with NewHope.
+* NIST key wrapping

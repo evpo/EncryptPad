@@ -1,6 +1,6 @@
 /*
 * RSA
-* (C) 1999-2010,2015,2016 Jack Lloyd
+* (C) 1999-2010,2015,2016,2018 Jack Lloyd
 *
 * Botan is released under the Simplified BSD License (see license.txt)
 */
@@ -14,6 +14,8 @@
 #include <botan/der_enc.h>
 #include <botan/ber_dec.h>
 #include <botan/pow_mod.h>
+#include <botan/monty.h>
+#include <botan/internal/monty_exp.h>
 
 #if defined(BOTAN_HAS_OPENSSL)
   #include <botan/internal/openssl.h>
@@ -43,12 +45,14 @@ AlgorithmIdentifier RSA_PublicKey::algorithm_identifier() const
 
 std::vector<uint8_t> RSA_PublicKey::public_key_bits() const
    {
-   return DER_Encoder()
-      .start_cons(SEQUENCE)
+   std::vector<uint8_t> output;
+   DER_Encoder der(output);
+   der.start_cons(SEQUENCE)
          .encode(m_n)
          .encode(m_e)
-      .end_cons()
-      .get_contents_unlocked();
+      .end_cons();
+
+   return output;
    }
 
 RSA_PublicKey::RSA_PublicKey(const AlgorithmIdentifier&,
@@ -66,7 +70,7 @@ RSA_PublicKey::RSA_PublicKey(const AlgorithmIdentifier&,
 */
 bool RSA_PublicKey::check_key(RandomNumberGenerator&, bool) const
    {
-   if(m_n < 35 || m_n.is_even() || m_e < 2)
+   if(m_n < 35 || m_n.is_even() || m_e < 3 || m_e.is_even())
       return false;
    return true;
    }
@@ -117,11 +121,8 @@ RSA_PrivateKey::RSA_PrivateKey(const BigInt& prime1,
 
    if(m_d == 0)
       {
-      BigInt inv_for_d = lcm(m_p - 1, m_q - 1);
-      if(m_e.is_even())
-         inv_for_d >>= 1;
-
-      m_d = inverse_mod(m_e, inv_for_d);
+      const BigInt phi_n = lcm(m_p - 1, m_q - 1);
+      m_d = inverse_mod(m_e, phi_n);
       }
 
    m_d1 = m_d % (m_p - 1);
@@ -142,14 +143,20 @@ RSA_PrivateKey::RSA_PrivateKey(RandomNumberGenerator& rng,
 
    m_e = exp;
 
+   const size_t p_bits = (bits + 1) / 2;
+   const size_t q_bits = bits - p_bits;
+
    do
       {
-      m_p = random_prime(rng, (bits + 1) / 2, m_e);
-      m_q = random_prime(rng, bits - m_p.bits(), m_e);
+      m_p = generate_rsa_prime(rng, rng, p_bits, m_e);
+      m_q = generate_rsa_prime(rng, rng, q_bits, m_e);
       m_n = m_p * m_q;
       } while(m_n.bits() != bits);
 
-   m_d = inverse_mod(m_e, lcm(m_p - 1, m_q - 1));
+   // FIXME: lcm calls gcd which is not const time
+   const BigInt phi_n = lcm(m_p - 1, m_q - 1);
+   // FIXME: this uses binary ext gcd because phi_n is even
+   m_d = inverse_mod(m_e, phi_n);
    m_d1 = m_d % (m_p - 1);
    m_d2 = m_d % (m_q - 1);
    m_c = inverse_mod(m_q, m_p);
@@ -160,7 +167,10 @@ RSA_PrivateKey::RSA_PrivateKey(RandomNumberGenerator& rng,
 */
 bool RSA_PrivateKey::check_key(RandomNumberGenerator& rng, bool strong) const
    {
-   if(m_n < 35 || m_n.is_even() || m_e < 2 || m_d < 2 || m_p < 3 || m_q < 3 || m_p*m_q != m_n)
+   if(m_n < 35 || m_n.is_even() || m_e < 3 || m_e.is_even())
+      return false;
+
+   if(m_d < 2 || m_p < 3 || m_q < 3 || m_p*m_q != m_n)
       return false;
 
    if(m_d1 != m_d % (m_p - 1) || m_d2 != m_d % (m_q - 1) || m_c != inverse_mod(m_q, m_p))
@@ -190,26 +200,32 @@ namespace {
 class RSA_Private_Operation
    {
    protected:
-      size_t get_max_input_bits() const { return (m_n.bits() - 1); }
+      size_t get_max_input_bits() const { return (m_mod_bits - 1); }
+
+      const size_t exp_blinding_bits = 64;
 
       explicit RSA_Private_Operation(const RSA_PrivateKey& rsa, RandomNumberGenerator& rng) :
-         m_n(rsa.get_n()),
-         m_q(rsa.get_q()),
-         m_c(rsa.get_c()),
-         m_powermod_e_n(rsa.get_e(), rsa.get_n()),
-         m_powermod_d1_p(rsa.get_d1(), rsa.get_p()),
-         m_powermod_d2_q(rsa.get_d2(), rsa.get_q()),
-         m_mod_p(rsa.get_p()),
-         m_blinder(m_n,
+         m_key(rsa),
+         m_mod_p(m_key.get_p()),
+         m_mod_q(m_key.get_q()),
+         m_monty_p(std::make_shared<Montgomery_Params>(m_key.get_p(), m_mod_p)),
+         m_monty_q(std::make_shared<Montgomery_Params>(m_key.get_q(), m_mod_q)),
+         m_powermod_e_n(m_key.get_e(), m_key.get_n()),
+         m_blinder(m_key.get_n(),
                    rng,
                    [this](const BigInt& k) { return m_powermod_e_n(k); },
-                   [this](const BigInt& k) { return inverse_mod(k, m_n); })
+                   [this](const BigInt& k) { return inverse_mod(k, m_key.get_n()); }),
+         m_blinding_bits(64),
+         m_mod_bytes(m_key.get_n().bytes()),
+         m_mod_bits(m_key.get_n().bits()),
+         m_max_d1_bits(m_key.get_p().bits() + m_blinding_bits),
+         m_max_d2_bits(m_key.get_q().bits() + m_blinding_bits)
          {
          }
 
       BigInt blinded_private_op(const BigInt& m) const
          {
-         if(m >= m_n)
+         if(m >= m_key.get_n())
             throw Invalid_Argument("RSA private op - input is too large");
 
          return m_blinder.unblind(private_op(m_blinder.blind(m)));
@@ -217,26 +233,62 @@ class RSA_Private_Operation
 
       BigInt private_op(const BigInt& m) const
          {
+         const size_t powm_window = 4;
+
+         const BigInt d1_mask(m_blinder.rng(), m_blinding_bits);
+
 #if defined(BOTAN_TARGET_OS_HAS_THREADS)
-         auto future_j1 = std::async(std::launch::async, m_powermod_d1_p, m);
-         BigInt j2 = m_powermod_d2_q(m);
-         BigInt j1 = future_j1.get();
+         auto future_j1 = std::async(std::launch::async, [this, &m, &d1_mask, powm_window]() {
+               const BigInt masked_d1 = m_key.get_d1() + (d1_mask * (m_key.get_p() - 1));
+               auto powm_d1_p = monty_precompute(m_monty_p, m, powm_window);
+               return monty_execute(*powm_d1_p, masked_d1, m_max_d1_bits);
+            });
 #else
-         BigInt j1 = m_powermod_d1_p(m);
-         BigInt j2 = m_powermod_d2_q(m);
+         const BigInt masked_d1 = m_key.get_d1() + (d1_mask * (m_key.get_p() - 1));
+         auto powm_d1_p = monty_precompute(m_monty_p, m, powm_window);
+         BigInt j1 = monty_execute(*powm_d1_p, masked_d1, m_max_d1_bits);
 #endif
 
-         j1 = m_mod_p.reduce(sub_mul(j1, j2, m_c));
+         const BigInt d2_mask(m_blinder.rng(), m_blinding_bits);
+         const BigInt masked_d2 = m_key.get_d2() + (d2_mask * (m_key.get_q() - 1));
+         auto powm_d2_q = monty_precompute(m_monty_q, m, powm_window);
+         const BigInt j2 = monty_execute(*powm_d2_q, masked_d2, m_max_d2_bits);
 
-         return mul_add(j1, m_q, j2);
+         /*
+         * To recover the final value from the CRT representation (j1,j2)
+         * we use Garner's algorithm:
+         * c = q^-1 mod p (this is precomputed)
+         * h = c*(j1-j2) mod p
+         * m = j2 + h*q
+         */
+
+#if defined(BOTAN_TARGET_OS_HAS_THREADS)
+         BigInt j1 = future_j1.get();
+#endif
+
+         /*
+         To prevent a side channel that allows detecting case where j1 < j2,
+         add p to j1 before reducing [computing c*(p+j1-j2) mod p]
+         */
+         j1 = m_mod_p.reduce(sub_mul(m_key.get_p() + j1, j2, m_key.get_c()));
+         return mul_add(j1, m_key.get_q(), j2);
          }
 
-      const BigInt& m_n;
-      const BigInt& m_q;
-      const BigInt& m_c;
-      Fixed_Exponent_Power_Mod m_powermod_e_n, m_powermod_d1_p, m_powermod_d2_q;
+      const RSA_PrivateKey& m_key;
+
+      // TODO these could all be computed once and stored in the key object
       Modular_Reducer m_mod_p;
+      Modular_Reducer m_mod_q;
+      std::shared_ptr<const Montgomery_Params> m_monty_p;
+      std::shared_ptr<const Montgomery_Params> m_monty_q;
+
+      Fixed_Exponent_Power_Mod m_powermod_e_n;
       Blinder m_blinder;
+      const size_t m_blinding_bits;
+      const size_t m_mod_bytes;
+      const size_t m_mod_bits;
+      const size_t m_max_d1_bits;
+      const size_t m_max_d2_bits;
    };
 
 class RSA_Signature_Operation final : public PK_Ops::Signature_with_EMSA,
@@ -259,7 +311,7 @@ class RSA_Signature_Operation final : public PK_Ops::Signature_with_EMSA,
          const BigInt x = blinded_private_op(m);
          const BigInt c = m_powermod_e_n(x);
          BOTAN_ASSERT(m == c, "RSA sign consistency check");
-         return BigInt::encode_1363(x, m_n.bytes());
+         return BigInt::encode_1363(x, m_mod_bytes);
          }
    };
 
@@ -267,8 +319,6 @@ class RSA_Decryption_Operation final : public PK_Ops::Decryption_with_EME,
                                  private RSA_Private_Operation
    {
    public:
-
-      size_t max_raw_input_bits() const override { return get_max_input_bits(); }
 
       RSA_Decryption_Operation(const RSA_PrivateKey& rsa, const std::string& eme, RandomNumberGenerator& rng) :
          PK_Ops::Decryption_with_EME(eme),
@@ -282,7 +332,7 @@ class RSA_Decryption_Operation final : public PK_Ops::Decryption_with_EME,
          const BigInt x = blinded_private_op(m);
          const BigInt c = m_powermod_e_n(x);
          BOTAN_ASSERT(m == c, "RSA decrypt consistency check");
-         return BigInt::encode_1363(x, m_n.bytes());
+         return BigInt::encode_1363(x, m_mod_bytes);
          }
    };
 
@@ -305,7 +355,7 @@ class RSA_KEM_Decryption_Operation final : public PK_Ops::KEM_Decryption_with_KD
          const BigInt x = blinded_private_op(m);
          const BigInt c = m_powermod_e_n(x);
          BOTAN_ASSERT(m == c, "RSA KEM consistency check");
-         return BigInt::encode_1363(x, m_n.bytes());
+         return BigInt::encode_1363(x, m_mod_bytes);
          }
    };
 
@@ -316,7 +366,9 @@ class RSA_Public_Operation
    {
    public:
       explicit RSA_Public_Operation(const RSA_PublicKey& rsa) :
-         m_n(rsa.get_n()), m_powermod_e_n(rsa.get_e(), rsa.get_n())
+         m_n(rsa.get_n()),
+         m_e(rsa.get_e()),
+         m_monty_n(std::make_shared<Montgomery_Params>(m_n))
          {}
 
       size_t get_max_input_bits() const { return (m_n.bits() - 1); }
@@ -326,17 +378,22 @@ class RSA_Public_Operation
          {
          if(m >= m_n)
             throw Invalid_Argument("RSA public op - input is too large");
-         return m_powermod_e_n(m);
+
+         const size_t powm_window = 1;
+
+         auto powm_m_n = monty_precompute(m_monty_n, m, powm_window, false);
+         return monty_execute_vartime(*powm_m_n, m_e);
          }
 
       const BigInt& get_n() const { return m_n; }
 
       const BigInt& m_n;
-      Fixed_Exponent_Power_Mod m_powermod_e_n;
+      const BigInt& m_e;
+      std::shared_ptr<Montgomery_Params> m_monty_n;
    };
 
 class RSA_Encryption_Operation final : public PK_Ops::Encryption_with_EME,
-                                 private RSA_Public_Operation
+                                       private RSA_Public_Operation
    {
    public:
 
@@ -349,7 +406,7 @@ class RSA_Encryption_Operation final : public PK_Ops::Encryption_with_EME,
       size_t max_raw_input_bits() const override { return get_max_input_bits(); }
 
       secure_vector<uint8_t> raw_encrypt(const uint8_t msg[], size_t msg_len,
-                                      RandomNumberGenerator&) override
+                                         RandomNumberGenerator&) override
          {
          BigInt m(msg, msg_len);
          return BigInt::encode_1363(public_op(m), m_n.bytes());
@@ -357,7 +414,7 @@ class RSA_Encryption_Operation final : public PK_Ops::Encryption_with_EME,
    };
 
 class RSA_Verify_Operation final : public PK_Ops::Verification_with_EMSA,
-                             private RSA_Public_Operation
+                                   private RSA_Public_Operation
    {
    public:
 
@@ -379,7 +436,7 @@ class RSA_Verify_Operation final : public PK_Ops::Verification_with_EMSA,
    };
 
 class RSA_KEM_Encryption_Operation final : public PK_Ops::KEM_Encryption_with_KDF,
-                                     private RSA_Public_Operation
+                                           private RSA_Public_Operation
    {
    public:
 
@@ -423,7 +480,7 @@ RSA_PublicKey::create_encryption_op(RandomNumberGenerator& /*rng*/,
          * to the normal version.
          */
          if(provider == "openssl")
-            throw Exception("OpenSSL RSA provider rejected key:", e.what());
+            throw Lookup_Error("OpenSSL RSA provider rejected key:" + std::string(e.what()));
          }
       }
 #endif
@@ -477,7 +534,7 @@ RSA_PrivateKey::create_decryption_op(RandomNumberGenerator& rng,
       catch(Exception& e)
          {
          if(provider == "openssl")
-            throw Exception("OpenSSL RSA provider rejected key:", e.what());
+            throw Lookup_Error("OpenSSL RSA provider rejected key:" + std::string(e.what()));
          }
       }
 #endif

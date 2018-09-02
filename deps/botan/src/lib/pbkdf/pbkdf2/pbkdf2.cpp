@@ -6,6 +6,7 @@
 */
 
 #include <botan/pbkdf2.h>
+#include <botan/exceptn.h>
 #include <botan/internal/rounding.h>
 
 namespace Botan {
@@ -26,7 +27,7 @@ pbkdf2(MessageAuthenticationCode& prf,
 
    try
       {
-      prf.set_key(reinterpret_cast<const uint8_t*>(passphrase.data()), passphrase.size());
+      prf.set_key(cast_char_ptr_to_uint8(passphrase.data()), passphrase.size());
       }
    catch(Invalid_Key_Length&)
       {

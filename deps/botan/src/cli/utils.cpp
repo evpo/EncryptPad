@@ -8,30 +8,25 @@
 #include "cli.h"
 
 #include <botan/version.h>
-#include <botan/hash.h>
-#include <botan/mac.h>
+#include <botan/rng.h>
 #include <botan/cpuid.h>
 #include <botan/hex.h>
-#include <botan/entropy_src.h>
+#include <botan/parsing.h>
+#include <botan/internal/stl_util.h>
+#include <sstream>
+#include <iterator>
+#include <iomanip>
+
+#if defined(BOTAN_HAS_HASH)
+   #include <botan/hash.h>
+#endif
+
+#if defined(BOTAN_HAS_MAC)
+   #include <botan/mac.h>
+#endif
 
 #if defined(BOTAN_HAS_BASE64_CODEC)
    #include <botan/base64.h>
-#endif
-
-#if defined(BOTAN_HAS_AUTO_SEEDING_RNG)
-   #include <botan/auto_rng.h>
-#endif
-
-#if defined(BOTAN_HAS_SYSTEM_RNG)
-   #include <botan/system_rng.h>
-#endif
-
-#if defined(BOTAN_HAS_RDRAND_RNG)
-   #include <botan/rdrand_rng.h>
-#endif
-
-#if defined(BOTAN_HAS_HMAC_DRBG)
-   #include <botan/hmac_drbg.h>
 #endif
 
 #if defined(BOTAN_HAS_HTTP_UTIL)
@@ -44,63 +39,126 @@
 
 namespace Botan_CLI {
 
-std::unique_ptr<Botan::RandomNumberGenerator>
-cli_make_rng(const std::string& rng_type, const std::string& hex_drbg_seed)
+class Print_Help final : public Command
    {
-#if defined(BOTAN_HAS_SYSTEM_RNG)
-   if(rng_type == "system" || rng_type.empty())
-      {
-      return std::unique_ptr<Botan::RandomNumberGenerator>(new Botan::System_RNG);
+   public:
+      Print_Help() : Command("help") {}
+
+      std::string help_text() const override
+         {
+         std::map<std::string, std::vector<std::unique_ptr<Command>>> grouped_commands;
+
+         auto reg_commands = Command::registered_cmds();
+         for(const auto& cmd_name : reg_commands)
+            {
+            auto cmd = Command::get_cmd(cmd_name);
+            if(cmd)
+               {
+               grouped_commands[cmd->group()].push_back(std::move(cmd));
+               }
+            }
+
+         const std::map<std::string, std::string> groups_description {
+            { "encryption", "Encryption" },
+            { "compression", "Compression" },
+            { "codec", "Encoders/Decoders" },
+            { "hash", "Hash Functions" },
+            { "hmac", "HMAC" },
+            { "info", "Informational" },
+            { "numtheory", "Number Theory" },
+            { "passhash", "Password Hashing" },
+            { "psk", "PSK Database" },
+            { "pubkey", "Public Key Cryptography" },
+            { "tls", "TLS" },
+            { "x509", "X.509" },
+            { "misc", "Miscellaneous" }
+         };
+
+      std::ostringstream oss;
+
+      oss << "Usage: botan <cmd> <cmd-options>\n";
+      oss << "All commands support --verbose --help --output= --error-output= --rng-type= --drbg-seed=\n\n";
+      oss << "Available commands:\n\n";
+
+      for(const auto& commands : grouped_commands)
+         {
+         std::string desc = commands.first;
+         if(desc.empty())
+            {
+            continue;
+            }
+
+         oss << Botan::search_map(groups_description, desc, desc) << ":\n";
+         for(auto& cmd : commands.second)
+            {
+            oss << "   " << std::setw(16) << std::left << cmd->cmd_name() << "   " << cmd->description() << "\n";
+            }
+         oss << "\n";
+         }
+
+      return oss.str();
       }
-#endif
 
-#if defined(BOTAN_HAS_RDRAND_RNG)
-   if(rng_type == "rdrand")
-      {
-      if(Botan::CPUID::has_rdrand())
-         return std::unique_ptr<Botan::RandomNumberGenerator>(new Botan::RDRAND_RNG);
-      else
-         throw CLI_Error("RDRAND instruction not supported on this processor");
-      }
-#endif
+      std::string group() const override
+         {
+         return "";
+         }
 
-   const std::vector<uint8_t> drbg_seed = Botan::hex_decode(hex_drbg_seed);
+      std::string description() const override
+         {
+         return "Prints a help string";
+         }
 
-#if defined(BOTAN_HAS_AUTO_SEEDING_RNG)
-   if(rng_type == "auto" || rng_type == "entropy" || rng_type.empty())
-      {
-      std::unique_ptr<Botan::RandomNumberGenerator> rng;
+      void go() override
+         {
+         this->set_return_code(1);
+         output() << help_text();
+         }
+   };
 
-      if(rng_type == "entropy")
-         rng.reset(new Botan::AutoSeeded_RNG(Botan::Entropy_Sources::global_sources()));
-      else
-         rng.reset(new Botan::AutoSeeded_RNG);
+BOTAN_REGISTER_COMMAND("help", Print_Help);
 
-      if(drbg_seed.size() > 0)
-         rng->add_entropy(drbg_seed.data(), drbg_seed.size());
-      return rng;
-      }
-#endif
+class Has_Command final : public Command
+   {
+   public:
+      Has_Command() : Command("has_command cmd") {}
 
-#if defined(BOTAN_HAS_HMAC_DRBG) && defined(BOTAN_AUTO_RNG_HMAC)
-   if(rng_type == "drbg")
-      {
-      std::unique_ptr<Botan::MessageAuthenticationCode> mac =
-         Botan::MessageAuthenticationCode::create(BOTAN_AUTO_RNG_HMAC);
-      std::unique_ptr<Botan::Stateful_RNG> rng(new Botan::HMAC_DRBG(std::move(mac)));
-      rng->add_entropy(drbg_seed.data(), drbg_seed.size());
+      std::string group() const override
+         {
+         return "info";
+         }
 
-      if(rng->is_seeded() == false)
-         throw CLI_Error("For " + rng->name() + " a seed of at least " +
-                         std::to_string(rng->security_level()/8) +
-                         " bytes must be provided");
+      std::string description() const override
+         {
+         return "Test if a command is available";
+         }
 
-      return std::unique_ptr<Botan::RandomNumberGenerator>(rng.release());
-      }
-#endif
+      void go() override
+         {
+         const std::string cmd = get_arg("cmd");
 
-   throw CLI_Error_Unsupported("RNG", rng_type);
-   }
+         bool exists = false;
+         for(auto registered_cmd : Command::registered_cmds())
+            {
+            if(cmd == registered_cmd)
+               {
+               exists = true;
+               break;
+               }
+            }
+
+         if(verbose())
+            {
+            output() << "Command '" << cmd << "' is "
+                     << (exists ? "": "not ") << "available\n";
+            }
+
+         if(exists == false)
+            this->set_return_code(1);
+         }
+   };
+
+BOTAN_REGISTER_COMMAND("has_command", Has_Command);
 
 class Config_Info final : public Command
    {
@@ -114,6 +172,16 @@ class Config_Info final : public Command
                 "   cflags: Print include params\n"
                 "   ldflags: Print linker params\n"
                 "   libs: Print libraries\n";
+         }
+
+      std::string group() const override
+         {
+         return "info";
+         }
+
+      std::string description() const override
+         {
+         return "Print the used prefix, cflags, ldflags or libs";
          }
 
       void go() override
@@ -152,6 +220,16 @@ class Version_Info final : public Command
    public:
       Version_Info() : Command("version --full") {}
 
+      std::string group() const override
+         {
+         return "info";
+         }
+
+      std::string description() const override
+         {
+         return "Print version info";
+         }
+
       void go() override
          {
          if(flag_set("full"))
@@ -160,9 +238,7 @@ class Version_Info final : public Command
             }
          else
             {
-            output() << Botan::version_major() << "."
-                     << Botan::version_minor() << "."
-                     << Botan::version_patch() << "\n";
+            output() << Botan::short_version_string() << "\n";
             }
          }
    };
@@ -174,6 +250,16 @@ class Print_Cpuid final : public Command
    public:
       Print_Cpuid() : Command("cpuid") {}
 
+      std::string group() const override
+         {
+         return "info";
+         }
+
+      std::string description() const override
+         {
+         return "List available processor flags (aes_ni, SIMD extensions, ...)";
+         }
+
       void go() override
          {
          output() << "CPUID flags: " << Botan::CPUID::to_string() << "\n";
@@ -182,10 +268,22 @@ class Print_Cpuid final : public Command
 
 BOTAN_REGISTER_COMMAND("cpuid", Print_Cpuid);
 
+#if defined(BOTAN_HAS_HASH)
+
 class Hash final : public Command
    {
    public:
-      Hash() : Command("hash --algo=SHA-256 --buf-size=4096 *files") {}
+      Hash() : Command("hash --algo=SHA-256 --buf-size=4096 --no-fsname *files") {}
+
+      std::string group() const override
+         {
+         return "hash";
+         }
+
+      std::string description() const override
+         {
+         return "Compute the message digest of given file(s)";
+         }
 
       void go() override
          {
@@ -198,6 +296,7 @@ class Hash final : public Command
             }
 
          const size_t buf_size = get_arg_sz("buf-size");
+         const bool no_fsname = flag_set("no-fsname");
 
          std::vector<std::string> files = get_arg_list("files");
          if(files.empty())
@@ -211,7 +310,12 @@ class Hash final : public Command
                {
                auto update_hash = [&](const uint8_t b[], size_t l) { hash_fn->update(b, l); };
                read_file(fsname, update_hash, buf_size);
-               output() << Botan::hex_encode(hash_fn->final()) << " " << fsname << "\n";
+               const std::string digest = Botan::hex_encode(hash_fn->final());
+
+               if(no_fsname)
+                  output() << digest << "\n";
+               else
+                  output() << digest << " " << fsname << "\n";
                }
             catch(CLI_IO_Error& e)
                {
@@ -223,10 +327,22 @@ class Hash final : public Command
 
 BOTAN_REGISTER_COMMAND("hash", Hash);
 
+#endif
+
 class RNG final : public Command
    {
    public:
       RNG() : Command("rng --system --rdrand --auto --entropy --drbg --drbg-seed= *bytes") {}
+
+      std::string group() const override
+         {
+         return "misc";
+         }
+
+      std::string description() const override
+         {
+         return "Sample random bytes from the specified rng";
+         }
 
       void go() override
          {
@@ -245,7 +361,7 @@ class RNG final : public Command
             }
 
          const std::string drbg_seed = get_arg("drbg-seed");
-         std::unique_ptr<Botan::RNG> rng = cli_make_rng(type, drbg_seed);
+         std::unique_ptr<Botan::RandomNumberGenerator> rng = cli_make_rng(type, drbg_seed);
 
          for(const std::string& req : get_arg_list("bytes"))
             {
@@ -261,11 +377,25 @@ BOTAN_REGISTER_COMMAND("rng", RNG);
 class HTTP_Get final : public Command
    {
    public:
-      HTTP_Get() : Command("http_get url") {}
+      HTTP_Get() : Command("http_get --redirects=1 --timeout=3000 url") {}
+
+      std::string group() const override
+         {
+         return "misc";
+         }
+
+      std::string description() const override
+         {
+         return "Retrieve resource from the passed http/https url";
+         }
 
       void go() override
          {
-         output() << Botan::HTTP::GET_sync(get_arg("url")) << "\n";
+         const std::string url = get_arg("url");
+         const std::chrono::milliseconds timeout(get_arg_sz("timeout"));
+         const size_t redirects = get_arg_sz("redirects");
+
+         output() << Botan::HTTP::GET_sync(url, redirects, timeout) << "\n";
          }
    };
 
@@ -280,6 +410,16 @@ class Hex_Encode final : public Command
    public:
       Hex_Encode() : Command("hex_enc file") {}
 
+      std::string group() const override
+         {
+         return "codec";
+         }
+
+      std::string description() const override
+         {
+         return "Hex encode a given file";
+         }
+
       void go() override
          {
          auto hex_enc_f = [&](const uint8_t b[], size_t l) { output() << Botan::hex_encode(b, l); };
@@ -293,6 +433,16 @@ class Hex_Decode final : public Command
    {
    public:
       Hex_Decode() : Command("hex_dec file") {}
+
+      std::string group() const override
+         {
+         return "codec";
+         }
+
+      std::string description() const override
+         {
+         return "Hex decode a given file";
+         }
 
       void go() override
          {
@@ -317,6 +467,16 @@ class Base64_Encode final : public Command
    public:
       Base64_Encode() : Command("base64_enc file") {}
 
+      std::string group() const override
+         {
+         return "codec";
+         }
+
+      std::string description() const override
+         {
+         return "Encode given file to Base64";
+         }
+
       void go() override
          {
          auto onData = [&](const uint8_t b[], size_t l)
@@ -333,6 +493,16 @@ class Base64_Decode final : public Command
    {
    public:
       Base64_Decode() : Command("base64_dec file") {}
+
+      std::string group() const override
+         {
+         return "codec";
+         }
+
+      std::string description() const override
+         {
+         return "Decode Base64 encoded file";
+         }
 
       void go() override
          {
@@ -357,6 +527,16 @@ class Generate_Bcrypt final : public Command
    public:
       Generate_Bcrypt() : Command("gen_bcrypt --work-factor=12 password") {}
 
+      std::string group() const override
+         {
+         return "passhash";
+         }
+
+      std::string description() const override
+         {
+         return "Calculate the bcrypt password digest of a given file";
+         }
+
       void go() override
          {
          const std::string password = get_arg("password");
@@ -380,6 +560,16 @@ class Check_Bcrypt final : public Command
    {
    public:
       Check_Bcrypt() : Command("check_bcrypt password hash") {}
+
+      std::string group() const override
+         {
+         return "passhash";
+         }
+
+      std::string description() const override
+         {
+         return "Checks a given bcrypt hash against hash";
+         }
 
       void go() override
          {
@@ -407,6 +597,16 @@ class HMAC final : public Command
    {
    public:
       HMAC() : Command("hmac --hash=SHA-256 --buf-size=4096 key *files") {}
+
+      std::string group() const override
+         {
+         return "hmac";
+         }
+
+      std::string description() const override
+         {
+         return "Compute the HMAC tag of given file(s)";
+         }
 
       void go() override
          {

@@ -1,16 +1,15 @@
-os_type unix
 
 soname_suffix "so"
 
 <target_features>
-clock_gettime
-gettimeofday
+posix1
 posix_mlock
-gmtime_r
-dlopen
+
+dev_random
+proc_fs
+clock_gettime
 getauxval
-readdir
-timegm
+
 sockets
 threads
 filesystem

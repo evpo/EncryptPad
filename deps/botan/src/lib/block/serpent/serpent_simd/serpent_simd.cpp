@@ -17,38 +17,38 @@ namespace Botan {
       B1 ^= SIMD_32::splat(m_round_key[4*round+1]);                \
       B2 ^= SIMD_32::splat(m_round_key[4*round+2]);                \
       B3 ^= SIMD_32::splat(m_round_key[4*round+3]);                \
-   } while(0);
+   } while(0)
 
 /*
 * Serpent's linear transformations
 */
 #define transform(B0, B1, B2, B3)                                  \
    do {                                                            \
-      B0.rotate_left(13);                                          \
-      B2.rotate_left(3);                                           \
+      B0 = B0.rotl<13>();                                          \
+      B2 = B2.rotl<3>();                                           \
       B1 ^= B0 ^ B2;                                               \
-      B3 ^= B2 ^ (B0 << 3);                                        \
-      B1.rotate_left(1);                                           \
-      B3.rotate_left(7);                                           \
+      B3 ^= B2 ^ B0.shl<3>();                                      \
+      B1 = B1.rotl<1>();                                           \
+      B3 = B3.rotl<7>();                                           \
       B0 ^= B1 ^ B3;                                               \
-      B2 ^= B3 ^ (B1 << 7);                                        \
-      B0.rotate_left(5);                                           \
-      B2.rotate_left(22);                                          \
-   } while(0);
+      B2 ^= B3 ^ B1.shl<7>();                                      \
+      B0 = B0.rotl<5>();                                           \
+      B2 = B2.rotl<22>();                                          \
+   } while(0)
 
 #define i_transform(B0, B1, B2, B3)                                \
    do {                                                            \
-      B2.rotate_right(22);                                         \
-      B0.rotate_right(5);                                          \
-      B2 ^= B3 ^ (B1 << 7);                                        \
+      B2 = B2.rotr<22>();                                          \
+      B0 = B0.rotr<5>();                                           \
+      B2 ^= B3 ^ B1.shl<7>();                                      \
       B0 ^= B1 ^ B3;                                               \
-      B3.rotate_right(7);                                          \
-      B1.rotate_right(1);                                          \
-      B3 ^= B2 ^ (B0 << 3);                                        \
+      B3 = B3.rotr<7>();                                           \
+      B1 = B1.rotr<1>();                                           \
+      B3 ^= B2 ^ B0.shl<3>();                                      \
       B1 ^= B0 ^ B2;                                               \
-      B2.rotate_right(3);                                          \
-      B0.rotate_right(13);                                         \
-   } while(0);
+      B2 = B2.rotr<3>();                                           \
+      B0 = B0.rotr<13>();                                          \
+   } while(0)
 
 /*
 * SIMD Serpent Encryption of 4 blocks in parallel

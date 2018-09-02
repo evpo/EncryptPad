@@ -15,6 +15,37 @@ mail please use::
 This key can be found in the file ``doc/pgpkey.txt`` or online at
 https://keybase.io/jacklloyd and on most PGP keyservers.
 
+2018
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+* 2018-06-13 (CVE-2018-12435): ECDSA side channel
+
+  A side channel in the ECDSA signature operation could allow a local attacker
+  to recover the secret key. Found by Keegan Ryan of NCC Group.
+
+  Bug introduced in 2.5.0, fixed in 2.7.0. The 1.10 branch is not affected.
+
+* 2018-04-10 (CVE-2018-9860): Memory overread in TLS CBC decryption
+
+  An off by one error in TLS CBC decryption meant that for a particular
+  malformed ciphertext, the receiver would miscompute a length field and HMAC
+  exactly 64K bytes of data following the record buffer as if it was part of the
+  message. This cannot be used to leak information since the MAC comparison will
+  subsequently fail and the connection will be closed. However it might be used
+  for denial of service. Found by OSS-Fuzz.
+
+  Bug introduced in 1.11.32, fixed in 2.6.0
+
+* 2018-03-29 (CVE-2018-9127): Invalid wildcard match
+
+  RFC 6125 wildcard matching was incorrectly implemented, so that a wildcard
+  certificate such as ``b*.domain.com`` would match any hosts ``*b*.domain.com``
+  instead of just server names beginning with ``b``. The host and certificate
+  would still have to be in the same domain name. Reported by Fabian Weißberg of
+  Rohde and Schwarz Cybersecurity.
+
+  Bug introduced in 2.2.0, fixed in 2.5.0
+
 2017
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

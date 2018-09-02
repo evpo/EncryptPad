@@ -6,6 +6,7 @@
 */
 
 #include <botan/cmac.h>
+#include <botan/exceptn.h>
 #include <botan/internal/poly_dbl.h>
 
 namespace Botan {
@@ -25,19 +26,21 @@ secure_vector<uint8_t> CMAC::poly_double(const secure_vector<uint8_t>& in)
 */
 void CMAC::add_data(const uint8_t input[], size_t length)
    {
+   const size_t bs = output_length();
+
    buffer_insert(m_buffer, m_position, input, length);
-   if(m_position + length > output_length())
+   if(m_position + length > bs)
       {
-      xor_buf(m_state, m_buffer, output_length());
+      xor_buf(m_state, m_buffer, bs);
       m_cipher->encrypt(m_state);
-      input += (output_length() - m_position);
-      length -= (output_length() - m_position);
-      while(length > output_length())
+      input += (bs - m_position);
+      length -= (bs - m_position);
+      while(length > bs)
          {
-         xor_buf(m_state, input, output_length());
+         xor_buf(m_state, input, bs);
          m_cipher->encrypt(m_state);
-         input += output_length();
-         length -= output_length();
+         input += bs;
+         length -= bs;
          }
       copy_mem(m_buffer.data(), input, length);
       m_position = 0;
@@ -64,8 +67,7 @@ void CMAC::final_result(uint8_t mac[])
 
    m_cipher->encrypt(m_state);
 
-   for(size_t i = 0; i != output_length(); ++i)
-      mac[i] = m_state[i];
+   copy_mem(mac, m_state.data(), output_length());
 
    zeroise(m_state);
    zeroise(m_buffer);
@@ -120,8 +122,7 @@ CMAC::CMAC(BlockCipher* cipher) :
    m_cipher(cipher),
    m_block_size(m_cipher->block_size())
    {
-   if(m_block_size !=  8 && m_block_size != 16 &&
-      m_block_size != 32 && m_block_size != 64)
+   if(poly_double_supported_size(m_block_size) == false)
       {
       throw Invalid_Argument("CMAC cannot use the " +
                              std::to_string(m_block_size * 8) +

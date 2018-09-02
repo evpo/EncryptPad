@@ -28,22 +28,21 @@ Library Layout
 * ``kdf`` contains the key derivation functions
 * ``mac`` contains the message authentication codes
 * ``pbkdf`` contains password hashing algorithms for key derivation
-* ``math`` is the math library for public key operations. It is divided into
-  four parts: ``mp`` which are the low level algorithms; ``bigint`` which is
-  a C++ wrapper around ``mp``; ``numbertheory`` which contains algorithms like
-  primality testing and exponentiation; and ``ec_gfp`` which defines elliptic
-  curves over prime fields.
-* ``pubkey`` contains the public key implementations
+* ``math`` is the big integer math library. It is divided into three parts:
+  ``mp`` which are the low level algorithms; ``bigint`` which is a C++ wrapper
+  around ``mp``, and ``numbertheory`` which contains higher level algorithms like
+  primality testing and exponentiation
+* ``pubkey`` contains the public key algorithms
 * ``pk_pad`` contains padding schemes for public key algorithms
 * ``rng`` contains the random number generators
-* ``entropy`` has various entropy sources
+* ``entropy`` has various entropy sources used by some of the RNGs
 * ``asn1`` is the DER encoder/decoder
-* ``cert/x509`` is X.509 certificates, PKCS #10 requests, OCSP
+* ``x509`` is X.509 certificates, PKCS #10 requests, OCSP
 * ``tls`` contains the TLS implementation
 * ``filters`` is a filter/pipe API for data transforms
 * ``compression`` has the compression wrappers (zlib, bzip2, lzma)
 * ``ffi`` is the C99 API
-* ``prov`` contains bindings to external libraries like OpenSSL
+* ``prov`` contains bindings to external libraries like OpenSSL and PKCS #11
 * ``misc`` contains odds and ends: format preserving encryption, SRP, threshold
   secret sharing, all or nothing transform, and others
 
@@ -97,12 +96,12 @@ Python
 
 Scripts should be in Python whenever possible.
 
-For configure.py (and install.py) the target is stock (no modules outside the
-standard library) CPython 2.7 plus latest CPython 3.x. Support for CPython 2.6,
-PyPy, etc is great when viable (in the sense of not causing problems for 2.7 or
-3.x, and not requiring huge blocks of version dependent code). As running this
-program succesfully is required for a working build making it as portable as
-possible is considered key.
+For configure.py (and helper scripts install.py, cleanup.py and build_docs.py)
+the target is stock (no modules outside the standard library) CPython 2.7 plus
+latest CPython 3.x. Support for CPython 2.6, PyPy, etc is great when viable (in
+the sense of not causing problems for 2.7 or 3.x, and not requiring huge blocks
+of version dependent code). As running this program succesfully is required for
+a working build, making it as portable as possible is considered key.
 
 The python wrapper botan2.py targets CPython 2.7, 3.x, and latest PyPy. Note that
 a single file is used to avoid dealing with any of Python's various crazy module
@@ -121,8 +120,10 @@ If you don't already use it for all your C/C++ development, install
 ``ccache`` now and configure a large cache on a fast disk. It allows for
 very quick rebuilds by caching the compiler output.
 
-Use ``--with-sanitizers`` to enable ASan. UBSan has to be added separately
-with ``--cc-abi-flags`` at the moment as GCC 4.8 does not have UBSan.
+Use ``--enable-sanitizers=`` flag to enable various sanitizer checks.
+Supported values including "address" and "undefined" for GCC and
+Clang.  GCC also supports "iterator" (checked iterators), and Clang
+supports "memory" (MSan) and "coverage" (for fuzzing).
 
 Copyright Notice
 ========================================
@@ -203,7 +204,7 @@ on, so there are some existing examples of appropriate use.
 
 Generally intrinsics or inline asm is preferred over bare assembly to avoid
 calling convention issues among different platforms; the improvement in
-maintainability is seen as worth any potentially performance tradeoff. One risk
+maintainability is seen as worth any potential performance tradeoff. One risk
 with intrinsics is that the compiler might rewrite your clever const-time SIMD
 into something with a conditional jump, but code intended to be const-time
 should in any case be annotated so it can be checked at runtime with tools.
@@ -238,20 +239,19 @@ additional lines of code in the library. That is, if the library really does
 need this functionality, and it can be done in the library for less than that,
 then it makes sense to just write the code. Yup.
 
-Given the entire library is (accoriding to SLOCcount) 62K lines of code, that
+Given the entire library is (according to cloc) 92K lines of code, that
 may give some estimate of the bar - you can do pretty much anything in 1000
 lines of well written C++11 (the implementations of *all* of the message
 authentication codes is much less than 1K SLOC).
 
 Current the (optional) external dependencies of the library are OpenSSL (for
 access to fast and side channel hardened RSA, ECDSA, AES), zlib, bzip2, lzma,
-sqlite3, Trousers (TPM integration), plus various operating system utilities
-like basic filesystem operations. These provide major pieces of functionality
-which seem worth the trouble of maintaining an integration with.
+sqlite3, Trousers (TPM integration), PKCS #11, plus various operating system
+utilities like basic filesystem operations. These provide major pieces of
+functionality which seem worth the trouble of maintaining an integration with.
 
 Examples of other external dependencies that would be appropriate include
-integration with system crypto (PKCS #11, TPM, CommonCrypto, CryptoAPI
-algorithms), potentially a parallelism framework such as Cilk (as part of a
-larger design for parallel message processing, say), or hypothentically use of a
-safe ASN.1 parser (that is, one written in a safe language like Rust or OCaml
-providing a C API).
+integration with system crypto (/dev/crypto, CommonCrypto, CryptoAPI, ...),
+potentially a parallelism framework such as Cilk (as part of a larger design for
+parallel message processing, say), or hypothentically use of a safe ASN.1 parser
+(that is, one written in a safe language like Rust or OCaml providing a C API).

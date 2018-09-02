@@ -8,7 +8,7 @@
 
 #include "cli.h"
 
-#if defined(BOTAN_HAS_TLS) && defined(BOTAN_HAS_BOOST_ASIO)
+#if defined(BOTAN_HAS_TLS) && defined(BOTAN_HAS_BOOST_ASIO) && defined(BOTAN_TARGET_OS_HAS_FILESYSTEM)
 
 #include <iostream>
 #include <string>
@@ -60,7 +60,8 @@ void log_text_message(const char* where,  const uint8_t buf[], size_t buf_len)
    //std::cout << where << ' ' << std::string(c, c + buf_len)  << std::endl;
    }
 
-class tls_proxy_session : public boost::enable_shared_from_this<tls_proxy_session>, public Botan::TLS::Callbacks
+class tls_proxy_session final : public boost::enable_shared_from_this<tls_proxy_session>,
+                                public Botan::TLS::Callbacks
    {
    public:
       enum { readbuf_size = 4 * 1024 };
@@ -337,7 +338,7 @@ class tls_proxy_session : public boost::enable_shared_from_this<tls_proxy_sessio
       std::vector<uint8_t> m_p2s_pending;
    };
 
-class tls_proxy_server
+class tls_proxy_server final
    {
    public:
       typedef tls_proxy_session session;
@@ -410,6 +411,25 @@ class TLS_Proxy final : public Command
       TLS_Proxy() : Command("tls_proxy listen_port target_host target_port server_cert server_key "
                                "--threads=0 --session-db= --session-db-pass=") {}
 
+      std::string group() const override
+         {
+         return "tls";
+         }
+
+      std::string description() const override
+         {
+         return "Proxies requests between a TLS client and a TLS server";
+         }
+
+      size_t thread_count() const
+         {
+         if(size_t t = get_arg_sz("threads"))
+            return t;
+         if(size_t t = std::thread::hardware_concurrency())
+            return t;
+         return 2;
+         }
+
       void go() override
          {
          const size_t listen_port = get_arg_sz("listen_port");
@@ -419,7 +439,7 @@ class TLS_Proxy final : public Command
          const std::string server_crt = get_arg("server_cert");
          const std::string server_key = get_arg("server_key");
 
-         const size_t num_threads = get_arg_sz("threads") || std::thread::hardware_concurrency() || 2;
+         const size_t num_threads = thread_count();
 
          Basic_Credentials_Manager creds(rng(), server_crt, server_key);
 

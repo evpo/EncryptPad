@@ -9,8 +9,10 @@
 #if defined(BOTAN_HAS_NUMBERTHEORY)
    #include <botan/bigint.h>
    #include <botan/numthry.h>
+   #include <botan/reducer.h>
    #include <botan/pow_mod.h>
    #include <botan/parsing.h>
+   #include "test_rng.h"
 #endif
 
 namespace Botan_Tests {
@@ -87,11 +89,15 @@ class BigInt_Unit_Tests final : public Test
          {
          Test::Result result("BigInt prime generation");
 
-         result.test_throws("Invalid arg", []() { Botan::random_prime(Test::rng(), 0); });
-         result.test_throws("Invalid arg", []() { Botan::random_prime(Test::rng(), 1); });
-         result.test_throws("Invalid arg", []() { Botan::random_prime(Test::rng(), 2, 0); });
-         result.test_throws("Invalid arg", []() { Botan::random_prime(Test::rng(), 2, 1, 1, 3); });
-         result.test_throws("Invalid arg", []() { Botan::random_prime(Test::rng(), 2, 1, 0, 2); });
+         result.test_throws("Invalid bit size",
+                            "Invalid argument random_prime: Can't make a prime of 0 bits",
+                            []() { Botan::random_prime(Test::rng(), 0); });
+         result.test_throws("Invalid bit size",
+                            "Invalid argument random_prime: Can't make a prime of 1 bits",
+                            []() { Botan::random_prime(Test::rng(), 1); });
+         result.test_throws("Invalid arg",
+                            "Invalid argument random_prime Invalid value for equiv/modulo",
+                            []() { Botan::random_prime(Test::rng(), 2, 1, 0, 2); });
 
          BigInt p = Botan::random_prime(Test::rng(), 2);
          result.confirm("Only two 2-bit primes", p == 2 || p == 3);
@@ -134,54 +140,39 @@ class BigInt_Unit_Tests final : public Test
 
          result.start_timer();
 
-         // A value of 500 caused a non-negligible amount of test failures
-         const size_t ITERATIONS_PER_POSSIBLE_VALUE = 750;
+         const size_t SAMPLES = 500000;
 
-         std::vector<size_t> min_ranges{ 0 };
-         std::vector<size_t> max_ranges{ 10 };
+         const uint64_t range_min = 0;
+         const uint64_t range_max = 100;
 
-         if(Test::run_long_tests())
+         /*
+         * We have a range of 0...100 thus 100 degrees of freedom.
+         * This bound is 99.9% probability of non-uniform
+         */
+         const double CHI_CRIT = 148.230;
+
+         std::map<uint32_t, size_t> counts;
+
+         for(size_t i = 0; i != SAMPLES; ++i)
             {
-            // This gets slow quickly:
-            min_ranges.push_back(7);
-            max_ranges.push_back(113);
+            uint32_t r = BigInt::random_integer(Test::rng(), range_min, range_max).to_u32bit();
+            counts[r] += 1;
             }
 
-         for(size_t range_min : min_ranges)
+         // Chi-square test
+         const double expected = static_cast<double>(SAMPLES) / (range_max - range_min);
+         double chi2 = 0;
+
+         for(auto sample : counts)
             {
-            for(size_t range_max : max_ranges)
-               {
-               if(range_min >= range_max)
-                  {
-                  continue;
-                  }
-
-               std::vector<size_t> counts(range_max - range_min);
-
-               for(size_t i = 0; i != counts.size() * ITERATIONS_PER_POSSIBLE_VALUE; ++i)
-                  {
-                  uint32_t r = BigInt::random_integer(Test::rng(), range_min, range_max).to_u32bit();
-                  result.test_gte("random_integer", r, range_min);
-                  result.test_lt("random_integer", r, range_max);
-                  counts[r - range_min] += 1;
-                  }
-
-               for(const auto count : counts)
-                  {
-                  double ratio = static_cast<double>(count) / ITERATIONS_PER_POSSIBLE_VALUE;
-
-                  if(ratio >= 0.85 && ratio <= 1.15) // +/-15 %
-                     {
-                     result.test_success("distribution within expected range");
-                     }
-                  else
-                     {
-                     result.test_failure("distribution ratio outside expected range (+/-15 %): " +
-                                         std::to_string(ratio));
-                     }
-                  }
-               }
+            const double count = sample.second;
+            chi2 += ((count - expected)*(count - expected)) / expected;
             }
+
+         if(chi2 >= CHI_CRIT)
+            result.test_failure("Failed Chi-square test, value " + std::to_string(chi2));
+         else
+            result.test_success("Passed Chi-square test, value " + std::to_string(chi2));
 
          result.end_timer();
 
@@ -266,10 +257,9 @@ class BigInt_Add_Test final : public Text_Based_Test
 
          using Botan::BigInt;
 
-         const BigInt a = get_req_bn(vars, "In1");
-         const BigInt b = get_req_bn(vars, "In2");
-         const BigInt c = get_req_bn(vars, "Output");
-         BigInt d = a + b;
+         const BigInt a = vars.get_req_bn("In1");
+         const BigInt b = vars.get_req_bn("In2");
+         const BigInt c = vars.get_req_bn("Output");
 
          result.test_eq("a + b", a + b, c);
          result.test_eq("b + a", b + a, c);
@@ -298,11 +288,9 @@ class BigInt_Sub_Test final : public Text_Based_Test
          {
          Test::Result result("BigInt Subtraction");
 
-         const BigInt a = get_req_bn(vars, "In1");
-         const BigInt b = get_req_bn(vars, "In2");
-         const BigInt c = get_req_bn(vars, "Output");
-
-         BigInt d = a - b;
+         const BigInt a = vars.get_req_bn("In1");
+         const BigInt b = vars.get_req_bn("In2");
+         const BigInt c = vars.get_req_bn("Output");
 
          result.test_eq("a - b", a - b, c);
 
@@ -325,9 +313,9 @@ class BigInt_Mul_Test final : public Text_Based_Test
          {
          Test::Result result("BigInt Multiply");
 
-         const BigInt a = get_req_bn(vars, "In1");
-         const BigInt b = get_req_bn(vars, "In2");
-         const BigInt c = get_req_bn(vars, "Output");
+         const BigInt a = vars.get_req_bn("In1");
+         const BigInt b = vars.get_req_bn("In2");
+         const BigInt c = vars.get_req_bn("Output");
 
          result.test_eq("a * b", a * b, c);
          result.test_eq("b * a", b * a, c);
@@ -355,8 +343,8 @@ class BigInt_Sqr_Test final : public Text_Based_Test
          {
          Test::Result result("BigInt Square");
 
-         const BigInt input = get_req_bn(vars, "Input");
-         const BigInt output = get_req_bn(vars, "Output");
+         const BigInt input = vars.get_req_bn("Input");
+         const BigInt output = vars.get_req_bn("Output");
 
          result.test_eq("a * a", input * input, output);
          result.test_eq("sqr(a)", square(input), output);
@@ -376,9 +364,9 @@ class BigInt_Div_Test final : public Text_Based_Test
          {
          Test::Result result("BigInt Divide");
 
-         const BigInt a = get_req_bn(vars, "In1");
-         const BigInt b = get_req_bn(vars, "In2");
-         const BigInt c = get_req_bn(vars, "Output");
+         const BigInt a = vars.get_req_bn("In1");
+         const BigInt b = vars.get_req_bn("In2");
+         const BigInt c = vars.get_req_bn("Output");
 
          result.test_eq("a / b", a / b, c);
 
@@ -401,15 +389,18 @@ class BigInt_Mod_Test final : public Text_Based_Test
          {
          Test::Result result("BigInt Mod");
 
-         const BigInt a = get_req_bn(vars, "In1");
-         const BigInt b = get_req_bn(vars, "In2");
-         const BigInt c = get_req_bn(vars, "Output");
+         const BigInt a = vars.get_req_bn("In1");
+         const BigInt b = vars.get_req_bn("In2");
+         const BigInt c = vars.get_req_bn("Output");
 
          result.test_eq("a % b", a % b, c);
 
          BigInt e = a;
          e %= b;
          result.test_eq("a %= b", e, c);
+
+         const Botan::Modular_Reducer mod_b(b);
+         result.test_eq("Barrett", mod_b.reduce(a), c);
 
          // if b fits into a Botan::word test %= operator for words
          if(b.bytes() <= sizeof(Botan::word))
@@ -435,9 +426,9 @@ class BigInt_GCD_Test final : public Text_Based_Test
          {
          Test::Result result("BigInt Mod");
 
-         const BigInt x = get_req_bn(vars, "X");
-         const BigInt y = get_req_bn(vars, "Y");
-         const BigInt expected = get_req_bn(vars, "GCD");
+         const BigInt x = vars.get_req_bn("X");
+         const BigInt y = vars.get_req_bn("Y");
+         const BigInt expected = vars.get_req_bn("GCD");
 
          const BigInt g = Botan::gcd(x, y);
 
@@ -457,9 +448,9 @@ class BigInt_Lshift_Test final : public Text_Based_Test
          {
          Test::Result result("BigInt Lshift");
 
-         const BigInt value = get_req_bn(vars, "Value");
-         const size_t shift = get_req_bn(vars, "Shift").to_u32bit();
-         const BigInt output = get_req_bn(vars, "Output");
+         const BigInt value = vars.get_req_bn("Value");
+         const size_t shift = vars.get_req_bn("Shift").to_u32bit();
+         const BigInt output = vars.get_req_bn("Output");
 
          result.test_eq("a << s", value << shift, output);
 
@@ -482,9 +473,9 @@ class BigInt_Rshift_Test final : public Text_Based_Test
          {
          Test::Result result("BigInt Rshift");
 
-         const BigInt value = get_req_bn(vars, "Value");
-         const size_t shift = get_req_bn(vars, "Shift").to_u32bit();
-         const BigInt output = get_req_bn(vars, "Output");
+         const BigInt value = vars.get_req_bn("Value");
+         const size_t shift = vars.get_req_bn("Shift").to_u32bit();
+         const BigInt output = vars.get_req_bn("Output");
 
          result.test_eq("a >> s", value >> shift, output);
 
@@ -507,10 +498,10 @@ class BigInt_Powmod_Test final : public Text_Based_Test
          {
          Test::Result result("BigInt Powmod");
 
-         const BigInt base = get_req_bn(vars, "Base");
-         const BigInt exponent = get_req_bn(vars, "Exponent");
-         const BigInt modulus = get_req_bn(vars, "Modulus");
-         const BigInt expected = get_req_bn(vars, "Output");
+         const BigInt base = vars.get_req_bn("Base");
+         const BigInt exponent = vars.get_req_bn("Exponent");
+         const BigInt modulus = vars.get_req_bn("Modulus");
+         const BigInt expected = vars.get_req_bn("Output");
 
          result.test_eq("power_mod", Botan::power_mod(base, exponent, modulus), expected);
 
@@ -563,7 +554,7 @@ class BigInt_IsPrime_Test final : public Text_Based_Test
             throw Test_Error("Bad header for prime test " + header);
             }
 
-         const BigInt value = get_req_bn(vars, "X");
+         const BigInt value = vars.get_req_bn("X");
          const bool is_prime = (header == "Prime");
 
          Test::Result result("BigInt Test " + header);
@@ -583,9 +574,9 @@ class BigInt_Ressol_Test final : public Text_Based_Test
          {
          Test::Result result("BigInt Ressol");
 
-         const Botan::BigInt a = get_req_bn(vars, "Input");
-         const Botan::BigInt p = get_req_bn(vars, "Modulus");
-         const Botan::BigInt exp = get_req_bn(vars, "Output");
+         const Botan::BigInt a = vars.get_req_bn("Input");
+         const Botan::BigInt p = vars.get_req_bn("Modulus");
+         const Botan::BigInt exp = vars.get_req_bn("Output");
 
          const Botan::BigInt a_sqrt = Botan::ressol(a, p);
 
@@ -612,11 +603,11 @@ class BigInt_InvMod_Test final : public Text_Based_Test
          {
          Test::Result result("BigInt InvMod");
 
-         const Botan::BigInt a = get_req_bn(vars, "Input");
-         const Botan::BigInt mod = get_req_bn(vars, "Modulus");
-         const Botan::BigInt expected = get_req_bn(vars, "Output");
+         const Botan::BigInt a = vars.get_req_bn("Input");
+         const Botan::BigInt mod = vars.get_req_bn("Modulus");
+         const Botan::BigInt expected = vars.get_req_bn("Output");
 
-         const Botan::BigInt a_inv = Botan::inverse_mod(a, mod);
+         const Botan::BigInt a_inv = Botan::inverse_euclid(a, mod);
 
          result.test_eq("inverse_mod", a_inv, expected);
 
@@ -625,7 +616,7 @@ class BigInt_InvMod_Test final : public Text_Based_Test
             result.test_eq("inverse ok", (a * a_inv) % mod, 1);
             }
 
-         if(mod.is_odd())
+         if(mod.is_odd() && a < mod)
             {
             result.test_eq("ct_inverse_odd_modulus",
                            ct_inverse_mod_odd_modulus(a, mod),
@@ -645,6 +636,31 @@ class BigInt_InvMod_Test final : public Text_Based_Test
 
 BOTAN_REGISTER_TEST("bn_invmod", BigInt_InvMod_Test);
 
+class BigInt_Rand_Test final : public Text_Based_Test
+   {
+   public:
+      BigInt_Rand_Test() : Text_Based_Test("bn/random.vec", "Seed,Min,Max,Output") {}
+
+      Test::Result run_one_test(const std::string&, const VarMap& vars) override
+         {
+         Test::Result result("BigInt Random");
+
+         const std::vector<uint8_t> seed = vars.get_req_bin("Seed");
+         const Botan::BigInt min = vars.get_req_bn("Min");
+         const Botan::BigInt max = vars.get_req_bn("Max");
+         const Botan::BigInt expected = vars.get_req_bn("Output");
+
+         Fixed_Output_RNG rng(seed);
+         Botan::BigInt generated = BigInt::random_integer(rng, min, max);
+
+         result.test_eq("random_integer KAT", generated, expected);
+
+         return result;
+         }
+   };
+
+BOTAN_REGISTER_TEST("bn_rand", BigInt_Rand_Test);
+
 class DSA_ParamGen_Test final : public Text_Based_Test
    {
    public:
@@ -652,11 +668,11 @@ class DSA_ParamGen_Test final : public Text_Based_Test
 
       Test::Result run_one_test(const std::string& header, const VarMap& vars) override
          {
-         const std::vector<uint8_t> seed = get_req_bin(vars, "Seed");
-         const size_t offset = get_req_sz(vars, "Counter");
+         const std::vector<uint8_t> seed = vars.get_req_bin("Seed");
+         const size_t offset = vars.get_req_sz("Counter");
 
-         const Botan::BigInt exp_P = get_req_bn(vars, "P");
-         const Botan::BigInt exp_Q = get_req_bn(vars, "Q");
+         const Botan::BigInt exp_P = vars.get_req_bn("P");
+         const Botan::BigInt exp_Q = vars.get_req_bn("Q");
 
          const std::vector<std::string> header_parts = Botan::split_on(header, ',');
 
@@ -669,12 +685,6 @@ class DSA_ParamGen_Test final : public Text_Based_Test
          const size_t q_bits = Botan::to_u32bit(header_parts[0]);
 
          Test::Result result("DSA Parameter Generation");
-
-         // These tests are very slow so skip in normal runs
-         if(p_bits > 1024 && Test::run_long_tests() == false)
-            {
-            return result;
-            }
 
          try
             {

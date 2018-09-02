@@ -16,11 +16,11 @@ namespace Botan {
 */
 std::ostream& operator<<(std::ostream& stream, Pipe& pipe)
    {
-   secure_vector<uint8_t> buffer(DEFAULT_BUFFERSIZE);
+   secure_vector<uint8_t> buffer(BOTAN_DEFAULT_BUFFER_SIZE);
    while(stream.good() && pipe.remaining())
       {
       const size_t got = pipe.read(buffer.data(), buffer.size());
-      stream.write(reinterpret_cast<const char*>(buffer.data()), got);
+      stream.write(cast_uint8_ptr_to_char(buffer.data()), got);
       }
    if(!stream.good())
       throw Stream_IO_Error("Pipe output operator (iostream) has failed");
@@ -32,10 +32,10 @@ std::ostream& operator<<(std::ostream& stream, Pipe& pipe)
 */
 std::istream& operator>>(std::istream& stream, Pipe& pipe)
    {
-   secure_vector<uint8_t> buffer(DEFAULT_BUFFERSIZE);
+   secure_vector<uint8_t> buffer(BOTAN_DEFAULT_BUFFER_SIZE);
    while(stream.good())
       {
-      stream.read(reinterpret_cast<char*>(buffer.data()), buffer.size());
+      stream.read(cast_uint8_ptr_to_char(buffer.data()), buffer.size());
       const size_t got = static_cast<size_t>(stream.gcount());
       pipe.write(buffer.data(), got);
       }

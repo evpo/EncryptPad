@@ -15,10 +15,7 @@
 
 namespace Botan_FFI {
 
-#define BOTAN_ASSERT_ARG_NON_NULL(p) \
-   do { if(!p) throw Botan::Invalid_Argument("Argument " #p " is null"); } while(0)
-
-class FFI_Error final : public Botan::Exception
+class BOTAN_UNSTABLE_API FFI_Error final : public Botan::Exception
    {
    public:
       explicit FFI_Error(const std::string& what) : Exception("FFI error", what) {}
@@ -33,11 +30,8 @@ struct botan_struct
 
       bool magic_ok() const { return (m_magic == MAGIC); }
 
-      T* get() const
+      T* unsafe_get() const
          {
-         if(magic_ok() == false)
-            throw FFI_Error("Bad magic " + std::to_string(m_magic) +
-                            " in ffi object expected " + std::to_string(MAGIC));
          return m_obj.get();
          }
    private:
@@ -46,7 +40,7 @@ struct botan_struct
    };
 
 #define BOTAN_FFI_DECLARE_STRUCT(NAME, TYPE, MAGIC) \
-   struct NAME final : public botan_struct<TYPE, MAGIC> { explicit NAME(TYPE* x) : botan_struct(x) {} }
+   struct NAME final : public Botan_FFI::botan_struct<TYPE, MAGIC> { explicit NAME(TYPE* x) : botan_struct(x) {} }
 
 // Declared in ffi.cpp
 int ffi_error_exception_thrown(const char* func_name, const char* exn);
@@ -56,19 +50,14 @@ T& safe_get(botan_struct<T,M>* p)
    {
    if(!p)
       throw FFI_Error("Null pointer argument");
-   if(T* t = p->get())
-      return *t;
-   throw FFI_Error("Invalid object pointer");
-   }
+   if(p->magic_ok() == false)
+      throw FFI_Error("Bad magic in ffi object");
 
-template<typename T, uint32_t M>
-const T& safe_get(const botan_struct<T,M>* p)
-   {
-   if(!p)
-      throw FFI_Error("Null pointer argument");
-   if(const T* t = p->get())
+   T* t = p->unsafe_get();
+   if(t)
       return *t;
-   throw FFI_Error("Invalid object pointer");
+   else
+      throw FFI_Error("Invalid object pointer");
    }
 
 template<typename Thunk>
@@ -78,7 +67,7 @@ int ffi_guard_thunk(const char* func_name, Thunk thunk)
       {
       return thunk();
       }
-   catch(std::bad_alloc)
+   catch(std::bad_alloc&)
       {
       return ffi_error_exception_thrown(func_name, "bad_alloc");
       }
@@ -97,27 +86,13 @@ int ffi_guard_thunk(const char* func_name, Thunk thunk)
 template<typename T, uint32_t M, typename F>
 int apply_fn(botan_struct<T, M>* o, const char* func_name, F func)
    {
-   try
-      {
-      if(!o)
-         throw FFI_Error("Null object to " + std::string(func_name));
-      if(T* t = o->get())
-         return func(*t);
-      }
-   catch(std::bad_alloc)
-      {
-      return ffi_error_exception_thrown(func_name, "bad_alloc");
-      }
-   catch(std::exception& e)
-      {
-      return ffi_error_exception_thrown(func_name, e.what());
-      }
-   catch(...)
-      {
-      return ffi_error_exception_thrown(func_name, "unknown exception");
-      }
+   if(!o)
+      return BOTAN_FFI_ERROR_NULL_POINTER;
 
-   return BOTAN_FFI_ERROR_UNKNOWN_ERROR;
+   if(o->magic_ok() == false)
+      return BOTAN_FFI_ERROR_INVALID_OBJECT;
+
+   return ffi_guard_thunk(func_name, [&]() { return func(*o->unsafe_get()); });
    }
 
 #define BOTAN_FFI_DO(T, obj, param, block)                              \
@@ -133,7 +108,7 @@ int ffi_delete_object(botan_struct<T, M>* obj, const char* func_name)
          return BOTAN_FFI_SUCCESS; // ignore delete of null objects
 
       if(obj->magic_ok() == false)
-         return BOTAN_FFI_ERROR_INVALID_INPUT;
+         return BOTAN_FFI_ERROR_INVALID_OBJECT;
 
       delete obj;
       return BOTAN_FFI_SUCCESS;
@@ -176,19 +151,20 @@ int write_vec_output(uint8_t out[], size_t* out_len, const std::vector<uint8_t, 
 inline int write_str_output(uint8_t out[], size_t* out_len, const std::string& str)
    {
    return write_output(out, out_len,
-                       reinterpret_cast<const uint8_t*>(str.c_str()),
+                       Botan::cast_char_ptr_to_uint8(str.data()),
                        str.size() + 1);
    }
 
 inline int write_str_output(char out[], size_t* out_len, const std::string& str)
    {
-   return write_str_output(reinterpret_cast<uint8_t*>(out), out_len, str);
+   return write_str_output(Botan::cast_char_ptr_to_uint8(out), out_len, str);
    }
 
 inline int write_str_output(char out[], size_t* out_len, const std::vector<uint8_t>& str_vec)
    {
-   return write_output(reinterpret_cast<uint8_t*>(out), out_len,
-                       reinterpret_cast<const uint8_t*>(str_vec.data()),
+   return write_output(Botan::cast_char_ptr_to_uint8(out),
+                       out_len,
+                       str_vec.data(),
                        str_vec.size());
    }
 
