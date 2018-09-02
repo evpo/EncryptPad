@@ -1,7 +1,12 @@
+include ../deps/makefiles/platform.mak
 GTEST_DIR = ../deps/gtest/googletest
 TARGET_DIR = $(GTEST_DIR)/build
 
 MKDIR_P := mkdir -p
+
+ifeq ($(PLATFORM),MACOS)
+CXXFLAGS += -m64 -stdlib=libc++
+endif
 
 # Flags passed to the preprocessor.
 # Set Google Test's header directory as a system directory, such that
