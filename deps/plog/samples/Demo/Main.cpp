@@ -4,6 +4,7 @@
 
 #include <plog/Log.h>
 #include "MyClass.h"
+#include "Customer.h"
 
 int main()
 {
@@ -21,6 +22,7 @@ int main()
     LOG_WARNING << "This is a WARNING message";
     LOG_ERROR << "This is an ERROR message";
     LOG_FATAL << "This is a FATAL message";
+    LOG_NONE << "This is a NONE message";
 
     // Integers demo.
     LOG_INFO << "This is a bool: " << std::boolalpha << true;
@@ -35,20 +37,32 @@ int main()
     LOG_INFO << "This is a float: " << 1.2345f;
     LOG_INFO << "This is a double: " << std::setprecision(15) << 1.234512345;
 
+    // Managed string.
+#ifdef __cplusplus_cli
+    System::String^ managedStr = "This is a managed string";
+    LOG_INFO << managedStr;
+#endif
+
     // Null strings are safe.
     LOG_DEBUG << static_cast<char*>(NULL);
-    LOG_DEBUG << static_cast<wchar_t*>(NULL);
     LOG_DEBUG << static_cast<const char*>(NULL);
+
+#if PLOG_ENABLE_WCHAR_INPUT
+    LOG_DEBUG << static_cast<wchar_t*>(NULL);
     LOG_DEBUG << static_cast<const wchar_t*>(NULL);
+#endif
 
     // Plog handles unicode and std::string/wstring.
 #ifndef _WIN32 // On Windows the following code produces a warning C4566 if the codepage is not Cyrillic.
     LOG_DEBUG << "Cat - котэ";
     LOG_DEBUG << std::string("test - тест");
 #endif
+
+#if PLOG_ENABLE_WCHAR_INPUT
     LOG_DEBUG << L"Cat - котэ";
     LOG_DEBUG << std::wstring(L"test - тест");
     LOG_DEBUG << L'ы';
+#endif
 
     // Multiline.
     LOG_INFO << "This\nis\na" << std::endl << "multiline\nmessage!";
@@ -61,6 +75,16 @@ int main()
     LOG_DEBUG_IF(var != 0) << "You shouldn't see this message";
     LOG_DEBUG_IF(var == 0) << "This is a conditional log message";
 
+    // Executed only on log level >= debug.
+    IF_LOG(plog::debug) var = 5; // one line
+    IF_LOG(plog::debug) // block
+    {
+        var++;
+    }
+
+    // Log macros don't break then-else clause without braces.
+    if (var == 0) LOGI << "then clause (condition is false, so it is skipped)"; else LOGI << "else clase (should be visible)";
+
     // Log in a class (capture this pointer, c++ function names).
     MyClass obj;
     obj.method();
@@ -70,6 +94,10 @@ int main()
 
     // Implicit cast to string.
     LOG_INFO << obj;
+
+    // ostream operator<< (on Windows wostream operator<< has priority but not required)
+    Customer customer = { 10, "John" };
+    LOG_INFO << customer;
 
     return 0;
 }

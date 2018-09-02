@@ -1,4 +1,6 @@
 #pragma once
+#include <plog/Appenders/IAppender.h>
+#include <plog/WinApi.h>
 
 namespace plog
 {
@@ -8,7 +10,7 @@ namespace plog
     public:
         virtual void write(const Record& record)
         {
-            ::OutputDebugStringW(Formatter::format(record).c_str());
+            OutputDebugStringW(Formatter::format(record).c_str());
         }
     };
 }

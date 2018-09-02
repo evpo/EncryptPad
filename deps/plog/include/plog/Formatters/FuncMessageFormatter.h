@@ -1,5 +1,5 @@
 #pragma once
-#include <iomanip>
+#include <plog/Record.h>
 #include <plog/Util.h>
 
 namespace plog
@@ -14,9 +14,8 @@ namespace plog
 
         static util::nstring format(const Record& record)
         {
-            util::nstringstream ss;
-            ss << record.getFunc() << "@" << record.getLine() << ": ";
-            ss << record.getMessage() << "\n";
+            util::nostringstream ss;
+            ss << record.getFunc() << PLOG_NSTR("@") << record.getLine() << PLOG_NSTR(": ") << record.getMessage() << PLOG_NSTR("\n");
 
             return ss.str();
         }

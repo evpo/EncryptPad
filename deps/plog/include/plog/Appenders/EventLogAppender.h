@@ -1,4 +1,6 @@
 #pragma once
+#include <plog/Appenders/IAppender.h>
+#include <plog/WinApi.h>
 
 namespace plog
 {
@@ -6,13 +8,13 @@ namespace plog
     class EventLogAppender : public IAppender
     {
     public:
-        EventLogAppender(const wchar_t* sourceName) : m_eventSource(::RegisterEventSourceW(NULL, sourceName))
+        EventLogAppender(const wchar_t* sourceName) : m_eventSource(RegisterEventSourceW(NULL, sourceName))
         {
         }
 
         ~EventLogAppender()
         {
-            ::DeregisterEventSource(m_eventSource);
+            DeregisterEventSource(m_eventSource);
         }
 
         virtual void write(const Record& record)
@@ -20,7 +22,7 @@ namespace plog
             std::wstring str = Formatter::format(record);
             const wchar_t* logMessagePtr[] = { str.c_str() };
 
-            ::ReportEventW(m_eventSource, logSeverityToType(record.getSeverity()), static_cast<WORD>(record.getSeverity()), 0, NULL, 1, 0, logMessagePtr, NULL);
+            ReportEventW(m_eventSource, logSeverityToType(record.getSeverity()), static_cast<WORD>(record.getSeverity()), 0, NULL, 1, 0, logMessagePtr, NULL);
         }
 
     private:
@@ -30,16 +32,16 @@ namespace plog
             {
             case plog::fatal:
             case plog::error:
-                return EVENTLOG_ERROR_TYPE;
+                return eventLog::kErrorType;
 
             case plog::warning:
-                return EVENTLOG_WARNING_TYPE;
+                return eventLog::kWarningType;
 
             case plog::info:
             case plog::debug:
             case plog::verbose:
             default:
-                return EVENTLOG_INFORMATION_TYPE;
+                return eventLog::kInformationType;
             }
         }
 
@@ -50,22 +52,42 @@ namespace plog
     class EventLogAppenderRegistry
     {
     public:
-        static void add(const wchar_t* sourceName, const wchar_t* logName = L"Application")
+        static bool add(const wchar_t* sourceName, const wchar_t* logName = L"Application")
         {
             std::wstring logKeyName;
             std::wstring sourceKeyName;
             getKeyNames(sourceName, logName, sourceKeyName, logKeyName);
 
             HKEY sourceKey;
-            ::RegCreateKeyExW(HKEY_LOCAL_MACHINE, sourceKeyName.c_str(), 0, NULL, REG_OPTION_NON_VOLATILE, KEY_SET_VALUE, NULL, &sourceKey, NULL);
+            if (0 != RegCreateKeyExW(hkey::kLocalMachine, sourceKeyName.c_str(), 0, NULL, 0, regSam::kSetValue, NULL, &sourceKey, NULL))
+            {
+                return false;
+            }
 
-            const DWORD kTypesSupported = EVENTLOG_ERROR_TYPE | EVENTLOG_WARNING_TYPE | EVENTLOG_INFORMATION_TYPE;
-            ::RegSetValueExW(sourceKey, L"TypesSupported", 0, REG_DWORD, reinterpret_cast<const BYTE*>(&kTypesSupported), sizeof(DWORD));
+            const DWORD kTypesSupported = eventLog::kErrorType | eventLog::kWarningType | eventLog::kInformationType;
+            RegSetValueExW(sourceKey, L"TypesSupported", 0, regType::kDword, &kTypesSupported, sizeof(kTypesSupported));
 
             const wchar_t kEventMessageFile[] = L"%windir%\\Microsoft.NET\\Framework\\v4.0.30319\\EventLogMessages.dll;%windir%\\Microsoft.NET\\Framework\\v2.0.50727\\EventLogMessages.dll";
-            ::RegSetValueExW(sourceKey, L"EventMessageFile", 0, REG_EXPAND_SZ, reinterpret_cast<const BYTE*>(kEventMessageFile), ::wcslen(kEventMessageFile) * sizeof(wchar_t));
+            RegSetValueExW(sourceKey, L"EventMessageFile", 0, regType::kExpandSz, kEventMessageFile, static_cast<DWORD>(::wcslen(kEventMessageFile) * sizeof(wchar_t)));
 
-            ::RegCloseKey(sourceKey);
+            RegCloseKey(sourceKey);
+            return true;
+        }
+
+        static bool exists(const wchar_t* sourceName, const wchar_t* logName = L"Application")
+        {
+            std::wstring logKeyName;
+            std::wstring sourceKeyName;
+            getKeyNames(sourceName, logName, sourceKeyName, logKeyName);
+
+            HKEY sourceKey;
+            if (0 != RegOpenKeyExW(hkey::kLocalMachine, sourceKeyName.c_str(), 0, regSam::kQueryValue, &sourceKey))
+            {
+                return false;
+            }
+
+            RegCloseKey(sourceKey);
+            return true;
         }
 
         static void remove(const wchar_t* sourceName, const wchar_t* logName = L"Application")
@@ -74,8 +96,8 @@ namespace plog
             std::wstring sourceKeyName;
             getKeyNames(sourceName, logName, sourceKeyName, logKeyName);
 
-            ::RegDeleteKeyW(HKEY_LOCAL_MACHINE, sourceKeyName.c_str());
-            ::RegDeleteKeyW(HKEY_LOCAL_MACHINE, logKeyName.c_str());
+            RegDeleteKeyW(hkey::kLocalMachine, sourceKeyName.c_str());
+            RegDeleteKeyW(hkey::kLocalMachine, logKeyName.c_str());
         }
 
     private:

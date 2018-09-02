@@ -1,7 +1,10 @@
 #pragma once
-#include <sstream>
-#include <plog/Util.h>
 #include <plog/Severity.h>
+#include <plog/Util.h>
+
+#ifdef __cplusplus_cli
+#include <vcclr.h>  // For PtrToStringChars
+#endif
 
 namespace plog
 {
@@ -10,7 +13,7 @@ namespace plog
         //////////////////////////////////////////////////////////////////////////
         // Stream output operators as free functions
 
-        inline void operator<<(util::nstringstream& stream, const char* data)
+        inline void operator<<(util::nostringstream& stream, const char* data)
         {
             data = data ? data : "(null)";
 
@@ -23,26 +26,75 @@ namespace plog
 #endif
         }
 
-        inline void operator<<(util::nstringstream& stream, const std::string& data)
+        inline void operator<<(util::nostringstream& stream, const std::string& data)
         {
             plog::detail::operator<<(stream, data.c_str());
         }
 
-#ifndef __ANDROID__
-        inline void operator<<(util::nstringstream& stream, const wchar_t* data)
+#if PLOG_ENABLE_WCHAR_INPUT
+        inline void operator<<(util::nostringstream& stream, const wchar_t* data)
         {
             data = data ? data : L"(null)";
 
-#ifdef _WIN32
+#   ifdef _WIN32
             std::operator<<(stream, data);
-#else
+#   else
             std::operator<<(stream, util::toNarrow(data));
-#endif
+#   endif
         }
 
-        inline void operator<<(util::nstringstream& stream, const std::wstring& data)
+        inline void operator<<(util::nostringstream& stream, const std::wstring& data)
         {
             plog::detail::operator<<(stream, data.c_str());
+        }
+#endif
+
+#ifdef _WIN32
+        namespace meta
+        {
+            template<class T, class Stream>
+            inline char operator<<(Stream&, const T&);
+
+            template <class T, class Stream>
+            struct isStreamable
+            {
+#ifdef __INTEL_COMPILER
+#    pragma warning(suppress: 327) // NULL reference is not allowed
+#endif
+                enum { value = sizeof(operator<<(*reinterpret_cast<Stream*>(0), *reinterpret_cast<const T*>(0))) != sizeof(char) };
+            };
+
+            template <class Stream>
+            struct isStreamable<std::ios_base& (std::ios_base&), Stream>
+            {
+                enum { value = true };
+            };
+
+            template <class Stream, size_t N>
+            struct isStreamable<wchar_t[N], Stream>
+            {
+                enum { value = false };
+            };
+
+            template <class Stream, size_t N>
+            struct isStreamable<const wchar_t[N], Stream>
+            {
+                enum { value = false };
+            };
+
+            template<bool B, class T = void>
+            struct enableIf {};
+
+            template<class T>
+            struct enableIf<true, T> { typedef T type; };
+        }
+
+        template<class T>
+        inline typename meta::enableIf<meta::isStreamable<T, std::ostream>::value && !meta::isStreamable<T, std::wostream>::value, void>::type operator<<(std::wostringstream& stream, const T& data)
+        {
+            std::ostringstream ss;
+            ss << data;
+            stream << ss.str();
         }
 #endif
     }
@@ -65,7 +117,7 @@ namespace plog
             return *this << str;
         }
 
-#ifndef __ANDROID__
+#if PLOG_ENABLE_WCHAR_INPUT
         Record& operator<<(wchar_t data)
         {
             wchar_t str[] = { data, 0 };
@@ -91,6 +143,14 @@ namespace plog
 #else
             return *this << data.toStdString();
 #endif
+        }
+#endif
+
+#ifdef __cplusplus_cli
+        Record& operator<<(System::String^ data)
+        {
+            cli::pin_ptr<const System::Char> ptr = PtrToStringChars(data);
+            return *this << static_cast<const wchar_t*>(ptr);
         }
 #endif
 
@@ -148,13 +208,17 @@ namespace plog
             return m_file;
         }
 
+        virtual ~Record() // virtual destructor to satisfy -Wnon-virtual-dtor warning
+        {
+        }
+
     private:
         util::Time              m_time;
         const Severity          m_severity;
         const unsigned int      m_tid;
         const void* const       m_object;
         const size_t            m_line;
-        util::nstringstream     m_message;
+        util::nostringstream    m_message;
         const char* const       m_func;
         const char* const       m_file;
         mutable std::string     m_funcStr;
