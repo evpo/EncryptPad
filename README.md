@@ -422,6 +422,7 @@ EncryptPad uses the following frameworks and libraries:
 4. [**zlib**](http://zlib.net/)
 6. [**gtest**](http://code.google.com/p/googletest/)
 7. [**famfamfam Silk iconset 1.3**](http://www.famfamfam.com/lab/icons/silk/)
+8. [**plog**](https://github.com/SergiusTheBest/plog)
 
 <div id="integrity-verification"></div>
 
