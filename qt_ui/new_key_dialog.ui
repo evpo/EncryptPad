@@ -69,8 +69,13 @@
      </item>
      <item row="3" column="0" colspan="3">
       <widget class="QLabel" name="label">
+       <property name="font">
+        <font>
+         <pointsize>8</pointsize>
+        </font>
+       </property>
        <property name="text">
-        <string>The repository is the &lt;b&gt;.encryptpad&lt;/b&gt; (&lt;b&gt;_encryptpad&lt;/b&gt; on Windows) directory in the user's home folder. If it does not exist, it will be created.</string>
+        <string>The repository is &lt;b&gt;.encryptpad&lt;/b&gt; directory in the user's profile (&lt;b&gt;encryptpad_repository&lt;/b&gt; in portable mode).</string>
        </property>
        <property name="wordWrap">
         <bool>true</bool>

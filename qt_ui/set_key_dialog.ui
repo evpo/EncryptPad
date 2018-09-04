@@ -163,8 +163,13 @@
      </item>
      <item row="2" column="0" colspan="3">
       <widget class="QLabel" name="label_2">
+       <property name="font">
+        <font>
+         <pointsize>8</pointsize>
+        </font>
+       </property>
        <property name="text">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The key repository is &lt;span style=&quot; font-weight:600;&quot;&gt;.encryptpad&lt;/span&gt; (&lt;b&gt;_encryptpad&lt;/b&gt; on Windows) directory in the user's profile. Select a key or specify a file name without path for the repository keys.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        <string>The repository is &lt;b&gt;.encryptpad&lt;/b&gt; directory in the user's profile (&lt;b&gt;encryptpad_repository&lt;/b&gt; in portable mode). Select a key or specify a file name without path for the repository keys.</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignJustify|Qt::AlignVCenter</set>
