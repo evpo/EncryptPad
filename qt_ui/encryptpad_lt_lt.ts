@@ -561,613 +561,613 @@ Ar norite jį pakeisti?</translation>
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="mainwindow.cpp" line="166"/>
+        <location filename="mainwindow.cpp" line="161"/>
         <source>ln: %1 of %2</source>
         <translation>Ties: %1 iš %2</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="167"/>
+        <location filename="mainwindow.cpp" line="162"/>
         <source>chars: %1</source>
         <translation>simb.: %1</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="186"/>
+        <location filename="mainwindow.cpp" line="181"/>
         <source>Passphrase not set</source>
         <translation>Slaptafrazė nenustatyta</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="191"/>
+        <location filename="mainwindow.cpp" line="186"/>
         <source>Passphrase protected</source>
         <translation>Apsaugota slaptafraze</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="264"/>
-        <location filename="mainwindow.cpp" line="280"/>
+        <location filename="mainwindow.cpp" line="259"/>
+        <location filename="mainwindow.cpp" line="275"/>
         <source>Cannot open &apos;%1&apos;</source>
         <translation>Nepavyksta atverti &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="300"/>
+        <location filename="mainwindow.cpp" line="295"/>
         <source>Cannot open the encryption key</source>
         <translation>Nepavyksta atverti šifravimo raktą</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="308"/>
+        <location filename="mainwindow.cpp" line="303"/>
         <source>The encryption key is invalid</source>
         <translation>Šifravimo raktas yra neteisingas</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="316"/>
+        <location filename="mainwindow.cpp" line="311"/>
         <source>Cannot download the encryption key. CURL tool is not found.</source>
         <translation>Nepavyksta atsisiųsti šifravimo rakto. Nerastas CURL įrankis.</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="324"/>
+        <location filename="mainwindow.cpp" line="319"/>
         <source>Cannot download the key. CURL returned non zero exit code</source>
         <translation>Nepavyksta atsisiųsti raktą. CURL grąžino nenulinį išėjimo kodą</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="341"/>
+        <location filename="mainwindow.cpp" line="336"/>
         <source>Cannot load the file</source>
         <translation>Nepavyksta įkelti failą</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="389"/>
+        <location filename="mainwindow.cpp" line="384"/>
         <source>File loaded</source>
         <translation>Failas įkeltas</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="455"/>
+        <location filename="mainwindow.cpp" line="450"/>
         <source>The file has been modified by another program. Do you want to reload it?</source>
         <translation>Failas buvo modifikuotas kitos programos. Ar norite jį įkelti iš naujo?</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="458"/>
+        <location filename="mainwindow.cpp" line="453"/>
         <source>The file has been modified by another program. Do you want to reload it and lose the changes made in this application?</source>
         <translation>Failas buvo modifikuotas kitos programos. Ar norite jį įkelti iš naujo ir prarasti šioje programoje atliktus pakeitimus?</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="497"/>
+        <location filename="mainwindow.cpp" line="492"/>
         <source>Open File</source>
         <translation>Atverti failą</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="541"/>
+        <location filename="mainwindow.cpp" line="536"/>
         <source>Save File As</source>
         <translation>Įrašyti failą kaip</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="568"/>
+        <location filename="mainwindow.cpp" line="562"/>
         <source>Cannot create the repository directory in HOME</source>
         <translation>Nepavyksta sukurti saugyklos katalogo NAMŲ aplanke</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="602"/>
+        <location filename="mainwindow.cpp" line="597"/>
         <source>Passphrase for Key File</source>
         <translation>Rakto failo slaptafrazė</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="610"/>
+        <location filename="mainwindow.cpp" line="605"/>
         <source>You left the passphrase blank. The key file is going to be UNENCRYPTED. Do you want to continue?</source>
         <translation>Jūs palikote slaptafrazę tuščią. Rakto failas bus NEŠIFRUOTAS. Ar norite tęsti?</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="642"/>
+        <location filename="mainwindow.cpp" line="637"/>
         <source>Cannot generate the key &apos;%1&apos; Check the path and permissions.</source>
         <translation>Nepavyksta generuoti raktą &quot;%1&quot;. Patikrinkite kelią ir leidimus.</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="644"/>
+        <location filename="mainwindow.cpp" line="639"/>
         <source>Cannot generate key</source>
         <translation>Nepavyksta generuoti rakto</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="648"/>
+        <location filename="mainwindow.cpp" line="643"/>
         <source>Do you want to use the generated key for this file?</source>
         <translation>Ar norite šiam failui naudoti sugeneruotą raktą?</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="661"/>
+        <location filename="mainwindow.cpp" line="656"/>
         <source>About EncryptPad</source>
         <translation>Apie EncryptPad</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="662"/>
+        <location filename="mainwindow.cpp" line="657"/>
         <source>&lt;b&gt;EncryptPad %1 Beta&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;A minimalist secure text editor and file encryptor that implements RFC 4880 Open PGP format: symmetrically encrypted, compressed and integrity protected. The editor can protect files with passphrases, key files or both.&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;GNU General Public License v2&lt;br/&gt;&lt;br/&gt;</source>
         <oldsource>&lt;b&gt;EncryptPad %1 Beta&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;Minimalist secure text editor and binary encryptor that implements RFC 4880 Open PGP format: symmetrically encrypted, compressed and integrity protected. The editor can protect files with passphrases, key files or both.&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;GNU General Public License v2&lt;br/&gt;&lt;br/&gt;</oldsource>
         <translation>&lt;b&gt;EncryptPad %1 Beta&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;Minimalistinis saugus tekstų redaktorius ir failų šifravimo įrankis, įgyvendinantis RFC 4880 Open PGP formatą: simetriškai šifruotą, glaudintą ir apsaugotą vientisumu. Redaktorius gali apsaugoti failus slaptafrazėmis, rakto failais arba abiem.&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;GNU Bendroji viešoji licencija v2&lt;br/&gt;&lt;br/&gt;</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="716"/>
+        <location filename="mainwindow.cpp" line="711"/>
         <source>Do you want to apply the modified default file properties to this file?</source>
         <translation>Ar norite pritaikyti modifikuotas numatytąsias failo savybes šiam failui?</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="729"/>
+        <location filename="mainwindow.cpp" line="724"/>
         <source>&amp;New</source>
         <translation>&amp;Naujas</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="731"/>
+        <location filename="mainwindow.cpp" line="726"/>
         <source>Create a new file</source>
         <translation>Sukurti naują failą</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="734"/>
+        <location filename="mainwindow.cpp" line="729"/>
         <source>&amp;Open...</source>
         <translation>&amp;Atverti...</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="736"/>
+        <location filename="mainwindow.cpp" line="731"/>
         <source>Open an existing file</source>
         <translation>Atverti esamą failą</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="739"/>
+        <location filename="mainwindow.cpp" line="734"/>
         <source>&amp;Save</source>
         <translation>Į&amp;rašyti</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="741"/>
+        <location filename="mainwindow.cpp" line="736"/>
         <source>Save the document to disk</source>
         <translation>Įrašyti dokumentą į diską</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="744"/>
+        <location filename="mainwindow.cpp" line="739"/>
         <source>Save &amp;As...</source>
         <translation>Įrašyti &amp;kaip...</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="746"/>
+        <location filename="mainwindow.cpp" line="741"/>
         <source>Save the document under a new name</source>
         <translation>Įrašyti dokumentą nauju pavadinimu</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="749"/>
+        <location filename="mainwindow.cpp" line="744"/>
         <source>File &amp;Properties...</source>
         <translation>Failo &amp;savybės...</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="750"/>
+        <location filename="mainwindow.cpp" line="745"/>
         <source>Set file properties</source>
         <translation>Nustatyti failo savybes</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="753"/>
+        <location filename="mainwindow.cpp" line="748"/>
         <source>&amp;Close and Reset</source>
         <translation>&amp;Užverti ir atstatyti</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="755"/>
+        <location filename="mainwindow.cpp" line="750"/>
         <source>Close and reset security settings</source>
         <translation>Užverti ir atstatyti saugumo nustatymus</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="758"/>
+        <location filename="mainwindow.cpp" line="753"/>
         <source>Generate Key...</source>
         <translation>Generuoti raktą...</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="759"/>
+        <location filename="mainwindow.cpp" line="754"/>
         <source>Generate a new key file</source>
         <translation>Generuoti naują rakto failą</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="762"/>
+        <location filename="mainwindow.cpp" line="757"/>
         <source>Set &amp;Passphrase...</source>
         <translation>Nustatyti slapta&amp;frazę...</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="763"/>
+        <location filename="mainwindow.cpp" line="758"/>
         <source>Set passphrase for encryption and decryption</source>
         <translation>Nustatyti slapafrazę, skirtą šifravimui ir iššifravimui</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="766"/>
+        <location filename="mainwindow.cpp" line="761"/>
         <source>Set &amp;Encryption Key...</source>
         <translation>Nustatyti š&amp;ifravimo raktą...</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="767"/>
+        <location filename="mainwindow.cpp" line="762"/>
         <source>Set encryption key file</source>
         <translation>Nustatyti šifravimo rakto failą</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="770"/>
+        <location filename="mainwindow.cpp" line="765"/>
         <source>Clear &amp;Encryption Key</source>
         <translation>Išvalyti šifr&amp;avimo raktą</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="771"/>
+        <location filename="mainwindow.cpp" line="766"/>
         <source>Clear encryption key file. Passphrase only (if set).</source>
         <translation>Išvalyti šifravimo rakto failą. Tik slaptafrazė (jei nustatyta).</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="774"/>
+        <location filename="mainwindow.cpp" line="769"/>
         <source>&amp;Clear Passphrase</source>
         <translation>Iš&amp;valyti slaptafrazę</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="775"/>
+        <location filename="mainwindow.cpp" line="770"/>
         <source>Save without passphrase protected encryption. Encryption with file key only (if enabled).</source>
         <translation>Įrašyti be slaptafraze apsaugoto šifravimo. Šifravimas tik su rakto failu (jei įjungta).</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="778"/>
+        <location filename="mainwindow.cpp" line="773"/>
         <source>E&amp;xit</source>
         <translation>Iš&amp;eiti</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="781"/>
+        <location filename="mainwindow.cpp" line="776"/>
         <source>Exit the application</source>
         <translation>Išeiti iš programos</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="784"/>
-        <location filename="mainwindow.cpp" line="786"/>
+        <location filename="mainwindow.cpp" line="779"/>
+        <location filename="mainwindow.cpp" line="781"/>
         <source>Undo</source>
         <translation>Atšaukti</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="789"/>
-        <location filename="mainwindow.cpp" line="791"/>
+        <location filename="mainwindow.cpp" line="784"/>
+        <location filename="mainwindow.cpp" line="786"/>
         <source>Redo</source>
         <translation>Grąžinti</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="794"/>
+        <location filename="mainwindow.cpp" line="789"/>
         <source>Cu&amp;t</source>
         <translation>Iš&amp;kirpti</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="796"/>
+        <location filename="mainwindow.cpp" line="791"/>
         <source>Cut the current selection&apos;s contents to the clipboard</source>
         <translation>Iškirpti dabartinio žymėjimo turinį į iškarpinę</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="800"/>
+        <location filename="mainwindow.cpp" line="795"/>
         <source>&amp;Copy</source>
         <translation>&amp;Kopijuoti</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="802"/>
+        <location filename="mainwindow.cpp" line="797"/>
         <source>Copy the current selection&apos;s contents to the clipboard</source>
         <translation>Kopijuoti dabartinio žymėjimo turinį į iškarpinę</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="806"/>
+        <location filename="mainwindow.cpp" line="801"/>
         <source>&amp;Paste</source>
         <translation>Į&amp;dėti</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="808"/>
+        <location filename="mainwindow.cpp" line="803"/>
         <source>Paste the clipboard&apos;s contents into the current selection</source>
         <translation>Įdėti iškarpinės turinį į dabartinį žymėjimą</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="812"/>
+        <location filename="mainwindow.cpp" line="807"/>
         <source>&amp;Select All</source>
         <translation>Ž&amp;ymėti viską</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="814"/>
+        <location filename="mainwindow.cpp" line="809"/>
         <source>Select all text</source>
         <translation>Žymėti visą tekstą</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="817"/>
+        <location filename="mainwindow.cpp" line="812"/>
         <source>&amp;Find...</source>
         <translation>&amp;Rasti...</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="819"/>
+        <location filename="mainwindow.cpp" line="814"/>
         <source>Find in text</source>
         <translation>Rasti tekste</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="822"/>
+        <location filename="mainwindow.cpp" line="817"/>
         <source>&amp;Go to...</source>
         <translation>&amp;Pereiti į...</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="823"/>
-        <location filename="mainwindow.cpp" line="1558"/>
+        <location filename="mainwindow.cpp" line="818"/>
+        <location filename="mainwindow.cpp" line="1553"/>
         <source>Go to</source>
         <translation>Pereiti į</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="827"/>
+        <location filename="mainwindow.cpp" line="822"/>
         <source>&amp;Generate Passphrase...</source>
         <translation>&amp;Generuoti slaptafrazę...</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="828"/>
+        <location filename="mainwindow.cpp" line="823"/>
         <source>Generate passphrase</source>
         <translation>Generuoti slaptafrazę</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="831"/>
+        <location filename="mainwindow.cpp" line="826"/>
         <source>&amp;Replace...</source>
         <translation>&amp;Pakeisti...</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="833"/>
+        <location filename="mainwindow.cpp" line="828"/>
         <source>Find and replace text</source>
         <translation>Rasti ir pakeisti tekstą</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="836"/>
+        <location filename="mainwindow.cpp" line="831"/>
         <source>Read Only</source>
         <translation>Tik skaityti</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="838"/>
+        <location filename="mainwindow.cpp" line="833"/>
         <source>Enable Read Only mode</source>
         <translation>Įjungti tik skaitymo veikseną</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="843"/>
+        <location filename="mainwindow.cpp" line="838"/>
         <source>Word Wrap</source>
         <translation>Teksto skaidymas į eilutes</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="845"/>
+        <location filename="mainwindow.cpp" line="840"/>
         <source>Enable Word Wrap</source>
         <translation>Įjungti teksto skaidymą į eilutes</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="848"/>
+        <location filename="mainwindow.cpp" line="843"/>
         <source>&amp;Zoom In</source>
         <translation>&amp;Didinti</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="850"/>
+        <location filename="mainwindow.cpp" line="845"/>
         <source>Zoom In</source>
         <translation>Didinti</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="853"/>
+        <location filename="mainwindow.cpp" line="848"/>
         <source>&amp;Zoom Out</source>
         <translation>&amp;Mažinti</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="855"/>
+        <location filename="mainwindow.cpp" line="850"/>
         <source>Zoom Out</source>
         <translation>Mažinti</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="858"/>
+        <location filename="mainwindow.cpp" line="853"/>
         <source>&amp;Reset Zoom</source>
         <translation>&amp;Atstatyti mastelį</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="860"/>
+        <location filename="mainwindow.cpp" line="855"/>
         <source>Reset Zoom</source>
         <translation>Atstatyti mastelį</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="863"/>
+        <location filename="mainwindow.cpp" line="858"/>
         <source>&amp;About...</source>
         <translation>&amp;Apie...</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="864"/>
+        <location filename="mainwindow.cpp" line="859"/>
         <source>Show the application&apos;s About box</source>
         <translation>Rodyti langelį apie programą</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="868"/>
+        <location filename="mainwindow.cpp" line="863"/>
         <source>About &amp;Qt</source>
         <translation>Apie &amp;Qt</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="869"/>
+        <location filename="mainwindow.cpp" line="864"/>
         <source>Show the Qt library&apos;s About box</source>
         <translation>Rodyti langelį apie Qt biblioteką</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="872"/>
+        <location filename="mainwindow.cpp" line="867"/>
         <source>&amp;Preferences...</source>
         <translation>&amp;Nuostatos...</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="873"/>
+        <location filename="mainwindow.cpp" line="868"/>
         <source>Application preferences</source>
         <translation>Programos nuostatos</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="876"/>
+        <location filename="mainwindow.cpp" line="871"/>
         <source>File Encryption...</source>
         <translation>Failų šifravimas...</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="877"/>
+        <location filename="mainwindow.cpp" line="872"/>
         <source>File encryption</source>
         <translation>Failų šifravimas</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="880"/>
+        <location filename="mainwindow.cpp" line="875"/>
         <source>Windows EOL</source>
         <translation>Windows eilutės pabaiga</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="881"/>
+        <location filename="mainwindow.cpp" line="876"/>
         <source>&quot;Windows&quot; end of line: CR+LF</source>
         <translation>&quot;Windows&quot; eilutės pabaiga: CR+LF</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="976"/>
+        <location filename="mainwindow.cpp" line="971"/>
         <source>End of file reached. Started from the top.</source>
         <translation>Prieita prie failo pabaigos. Pradėta nuo viršaus.</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="992"/>
+        <location filename="mainwindow.cpp" line="987"/>
         <source>Text not found.</source>
         <translation>Tekstas nerastas.</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1006"/>
+        <location filename="mainwindow.cpp" line="1001"/>
         <source>Text found.</source>
         <translation>Tekstas rastas.</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1013"/>
+        <location filename="mainwindow.cpp" line="1008"/>
         <source>&amp;File</source>
         <translation>&amp;Failas</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1030"/>
+        <location filename="mainwindow.cpp" line="1025"/>
         <source>&amp;Edit</source>
         <translation>&amp;Taisa</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1048"/>
+        <location filename="mainwindow.cpp" line="1043"/>
         <source>&amp;View</source>
         <translation>&amp;Rodinys</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1057"/>
+        <location filename="mainwindow.cpp" line="1052"/>
         <source>En&amp;cryption</source>
         <translation>Šifra&amp;vimas</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1065"/>
+        <location filename="mainwindow.cpp" line="1060"/>
         <source>&amp;Settings</source>
         <translation>Nu&amp;statymai</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1068"/>
+        <location filename="mainwindow.cpp" line="1063"/>
         <source>&amp;Help</source>
         <translation>&amp;Pagalba</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1074"/>
+        <location filename="mainwindow.cpp" line="1069"/>
         <source>File</source>
         <translation>Failas</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1085"/>
+        <location filename="mainwindow.cpp" line="1080"/>
         <source>Edit</source>
         <translation>Taisa</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1093"/>
+        <location filename="mainwindow.cpp" line="1088"/>
         <source>Encryption</source>
         <translation>Šifravimas</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1100"/>
+        <location filename="mainwindow.cpp" line="1095"/>
         <source>View</source>
         <translation>Rodinys</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1110"/>
+        <location filename="mainwindow.cpp" line="1105"/>
         <source>Ready</source>
         <translation>Pasiruošę</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1205"/>
+        <location filename="mainwindow.cpp" line="1200"/>
         <source>The document has been modified.</source>
         <translation>Šis dokumentas buvo modifikuotas.</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1206"/>
+        <location filename="mainwindow.cpp" line="1201"/>
         <source>Do you want to save your changes?</source>
         <translation>Ar norite įrašyti pakeitimus?</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1341"/>
+        <location filename="mainwindow.cpp" line="1336"/>
         <source>Cannot save &apos;%1&apos;</source>
         <translation>Nepavyksta įrašyti &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1344"/>
+        <location filename="mainwindow.cpp" line="1339"/>
         <source>Cannot open the specified encryption key</source>
         <translation>Nepavyksta atverti nurodytą šifravimo raktą</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1347"/>
+        <location filename="mainwindow.cpp" line="1342"/>
         <source>The specified encryption key is invalid</source>
         <translation>Nurodytas šifravimo raktas yra neteisingas</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1350"/>
+        <location filename="mainwindow.cpp" line="1345"/>
         <source>Cannot download the encryption key. CURL tool is not found</source>
         <translation>Nepavyksta atsisiųsti šifravimo rakto. Nerastas CURL įrankis</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1353"/>
+        <location filename="mainwindow.cpp" line="1348"/>
         <source>Cannot download the encryption key. CURL returned non zero exit code</source>
         <translation>Nepavyksta atsisiųsti šifravimo raktą. CURL grąžino nenulinį išėjimo kodą</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1360"/>
+        <location filename="mainwindow.cpp" line="1355"/>
         <source>Unknown encryption error</source>
         <translation>Nežinoma šifravimo klaida</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1364"/>
+        <location filename="mainwindow.cpp" line="1359"/>
         <source>Cannot create bak file</source>
         <translation>Nepavyksta sukurti bak failą</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1373"/>
+        <location filename="mainwindow.cpp" line="1368"/>
         <source>Unknown error</source>
         <translation>Nežinoma klaida</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1384"/>
+        <location filename="mainwindow.cpp" line="1379"/>
         <source>Cannot save file</source>
         <translation>Nepavyksta įrašyti failą</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1390"/>
+        <location filename="mainwindow.cpp" line="1385"/>
         <source>File saved</source>
         <translation>Failas įrašytas</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1558"/>
+        <location filename="mainwindow.cpp" line="1553"/>
         <source>Line number:</source>
         <translation>Eilutės numeris:</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1578"/>
+        <location filename="mainwindow.cpp" line="1573"/>
         <source>Maximum zoom</source>
         <translation>Didžiausias mastelis</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1584"/>
+        <location filename="mainwindow.cpp" line="1579"/>
         <source>Font size: %1</source>
         <translation>Šrifto dydis: %1</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1592"/>
+        <location filename="mainwindow.cpp" line="1587"/>
         <source>Minimum zoom</source>
         <translation>Mažiausias mastelis</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1598"/>
-        <location filename="mainwindow.cpp" line="1613"/>
+        <location filename="mainwindow.cpp" line="1593"/>
+        <location filename="mainwindow.cpp" line="1608"/>
         <source>Font size: </source>
         <translation>Šrifto dydis: </translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1642"/>
+        <location filename="mainwindow.cpp" line="1637"/>
         <source>untitled</source>
         <translation>be pavadinimo</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1651"/>
+        <location filename="mainwindow.cpp" line="1646"/>
         <source>Key protected</source>
         <translation>Apsaugota raktu</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1652"/>
+        <location filename="mainwindow.cpp" line="1647"/>
         <source>Key not set</source>
         <translation>Raktas nenustatytas</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1653"/>
+        <location filename="mainwindow.cpp" line="1648"/>
         <source>persistent</source>
         <translation>pastovus</translation>
     </message>
@@ -1195,17 +1195,17 @@ Ar norite jį pakeisti?</translation>
         <translation>Rakto kelias</translation>
     </message>
     <message>
-        <location filename="new_key_dialog.ui" line="73"/>
-        <source>The repository is the &lt;b&gt;.encryptpad&lt;/b&gt; (&lt;b&gt;_encryptpad&lt;/b&gt; on Windows) directory in the user&apos;s home folder. If it does not exist, it will be created.</source>
+        <location filename="new_key_dialog.ui" line="78"/>
+        <source>The repository is &lt;b&gt;.encryptpad&lt;/b&gt; directory in the user&apos;s profile (&lt;b&gt;encryptpad_repository&lt;/b&gt; in portable mode).</source>
         <translation>Saugykla yra &lt;b&gt;.encryptpad&lt;/b&gt; (Windows sistemose &lt;b&gt;_encryptpad&lt;/b&gt;) kataloge, naudotojo namų aplanke. Jei šio katalogo nėra, tuomet jis bus sukurtas.</translation>
     </message>
     <message>
-        <location filename="new_key_dialog.ui" line="83"/>
+        <location filename="new_key_dialog.ui" line="88"/>
         <source>Browse...</source>
         <translation>Naršyti...</translation>
     </message>
     <message>
-        <location filename="new_key_dialog.ui" line="93"/>
+        <location filename="new_key_dialog.ui" line="98"/>
         <source>Key name in the repository</source>
         <translation>Rakto pavadinimas saugykloje</translation>
     </message>
@@ -1507,8 +1507,8 @@ Ar norite jį pakeisti?</translation>
         <translation>&amp;Pastovaus rakto vietą šifruotame faile</translation>
     </message>
     <message>
-        <location filename="set_key_dialog.ui" line="167"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The key repository is &lt;span style=&quot; font-weight:600;&quot;&gt;.encryptpad&lt;/span&gt; (&lt;b&gt;_encryptpad&lt;/b&gt; on Windows) directory in the user&apos;s profile. Select a key or specify a file name without path for the repository keys.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <location filename="set_key_dialog.ui" line="172"/>
+        <source>The repository is &lt;b&gt;.encryptpad&lt;/b&gt; directory in the user&apos;s profile (&lt;b&gt;encryptpad_repository&lt;/b&gt; in portable mode). Select a key or specify a file name without path for the repository keys.</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Rakto saugykla yra &lt;span style=&quot; font-weight:600;&quot;&gt;.encryptpad&lt;/span&gt; (Windows sistemose &lt;b&gt;_encryptpad&lt;/b&gt;) katalogas, naudotojo profilyje. Pasirinkite raktą arba saugyklos raktams nurodykite failo pavadinimą be kelio.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>

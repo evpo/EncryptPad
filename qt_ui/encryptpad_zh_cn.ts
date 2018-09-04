@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="zh">
+<?xml version="1.0" ?><!DOCTYPE TS><TS language="zh" version="2.1">
 <context>
     <name>ConfirmPassphraseDialog</name>
     <message>
@@ -1171,7 +1169,7 @@ Do you want to replace it?</source>
     <message>
         <location filename="mainwindow.cpp" line="1648"/>
         <source>persistent</source>
-        <translation>持久的</translation>
+        <translation>记住</translation>
     </message>
 </context>
 <context>
@@ -1199,11 +1197,7 @@ Do you want to replace it?</source>
     <message>
         <location filename="new_key_dialog.ui" line="78"/>
         <source>The repository is &lt;b&gt;.encryptpad&lt;/b&gt; directory in the user&apos;s profile (&lt;b&gt;encryptpad_repository&lt;/b&gt; in portable mode).</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>The repository is the &lt;b&gt;.encryptpad&lt;/b&gt; (&lt;b&gt;_encryptpad&lt;/b&gt; on Windows) directory in the user&apos;s home folder. If it does not exist, it will be created.</source>
-        <translation type="vanished">仓库存在于 &lt;b&gt;.encryptpad&lt;/b&gt; (&lt;b&gt;_encryptpad&lt;/b&gt; on Windows) 处于用户文件夹中的目录里。如果不存在，它将会被创建。</translation>
+        <translation>仓库存在于 &lt;b&gt;.encryptpad&lt;/b&gt; (&lt;b&gt;_encryptpad&lt;/b&gt; on Windows) 处于用户文件夹中的目录里。如果不存在，它将会被创建。</translation>
     </message>
     <message>
         <location filename="new_key_dialog.ui" line="88"/>
@@ -1515,11 +1509,7 @@ Do you want to replace it?</source>
     <message>
         <location filename="set_key_dialog.ui" line="172"/>
         <source>The repository is &lt;b&gt;.encryptpad&lt;/b&gt; directory in the user&apos;s profile (&lt;b&gt;encryptpad_repository&lt;/b&gt; in portable mode). Select a key or specify a file name without path for the repository keys.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The key repository is &lt;span style=&quot; font-weight:600;&quot;&gt;.encryptpad&lt;/span&gt; (&lt;b&gt;_encryptpad&lt;/b&gt; on Windows) directory in the user&apos;s profile. Select a key or specify a file name without path for the repository keys.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;密钥仓库是用户文件夹里的&lt;span style=&quot; font-weight:600;&quot;&gt;.encryptpad&lt;/span&gt; （在Windows上是&lt;b&gt;_encryptpad&lt;/b&gt; ）文件夹。请选择一个密钥，或者输入一个不含路径的文件名来指定一个仓库中的密钥。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;密钥仓库是用户文件夹里的&lt;span style=&quot; font-weight:600;&quot;&gt;.encryptpad&lt;/span&gt; （在Windows上是&lt;b&gt;_encryptpad&lt;/b&gt; ）文件夹。请选择一个密钥，或者输入一个不含路径的文件名来指定一个仓库中的密钥。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="set_key_dialog.cpp" line="90"/>
