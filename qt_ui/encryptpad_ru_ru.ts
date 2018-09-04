@@ -1,4 +1,6 @@
-<?xml version="1.0" ?><!DOCTYPE TS><TS language="ru" version="2.1">
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="ru">
 <context>
     <name>ConfirmPassphraseDialog</name>
     <message>
@@ -560,613 +562,613 @@ Do you want to replace it?</source>
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="mainwindow.cpp" line="166"/>
+        <location filename="mainwindow.cpp" line="161"/>
         <source>ln: %1 of %2</source>
         <translation>стр: %1 из %2</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="167"/>
+        <location filename="mainwindow.cpp" line="162"/>
         <source>chars: %1</source>
         <translation>симв: %1</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="186"/>
+        <location filename="mainwindow.cpp" line="181"/>
         <source>Passphrase not set</source>
         <translation>Пароль не задан</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="191"/>
+        <location filename="mainwindow.cpp" line="186"/>
         <source>Passphrase protected</source>
         <translation>Защищен паролем</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="264"/>
-        <location filename="mainwindow.cpp" line="280"/>
+        <location filename="mainwindow.cpp" line="259"/>
+        <location filename="mainwindow.cpp" line="275"/>
         <source>Cannot open &apos;%1&apos;</source>
         <translation>Невозможно открыть &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="300"/>
+        <location filename="mainwindow.cpp" line="295"/>
         <source>Cannot open the encryption key</source>
         <translation>Невозможно открыть ключ шифрования.</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="308"/>
+        <location filename="mainwindow.cpp" line="303"/>
         <source>The encryption key is invalid</source>
         <translation>Ключ шифрования не верен.</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="316"/>
+        <location filename="mainwindow.cpp" line="311"/>
         <source>Cannot download the encryption key. CURL tool is not found.</source>
         <translation>Не могу закачать ключ шифрования. Утилита CURL не найдена.</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="324"/>
+        <location filename="mainwindow.cpp" line="319"/>
         <source>Cannot download the key. CURL returned non zero exit code</source>
         <translation>Не могу закачать ключ шифрования. CURL вернул не нулевой код.</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="341"/>
+        <location filename="mainwindow.cpp" line="336"/>
         <source>Cannot load the file</source>
         <translation>Невозможно загрузить файл</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="389"/>
+        <location filename="mainwindow.cpp" line="384"/>
         <source>File loaded</source>
         <translation>Файл загружен</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="455"/>
+        <location filename="mainwindow.cpp" line="450"/>
         <source>The file has been modified by another program. Do you want to reload it?</source>
         <translation>Файл был изменен внешней программой. Загрузить его снова?</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="458"/>
+        <location filename="mainwindow.cpp" line="453"/>
         <source>The file has been modified by another program. Do you want to reload it and lose the changes made in this application?</source>
         <translation>Файл был изменен внешней программой. Хотите загрузить его снова с потерей текущих изменений?</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="497"/>
+        <location filename="mainwindow.cpp" line="492"/>
         <source>Open File</source>
         <translation>Открыть Файл</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="541"/>
+        <location filename="mainwindow.cpp" line="536"/>
         <source>Save File As</source>
         <translation>Сохранить Как</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="568"/>
+        <location filename="mainwindow.cpp" line="562"/>
         <source>Cannot create the repository directory in HOME</source>
         <translation>Невозможно создать хранилище в HOME</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="602"/>
+        <location filename="mainwindow.cpp" line="597"/>
         <source>Passphrase for Key File</source>
         <translation>Пароль для Ключа</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="610"/>
+        <location filename="mainwindow.cpp" line="605"/>
         <source>You left the passphrase blank. The key file is going to be UNENCRYPTED. Do you want to continue?</source>
         <translation>Вы не установили пароль. Файл ключа НЕ БУДЕТ ЗАШИФРОВАН. Продолжить?</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="642"/>
+        <location filename="mainwindow.cpp" line="637"/>
         <source>Cannot generate the key &apos;%1&apos; Check the path and permissions.</source>
         <translation>Невозможно генерировать ключ &apos;%1&apos;. Проверьте правильность пути и разрешений.</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="644"/>
+        <location filename="mainwindow.cpp" line="639"/>
         <source>Cannot generate key</source>
         <translation>Невозможно генерировать ключ</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="648"/>
+        <location filename="mainwindow.cpp" line="643"/>
         <source>Do you want to use the generated key for this file?</source>
         <translation>Хотите использовать cгенерированный ключ для этого файла?</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="661"/>
+        <location filename="mainwindow.cpp" line="656"/>
         <source>About EncryptPad</source>
         <translation>Об EncryptPad</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="662"/>
+        <location filename="mainwindow.cpp" line="657"/>
         <source>&lt;b&gt;EncryptPad %1 Beta&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;A minimalist secure text editor and file encryptor that implements RFC 4880 Open PGP format: symmetrically encrypted, compressed and integrity protected. The editor can protect files with passphrases, key files or both.&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;GNU General Public License v2&lt;br/&gt;&lt;br/&gt;</source>
         <oldsource>&lt;b&gt;EncryptPad %1 Beta&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;Minimalist secure text editor and binary encryptor that implements RFC 4880 Open PGP format: symmetrically encrypted, compressed and integrity protected. The editor can protect files with passphrases, key files or both.&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;GNU General Public License v2&lt;br/&gt;&lt;br/&gt;</oldsource>
         <translation>&lt;b&gt;EncryptPad %1 Beta&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;Упрощенный и защищенный текстовый редактор который реализует RFC 4880 Open PGP формат: симметричное шифрование, архивация и проверка целостности. Редактор может защищать файлы паролями, файловыми ключами или обоими.&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;GNU General Public License v2&lt;br/&gt;&lt;br/&gt;</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="716"/>
+        <location filename="mainwindow.cpp" line="711"/>
         <source>Do you want to apply the modified default file properties to this file?</source>
         <translation>Хотите применить измененные настройки по умолчанию к этому файлу?</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="729"/>
+        <location filename="mainwindow.cpp" line="724"/>
         <source>&amp;New</source>
         <translation>&amp;Новый</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="731"/>
+        <location filename="mainwindow.cpp" line="726"/>
         <source>Create a new file</source>
         <translation>Создать новый файл</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="734"/>
+        <location filename="mainwindow.cpp" line="729"/>
         <source>&amp;Open...</source>
         <translation>&amp;Открыть...</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="736"/>
+        <location filename="mainwindow.cpp" line="731"/>
         <source>Open an existing file</source>
         <translation>Открыть существующий файл</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="739"/>
+        <location filename="mainwindow.cpp" line="734"/>
         <source>&amp;Save</source>
         <translation>&amp;Сохранить</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="741"/>
+        <location filename="mainwindow.cpp" line="736"/>
         <source>Save the document to disk</source>
         <translation>Сохранить документ на диск</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="744"/>
+        <location filename="mainwindow.cpp" line="739"/>
         <source>Save &amp;As...</source>
         <translation>Сохранить &amp;Как...</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="746"/>
+        <location filename="mainwindow.cpp" line="741"/>
         <source>Save the document under a new name</source>
         <translation>Сохранить документ под другим именем</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="749"/>
+        <location filename="mainwindow.cpp" line="744"/>
         <source>File &amp;Properties...</source>
         <translation>Свойства &amp;Файла...</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="750"/>
+        <location filename="mainwindow.cpp" line="745"/>
         <source>Set file properties</source>
         <translation>Установить свойства файла</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="753"/>
+        <location filename="mainwindow.cpp" line="748"/>
         <source>&amp;Close and Reset</source>
         <translation>&amp;Закрыть и Сбросить</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="755"/>
+        <location filename="mainwindow.cpp" line="750"/>
         <source>Close and reset security settings</source>
         <translation>Закрыть и сбросить установки защиты</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="758"/>
+        <location filename="mainwindow.cpp" line="753"/>
         <source>Generate Key...</source>
         <translation>Генерировать Ключ...</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="759"/>
+        <location filename="mainwindow.cpp" line="754"/>
         <source>Generate a new key file</source>
         <translation>Создать новый файл ключа</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="762"/>
+        <location filename="mainwindow.cpp" line="757"/>
         <source>Set &amp;Passphrase...</source>
         <translation>Задать &amp;Пароль...</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="763"/>
+        <location filename="mainwindow.cpp" line="758"/>
         <source>Set passphrase for encryption and decryption</source>
         <translation>Установить пароль для шифрования...</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="766"/>
+        <location filename="mainwindow.cpp" line="761"/>
         <source>Set &amp;Encryption Key...</source>
         <translation>Установить &amp;Ключ Шифрования...</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="767"/>
+        <location filename="mainwindow.cpp" line="762"/>
         <source>Set encryption key file</source>
         <translation>Установить файл ключа шифрования</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="770"/>
+        <location filename="mainwindow.cpp" line="765"/>
         <source>Clear &amp;Encryption Key</source>
         <translation>С&amp;бросить Ключ Шифрования</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="771"/>
+        <location filename="mainwindow.cpp" line="766"/>
         <source>Clear encryption key file. Passphrase only (if set).</source>
         <translation>Сбросить ключ шифрования. Только пароль (если задан).</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="774"/>
+        <location filename="mainwindow.cpp" line="769"/>
         <source>&amp;Clear Passphrase</source>
         <translation>Сб&amp;росить Пароль</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="775"/>
+        <location filename="mainwindow.cpp" line="770"/>
         <source>Save without passphrase protected encryption. Encryption with file key only (if enabled).</source>
         <translation>Сохранять без защиты паролем. Будет использован только ключ (если он установлен).</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="778"/>
+        <location filename="mainwindow.cpp" line="773"/>
         <source>E&amp;xit</source>
         <translation>&amp;Выход</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="781"/>
+        <location filename="mainwindow.cpp" line="776"/>
         <source>Exit the application</source>
         <translation>Выйти из приложения</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="784"/>
-        <location filename="mainwindow.cpp" line="786"/>
+        <location filename="mainwindow.cpp" line="779"/>
+        <location filename="mainwindow.cpp" line="781"/>
         <source>Undo</source>
         <translation>Отменить</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="789"/>
-        <location filename="mainwindow.cpp" line="791"/>
+        <location filename="mainwindow.cpp" line="784"/>
+        <location filename="mainwindow.cpp" line="786"/>
         <source>Redo</source>
         <translation>Вперед</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="794"/>
+        <location filename="mainwindow.cpp" line="789"/>
         <source>Cu&amp;t</source>
         <translation>&amp;Вырезать</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="796"/>
+        <location filename="mainwindow.cpp" line="791"/>
         <source>Cut the current selection&apos;s contents to the clipboard</source>
         <translation>Вырезать выбранное в буфер обмена</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="800"/>
+        <location filename="mainwindow.cpp" line="795"/>
         <source>&amp;Copy</source>
         <translation>&amp;Копировать</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="802"/>
+        <location filename="mainwindow.cpp" line="797"/>
         <source>Copy the current selection&apos;s contents to the clipboard</source>
         <translation>Копировать выбранное в буфер обмена</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="806"/>
+        <location filename="mainwindow.cpp" line="801"/>
         <source>&amp;Paste</source>
         <translation>Вс&amp;тавить</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="808"/>
+        <location filename="mainwindow.cpp" line="803"/>
         <source>Paste the clipboard&apos;s contents into the current selection</source>
         <translation>Вставить содержимое буфера обмена в выбранную область</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="812"/>
+        <location filename="mainwindow.cpp" line="807"/>
         <source>&amp;Select All</source>
         <translation>Вы&amp;брать Все</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="814"/>
+        <location filename="mainwindow.cpp" line="809"/>
         <source>Select all text</source>
         <translation>Выбрать весь текст</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="817"/>
+        <location filename="mainwindow.cpp" line="812"/>
         <source>&amp;Find...</source>
         <translation>&amp;Найти...</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="819"/>
+        <location filename="mainwindow.cpp" line="814"/>
         <source>Find in text</source>
         <translation>Найти в тексте</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="822"/>
+        <location filename="mainwindow.cpp" line="817"/>
         <source>&amp;Go to...</source>
         <translation>&amp;Перейти...</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="823"/>
-        <location filename="mainwindow.cpp" line="1558"/>
+        <location filename="mainwindow.cpp" line="818"/>
+        <location filename="mainwindow.cpp" line="1553"/>
         <source>Go to</source>
         <translation>Перейти</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="827"/>
+        <location filename="mainwindow.cpp" line="822"/>
         <source>&amp;Generate Passphrase...</source>
         <translation>&amp;Генерировать Пароль...</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="828"/>
+        <location filename="mainwindow.cpp" line="823"/>
         <source>Generate passphrase</source>
         <translation>Генерировать пароль</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="831"/>
+        <location filename="mainwindow.cpp" line="826"/>
         <source>&amp;Replace...</source>
         <translation>&amp;Заменить...</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="833"/>
+        <location filename="mainwindow.cpp" line="828"/>
         <source>Find and replace text</source>
         <translation>Найти и заменить текст</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="836"/>
+        <location filename="mainwindow.cpp" line="831"/>
         <source>Read Only</source>
         <translation>Только Чтение</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="838"/>
+        <location filename="mainwindow.cpp" line="833"/>
         <source>Enable Read Only mode</source>
         <translation>Переключить Режим Только Чтение</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="843"/>
+        <location filename="mainwindow.cpp" line="838"/>
         <source>Word Wrap</source>
         <translation>Переносить Слова</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="845"/>
+        <location filename="mainwindow.cpp" line="840"/>
         <source>Enable Word Wrap</source>
         <translation>Переключить Перенос Слов</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="848"/>
+        <location filename="mainwindow.cpp" line="843"/>
         <source>&amp;Zoom In</source>
         <translation>&amp;Увеличить</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="850"/>
+        <location filename="mainwindow.cpp" line="845"/>
         <source>Zoom In</source>
         <translation>Увеличить</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="853"/>
+        <location filename="mainwindow.cpp" line="848"/>
         <source>&amp;Zoom Out</source>
         <translation>Уме&amp;ньшить</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="855"/>
+        <location filename="mainwindow.cpp" line="850"/>
         <source>Zoom Out</source>
         <translation>Уменьшить</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="858"/>
+        <location filename="mainwindow.cpp" line="853"/>
         <source>&amp;Reset Zoom</source>
         <translation>&amp;Сбросить Увеличение</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="860"/>
+        <location filename="mainwindow.cpp" line="855"/>
         <source>Reset Zoom</source>
         <translation>Сбросить Приближение</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="863"/>
+        <location filename="mainwindow.cpp" line="858"/>
         <source>&amp;About...</source>
         <translation>&amp;О Программе...</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="864"/>
+        <location filename="mainwindow.cpp" line="859"/>
         <source>Show the application&apos;s About box</source>
         <translation>Показать окно О Программе</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="868"/>
+        <location filename="mainwindow.cpp" line="863"/>
         <source>About &amp;Qt</source>
         <translation>О &amp;Qt</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="869"/>
+        <location filename="mainwindow.cpp" line="864"/>
         <source>Show the Qt library&apos;s About box</source>
         <translation>Показать диалог О Qt библиотеке</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="872"/>
+        <location filename="mainwindow.cpp" line="867"/>
         <source>&amp;Preferences...</source>
         <translation>&amp;Параметры...</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="873"/>
+        <location filename="mainwindow.cpp" line="868"/>
         <source>Application preferences</source>
         <translation>Параметры приложения</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="876"/>
+        <location filename="mainwindow.cpp" line="871"/>
         <source>File Encryption...</source>
         <translation>Шифрование Файлов...</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="877"/>
+        <location filename="mainwindow.cpp" line="872"/>
         <source>File encryption</source>
         <translation>Шифрование файлов</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="880"/>
+        <location filename="mainwindow.cpp" line="875"/>
         <source>Windows EOL</source>
         <translation>Конец Строки Windows</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="881"/>
+        <location filename="mainwindow.cpp" line="876"/>
         <source>&quot;Windows&quot; end of line: CR+LF</source>
         <translation>Окончания строк &quot;Windows&quot;: CR+LF</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="976"/>
+        <location filename="mainwindow.cpp" line="971"/>
         <source>End of file reached. Started from the top.</source>
         <translation>Достигнут конец файла. Начали сверху.</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="992"/>
+        <location filename="mainwindow.cpp" line="987"/>
         <source>Text not found.</source>
         <translation>Текст не найден.</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1006"/>
+        <location filename="mainwindow.cpp" line="1001"/>
         <source>Text found.</source>
         <translation>Текст найден.</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1013"/>
+        <location filename="mainwindow.cpp" line="1008"/>
         <source>&amp;File</source>
         <translation>&amp;Файл</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1030"/>
+        <location filename="mainwindow.cpp" line="1025"/>
         <source>&amp;Edit</source>
         <translation>&amp;Редактирование</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1048"/>
+        <location filename="mainwindow.cpp" line="1043"/>
         <source>&amp;View</source>
         <translation>&amp;Просмотр</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1057"/>
+        <location filename="mainwindow.cpp" line="1052"/>
         <source>En&amp;cryption</source>
         <translation>&amp;Шифрование</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1065"/>
+        <location filename="mainwindow.cpp" line="1060"/>
         <source>&amp;Settings</source>
         <translation>&amp;Установки</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1068"/>
+        <location filename="mainwindow.cpp" line="1063"/>
         <source>&amp;Help</source>
         <translation>&amp;Помощь</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1074"/>
+        <location filename="mainwindow.cpp" line="1069"/>
         <source>File</source>
         <translation>Файл</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1085"/>
+        <location filename="mainwindow.cpp" line="1080"/>
         <source>Edit</source>
         <translation>Редактирование</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1093"/>
+        <location filename="mainwindow.cpp" line="1088"/>
         <source>Encryption</source>
         <translation>Шифрование</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1100"/>
+        <location filename="mainwindow.cpp" line="1095"/>
         <source>View</source>
         <translation>Просмотр</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1110"/>
+        <location filename="mainwindow.cpp" line="1105"/>
         <source>Ready</source>
         <translation>Готов</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1205"/>
+        <location filename="mainwindow.cpp" line="1200"/>
         <source>The document has been modified.</source>
         <translation>Документ был изменен.</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1206"/>
+        <location filename="mainwindow.cpp" line="1201"/>
         <source>Do you want to save your changes?</source>
         <translation>Хотите сохранить изменения?</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1341"/>
+        <location filename="mainwindow.cpp" line="1336"/>
         <source>Cannot save &apos;%1&apos;</source>
         <translation>Невозможно сохранить &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1344"/>
+        <location filename="mainwindow.cpp" line="1339"/>
         <source>Cannot open the specified encryption key</source>
         <translation>Невозможно открыть указанный ключ шифрования</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1347"/>
+        <location filename="mainwindow.cpp" line="1342"/>
         <source>The specified encryption key is invalid</source>
         <translation>Указанный ключ шифрования не верен</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1350"/>
+        <location filename="mainwindow.cpp" line="1345"/>
         <source>Cannot download the encryption key. CURL tool is not found</source>
         <translation>Невозможно закачать ключ шифрования. Утилита CURL не найдена</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1353"/>
+        <location filename="mainwindow.cpp" line="1348"/>
         <source>Cannot download the encryption key. CURL returned non zero exit code</source>
         <translation>Невозможно закачать ключ шифрования. Утилита CURL вернула не нулевой код</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1360"/>
+        <location filename="mainwindow.cpp" line="1355"/>
         <source>Unknown encryption error</source>
         <translation>Неизвестная ошибка при шифровании</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1364"/>
+        <location filename="mainwindow.cpp" line="1359"/>
         <source>Cannot create bak file</source>
         <translation>Невозможно создать файл резервного копирования</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1373"/>
+        <location filename="mainwindow.cpp" line="1368"/>
         <source>Unknown error</source>
         <translation>Неизвестная ошибка</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1384"/>
+        <location filename="mainwindow.cpp" line="1379"/>
         <source>Cannot save file</source>
         <translation>Невозможно сохранить файл</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1390"/>
+        <location filename="mainwindow.cpp" line="1385"/>
         <source>File saved</source>
         <translation>Файл сохранен</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1558"/>
+        <location filename="mainwindow.cpp" line="1553"/>
         <source>Line number:</source>
         <translation>Номер строки:</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1578"/>
+        <location filename="mainwindow.cpp" line="1573"/>
         <source>Maximum zoom</source>
         <translation>Максимальное увеличение</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1584"/>
+        <location filename="mainwindow.cpp" line="1579"/>
         <source>Font size: %1</source>
         <translation>Размер шрифта: %1</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1592"/>
+        <location filename="mainwindow.cpp" line="1587"/>
         <source>Minimum zoom</source>
         <translation>Минимально увеличение</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1598"/>
-        <location filename="mainwindow.cpp" line="1613"/>
+        <location filename="mainwindow.cpp" line="1593"/>
+        <location filename="mainwindow.cpp" line="1608"/>
         <source>Font size: </source>
         <translation>Размер шрифта: </translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1642"/>
+        <location filename="mainwindow.cpp" line="1637"/>
         <source>untitled</source>
         <translation>новый</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1651"/>
+        <location filename="mainwindow.cpp" line="1646"/>
         <source>Key protected</source>
         <translation>Защита ключом</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1652"/>
+        <location filename="mainwindow.cpp" line="1647"/>
         <source>Key not set</source>
         <translation>Ключ не установлен</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1653"/>
+        <location filename="mainwindow.cpp" line="1648"/>
         <source>persistent</source>
         <translation>сохранять путь</translation>
     </message>
@@ -1194,17 +1196,21 @@ Do you want to replace it?</source>
         <translation>Путь к ключу</translation>
     </message>
     <message>
-        <location filename="new_key_dialog.ui" line="73"/>
-        <source>The repository is the &lt;b&gt;.encryptpad&lt;/b&gt; (&lt;b&gt;_encryptpad&lt;/b&gt; on Windows) directory in the user&apos;s home folder. If it does not exist, it will be created.</source>
-        <translation>Хранилище это директория &lt;b&gt;.encryptpad&lt;/b&gt; (&lt;b&gt;_encryptpad&lt;/b&gt; на Windows) в домашней директории пользователя. Если не существует, то она будет создана.</translation>
+        <location filename="new_key_dialog.ui" line="78"/>
+        <source>The repository is &lt;b&gt;.encryptpad&lt;/b&gt; directory in the user&apos;s profile (&lt;b&gt;encryptpad_repository&lt;/b&gt; in portable mode).</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="new_key_dialog.ui" line="83"/>
+        <source>The repository is the &lt;b&gt;.encryptpad&lt;/b&gt; (&lt;b&gt;_encryptpad&lt;/b&gt; on Windows) directory in the user&apos;s home folder. If it does not exist, it will be created.</source>
+        <translation type="vanished">Хранилище это директория &lt;b&gt;.encryptpad&lt;/b&gt; (&lt;b&gt;_encryptpad&lt;/b&gt; на Windows) в домашней директории пользователя. Если не существует, то она будет создана.</translation>
+    </message>
+    <message>
+        <location filename="new_key_dialog.ui" line="88"/>
         <source>Browse...</source>
         <translation>Просмотр...</translation>
     </message>
     <message>
-        <location filename="new_key_dialog.ui" line="93"/>
+        <location filename="new_key_dialog.ui" line="98"/>
         <source>Key name in the repository</source>
         <translation>Имя ключа в хранилище</translation>
     </message>
@@ -1506,9 +1512,13 @@ Do you want to replace it?</source>
         <translation>&amp;Сохранить путь ключа в зашифрованном файле</translation>
     </message>
     <message>
-        <location filename="set_key_dialog.ui" line="167"/>
+        <location filename="set_key_dialog.ui" line="172"/>
+        <source>The repository is &lt;b&gt;.encryptpad&lt;/b&gt; directory in the user&apos;s profile (&lt;b&gt;encryptpad_repository&lt;/b&gt; in portable mode). Select a key or specify a file name without path for the repository keys.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The key repository is &lt;span style=&quot; font-weight:600;&quot;&gt;.encryptpad&lt;/span&gt; (&lt;b&gt;_encryptpad&lt;/b&gt; on Windows) directory in the user&apos;s profile. Select a key or specify a file name without path for the repository keys.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Хранилище это директория &lt;span style=&quot; font-weight:600;&quot;&gt;.encryptpad&lt;/span&gt; (&lt;b&gt;_encryptpad&lt;/b&gt; на Windows) в домашней директории пользователя. Выберите ключ или укажите имя файла без пути для ключей в хранилище.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Хранилище это директория &lt;span style=&quot; font-weight:600;&quot;&gt;.encryptpad&lt;/span&gt; (&lt;b&gt;_encryptpad&lt;/b&gt; на Windows) в домашней директории пользователя. Выберите ключ или укажите имя файла без пути для ключей в хранилище.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="set_key_dialog.cpp" line="90"/>
