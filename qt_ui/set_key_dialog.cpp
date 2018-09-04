@@ -35,7 +35,7 @@ SetKeyDialog::SetKeyDialog(QWidget *parent, FileRequestService &file_request_ser
     adjustSize();
 }
 
-void SetKeyDialog::on_uiRepositoryListView_current_changed(QModelIndex index, QModelIndex)
+void SetKeyDialog::CurrentChanged(QModelIndex index, QModelIndex)
 {
     if(!model_)
         return;
@@ -77,7 +77,7 @@ void SetKeyDialog::SetRepositoryListModel(QFileSystemModel &model, const QModelI
                 ui->uiRepositoryListView->selectionModel(),
                 SIGNAL(currentChanged(QModelIndex,QModelIndex)),
                 this,
-                SLOT(on_uiRepositoryListView_current_changed(QModelIndex, QModelIndex))
+                SLOT(CurrentChanged(QModelIndex, QModelIndex))
                 );
 }
 
@@ -95,14 +95,4 @@ void SetKeyDialog::on_uiFileDialog_clicked()
         return;
 
     ui->uiKeyFilePath->setText(selection.file_name);
-}
-
-void SetKeyDialog::on_uiUseKeyGroupBox_toggled(bool checked)
-{
-   if(!checked)
-   {
-       this->ui->uiKeyFilePath->setText(tr(""));
-       this->ui->uiPersistKeyLocation->setChecked(false);
-   }
-
 }

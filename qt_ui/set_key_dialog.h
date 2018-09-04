@@ -43,11 +43,9 @@ public:
     void SetKeyFilePath(const QString &path);
     void SetRepositoryListModel(QFileSystemModel &repository_list_model, const QModelIndex &index);
 public slots:
-    void on_uiRepositoryListView_current_changed(QModelIndex index, QModelIndex);
+    void CurrentChanged(QModelIndex index, QModelIndex);
 private slots:
     void on_uiFileDialog_clicked();
-
-    void on_uiUseKeyGroupBox_toggled(bool checked);
 
 private:
     Ui::SetKeyDialog *ui;
