@@ -35,6 +35,7 @@ EncryptPad is an application for viewing and editing symmetrically encrypted tex
 * [Compile EncryptPad on Mac/Linux](#compile-on-mac-linux)
     - [Dynamic build](#dynamic-build)
     - [Fedora](#build-on-fedora)
+* [Portable mode] (#portable-mode)
 * [Does EncryptPad store passphrases in the memory to reopen files?](#passphrases-in-memory)
 * [Acknowledgements](#acknowledgements)
 * [EncryptPad integrity verification](#integrity-verification)
@@ -403,6 +404,12 @@ For a dynamic build with using the system libraries:
 
     dnf install botan-devel
     ./configure.sh --all --use-system-libs
+
+<div id="portable-mode"></dev>
+
+## Portable mode
+
+EncryptPad checks the executable directory if there is a sub-directory called `encryptpad_repository`. If exists, it is used for key files and settings. The directory `.encryptpad` in the user's profile is ignored. The EncryptPad executable can be copied to a removable media with `encryptpad_repository` and used on multiple computers. It should be noted that keeping encrypted material with the key files on the same removable media is less secure. Separate them if possible.
 
 <div id="passphrases-in-memory"></div>
 
