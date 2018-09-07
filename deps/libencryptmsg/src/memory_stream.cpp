@@ -79,6 +79,7 @@ namespace EncryptMsg
     SafeVector::const_iterator InBufferStream::ReadLength(SafeVector::const_iterator it, SafeVector::const_iterator end)
     {
         assert(static_cast<size_t>(end - it) >= 5U);
+        (void)end;
         // TODO: Add ReadLength overload to read from iterators so we don't need to make a temp buffer
         SafeVector buf(it, it + 5U);
         InBufferStream stm;

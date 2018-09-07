@@ -382,6 +382,8 @@ namespace EncryptMsg
             cipher_mode_->finish(buf);
         }
 
+        (void)kMDCLength;
+
         out.Write(buf.data(), buf.size());
     }
 
