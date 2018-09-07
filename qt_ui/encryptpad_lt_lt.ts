@@ -95,17 +95,17 @@
     <message>
         <location filename="file_encryption_dialog.ui" line="191"/>
         <source>EPD</source>
-        <translation type="unfinished"/>
+        <translation>EPD</translation>
     </message>
     <message>
         <location filename="file_encryption_dialog.ui" line="201"/>
         <source>OpenPGP</source>
-        <translation type="unfinished"/>
+        <translation>OpenPGP</translation>
     </message>
     <message>
         <location filename="file_encryption_dialog.ui" line="204"/>
         <source>GPG</source>
-        <translation type="unfinished"/>
+        <translation>GPG</translation>
     </message>
     <message>
         <location filename="file_encryption_dialog.ui" line="219"/>
@@ -165,12 +165,12 @@
     <message>
         <location filename="file_encryption_dialog.ui" line="399"/>
         <source>SwitchDirection</source>
-        <translation type="unfinished"/>
+        <translation>SwitchDirection</translation>
     </message>
     <message>
         <location filename="file_encryption_dialog.ui" line="404"/>
         <source>IOChange</source>
-        <translation type="unfinished"/>
+        <translation>IOChange</translation>
     </message>
     <message>
         <location filename="file_encryption_dialog.cpp" line="233"/>
@@ -187,7 +187,7 @@
         <location filename="file_encryption_dialog.cpp" line="301"/>
         <location filename="file_encryption_dialog.cpp" line="310"/>
         <source>EncryptPad</source>
-        <translation type="unfinished"/>
+        <translation>EncryptPad</translation>
     </message>
     <message>
         <location filename="file_encryption_dialog.cpp" line="293"/>
@@ -358,12 +358,12 @@ Ar norite jį pakeisti?</translation>
     <message>
         <location filename="file_properties_dialog.ui" line="176"/>
         <source>FFFFFFFFFFFFFFFF</source>
-        <translation type="unfinished"/>
+        <translation>FFFFFFFFFFFFFFFF</translation>
     </message>
     <message>
         <location filename="file_properties_dialog.ui" line="195"/>
         <source>PropertyChanged</source>
-        <translation type="unfinished"/>
+        <translation>PropertyChanged</translation>
     </message>
     <message>
         <location filename="file_properties_dialog.cpp" line="84"/>
@@ -1197,7 +1197,7 @@ Ar norite jį pakeisti?</translation>
     <message>
         <location filename="new_key_dialog.ui" line="78"/>
         <source>The repository is &lt;b&gt;.encryptpad&lt;/b&gt; directory in the user&apos;s profile (&lt;b&gt;encryptpad_repository&lt;/b&gt; in portable mode).</source>
-        <translation>Saugykla yra &lt;b&gt;.encryptpad&lt;/b&gt; (Windows sistemose &lt;b&gt;_encryptpad&lt;/b&gt;) kataloge, naudotojo namų aplanke. Jei šio katalogo nėra, tuomet jis bus sukurtas.</translation>
+        <translation>Saugykla yra &lt;b&gt;.encryptpad&lt;/b&gt; katalogas naudotojo profilyje (&lt;b&gt;encryptpad_repository&lt;/b&gt; perkeliamoje veiksenoje).</translation>
     </message>
     <message>
         <location filename="new_key_dialog.ui" line="88"/>
@@ -1363,7 +1363,7 @@ Ar norite jį pakeisti?</translation>
     <message>
         <location filename="preferences_dialog.ui" line="125"/>
         <source>[example: Monospace (Size: 12)]</source>
-        <translation type="unfinished"/>
+        <translation>[example: Monospace (Size: 12)]</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="138"/>
@@ -1415,22 +1415,22 @@ Ar norite jį pakeisti?</translation>
     <message>
         <location filename="preferences_dialog.ui" line="370"/>
         <source>32</source>
-        <translation type="unfinished"/>
+        <translation>32</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="375"/>
         <source>64</source>
-        <translation type="unfinished"/>
+        <translation>64</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="380"/>
         <source>128</source>
-        <translation type="unfinished"/>
+        <translation>128</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="385"/>
         <source>256</source>
-        <translation type="unfinished"/>
+        <translation>256</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="393"/>
@@ -1509,7 +1509,7 @@ Ar norite jį pakeisti?</translation>
     <message>
         <location filename="set_key_dialog.ui" line="172"/>
         <source>The repository is &lt;b&gt;.encryptpad&lt;/b&gt; directory in the user&apos;s profile (&lt;b&gt;encryptpad_repository&lt;/b&gt; in portable mode). Select a key or specify a file name without path for the repository keys.</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Rakto saugykla yra &lt;span style=&quot; font-weight:600;&quot;&gt;.encryptpad&lt;/span&gt; (Windows sistemose &lt;b&gt;_encryptpad&lt;/b&gt;) katalogas, naudotojo profilyje. Pasirinkite raktą arba saugyklos raktams nurodykite failo pavadinimą be kelio.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>Saugykla yra &lt;b&gt;.encryptpad&lt;/b&gt; katalogas naudotojo profilyje (&lt;b&gt;encryptpad_repository&lt;/b&gt; perkeliamoje veiksenoje). Pasirinkite raktą arba saugyklos raktams nurodykite failo pavadinimą be kelio.</translation>
     </message>
     <message>
         <location filename="set_key_dialog.cpp" line="90"/>
