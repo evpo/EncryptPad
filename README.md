@@ -205,7 +205,7 @@ There are three different structures a saved file can have depending on protecti
 
 2. **Key only** (passphrase is not set but a key file is used for protection). The file is a WAD file. [WAD](https://en.wikipedia.org/wiki/Doom_WAD) is a simple format for combining multiple binary files in one. You can open a WAD file in [Slade](http://slade.mancubus.net/). It contains two files internally: 
     * OpenPGP file encrypted with the key
-    * `__X2_KEY` is a plain text file containing the path to the key if "Persistent key location" in the encrypted file is enabled. Otherwise, it has zero length.
+    * `__X2_KEY` is a plain text file containing the path to the key if "Persistent key location in the encrypted file" is enabled. Otherwise, it has zero length.
 
 3. **Protected with passphrase and key**. The resulting file is an OpenPGP file containing a WAD file as explained in 2.
 
