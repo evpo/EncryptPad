@@ -26,7 +26,7 @@ EncryptPad is an application for viewing and editing symmetrically encrypted tex
 * [Compile EncryptPad on Mac/Linux](#compile-on-mac-linux)
     - [Dynamic build](#dynamic-build)
     - [Fedora](#build-on-fedora)
-* [Portable mode] (#portable-mode)
+* [Portable mode](#portable-mode)
 * [Does EncryptPad store passphrases in the memory to reopen files?](#passphrases-in-memory)
 * [Acknowledgements](#acknowledgements)
 * [EncryptPad integrity verification](#integrity-verification)
