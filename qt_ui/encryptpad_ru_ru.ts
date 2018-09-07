@@ -1196,7 +1196,7 @@ Do you want to replace it?</source>
     <message>
         <location filename="new_key_dialog.ui" line="78"/>
         <source>The repository is &lt;b&gt;.encryptpad&lt;/b&gt; directory in the user&apos;s profile (&lt;b&gt;encryptpad_repository&lt;/b&gt; in portable mode).</source>
-        <translation>Хранилище это директория &lt;b&gt;.encryptpad&lt;/b&gt; (&lt;b&gt;_encryptpad&lt;/b&gt; на Windows) в домашней директории пользователя. Если не существует, то она будет создана.</translation>
+        <translation>Хранилище - это директория &lt;b&gt;.encryptpad&lt;/b&gt; в домашней директории пользователя (&lt;b&gt;encryptpad_repository&lt;/b&gt; в переносном режиме).</translation>
     </message>
     <message>
         <location filename="new_key_dialog.ui" line="88"/>
@@ -1508,7 +1508,7 @@ Do you want to replace it?</source>
     <message>
         <location filename="set_key_dialog.ui" line="172"/>
         <source>The repository is &lt;b&gt;.encryptpad&lt;/b&gt; directory in the user&apos;s profile (&lt;b&gt;encryptpad_repository&lt;/b&gt; in portable mode). Select a key or specify a file name without path for the repository keys.</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Хранилище это директория &lt;span style=&quot; font-weight:600;&quot;&gt;.encryptpad&lt;/span&gt; (&lt;b&gt;_encryptpad&lt;/b&gt; на Windows) в домашней директории пользователя. Выберите ключ или укажите имя файла без пути для ключей в хранилище.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>Хранилище - это директория &lt;b&gt;.encryptpad&lt;/b&gt; в домашней директории пользователя (&lt;b&gt;encryptpad_repository&lt;/b&gt; в переносном режиме. Выберите ключ или укажите имя файла без пути для ключей в хранилище.</translation>
     </message>
     <message>
         <location filename="set_key_dialog.cpp" line="90"/>

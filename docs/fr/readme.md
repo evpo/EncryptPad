@@ -26,6 +26,7 @@ EncryptPad est une application de visualisation et d’édition de texte chiffr�
 * [Compiler EncryptPad sous Mac/Linux](#compile-on-mac-linux)
     - [Compilation dynamique](#dynamic-build)
     - [Fedora](#build-on-fedora)
+* [Portable mode](#portable-mode)
 * [EncryptPad stocke-t-il les phrases de passe en mémoire pour rouvrir les fichiers ?](#passphrases-in-memory)
 * [Remerciements](#acknowledgements)
 * [Vérification de l’intégrité par EncryptPad](#integrity-verification)
@@ -394,6 +395,12 @@ Pour une compilation dynamique en utilisant les bibliothèques système :
 
     dnf install botan-devel
     ./configure.sh --all --use-system-libs
+
+<div id="portable-mode"></dev>
+
+## Portable mode
+
+EncryptPad checks the executable directory if there is a sub-directory called `encryptpad_repository`. If exists, it is used for key files and settings. The directory `.encryptpad` in the user's profile is ignored. The EncryptPad executable can be copied to a removable media with `encryptpad_repository` and used on multiple computers. It should be noted that keeping encrypted material with the key files on the same removable media is less secure. Separate them if possible.
 
 <div id="passphrases-in-memory"></div>
 
