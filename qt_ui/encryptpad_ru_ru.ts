@@ -1508,7 +1508,7 @@ Do you want to replace it?</source>
     <message>
         <location filename="set_key_dialog.ui" line="172"/>
         <source>The repository is &lt;b&gt;.encryptpad&lt;/b&gt; directory in the user&apos;s profile (&lt;b&gt;encryptpad_repository&lt;/b&gt; in portable mode). Select a key or specify a file name without path for the repository keys.</source>
-        <translation>Хранилище - это директория &lt;b&gt;.encryptpad&lt;/b&gt; в домашней директории пользователя (&lt;b&gt;encryptpad_repository&lt;/b&gt; в переносном режиме. Выберите ключ или укажите имя файла без пути для ключей в хранилище.</translation>
+        <translation>Хранилище - это директория &lt;b&gt;.encryptpad&lt;/b&gt; в домашней директории пользователя (&lt;b&gt;encryptpad_repository&lt;/b&gt; в переносном режиме). Выберите ключ или укажите имя файла без пути для ключей в хранилище.</translation>
     </message>
     <message>
         <location filename="set_key_dialog.cpp" line="90"/>
