@@ -195,7 +195,7 @@ Un fichier enregistré peut avoir trois structures différentes selon le mode de
 
 2. **Clé seulement** (une phrase de passe n’est pas définie, mais un fichier clé est utilisé pour la protection). Le fichier est un fichier WAD. [WAD](https://fr.wikipedia.org/wiki/.wad) est un format simple qui combine plusieurs fichiers binaires en un seul. Vous pouvez ouvrir un fichier WAD avec [Slade](http://slade.mancubus.net/). Il contient deux fichiers : 
     * Fichier OpenPGP chiffré avec la clé
-    * `__X2_KEY` est un fichier texte en clair contenant le chemin de la clé si `Emplacement de clé persistante dans le fichier chiffré` est activé. Autrement, il a une taille de zéro.
+    * `__X2_KEY` est un fichier texte en clair contenant le chemin de la clé si « Emplacement de clé persistante dans le fichier chiffré ». Autrement, il a une taille de zéro.
 
 3. **Protégé par phrase de passe et clé**. Le fichier produit est un fichier OpenPGP contenant un fichier WAD tel que décrit en 2.
 
