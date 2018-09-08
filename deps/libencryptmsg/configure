@@ -39,6 +39,14 @@ INCLUDEDIR=include
 STATIC_MODE=false
 DEPSDIR=deps
 BOTANDIR=
+MAKE=mingw32-make
+if which make > /dev/null
+then
+    MAKE=make
+elif which mingw32-make > /dev/null
+then
+    MAKE=mingw32-make
+fi
 
 while [[ $# > 0 ]]
 do
@@ -107,7 +115,6 @@ DEPSDIR=$DEPSDIR
 BOTANDIR=$BOTANDIR
 EOM
 
-
 cat > build/libencryptmsg.pc << EOM
 prefix=$PREFIX
 libdir=$PREFIX/$LIBDIR
@@ -121,30 +128,31 @@ Libs: -L\${libdir} -lencryptmsg
 Cflags: -I\${includedir}
 EOM
 
-if [[ $DEBUG_MODE != true ]]; then
-    RELEASE=on
-fi
-
-if [[ $STATIC_MODE == true ]]; then
-    pushd src >/dev/null
-
-SUBDIR=$(cat <<EOM | make -s --no-print-directory -f -
+cat > build/get_platform.mak <<EOM
 RELEASE=$RELEASE
 include ${DEPSDIR}/makefiles/platform.mak
 all:
 	@echo \$(SUBDIR)
 EOM
-)
 
-LIBRARIES=$(cat <<EOM | make -s --no-print-directory -f -
+cat > build/get_libraries.mak <<EOM
 .DEFAULT_GOAL := default
 RELEASE=$RELEASE
 include ./Makefile
 default::
 	@echo \$(LIBRARIES)
 EOM
-)
+
+if [[ $DEBUG_MODE != true ]]; then
+    RELEASE=on
+fi
+
+if [[ $STATIC_MODE == true ]]; then
+    SUBDIR=$($MAKE -s --no-print-directory -f build/get_platform.mak)
+    LIBRARIES=$($MAKE -s --no-print-directory -f build/get_libraries.mak)
     LIBRARIES+=" ."
+
+    pushd src >/dev/null
 
     for L in $LIBRARIES
     do
