@@ -47,9 +47,6 @@
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////
-// TODO: remove later
-#include <iostream>
-
 
 namespace stlplus
 {
@@ -705,9 +702,9 @@ namespace stlplus
   bool folder_create (const std::string& directory)
   {
 #ifdef MSWINDOWS
-      std::wstring buffer;
-      Multi2Wide(directory, buffer);
-      return CreateDirectoryW(buffer.c_str(),NULL) != 0;
+    std::wstring buffer;
+    Multi2Wide(directory, buffer);
+    return CreateDirectoryW(buffer.c_str(),NULL) != 0;
 #else
     return mkdir(directory.c_str(), 0777) == 0;
 #endif
@@ -922,9 +919,9 @@ namespace stlplus
   {
 #ifdef MSWINDOWS
     if(getenv("HOME"))
-        return ExpandVariablesWin("%HOME%");
+      return ExpandVariablesWin("%HOME%");
     if (getenv("HOMEDRIVE") || getenv("HOMEPATH"))
-        return ExpandVariablesWin("%HOMEDRIVE%%HOMEPATH%");
+      return ExpandVariablesWin("%HOMEDRIVE%%HOMEPATH%");
     return "C:\\";
 #else
     if (getenv("HOME"))
@@ -1205,21 +1202,20 @@ namespace stlplus
   std::string install_path(const std::string& argv0)
   {
 #ifdef MSWINDOWS
-      (void)argv0;
-      std::wstring buffer;
-      buffer.resize(MAX_PATH);
-
-      DWORD size = GetModuleFileNameW(NULL, &buffer[0], buffer.size());
-      while(size == buffer.size())
-      {
-          // ERROR_INSUFFICENT_BUFFER
-          buffer.resize(buffer.size() * 2);
-          size = GetModuleFileNameW(NULL, &buffer[0], buffer.size());
-      }
-      buffer.resize(size);
-      std::string binary;
-      Wide2Multi(buffer, binary);
-      return folder_part(binary);
+    (void)argv0;
+    std::wstring buffer;
+    buffer.resize(MAX_PATH);
+    DWORD size = GetModuleFileNameW(NULL, &buffer[0], buffer.size());
+    while(size == buffer.size())
+    {
+      // ERROR_INSUFFICENT_BUFFER
+      buffer.resize(buffer.size() * 2);
+      size = GetModuleFileNameW(NULL, &buffer[0], buffer.size());
+    }
+    buffer.resize(size);
+    std::string binary;
+    Wide2Multi(buffer, binary);
+    return folder_part(binary);
 #else
     std::string bin_directory = folder_part(argv0);
     if (bin_directory.empty())
