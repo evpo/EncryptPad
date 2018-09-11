@@ -1197,7 +1197,7 @@ Do you want to replace it?</source>
     <message>
         <location filename="new_key_dialog.ui" line="78"/>
         <source>The repository is &lt;b&gt;.encryptpad&lt;/b&gt; directory in the user&apos;s profile (&lt;b&gt;encryptpad_repository&lt;/b&gt; in portable mode).</source>
-        <translation>仓库存在于 &lt;b&gt;.encryptpad&lt;/b&gt; (&lt;b&gt;_encryptpad&lt;/b&gt; on Windows) 处于用户文件夹中的目录里。如果不存在，它将会被创建。</translation>
+        <translation>EncryptPad仓库即用户文件夹内的&lt;b&gt;.encryptpad&lt;/b&gt;，（便携版EncryptPad则为EncryptPad目录内的&lt;b&gt;encryptpad_repository&lt;/b&gt;）</translation>
     </message>
     <message>
         <location filename="new_key_dialog.ui" line="88"/>
@@ -1509,7 +1509,7 @@ Do you want to replace it?</source>
     <message>
         <location filename="set_key_dialog.ui" line="172"/>
         <source>The repository is &lt;b&gt;.encryptpad&lt;/b&gt; directory in the user&apos;s profile (&lt;b&gt;encryptpad_repository&lt;/b&gt; in portable mode). Select a key or specify a file name without path for the repository keys.</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;密钥仓库是用户文件夹里的&lt;span style=&quot; font-weight:600;&quot;&gt;.encryptpad&lt;/span&gt; （在Windows上是&lt;b&gt;_encryptpad&lt;/b&gt; ）文件夹。请选择一个密钥，或者输入一个不含路径的文件名来指定一个仓库中的密钥。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>如果要指定一个在EncryptPad仓库（安装版Encryptpad的话为用户文件夹内的&lt;b&gt;.encryptpad&lt;/b&gt;，便携版则为EncryptPad目录内的&lt;b&gt;encryptpad_repository&lt;/b&gt;）内的密钥，可以省略密钥文件的路径。</translation>
     </message>
     <message>
         <location filename="set_key_dialog.cpp" line="90"/>
