@@ -8,9 +8,10 @@ h2
 
 ### Version 0.4.0.3
 
-* Portable software should be able to store all its files in a single removable location such as a memory stick. EncryptPad creates and reads a setting file in `$HOME/.encryptpad`. After this change EncryptPad will check if there is `encryptpad_repository` directory in the application path and use it for settings and key files.
-* Botan has been updated to version 2.7.
-* Plog has been updated to version 1.1.4 and added it to acknowledgements.
+* Un logiciel portable devrait pouvoir enregistrer tous ses fichiers en un seul endroit amovible, tel qu’une clé USB. EncryptPad crée son fichier de paramètres dans `$HOME/.encryptpad`. Après ce changement, EncryptPad vérifiera la présence d’un répertoire `encryptpad_repository` dans le chemin de l’application et l’utilisera pour les paramètres et les fichiers clés.
+* Botan a été mis à jour vers la version 2.7.
+* Plog a été mis à jour vers la version 1.1.4.
+* Traduction en lituanien
 
 ### Version 0.4.0.0
 

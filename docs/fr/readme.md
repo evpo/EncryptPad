@@ -26,7 +26,7 @@ EncryptPad est une application de visualisation et d’édition de texte chiffr�
 * [Compiler EncryptPad sous Mac/Linux](#compile-on-mac-linux)
     - [Compilation dynamique](#dynamic-build)
     - [Fedora](#build-on-fedora)
-* [Portable mode](#portable-mode)
+* [Mode portable](#portable-mode)
 * [EncryptPad stocke-t-il les phrases de passe en mémoire pour rouvrir les fichiers ?](#passphrases-in-memory)
 * [Remerciements](#acknowledgements)
 * [Vérification de l’intégrité par EncryptPad](#integrity-verification)
@@ -46,7 +46,7 @@ EncryptPad est une application de visualisation et d’édition de texte chiffr�
 * Combinaison d’une **phrase de passe et d’un fichier clé**
 * **Générateur de fichiers clés** aléatoires 
 * **Dépôt de clés** dans un répertoire caché du dossier personnel de l’utilisateur
-* Le chemin d’un fichier clé peut être stocké dans un fichier chiffré. Si cette option est activée, **vous n’avez pas à spécifier le fichier clé** chaque fois que vous ouvrez des fichiers.
+* Le chemin d’un fichier clé peut être stocké dans un fichier chiffré. Si cette option est activée, **vous n’avez pas à indiquer le fichier clé** chaque fois que vous ouvrez des fichiers.
 * Chiffrement de **fichiers binaires** (images, vidéos, fichiers compressés, etc.)
 * Mode **lecture seulement** pour empêcher les modifications accidentelles de fichiers
 * Encodage de texte **UTF8**
@@ -147,7 +147,7 @@ Format propre à EncryptPad. Les autres logiciels OpenPGP ne pourront pas l’ou
 <tr><td>EPD</td><td>Fichier clé et phrase de passe</td><td>oui</td><td>oui</td><td>non</td><td>Imbriqué : OpenPGP/WAD/OpenPGP</td></tr>
 </table>
 
-\*  L’emplacement du fichier clé se trouve dans l’en-tête d’un fichier chiffré afin que l’utilisateur n’ait pas à le spécifier lors du déchiffrement.
+\*  L’emplacement du fichier clé se trouve dans l’en-tête d’un fichier chiffré afin que l’utilisateur n’ait pas à l’indiquer lors du déchiffrement.
 
 <div id="key-file"></div>
 
@@ -196,7 +196,7 @@ Un fichier enregistré peut avoir trois structures différentes selon le mode de
 
 2. **Clé seulement** (une phrase de passe n’est pas définie, mais un fichier clé est utilisé pour la protection). Le fichier est un fichier WAD. [WAD](https://fr.wikipedia.org/wiki/.wad) est un format simple qui combine plusieurs fichiers binaires en un seul. Vous pouvez ouvrir un fichier WAD avec [Slade](http://slade.mancubus.net/). Il contient deux fichiers : 
     * Fichier OpenPGP chiffré avec la clé
-    * `__X2_KEY` est un fichier texte en clair contenant le chemin de la clé si « Emplacement de clé persistante dans le fichier chiffré ». Autrement, il a une taille de zéro.
+    * `__X2_KEY` est un fichier texte en clair contenant le chemin de la clé si l’option « Emplacement de clé persistante dans le fichier chiffré » est activée. Sinon, il a une taille de zéro.
 
 3. **Protégé par phrase de passe et clé**. Le fichier produit est un fichier OpenPGP contenant un fichier WAD tel que décrit en 2.
 
@@ -398,9 +398,9 @@ Pour une compilation dynamique en utilisant les bibliothèques système :
 
 <div id="portable-mode"></dev>
 
-## Portable mode
+## Mode portable
 
-EncryptPad checks the executable directory if there is a sub-directory called `encryptpad_repository`. If exists, it is used for key files and settings. The directory `.encryptpad` in the user's profile is ignored. The EncryptPad executable can be copied to a removable media with `encryptpad_repository` and used on multiple computers. It should be noted that keeping encrypted material with the key files on the same removable media is less secure. Separate them if possible.
+EncryptPad vérifie la présence d’un sous-répertoire nommé `encryptpad_repository` dans le répertoire de l’exécutable. S’il existe, il est utilisé pour les paramètres et les fichiers clés. Le répertoire `.encryptpad` situé dans le profil de l’utilisateur est alors ignoré. L’exécutable EncryptPad et `encryptpad_repository` peuvent être copiés vers un support amovible, et ainsi être utilisés sur plusieurs ordinateurs. Il convient de noter qu’il est moins sécuritaire de conserver sur le même support amovible documents chiffrés et fichiers clés. Séparez-les si possible.
 
 <div id="passphrases-in-memory"></div>
 

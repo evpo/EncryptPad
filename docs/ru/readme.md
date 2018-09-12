@@ -400,7 +400,7 @@ For a dynamic build with using the system libraries:
 
 ## Portable mode
 
-EncryptPad checks the executable directory if there is a sub-directory called `encryptpad_repository`. If exists, it is used for key files and settings. The directory `.encryptpad` in the user's profile is ignored. The EncryptPad executable can be copied to a removable media with `encryptpad_repository` and used on multiple computers. It should be noted that keeping encrypted material with the key files on the same removable media is less secure. Separate them if possible.
+EncryptPad checks the executable directory for a sub-directory called `encryptpad_repository`. If exists, it is used for key files and settings. The directory `.encryptpad` in the user's profile is then ignored. The EncryptPad executable and `encryptpad_repository`can both be copied to a removable media and used on multiple computers. It should be noted that keeping encrypted material with the key files on the same removable media is less secure. Separate them if possible.
 
 <div id="passphrases-in-memory"></div>
 

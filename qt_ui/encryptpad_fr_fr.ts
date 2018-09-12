@@ -1197,7 +1197,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="new_key_dialog.ui" line="78"/>
         <source>The repository is &lt;b&gt;.encryptpad&lt;/b&gt; directory in the user&apos;s profile (&lt;b&gt;encryptpad_repository&lt;/b&gt; in portable mode).</source>
-        <translation>Le dépôt est le répertoire &lt;b&gt;.encryptpad&lt;/b&gt; (&lt;b&gt;_encryptpad&lt;/b&gt; sous Windows) dans le dossier personnel de l’utilisateur. S’il n’existe pas, il sera créé.</translation>
+        <translation>Le dépôt est le répertoire &lt;b&gt;.encryptpad&lt;/b&gt; dans le profile de l’utilisateur (&lt;b&gt;encryptpad_repository&lt;/b&gt; en mode portable).</translation>
     </message>
     <message>
         <location filename="new_key_dialog.ui" line="88"/>
@@ -1509,12 +1509,12 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="set_key_dialog.ui" line="172"/>
         <source>The repository is &lt;b&gt;.encryptpad&lt;/b&gt; directory in the user&apos;s profile (&lt;b&gt;encryptpad_repository&lt;/b&gt; in portable mode). Select a key or specify a file name without path for the repository keys.</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Le dépôt de clé est le répertoire &lt;span style=&quot; font-weight:600;&quot;&gt;.encryptpad&lt;/span&gt; (&lt;b&gt;_encryptpad&lt;/b&gt; sous Windows) dans le profile de l’utilisateur. Choisir une clé ou spécifier un nom de fichier sans chemin pour les clés du dépôt.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>Le dépôt est le répertoire &lt;b&gt;.encryptpad&lt;/b&gt; dans le profile de l’utilisateur (&lt;b&gt;encryptpad_repository&lt;/b&gt; en mode portable). Sélectionner une clé ou indiquer un nom de fichier sans chemin pour les clés du dépôt.</translation>
     </message>
     <message>
         <location filename="set_key_dialog.cpp" line="90"/>
         <source>Specify encryption key location</source>
-        <translation>Spécifier l’emplacement de la clé de chiffrement</translation>
+        <translation>Indiquer l’emplacement de la clé de chiffrement</translation>
     </message>
 </context>
 <context>
