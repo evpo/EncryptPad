@@ -31,7 +31,10 @@ SetKeyDialog::SetKeyDialog(QWidget *parent, FileRequestService &file_request_ser
     file_request_service_(file_request_service)
 {
     ui->setupUi(this);
-    setMinimumSize(sizeHint());
+    auto size = sizeHint();
+    size.setWidth(std::max(size.width(), minimumWidth()));
+    size.setHeight(std::max(size.height(), minimumHeight()));
+    setMinimumSize(size);
     adjustSize();
 }
 
