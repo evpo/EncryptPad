@@ -6,7 +6,7 @@ h2
 </style>
 ## Release Notes ##
 
-### Version 0.4.0.3
+### Version 0.4.0.4
 
 * Portable software should be able to store all its files in a single removable location such as a memory stick. EncryptPad creates its setting file in `$HOME/.encryptpad`. After this change EncryptPad will check if there is `encryptpad_repository` directory in the application path and use it for settings and key files.
 * Botan has been updated to version 2.7.

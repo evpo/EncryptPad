@@ -6,7 +6,7 @@ h2
 </style>
 ## Notes de version ##
 
-### Version 0.4.0.3
+### Version 0.4.0.4
 
 * Un logiciel portable devrait pouvoir enregistrer tous ses fichiers en un seul endroit amovible, tel qu’une clé USB. EncryptPad crée son fichier de paramètres dans `$HOME/.encryptpad`. Après ce changement, EncryptPad vérifiera la présence d’un répertoire `encryptpad_repository` dans le chemin de l’application et l’utilisera pour les paramètres et les fichiers clés.
 * Botan a été mis à jour vers la version 2.7.
