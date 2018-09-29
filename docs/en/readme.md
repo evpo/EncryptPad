@@ -26,6 +26,7 @@ EncryptPad is an application for viewing and editing symmetrically encrypted tex
 * [Compile EncryptPad on Mac/Linux](#compile-on-mac-linux)
     - [Dynamic build](#dynamic-build)
     - [Fedora](#build-on-fedora)
+    - [Debian](#build-on-debian)
 * [Portable mode](#portable-mode)
 * [Does EncryptPad store passphrases in the memory to reopen files?](#passphrases-in-memory)
 * [Acknowledgements](#acknowledgements)
@@ -394,6 +395,26 @@ Open the EncryptPad directory:
 For a dynamic build with using the system libraries:
 
     dnf install botan-devel
+    ./configure.sh --all --use-system-libs
+
+<div id="build-on-debian"></div>
+
+### Debian
+
+Install dependencies and tools:
+
+    apt-get install qtbase5-dev qt5-default gcc g++ make python zlib1g-dev pkg-config
+
+Open the EncryptPad source directory:
+
+    ./configure.sh --all
+
+You can also use the system `libbotan-2-dev` instead of building it. If `libbotan-2-dev` is not available, add `stretch-backports` to the repository:
+
+    echo "deb http://deb.debian.org/debian/ stretch-backports main" >> /etc/apt/sources.list
+
+    apt-get install libbotan-2-dev
+
     ./configure.sh --all --use-system-libs
 
 <div id="portable-mode"></dev>

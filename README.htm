@@ -34,6 +34,7 @@
 <ul>
 <li><a href="#dynamic-build">Dynamic build</a></li>
 <li><a href="#build-on-fedora">Fedora</a></li>
+<li><a href="#build-on-debian">Debian</a></li>
 </ul></li>
 <li><a href="#portable-mode">Portable mode</a></li>
 <li><a href="#passphrases-in-memory">Does EncryptPad store passphrases in the memory to reopen files?</a></li>
@@ -432,6 +433,29 @@ export PATH
 <p>For a dynamic build with using the system libraries:</p>
 
 <pre><code>dnf install botan-devel
+./configure.sh --all --use-system-libs
+</code></pre>
+
+<div id="build-on-debian"></div>
+
+<h3>Debian</h3>
+
+<p>Install dependencies and tools:</p>
+
+<pre><code>apt-get install qtbase5-dev qt5-default gcc g++ make python zlib1g-dev pkg-config
+</code></pre>
+
+<p>Open the EncryptPad source directory:</p>
+
+<pre><code>./configure.sh --all
+</code></pre>
+
+<p>You can also use the system <code>libbotan-2-dev</code> instead of building it. If <code>libbotan-2-dev</code> is not available, add <code>stretch-backports</code> to the repository:</p>
+
+<pre><code>echo "deb http://deb.debian.org/debian/ stretch-backports main" &gt;&gt; /etc/apt/sources.list
+
+apt-get install libbotan-2-dev
+
 ./configure.sh --all --use-system-libs
 </code></pre>
 
