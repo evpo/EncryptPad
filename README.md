@@ -36,6 +36,7 @@ EncryptPad is an application for viewing and editing symmetrically encrypted tex
     - [Dynamic build](#dynamic-build)
     - [Fedora](#build-on-fedora)
     - [Debian](#build-on-debian)
+    - [openSUSE](#build-on-opensuse)
 * [Portable mode](#portable-mode)
 * [Does EncryptPad store passphrases in the memory to reopen files?](#passphrases-in-memory)
 * [Acknowledgements](#acknowledgements)
@@ -425,6 +426,25 @@ You can also use the system `libbotan-2-dev` instead of building it. If `libbota
     apt-get install libbotan-2-dev
 
     ./configure.sh --all --use-system-libs
+
+<div id="build-on-opensuse"></div>
+
+### openSUSE
+
+Install dependencies and tools:
+
+    zypper install gcc gcc-c++ make python pkg-config zlib-devel libqt5-qtbase-devel
+    ln -s qmake-qt5 /usr/bin/qmake
+
+You can also install later compiler versions and link them to the default commands:
+
+    zypper install gcc7 gcc7-c++
+    ln -sf gcc-7 /usr/bin/gcc
+    ln -sf g++-7 /usr/bin/g++
+
+Open the EncryptPad source directory:
+
+    ./configure.sh --all
 
 <div id="portable-mode"></dev>
 
