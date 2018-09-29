@@ -32,7 +32,6 @@
 </ul></li>
 <li><a href="#compile-on-mac-linux">Compile EncryptPad on Mac/Linux</a>
 <ul>
-<li><a href="#dynamic-build">Dynamic build</a></li>
 <li><a href="#build-on-fedora">Fedora</a></li>
 <li><a href="#build-on-debian">Debian</a></li>
 <li><a href="#build-on-opensuse">openSUSE</a></li>
@@ -403,17 +402,6 @@ encryptpad0_3_2_5_webupd8_ppa_changes/encryptpad_0.3.2.5-1~webupd8~yakkety1_sour
 
 <pre><code>./configure.sh --all
 </code></pre>
-
-<div id="dynamic-build"></div>
-
-<h3>Dynamic build</h3>
-
-<pre><code>./configure.sh --all --use-system-libs
-</code></pre>
-
-<p>Build with dynamic linking to libraries. It also uses <code>Botan</code> and <code>Zlib</code> installed on the system instead
-of compiling their source code under <code>deps</code>. On Ubuntu, install <code>libbotan1.10-dev</code> and <code>zlib1g-dev</code>
-packages before building.</p>
 
 <div id="build-on-fedora"></div>
 

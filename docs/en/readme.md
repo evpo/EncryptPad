@@ -24,7 +24,6 @@ EncryptPad is an application for viewing and editing symmetrically encrypted tex
   - [Prerequisites](#prerequisites)
   - [Steps](#steps)
 * [Compile EncryptPad on Mac/Linux](#compile-on-mac-linux)
-    - [Dynamic build](#dynamic-build)
     - [Fedora](#build-on-fedora)
     - [Debian](#build-on-debian)
     - [openSUSE](#build-on-opensuse)
@@ -368,16 +367,6 @@ Note that if you want EncryptPad to work as a single executable without dlls, yo
 It is easier than building on Windows. All you need is to install Qt, Python and run:
 
     ./configure.sh --all
-
-<div id="dynamic-build"></div>
-
-### Dynamic build
-
-    ./configure.sh --all --use-system-libs
-
-Build with dynamic linking to libraries. It also uses `Botan` and `Zlib` installed on the system instead
-of compiling their source code under `deps`. On Ubuntu, install `libbotan1.10-dev` and `zlib1g-dev`
-packages before building.
 
 <div id="build-on-fedora"></div>
 
