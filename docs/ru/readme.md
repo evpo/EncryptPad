@@ -396,7 +396,7 @@ For a dynamic build with using the system libraries:
     dnf install botan-devel
     ./configure.sh --all --use-system-libs
 
-<div id="portable-mode"></dev>
+<div id="portable-mode"></div>
 
 ## Portable mode
 

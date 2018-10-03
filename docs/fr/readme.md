@@ -396,7 +396,7 @@ Pour une compilation dynamique en utilisant les bibliothèques système :
     dnf install botan-devel
     ./configure.sh --all --use-system-libs
 
-<div id="portable-mode"></dev>
+<div id="portable-mode"></div>
 
 ## Mode portable
 

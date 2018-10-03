@@ -435,7 +435,7 @@ Open the EncryptPad source directory:
 
     ./configure.sh --all
 
-<div id="portable-mode"></dev>
+<div id="portable-mode"></div>
 
 ## Portable mode
 
