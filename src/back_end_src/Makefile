@@ -10,4 +10,7 @@ LDFLAGS += -Wall
 
 CXXFLAGS += $(BOTAN) -I../deps/libencryptmsg/include -I../deps/plog/include -std=c++11
 CXXFLAGS += -D_FILE_OFFSET_BITS=64
+EXTERNAL_LIBRARY := on
+EXTERNAL_SOURCES := on
+-include ../build/back_end_src.mak
 include ../deps/makefiles/gcc.mak

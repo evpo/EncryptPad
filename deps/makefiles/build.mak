@@ -171,6 +171,7 @@ endif
 ################################################################################
 # now start generating the build structure
 
+ifneq ($(EXTERNAL_SOURCES),on)
 # this adapts the make to find all .cpp files so they can be compiled as C++ files
 CPP_SOURCES := $(wildcard *.cpp)
 CPP_OBJECTS := $(patsubst %.cpp,$(SUBDIR)/%.o,$(CPP_SOURCES))
@@ -184,16 +185,19 @@ ifeq ($(WINDOWS),on)
 RC_SOURCES := $(wildcard *.rc)
 RC_OBJECTS := $(patsubst %.rc,$(SUBDIR)/%_rc.o,$(RC_SOURCES))
 endif
+endif
 
 # the set of objects is a set of one .o file for each source file, stored in the build-specific subdirectory
 OBJECTS := $(RC_OBJECTS) $(C_OBJECTS) $(CPP_OBJECTS)
 
+ifneq ($(EXTERNAL_LIBRARY),on)
 # the object library name is the library name with common conventions for library files applied
 # don't generate a library if there are no object files to generate
 ifeq ($(strip $(OBJECTS)),)
 LIBRARY :=
 else
 LIBRARY := $(call archive_subpath,$(LIBNAME))
+endif
 endif
 
 # the set of include directories is the set of libraries
@@ -221,6 +225,7 @@ build:: $(LIBRARY) $(ARCHIVE_LIBRARIES) $(IMAGE) $(SHARED_SO)
 #       I no longer support those older versions
 
 # the rule for compiling a C++ source file
+ifneq ($(EXTERNAL_SOURCES),on)
 $(SUBDIR)/%.o: %.cpp
 	@echo "$(LIBNAME):$(SUBDIR): C++ compiling $<"
 	@mkdir -p $(SUBDIR)
@@ -247,13 +252,16 @@ endif
 # Make tries to find a rule to recreate that file. The solution is to delete
 # the object library subdirectory (make clean) and do a clean build
 -include $(SUBDIR)/*.d
+endif
 
 ########################################
 # the rule for making an object library out of object files
 
+ifneq ($(EXTERNAL_LIBRARY),on)
 $(LIBRARY): $(OBJECTS)
 	@echo "$(LIBNAME):$(SUBDIR): Updating library $@"
 	@$(AR) crs $(LIBRARY) $(OBJECTS)
+endif
 
 
 ########################################
@@ -263,7 +271,8 @@ ifneq ($(SHARED_SO),)
 
 # the rule for building the library dependencies unconditionally runs a recursive Make
 $(ARCHIVE_LIBRARIES): FORCE
-	@$(MAKE) -C $@
+	$(MAKE) -C $@
+
 
 # the rule for linking a shared library
 # This is complicated - gcc exports all symbols from a .o file but no symbols from a .a file

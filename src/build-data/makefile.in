@@ -1,0 +1,83 @@
+# Paths to relevant programs
+
+CXX            = %{cxx}
+LINKER         = %{linker}
+AR             = %{ar_command}
+PYTHON_EXE     = %{python_exe}
+
+# Compiler Flags
+
+ABI_FLAGS      = %{cc_sysroot} %{cxx_abi_flags}
+LANG_FLAGS     = %{cc_lang_flags}
+CXXFLAGS       = %{cc_compile_flags}
+WARN_FLAGS     = %{cc_warning_flags}
+SO_OBJ_FLAGS   = %{shared_flags}
+LDFLAGS        = %{ldflags}
+
+EXE_LINK_CMD   = %{exe_link_cmd}
+POST_LINK_CMD  = %{post_link_cmd}
+
+LIB_LINKS_TO   = %{link_to}
+EXE_LINKS_TO   = %{library_target} $(LIB_LINKS_TO)
+
+BUILD_FLAGS    = $(ABI_FLAGS) $(LANG_FLAGS) $(CXXFLAGS) $(WARN_FLAGS)
+
+INSTALLED_LIB_DIR = %{prefix}/libdir
+SCRIPTS_DIR = scripts
+
+BOTAN_CXXFLAGS = %{botan_cxxflags}
+BOTAN_LDFLAGS = %{botan_ldflags}
+
+# The primary target
+all: libs cli
+
+# Executable targets
+CLI           = %{cli_exe}
+LIBRARIES     = %{library_target}
+
+cli: $(CLI)
+libs: $(LIBRARIES)
+
+# Misc targets
+
+%{if make_supports_phony}
+.PHONY = all cli libs clean distclean install
+%{endif}
+
+clean:
+	$(PYTHON_EXE) $(SCRIPTS_DIR)/cleanup.py --build-dir="%{build_dir}"
+
+distclean:
+	$(PYTHON_EXE) $(SCRIPTS_DIR)/cleanup.py --build-dir="%{build_dir}" --distclean
+
+# Object Files
+LIBOBJS = %{join lib_objs}
+
+CLIOBJS = %{join cli_objs}
+
+# Executable targets
+
+$(CLI): $(LIBRARIES) $(CLIOBJS)
+	$(EXE_LINK_CMD) $(ABI_FLAGS) $(LDFLAGS) $(BOTAN_LDFLAGS) $(CLIOBJS) $(EXE_LINKS_TO) %{output_to_exe}$@
+	$(POST_LINK_CMD)
+
+$(TEST): $(LIBRARIES) $(TESTOBJS)
+	$(EXE_LINK_CMD) $(ABI_FLAGS) $(LDFLAGS) $(TESTOBJS) $(EXE_LINKS_TO) %{output_to_exe}$@
+	$(POST_LINK_CMD)
+
+# Library targets
+
+%{library_target}: $(LIBOBJS)
+	$(AR) %{ar_options} %{ar_output_to}$@ $(LIBOBJS)
+
+# Build Commands
+
+%{for lib_build_info}
+%{obj}: %{src}
+	$(CXX) $(SO_OBJ_FLAGS) $(BUILD_FLAGS) %{isa_flags} $(BOTAN_CXXFLAGS) %{include_paths} %{dash_c} %{src} %{dash_o}$@
+%{endfor}
+
+%{for cli_build_info}
+%{obj}: %{src}
+	$(CXX) $(BUILD_FLAGS) %{isa_flags} $(BOTAN_CXXFLAGS) %{include_paths} %{dash_c} %{src} %{dash_o}$@
+%{endfor}

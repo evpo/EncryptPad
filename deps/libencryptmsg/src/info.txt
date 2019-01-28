@@ -1,0 +1,17 @@
+<defines>
+libencryptmsg -> 20190126
+</defines>
+
+<header:internal>
+context.h
+emsg_constants.h
+graph_builder.h
+logger_init.h
+memory_stream.h
+packet_parsers.h
+packet_reader.h
+packet_writer.h
+session_state.h
+state_handlers.h
+state_id.h
+</header:internal>

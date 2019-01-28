@@ -1,8 +1,11 @@
-define OPENPGP_CODEC
-
-load_on auto
+<defines>
+OPENPGP_CODEC -> 20190126
+</defines>
 
 <requires>
 crc24
 filters
 </requires>
+<header:internal>
+openpgp.h
+</header:internal>
