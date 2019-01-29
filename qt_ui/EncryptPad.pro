@@ -10,7 +10,7 @@ CONFIG(release, debug|release){
     SUBDIR_RELEASE = RELEASE=on
 }
 
-unix|macx: DEPS_SUBDIR = $$system(cd ../build && ./get_subdir.sh $$SUBDIR_RELEASE)
+# unix|macx: DEPS_SUBDIR = $$system(cd ../build && ./get_subdir.sh $$SUBDIR_RELEASE)
 
 # For windows build sh.exe needs to be in the PATH environment variable
 win32: DEPS_SUBDIR = $$system(cd ..\build && sh .\get_subdir.sh $$SUBDIR_RELEASE)
@@ -41,15 +41,7 @@ FORMS += \
 
 win32: LIBS += -static -luserenv
 
-LIBS += -L$$PWD/../deps/stlplus/portability/$$DEPS_SUBDIR \
-     -L$$PWD/../back_end_src/$$DEPS_SUBDIR \
-     -lback_end_src -lportability \
-     -L$$PWD/../deps/libencryptmsg/src/$$DEPS_SUBDIR \
-     -L$$PWD/../deps/state_machine/$$DEPS_SUBDIR \
-     -L$$PWD/../deps/botan_1_openpgp_codec/$$DEPS_SUBDIR \
-     -lsrc \
-     -lstate_machine \
-     -lbotan_1_openpgp_codec
+LIBS += -L$$PWD/../build/ -lback_end
 
 # the line below is required for mingw wine
 win32: LIBS += -lgdi32 -lkernel32 -luser32
@@ -76,10 +68,12 @@ win32: LIBS += -lWs2_32
 
 unix:QMAKE_CXXFLAGS += -D_FILE_OFFSET_BITS=64
 
-INCLUDEPATH += $$PWD/../deps/stlplus/portability
-INCLUDEPATH += $$PWD/../back_end_src
+INCLUDEPATH += $$PWD/../build/include
 INCLUDEPATH += $$PWD/../deps/libencryptmsg/include
 INCLUDEPATH += $$PWD/../deps/plog/include
+
+# INCLUDEPATH += $$PWD/../deps/stlplus/portability
+# INCLUDEPATH += $$PWD/../back_end_src
 
 SOURCES += \
     application.cpp \
