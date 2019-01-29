@@ -521,6 +521,10 @@ def process_command_line(args):
     build_group.add_option('--with-debug-asserts', action='store_true', default=False,
                            help=optparse.SUPPRESS_HELP)
 
+    #EncryptPad parameters
+    build_group.add_option('--qmake-bin', dest='qmake_binary', metavar='QMAKE', default=None,
+                            help='set path to qmake binary')
+
     parser.add_option_group(build_group)
     (options, args) = parser.parse_args(args)
 
@@ -1575,23 +1579,17 @@ def generate_build_info(build_paths, modules, cc, arch, osinfo, options):
 
     return out
 
-def main(argv):
+def configure_back_end(system_command, options):
     """
-    Main driver
+    Build the back_end library and cli
     """
 
-    # pylint: disable=too-many-locals
-    options = process_command_line(argv[1:])
-    setup_logging(options)
-
-    source_paths = SourcePaths(os.path.dirname(argv[0]))
+    source_paths = SourcePaths(os.path.dirname(system_command))
     info_arch = load_build_data_info_files(source_paths, 'CPU info', 'arch', ArchInfo)
     info_os = load_build_data_info_files(source_paths, 'OS info', 'os', OsInfo)
     info_cc = load_build_data_info_files(source_paths, 'compiler info', 'cc', CompilerInfo)
 
     set_defaults_for_unset_options(options, info_arch, info_cc)
-
-    logging.info('%s invoked with options "%s"', argv[0], ' '.join(argv[1:]))
 
     logging.info('Autodetected platform information: OS="%s" machine="%s" proc="%s"',
                  platform.system(), platform.machine(), platform.processor())
@@ -1628,14 +1626,24 @@ def main(argv):
     template_vars['botan_cxxflags'] = '$(shell pkg-config --cflags botan-2)'
     template_vars['botan_ldflags'] = '$(shell pkg-config --libs botan-2)'
 
-    link_to = template_vars['link_to']
-    link_to_items = []
-    for link_item in link_to_items:
-        link_to += ' ' + link_item
-    template_vars['link_to'] = link_to
-
     do_io_for_build(cc, arch, osinfo, info_modules.values(), build_paths, source_paths, template_vars, options)
 
+
+def main(argv):
+    """
+    Main driver
+    """
+
+    # pylint: disable=too-many-locals
+    options = process_command_line(argv[1:])
+    setup_logging(options)
+    logging.info('%s invoked with options "%s"', argv[0], ' '.join(argv[1:]))
+
+    # p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
+    # out_raw = p.communicate(input=binascii.unhexlify(invalue))[0]
+    # out = binascii.hexlify(out_raw).decode("UTF-8").lower()
+
+    configure_back_end(argv[0], options)
     return 0
 
 if __name__ == '__main__':
