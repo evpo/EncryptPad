@@ -18,6 +18,7 @@ script:
     - qt53-env.sh
     - qmake -v
     - ./configure.py
+    - find build
     - make
     - ./configure.py --back-end --debug --test
     - make
