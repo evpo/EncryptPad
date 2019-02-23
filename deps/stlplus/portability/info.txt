@@ -1,0 +1,22 @@
+<defines>
+portability -> 20190127
+</defines>
+<header:internal>
+build.hpp
+debug.hpp
+dprintf.hpp
+dynaload.hpp
+file_system.hpp
+inf.hpp
+ip_sockets.hpp
+portability_exceptions.hpp
+portability_fixes.hpp
+portability.hpp
+subprocesses.hpp
+tcp.hpp
+tcp_sockets.hpp
+time.hpp
+udp_sockets.hpp
+version.hpp
+wildcard.hpp
+</header:internal>

@@ -1,0 +1,12 @@
+<defines>
+subsystems -> 20190127
+</defines>
+<header:internal>
+cli_parser.hpp
+ini_manager.hpp
+library_manager.hpp
+message_handler.hpp
+subsystems_fixes.hpp
+subsystems.hpp
+timer.hpp
+</header:internal>
