@@ -463,7 +463,7 @@ def process_command_line(args):
 
     build_group = optparse.OptionGroup(parser, 'Build options')
 
-    build_group.add_option('--use-system-libs', action='store_true', default=True,
+    build_group.add_option('--use-system-libs', dest='use_system_libs', action='store_true', default=False,
             help='use botan, zlib and other shared libraries installed on the system')
     build_group.add_option('--debug-mode', action='store_true', default=False,
             help='debug configuration. If not specified, the release configuration is used.')
@@ -522,7 +522,7 @@ def process_command_line(args):
                            help=optparse.SUPPRESS_HELP)
 
     #EncryptPad parameters
-    build_group.add_option('--qmake-bin', dest='qmake_binary', metavar='QMAKE', default=None,
+    build_group.add_option('--qmake-bin', dest='qmake_bin', metavar='QMAKE', default='qmake',
                             help='set path to qmake binary')
 
     parser.add_option_group(build_group)
@@ -1579,6 +1579,33 @@ def generate_build_info(build_paths, modules, cc, arch, osinfo, options):
 
     return out
 
+def execute_qmake(options):
+    #cd $(QT_BUILD) && $(QMAKE) -r -spec $(QMAKE_SPEC) "CONFIG+=$(QMAKE_CONFIG)" ../../qt_ui/EncryptPad.pro
+    build_dir = os.path.join('build','qt_build')
+    if not os.path.isdir(build_dir):
+        os.mkdir(build_dir)
+
+    configs = []
+    configs.append('debug' if options.debug_mode else 'release')
+    if options.use_system_libs:
+        configs.append('USE_SYSTEM_LIBS')
+
+    cmd = [options.qmake_bin,
+           '-r',
+           '-spec', 'linux-g++',
+           'CONFIG+=%s' % (' '.join(configs)),
+           os.path.join('..','..','qt_ui','EncryptPad.pro')]
+
+    logging.info('Executing: %s', ' '.join(cmd))
+    try:
+        qmake_proc = subprocess.Popen(cmd, cwd = build_dir)
+        result = qmake_proc.wait()
+    except OSError as e:
+        raise UserError('Error while executing qmake: %s' % e)
+
+    if result != 0:
+        raise UserError('%s returned non zero exit code' % options.qmake_bin)
+
 def configure_back_end(system_command, options):
     """
     Build the back_end library and cli
@@ -1626,6 +1653,11 @@ def configure_back_end(system_command, options):
     template_vars['botan_cxxflags'] = '$(shell pkg-config --cflags botan-2)'
     template_vars['botan_ldflags'] = '$(shell pkg-config --libs botan-2)'
 
+    #qt build
+    template_vars['build_qt_ui'] = True
+    template_vars['qt_build_dir'] = os.path.join('build', 'qt_build')
+    template_vars['debug_mode'] = options.debug_mode
+
     do_io_for_build(cc, arch, osinfo, info_modules.values(), build_paths, source_paths, template_vars, options)
 
 
@@ -1644,6 +1676,7 @@ def main(argv):
     # out = binascii.hexlify(out_raw).decode("UTF-8").lower()
 
     configure_back_end(argv[0], options)
+    execute_qmake(options)
     return 0
 
 if __name__ == '__main__':

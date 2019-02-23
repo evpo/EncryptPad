@@ -33,3 +33,5 @@ deps/stlplus
 deps/zlib
 deps/libencryptmsg/deps
 *~
+Makefile
+build/

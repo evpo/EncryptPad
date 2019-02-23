@@ -29,7 +29,13 @@ BOTAN_CXXFLAGS = %{botan_cxxflags}
 BOTAN_LDFLAGS = %{botan_ldflags}
 
 # The primary target
+%{if build_qt_ui}
+all: libs cli qt_ui
+%{endif}
+
+%{unless build_qt_ui}
 all: libs cli
+%{endif}
 
 # Executable targets
 CLI           = %{cli_exe}
@@ -38,16 +44,38 @@ LIBRARIES     = %{library_target}
 cli: $(CLI)
 libs: $(LIBRARIES)
 
+# QT ui build
+QT_BUILD_DIR = %{qt_build_dir}
+
+%{if debug_mode}
+RELEASE=
+%{endif}
+
+%{unless debug_mode}
+RELEASE=on
+%{endif}
+
+qt_ui: libs
+	$(MAKE) -C $(QT_BUILD_DIR)
+
+qt_ui_clean:
+%{if build_qt_ui}
+	if [ -d $(QT_BUILD_DIR) ]; \
+	then \
+	$(MAKE) -C $(QT_BUILD_DIR) clean RELEASE=$(RELEASE) \
+	fi
+%{endif}
+
 # Misc targets
 
 %{if make_supports_phony}
 .PHONY = all cli libs clean distclean install
 %{endif}
 
-clean:
+clean: qt_ui_clean
 	$(PYTHON_EXE) $(SCRIPTS_DIR)/cleanup.py --build-dir="%{build_dir}"
 
-distclean:
+distclean: qt_ui_clean
 	$(PYTHON_EXE) $(SCRIPTS_DIR)/cleanup.py --build-dir="%{build_dir}" --distclean
 
 # Object Files
