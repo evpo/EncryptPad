@@ -27,7 +27,7 @@ OPTIONS:\n\
 
 TARGET=encryptpad
 OSX_APP=EncryptPad.app
-TEST_TARGET=encrypt_pad_tests
+TEST_TARGET=encrypt_pad_test
 
 if [[ $# > 3 ]] || [[ $# < 1 ]]
 then
@@ -44,7 +44,7 @@ then
 fi
 
 pushd ./build >/dev/null
-SUBDIR=`./get_subdir.sh`
+SUBDIR=`./../scripts/get_subdir.sh`
 
 RELEASE=on
 QT_BIN_SUB=release
@@ -161,8 +161,9 @@ case $COMMAND in
     ;;
 -t|--run-tests)
     # Unit tests should run from tests directory because they need files the directory contains
-    pushd ../tests >/dev/null
-    ../bin/debug/${TEST_TARGET}
+    # pushd ../src/test >/dev/null
+    pushd ../src/test
+    ../../bin/debug/${TEST_TARGET}
     RESULT=$?
     popd >/dev/null
 

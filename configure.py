@@ -1536,6 +1536,60 @@ def execute_qmake(options):
     if result != 0:
         raise UserError('%s returned non zero exit code' % options.qmake_bin)
 
+def get_botan_build_dir():
+    botan_dir = os.path.join('deps', 'botan')
+    return botan_dir
+
+def configure_botan(options):
+    botan_dir = get_botan_build_dir()
+
+    # There is an option in botan to change the build directory
+    # Unfortunately it does not work with amalgamation
+    botan_build_dir = botan_dir
+
+    if not os.path.isdir(botan_build_dir):
+        os.mkdir(botan_build_dir)
+
+    cmd = [
+            sys.executable,
+            './configure.py',
+            # '--with-build-dir', botan_build_dir,
+            '--cc', options.compiler,
+            '--cpu', options.cpu,
+            '--amalgamation',
+            '--disable-shared',
+            '--with-zlib',
+            '--enable-modules', 'aes,pbkdf2,auto_rng,compression']
+
+    logging.info('Executing: %s', ' '.join(cmd))
+
+    try:
+        botan_proc = subprocess.Popen(cmd, cwd = botan_dir)
+        result = botan_proc.wait()
+    except OSError as e:
+        raise UserError('Error while executing qmake: %s' % e)
+
+def get_zlib_dir():
+    return os.path.join('deps', 'zlib')
+
+def is_windows(options):
+    return options.os in ['windows','mingw']
+
+def configure_zlib(options):
+    if is_windows(options):
+        return
+
+    zlib_dir = get_zlib_dir()
+    cmd = [
+            './configure',
+            '--static']
+    logging.info('Executing: %s', ' '.join(cmd))
+    try:
+        zlib_proc = subprocess.Popen(cmd, cwd = zlib_dir)
+        result = zlib_proc.wait()
+    except OSError as e:
+        raise UserError('Error while executing qmake: %s' % e)
+
 def process_command_line(args):
     """
     Handle command line options
@@ -1683,8 +1737,6 @@ def configure_back_end(system_command, options):
 
     template_vars['include_paths'] = include_paths
 
-    template_vars['botan_cxxflags'] = '$(shell pkg-config --cflags botan-2)'
-    template_vars['botan_ldflags'] = '$(shell pkg-config --libs botan-2)'
 
     #qt build
     template_vars['build_qt_ui'] = (not options.back_end and not options.test)
@@ -1698,8 +1750,29 @@ def configure_back_end(system_command, options):
 
     template_vars['default_targets'] = ' '.join(default_targets)
 
-    do_io_for_build(cc, arch, osinfo, info_modules.values(), build_paths, source_paths, template_vars, options)
+    template_vars['build_botan'] = not options.use_system_libs
+    template_vars['build_zlib'] = not options.use_system_libs
 
+    if options.use_system_libs:
+        botan_cxxflags = '$(shell pkg-config --cflags botan-2)'
+        botan_ldflags = '$(shell pkg-config --libs botan-2)'
+    else:
+        botan_build_dir = get_botan_build_dir()
+        botan_target = os.path.join(botan_build_dir,
+                'botan.lib' if is_windows(options) else 'libbotan-2.a')
+        template_vars['botan_target'] = botan_target
+        template_vars['botan_build_dir'] = botan_build_dir
+        botan_cxxflags = '-I %s' % os.path.join('deps', 'botan', 'build', 'include')
+        botan_ldflags = '%s -ldl -lm' % botan_target
+        zlib_dir = os.path.join('deps', 'zlib')
+        template_vars['zlib_dir'] = zlib_dir
+        template_vars['zlib_target'] = os.path.join(zlib_dir, 'libz.a')
+
+
+    template_vars['botan_cxxflags'] = botan_cxxflags
+    template_vars['botan_ldflags'] = botan_ldflags
+
+    do_io_for_build(cc, arch, osinfo, info_modules.values(), build_paths, source_paths, template_vars, options)
 
 def main(argv):
     """
@@ -1714,6 +1787,10 @@ def main(argv):
     configure_back_end(argv[0], options)
     if not options.back_end:
         execute_qmake(options)
+
+    if not options.use_system_libs:
+        configure_botan(options)
+        configure_zlib(options)
     return 0
 
 if __name__ == '__main__':

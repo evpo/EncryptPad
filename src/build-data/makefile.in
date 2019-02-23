@@ -29,21 +29,6 @@ SCRIPTS_DIR = scripts
 BOTAN_CXXFLAGS = %{botan_cxxflags}
 BOTAN_LDFLAGS = %{botan_ldflags}
 
-# The primary target
-all: %{default_targets}
-
-# Executable targets
-CLI           = %{cli_exe}
-TEST         = %{test_exe}
-LIBRARIES     = %{library_target}
-
-cli: $(CLI)
-test: $(TEST)
-libs: $(LIBRARIES)
-
-# QT UI build
-QT_BUILD_DIR = %{qt_build_dir}
-
 %{if debug_mode}
 RELEASE=
 %{endif}
@@ -52,8 +37,45 @@ RELEASE=
 RELEASE=on
 %{endif}
 
-qt_ui: libs
-	$(MAKE) -C $(QT_BUILD_DIR)
+# The primary target
+all: %{default_targets}
+
+# Executable targets
+CLI           = %{cli_exe}
+TEST          = %{test_exe}
+LIBRARIES     = %{library_target}
+
+cli: $(CLI)
+test: $(TEST)
+libs: $(LIBRARIES)
+zlib: $(ZLIB)
+
+# Botan
+
+%{if build_botan}
+BOTAN_TARGET = %{botan_target}
+BOTAN_BUILD_DIR = %{botan_build_dir}
+$(BOTAN_TARGET):
+	$(MAKE) -C $(BOTAN_BUILD_DIR)
+%{endif}
+
+botan: $(BOTAN_TARGET)
+
+# Zlib
+%{if build_zlib}
+ZLIB = %{zlib_target}
+ZLIB_DIR = %{zlib_dir}
+EXE_LINKS_TO += $(ZLIB)
+$(ZLIB) :
+	$(MAKE) -C $(ZLIB_DIR) RELEASE=$(RELEASE)
+%{endif}
+
+# QT UI build
+
+QT_BUILD_DIR = %{qt_build_dir}
+
+qt_ui: libs $(BOTAN_TARGET) $(ZLIB)
+	$(MAKE) -C $(QT_BUILD_DIR) RELEASE=$(RELEASE)
 
 qt_ui_clean:
 %{if build_qt_ui}
@@ -116,7 +138,7 @@ TEST_LINKS_TO = $(GTEST_TARGET_DIR)/libgtest_main.a $(GTEST_TARGET_DIR)/libgtest
 # Misc targets
 
 %{if make_supports_phony}
-.PHONY = all cli libs qt_ui test qt_ui_clean test_clean clean distclean install
+.PHONY = all cli libs qt_ui test botan zlib qt_ui_clean test_clean clean distclean install
 %{endif}
 
 clean: qt_ui_clean
@@ -134,12 +156,12 @@ TESTOBJS = %{join test_objs}
 
 # Executable targets
 
-$(CLI): $(LIBRARIES) $(CLIOBJS)
-	$(EXE_LINK_CMD) $(ABI_FLAGS) $(LDFLAGS) $(BOTAN_LDFLAGS) $(CLIOBJS) $(EXE_LINKS_TO) %{output_to_exe}$@
+$(CLI): $(LIBRARIES) $(CLIOBJS) $(BOTAN_TARGET) $(ZLIB)
+	$(EXE_LINK_CMD) $(ABI_FLAGS) $(LDFLAGS) $(CLIOBJS) $(BOTAN_LDFLAGS) $(EXE_LINKS_TO) %{output_to_exe}$@
 	$(POST_LINK_CMD)
 
-$(TEST): $(LIBRARIES) $(TESTOBJS) $(GTEST)
-	$(EXE_LINK_CMD) $(ABI_FLAGS) $(LDFLAGS) $(BOTAN_LDFLAGS) $(TESTOBJS) $(EXE_LINKS_TO) $(TEST_LINKS_TO) %{output_to_exe}$@
+$(TEST): $(LIBRARIES) $(TESTOBJS) $(GTEST) $(BOTAN_TARGET) $(ZLIB)
+	$(EXE_LINK_CMD) $(ABI_FLAGS) $(LDFLAGS) $(TESTOBJS) $(BOTAN_LDFLAGS) $(EXE_LINKS_TO) $(TEST_LINKS_TO) %{output_to_exe}$@
 	$(POST_LINK_CMD)
 
 # Library targets
