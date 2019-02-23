@@ -453,99 +453,6 @@ def choose_link_method(options):
     logging.warning('Could not use link method "%s", will copy instead' % (req))
     return 'copy'
 
-def process_command_line(args):
-    """
-    Handle command line options
-    """
-
-    parser = optparse.OptionParser(
-        formatter=optparse.IndentedHelpFormatter(max_help_position=50))
-
-    build_group = optparse.OptionGroup(parser, 'Build options')
-
-    build_group.add_option('--use-system-libs', dest='use_system_libs', action='store_true', default=False,
-            help='use botan, zlib and other shared libraries installed on the system')
-    build_group.add_option('--debug-mode', action='store_true', default=False,
-            help='debug configuration. If not specified, the release configuration is used.')
-
-    link_methods = ['symlink', 'hardlink', 'copy']
-    build_group.add_option('--link-method', default=None, metavar='METHOD',
-                           choices=link_methods,
-                           help='choose how links to include headers are created (%s)' % ', '.join(link_methods))
-
-    build_group.add_option('--os', help='set the target operating system')
-    build_group.add_option('--cc', dest='compiler', help='set the desired build compiler')
-    build_group.add_option('--cc-bin', dest='compiler_binary', metavar='BINARY',
-                            help='set path to compiler binary')
-    build_group.add_option('--cpu', help='set the target CPU architecture')
-    build_group.add_option('--with-build-dir', metavar='DIR', default='',
-                           help='setup the build in DIR')
-    build_group.add_option('--program-suffix', metavar='SUFFIX',
-                             help='append string to program names')
-    build_group.add_option('--with-local-config',
-                           dest='local_config', metavar='FILE',
-                           help='include the contents of FILE into build.h')
-    build_group.add_option('--includedir', metavar='DIR',
-                             help='set the include file install dir')
-    build_group.add_option('--with-endian', metavar='ORDER', default=None,
-                            help='override byte order guess')
-    build_group.add_option('--with-python-versions', dest='python_version',
-                           metavar='N.M',
-                           default='%d.%d' % (sys.version_info[0], sys.version_info[1]),
-                           help='where to install botan2.py (def %default)')
-    build_group.add_option('--with-debug-info', action='store_true', default=False, dest='with_debug_info',
-                           help='include debug symbols')
-    build_group.add_option('--with-stack-protector', dest='with_stack_protector',
-                           action='store_false', default=None, help=optparse.SUPPRESS_HELP)
-    build_group.add_option('--optimize-for-size', dest='optimize_for_size',
-                           action='store_true', default=False,
-                           help='optimize for code size')
-    build_group.add_option('--with-sysroot-dir', metavar='DIR', default='',
-                           help='use DIR for system root while cross-compiling')
-
-    build_group.add_option('--cxxflags', metavar='FLAG', default=None,
-                            help='set compiler flags')
-    build_group.add_option('--no-optimizations', dest='no_optimizations',
-                           action='store_true', default=False,
-                           help='disable all optimizations (for debugging)')
-    build_group.add_option('--ldflags', metavar='FLAG',
-                            help='set linker flags', default=None)
-    build_group.add_option('--with-external-libdir', metavar='DIR', default='',
-                           help='use DIR for external libs')
-    build_group.add_option('--ar-command', dest='ar_command', metavar='AR', default=None,
-                            help='set path to static archive creator')
-    build_group.add_option('--with-external-includedir', metavar='DIR', default='',
-                           help='use DIR for external includes')
-    build_group.add_option('--without-os-features', action='append', metavar='FEAT',
-                            help='specify OS features to disable')
-    build_group.add_option('--with-debug-asserts', action='store_true', default=False,
-                           help=optparse.SUPPRESS_HELP)
-
-    #EncryptPad parameters
-    build_group.add_option('--qmake-bin', dest='qmake_bin', metavar='QMAKE', default='qmake',
-                            help='set path to qmake binary')
-
-    parser.add_option_group(build_group)
-    (options, args) = parser.parse_args(args)
-
-    if args != []:
-        raise UserError('Unhandled option(s): ' + ' '.join(args))
-
-    if options.with_endian not in [None, 'little', 'big']:
-        raise UserError('Bad value to --with-endian "%s"' % (options.with_endian))
-
-    if options.debug_mode:
-        options.no_optimizations = True
-        options.with_debug_info = True
-
-    options.enabled_modules = []
-    options.disabled_modules = []
-    options.with_os_features = []
-    options.without_os_features = []
-    options.disable_intrinsics = []
-
-    return options
-
 def system_cpu_info():
 
     cpu_info = []
@@ -1580,7 +1487,9 @@ def generate_build_info(build_paths, modules, cc, arch, osinfo, options):
     return out
 
 def execute_qmake(options):
-    #cd $(QT_BUILD) && $(QMAKE) -r -spec $(QMAKE_SPEC) "CONFIG+=$(QMAKE_CONFIG)" ../../qt_ui/EncryptPad.pro
+    """
+    run qmake to generate its Makefile
+    """
     build_dir = os.path.join('build','qt_build')
     if not os.path.isdir(build_dir):
         os.mkdir(build_dir)
@@ -1590,11 +1499,22 @@ def execute_qmake(options):
     if options.use_system_libs:
         configs.append('USE_SYSTEM_LIBS')
 
-    cmd = [options.qmake_bin,
-           '-r',
-           '-spec', 'linux-g++',
-           'CONFIG+=%s' % (' '.join(configs)),
-           os.path.join('..','..','qt_ui','EncryptPad.pro')]
+    spec_table = {
+            'linux':'linux-g++',
+            'freebsd':'freebsd-clang',
+            'openbsd':'freebsd-clang',
+            'darwin':'macx-clang',
+            'windows':'win32-g++',
+            }
+
+    cmd = [options.qmake_bin, '-r']
+    spec_name = spec_table.get(options.os)
+    if spec_name:
+        cmd.append('-spec')
+        cmd.append(spec_name)
+    cmd.extend([
+        'CONFIG+=%s' % (' '.join(configs)),
+        os.path.join('..','..','qt_ui','EncryptPad.pro')])
 
     logging.info('Executing: %s', ' '.join(cmd))
     try:
@@ -1605,6 +1525,105 @@ def execute_qmake(options):
 
     if result != 0:
         raise UserError('%s returned non zero exit code' % options.qmake_bin)
+
+def process_command_line(args):
+    """
+    Handle command line options
+    """
+
+    parser = optparse.OptionParser(
+        formatter=optparse.IndentedHelpFormatter(max_help_position=50))
+
+    build_group = optparse.OptionGroup(parser, 'Build options')
+
+    # EncryptPad parameters
+    build_group.add_option('--back-end', dest='back_end', action='store_true', default=False,
+                           help='include the libraries and CLI targets without Qt UI')
+    build_group.add_option('--tests', action='store_true', default=False,
+                           help='include the unit tests without other targets')
+    build_group.add_option('--use-system-libs', dest='use_system_libs', action='store_true', default=False,
+            help='use botan, zlib and other shared libraries installed on the system')
+
+    # Generic parameters
+    build_group.add_option('--debug-mode', action='store_true', default=False,
+            help='debug configuration. If not specified, the release configuration is used.')
+
+    link_methods = ['symlink', 'hardlink', 'copy']
+    build_group.add_option('--link-method', default=None, metavar='METHOD',
+                           choices=link_methods,
+                           help='choose how links to include headers are created (%s)' % ', '.join(link_methods))
+
+    build_group.add_option('--os', help='set the target operating system')
+    build_group.add_option('--cc', dest='compiler', help='set the desired build compiler')
+    build_group.add_option('--cc-bin', dest='compiler_binary', metavar='BINARY',
+                            help='set path to compiler binary')
+    build_group.add_option('--cpu', help='set the target CPU architecture')
+    build_group.add_option('--with-build-dir', metavar='DIR', default='',
+                           help='setup the build in DIR')
+    build_group.add_option('--program-suffix', metavar='SUFFIX',
+                             help='append string to program names')
+    build_group.add_option('--with-local-config',
+                           dest='local_config', metavar='FILE',
+                           help='include the contents of FILE into build.h')
+    build_group.add_option('--includedir', metavar='DIR',
+                             help='set the include file install dir')
+    build_group.add_option('--with-endian', metavar='ORDER', default=None,
+                            help='override byte order guess')
+    build_group.add_option('--with-python-versions', dest='python_version',
+                           metavar='N.M',
+                           default='%d.%d' % (sys.version_info[0], sys.version_info[1]),
+                           help='where to install botan2.py (def %default)')
+    build_group.add_option('--with-debug-info', action='store_true', default=False, dest='with_debug_info',
+                           help='include debug symbols')
+    build_group.add_option('--with-stack-protector', dest='with_stack_protector',
+                           action='store_false', default=None, help=optparse.SUPPRESS_HELP)
+    build_group.add_option('--optimize-for-size', dest='optimize_for_size',
+                           action='store_true', default=False,
+                           help='optimize for code size')
+    build_group.add_option('--with-sysroot-dir', metavar='DIR', default='',
+                           help='use DIR for system root while cross-compiling')
+
+    build_group.add_option('--cxxflags', metavar='FLAG', default=None,
+                            help='set compiler flags')
+    build_group.add_option('--no-optimizations', dest='no_optimizations',
+                           action='store_true', default=False,
+                           help='disable all optimizations (for debugging)')
+    build_group.add_option('--ldflags', metavar='FLAG',
+                            help='set linker flags', default=None)
+    build_group.add_option('--with-external-libdir', metavar='DIR', default='',
+                           help='use DIR for external libs')
+    build_group.add_option('--ar-command', dest='ar_command', metavar='AR', default=None,
+                            help='set path to static archive creator')
+    build_group.add_option('--with-external-includedir', metavar='DIR', default='',
+                           help='use DIR for external includes')
+    build_group.add_option('--without-os-features', action='append', metavar='FEAT',
+                            help='specify OS features to disable')
+    build_group.add_option('--with-debug-asserts', action='store_true', default=False,
+                           help=optparse.SUPPRESS_HELP)
+
+    build_group.add_option('--qmake-bin', dest='qmake_bin', metavar='QMAKE', default='qmake',
+                            help='set path to qmake binary')
+
+    parser.add_option_group(build_group)
+    (options, args) = parser.parse_args(args)
+
+    if args != []:
+        raise UserError('Unhandled option(s): ' + ' '.join(args))
+
+    if options.with_endian not in [None, 'little', 'big']:
+        raise UserError('Bad value to --with-endian "%s"' % (options.with_endian))
+
+    if options.debug_mode:
+        options.no_optimizations = True
+        options.with_debug_info = True
+
+    options.enabled_modules = []
+    options.disabled_modules = []
+    options.with_os_features = []
+    options.without_os_features = []
+    options.disable_intrinsics = []
+
+    return options
 
 def configure_back_end(system_command, options):
     """
@@ -1635,7 +1654,10 @@ def configure_back_end(system_command, options):
     template_vars = create_template_vars(source_paths, build_paths, options, info_modules.values(),
             cc, arch, osinfo)
     template_vars['library_target'] = os.path.join(build_paths.build_dir, 'libback_end.a')
-    template_vars['cli_exe'] = os.path.join(build_paths.build_dir, 'encryptcli')
+    target_dir = os.path.join('bin', 'debug' if options.debug_mode else 'release')
+    if not os.path.isdir(target_dir):
+        robust_makedirs(target_dir)
+    template_vars['cli_exe'] = os.path.join(target_dir, 'encryptcli')
 
     include_paths_items = [
             ('deps','stlplus','containers'),
@@ -1654,7 +1676,7 @@ def configure_back_end(system_command, options):
     template_vars['botan_ldflags'] = '$(shell pkg-config --libs botan-2)'
 
     #qt build
-    template_vars['build_qt_ui'] = True
+    template_vars['build_qt_ui'] = (not options.back_end and not options.tests)
     template_vars['qt_build_dir'] = os.path.join('build', 'qt_build')
     template_vars['debug_mode'] = options.debug_mode
 
@@ -1676,7 +1698,8 @@ def main(argv):
     # out = binascii.hexlify(out_raw).decode("UTF-8").lower()
 
     configure_back_end(argv[0], options)
-    execute_qmake(options)
+    if not options.back_end and not options.tests:
+        execute_qmake(options)
     return 0
 
 if __name__ == '__main__':
