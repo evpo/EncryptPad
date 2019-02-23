@@ -768,6 +768,7 @@ class OsInfo(InfoObject): # pylint: disable=too-many-instance-attributes
                 'use_stack_protector': 'true',
                 'so_post_link_command': '',
                 'cli_exe_name': 'encryptcli',
+                'test_exe_name': 'encrypt_pad_test',
                 'lib_prefix': 'lib',
                 'library_name': 'botan{suffix}-{major}',
             })
@@ -803,6 +804,7 @@ class OsInfo(InfoObject): # pylint: disable=too-many-instance-attributes
         self.ar_options = lex.ar_options
         self.bin_dir = lex.bin_dir
         self.cli_exe_name = lex.cli_exe_name
+        self.test_exe_name = lex.test_exe_name
         self.doc_dir = lex.doc_dir
         self.header_dir = lex.header_dir
         self.install_root = lex.install_root
@@ -1102,6 +1104,7 @@ class BuildPaths(object): # pylint: disable=too-many-instance-attributes
 
         self.libobj_dir = os.path.join(self.build_dir, 'obj', 'lib')
         self.cliobj_dir = os.path.join(self.build_dir, 'obj', 'cli')
+        self.testobj_dir = os.path.join(self.build_dir, 'obj', 'test')
 
         self.include_dir = os.path.join(self.build_dir, 'include')
         self.internal_include_dir = os.path.join(self.include_dir, 'internal')
@@ -1126,6 +1129,8 @@ class BuildPaths(object): # pylint: disable=too-many-instance-attributes
         self.cli_sources = [normalize_source_path(s) for s in find_sources_in(source_paths.src_dir, 'cli')]
         self.cli_headers = [normalize_source_path(s) for s in find_headers_in(source_paths.src_dir, 'cli')]
 
+        self.test_sources = [normalize_source_path(s) for s in find_sources_in(source_paths.src_dir, 'test')]
+        self.test_headers = [normalize_source_path(s) for s in find_headers_in(source_paths.src_dir, 'test')]
 
         self.public_headers = sorted(flatten([m.public_headers() for m in modules]))
 
@@ -1133,6 +1138,7 @@ class BuildPaths(object): # pylint: disable=too-many-instance-attributes
         out = [
             self.libobj_dir,
             self.cliobj_dir,
+            self.testobj_dir,
             self.internal_include_dir,
             self.external_include_dir,
         ]
@@ -1152,6 +1158,8 @@ class BuildPaths(object): # pylint: disable=too-many-instance-attributes
             return (self.lib_sources, self.libobj_dir)
         elif typ == 'cli':
             return (self.cli_sources, self.cliobj_dir)
+        elif typ == 'test':
+            return (self.test_sources, self.testobj_dir)
 
 def create_template_vars(source_paths, build_paths, options, modules, cc, arch, osinfo):
     #pylint: disable=too-many-locals,too-many-branches,too-many-statements
@@ -1254,6 +1262,7 @@ def create_template_vars(source_paths, build_paths, options, modules, cc, arch, 
 
         'libobj_dir': build_paths.libobj_dir,
         'cliobj_dir': build_paths.cliobj_dir,
+        'testobj_dir': build_paths.testobj_dir,
         'os': options.os,
         'arch': options.arch,
         'cpu_family': arch.family,
@@ -1453,7 +1462,7 @@ def generate_build_info(build_paths, modules, cc, arch, osinfo, options):
 
     out = {}
 
-    targets = ['lib','cli']
+    targets = ['lib','cli','test']
 
     out['isa_build_info'] = []
 
@@ -1505,6 +1514,7 @@ def execute_qmake(options):
             'openbsd':'freebsd-clang',
             'darwin':'macx-clang',
             'windows':'win32-g++',
+            'mingw':'win32-g++',
             }
 
     cmd = [options.qmake_bin, '-r']
@@ -1539,7 +1549,7 @@ def process_command_line(args):
     # EncryptPad parameters
     build_group.add_option('--back-end', dest='back_end', action='store_true', default=False,
                            help='include the libraries and CLI targets without Qt UI')
-    build_group.add_option('--tests', action='store_true', default=False,
+    build_group.add_option('--test', action='store_true', default=False,
                            help='include the unit tests without other targets')
     build_group.add_option('--use-system-libs', dest='use_system_libs', action='store_true', default=False,
             help='use botan, zlib and other shared libraries installed on the system')
@@ -1658,6 +1668,7 @@ def configure_back_end(system_command, options):
     if not os.path.isdir(target_dir):
         robust_makedirs(target_dir)
     template_vars['cli_exe'] = os.path.join(target_dir, 'encryptcli')
+    template_vars['test_exe'] = os.path.join(target_dir, 'encrypt_pad_test')
 
     include_paths_items = [
             ('deps','stlplus','containers'),
@@ -1676,9 +1687,16 @@ def configure_back_end(system_command, options):
     template_vars['botan_ldflags'] = '$(shell pkg-config --libs botan-2)'
 
     #qt build
-    template_vars['build_qt_ui'] = (not options.back_end and not options.tests)
+    template_vars['build_qt_ui'] = (not options.back_end and not options.test)
     template_vars['qt_build_dir'] = os.path.join('build', 'qt_build')
     template_vars['debug_mode'] = options.debug_mode
+    default_targets = ['libs','cli']
+    if not options.back_end:
+        default_targets.append('qt_ui')
+    if options.test:
+        default_targets.append('test')
+
+    template_vars['default_targets'] = ' '.join(default_targets)
 
     do_io_for_build(cc, arch, osinfo, info_modules.values(), build_paths, source_paths, template_vars, options)
 
@@ -1693,12 +1711,8 @@ def main(argv):
     setup_logging(options)
     logging.info('%s invoked with options "%s"', argv[0], ' '.join(argv[1:]))
 
-    # p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
-    # out_raw = p.communicate(input=binascii.unhexlify(invalue))[0]
-    # out = binascii.hexlify(out_raw).decode("UTF-8").lower()
-
     configure_back_end(argv[0], options)
-    if not options.back_end and not options.tests:
+    if not options.back_end:
         execute_qmake(options)
     return 0
 

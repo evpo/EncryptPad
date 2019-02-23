@@ -4,6 +4,7 @@ CXX            = %{cxx}
 LINKER         = %{linker}
 AR             = %{ar_command}
 PYTHON_EXE     = %{python_exe}
+MKDIR_P        = mkdir -p
 
 # Compiler Flags
 
@@ -29,22 +30,18 @@ BOTAN_CXXFLAGS = %{botan_cxxflags}
 BOTAN_LDFLAGS = %{botan_ldflags}
 
 # The primary target
-%{if build_qt_ui}
-all: libs cli qt_ui
-%{endif}
-
-%{unless build_qt_ui}
-all: libs cli
-%{endif}
+all: %{default_targets}
 
 # Executable targets
 CLI           = %{cli_exe}
+TEST         = %{test_exe}
 LIBRARIES     = %{library_target}
 
 cli: $(CLI)
+test: $(TEST)
 libs: $(LIBRARIES)
 
-# QT ui build
+# QT UI build
 QT_BUILD_DIR = %{qt_build_dir}
 
 %{if debug_mode}
@@ -66,10 +63,60 @@ qt_ui_clean:
 	fi
 %{endif}
 
+# Gtest build
+# ###########
+
+GTEST_DIR = deps/gtest/googletest
+GTEST_TARGET_DIR = %{build_dir}/gtest
+# Flags passed to the preprocessor.
+# Set Google Test's header directory as a system directory, such that
+# the compiler doesn't generate warnings in Google Test headers.
+GTEST_CPPFLAGS += -isystem $(GTEST_DIR)/include
+# All Google Test headers.  Usually you shouldn't change this
+# definition.
+GTEST_HEADERS = $(GTEST_DIR)/include/gtest/*.h \
+                $(GTEST_DIR)/include/gtest/internal/*.h
+
+# Usually you shouldn't tweak such internal variables, indicated by a
+# trailing _.
+GTEST_SRCS_ = $(GTEST_DIR)/src/*.cc $(GTEST_DIR)/src/*.h $(GTEST_HEADERS)
+GTEST = $(GTEST_TARGET_DIR)/libgtest_main.a $(GTEST_TARGET_DIR)/libgtest.a
+
+clean_gtest :
+	rm -f $(GTEST_TARGET_DIR)/libgtest.a $(GTEST_TARGET_DIR)/libgtest_main.a $(GTEST_TARGET_DIR)/*.o
+
+# For simplicity and to avoid depending on Google Test's
+# implementation details, the dependencies specified below are
+# conservative and not optimized.  This is fine as Google Test
+# compiles fast and for ordinary users its source rarely changes.
+$(GTEST_TARGET_DIR)/gtest-all.o : $(GTEST_SRCS_)
+	$(MKDIR_P) $(@D)
+	$(CXX) $(CPPFLAGS) $(GTEST_CPPFLAGS) -I$(GTEST_DIR) $(CXXFLAGS) -c \
+            $(GTEST_DIR)/src/gtest-all.cc -o $@
+
+$(GTEST_TARGET_DIR)/gtest_main.o : $(GTEST_SRCS_)
+	$(MKDIR_P) $(@D)
+	$(CXX) $(CPPFLAGS) $(GTEST_CPPFLAGS) -I$(GTEST_DIR) $(CXXFLAGS) -c \
+            $(GTEST_DIR)/src/gtest_main.cc -o $@
+
+$(GTEST_TARGET_DIR)/libgtest.a : $(GTEST_TARGET_DIR)/gtest-all.o
+	$(AR) $(ARFLAGS) $@ $^
+
+$(GTEST_TARGET_DIR)/libgtest_main.a : $(GTEST_TARGET_DIR)/gtest-all.o $(GTEST_TARGET_DIR)/gtest_main.o
+	$(AR) $(ARFLAGS) $@ $^
+
+# End Gtest build
+# ###############
+
+# Unit tests
+
+TEST_INCLUDES = -I $(GTEST_DIR)/include
+TEST_LINKS_TO = $(GTEST_TARGET_DIR)/libgtest_main.a $(GTEST_TARGET_DIR)/libgtest.a
+
 # Misc targets
 
 %{if make_supports_phony}
-.PHONY = all cli libs clean distclean install
+.PHONY = all cli libs qt_ui test qt_ui_clean test_clean clean distclean install
 %{endif}
 
 clean: qt_ui_clean
@@ -83,14 +130,16 @@ LIBOBJS = %{join lib_objs}
 
 CLIOBJS = %{join cli_objs}
 
+TESTOBJS = %{join test_objs}
+
 # Executable targets
 
 $(CLI): $(LIBRARIES) $(CLIOBJS)
 	$(EXE_LINK_CMD) $(ABI_FLAGS) $(LDFLAGS) $(BOTAN_LDFLAGS) $(CLIOBJS) $(EXE_LINKS_TO) %{output_to_exe}$@
 	$(POST_LINK_CMD)
 
-$(TEST): $(LIBRARIES) $(TESTOBJS)
-	$(EXE_LINK_CMD) $(ABI_FLAGS) $(LDFLAGS) $(TESTOBJS) $(EXE_LINKS_TO) %{output_to_exe}$@
+$(TEST): $(LIBRARIES) $(TESTOBJS) $(GTEST)
+	$(EXE_LINK_CMD) $(ABI_FLAGS) $(LDFLAGS) $(BOTAN_LDFLAGS) $(TESTOBJS) $(EXE_LINKS_TO) $(TEST_LINKS_TO) %{output_to_exe}$@
 	$(POST_LINK_CMD)
 
 # Library targets
@@ -108,4 +157,9 @@ $(TEST): $(LIBRARIES) $(TESTOBJS)
 %{for cli_build_info}
 %{obj}: %{src}
 	$(CXX) $(BUILD_FLAGS) %{isa_flags} $(BOTAN_CXXFLAGS) %{include_paths} %{dash_c} %{src} %{dash_o}$@
+%{endfor}
+
+%{for test_build_info}
+%{obj}: %{src}
+	$(CXX) $(BUILD_FLAGS) %{isa_flags} $(BOTAN_CXXFLAGS) %{include_paths} $(TEST_INCLUDES) %{dash_c} %{src} %{dash_o}$@
 %{endfor}
