@@ -67,6 +67,7 @@ win32: LIBS += -lWs2_32
 }
 
 unix:QMAKE_CXXFLAGS += -D_FILE_OFFSET_BITS=64
+unix:QMAKE_CXXFLAGS += -std=c++11
 
 INCLUDEPATH += $$PWD/../build/include
 INCLUDEPATH += $$PWD/../deps/libencryptmsg/include
