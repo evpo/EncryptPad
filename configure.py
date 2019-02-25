@@ -490,6 +490,30 @@ def guess_processor(archinfo):
 
     raise UserError('Could not determine target CPU; set with --cpu')
 
+def have_program(program):
+    """
+    Test for the existence of a program
+    """
+
+    def exe_test(path, program):
+        exe_file = os.path.join(path, program)
+
+        if os.path.exists(exe_file) and os.access(exe_file, os.X_OK):
+            logging.debug('Found program %s in %s' % (program, path))
+            return True
+        else:
+            return False
+
+    exe_suffixes = ['', '.exe']
+
+    for path in os.environ['PATH'].split(os.pathsep):
+        for suffix in exe_suffixes:
+            if exe_test(path, program + suffix):
+                return True
+
+    logging.debug('Program %s not found' % (program))
+    return False
+
 def set_defaults_for_unset_options(options, info_arch, info_cc): # pylint: disable=too-many-branches
     if options.os is None:
         system_from_python = platform.system().lower()
