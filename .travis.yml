@@ -14,7 +14,7 @@ install:
     
 script:
     - QTDIR="/opt/qt53"
-    - PATH="$QTDIR/bin:$PATH"
+    - export PATH="$QTDIR/bin:$PATH"
     - qt53-env.sh
     - qmake -v
     - ./configure.py
