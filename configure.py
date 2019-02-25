@@ -1518,7 +1518,7 @@ def execute_qmake(options):
             }
 
     #remove later
-    qmake_test = subprocess.Popen(['which','qmake'])
+    qmake_test = subprocess.Popen(['env'])
     result = qmake_test.wait()
     qmake_test = subprocess.Popen([options.qmake_bin,'-v'])
     result = qmake_test.wait()

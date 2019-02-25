@@ -16,8 +16,11 @@ script:
     - QTDIR="/opt/qt53"
     - export PATH="$QTDIR/bin:$PATH"
     - qt53-env.sh
+    - which qt53-env.sh
+    - cat $(which qt53-env.sh)
+    - which qmake
     - qmake -v
-    - ./configure.py
+    - env && ./configure.py
     - echo make
     - env && ./configure.py --back-end --debug --test
     - echo make
