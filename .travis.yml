@@ -14,18 +14,15 @@ install:
     
 script:
     - QTDIR="/opt/qt53"
-    - export PATH="$QTDIR/bin:$PATH"
+    - PATH="$QTDIR/bin:$PATH"
     - qt53-env.sh
-    - which qt53-env.sh
-    - cat $(which qt53-env.sh)
-    - which qmake
     - qmake -v
-    - env && ./configure.py
-    - echo make
-    - env && ./configure.py --back-end --debug --test
-    - echo make
-    - echo ./scripts/tool.sh --run-tests
-    - echo ./scripts/tool.sh --run-func-tests --debug
+    - ./configure.py --qmake-bin $(which qmake)
+    - make
+    - ./configure.py --back-end --debug --test --qmake-bin $(which qmake)
+    - make
+    - ./scripts/tool.sh --run-tests
+    - ./scripts/tool.sh --run-func-tests --debug
 
 addons:
     apt:

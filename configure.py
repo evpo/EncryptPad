@@ -1517,13 +1517,6 @@ def execute_qmake(options):
             'mingw':'win32-g++',
             }
 
-    #remove later
-    qmake_test = subprocess.Popen(['env'])
-    result = qmake_test.wait()
-    qmake_test = subprocess.Popen([options.qmake_bin,'-v'])
-    result = qmake_test.wait()
-    #end
-
     cmd = [options.qmake_bin, '-r']
     spec_name = spec_table.get(options.os)
     if spec_name:
