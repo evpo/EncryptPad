@@ -1,29 +1,55 @@
 language: cpp
-os: linux
+os:
+    - linux
+    - osx
+
 compiler: gcc
 env: CONFIG=Release
 group: stable
 dist: trusty
 
 install:
-    - sudo apt-add-repository -y ppa:beineri/opt-qt532-trusty
-    - sudo apt-get -qq update
-    - sudo apt-get install qt53tools
-    - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 50
-    - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-5 50
-    
+    - |
+        if [[ "$TRAVIS_OS_NAME" == "linux" ]]
+        then
+            sudo apt-add-repository -y ppa:beineri/opt-qt532-trusty
+            sudo apt-get -qq update
+            sudo apt-get install qt53tools
+            sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 50
+            sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-5 50
+        fi
+    - |
+        if [[ "$TRAVIS_OS_NAME" == "osx" ]]
+        then
+            brew update > /dev/null
+            brew install qt5
+            export QTDIR="/usr/local/opt/qt5"
+        fi
 script:
-    - QTDIR="/opt/qt53"
-    - PATH="$QTDIR/bin:$PATH"
-    - qt53-env.sh
-    - qmake -v
-    - ./configure.py --qmake-bin $(which qmake)
-    - make
-    - ./configure.py --back-end --debug --test --qmake-bin $(which qmake)
-    - make
-    - ./scripts/tool.sh --run-tests
-    - ./scripts/tool.sh --run-func-tests --debug
-
+    - |
+        if [[ "$TRAVIS_OS_NAME" == "linux" ]]
+        then
+            QTDIR="/opt/qt53"
+            PATH="$QTDIR/bin:$PATH"
+            qt53-env.sh
+            qmake -v
+            ./configure.py --qmake-bin $(which qmake)
+            make
+            ./configure.py --back-end --debug --test --qmake-bin $(which qmake)
+            make
+            ./scripts/tool.sh --run-tests
+            ./scripts/tool.sh --run-func-tests --debug
+        fi
+    - |
+        if [[ "$TRAVIS_OS_NAME" == "osx" ]]
+        then
+            PATH="$QTDIR/bin:$PATH"
+            LDFLAGS=-L$QTDIR/lib
+            CPPFLAGS=-I$QTDIR/include
+            qmake -v
+            ./configure.py
+            make
+        fi
 addons:
     apt:
         sources:
