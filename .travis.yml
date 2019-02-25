@@ -19,7 +19,7 @@ script:
     - qmake -v
     - ./configure.py
     - echo make
-    - ./configure.py --back-end --debug --test
+    - env && ./configure.py --back-end --debug --test
     - echo make
     - echo ./scripts/tool.sh --run-tests
     - echo ./scripts/tool.sh --run-func-tests --debug
