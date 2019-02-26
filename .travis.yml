@@ -48,7 +48,7 @@ script:
             qmake -v
             ./configure.py --cpu x86_64
             make
-            ./configure.py --back-end --debug --cpu x86_64
+            ./configure.py --back-end --debug --test --cpu x86_64
             make
             ./scripts/tool.sh --run-tests
             ./scripts/tool.sh --run-func-tests --debug
