@@ -46,7 +46,7 @@ script:
             LDFLAGS=-L$QTDIR/lib
             CPPFLAGS=-I$QTDIR/include
             qmake -v
-            ./configure.py --os x86_64 --arch x86_64
+            ./configure.py --os x86_64
             make
         fi
 addons:
