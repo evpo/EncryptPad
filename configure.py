@@ -1438,6 +1438,29 @@ def yield_objectfile_list(sources, obj_dir, obj_suffix):
         name = name.replace('.cpp', obj_suffix)
         yield os.path.join(obj_dir, name)
 
+# Mutates `options`
+def canonicalize_options(options, info_os, info_arch):
+    # pylint: disable=too-many-branches
+    if options.os not in info_os:
+        def find_canonical_os_name(os_name_variant):
+            for (canonical_os_name, os_info) in info_os.items():
+                if os_info.matches_name(os_name_variant):
+                    return canonical_os_name
+            return os_name_variant # not found
+        options.os = find_canonical_os_name(options.os)
+
+    # canonical ARCH/CPU
+    options.arch = canon_processor(info_arch, options.cpu)
+    if options.arch is None:
+        raise UserError('Unknown or unidentifiable processor "%s"' % (options.cpu))
+
+    if options.cpu != options.arch:
+        logging.info('Canonicalized CPU target %s to %s', options.cpu, options.arch)
+
+    if options.with_stack_protector is None:
+        if options.os in info_os:
+            options.with_stack_protector = info_os[options.os].use_stack_protector
+
 def generate_build_info(build_paths, modules, cc, arch, osinfo, options):
     # pylint: disable=too-many-locals
 
@@ -1642,7 +1665,6 @@ def process_command_line(args):
                            help='choose how links to include headers are created (%s)' % ', '.join(link_methods))
 
     build_group.add_option('--os', help='set the target operating system')
-    build_group.add_option('--arch', help='set the target architecture')
     build_group.add_option('--cc', dest='compiler', help='set the desired build compiler')
     build_group.add_option('--cc-bin', dest='compiler_binary', metavar='BINARY',
                             help='set path to compiler binary')
@@ -1725,6 +1747,7 @@ def configure_back_end(system_command, options):
     info_cc = load_build_data_info_files(source_paths, 'compiler info', 'cc', CompilerInfo)
 
     set_defaults_for_unset_options(options, info_arch, info_cc)
+    canonicalize_options(options, info_os, info_arch)
 
     logging.info('Autodetected platform information: OS="%s" machine="%s" proc="%s"',
                  platform.system(), platform.machine(), platform.processor())
