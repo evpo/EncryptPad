@@ -1580,6 +1580,7 @@ def configure_botan(options):
             # '--with-build-dir', botan_build_dir,
             '--cc', options.compiler,
             '--cpu', options.cpu,
+            '--arch', options.arch,
             '--amalgamation',
             '--disable-shared',
             '--with-zlib',
@@ -1642,6 +1643,7 @@ def process_command_line(args):
                            help='choose how links to include headers are created (%s)' % ', '.join(link_methods))
 
     build_group.add_option('--os', help='set the target operating system')
+    build_group.add_option('--arch', help='set the target architecture')
     build_group.add_option('--cc', dest='compiler', help='set the desired build compiler')
     build_group.add_option('--cc-bin', dest='compiler_binary', metavar='BINARY',
                             help='set path to compiler binary')
