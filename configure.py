@@ -1580,7 +1580,6 @@ def configure_botan(options):
             # '--with-build-dir', botan_build_dir,
             '--cc', options.compiler,
             '--cpu', options.cpu,
-            '--arch', options.arch,
             '--amalgamation',
             '--disable-shared',
             '--with-zlib',
