@@ -8,10 +8,10 @@ EXE_LINKS_TO = %{library_target} %{link_to}
 BOTAN_LDFLAGS = %{botan_ldflags}
 BOTAN_CXXFLAGS = %{botan_cxxflags}
 
-# zlib
-LIBS += $$EXE_LINKS_TO
 LIBS += $$BOTAN_LDFLAGS
+LIBS += $$EXE_LINKS_TO
 
+# zlib
 %{if build_zlib}
 LIBS += %{zlib_target}
 %{endif}
