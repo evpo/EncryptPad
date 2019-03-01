@@ -1798,12 +1798,41 @@ def configure_back_end(system_command, options):
 
     template_vars['default_targets'] = ' '.join(default_targets)
 
-    template_vars['build_botan'] = not options.use_system_libs
+    set_botan_variables(options, template_vars)
     template_vars['build_zlib'] = not options.use_system_libs
 
+    if not options.use_system_libs:
+        zlib_dir = os.path.join('deps', 'zlib')
+        template_vars['zlib_dir'] = zlib_dir
+        template_vars['zlib_target'] = os.path.join(zlib_dir, 'libz.a')
+
+    do_io_for_build(cc, arch, osinfo, info_modules.values(), build_paths, source_paths, template_vars, options)
+
+def external_command(cmd):
+    logging.info('Executing: %s', ' '.join(cmd))
+    result = ''
+    try:
+        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+        result, errs = proc.communicate()
+    except OSError as e:
+        raise UserError('Error while executing command: %s' % e)
+    return result
+
+def set_botan_variables(options, template_vars):
+    template_vars['build_botan'] = not options.use_system_libs
     if options.use_system_libs:
-        botan_cxxflags = '$(shell pkg-config --cflags botan-2)'
-        botan_ldflags = '$(shell pkg-config --libs botan-2)'
+        botan_cxxflags = external_command(['pkg-config', '--cflags', 'botan-2'])
+        botan_ldflags = external_command(['pkg-config', '--libs', 'botan-2'])
+
+        # remove all existing flags to avoid repetition
+        all_flags = []
+        for name in ['cc_sysroot', 'cxx_abi_flags', 'ldflags']:
+            flags = template_vars[name]
+            all_flags.extend(flags.split())
+
+        received_flags = botan_ldflags.split()
+        botan_ldflags = ' '.join(flag for flag in received_flags if flag not in all_flags)
+
     else:
         botan_build_dir = get_botan_build_dir()
         botan_target = os.path.join(botan_build_dir,
@@ -1811,16 +1840,10 @@ def configure_back_end(system_command, options):
         template_vars['botan_target'] = botan_target
         template_vars['botan_build_dir'] = botan_build_dir
         botan_cxxflags = '-I %s' % os.path.join('deps', 'botan', 'build', 'include')
-        botan_ldflags = '%s -ldl -lm' % botan_target
-        zlib_dir = os.path.join('deps', 'zlib')
-        template_vars['zlib_dir'] = zlib_dir
-        template_vars['zlib_target'] = os.path.join(zlib_dir, 'libz.a')
-
+        botan_ldflags = botan_target
 
     template_vars['botan_cxxflags'] = botan_cxxflags
     template_vars['botan_ldflags'] = botan_ldflags
-
-    do_io_for_build(cc, arch, osinfo, info_modules.values(), build_paths, source_paths, template_vars, options)
 
 def main(argv):
     """

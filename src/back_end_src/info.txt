@@ -3,7 +3,7 @@ back_end_src -> 20190126
 </defines>
 
 <libs>
-linux -> rt
+linux -> rt,m,dl
 mingw -> ws2_32
 windows -> ws2_32.lib
 </libs>
