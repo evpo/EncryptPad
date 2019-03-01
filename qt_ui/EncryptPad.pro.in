@@ -2,6 +2,22 @@ QT       += core gui widgets
 PROJ = ../..
 VPATH = $$PROJ/qt_ui
 
+EXE_LINKS_TO = %{library_target} %{link_to}
+
+# botan
+BOTAN_LDFLAGS = %{botan_ldflags}
+BOTAN_CXXFLAGS = %{botan_cxxflags}
+
+# zlib
+LIBS += $$EXE_LINKS_TO
+LIBS += $$BOTAN_LDFLAGS
+
+%{if build_zlib}
+LIBS += %{zlib_target}
+%{endif}
+
+QMAKE_CXXFLAGS += $$BOTAN_CXXFLAGS
+
 CONFIG(debug, debug|release){
     CONFIG_NAME = debug
     SUBDIR_RELEASE =
@@ -12,19 +28,11 @@ CONFIG(release, debug|release){
     SUBDIR_RELEASE = RELEASE=on
 }
 
-# For windows build sh.exe needs to be in the PATH environment variable
-win32: DEPS_SUBDIR = $$system(cd ..\build && sh .\get_subdir.sh $$SUBDIR_RELEASE)
-#message(DEPS_SUBDIR=$$DEPS_SUBDIR)
-
 # install
-target.path = /prj/EncryptPadLight
 sources.files = $$SOURCES $$HEADERS $$RESOURCES $$FORMS EncryptPad.pro images
-sources.path = /prj/EncryptPadLight
-INSTALLS += target sources
+# INSTALLS += target sources
 
 CONFIG += c++11
-
-QMAKE_CFLAGS += -fexceptions -o2
 
 FORMS += \
     set_key_dialog.ui \
@@ -41,40 +49,15 @@ FORMS += \
 
 win32: LIBS += -static -luserenv
 
-LIBS += -L$$PROJ/build/ -lback_end
-
 # the line below is required for mingw wine
 win32: LIBS += -lgdi32 -lkernel32 -luser32
-win32: BOTANFILE = $$PROJ/deps/botan/botan.lib -fstack-protector
-unix: BOTANFILE = -L$$PROJ/deps/botan -lbotan-2
-
-!USE_SYSTEM_LIBS {
-    LIBS += $$BOTANFILE $$PROJ/deps/zlib/libz.a -lm
-} else {
-    BOTANLIB = $$system(pkg-config --libs botan-2)
-    LIBS += $$BOTANLIB -lz
-}
-# this line is required in mingw wine
 win32: LIBS += -lWs2_32
 
-!USE_SYSTEM_LIBS {
-    INCLUDEPATH += $$PROJ/deps/botan/build/include
-    unix: LIBS += -ldl
-    macx: LIBS += -framework Security
-} else {
-    BOTANCXX = $$system(pkg-config --cflags botan-2)
-    QMAKE_CXXFLAGS += $$BOTANCXX
-}
-
 unix:QMAKE_CXXFLAGS += -D_FILE_OFFSET_BITS=64
-unix:QMAKE_CXXFLAGS += -std=c++11
 
 INCLUDEPATH += $$PROJ/build/include
 INCLUDEPATH += $$PROJ/deps/libencryptmsg/include
 INCLUDEPATH += $$PROJ/deps/plog/include
-
-# INCLUDEPATH += $$PROJ/deps/stlplus/portability
-# INCLUDEPATH += $$PROJ/back_end_src
 
 SOURCES += \
     application.cpp \

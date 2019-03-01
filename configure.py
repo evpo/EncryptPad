@@ -1589,9 +1589,11 @@ def execute_qmake(options):
     if result != 0:
         raise UserError('%s returned non zero exit code' % options.qmake_bin)
 
+def get_project_dir():
+    return os.path.abspath(os.curdir)
+
 def get_botan_build_dir():
-    botan_dir = os.path.join('deps', 'botan')
-    return botan_dir
+    return os.path.join(get_project_dir(), 'deps', 'botan')
 
 def configure_botan(options):
     botan_dir = get_botan_build_dir()
@@ -1623,7 +1625,7 @@ def configure_botan(options):
         raise UserError('Error while executing qmake: %s' % e)
 
 def get_zlib_dir():
-    return os.path.join('deps', 'zlib')
+    return os.path.join(get_project_dir(), 'deps', 'zlib')
 
 def is_windows(options):
     return options.os in ['windows','mingw']
@@ -1771,8 +1773,8 @@ def configure_back_end(system_command, options):
     osinfo = info_os[options.os]
     template_vars = create_template_vars(source_paths, build_paths, options, info_modules.values(),
             cc, arch, osinfo)
-    template_vars['library_target'] = os.path.join(build_paths.build_dir, 'libback_end.a')
-    target_dir = os.path.join('bin', 'debug' if options.debug_mode else 'release')
+    template_vars['library_target'] = os.path.join(get_project_dir(), build_paths.build_dir, 'libback_end.a')
+    target_dir = os.path.join(get_project_dir(), 'bin', 'debug' if options.debug_mode else 'release')
     if not os.path.isdir(target_dir):
         robust_makedirs(target_dir)
     template_vars['cli_exe'] = os.path.join(target_dir, 'encryptcli')
@@ -1787,7 +1789,7 @@ def configure_back_end(system_command, options):
 
     include_paths = template_vars['include_paths']
     for item in include_paths_items:
-        include_paths += ' ' + cc.add_include_dir_option + os.path.join(*item)
+        include_paths += ' ' + cc.add_include_dir_option + os.path.join(get_project_dir(), *item)
 
     template_vars['include_paths'] = include_paths
 
@@ -1808,7 +1810,7 @@ def configure_back_end(system_command, options):
     template_vars['build_zlib'] = not options.use_system_libs
 
     if not options.use_system_libs:
-        zlib_dir = os.path.join('deps', 'zlib')
+        zlib_dir = get_zlib_dir()
         template_vars['zlib_dir'] = zlib_dir
         template_vars['zlib_target'] = os.path.join(zlib_dir, 'libz.a')
 
@@ -1845,7 +1847,7 @@ def set_botan_variables(options, template_vars):
                 'botan.lib' if is_windows(options) else 'libbotan-2.a')
         template_vars['botan_target'] = botan_target
         template_vars['botan_build_dir'] = botan_build_dir
-        botan_cxxflags = '-I %s' % os.path.join('deps', 'botan', 'build', 'include')
+        botan_cxxflags = '-I %s' % os.path.join(get_project_dir(), 'deps', 'botan', 'build', 'include')
         botan_ldflags = botan_target
 
     template_vars['botan_cxxflags'] = botan_cxxflags
