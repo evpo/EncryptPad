@@ -128,7 +128,7 @@ TRANSLATIONS = \
     encryptpad_fr_fr.ts \
     encryptpad_zh_cn.ts
 
-RC_FILE = encrypt_pad.rc
+RC_FILE = $$PROJ/qt_ui/encrypt_pad.rc
 DESTDIR = $$PROJ/bin/$$CONFIG_NAME
 OBJECTS_DIR = $$CONFIG_NAME/obj
 unix|win32:TARGET = encryptpad
