@@ -1,4 +1,6 @@
 QT       += core gui widgets
+PROJ = ../..
+VPATH = $$PROJ/qt_ui
 
 CONFIG(debug, debug|release){
     CONFIG_NAME = debug
@@ -9,8 +11,6 @@ CONFIG(release, debug|release){
     CONFIG_NAME = release
     SUBDIR_RELEASE = RELEASE=on
 }
-
-# unix|macx: DEPS_SUBDIR = $$system(cd ../build && ./get_subdir.sh $$SUBDIR_RELEASE)
 
 # For windows build sh.exe needs to be in the PATH environment variable
 win32: DEPS_SUBDIR = $$system(cd ..\build && sh .\get_subdir.sh $$SUBDIR_RELEASE)
@@ -41,15 +41,15 @@ FORMS += \
 
 win32: LIBS += -static -luserenv
 
-LIBS += -L$$PWD/../build/ -lback_end
+LIBS += -L$$PROJ/build/ -lback_end
 
 # the line below is required for mingw wine
 win32: LIBS += -lgdi32 -lkernel32 -luser32
-win32: BOTANFILE = $$PWD/../deps/botan/botan.lib -fstack-protector
-unix: BOTANFILE = -L$$PWD/../deps/botan -lbotan-2
+win32: BOTANFILE = $$PROJ/deps/botan/botan.lib -fstack-protector
+unix: BOTANFILE = -L$$PROJ/deps/botan -lbotan-2
 
 !USE_SYSTEM_LIBS {
-    LIBS += $$BOTANFILE $$PWD/../deps/zlib/libz.a -lm
+    LIBS += $$BOTANFILE $$PROJ/deps/zlib/libz.a -lm
 } else {
     BOTANLIB = $$system(pkg-config --libs botan-2)
     LIBS += $$BOTANLIB -lz
@@ -58,7 +58,7 @@ unix: BOTANFILE = -L$$PWD/../deps/botan -lbotan-2
 win32: LIBS += -lWs2_32
 
 !USE_SYSTEM_LIBS {
-    INCLUDEPATH += $$PWD/../deps/botan/build/include
+    INCLUDEPATH += $$PROJ/deps/botan/build/include
     unix: LIBS += -ldl
     macx: LIBS += -framework Security
 } else {
@@ -69,12 +69,12 @@ win32: LIBS += -lWs2_32
 unix:QMAKE_CXXFLAGS += -D_FILE_OFFSET_BITS=64
 unix:QMAKE_CXXFLAGS += -std=c++11
 
-INCLUDEPATH += $$PWD/../build/include
-INCLUDEPATH += $$PWD/../deps/libencryptmsg/include
-INCLUDEPATH += $$PWD/../deps/plog/include
+INCLUDEPATH += $$PROJ/build/include
+INCLUDEPATH += $$PROJ/deps/libencryptmsg/include
+INCLUDEPATH += $$PROJ/deps/plog/include
 
-# INCLUDEPATH += $$PWD/../deps/stlplus/portability
-# INCLUDEPATH += $$PWD/../back_end_src
+# INCLUDEPATH += $$PROJ/deps/stlplus/portability
+# INCLUDEPATH += $$PROJ/back_end_src
 
 SOURCES += \
     application.cpp \
@@ -146,7 +146,7 @@ TRANSLATIONS = \
     encryptpad_zh_cn.ts
 
 RC_FILE = encrypt_pad.rc
-DESTDIR = ../../bin/$$CONFIG_NAME
+DESTDIR = $$PROJ/bin/$$CONFIG_NAME
 OBJECTS_DIR = $$CONFIG_NAME/obj
 unix|win32:TARGET = encryptpad
 macx:TARGET = EncryptPad

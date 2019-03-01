@@ -1400,6 +1400,14 @@ def do_io_for_build(cc, arch, osinfo, using_mods, build_paths, source_paths, tem
     makefile_template = os.path.join(source_paths.build_data_dir, 'makefile.in')
     write_template(template_vars['makefile_path'], makefile_template)
 
+    if not options.back_end:
+        build_dir = os.path.join('build','qt_build')
+        if not os.path.isdir(build_dir):
+            os.mkdir(build_dir)
+        qt_pro_path = os.path.join('build','qt_build','EncryptPad.pro')
+        qt_pro_template = os.path.join('qt_ui', 'EncryptPad.pro.in')
+        write_template(qt_pro_path, qt_pro_template)
+
 def yield_objectfile_list(sources, obj_dir, obj_suffix):
     obj_suffix = '.' + obj_suffix
 
@@ -1547,8 +1555,8 @@ def execute_qmake(options):
     run qmake to generate its Makefile
     """
     build_dir = os.path.join('build','qt_build')
-    if not os.path.isdir(build_dir):
-        os.mkdir(build_dir)
+    # if not os.path.isdir(build_dir):
+    #     os.mkdir(build_dir)
 
     configs = []
     configs.append('debug' if options.debug_mode else 'release')
@@ -1569,11 +1577,9 @@ def execute_qmake(options):
     if spec_name:
         cmd.append('-spec')
         cmd.append(spec_name)
-    cmd.extend([
-        'CONFIG+=%s' % (' '.join(configs)),
-        os.path.join('..','..','qt_ui','EncryptPad.pro')])
+    cmd.extend(['CONFIG+=%s' % (' '.join(configs)), 'EncryptPad.pro'])
 
-    logging.info('Executing: %s', ' '.join(cmd))
+    logging.info('Executing: %s in %s', ' '.join(cmd), build_dir)
     try:
         qmake_proc = subprocess.Popen(cmd, cwd = build_dir)
         result = qmake_proc.wait()
