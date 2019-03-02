@@ -156,7 +156,8 @@ class ModuleInfo(InfoObject):
             ['defines'],
             {
                 'load_on': 'auto',
-                'need_isa': ''
+                'need_isa': '',
+                'third_party': 'no'
             })
 
         def check_header_duplicates(header_list_public, header_list_internal):
@@ -213,6 +214,7 @@ class ModuleInfo(InfoObject):
         self.libs = convert_lib_list(lex.libs)
         self.load_on = lex.load_on
         self.need_isa = lex.need_isa.split(',') if lex.need_isa else []
+        self.third_party = True if lex.third_party == 'yes' else False
         self.os_features = lex.os_features
         self.requires = lex.requires
         self.warning = ' '.join(lex.warning) if lex.warning else None
@@ -1127,6 +1129,7 @@ class BuildPaths(object): # pylint: disable=too-many-instance-attributes
         self.build_dir = os.path.join(options.with_build_dir, 'build')
 
         self.libobj_dir = os.path.join(self.build_dir, 'obj', 'lib')
+        self.depsobj_dir = os.path.join(self.build_dir, 'obj', 'deps')
         self.cliobj_dir = os.path.join(self.build_dir, 'obj', 'cli')
         self.testobj_dir = os.path.join(self.build_dir, 'obj', 'test')
 
@@ -1137,7 +1140,12 @@ class BuildPaths(object): # pylint: disable=too-many-instance-attributes
         self.internal_headers = sorted(flatten([m.internal_headers() for m in modules]))
         self.external_headers = sorted(flatten([m.external_headers() for m in modules]))
 
-        self.lib_sources = [normalize_source_path(s) for s in sorted(flatten([mod.sources() for mod in modules]))]
+        self.lib_sources = [normalize_source_path(s) for s in
+                sorted(flatten([mod.sources() for mod in modules if not mod.third_party ]))]
+
+        self.deps_sources = [normalize_source_path(s) for s in
+                sorted(flatten([mod.sources() for mod in modules if mod.third_party ]))]
+
         def find_sources_in(basedir, srcdir):
             for (dirpath, _, filenames) in os.walk(os.path.join(basedir, srcdir)):
                 for filename in filenames:
@@ -1161,6 +1169,7 @@ class BuildPaths(object): # pylint: disable=too-many-instance-attributes
     def build_dirs(self):
         out = [
             self.libobj_dir,
+            self.depsobj_dir,
             self.cliobj_dir,
             self.testobj_dir,
             self.internal_include_dir,
@@ -1180,6 +1189,8 @@ class BuildPaths(object): # pylint: disable=too-many-instance-attributes
     def src_info(self, typ):
         if typ == 'lib':
             return (self.lib_sources, self.libobj_dir)
+        if typ == 'deps':
+            return (self.deps_sources, self.depsobj_dir)
         elif typ == 'cli':
             return (self.cli_sources, self.cliobj_dir)
         elif typ == 'test':
@@ -1285,6 +1296,7 @@ def create_template_vars(source_paths, build_paths, options, modules, cc, arch, 
         'makefile_path': os.path.join(build_paths.build_dir, '..', 'Makefile'),
 
         'libobj_dir': build_paths.libobj_dir,
+        'depsobj_dir': build_paths.depsobj_dir,
         'cliobj_dir': build_paths.cliobj_dir,
         'testobj_dir': build_paths.testobj_dir,
         'os': options.os,
@@ -1481,19 +1493,11 @@ def generate_build_info(build_paths, modules, cc, arch, osinfo, options):
             module_that_owns[src] = mod
 
     def _isa_specific_flags(src):
-        if os.path.basename(src) == 'test_simd.cpp':
-            return cc.get_isa_specific_flags(['simd'], arch, options)
 
         if src in module_that_owns:
             module = module_that_owns[src]
             isas = module.need_isa
-            if 'simd' in module.dependencies(osinfo):
-                isas.append('simd')
 
-            return cc.get_isa_specific_flags(isas, arch, options)
-
-        if src.startswith('botan_all_'):
-            isas = src.replace('botan_all_', '').replace('.cpp', '').split('_')
             return cc.get_isa_specific_flags(isas, arch, options)
 
         return ''
@@ -1507,17 +1511,13 @@ def generate_build_info(build_paths, modules, cc, arch, osinfo, options):
                 'isa_flags': _isa_specific_flags(src)
                 }
 
-            if target_type == 'fuzzer':
-                fuzz_basename = os.path.basename(obj_file).replace('.' + osinfo.obj_suffix, '')
-                info['exe'] = os.path.join(build_paths.fuzzer_output_dir, fuzz_basename)
-
             output.append(info)
 
         return output
 
     out = {}
 
-    targets = ['lib','cli','test']
+    targets = ['lib','deps','cli','test']
 
     out['isa_build_info'] = []
 
@@ -1642,10 +1642,57 @@ def configure_zlib(options):
     except OSError as e:
         raise UserError('Error while executing qmake: %s' % e)
 
+def external_command(cmd):
+    logging.info('Executing: %s', ' '.join(cmd))
+    result = ''
+    try:
+        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+        result, errs = proc.communicate()
+    except OSError as e:
+        raise UserError('Error while executing command: %s' % e)
+    return result
+
+def set_zlib_variables(options, template_vars, cc):
+    template_vars['build_zlib'] = options.build_zlib
+    if options.build_zlib:
+        zlib_dir = get_zlib_dir()
+        template_vars['zlib_dir'] = zlib_dir
+        template_vars['zlib_target'] = os.path.join(zlib_dir, 'libz.a')
+
+        template_vars['zlib_cxxflags'] =  cc.add_include_dir_option + zlib_dir
+        template_vars['zlib_ldflags'] = os.path.join(zlib_dir, 'libz.a')
+    else:
+        template_vars['zlib_cxxflags'] = external_command(['pkg-config', '--cflags', 'zlib'])
+        template_vars['zlib_ldflags'] = external_command(['pkg-config', '--libs', 'zlib'])
+
+def set_botan_variables(options, template_vars, cc):
+    template_vars['build_botan'] = options.build_botan
+    if not options.build_botan:
+        botan_cxxflags = external_command(['pkg-config', '--cflags', 'botan-2'])
+        botan_ldflags = external_command(['pkg-config', '--libs', 'botan-2'])
+
+        # remove all existing flags to avoid repetition
+        all_flags = []
+        for name in ['cc_sysroot', 'cxx_abi_flags', 'ldflags']:
+            flags = template_vars[name]
+            all_flags.extend(flags.split())
+
+        received_flags = botan_ldflags.split()
+        botan_ldflags = ' '.join(flag for flag in received_flags if flag not in all_flags)
+
+    else:
+        botan_build_dir = get_botan_build_dir()
+        botan_target = os.path.join(botan_build_dir,
+                'botan.lib' if is_windows(options) else 'libbotan-2.a')
+        template_vars['botan_target'] = botan_target
+        template_vars['botan_build_dir'] = botan_build_dir
+        botan_cxxflags = cc.add_include_dir_option + os.path.join(get_project_dir(), 'deps', 'botan', 'build', 'include')
+        botan_ldflags = botan_target
+
+    template_vars['botan_cxxflags'] = botan_cxxflags
+    template_vars['botan_ldflags'] = botan_ldflags
+
 def process_command_line(args):
-    """
-    Handle command line options
-    """
 
     parser = optparse.OptionParser(
         formatter=optparse.IndentedHelpFormatter(max_help_position=50))
@@ -1781,15 +1828,20 @@ def configure_back_end(system_command, options):
     template_vars['test_exe'] = os.path.join(target_dir, 'encrypt_pad_test')
 
     include_paths_items = [
-            ('deps','stlplus','containers'),
             ('deps','libencryptmsg','include'),
-            ('deps','plog','include'),
             ('build','include','internal'),
             ]
 
     include_paths = template_vars['include_paths']
     for item in include_paths_items:
         include_paths += ' ' + cc.add_include_dir_option + os.path.join(get_project_dir(), *item)
+
+    include_paths_items = [
+            ('deps','stlplus','containers'),
+            ('deps','plog','include'),
+            ]
+    for item in include_paths_items:
+        include_paths += ' -isystem ' + os.path.join(get_project_dir(), *item)
 
     template_vars['include_paths'] = include_paths
 
@@ -1809,56 +1861,6 @@ def configure_back_end(system_command, options):
     set_zlib_variables(options, template_vars, cc)
 
     do_io_for_build(cc, arch, osinfo, info_modules.values(), build_paths, source_paths, template_vars, options)
-
-def external_command(cmd):
-    logging.info('Executing: %s', ' '.join(cmd))
-    result = ''
-    try:
-        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE)
-        result, errs = proc.communicate()
-    except OSError as e:
-        raise UserError('Error while executing command: %s' % e)
-    return result
-
-def set_zlib_variables(options, template_vars, cc):
-    template_vars['build_zlib'] = options.build_zlib
-    if options.build_zlib:
-        zlib_dir = get_zlib_dir()
-        template_vars['zlib_dir'] = zlib_dir
-        template_vars['zlib_target'] = os.path.join(zlib_dir, 'libz.a')
-
-        template_vars['zlib_cxxflags'] =  cc.add_include_dir_option + zlib_dir
-        template_vars['zlib_ldflags'] = os.path.join(zlib_dir, 'libz.a')
-    else:
-        template_vars['zlib_cxxflags'] = external_command(['pkg-config', '--cflags', 'zlib'])
-        template_vars['zlib_ldflags'] = external_command(['pkg-config', '--libs', 'zlib'])
-
-def set_botan_variables(options, template_vars, cc):
-    template_vars['build_botan'] = options.build_botan
-    if not options.build_botan:
-        botan_cxxflags = external_command(['pkg-config', '--cflags', 'botan-2'])
-        botan_ldflags = external_command(['pkg-config', '--libs', 'botan-2'])
-
-        # remove all existing flags to avoid repetition
-        all_flags = []
-        for name in ['cc_sysroot', 'cxx_abi_flags', 'ldflags']:
-            flags = template_vars[name]
-            all_flags.extend(flags.split())
-
-        received_flags = botan_ldflags.split()
-        botan_ldflags = ' '.join(flag for flag in received_flags if flag not in all_flags)
-
-    else:
-        botan_build_dir = get_botan_build_dir()
-        botan_target = os.path.join(botan_build_dir,
-                'botan.lib' if is_windows(options) else 'libbotan-2.a')
-        template_vars['botan_target'] = botan_target
-        template_vars['botan_build_dir'] = botan_build_dir
-        botan_cxxflags = cc.add_include_dir_option + os.path.join(get_project_dir(), 'deps', 'botan', 'build', 'include')
-        botan_ldflags = botan_target
-
-    template_vars['botan_cxxflags'] = botan_cxxflags
-    template_vars['botan_ldflags'] = botan_ldflags
 
 def main(argv):
     """

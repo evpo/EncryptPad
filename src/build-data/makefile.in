@@ -22,12 +22,15 @@ LIB_LINKS_TO   = %{link_to}
 EXE_LINKS_TO   = %{library_target} $(LIB_LINKS_TO)
 
 BUILD_FLAGS    = $(ABI_FLAGS) $(LANG_FLAGS) $(CXXFLAGS) $(WARN_FLAGS)
+DEPS_BUILD_FLAGS = $(ABI_FLAGS) $(LANG_FLAGS) $(CXXFLAGS)
 
 INSTALLED_LIB_DIR = %{prefix}/libdir
 SCRIPTS_DIR = scripts
 
 BOTAN_CXXFLAGS = %{botan_cxxflags}
 BOTAN_LDFLAGS = %{botan_ldflags}
+
+INCLUDE_PATHS = %{include_paths}
 
 %{if debug_mode}
 RELEASE=
@@ -151,6 +154,8 @@ distclean: qt_ui_clean
 # Object Files
 LIBOBJS = %{join lib_objs}
 
+DEPSOBJS = %{join deps_objs}
+
 CLIOBJS = %{join cli_objs}
 
 TESTOBJS = %{join test_objs}
@@ -167,22 +172,27 @@ $(TEST): $(LIBRARIES) $(TESTOBJS) $(GTEST) $(BOTAN_TARGET) $(ZLIB)
 
 # Library targets
 
-%{library_target}: $(LIBOBJS)
-	$(AR) %{ar_options} %{ar_output_to}$@ $(LIBOBJS)
+%{library_target}: $(LIBOBJS) $(DEPSOBJS)
+	$(AR) %{ar_options} %{ar_output_to}$@ $(LIBOBJS) $(DEPSOBJS)
 
 # Build Commands
 
 %{for lib_build_info}
 %{obj}: %{src}
-	$(CXX) $(SO_OBJ_FLAGS) $(BUILD_FLAGS) %{isa_flags} $(BOTAN_CXXFLAGS) %{include_paths} %{dash_c} %{src} %{dash_o}$@
+	$(CXX) $(SO_OBJ_FLAGS) $(BUILD_FLAGS) %{isa_flags} $(BOTAN_CXXFLAGS) $(INCLUDE_PATHS) %{dash_c} %{src} %{dash_o}$@
+%{endfor}
+
+%{for deps_build_info}
+%{obj}: %{src}
+	$(CXX) $(SO_OBJ_FLAGS) $(DEPS_BUILD_FLAGS) $(BOTAN_CXXFLAGS) $(INCLUDE_PATHS) %{dash_c} %{src} %{dash_o}$@
 %{endfor}
 
 %{for cli_build_info}
 %{obj}: %{src}
-	$(CXX) $(BUILD_FLAGS) %{isa_flags} $(BOTAN_CXXFLAGS) %{include_paths} %{dash_c} %{src} %{dash_o}$@
+	$(CXX) $(BUILD_FLAGS) %{isa_flags} $(BOTAN_CXXFLAGS) $(INCLUDE_PATHS) %{dash_c} %{src} %{dash_o}$@
 %{endfor}
 
 %{for test_build_info}
 %{obj}: %{src}
-	$(CXX) $(BUILD_FLAGS) %{isa_flags} $(BOTAN_CXXFLAGS) %{include_paths} $(TEST_INCLUDES) %{dash_c} %{src} %{dash_o}$@
+	$(CXX) $(BUILD_FLAGS) %{isa_flags} $(BOTAN_CXXFLAGS) $(INCLUDE_PATHS) $(TEST_INCLUDES) %{dash_c} %{src} %{dash_o}$@
 %{endfor}

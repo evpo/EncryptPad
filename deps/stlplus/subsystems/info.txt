@@ -1,3 +1,4 @@
+third_party yes
 <defines>
 subsystems -> 20190127
 </defines>
