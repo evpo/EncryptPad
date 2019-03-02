@@ -33,9 +33,9 @@ script:
             PATH="$QTDIR/bin:$PATH"
             qt53-env.sh
             qmake -v
-            ./configure.py --qmake-bin $(which qmake)
+            ./configure.py --qmake-bin $(which qmake) --build-botan --build-zlib
             make
-            ./configure.py --back-end --debug --test
+            ./configure.py --without-qt-ui --debug-mode --test --build-botan --build-zlib
             make
             ./scripts/tool.sh --run-tests
             ./scripts/tool.sh --run-func-tests --debug
@@ -47,12 +47,12 @@ script:
             LDFLAGS=-L$QTDIR/lib
             CPPFLAGS=-I$QTDIR/include
             qmake -v
-            ./configure.py --cpu x86_64
+            ./configure.py --cpu x86_64 --build-botan --build-zlib
             make
-            ./configure.py --back-end --debug --test --cpu x86_64
+            ./configure.py --without-qt-ui --debug-mode --test --cpu x86_64 --build-botan --build-zlib
             make
             ./scripts/tool.sh --run-tests
-            ./scripts/tool.sh --run-func-tests --debug
+            ./scripts/tool.sh --run-func-tests --debug 
         fi
 addons:
     apt:
