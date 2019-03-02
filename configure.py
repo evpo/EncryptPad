@@ -1400,7 +1400,7 @@ def do_io_for_build(cc, arch, osinfo, using_mods, build_paths, source_paths, tem
     makefile_template = os.path.join(source_paths.build_data_dir, 'makefile.in')
     write_template(template_vars['makefile_path'], makefile_template)
 
-    if not options.back_end:
+    if not options.without_qt_ui:
         build_dir = os.path.join('build','qt_build')
         if not os.path.isdir(build_dir):
             os.mkdir(build_dir)
@@ -1560,9 +1560,6 @@ def execute_qmake(options):
 
     configs = []
     configs.append('debug' if options.debug_mode else 'release')
-    if options.use_system_libs:
-        configs.append('USE_SYSTEM_LIBS')
-
     spec_table = {
             'linux':'linux-g++',
             'freebsd':'freebsd-clang',
@@ -1656,12 +1653,10 @@ def process_command_line(args):
     build_group = optparse.OptionGroup(parser, 'Build options')
 
     # EncryptPad parameters
-    build_group.add_option('--back-end', dest='back_end', action='store_true', default=False,
+    build_group.add_option('--without-qt-ui', dest='without_qt_ui', action='store_true', default=False,
                            help='include the libraries and CLI targets without Qt UI')
     build_group.add_option('--test', action='store_true', default=False,
                            help='include the unit tests without other targets')
-    build_group.add_option('--use-system-libs', dest='use_system_libs', action='store_true', default=False,
-            help='use botan, zlib and other shared libraries installed on the system')
 
     # Generic parameters
     build_group.add_option('--debug-mode', action='store_true', default=False,
@@ -1722,6 +1717,11 @@ def process_command_line(args):
 
     build_group.add_option('--qmake-bin', dest='qmake_bin', metavar='QMAKE', default='qmake',
                             help='set path to qmake binary')
+
+    build_group.add_option('--build-zlib', action='store_true', dest='build_zlib', default=False,
+                            help='build botan from source. If not set, use the system library')
+    build_group.add_option('--build-botan', action='store_true', dest='build_botan', default=False,
+                            help='build zlib from source. If not set, use the system library')
 
     parser.add_option_group(build_group)
     (options, args) = parser.parse_args(args)
@@ -1793,26 +1793,20 @@ def configure_back_end(system_command, options):
 
     template_vars['include_paths'] = include_paths
 
-
     #qt build
-    template_vars['build_qt_ui'] = (not options.back_end and not options.test)
+    template_vars['build_qt_ui'] = (not options.without_qt_ui and not options.test)
     template_vars['qt_build_dir'] = os.path.join('build', 'qt_build')
     template_vars['debug_mode'] = options.debug_mode
     default_targets = ['libs','cli']
-    if not options.back_end:
+    if not options.without_qt_ui:
         default_targets.append('qt_ui')
     if options.test:
         default_targets.append('test')
 
     template_vars['default_targets'] = ' '.join(default_targets)
 
-    set_botan_variables(options, template_vars)
-    template_vars['build_zlib'] = not options.use_system_libs
-
-    if not options.use_system_libs:
-        zlib_dir = get_zlib_dir()
-        template_vars['zlib_dir'] = zlib_dir
-        template_vars['zlib_target'] = os.path.join(zlib_dir, 'libz.a')
+    set_botan_variables(options, template_vars, cc)
+    set_zlib_variables(options, template_vars, cc)
 
     do_io_for_build(cc, arch, osinfo, info_modules.values(), build_paths, source_paths, template_vars, options)
 
@@ -1826,9 +1820,22 @@ def external_command(cmd):
         raise UserError('Error while executing command: %s' % e)
     return result
 
-def set_botan_variables(options, template_vars):
-    template_vars['build_botan'] = not options.use_system_libs
-    if options.use_system_libs:
+def set_zlib_variables(options, template_vars, cc):
+    template_vars['build_zlib'] = options.build_zlib
+    if options.build_zlib:
+        zlib_dir = get_zlib_dir()
+        template_vars['zlib_dir'] = zlib_dir
+        template_vars['zlib_target'] = os.path.join(zlib_dir, 'libz.a')
+
+        template_vars['zlib_cxxflags'] =  cc.add_include_dir_option + zlib_dir
+        template_vars['zlib_ldflags'] = os.path.join(zlib_dir, 'libz.a')
+    else:
+        template_vars['zlib_cxxflags'] = external_command(['pkg-config', '--cflags', 'zlib'])
+        template_vars['zlib_ldflags'] = external_command(['pkg-config', '--libs', 'zlib'])
+
+def set_botan_variables(options, template_vars, cc):
+    template_vars['build_botan'] = options.build_botan
+    if not options.build_botan:
         botan_cxxflags = external_command(['pkg-config', '--cflags', 'botan-2'])
         botan_ldflags = external_command(['pkg-config', '--libs', 'botan-2'])
 
@@ -1847,7 +1854,7 @@ def set_botan_variables(options, template_vars):
                 'botan.lib' if is_windows(options) else 'libbotan-2.a')
         template_vars['botan_target'] = botan_target
         template_vars['botan_build_dir'] = botan_build_dir
-        botan_cxxflags = '-I %s' % os.path.join(get_project_dir(), 'deps', 'botan', 'build', 'include')
+        botan_cxxflags = cc.add_include_dir_option + os.path.join(get_project_dir(), 'deps', 'botan', 'build', 'include')
         botan_ldflags = botan_target
 
     template_vars['botan_cxxflags'] = botan_cxxflags
@@ -1864,11 +1871,12 @@ def main(argv):
     logging.info('%s invoked with options "%s"', argv[0], ' '.join(argv[1:]))
 
     configure_back_end(argv[0], options)
-    if not options.back_end:
+    if not options.without_qt_ui:
         execute_qmake(options)
 
-    if not options.use_system_libs:
+    if options.build_botan:
         configure_botan(options)
+    if options.build_zlib:
         configure_zlib(options)
     return 0
 

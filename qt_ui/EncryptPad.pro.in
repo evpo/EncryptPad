@@ -12,9 +12,7 @@ LIBS += $$BOTAN_LDFLAGS
 LIBS += $$EXE_LINKS_TO
 
 # zlib
-%{if build_zlib}
-LIBS += %{zlib_target}
-%{endif}
+LIBS += %{zlib_ldflags}
 
 QMAKE_CXXFLAGS += $$BOTAN_CXXFLAGS
 

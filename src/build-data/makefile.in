@@ -65,10 +65,11 @@ botan: $(BOTAN_TARGET)
 %{if build_zlib}
 ZLIB = %{zlib_target}
 ZLIB_DIR = %{zlib_dir}
-EXE_LINKS_TO += $(ZLIB)
 $(ZLIB) :
 	$(MAKE) -C $(ZLIB_DIR) RELEASE=$(RELEASE)
 %{endif}
+
+EXE_LINKS_TO += %{zlib_ldflags}
 
 # QT UI build
 
