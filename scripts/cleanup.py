@@ -102,25 +102,13 @@ def main(args=None):
         remove_file(build_config['makefile_path'])
         remove_dir(build_dir)
     else:
-        for dir_type in ['libobj_dir', 'cliobj_dir', 'testobj_dir', 'doc_output_dir_manual', 'doc_output_dir_doxygen']:
+        for dir_type in ['libobj_dir', 'cliobj_dir', 'testobj_dir', 'depsobj_dir']:
             dir_path = build_config[dir_type]
             if dir_path:
                 remove_all_in_dir(dir_path)
 
-        remove_file(build_config['doc_stamp_file'])
-
     remove_file(build_config['cli_exe'])
     remove_file(build_config['test_exe'])
-
-    lib_basename = build_config['lib_prefix'] + build_config['libname']
-    matches_libname = re.compile('^' + lib_basename + '.([a-z]+)((\\.[0-9\\.]+)|$)')
-
-    known_suffix = ['a', 'so', 'dll', 'manifest', 'exp']
-
-    for f in os.listdir(build_config['out_dir']):
-        match = matches_libname.match(f)
-        if match and match.group(1) in known_suffix:
-            remove_file(os.path.join(build_config['out_dir'], f))
 
     if options.distclean:
         if 'generated_files' in build_config:

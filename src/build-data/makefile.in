@@ -64,6 +64,16 @@ $(BOTAN_TARGET):
 
 botan: $(BOTAN_TARGET)
 
+botan_clean:
+%{if build_botan}
+	$(MAKE) -C $(BOTAN_BUILD_DIR) clean
+%{endif}
+
+botan_distclean:
+%{if build_botan}
+	$(MAKE) -C $(BOTAN_BUILD_DIR) distclean
+%{endif}
+
 # Zlib
 %{if build_zlib}
 ZLIB = %{zlib_target}
@@ -73,6 +83,16 @@ $(ZLIB) :
 %{endif}
 
 EXE_LINKS_TO += %{zlib_ldflags}
+
+zlib_clean:
+%{if build_zlib}
+	$(MAKE) -C $(ZLIB_DIR) clean
+%{endif}
+
+zlib_distclean:
+%{if build_zlib}
+	$(MAKE) -C $(ZLIB_DIR) distclean
+%{endif}
 
 # QT UI build
 
@@ -85,7 +105,15 @@ qt_ui_clean:
 %{if build_qt_ui}
 	if [ -d $(QT_BUILD_DIR) ]; \
 	then \
-	$(MAKE) -C $(QT_BUILD_DIR) clean RELEASE=$(RELEASE) \
+	$(MAKE) -C $(QT_BUILD_DIR) clean RELEASE=$(RELEASE) ;\
+	fi
+%{endif}
+
+qt_ui_distclean:
+%{if build_qt_ui}
+	if [ -d $(QT_BUILD_DIR) ]; \
+	then \
+	$(MAKE) -C $(QT_BUILD_DIR) distclean RELEASE=$(RELEASE) ;\
 	fi
 %{endif}
 
@@ -148,7 +176,7 @@ TEST_LINKS_TO = $(GTEST_TARGET_DIR)/libgtest_main.a $(GTEST_TARGET_DIR)/libgtest
 clean: qt_ui_clean
 	$(PYTHON_EXE) $(SCRIPTS_DIR)/cleanup.py --build-dir="%{build_dir}"
 
-distclean: qt_ui_clean
+distclean: qt_ui_distclean zlib_distclean botan_distclean
 	$(PYTHON_EXE) $(SCRIPTS_DIR)/cleanup.py --build-dir="%{build_dir}" --distclean
 
 # Object Files
