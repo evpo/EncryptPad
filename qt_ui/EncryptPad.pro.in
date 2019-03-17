@@ -15,6 +15,7 @@ LIBS += $$EXE_LINKS_TO
 LIBS += %{zlib_ldflags}
 
 QMAKE_CXXFLAGS += $$BOTAN_CXXFLAGS
+LIBS += %{cxx_abi_flags}
 
 CONFIG(debug, debug|release){
     CONFIG_NAME = debug
