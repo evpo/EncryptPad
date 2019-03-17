@@ -7,19 +7,37 @@
 skip_tags: true
 
 environment:
-  global:
   matrix:
     - qtdir: "C:\\Qt\\5.11\\mingw53_32"
       gpp: win32-g++
+    # - qtdir: "C:\\Qt\\latest\\mingw73_64"
+    #   gpp: win32-g++
 
 install:
   # Qt-versions: https://www.appveyor.com/docs/build-environment/#qt
+  - ps: |
+      $path = [Environment]::GetEnvironmentVariable("path", "machine")
+      $newPath = ($path.Split(';') | Where-Object { $_ -eq 'C:\ProgramData\chocolatey\bin' }) -join ';'
+      [Environment]::SetEnvironmentVariable("path", $newPath, "machine")
+  - cmd: appveyor-retry choco install gpg4win
   - set QTDIR=%qtdir%
-  - set PATH=%PATH%;%QTDIR%\bin;C:\MinGW\bin
+  - set QTTOOLS=C:\Qt\Tools\mingw530_32
+  - set GPGPATH="C:\Program Files (x86)\Gpg4win\..\GnuPG"
+  - set PATH=%GPGPATH%\bin;%QTTOOLS%\bin;%QTDIR%\bin;%PATH%;C:\MinGW\bin
 
 build_script:
   # enable this to take a look if there are new qt versions
+  - echo %PATH%
   - dir C:\Qt
   - dir C:\Qt\latest
-  - python2 configure.py --debug-mode --cpu x86 --os=mingw
-  - mingw32-make
+  - dir %GPGPATH%
+  - which g++
+  - g++ --version
+  - uname
+  - gpg --version
+  - python configure.py --debug-mode --cpu x86 --os=mingw
+  - mingw32-make -j 2
+  - python configure.py --without-qt-ui --debug-mode --test --cpu x86 --os=mingw
+  - mingw32-make -j 2
+  - bash scripts\tool.sh --run-tests
+  - bash scripts\tool.sh --run-func-tests --debug
