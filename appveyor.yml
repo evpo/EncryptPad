@@ -1,0 +1,25 @@
+# AppVeyor build configuration
+#
+# doc: http://www.appveyor.com/docs/build-configuration
+# Qt-versions: https://www.appveyor.com/docs/build-environment/#qt
+# validator: https://ci.appveyor.com/tools/validate-yaml
+
+skip_tags: true
+
+environment:
+  global:
+  matrix:
+    - qtdir: "C:\\Qt\\5.11\\mingw53_32"
+      gpp: win32-g++
+
+install:
+  # Qt-versions: https://www.appveyor.com/docs/build-environment/#qt
+  - set QTDIR=%qtdir%
+  - set PATH=%PATH%;%QTDIR%\bin;C:\MinGW\bin
+
+build_script:
+  # enable this to take a look if there are new qt versions
+  - dir C:\Qt
+  - dir C:\Qt\latest
+  - python2 configure.py --debug-mode --cpu x86 --os=mingw
+  - mingw32-make
