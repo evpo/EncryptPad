@@ -59,7 +59,7 @@ zlib: $(ZLIB)
 BOTAN_TARGET = %{botan_target}
 BOTAN_BUILD_DIR = %{botan_build_dir}
 $(BOTAN_TARGET):
-	$(MAKE) -C $(BOTAN_BUILD_DIR)
+	$(MAKE) -C $(BOTAN_BUILD_DIR) libs
 %{endif}
 
 botan: $(BOTAN_TARGET)
@@ -79,7 +79,7 @@ botan_distclean:
 ZLIB = %{zlib_target}
 ZLIB_DIR = %{zlib_dir}
 $(ZLIB) :
-	$(MAKE) -C $(ZLIB_DIR) RELEASE=$(RELEASE)
+	$(MAKE) %{zlib_makefile} -C $(ZLIB_DIR) RELEASE=$(RELEASE)
 %{endif}
 
 EXE_LINKS_TO += %{zlib_ldflags}

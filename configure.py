@@ -565,6 +565,10 @@ def set_defaults_for_unset_options(options, info_arch, info_cc): # pylint: disab
         options.cpu = cpu
         logging.info('Guessing target processor is a %s (use --cpu to set)' % (options.arch))
 
+    if is_windows(options):
+        options.build_botan = True
+        options.build_zlib = True
+
 class EncryptPadConfigureLogHandler(logging.StreamHandler, object):
     def emit(self, record):
         # Do the default stuff first
@@ -1608,6 +1612,7 @@ def configure_botan(options):
             # '--with-build-dir', botan_build_dir,
             '--cc', options.compiler,
             '--cpu', options.cpu,
+            '--os', options.os,
             '--amalgamation',
             '--disable-shared',
             '--with-zlib',
@@ -1661,6 +1666,12 @@ def set_zlib_variables(options, template_vars, cc):
 
         template_vars['zlib_cxxflags'] =  cc.add_include_dir_option + zlib_dir
         template_vars['zlib_ldflags'] = os.path.join(zlib_dir, 'libz.a')
+
+        if is_windows(options):
+            template_vars['zlib_makefile'] = '-f win32/Makefile.gcc'
+        else:
+            template_vars['zlib_makefile'] = ''
+
     else:
         template_vars['zlib_cxxflags'] = external_command(['pkg-config', '--cflags', 'zlib'])
         template_vars['zlib_ldflags'] = external_command(['pkg-config', '--libs', 'zlib'])
@@ -1682,8 +1693,7 @@ def set_botan_variables(options, template_vars, cc):
 
     else:
         botan_build_dir = get_botan_build_dir()
-        botan_target = os.path.join(botan_build_dir,
-                'botan.lib' if is_windows(options) else 'libbotan-2.a')
+        botan_target = os.path.join(botan_build_dir, 'libbotan-2.a')
         template_vars['botan_target'] = botan_target
         template_vars['botan_build_dir'] = botan_build_dir
         botan_cxxflags = cc.add_include_dir_option + os.path.join(get_project_dir(), 'deps', 'botan', 'build', 'include')
@@ -1766,9 +1776,9 @@ def process_command_line(args):
                             help='set path to qmake binary')
 
     build_group.add_option('--build-zlib', action='store_true', dest='build_zlib', default=False,
-                            help='build botan from source. If not set, use the system library')
-    build_group.add_option('--build-botan', action='store_true', dest='build_botan', default=False,
                             help='build zlib from source. If not set, use the system library')
+    build_group.add_option('--build-botan', action='store_true', dest='build_botan', default=False,
+                            help='build botan from source. If not set, use the system library')
 
     parser.add_option_group(build_group)
     (options, args) = parser.parse_args(args)
