@@ -1613,10 +1613,15 @@ def configure_botan(options):
             '--cc', options.compiler,
             '--cpu', options.cpu,
             '--os', options.os,
-            '--amalgamation',
+            ]
+
+    if options.link_method:
+        cmd.extend(['--link-method', options.link_method])
+
+    cmd.extend(['--amalgamation',
             '--disable-shared',
             '--with-zlib',
-            '--enable-modules', 'aes,pbkdf2,auto_rng,compression']
+            '--enable-modules', 'aes,pbkdf2,auto_rng,compression'])
 
     logging.info('Executing: %s', ' '.join(cmd))
 
