@@ -35,9 +35,9 @@ build_script:
   - g++ --version
   - uname
   - gpg --version
-  - python configure.py --debug-mode --cpu x86 --os=mingw
+  - python configure.py --debug-mode --cpu x86 --os=mingw --static
   - mingw32-make -j 2
-  - python configure.py --without-qt-ui --debug-mode --test --cpu x86 --os=mingw
+  - python configure.py --without-qt-ui --debug-mode --test --cpu x86 --os=mingw --static
   - mingw32-make -j 2
   - bash scripts\tool.sh --run-tests
   - bash scripts\tool.sh --run-func-tests --debug

@@ -30,6 +30,8 @@ undefined -> "-fsanitize=undefined -fno-sanitize-recover=undefined"
 visibility_build_flags "-fvisibility=hidden"
 visibility_attribute '__attribute__((visibility("default")))'
 
+large_files '-D_FILE_OFFSET_BITS=64'
+
 <so_link_commands>
 # The default works for GNU ld and several other Unix linkers
 default       -> "$(CXX) -shared -fPIC -Wl,-soname,{soname_abi}"
@@ -97,3 +99,5 @@ netbsd  -> "-D_NETBSD_SOURCE"
 qnx     -> "-fexceptions -D_QNX_SOURCE"
 cygwin  -> "-U__STRICT_ANSI__"
 </mach_abi_linking>
+
+static_linking '-static'

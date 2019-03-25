@@ -908,6 +908,8 @@ class CompilerInfo(InfoObject): # pylint: disable=too-many-instance-attributes
                 'ar_command': '',
                 'ar_options': '',
                 'ar_output_to': '',
+                'static_linking': '',
+                'large_files': '',
             })
 
         self.add_framework_option = lex.add_framework_option
@@ -945,6 +947,8 @@ class CompilerInfo(InfoObject): # pylint: disable=too-many-instance-attributes
         self.visibility_attribute = lex.visibility_attribute
         self.visibility_build_flags = lex.visibility_build_flags
         self.warning_flags = lex.warning_flags
+        self.static_linking = lex.static_linking
+        self.large_files = lex.large_files
 
     def isa_flags_for(self, isa, arch):
         if isa in self.isa_flags:
@@ -987,6 +991,16 @@ class CompilerInfo(InfoObject): # pylint: disable=too-many-instance-attributes
 
         def flag_builder():
             return ''
+
+        return ' '.join(list(flag_builder()))
+
+    def gen_ldflags(self, options):
+        """
+        Return the general linking flags, if any
+        """
+        def flag_builder():
+            if options.static_linking:
+                yield self.static_linking
 
         return ' '.join(list(flag_builder()))
 
@@ -1077,6 +1091,8 @@ class CompilerInfo(InfoObject): # pylint: disable=too-many-instance-attributes
 
                 if not (options.debug_mode or sanitizers_enabled):
                     yield self.cpu_flags_no_debug[options.arch]
+
+            yield self.large_files
 
         return (' '.join(gen_flags(with_debug_info, enable_optimizations))).strip()
 
@@ -1327,7 +1343,7 @@ def create_template_vars(source_paths, build_paths, options, modules, cc, arch, 
         'cc_lang_flags': cc.cc_lang_flags(),
         'cc_sysroot': sysroot_option(),
         'cc_compile_flags': options.cxxflags or cc.cc_compile_flags(options),
-        'ldflags': options.ldflags or '',
+        'ldflags': options.ldflags or cc.gen_ldflags(options),
         'cc_warning_flags': cc.cc_warning_flags(options),
         'output_to_exe': cc.output_to_exe,
         'cc_macro': cc.macro_name,
@@ -1776,6 +1792,9 @@ def process_command_line(args):
                             help='specify OS features to disable')
     build_group.add_option('--with-debug-asserts', action='store_true', default=False,
                            help=optparse.SUPPRESS_HELP)
+
+    build_group.add_option('--static', action='store_true', dest='static_linking', default=False,
+                            help='link the application statically')
 
     build_group.add_option('--qmake-bin', dest='qmake_bin', metavar='QMAKE', default='qmake',
                             help='set path to qmake binary')
