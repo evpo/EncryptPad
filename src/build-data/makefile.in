@@ -86,12 +86,12 @@ EXE_LINKS_TO += %{zlib_ldflags}
 
 zlib_clean:
 %{if build_zlib}
-	$(MAKE) -C $(ZLIB_DIR) clean
+	$(MAKE) -C $(ZLIB_DIR) %{zlib_makefile} clean
 %{endif}
 
 zlib_distclean:
 %{if build_zlib}
-	$(MAKE) -C $(ZLIB_DIR) distclean
+	$(MAKE) -C $(ZLIB_DIR) %{zlib_makefile} %{zlib_distclean_target}
 %{endif}
 
 # QT UI build

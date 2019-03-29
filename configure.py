@@ -1688,8 +1688,12 @@ def set_zlib_variables(options, template_vars, cc):
         template_vars['zlib_cxxflags'] =  cc.add_include_dir_option + zlib_dir
         template_vars['zlib_ldflags'] = os.path.join(zlib_dir, 'libz.a')
 
-        if is_windows(options):
+        template_vars['zlib_distclean_target'] = 'clean' if is_windows(options) else 'distclean'
+
+        if options.os == 'mingw':
             template_vars['zlib_makefile'] = '-f win32/Makefile.gcc'
+        elif is_windows(options):
+            template_vars['zlib_makefile'] = '-f win32/Makefile.msc'
         else:
             template_vars['zlib_makefile'] = ''
 
