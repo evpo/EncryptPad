@@ -1884,7 +1884,7 @@ def configure_back_end(system_command, options):
     template_vars['include_paths'] = include_paths
 
     #qt build
-    template_vars['build_qt_ui'] = (not options.without_qt_ui and not options.test)
+    template_vars['build_qt_ui'] = not options.without_qt_ui
     template_vars['qt_build_dir'] = os.path.join('build', 'qt_build')
     template_vars['debug_mode'] = options.debug_mode
     default_targets = ['libs','cli']

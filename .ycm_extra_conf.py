@@ -1,31 +1,16 @@
+import sys
+import os
+def AppendLineFile(ops, file_name):
+    if not os.path.isfile(file_name):
+        return
+
+    with open(file_name, 'r') as ops_file:
+        for line in ops_file.readlines():
+            for word in line.rstrip('\n').split(' '):
+                ops.append(word)
+
 def Settings( **kwargs ):
-    return {
-            'flags': [
-'-x', 'c++',
-'-D_DEBUG',
-'-I./back_end_src',
-'-I./cli',
-'-I./qt_ui',
-'-I./tests',
-'-I./deps',
-'-I/usr/local/include/botan-2',
-'-I./deps/botan/build/include',
-'-I./deps/stlplus/subsystems',
-'-I./deps/stlplus/portability',
-'-I./deps/stlplus/containers',
-'-I./deps/libencryptmsg/include',
-'-I./deps/libencryptmsg/src',
-'-I./deps/state_machine',
-'-I./deps/plog/include',
-'-I./deps/libencryptmsg/deps/plog/include',
-'-I./build/qt_build',
-'-I/usr/include/qt5',
-'-I/usr/include/qt5/QtWidgets',
-'-I/usr/include/qt5/QtGui',
-'-I/usr/include/qt5/QtCore',
-'-I/usr/include',
-'-std=c++11',
-'-w',
-'-fPIC',
-                ],
-            }
+    ops= []
+    AppendLineFile(ops, os.getenv('HOME') + '/.ycm/system_flags.txt')
+    AppendLineFile(ops, 'compiler_options.txt')
+    return {'flags': ops}

@@ -13,9 +13,15 @@ LIBS += $$EXE_LINKS_TO
 
 # zlib
 LIBS += %{zlib_ldflags}
-
 QMAKE_CXXFLAGS += $$BOTAN_CXXFLAGS
+
 LIBS += %{cxx_abi_flags}
+LIBS += %{ldflags}
+win32: LIBS += -luserenv
+
+# the line below is required for mingw wine
+win32: LIBS += -lgdi32 -lkernel32 -luser32
+win32: LIBS += -lWs2_32
 
 CONFIG(debug, debug|release){
     CONFIG_NAME = debug
@@ -45,12 +51,6 @@ FORMS += \
     file_encryption_dialog.ui \
     passphrase_generation_dialog.ui \
     find_dialog.ui
-
-win32: LIBS += -static -luserenv
-
-# the line below is required for mingw wine
-win32: LIBS += -lgdi32 -lkernel32 -luser32
-win32: LIBS += -lWs2_32
 
 unix:QMAKE_CXXFLAGS += -D_FILE_OFFSET_BITS=64
 
