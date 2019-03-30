@@ -145,12 +145,12 @@ clean_gtest :
 # compiles fast and for ordinary users its source rarely changes.
 $(GTEST_TARGET_DIR)/gtest-all.o : $(GTEST_SRCS_)
 	$(MKDIR_P) $(@D)
-	$(CXX) $(CPPFLAGS) $(GTEST_CPPFLAGS) -I$(GTEST_DIR) $(CXXFLAGS) -c \
+	$(CXX) $(ABI_FLAGS) $(CPPFLAGS) $(GTEST_CPPFLAGS) -I$(GTEST_DIR) $(CXXFLAGS) -c \
             $(GTEST_DIR)/src/gtest-all.cc -o $@
 
 $(GTEST_TARGET_DIR)/gtest_main.o : $(GTEST_SRCS_)
 	$(MKDIR_P) $(@D)
-	$(CXX) $(CPPFLAGS) $(GTEST_CPPFLAGS) -I$(GTEST_DIR) $(CXXFLAGS) -c \
+	$(CXX) $(ABI_FLAGS) $(CPPFLAGS) $(GTEST_CPPFLAGS) -I$(GTEST_DIR) $(CXXFLAGS) -c \
             $(GTEST_DIR)/src/gtest_main.cc -o $@
 
 $(GTEST_TARGET_DIR)/libgtest.a : $(GTEST_TARGET_DIR)/gtest-all.o
