@@ -34,10 +34,12 @@ INCLUDE_PATHS = %{include_paths}
 
 %{if debug_mode}
 RELEASE=
+CONFIG_DIR=debug
 %{endif}
 
 %{unless debug_mode}
 RELEASE=on
+CONFIG_DIR=release
 %{endif}
 
 # The primary target
@@ -181,7 +183,7 @@ distclean: qt_ui_distclean zlib_distclean botan_distclean
 
 # MacOS packaging
 macos_deployment: qt_ui
-	( cd macos_deployment && ./prepare_bundle.sh ../bin/${CONFIG_DIR}/${OSX_APP} )
+	( cd macos_deployment && ./prepare_bundle.sh ../bin/$(CONFIG_DIR)/EncryptPad.app )
 
 # Object Files
 LIBOBJS = %{join lib_objs}
