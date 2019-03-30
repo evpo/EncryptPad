@@ -17,11 +17,6 @@ QMAKE_CXXFLAGS += $$BOTAN_CXXFLAGS
 
 LIBS += %{cxx_abi_flags}
 LIBS += %{ldflags}
-win32: LIBS += -luserenv
-
-# the line below is required for mingw wine
-win32: LIBS += -lgdi32 -lkernel32 -luser32
-win32: LIBS += -lWs2_32
 
 CONFIG(debug, debug|release){
     CONFIG_NAME = debug
@@ -52,7 +47,7 @@ FORMS += \
     passphrase_generation_dialog.ui \
     find_dialog.ui
 
-unix:QMAKE_CXXFLAGS += -D_FILE_OFFSET_BITS=64
+QMAKE_CXXFLAGS += -D_FILE_OFFSET_BITS=64
 
 INCLUDEPATH += $$PROJ/build/include
 INCLUDEPATH += $$PROJ/deps/libencryptmsg/include
