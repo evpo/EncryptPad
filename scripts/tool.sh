@@ -36,15 +36,14 @@ then
     exit -1
 fi
 
-UNAME=`uname`
+UNAME=`uname -o 2>/dev/null || uname`
 MAKE="${MAKE:-make}"
-if [[ $UNAME == *MINGW* ]]
+if [[ $UNAME == *Msys* ]]
 then
     MAKE=mingw32-make
 fi
 
 pushd ./build >/dev/null
-SUBDIR=`./../scripts/get_subdir.sh`
 
 RELEASE=on
 QT_BIN_SUB=release
@@ -57,7 +56,7 @@ do
             QT_BIN_SUB=debug
             ;;
         --use-system-libs)
-            if [[ $UNAME == *MINGW* ]]
+            if [[ $UNAME == *Msys* ]]
             then
                 echo "--use-system-libs is not supported in MINGW"
                 exit -1
@@ -83,7 +82,7 @@ function build_all {
         $MAKE -f Makefile.botan
     fi
     $MAKE -f Makefile RELEASE=$RELEASE USE_SYSTEM_LIBS=$USE_SYSTEM_LIBS LOCALIZATION=$LOCALIZATION
-    if [[ $SUBDIR == *MACOS* ]]
+    if [[ $UNAME == *Darwin* ]]
     then
         pushd ../macos_deployment > /dev/null
         ./prepare_bundle.sh ../bin/${CONFIG_DIR}/${OSX_APP}
@@ -120,11 +119,11 @@ case $COMMAND in
     $MAKE -f Makefile.qt_ui clean RELEASE=$RELEASE 
     $MAKE -f Makefile clean RELEASE=$RELEASE 
 
-    if [[ $SUBDIR == *MACOS* ]]
+    if [[ $UNAME == *Darwin* ]]
     then
         rm -Rf ../bin/${CONFIG_DIR}/${OSX_APP}
         rm -f ../bin/${CONFIG_DIR}/encryptcli
-    elif [[ $UNAME == *MINGW* ]]
+    elif [[ $UNAME == *Msys* ]]
     then
         rm -f ../bin/${CONFIG_DIR}/${TARGET}.exe
         rm -f ../bin/${CONFIG_DIR}/encryptcli.exe
@@ -134,7 +133,7 @@ case $COMMAND in
     fi
     ;;
 -r|--run)
-    if [[ $SUBDIR == *MACOS* ]]
+    if [[ $UNAME == *Darwin* ]]
     then
         ../bin/${CONFIG_DIR}/${OSX_APP}/Contents/MacOS/${TARGET} &
     else
