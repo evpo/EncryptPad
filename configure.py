@@ -1890,12 +1890,11 @@ def configure_back_end(system_command, options):
     default_targets = ['libs','cli']
     if not options.without_qt_ui:
         default_targets.append('qt_ui')
+        if options.os == 'darwin':
+            default_targets.append('macos_deployment')
 
     if options.test:
         default_targets.append('test')
-
-    if options.os == 'darwin':
-        default_targets.append('macos_deployment')
 
     template_vars['default_targets'] = ' '.join(default_targets)
 
