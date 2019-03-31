@@ -172,7 +172,7 @@ TEST_LINKS_TO = $(GTEST_TARGET_DIR)/libgtest_main.a $(GTEST_TARGET_DIR)/libgtest
 # Misc targets
 
 %{if make_supports_phony}
-.PHONY = all cli libs qt_ui test botan zlib qt_ui_clean test_clean clean distclean install macos_deployment
+.PHONY: all cli libs qt_ui test botan zlib qt_ui_clean test_clean clean distclean install macos_deployment
 %{endif}
 
 clean: qt_ui_clean
