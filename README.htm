@@ -378,15 +378,11 @@ encryptpad0_3_2_5_webupd8_ppa_changes/encryptpad_0.3.2.5-1~webupd8~yakkety1_sour
 <ol>
 <li><p>Modify the session <strong>PATH</strong> environment variable to include the Qt build toolset and Python. <strong>mingw32-make</strong>, <strong>g++</strong>, <strong>qmake</strong>, <strong>python.exe</strong> should be in the global search path in your Git Bash session. I personally modify bash.bashrc and add a line like <code>PATH=$PATH:/c/Python35-32:...</code> not to pollute the system wide PATH variable.</p></li>
 <li><p>Extract the EncryptPad source files to a directory.</p></li>
-<li><p>Run <strong>configure.sh</strong> script without parameters to see available options. To build everything:</p>
+<li><p>Run <strong>configure.py --help</strong> script to see available options. To build everything:</p>
 
-<p>./configure.sh --all</p></li>
+<p>./configure.py
+make</p></li>
 </ol>
-
-<p>For localized binaries:</p>
-
-<pre><code>./configure.sh --all-cultures
-</code></pre>
 
 <p>The Makefiles system uses <strong>uname</strong> to identify the OS and platform. You may need to modify uname parameters in <strong>./deps/makefiles/platform.mak</strong> to make it work. See Makefiles documentation and configure.sh script if you have any problems.</p>
 
@@ -400,7 +396,8 @@ encryptpad0_3_2_5_webupd8_ppa_changes/encryptpad_0.3.2.5-1~webupd8~yakkety1_sour
 
 <p>It is easier than building on Windows. All you need is to install Qt, Python and run:</p>
 
-<pre><code>./configure.sh --all
+<pre><code>./configure.py
+make
 </code></pre>
 
 <div id="build-on-fedora"></div>
@@ -416,13 +413,15 @@ export PATH
 
 <p>Open the EncryptPad directory:</p>
 
-<pre><code>./configure.sh --all
+<pre><code>./configure.py
+make
 </code></pre>
 
 <p>For a dynamic build with using the system libraries:</p>
 
 <pre><code>dnf install botan-devel
-./configure.sh --all --use-system-libs
+./configure.py
+make
 </code></pre>
 
 <div id="build-on-debian"></div>
@@ -436,7 +435,8 @@ export PATH
 
 <p>Open the EncryptPad source directory:</p>
 
-<pre><code>./configure.sh --all
+<pre><code>./configure.py --build-botan --build-zlib
+make
 </code></pre>
 
 <p>You can also use the system <code>libbotan-2-dev</code> instead of building it. If <code>libbotan-2-dev</code> is not available, add <code>stretch-backports</code> to the repository:</p>
@@ -445,7 +445,8 @@ export PATH
 
 apt-get install libbotan-2-dev
 
-./configure.sh --all --use-system-libs
+./configure.py
+make
 </code></pre>
 
 <div id="build-on-opensuse"></div>
@@ -467,7 +468,7 @@ ln -sf g++-7 /usr/bin/g++
 
 <p>Open the EncryptPad source directory:</p>
 
-<pre><code>./configure.sh --all
+<pre><code>./configure.py --build-botan --build-zlib
 </code></pre>
 
 <div id="portable-mode"></div>

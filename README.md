@@ -355,13 +355,10 @@ Below are steps to verify the SHA-1 hashes of the source files in [Launchpad web
 
 2. Extract the EncryptPad source files to a directory.
 
-3. Run **configure.sh** script without parameters to see available options. To build everything:
+3. Run **configure.py --help** script to see available options. To build everything:
 
-    ./configure.sh --all
-
-For localized binaries:
-
-    ./configure.sh --all-cultures
+    ./configure.py
+    make
 
 The Makefiles system uses **uname** to identify the OS and platform. You may need to modify uname parameters in **./deps/makefiles/platform.mak** to make it work. See Makefiles documentation and configure.sh script if you have any problems.
 
@@ -375,7 +372,8 @@ Note that if you want EncryptPad to work as a single executable without dlls, yo
 
 It is easier than building on Windows. All you need is to install Qt, Python and run:
 
-    ./configure.sh --all
+    ./configure.py
+    make
 
 <div id="build-on-fedora"></div>
 
@@ -389,12 +387,14 @@ Install dependencies and tools:
 
 Open the EncryptPad directory:
 
-    ./configure.sh --all
+    ./configure.py
+    make
 
 For a dynamic build with using the system libraries:
 
     dnf install botan-devel
-    ./configure.sh --all --use-system-libs
+    ./configure.py
+    make
 
 <div id="build-on-debian"></div>
 
@@ -406,7 +406,8 @@ Install dependencies and tools:
 
 Open the EncryptPad source directory:
 
-    ./configure.sh --all
+    ./configure.py --build-botan --build-zlib
+    make
 
 You can also use the system `libbotan-2-dev` instead of building it. If `libbotan-2-dev` is not available, add `stretch-backports` to the repository:
 
@@ -414,7 +415,8 @@ You can also use the system `libbotan-2-dev` instead of building it. If `libbota
 
     apt-get install libbotan-2-dev
 
-    ./configure.sh --all --use-system-libs
+    ./configure.py
+    make
 
 <div id="build-on-opensuse"></div>
 
@@ -433,7 +435,7 @@ You can also install later compiler versions and link them to the default comman
 
 Open the EncryptPad source directory:
 
-    ./configure.sh --all
+    ./configure.py --build-botan --build-zlib
 
 <div id="portable-mode"></div>
 
