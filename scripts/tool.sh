@@ -18,9 +18,12 @@ OPTIONS:\n\
                      are always built with the debug configuration.\n\
 "
 
+script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+pkg_root=$script_dir/..
+
 TARGET=encryptpad
 OSX_APP=EncryptPad.app
-TEST_TARGET=encrypt_pad_test
+TEST_TARGET=encryptpad_test
 
 if [[ $# > 3 ]] || [[ $# < 1 ]]
 then
@@ -30,8 +33,6 @@ then
 fi
 
 UNAME=`uname -o 2>/dev/null || uname`
-
-pushd ./build >/dev/null
 
 CONFIG_DIR=release
 QT_BIN_SUB=release
@@ -52,69 +53,59 @@ done
 
 case $COMMAND in
 --culture-res)
-    for TSFILE in ../qt_ui/encryptpad_*.ts ../qt_ui/qt_excerpt_*.ts
+    for TSFILE in $pkg_root/qt_ui/encryptpad_*.ts $pkg_root/qt_ui/qt_excerpt_*.ts
     do
-        CULTUREFILE=$(echo -n "$TSFILE" | sed -n -e "s/..\/qt_ui\///" -e "s/\.ts$//p")
+        file_name=${TSFILE##*/}
+        CULTUREFILE=${file_name%.ts}
         if [[ $CULTUREFILE == encryptpad_en_gb ]]
         then
             continue
         fi
 
         echo $CULTUREFILE
-        lrelease $TSFILE -qm ../qt_ui/${CULTUREFILE}.qm
+        lrelease $TSFILE -qm $pkg_root/qt_ui/${CULTUREFILE}.qm
     done
     ;;
 --appimage)
-    USE_SYSTEM_LIBS=on
-    build_all
-    ../linux_deployment/prepare-appimage.sh ./qt_deployment
-    mkdir -p ../bin
-    mv ./qt_deployment/encryptpad.AppImage ../bin/
+    $pkg_root/linux_deployment/prepare-appimage.sh $pkg_root/build/qt_deployment
+    mkdir -p $pkg_root/bin
+    mv $pkg_root/build/qt_deployment/encryptpad.AppImage $pkg_root/bin/
     ;;
 -r|--run)
     if [[ $UNAME == *Darwin* ]]
     then
-        ../bin/${CONFIG_DIR}/${OSX_APP}/Contents/MacOS/${TARGET} &
+        $pkg_root/bin/${CONFIG_DIR}/${OSX_APP}/Contents/MacOS/${TARGET} &
     else
-        ../bin/${CONFIG_DIR}/${TARGET} &
+        $pkg_root/bin/${CONFIG_DIR}/${TARGET} &
     fi
     ;;
 -f|--run-func-tests)
-    pushd ../func_tests >/dev/null
+    pushd $pkg_root/func_tests >/dev/null
     ./run_all_tests.sh ../bin/${CONFIG_DIR}/encryptcli
-    RESULT=$?
+    result=$?
     popd >/dev/null
-    exit $RESULT
+    exit $result
     ;;
 -t|--run-tests)
     # Unit tests should run from tests directory because they need files the directory contains
-    # pushd ../src/test >/dev/null
-    pushd ../src/test
+    pushd $pkg_root/src/test
     ../../bin/debug/${TEST_TARGET}
     RESULT=$?
-    popd >/dev/null
-
-    if [[ $RESULT != 0 ]] 
-    then 
-        popd >/dev/null
-        exit $RESULT
-    fi
-
     popd >/dev/null
     exit $RESULT
     ;;
 --docs)
-    mkdir -p ../bin
-    mkdir -p ../bin/docs
-    ../contrib/markdown2web ../docs ../bin/docs
+    mkdir -p $pkg_root/bin
+    mkdir -p $pkg_root/bin/docs
+    $pkg_root/contrib/markdown2web $pkg_root/docs $pkg_root/bin/docs
     ;;
 --update-htm)
-    sed 1,/cutline/d ../README.md > /tmp/tmp_cut_readme.md
-    markdown /tmp/tmp_cut_readme.md > ../README.htm
-    cp /tmp/tmp_cut_readme.md ../docs/en/readme.md
+    sed 1,/cutline/d $pkg_root/README.md > /tmp/tmp_cut_readme.md
+    markdown /tmp/tmp_cut_readme.md > $pkg_root/README.htm
+    cp /tmp/tmp_cut_readme.md $pkg_root/docs/en/readme.md
     rm /tmp/tmp_cut_readme.md
-    cp ../CHANGES.md ../docs/en/changes.md
-    markdown ../CHANGES.md > ../CHANGES.htm
+    cp $pkg_root/CHANGES.md $pkg_root/docs/en/changes.md
+    markdown $pkg_root/CHANGES.md > $pkg_root/CHANGES.htm
     ;;
 -h|--help)
     echo -e "$USAGE"
@@ -122,11 +113,6 @@ case $COMMAND in
 
 *)  echo -e "$COMMAND is invalid parameter" >&2
     echo -e "$USAGE"
-    popd >/dev/null
     exit -1
     ;;
 esac
-
-RESULT=$?
-popd >/dev/null
-exit $RESULT

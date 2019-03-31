@@ -798,7 +798,7 @@ class OsInfo(InfoObject): # pylint: disable=too-many-instance-attributes
                 'use_stack_protector': 'true',
                 'so_post_link_command': '',
                 'cli_exe_name': 'encryptcli',
-                'test_exe_name': 'encrypt_pad_test',
+                'test_exe_name': 'encryptpad_test',
                 'lib_prefix': 'lib',
                 'library_name': 'botan{suffix}-{major}',
             })
@@ -1868,7 +1868,7 @@ def configure_back_end(system_command, options):
     if not os.path.isdir(target_dir):
         robust_makedirs(target_dir)
     template_vars['cli_exe'] = os.path.join(target_dir, 'encryptcli')
-    template_vars['test_exe'] = os.path.join(target_dir, 'encrypt_pad_test')
+    template_vars['test_exe'] = os.path.join(target_dir, 'encryptpad_test')
 
     include_paths_items = [
             ('deps','libencryptmsg','include'),
