@@ -1330,6 +1330,7 @@ def create_template_vars(source_paths, build_paths, options, modules, cc, arch, 
         'cxx': (options.compiler_binary or cc.binary_name),
         'cxx_abi_flags': cc.mach_abi_link_flags(options),
         'linker': cc.linker_name or '$(CXX)',
+        'make_supports_phony': cc.basename != 'msvc',
         'cc_compile_opt_flags': cc.cc_compile_flags(options, False, True),
         'cc_compile_debug_flags': cc.cc_compile_flags(options, True, False),
 
