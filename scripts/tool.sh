@@ -5,16 +5,9 @@ set -o pipefail
 USAGE="USAGE:\n\
 configure.sh <command> [option]\n\n\
 COMMANDS:\n\
--a, --all            build everything required to run the application\n\
--c, --clean          clean the application build files\n\
 -r, --run            run the application\n\
--b, --botan          build Botan\n\
--o, --clean-botan    clean Botan\n\
--e, --back-end       build the back end with CLI\n\
--u, --tests          build the unit tests\n\
 -t, --run-tests      run the unit tests\n\
 -f, --run-func-tests run functional tests\n\
--n, --clean-tests    clean the unit tests\n\
 --culture-res        build qm files from ts files to update culture resources\n\
 --appimage           build AppImage (requires AppImageKit and binaries)\n\
 --docs               build docs directory from markdown files (requres the markdown utility)\n\
@@ -23,7 +16,7 @@ COMMANDS:\n\
 OPTIONS:\n\
 --debug              debug configuration. If not specified, the release configuration is used. The unit tests\n\
                      are always built with the debug configuration.\n\
---use-system-libs    use botan, zlib and other shared libraries installed on the system."
+"
 
 TARGET=encryptpad
 OSX_APP=EncryptPad.app
@@ -37,31 +30,18 @@ then
 fi
 
 UNAME=`uname -o 2>/dev/null || uname`
-MAKE="${MAKE:-make}"
-if [[ $UNAME == *Msys* ]]
-then
-    MAKE=mingw32-make
-fi
 
 pushd ./build >/dev/null
 
-RELEASE=on
+CONFIG_DIR=release
 QT_BIN_SUB=release
 
 while [[ $# > 0 ]]
 do
     case $1 in
         -d|--debug)
-            RELEASE=
             QT_BIN_SUB=debug
-            ;;
-        --use-system-libs)
-            if [[ $UNAME == *Msys* ]]
-            then
-                echo "--use-system-libs is not supported in MINGW"
-                exit -1
-            fi
-            USE_SYSTEM_LIBS=on
+            CONFIG_DIR=debug
             ;;
         *)
             COMMAND=$1
@@ -70,31 +50,7 @@ do
     shift
 done
 
-CONFIG_DIR=release
-if [[ ! "$RELEASE" == "on" ]]
-then
-    CONFIG_DIR=debug
-fi
-
-function build_all {
-    if [[ ! "$USE_SYSTEM_LIBS" == "on" ]]
-    then
-        $MAKE -f Makefile.botan
-    fi
-    $MAKE -f Makefile RELEASE=$RELEASE USE_SYSTEM_LIBS=$USE_SYSTEM_LIBS LOCALIZATION=$LOCALIZATION
-    if [[ $UNAME == *Darwin* ]]
-    then
-        pushd ../macos_deployment > /dev/null
-        ./prepare_bundle.sh ../bin/${CONFIG_DIR}/${OSX_APP}
-        popd
-    fi
-}
-
 case $COMMAND in
--a|--all)
-    mkdir -p qt_build
-    build_all
-    ;;
 --culture-res)
     for TSFILE in ../qt_ui/encryptpad_*.ts ../qt_ui/qt_excerpt_*.ts
     do
@@ -115,23 +71,6 @@ case $COMMAND in
     mkdir -p ../bin
     mv ./qt_deployment/encryptpad.AppImage ../bin/
     ;;
--c|--clean)
-    $MAKE -f Makefile.qt_ui clean RELEASE=$RELEASE 
-    $MAKE -f Makefile clean RELEASE=$RELEASE 
-
-    if [[ $UNAME == *Darwin* ]]
-    then
-        rm -Rf ../bin/${CONFIG_DIR}/${OSX_APP}
-        rm -f ../bin/${CONFIG_DIR}/encryptcli
-    elif [[ $UNAME == *Msys* ]]
-    then
-        rm -f ../bin/${CONFIG_DIR}/${TARGET}.exe
-        rm -f ../bin/${CONFIG_DIR}/encryptcli.exe
-    else
-        rm -f ../bin/${CONFIG_DIR}/${TARGET}
-        rm -f ../bin/${CONFIG_DIR}/encryptcli
-    fi
-    ;;
 -r|--run)
     if [[ $UNAME == *Darwin* ]]
     then
@@ -139,17 +78,6 @@ case $COMMAND in
     else
         ../bin/${CONFIG_DIR}/${TARGET} &
     fi
-    ;;
--b|--botan) $MAKE -f Makefile.botan ;;
--o|--clean-botan) $MAKE -f Makefile.botan clean ;;
--e|--back-end)
-    $MAKE -f Makefile.back_end RELEASE=$RELEASE USE_SYSTEM_LIBS=$USE_SYSTEM_LIBS
-    $MAKE -f Makefile.cli RELEASE=$RELEASE USE_SYSTEM_LIBS=$USE_SYSTEM_LIBS
-    ;;
--u|--tests) $MAKE -f Makefile.unit_tests USE_SYSTEM_LIBS=$USE_SYSTEM_LIBS;;
--n|--clean-tests)
-    $MAKE -f Makefile.unit_tests clean 
-    rm -f ../bin/debug/${TEST_TARGET}
     ;;
 -f|--run-func-tests)
     pushd ../func_tests >/dev/null
@@ -171,12 +99,6 @@ case $COMMAND in
         popd >/dev/null
         exit $RESULT
     fi
-
-    # Functional tests
-    # pushd ../func_tests >/dev/null
-    # ./decryption_test.sh ../bin/${CONFIG_DIR}/encryptcli gpg_encrypted
-    # RESULT=$?
-    # popd >/dev/null
 
     popd >/dev/null
     exit $RESULT
