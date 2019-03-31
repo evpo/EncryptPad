@@ -1634,6 +1634,10 @@ def configure_botan(options):
 
     if options.link_method:
         cmd.extend(['--link-method', options.link_method])
+    if options.cxxflags:
+        cmd.extend(['--cxxflags', options.cxxflags])
+    if options.ldflags:
+        cmd.extend(['--ldflags', options.ldflags])
 
     cmd.extend(['--amalgamation',
             '--disable-shared',
