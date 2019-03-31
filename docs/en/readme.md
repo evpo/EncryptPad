@@ -334,7 +334,7 @@ Below are steps to verify the SHA-1 hashes of the source files in [Launchpad web
 
 ### Prerequisites
 
-1. [**Qt framework**](http://www.qt.io/download-open-source/) based on MingW 32 bit (the latest build has been tested with Qt 5.3.2).
+1. [**Qt framework**](http://www.qt.io/download-open-source/) based on MingW 32 bit (the latest build has been tested with Qt 5.10.1).
 2. MSYS: you can use one bundled with [**Git For Windows**](http://git-scm.com/download/win). You probably use Git anyway.
 3. Python: any recent version will work.
 
@@ -342,18 +342,17 @@ Below are steps to verify the SHA-1 hashes of the source files in [Launchpad web
 
 ### Steps
 
-1. Modify the session **PATH** environment variable to include the Qt build toolset and Python. **mingw32-make**, **g++**, **qmake**, **python.exe** should be in the global search path in your Git Bash session. I personally modify bash.bashrc and add a line like `PATH=$PATH:/c/Python35-32:...` not to pollute the system wide PATH variable.
+1. Modify the session **PATH** environment variable to include the Qt build toolset and Python. **mingw32-make**, **g++**, **qmake**, **python.exe** should be in the global search path in your Git Bash session. I personally modify bash.bashrc and add a line like `PATH=/c/Python35-32:/c/Qt/5.10.1/mingw53_32/bin:/c/Qt/Tools/mingw530_32/bin:/c/MinGW/msys/1.0/bin:/bin` not to pollute the system wide PATH variable.
 
 2. Extract the EncryptPad source files to a directory.
 
 3. Run **configure.py --help** script to see available options. To build everything:
 
-    ./configure.py
+    ./configure.py --cpu x86 --os mingw --static
     make
 
-The Makefiles system uses **uname** to identify the OS and platform. You may need to modify uname parameters in **./deps/makefiles/platform.mak** to make it work. See Makefiles documentation and configure.sh script if you have any problems.
-
-If the build is successful, you should see the executable **./bin/release/EncryptPad.exe**
+The configure command will always work if your console is running with administrative privileges. If you don't want to run as administrator, add `--link-method hardlink` to the options.
+If the build is successful, you should see the executable **./bin/release/encryptpad.exe**
 
 Note that if you want EncryptPad to work as a single executable without dlls, you need to build Qt framework yourself statically. It takes a few hours. There are plenty of instructions on how to do this in the Internet. The most popular article recommends using a PowerShell script. While it is convenient and I did it once, sometimes you don't want to upgrade your PowerShell and install heavy dependencies coming with it. So the next time I had to do that, I read the script and did everything manually. Luckily there are not too many steps in it.
 
@@ -361,10 +360,13 @@ Note that if you want EncryptPad to work as a single executable without dlls, yo
 
 ## Compile EncryptPad on Mac/Linux
 
-It is easier than building on Windows. All you need is to install Qt, Python and run:
+All you need is to install Qt, Python and run:
 
-    ./configure.py
+    export PATH=$HOME/Qt/5.10.1/clang_64/bin/:$PATH
+    ./configure.py --build-botan --ldflags "-mmacosx-version-min=10.10" --cxxflags "-mmacosx-version-min=10.10"
     make
+
+Change the Qt path and replace the minimal macOS versions as needed. The command will work without them but the result will be limited to the current version.
 
 <div id="build-on-fedora"></div>
 
@@ -378,7 +380,7 @@ Install dependencies and tools:
 
 Open the EncryptPad directory:
 
-    ./configure.py
+    ./configure.py --build-botan --build-zlib
     make
 
 For a dynamic build with using the system libraries:

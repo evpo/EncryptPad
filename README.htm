@@ -366,7 +366,7 @@ encryptpad0_3_2_5_webupd8_ppa_changes/encryptpad_0.3.2.5-1~webupd8~yakkety1_sour
 <h3>Prerequisites</h3>
 
 <ol>
-<li><a href="http://www.qt.io/download-open-source/"><strong>Qt framework</strong></a> based on MingW 32 bit (the latest build has been tested with Qt 5.3.2).</li>
+<li><a href="http://www.qt.io/download-open-source/"><strong>Qt framework</strong></a> based on MingW 32 bit (the latest build has been tested with Qt 5.10.1).</li>
 <li>MSYS: you can use one bundled with <a href="http://git-scm.com/download/win"><strong>Git For Windows</strong></a>. You probably use Git anyway.</li>
 <li>Python: any recent version will work.</li>
 </ol>
@@ -376,17 +376,16 @@ encryptpad0_3_2_5_webupd8_ppa_changes/encryptpad_0.3.2.5-1~webupd8~yakkety1_sour
 <h3>Steps</h3>
 
 <ol>
-<li><p>Modify the session <strong>PATH</strong> environment variable to include the Qt build toolset and Python. <strong>mingw32-make</strong>, <strong>g++</strong>, <strong>qmake</strong>, <strong>python.exe</strong> should be in the global search path in your Git Bash session. I personally modify bash.bashrc and add a line like <code>PATH=$PATH:/c/Python35-32:...</code> not to pollute the system wide PATH variable.</p></li>
+<li><p>Modify the session <strong>PATH</strong> environment variable to include the Qt build toolset and Python. <strong>mingw32-make</strong>, <strong>g++</strong>, <strong>qmake</strong>, <strong>python.exe</strong> should be in the global search path in your Git Bash session. I personally modify bash.bashrc and add a line like <code>PATH=/c/Python35-32:/c/Qt/5.10.1/mingw53_32/bin:/c/Qt/Tools/mingw530_32/bin:/c/MinGW/msys/1.0/bin:/bin</code> not to pollute the system wide PATH variable.</p></li>
 <li><p>Extract the EncryptPad source files to a directory.</p></li>
 <li><p>Run <strong>configure.py --help</strong> script to see available options. To build everything:</p>
 
-<p>./configure.py
+<p>./configure.py --cpu x86 --os mingw --static
 make</p></li>
 </ol>
 
-<p>The Makefiles system uses <strong>uname</strong> to identify the OS and platform. You may need to modify uname parameters in <strong>./deps/makefiles/platform.mak</strong> to make it work. See Makefiles documentation and configure.sh script if you have any problems.</p>
-
-<p>If the build is successful, you should see the executable <strong>./bin/release/EncryptPad.exe</strong></p>
+<p>The configure command will always work if your console is running with administrative privileges. If you don't want to run as administrator, add <code>--link-method hardlink</code> to the options.
+If the build is successful, you should see the executable <strong>./bin/release/encryptpad.exe</strong></p>
 
 <p>Note that if you want EncryptPad to work as a single executable without dlls, you need to build Qt framework yourself statically. It takes a few hours. There are plenty of instructions on how to do this in the Internet. The most popular article recommends using a PowerShell script. While it is convenient and I did it once, sometimes you don't want to upgrade your PowerShell and install heavy dependencies coming with it. So the next time I had to do that, I read the script and did everything manually. Luckily there are not too many steps in it.</p>
 
@@ -394,11 +393,14 @@ make</p></li>
 
 <h2>Compile EncryptPad on Mac/Linux</h2>
 
-<p>It is easier than building on Windows. All you need is to install Qt, Python and run:</p>
+<p>All you need is to install Qt, Python and run:</p>
 
-<pre><code>./configure.py
+<pre><code>export PATH=$HOME/Qt/5.10.1/clang_64/bin/:$PATH
+./configure.py --build-botan --ldflags "-mmacosx-version-min=10.10" --cxxflags "-mmacosx-version-min=10.10"
 make
 </code></pre>
+
+<p>Change the Qt path and replace the minimal macOS versions as needed. The command will work without them but the result will be limited to the current version.</p>
 
 <div id="build-on-fedora"></div>
 
@@ -413,7 +415,7 @@ export PATH
 
 <p>Open the EncryptPad directory:</p>
 
-<pre><code>./configure.py
+<pre><code>./configure.py --build-botan --build-zlib
 make
 </code></pre>
 
