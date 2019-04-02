@@ -18,6 +18,24 @@
 #include "emsg_constants.h"
 
 using namespace std;
+using namespace EncryptMsg;
+
+namespace
+{
+    EmsgResult CheckPrefix(const SafeVector &prefix)
+    {
+        // check the last two bytes for integrity of the message
+        const uint8_t *ptr = prefix.data();
+        ptr += prefix.size() - 4;
+        if(*ptr != *(ptr + 2))
+            return EmsgResult::InvalidSurrogateIV;
+        if(*(ptr + 1) != *(ptr + 3))
+            return EmsgResult::InvalidSurrogateIV;
+
+        return EmsgResult::Success;
+    }
+}
+
 namespace EncryptMsg
 {
     using SafeVector = Botan::secure_vector<uint8_t>;
@@ -190,19 +208,6 @@ namespace EncryptMsg
 
     SymmetricIntegProtectedRW::SymmetricIntegProtectedRW(SessionState &state)
         : SymmetricRWBase(state), version_read_(false){}
-
-    EmsgResult CheckPrefix(const SafeVector &prefix)
-    {
-        // check the last two bytes for integrity of the message
-        const uint8_t *ptr = prefix.data();
-        ptr += prefix.size() - 4;
-        if(*ptr != *(ptr + 2))
-            return EmsgResult::InvalidSurrogateIV;
-        if(*(ptr + 1) != *(ptr + 3))
-            return EmsgResult::InvalidSurrogateIV;
-
-        return EmsgResult::Success;
-    }
 
     EmsgResult SymmetricRW::DoRead(OutStream &out)
     {

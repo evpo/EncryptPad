@@ -14,9 +14,10 @@
 #include "openpgp_conversions.h"
 
 using namespace std;
+using namespace EncryptMsg;
 using SafeVector = Botan::secure_vector<uint8_t>;
 
-namespace EncryptMsg
+namespace
 {
     void WriteLength(OutStream &stm, size_t len)
     {
@@ -84,7 +85,10 @@ namespace EncryptMsg
             out.Write(buf.data(), buf.size());
         }
     }
+}
 
+namespace EncryptMsg
+{
     void WriteSymmetricKeyESK(const MessageConfig &config, Salt salt, OutStream &out)
     {
         const size_t kESKPacketLength = 13;

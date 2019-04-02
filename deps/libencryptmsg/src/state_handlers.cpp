@@ -11,17 +11,20 @@
 #include "emsg_constants.h"
 
 using namespace std;
+using namespace EncryptMsg;
 using namespace LightStateMachine;
 
-
-namespace EncryptMsg
+namespace
 {
-    Context &ToContext(StateMachineContext &ctx)
+    inline Context &ToContext(StateMachineContext &ctx)
     {
         StateMachineContext *p = &ctx;
         return *(static_cast<Context*>(p));
     }
+}
 
+namespace EncryptMsg
+{
     bool InitCanEnter(StateMachineContext &ctx)
     {
         Context &context = ToContext(ctx);

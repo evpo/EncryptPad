@@ -193,7 +193,7 @@ namespace EncryptMsg
     }
 
     MessageWriter::MessageWriter()
-        :impl_(new MessageWriterImpl()){};
+        :impl_(new MessageWriterImpl()){}
 
     MessageWriter::~MessageWriter()
     {
