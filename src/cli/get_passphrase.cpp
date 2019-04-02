@@ -154,7 +154,7 @@ namespace EncryptPad
         passphrase.clear();
         unsigned char ch=0;
 
-        const char *termid = ctermid(NULL);
+        const char *termid = ctermid(nullptr);
         FileHndl term_file(fopen(termid, "r+"));
         if(!term_file.Valid())
         {
@@ -166,7 +166,7 @@ namespace EncryptPad
         assert(res == prompt.size());
         (void)res;
 
-        while((ch = Getch(term_file.get())) != kReturn && ch != kInvalid)
+        while((ch = Getch(term_file.get())) != kReturn && ch != static_cast<unsigned char>(kInvalid))
         {
             if(ch == kBackspace)
             {

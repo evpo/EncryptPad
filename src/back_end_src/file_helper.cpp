@@ -23,7 +23,9 @@
 #include "win_file_reader.h"
 #include "epad_utilities.h"
 
-namespace EncryptPad
+using namespace EncryptPad;
+
+namespace
 {
     FILE *PlatformFOpen(const char *file_name, const char *mode)
     {
@@ -65,7 +67,10 @@ namespace EncryptPad
         return ftello(file.get());
 #endif
     }
+}
 
+namespace EncryptPad
+{
     OpenFileResult OpenFile(const std::string &file_name, InPacketStreamFile &stm)
     {
 #if defined(__MINGW__) || defined(__MINGW32__)

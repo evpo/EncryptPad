@@ -25,8 +25,9 @@
 #include "botan/auto_rng.h"
 
 using namespace std;
+using namespace EncryptPad;
 
-namespace 
+namespace
 {
     unsigned int GetRandomNumber(Botan::AutoSeeded_RNG &rng, unsigned min, unsigned max)
     {
@@ -43,6 +44,20 @@ namespace
 
         val = (val % (max - min + 1)) + min;
         return val;
+    }
+
+    void AddRangeIfEmpty(string &buf, char start, char end)
+    {
+        if(!buf.empty())
+            return;
+
+        int size = end + 1 - start;
+        buf.resize(size);
+        char c = start;
+        for(int i = 0; i < size; i++, c++)
+        {
+            buf[i] = c;
+        }
     }
 }
 
@@ -147,20 +162,6 @@ namespace EncryptPad
         }
 
         return ret_val;
-    }
-
-    void AddRangeIfEmpty(string &buf, char start, char end)
-    {
-        if(!buf.empty())
-            return;
-
-        int size = end + 1 - start;
-        buf.resize(size);
-        char c = start;
-        for(int i = 0; i < size; i++, c++)
-        {
-            buf[i] = c;
-        }
     }
 
     const std::string &GetLowerAtoZ()

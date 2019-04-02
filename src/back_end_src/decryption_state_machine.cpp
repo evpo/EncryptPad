@@ -7,15 +7,10 @@
 
 using namespace LightStateMachine;
 using namespace EncryptMsg;
+using namespace EncryptPad;
 
-namespace EncryptPad
+namespace
 {
-
-    int ID(StateID state_id)
-    {
-        return static_cast<StateMachineStateID>(state_id);
-    }
-
     struct Graph
     {
         StateGraph state_graph;
@@ -23,7 +18,12 @@ namespace EncryptPad
         StateGraph::iterator fail_node;
     };
 
-    // The graph of states is built here.
+    inline int ID(StateID state_id)
+    {
+        return static_cast<StateMachineStateID>(state_id);
+    }
+
+    // The graph of states is built here
     std::unique_ptr<Graph> BuildStateGraph()
     {
         std::unique_ptr<Graph> graph(new Graph());
@@ -102,6 +102,10 @@ namespace EncryptPad
         return graph;
     }
 
+}
+
+namespace EncryptPad
+{
     class DecryptionStateIDToStringConverter: public LightStateMachine::StateIDToStringConverter
     {
         public:

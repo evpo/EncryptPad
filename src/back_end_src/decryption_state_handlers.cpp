@@ -7,14 +7,25 @@
 #include "encryptmsg/openpgp_conversions.h"
 
 using namespace EncryptMsg;
+using namespace EncryptPad;
 
-namespace EncryptPad
+namespace
 {
-    DecryptionContext &ToContext(LightStateMachine::StateMachineContext &ctx)
+    inline DecryptionContext &ToContext(LightStateMachine::StateMachineContext &ctx)
     {
         return *static_cast<DecryptionContext*>(&ctx);
     }
 
+    inline bool IsEncryptedEmptyString(DecryptionContext &c)
+    {
+        return c.In().IsEOF() && c.GetFilterCount() == 1 && c.Buffer().empty() && c.PendingBuffer().empty()
+            && c.GetFormat() == Format::GPGOrNestedWad;
+    }
+
+}
+
+namespace EncryptPad
+{
     bool ReadIn_CanEnter(LightStateMachine::StateMachineContext &ctx)
     {
         auto &c = ToContext(ctx);
@@ -87,12 +98,6 @@ namespace EncryptPad
         metadata.salt = reader->GetSalt();
 
         c.SetResult(EpadResult::Success);
-    }
-
-    bool IsEncryptedEmptyString(DecryptionContext &c)
-    {
-        return c.In().IsEOF() && c.GetFilterCount() == 1 && c.Buffer().empty() && c.PendingBuffer().empty()
-            && c.GetFormat() == Format::GPGOrNestedWad;
     }
 
     bool ParseFormat_CanEnter(LightStateMachine::StateMachineContext &ctx)

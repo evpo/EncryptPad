@@ -61,6 +61,10 @@ namespace EncryptPad
         {
             return DoWrite(in_it, bytes2write);
         }
+
+        virtual ~OutStream()
+        {
+        }
     };
 
     class OutPacketStreamCont : public OutStream
@@ -130,6 +134,9 @@ namespace EncryptPad
     {
     public:
         virtual void operator()(InStream &stm) = 0;
+        virtual ~EOFHandlerBase()
+        {
+        }
     };
 
     // This function reads from the source, updates all counters and calls EOFHandler.

@@ -43,7 +43,7 @@ namespace EncryptPadEncryptor
         Encryptor(const Encryptor &);
         Encryptor & operator=(const Encryptor &);
     public:
-        Encryptor():mEncryptedPlainSwitchFunctor(NULL),
+        Encryptor():mEncryptedPlainSwitchFunctor(nullptr),
             kf_key_service_(1), mPlainText(true){}
 
         EncryptPad::KeyService &GetKFKeyService()

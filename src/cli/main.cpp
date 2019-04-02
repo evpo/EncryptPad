@@ -40,11 +40,11 @@
 #include "encryptmsg_version.h"
 #include "repository.h"
 
-namespace EncryptPad
-{
-    const char *kStdIn = "-";
-    const char *kStdOut = "-";
+using namespace EncryptPad;
+using namespace stlplus;
 
+namespace
+{
     void PrintUsage(bool use_cout = false)
     {
         std::string version = VER_PRODUCTNAME_STR " " VER_PRODUCTVERSION_STR;
@@ -176,12 +176,15 @@ namespace EncryptPad
             return kDefaultCompression;
         }
     }
+
+    const char *kStdIn = "-";
+    const char *kStdOut = "-";
 }
 
-using namespace EncryptPad;
-using namespace stlplus;
-
 void GenerateKeyFile(const std::string &path, size_t key_byte_size, const std::string &passphrase, PacketMetadata *kf_metadata);
+
+#undef END_CLI_DEFINITIONS
+#define END_CLI_DEFINITIONS {nullptr,stlplus::cli_switch_kind,stlplus::cli_single_mode,"",nullptr}
 
 // end Packet read write tests
 int main(int argc, char *argv[])
@@ -792,7 +795,7 @@ int main(int argc, char *argv[])
         }
 
         metadata.file_name = in_file;
-        metadata.file_date = static_cast<FileDate>(time(NULL));
+        metadata.file_date = static_cast<FileDate>(time(nullptr));
         metadata.is_binary = true;
     }
 
