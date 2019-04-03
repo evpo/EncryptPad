@@ -27,12 +27,12 @@ using namespace EncryptPad;
 
 namespace
 {
+#if !defined(__MINGW__) && !defined(__MINGW32__)
     FILE *PlatformFOpen(const char *file_name, const char *mode)
     {
         return fopen(file_name, mode);
     }
 
-#if !defined(__MINGW__) && !defined(__MINGW32__)
     FileHndl OpenInputLinux(const std::string &file_name)
     {
         if(file_name == "-")
