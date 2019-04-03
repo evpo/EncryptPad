@@ -32,6 +32,7 @@ namespace
         return fopen(file_name, mode);
     }
 
+#if !defined(__MINGW__) && !defined(__MINGW32__)
     FileHndl OpenInputLinux(const std::string &file_name)
     {
         if(file_name == "-")
@@ -49,6 +50,7 @@ namespace
         FileHndl file(PlatformFOpen(file_name.data(), "wb"));
         return file;
     }
+#endif
 
     int PlatformFSeek(FileHndl &file, stream_length_type offset, int origin)
     {

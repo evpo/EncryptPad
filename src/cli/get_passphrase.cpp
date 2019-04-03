@@ -74,7 +74,7 @@ namespace EncryptPad
         WriteToConsole(prompt);
 
         DWORD con_mode;
-        Hndl h = CreateFile("CONIN$", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0);
+        Hndl h = CreateFile("CONIN$", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, nullptr, OPEN_EXISTING, 0, nullptr);
         if(!h.Valid())
         {
             std::cerr << "Cannot open the terminal for input" << std::endl;

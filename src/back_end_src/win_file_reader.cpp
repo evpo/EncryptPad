@@ -34,8 +34,8 @@ namespace
     void Multi2Wide(const std::string &multi, std::wstring &wide)
     {
         wide.clear();
-        int len = MultiByteToWideChar(CP_UTF8, 0, multi.c_str(), -1, 
-                NULL, 0);
+        int len = MultiByteToWideChar(CP_UTF8, 0, multi.c_str(), -1,
+                nullptr, 0);
         if(!len)
             return;
 
@@ -51,13 +51,13 @@ namespace
         if(wide.empty()) 
             return;
 
-        int len = WideCharToMultiByte(CP_UTF8, 0, &wide[0], static_cast<int>(wide.size()), 
-                NULL, 0, NULL, NULL);
+        int len = WideCharToMultiByte(CP_UTF8, 0, &wide[0], static_cast<int>(wide.size()),
+                nullptr, 0, nullptr, nullptr);
 
         multi.resize(len - 1, 0);
 
-        WideCharToMultiByte(CP_UTF8, 0, &wide[0], static_cast<int>(wide.size()), 
-                &multi[0], len, NULL, NULL);
+        WideCharToMultiByte(CP_UTF8, 0, &wide[0], static_cast<int>(wide.size()),
+                &multi[0], len, nullptr, nullptr);
     }
 }
 
