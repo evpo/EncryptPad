@@ -22,6 +22,7 @@ LIB_LINKS_TO   = %{link_to}
 EXE_LINKS_TO   = %{library_target} $(LIB_LINKS_TO)
 
 BUILD_FLAGS    = $(ABI_FLAGS) $(LANG_FLAGS) $(CXXFLAGS) $(WARN_FLAGS)
+TEST_BUILD_FLAGS = $(ABI_FLAGS) $(LANG_FLAGS) $(CXXFLAGS)
 DEPS_BUILD_FLAGS = $(ABI_FLAGS) $(LANG_FLAGS) $(CXXFLAGS)
 
 INSTALLED_LIB_DIR = %{prefix}/libdir
@@ -166,7 +167,7 @@ $(GTEST_TARGET_DIR)/libgtest_main.a : $(GTEST_TARGET_DIR)/gtest-all.o $(GTEST_TA
 
 # Unit tests
 
-TEST_INCLUDES = -I $(GTEST_DIR)/include
+TEST_INCLUDES = -isystem $(GTEST_DIR)/include
 TEST_LINKS_TO = $(GTEST_TARGET_DIR)/libgtest_main.a $(GTEST_TARGET_DIR)/libgtest.a
 
 # Misc targets
@@ -228,5 +229,5 @@ $(TEST): $(LIBRARIES) $(TESTOBJS) $(GTEST) $(BOTAN_TARGET) $(ZLIB)
 
 %{for test_build_info}
 %{obj}: %{src}
-	$(CXX) $(BUILD_FLAGS) %{isa_flags} $(BOTAN_CXXFLAGS) $(INCLUDE_PATHS) $(TEST_INCLUDES) %{dash_c} %{src} %{dash_o}$@
+	$(CXX) $(TEST_BUILD_FLAGS) %{isa_flags} $(BOTAN_CXXFLAGS) $(INCLUDE_PATHS) $(TEST_INCLUDES) %{dash_c} %{src} %{dash_o}$@
 %{endfor}
