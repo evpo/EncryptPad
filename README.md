@@ -36,6 +36,7 @@ EncryptPad is an application for viewing and editing symmetrically encrypted tex
     - [Fedora](#build-on-fedora)
     - [Debian](#build-on-debian)
     - [openSUSE](#build-on-opensuse)
+    - [FreeBSD](#build-on-freebsd)
 * [Portable mode](#portable-mode)
 * [Does EncryptPad store passphrases in the memory to reopen files?](#passphrases-in-memory)
 * [Acknowledgements](#acknowledgements)
@@ -438,6 +439,20 @@ You can also install later compiler versions and link them to the default comman
 Open the EncryptPad source directory:
 
     ./configure.py --build-botan --build-zlib
+    make
+
+<div id="build-on-freebsd"></div>
+
+### FreeBSD
+
+Install dependencies and tools:
+
+    pkg install python pkgconf botan2 qt5
+
+Open the EncryptPad source directory:
+
+    ./configure.py
+    make
 
 <div id="portable-mode"></div>
 

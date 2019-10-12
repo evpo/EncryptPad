@@ -35,6 +35,7 @@
 <li><a href="#build-on-fedora">Fedora</a></li>
 <li><a href="#build-on-debian">Debian</a></li>
 <li><a href="#build-on-opensuse">openSUSE</a></li>
+<li><a href="#build-on-freebsd">FreeBSD</a></li>
 </ul></li>
 <li><a href="#portable-mode">Portable mode</a></li>
 <li><a href="#passphrases-in-memory">Does EncryptPad store passphrases in the memory to reopen files?</a></li>
@@ -471,6 +472,22 @@ ln -sf g++-7 /usr/bin/g++
 <p>Open the EncryptPad source directory:</p>
 
 <pre><code>./configure.py --build-botan --build-zlib
+make
+</code></pre>
+
+<div id="build-on-freebsd"></div>
+
+<h3>FreeBSD</h3>
+
+<p>Install dependencies and tools:</p>
+
+<pre><code>pkg install python pkgconf botan2 qt5
+</code></pre>
+
+<p>Open the EncryptPad source directory:</p>
+
+<pre><code>./configure.py
+make
 </code></pre>
 
 <div id="portable-mode"></div>
