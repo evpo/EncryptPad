@@ -16,12 +16,12 @@ do
     install --mode=744 --owner=0 --group=0 -T $f "/${f}"
 done
 popd >/dev/null
-if [[ -x "update-icon-caches" ]]; then
+if which update-icon-caches >/dev/null; then
     update-icon-caches /usr/share/icons/hicolor/*
 fi
-if [[ -x "update-mime-database" ]]; then
+if which update-mime-database >/dev/null; then
     update-mime-database /usr/share/mime
 fi
-if [[ -x "update-desktop-database" ]]; then
+if which update-desktop-database >/dev/null; then
     update-desktop-database /usr/share/applications
 fi
