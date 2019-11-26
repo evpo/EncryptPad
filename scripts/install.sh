@@ -17,7 +17,7 @@ do
 done
 popd >/dev/null
 if which update-icon-caches >/dev/null; then
-    update-icon-caches /usr/share/icons/hicolor/*
+    update-icon-caches /usr/share/icons/hicolor
 fi
 if which update-mime-database >/dev/null; then
     update-mime-database /usr/share/mime
