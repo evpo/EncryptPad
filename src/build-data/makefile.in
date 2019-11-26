@@ -186,6 +186,11 @@ distclean: qt_ui_distclean zlib_distclean botan_distclean
 macos_deployment: qt_ui
 	( cd macos_deployment && ./prepare_bundle.sh ../bin/$(CONFIG_DIR)/EncryptPad.app )
 
+# Install in Desktop Environment
+
+install: cli qt_ui
+	scripts/install.sh
+
 # Object Files
 LIBOBJS = %{join lib_objs}
 
