@@ -19,23 +19,26 @@ namespace Botan {
 /**
 * Exception thrown if you try to convert a zero point to an affine
 * coordinate
+*
+* In a future major release this exception type will be removed and its
+* usage replaced by Invalid_State
 */
-class BOTAN_PUBLIC_API(2,0) Illegal_Transformation final : public Exception
+class BOTAN_PUBLIC_API(2,0) Illegal_Transformation final : public Invalid_State
    {
    public:
-      explicit Illegal_Transformation(const std::string& err =
-                                      "Requested transformation is not possible") :
-         Exception(err) {}
+      explicit Illegal_Transformation(const std::string& err) : Invalid_State(err) {}
    };
 
 /**
 * Exception thrown if some form of illegal point is decoded
+*
+* In a future major release this exception type will be removed and its
+* usage replaced by Decoding_Error
 */
-class BOTAN_PUBLIC_API(2,0) Illegal_Point final : public Exception
+class BOTAN_PUBLIC_API(2,0) Illegal_Point final : public Decoding_Error
    {
    public:
-      explicit Illegal_Point(const std::string& err = "Malformed ECP point detected") :
-         Exception(err) {}
+      explicit Illegal_Point(const std::string& err) : Decoding_Error(err) {}
    };
 
 /**
@@ -93,6 +96,7 @@ class BOTAN_PUBLIC_API(2,0) PointGFp final
 
       /**
       * Construct a point from its affine coordinates
+      * Prefer EC_Group::point(x,y) for this operation.
       * @param curve the base curve
       * @param x affine x coordinate
       * @param y affine y coordinate
@@ -177,8 +181,7 @@ class BOTAN_PUBLIC_API(2,0) PointGFp final
       * Is this the point at infinity?
       * @result true, if this point is at infinity, false otherwise.
       */
-      bool is_zero() const
-         { return (m_coord_x.is_zero() && m_coord_z.is_zero()); }
+      bool is_zero() const { return m_coord_z.is_zero(); }
 
       /**
       * Checks whether the point is to be found on the underlying
@@ -417,7 +420,7 @@ class PointGFp_Var_Point_Precompute;
 * Deprecated API for point multiplication
 * Use EC_Group::blinded_base_point_multiply or EC_Group::blinded_var_point_multiply
 */
-class BOTAN_PUBLIC_API(2,0) BOTAN_DEPRECATED("See comments") Blinded_Point_Multiply final
+class BOTAN_PUBLIC_API(2,0) BOTAN_DEPRECATED("Use alternative APIs") Blinded_Point_Multiply final
    {
    public:
       Blinded_Point_Multiply(const PointGFp& base, const BigInt& order, size_t h = 0);

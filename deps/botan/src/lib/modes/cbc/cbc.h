@@ -13,6 +13,8 @@
 #include <botan/block_cipher.h>
 #include <botan/mode_pad.h>
 
+BOTAN_FUTURE_INTERNAL_HEADER(cbc.h)
+
 namespace Botan {
 
 /**
@@ -46,9 +48,9 @@ class BOTAN_PUBLIC_API(2,0) CBC_Mode : public Cipher_Mode
          return *m_padding;
          }
 
-      secure_vector<uint8_t>& state() { return m_state; }
+      size_t block_size() const { return m_block_size; }
 
-      size_t block_size() const { return m_state.size(); }
+      secure_vector<uint8_t>& state() { return m_state; }
 
       uint8_t* state_ptr() { return m_state.data(); }
 
@@ -60,6 +62,7 @@ class BOTAN_PUBLIC_API(2,0) CBC_Mode : public Cipher_Mode
       std::unique_ptr<BlockCipher> m_cipher;
       std::unique_ptr<BlockCipherModePaddingMethod> m_padding;
       secure_vector<uint8_t> m_state;
+      size_t m_block_size;
    };
 
 /**

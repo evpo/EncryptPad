@@ -24,7 +24,7 @@ class Stream_Cipher_Tests final : public Text_Based_Test
          const std::vector<uint8_t> key      = vars.get_req_bin("Key");
          const std::vector<uint8_t> expected = vars.get_req_bin("Out");
          const std::vector<uint8_t> nonce    = vars.get_opt_bin("Nonce");
-         const size_t seek                   = vars.get_opt_sz("Seek", 0);
+         const uint64_t seek                 = vars.get_opt_u64("Seek", 0);
          std::vector<uint8_t> input          = vars.get_opt_bin("In");
 
          if(input.empty())
@@ -57,6 +57,16 @@ class Stream_Cipher_Tests final : public Text_Based_Test
             result.test_is_nonempty("provider", provider);
             result.test_eq(provider, cipher->name(), algo);
 
+            result.confirm("default iv length is valid", cipher->valid_iv_length(cipher->default_iv_length()));
+
+            if(cipher->default_iv_length() == 0)
+               {
+               result.confirm("if default iv length is zero, no iv supported", nonce.size() == 0);
+
+               // This should still succeed
+               cipher->set_iv(nullptr, 0);
+               }
+
             try
                {
                std::vector<uint8_t> buf(128);
@@ -82,6 +92,33 @@ class Stream_Cipher_Tests final : public Text_Based_Test
                result.test_success("Trying to seek failed because not implemented");
                }
 
+            if(!cipher->valid_iv_length(nonce.size()))
+               {
+               throw Test_Error("Invalid nonce for " + algo);
+               }
+
+            bool accepted_nonce_early = false;
+            if(nonce.size() > 0)
+               {
+               try
+                  {
+                  cipher->set_iv(nonce.data(), nonce.size());
+                  accepted_nonce_early = true;
+                  }
+               catch(Botan::Invalid_State&) {}
+               }
+
+            /*
+            * Different providers may have additional restrictions on key sizes.
+            * Avoid testing the cipher with a key size that it does not natively support.
+            */
+            if(!cipher->valid_keylength(key.size()))
+               {
+               result.test_note("Skipping test with provider " + provider +
+                                " as it does not support key length " + std::to_string(key.size()));
+               continue;
+               }
+
             cipher->set_key(key);
 
             /*
@@ -93,26 +130,15 @@ class Stream_Cipher_Tests final : public Text_Based_Test
             result.test_throws("Throws if invalid nonce size given",
                                [&]() { cipher->set_iv(nullptr, large_nonce_size); });
 
-            if(nonce.size())
+            /*
+            If the set_nonce call earlier succeded, then we require that it also
+            worked (ie saved the nonce for later use) even though the key was
+            not set. So, don't set the nonce now, to ensure the previous call
+            had an effect.
+            */
+            if(nonce.size() > 0 && accepted_nonce_early == false)
                {
-               if(!cipher->valid_iv_length(nonce.size()))
-                  {
-                  throw Test_Error("Invalid nonce for " + algo);
-                  }
                cipher->set_iv(nonce.data(), nonce.size());
-               }
-            else
-               {
-               /*
-               * If no nonce was set then implicitly the cipher is using a
-               * null/empty nonce. Call set_iv with such a nonce to make sure
-               * set_iv accepts it.
-               */
-               if(!cipher->valid_iv_length(0))
-                  {
-                  throw Test_Error("Stream cipher " + algo + " requires nonce but none provided");
-                  }
-               cipher->set_iv(nullptr, 0);
                }
 
             if(seek != 0)
@@ -131,6 +157,16 @@ class Stream_Cipher_Tests final : public Text_Based_Test
             cipher->encrypt(buf);
             result.test_eq(provider, "encrypt", buf, expected);
             }
+
+            if(nonce.size() > 0)
+               {
+               std::vector<uint8_t> buf = input;
+               cipher->set_iv(nonce.data(), nonce.size());
+               if(seek != 0)
+                  cipher->seek(seek);
+               cipher->encrypt(buf);
+               result.test_eq(provider, "second encrypt", buf, expected);
+               }
 
             cipher->clear();
 

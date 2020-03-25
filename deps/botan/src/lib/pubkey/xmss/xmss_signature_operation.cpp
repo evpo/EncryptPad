@@ -4,12 +4,11 @@
  * defined in:
  *
  * [1] XMSS: Extended Hash-Based Signatures,
- *     draft-itrf-cfrg-xmss-hash-based-signatures-06
- *     Release: July 2016.
- *     https://datatracker.ietf.org/doc/
- *     draft-irtf-cfrg-xmss-hash-based-signatures/?include_text=1
+ *     Request for Comments: 8391
+ *     Release: May 2018.
+ *     https://datatracker.ietf.org/doc/rfc8391/
  *
- * (C) 2016,2017 Matthias Gierlings
+ * (C) 2016,2017,2018 Matthias Gierlings
  *
  * Botan is released under the Simplified BSD License (see license.txt)
  **/
@@ -52,6 +51,14 @@ XMSS_Signature_Operation::sign(const secure_vector<uint8_t>& msg_hash,
    return sig;
    }
 
+size_t XMSS_Signature_Operation::signature_length() const
+   {
+   return sizeof(uint64_t) + // size of leaf index
+          m_xmss_params.element_size() +
+          m_xmss_params.len() * m_xmss_params.element_size() +
+          m_xmss_params.tree_height() * m_xmss_params.element_size();
+   }
+
 wots_keysig_t
 XMSS_Signature_Operation::build_auth_path(XMSS_PrivateKey& priv_key,
       XMSS_Address& adrs)
@@ -61,8 +68,8 @@ XMSS_Signature_Operation::build_auth_path(XMSS_PrivateKey& priv_key,
 
    for(size_t j = 0; j < m_xmss_params.tree_height(); j++)
       {
-      size_t k = (m_leaf_idx / (1 << j)) ^ 0x01;
-      auth_path[j] = priv_key.tree_hash(k * (1 << j), j, adrs);
+      size_t k = (m_leaf_idx / (1ULL << j)) ^ 0x01;
+      auth_path[j] = priv_key.tree_hash(k * (1ULL << j), j, adrs);
       }
 
    return auth_path;
@@ -93,7 +100,7 @@ void XMSS_Signature_Operation::initialize()
    secure_vector<uint8_t> index_bytes;
    // reserve leaf index so it can not be reused in by another signature
    // operation using the same private key.
-   m_leaf_idx = m_priv_key.reserve_unused_leaf_index();
+   m_leaf_idx = static_cast<uint32_t>(m_priv_key.reserve_unused_leaf_index());
 
    // write prefix for message hashing into buffer.
    XMSS_Tools::concat(index_bytes, m_leaf_idx, 32);

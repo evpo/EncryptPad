@@ -1,5 +1,6 @@
 /*
-* (C) 2010,2014,2015 Jack Lloyd
+* (C) 2010,2014,2015,2019 Jack Lloyd
+* (C) 2019 Matthias Gierlings
 * (C) 2015 René Korthaus
 *
 * Botan is released under the Simplified BSD License (see license.txt)
@@ -11,6 +12,7 @@
 
 #include <botan/base64.h>
 #include <botan/hex.h>
+#include <botan/rng.h>
 
 #include <botan/pk_keys.h>
 #include <botan/x509_key.h>
@@ -19,6 +21,8 @@
 #include <botan/pubkey.h>
 #include <botan/workfactor.h>
 #include <botan/data_src.h>
+
+#include <fstream>
 
 #if defined(BOTAN_HAS_DL_GROUP)
    #include <botan/dl_group.h>
@@ -33,7 +37,7 @@ namespace Botan_CLI {
 class PK_Keygen final : public Command
    {
    public:
-      PK_Keygen() : Command("keygen --algo=RSA --params= --passphrase= --pbe= --pbe-millis=300 --der-out") {}
+      PK_Keygen() : Command("keygen --algo=RSA --params= --passphrase= --pbe= --pbe-millis=300 --provider= --der-out") {}
 
       std::string group() const override
          {
@@ -49,16 +53,17 @@ class PK_Keygen final : public Command
          {
          const std::string algo = get_arg("algo");
          const std::string params = get_arg("params");
+         const std::string provider = get_arg("provider");
 
-         std::unique_ptr<Botan::Private_Key>
-         key(Botan::create_private_key(algo, rng(), params));
+         std::unique_ptr<Botan::Private_Key> key =
+            Botan::create_private_key(algo, rng(), params, provider);
 
          if(!key)
             {
             throw CLI_Error_Unsupported("keygen", algo);
             }
 
-         const std::string pass = get_arg("passphrase");
+         const std::string pass = get_passphrase_arg("Key passphrase", "passphrase");
          const bool der_out = flag_set("der-out");
 
          const std::chrono::milliseconds pbe_millis(get_arg_sz("pbe-millis"));
@@ -95,20 +100,39 @@ BOTAN_REGISTER_COMMAND("keygen", PK_Keygen);
 
 namespace {
 
-std::string algo_default_emsa(const std::string& key)
+std::string choose_sig_padding(const std::string& key, const std::string& emsa, const std::string& hash)
    {
-   if(key == "RSA")
+   std::string emsa_or_default = [&]() -> std::string
       {
-      return "EMSA4";
-      } // PSS
-   else if(key == "ECDSA" || key == "DSA")
+      if(!emsa.empty())
+         {
+         return emsa;
+         }
+
+      if(key == "RSA")
+         {
+         return "EMSA4";
+         } // PSS
+      else if(key == "ECDSA" || key == "DSA")
+         {
+         return "EMSA1";
+         }
+      else if(key == "Ed25519")
+         {
+         return "";
+         }
+      else
+         {
+         return "EMSA1";
+         }
+      }();
+
+   if(emsa_or_default.empty())
       {
-      return "EMSA1";
+      return hash;
       }
-   else
-      {
-      return "EMSA1";
-      }
+
+   return emsa_or_default + "(" + hash + ")";
    }
 
 }
@@ -116,7 +140,7 @@ std::string algo_default_emsa(const std::string& key)
 class PK_Fingerprint final : public Command
    {
    public:
-      PK_Fingerprint() : Command("fingerprint --algo=SHA-256 *keys") {}
+      PK_Fingerprint() : Command("fingerprint --no-fsname --algo=SHA-256 *keys") {}
 
       std::string group() const override
          {
@@ -131,12 +155,21 @@ class PK_Fingerprint final : public Command
       void go() override
          {
          const std::string hash_algo = get_arg("algo");
+         const bool no_fsname = flag_set("no-fsname");
 
          for(std::string key_file : get_arg_list("keys"))
             {
-            std::unique_ptr<Botan::Public_Key> key(Botan::X509::load_key(key_file));
+            std::unique_ptr<Botan::Public_Key> key(
+               key_file == "-"
+               ? Botan::X509::load_key(this->slurp_file("-", 4096))
+               : Botan::X509::load_key(key_file));
 
-            output() << key_file << ": " << key->fingerprint_public(hash_algo) << "\n";
+            const std::string fprint = key->fingerprint_public(hash_algo);
+
+            if(no_fsname || key_file == "-")
+               { output() << fprint << "\n"; }
+            else
+               { output() << key_file << ": " << fprint << "\n"; }
             }
          }
    };
@@ -160,11 +193,11 @@ class PK_Sign final : public Command
 
       void go() override
          {
-         std::unique_ptr<Botan::Private_Key> key(
-            Botan::PKCS8::load_key(
-               get_arg("key"),
-               rng(),
-               get_arg("passphrase")));
+         const std::string key_file = get_arg("key");
+         const std::string passphrase = get_passphrase_arg("Passphrase for " + key_file, "passphrase");
+
+         Botan::DataSource_Stream input(key_file);
+         std::unique_ptr<Botan::Private_Key> key = Botan::PKCS8::load_key(input, passphrase);
 
          if(!key)
             {
@@ -172,7 +205,7 @@ class PK_Sign final : public Command
             }
 
          const std::string sig_padding =
-            get_arg_or("emsa", algo_default_emsa(key->algo_name())) + "(" + get_arg("hash") + ")";
+            choose_sig_padding(key->algo_name(), get_arg("emsa"), get_arg("hash"));
 
          const Botan::Signature_Format format =
             flag_set("der-format") ? Botan::DER_SEQUENCE : Botan::IEEE_1363;
@@ -187,7 +220,18 @@ class PK_Sign final : public Command
             };
          this->read_file(get_arg("file"), onData);
 
-         output() << Botan::base64_encode(signer.signature(rng())) << "\n";
+         std::vector<uint8_t> sig { signer.signature(rng()) };
+
+         if(key->stateful_operation())
+            {
+            std::ofstream updated_key(key_file);
+            if(passphrase.empty())
+               { updated_key << Botan::PKCS8::PEM_encode(*key); }
+            else
+               { updated_key << Botan::PKCS8::PEM_encode(*key, rng(), passphrase); }
+            }
+
+         output() << Botan::base64_encode(sig) << "\n";
          }
    };
 
@@ -217,7 +261,7 @@ class PK_Verify final : public Command
             }
 
          const std::string sig_padding =
-            get_arg_or("emsa", algo_default_emsa(key->algo_name())) + "(" + get_arg("hash") + ")";
+            choose_sig_padding(key->algo_name(), get_arg("emsa"), get_arg("hash"));
 
          const Botan::Signature_Format format =
             flag_set("der-format") ? Botan::DER_SEQUENCE : Botan::IEEE_1363;
@@ -257,9 +301,10 @@ class PKCS8_Tool final : public Command
 
       void go() override
          {
-         const std::string pass_in = get_arg("pass-in");
+         const std::string key_file = get_arg("key");
+         const std::string pass_in = get_passphrase_arg("Password for " + key_file, "pass-in");
 
-         Botan::DataSource_Memory key_src(slurp_file(get_arg("key")));
+         Botan::DataSource_Memory key_src(slurp_file(key_file));
          std::unique_ptr<Botan::Private_Key> key;
 
          if(pass_in.empty())
@@ -288,7 +333,7 @@ class PKCS8_Tool final : public Command
             }
          else
             {
-            const std::string pass_out = get_arg("pass-out");
+            const std::string pass_out = get_passphrase_arg("Passphrase to encrypt key", "pass-out");
 
             if(der_out)
                {
@@ -334,7 +379,7 @@ class EC_Group_Info final : public Command
 
       std::string description() const override
          {
-         return "Print raw elliptic curve domain parameters of the standarized curve name";
+         return "Print raw elliptic curve domain parameters of the standardized curve name";
          }
 
       void go() override
@@ -375,7 +420,7 @@ class DL_Group_Info final : public Command
 
       std::string description() const override
          {
-         return "Print raw Diffie-Hellman parameters (p,g) of the standarized DH group name";
+         return "Print raw Diffie-Hellman parameters (p,g) of the standardized DH group name";
          }
 
       void go() override
@@ -418,13 +463,13 @@ class PK_Workfactor final : public Command
          const std::string type = get_arg("type");
 
          if(type == "rsa")
-            output() << Botan::if_work_factor(bits) << "\n";
+            { output() << Botan::if_work_factor(bits) << "\n"; }
          else if(type == "dl")
-            output() << Botan::dl_work_factor(bits) << "\n";
+            { output() << Botan::dl_work_factor(bits) << "\n"; }
          else if(type == "dl_exp")
-            output() << Botan::dl_exponent_size(bits) << "\n";
+            { output() << Botan::dl_exponent_size(bits) << "\n"; }
          else
-            throw CLI_Usage_Error("Unknown type for pk_workfactor");
+            { throw CLI_Usage_Error("Unknown type for pk_workfactor"); }
          }
    };
 
@@ -456,14 +501,14 @@ class Gen_DL_Group final : public Command
          if(type == "strong")
             {
             if(seed_str.size() > 0)
-               throw CLI_Usage_Error("Seed only supported for DSA param gen");
+               { throw CLI_Usage_Error("Seed only supported for DSA param gen"); }
             Botan::DL_Group grp(rng(), Botan::DL_Group::Strong, pbits);
             output() << grp.PEM_encode(Botan::DL_Group::ANSI_X9_42);
             }
          else if(type == "subgroup")
             {
             if(seed_str.size() > 0)
-               throw CLI_Usage_Error("Seed only supported for DSA param gen");
+               { throw CLI_Usage_Error("Seed only supported for DSA param gen"); }
             Botan::DL_Group grp(rng(), Botan::DL_Group::Prime_Subgroup, pbits, qbits);
             output() << grp.PEM_encode(Botan::DL_Group::ANSI_X9_42);
             }
@@ -473,11 +518,11 @@ class Gen_DL_Group final : public Command
             if(dsa_qbits == 0)
                {
                if(pbits == 1024)
-                  dsa_qbits = 160;
+                  { dsa_qbits = 160; }
                else if(pbits == 2048 || pbits == 3072)
-                  dsa_qbits = 256;
+                  { dsa_qbits = 256; }
                else
-                  throw CLI_Usage_Error("Invalid DSA p/q sizes");
+                  { throw CLI_Usage_Error("Invalid DSA p/q sizes"); }
                }
 
             if(seed_str.empty())

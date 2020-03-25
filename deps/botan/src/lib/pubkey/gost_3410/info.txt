@@ -1,8 +1,7 @@
 <defines>
 GOST_34_10_2001 -> 20131128
+GOST_34_10_2012 -> 20190801
 </defines>
-
-load_on auto
 
 <requires>
 asn1

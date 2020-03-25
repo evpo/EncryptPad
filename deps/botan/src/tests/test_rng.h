@@ -29,6 +29,8 @@ class Fixed_Output_RNG : public Botan::RandomNumberGenerator
          return !m_buf.empty();
          }
 
+      bool accepts_input() const override { return true; }
+
       size_t reseed(Botan::Entropy_Sources&,
                     size_t,
                     std::chrono::milliseconds) override
@@ -54,7 +56,7 @@ class Fixed_Output_RNG : public Botan::RandomNumberGenerator
          return "Fixed_Output_RNG";
          }
 
-      void clear() BOTAN_NOEXCEPT override {}
+      void clear() noexcept override {}
 
       explicit Fixed_Output_RNG(const std::vector<uint8_t>& in)
          {
@@ -65,6 +67,13 @@ class Fixed_Output_RNG : public Botan::RandomNumberGenerator
          {
          std::vector<uint8_t> in = Botan::hex_decode(in_str);
          m_buf.insert(m_buf.end(), in.begin(), in.end());
+         }
+
+      Fixed_Output_RNG(RandomNumberGenerator& rng, size_t len)
+         {
+         std::vector<uint8_t> output;
+         rng.random_vec(output, len);
+         m_buf.insert(m_buf.end(), output.begin(), output.end());
          }
 
       Fixed_Output_RNG() = default;
@@ -116,9 +125,11 @@ class Fixed_Output_Position_RNG final : public Fixed_Output_RNG
             }
          }
 
+      bool accepts_input() const override { return false; }
+
       void add_entropy(const uint8_t*, size_t) override
          {
-         throw Botan::Exception("add_entropy() not supported by this RNG, test bug?");
+         throw Test_Error("add_entropy() not supported by this RNG, test bug?");
          }
 
       std::string name() const override
@@ -144,8 +155,10 @@ class SeedCapturing_RNG final : public Botan::RandomNumberGenerator
    public:
       void randomize(uint8_t[], size_t) override
          {
-         throw Botan::Exception("SeedCapturing_RNG has no output");
+         throw Test_Error("SeedCapturing_RNG has no output");
          }
+
+      bool accepts_input() const override { return true; }
 
       void add_entropy(const uint8_t input[], size_t len) override
          {
@@ -192,6 +205,8 @@ class Request_Counting_RNG final : public Botan::RandomNumberGenerator
          return m_randomize_count;
          }
 
+      bool accepts_input() const override { return false; }
+
       bool is_seeded() const override
          {
          return true;
@@ -204,7 +219,12 @@ class Request_Counting_RNG final : public Botan::RandomNumberGenerator
 
       void randomize(uint8_t out[], size_t out_len) override
          {
-         std::memset(out, 0x80, out_len);
+         /*
+         The HMAC_DRBG and ChaCha reseed KATs assume this RNG type
+         outputs all 0x80
+         */
+         for(size_t i = 0; i != out_len; ++i)
+            out[i] = 0x80;
          m_randomize_count++;
          }
 

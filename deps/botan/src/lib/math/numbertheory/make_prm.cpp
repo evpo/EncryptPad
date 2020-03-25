@@ -1,6 +1,6 @@
 /*
 * Prime Generation
-* (C) 1999-2007,2018 Jack Lloyd
+* (C) 1999-2007,2018,2019 Jack Lloyd
 *
 * Botan is released under the Simplified BSD License (see license.txt)
 */
@@ -8,16 +8,20 @@
 #include <botan/numthry.h>
 #include <botan/rng.h>
 #include <botan/internal/bit_ops.h>
+#include <botan/loadstor.h>
+#include <botan/reducer.h>
+#include <botan/internal/primality.h>
 #include <algorithm>
 
 namespace Botan {
 
 namespace {
 
-class Prime_Sieve
+class Prime_Sieve final
    {
    public:
-      Prime_Sieve(const BigInt& init_value) : m_sieve(PRIME_TABLE_SIZE)
+      Prime_Sieve(const BigInt& init_value, size_t sieve_size) :
+         m_sieve(std::min(sieve_size, PRIME_TABLE_SIZE))
          {
          for(size_t i = 0; i != m_sieve.size(); ++i)
             m_sieve[i] = static_cast<uint16_t>(init_value % PRIMES[i]);
@@ -75,9 +79,14 @@ BigInt random_prime(RandomNumberGenerator& rng,
                     size_t equiv, size_t modulo,
                     size_t prob)
    {
-   if(coprime.is_negative())
+   if(bits <= 1)
       {
-      throw Invalid_Argument("random_prime: coprime must be >= 0");
+      throw Invalid_Argument("random_prime: Can't make a prime of " +
+                             std::to_string(bits) + " bits");
+      }
+   if(coprime.is_negative() || (!coprime.is_zero() && coprime.is_even()) || coprime.bits() >= bits)
+      {
+      throw Invalid_Argument("random_prime: invalid coprime");
       }
    if(modulo == 0)
       {
@@ -90,32 +99,37 @@ BigInt random_prime(RandomNumberGenerator& rng,
       throw Invalid_Argument("random_prime Invalid value for equiv/modulo");
 
    // Handle small values:
-   if(bits <= 1)
-      {
-      throw Invalid_Argument("random_prime: Can't make a prime of " +
-                             std::to_string(bits) + " bits");
-      }
-   else if(bits == 2)
-      {
-      return ((rng.next_byte() % 2) ? 2 : 3);
-      }
-   else if(bits == 3)
-      {
-      return ((rng.next_byte() % 2) ? 5 : 7);
-      }
-   else if(bits == 4)
-      {
-      return ((rng.next_byte() % 2) ? 11 : 13);
-      }
-   else if(bits <= 16)
-      {
-      for(;;)
-         {
-         size_t idx = make_uint16(rng.next_byte(), rng.next_byte()) % PRIME_TABLE_SIZE;
-         uint16_t small_prime = PRIMES[idx];
 
-         if(high_bit(small_prime) == bits)
-            return small_prime;
+   if(bits <= 16)
+      {
+      if(equiv != 1 || modulo != 2 || coprime != 0)
+         throw Not_Implemented("random_prime equiv/modulo/coprime options not usable for small primes");
+
+      if(bits == 2)
+         {
+         return ((rng.next_byte() % 2) ? 2 : 3);
+         }
+      else if(bits == 3)
+         {
+         return ((rng.next_byte() % 2) ? 5 : 7);
+         }
+      else if(bits == 4)
+         {
+         return ((rng.next_byte() % 2) ? 11 : 13);
+         }
+      else
+         {
+         for(;;)
+            {
+            // This is slightly biased, but for small primes it does not seem to matter
+            const uint8_t b0 = rng.next_byte();
+            const uint8_t b1 = rng.next_byte();
+            const size_t idx = make_uint16(b0, b1) % PRIME_TABLE_SIZE;
+            const uint16_t small_prime = PRIMES[idx];
+
+            if(high_bit(small_prime) == bits)
+               return small_prime;
+            }
          }
       }
 
@@ -133,42 +147,59 @@ BigInt random_prime(RandomNumberGenerator& rng,
       // Force p to be equal to equiv mod modulo
       p += (modulo - (p % modulo)) + equiv;
 
-      Prime_Sieve sieve(p);
+      Prime_Sieve sieve(p, bits);
 
-      size_t counter = 0;
-      while(true)
+      for(size_t attempt = 0; attempt <= MAX_ATTEMPTS; ++attempt)
          {
-         ++counter;
-
-         if(counter > MAX_ATTEMPTS)
-            {
-            break; // don't try forever, choose a new starting point
-            }
-
          p += modulo;
 
          sieve.step(modulo);
 
-         if(sieve.passes(true) == false)
+         // p can be even if modulo is odd, continue on in that case
+         if(p.is_even() || sieve.passes(true) == false)
+            continue;
+
+         Modular_Reducer mod_p(p);
+
+         /*
+         First do a single M-R iteration to quickly elimate most non-primes,
+         before doing the coprimality check which is expensive
+         */
+         if(is_miller_rabin_probable_prime(p, mod_p, rng, 1) == false)
             continue;
 
          if(coprime > 1)
             {
             /*
-            * Check if gcd(p - 1, coprime) != 1 by computing the inverse. The
-            * gcd algorithm is not constant time, but modular inverse is (for
-            * odd modulus anyway). This avoids a side channel attack against RSA
-            * key generation, though RSA keygen should be using generate_rsa_prime.
+            * Check if gcd(p - 1, coprime) != 1 by attempting to compute a
+            * modular inverse. We are assured coprime is odd (since if it was
+            * even, it would always have a common factor with p - 1), so
+            * take off the factors of 2 from (p-1) then compute the inverse
+            * of coprime modulo that integer.
             */
-            if(inverse_mod(p - 1, coprime).is_zero())
+            BigInt p1 = p - 1;
+            p1 >>= low_zero_bits(p1);
+            if(ct_inverse_mod_odd_modulus(coprime, p1).is_zero())
+               {
+               BOTAN_DEBUG_ASSERT(gcd(p - 1, coprime) > 1);
                continue;
+               }
+
+            BOTAN_DEBUG_ASSERT(gcd(p - 1, coprime) == 1);
             }
 
          if(p.bits() > bits)
             break;
 
-         if(is_prime(p, rng, prob, true))
-            return p;
+         const size_t t = miller_rabin_test_iterations(bits, prob, true);
+
+         if(is_miller_rabin_probable_prime(p, mod_p, rng, t) == false)
+            continue;
+
+         if(prob > 32 && !is_lucas_probable_prime(p, mod_p))
+            continue;
+
+         return p;
          }
       }
    }
@@ -201,25 +232,27 @@ BigInt generate_rsa_prime(RandomNumberGenerator& keygen_rng,
       p.set_bit(bits - 2);
       p.set_bit(0);
 
-      Prime_Sieve sieve(p);
+      Prime_Sieve sieve(p, bits);
 
       const word step = 2;
 
-      size_t counter = 0;
-      while(true)
+      for(size_t attempt = 0; attempt <= MAX_ATTEMPTS; ++attempt)
          {
-         ++counter;
-
-         if(counter > MAX_ATTEMPTS)
-            {
-            break; // don't try forever, choose a new starting point
-            }
-
          p += step;
 
          sieve.step(step);
 
          if(sieve.passes() == false)
+            continue;
+
+         Modular_Reducer mod_p(p);
+
+         /*
+         * Do a single primality test first before checking coprimality, since
+         * currently a single Miller-Rabin test is faster than computing modular
+         * inverse, and this eliminates almost all wasted modular inverses.
+         */
+         if(is_miller_rabin_probable_prime(p, mod_p, prime_test_rng, 1) == false)
             continue;
 
          /*
@@ -236,18 +269,20 @@ BigInt generate_rsa_prime(RandomNumberGenerator& keygen_rng,
          */
          BigInt p1 = p - 1;
          p1 >>= low_zero_bits(p1);
-         if(inverse_mod(coprime, p1).is_zero())
+         if(ct_inverse_mod_odd_modulus(coprime, p1).is_zero())
             {
-            BOTAN_DEBUG_ASSERT(gcd(p1, coprime) > 1);
+            BOTAN_DEBUG_ASSERT(gcd(p - 1, coprime) > 1);
             continue;
             }
 
-         BOTAN_DEBUG_ASSERT(gcd(p1, coprime) == 1);
+         BOTAN_DEBUG_ASSERT(gcd(p - 1, coprime) == 1);
 
          if(p.bits() > bits)
             break;
 
-         if(is_prime(p, prime_test_rng, prob, true))
+         const size_t t = miller_rabin_test_iterations(bits, prob, true);
+
+         if(is_miller_rabin_probable_prime(p, mod_p, prime_test_rng, t) == true)
             return p;
          }
       }
@@ -269,6 +304,9 @@ BigInt random_safe_prime(RandomNumberGenerator& rng, size_t bits)
       Generate q == 2 (mod 3)
 
       Otherwise [q == 1 (mod 3) case], 2*q+1 == 3 (mod 3) and not prime.
+
+      Initially allow a very high error prob (1/2**8) to allow for fast checks,
+      then if 2*q+1 turns out to be a prime go back and strongly check q.
       */
       q = random_prime(rng, bits - 1, 0, 2, 3, 8);
       p = (q << 1) + 1;

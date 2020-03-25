@@ -8,10 +8,9 @@
 #include <botan/salsa20.h>
 #include <botan/exceptn.h>
 #include <botan/loadstor.h>
+#include <botan/rotate.h>
 
 namespace Botan {
-
-namespace {
 
 #define SALSA20_QUARTER_ROUND(x1, x2, x3, x4)    \
    do {                                          \
@@ -24,7 +23,8 @@ namespace {
 /*
 * Generate HSalsa20 cipher stream (for XSalsa20 IV setup)
 */
-void hsalsa20(uint32_t output[8], const uint32_t input[16])
+//static
+void Salsa20::hsalsa20(uint32_t output[8], const uint32_t input[16])
    {
    uint32_t x00 = input[ 0], x01 = input[ 1], x02 = input[ 2], x03 = input[ 3],
             x04 = input[ 4], x05 = input[ 5], x06 = input[ 6], x07 = input[ 7],
@@ -53,8 +53,6 @@ void hsalsa20(uint32_t output[8], const uint32_t input[16])
    output[6] = x08;
    output[7] = x09;
    }
-
-}
 
 /*
 * Generate Salsa20 cipher stream
@@ -111,14 +109,17 @@ void Salsa20::cipher(const uint8_t in[], uint8_t out[], size_t length)
 
    while(length >= m_buffer.size() - m_position)
       {
-      xor_buf(out, in, &m_buffer[m_position], m_buffer.size() - m_position);
-      length -= (m_buffer.size() - m_position);
-      in += (m_buffer.size() - m_position);
-      out += (m_buffer.size() - m_position);
+      const size_t available = m_buffer.size() - m_position;
+
+      xor_buf(out, in, &m_buffer[m_position], available);
       salsa_core(m_buffer.data(), m_state.data(), 20);
 
       ++m_state[8];
       m_state[9] += (m_state[8] == 0);
+
+      length -= available;
+      in += available;
+      out += available;
 
       m_position = 0;
       }
@@ -128,10 +129,7 @@ void Salsa20::cipher(const uint8_t in[], uint8_t out[], size_t length)
    m_position += length;
    }
 
-/*
-* Salsa20 Key Schedule
-*/
-void Salsa20::key_schedule(const uint8_t key[], size_t length)
+void Salsa20::initialize_state()
    {
    static const uint32_t TAU[] =
       { 0x61707865, 0x3120646e, 0x79622d36, 0x6b206574 };
@@ -139,32 +137,54 @@ void Salsa20::key_schedule(const uint8_t key[], size_t length)
    static const uint32_t SIGMA[] =
       { 0x61707865, 0x3320646e, 0x79622d32, 0x6b206574 };
 
-   const uint32_t* CONSTANTS = (length == 16) ? TAU : SIGMA;
+   m_state[1] = m_key[0];
+   m_state[2] = m_key[1];
+   m_state[3] = m_key[2];
+   m_state[4] = m_key[3];
+
+   if(m_key.size() == 4)
+      {
+      m_state[0] = TAU[0];
+      m_state[5] = TAU[1];
+      m_state[10] = TAU[2];
+      m_state[15] = TAU[3];
+      m_state[11] = m_key[0];
+      m_state[12] = m_key[1];
+      m_state[13] = m_key[2];
+      m_state[14] = m_key[3];
+      }
+   else
+      {
+      m_state[0] = SIGMA[0];
+      m_state[5] = SIGMA[1];
+      m_state[10] = SIGMA[2];
+      m_state[15] = SIGMA[3];
+      m_state[11] = m_key[4];
+      m_state[12] = m_key[5];
+      m_state[13] = m_key[6];
+      m_state[14] = m_key[7];
+      }
+
+   m_state[6] = 0;
+   m_state[7] = 0;
+   m_state[8] = 0;
+   m_state[9] = 0;
+
+   m_position = 0;
+   }
+
+/*
+* Salsa20 Key Schedule
+*/
+void Salsa20::key_schedule(const uint8_t key[], size_t length)
+   {
+   m_key.resize(length / 4);
+   load_le<uint32_t>(m_key.data(), key, m_key.size());
 
    m_state.resize(16);
    m_buffer.resize(64);
 
-   m_state[0] = CONSTANTS[0];
-   m_state[5] = CONSTANTS[1];
-   m_state[10] = CONSTANTS[2];
-   m_state[15] = CONSTANTS[3];
-
-   m_state[1] = load_le<uint32_t>(key, 0);
-   m_state[2] = load_le<uint32_t>(key, 1);
-   m_state[3] = load_le<uint32_t>(key, 2);
-   m_state[4] = load_le<uint32_t>(key, 3);
-
-   if(length == 32)
-      key += 16;
-
-   m_state[11] = load_le<uint32_t>(key, 0);
-   m_state[12] = load_le<uint32_t>(key, 1);
-   m_state[13] = load_le<uint32_t>(key, 2);
-   m_state[14] = load_le<uint32_t>(key, 3);
-
-   m_position = 0;
-
-   set_iv(nullptr, 0); // all-zero IV
+   set_iv(nullptr, 0);
    }
 
 /*
@@ -172,8 +192,12 @@ void Salsa20::key_schedule(const uint8_t key[], size_t length)
 */
 void Salsa20::set_iv(const uint8_t iv[], size_t length)
    {
+   verify_key_set(m_state.empty() == false);
+
    if(!valid_iv_length(length))
       throw Invalid_IV_Length(name(), length);
+
+   initialize_state();
 
    if(length == 0)
       {
@@ -220,9 +244,26 @@ void Salsa20::set_iv(const uint8_t iv[], size_t length)
    m_position = 0;
    }
 
-/*
-* Return the name of this type
-*/
+bool Salsa20::valid_iv_length(size_t iv_len) const
+   {
+   return (iv_len == 0 || iv_len == 8 || iv_len == 24);
+   }
+
+size_t Salsa20::default_iv_length() const
+   {
+   return 24;
+   }
+
+Key_Length_Specification Salsa20::key_spec() const
+   {
+   return Key_Length_Specification(16, 32, 16);
+   }
+
+StreamCipher* Salsa20::clone() const
+   {
+   return new Salsa20;
+   }
+
 std::string Salsa20::name() const
    {
    return "Salsa20";
@@ -233,6 +274,7 @@ std::string Salsa20::name() const
 */
 void Salsa20::clear()
    {
+   zap(m_key);
    zap(m_state);
    zap(m_buffer);
    m_position = 0;

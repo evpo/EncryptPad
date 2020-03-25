@@ -11,6 +11,8 @@
 #include <botan/stream_cipher.h>
 #include <botan/types.h>
 
+BOTAN_FUTURE_INTERNAL_HEADER(rc4.h)
+
 namespace Botan {
 
 /**
@@ -26,12 +28,9 @@ class BOTAN_PUBLIC_API(2,0) RC4 final : public StreamCipher
       void clear() override;
       std::string name() const override;
 
-      StreamCipher* clone() const override { return new RC4(m_SKIP); }
+      StreamCipher* clone() const override;
 
-      Key_Length_Specification key_spec() const override
-         {
-         return Key_Length_Specification(1, 256);
-         }
+      Key_Length_Specification key_spec() const override;
 
       /**
       * @param skip skip this many initial bytes in the keystream

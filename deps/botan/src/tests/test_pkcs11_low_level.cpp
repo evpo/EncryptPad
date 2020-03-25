@@ -1,6 +1,7 @@
 /*
 * (C) 2016 Daniel Neus
 * (C) 2016 Philipp Weber
+* (C) 2019 Michael Boric
 *
 * Botan is released under the Simplified BSD License (see license.txt)
 */
@@ -46,7 +47,7 @@ class RAII_LowLevel
 
          m_low_level->C_Initialize(&init_args);
          }
-      ~RAII_LowLevel() BOTAN_NOEXCEPT
+      ~RAII_LowLevel() noexcept
          {
          try
             {
@@ -74,7 +75,7 @@ class RAII_LowLevel
 
          if(slots.empty())
             {
-            throw Exception("No slot with attached token found");
+            throw Test_Error("No slot with attached token found");
             }
 
          return slots;
@@ -92,7 +93,7 @@ class RAII_LowLevel
          {
          Flags session_flags =  PKCS11::flags(Flag::SerialSession | Flag::RwSession);
          SessionHandle handle = open_session(session_flags);
-         login(UserType::User, PIN_SECVEC);
+         login(UserType::User, PIN());
          return handle;
          }
 
@@ -100,7 +101,7 @@ class RAII_LowLevel
          {
          if(!m_is_session_open)
             {
-            throw Exception("no open session");
+            throw Test_Error("no open session");
             }
          return m_session_handle;
          }
@@ -109,7 +110,7 @@ class RAII_LowLevel
          {
          if(!m_is_session_open)
             {
-            throw Exception("no open session");
+            throw Test_Error("no open session");
             }
 
          m_low_level.get()->C_CloseSession(m_session_handle);
@@ -120,12 +121,12 @@ class RAII_LowLevel
          {
          if(!m_is_session_open)
             {
-            throw Exception("no open session");
+            throw Test_Error("no open session");
             }
 
          if(m_is_logged_in)
             {
-            throw Exception("Already logged in");
+            throw Test_Error("Already logged in");
             }
 
          m_low_level.get()->C_Login(m_session_handle, user_type, pin);
@@ -136,7 +137,7 @@ class RAII_LowLevel
          {
          if(!m_is_logged_in)
             {
-            throw Exception("Not logged in");
+            throw Test_Error("Not logged in");
             }
 
          m_low_level.get()->C_Logout(m_session_handle);
@@ -306,8 +307,11 @@ Test::Result test_c_get_slot_list()
    // assumes at least one smartcard reader is attached
    bool token_present = false;
 
-   auto binder = std::bind(static_cast< bool (LowLevel::*)(bool, std::vector<SlotId>&, ReturnValue*) const>
-                           (&LowLevel::C_GetSlotList), *p11_low_level.get(), std::ref(token_present), std::ref(slot_vec), std::placeholders::_1);
+   auto binder = std::bind(static_cast< bool (LowLevel::*)(bool, std::vector<SlotId>&, ReturnValue*) const>(&LowLevel::C_GetSlotList),
+                           *p11_low_level.get(),
+                           std::ref(token_present),
+                           std::ref(slot_vec),
+                           std::placeholders::_1);
 
    Test::Result result = test_function("C_GetSlotList", binder);
    result.test_ne("C_GetSlotList number of slots without attached token > 0", slot_vec.size(), 0);
@@ -400,7 +404,7 @@ Test::Result test_c_init_token()
 
    auto sec_vec_binder = std::bind(
                             static_cast< bool (LowLevel::*)(SlotId, const secure_vector<uint8_t>&, const std::string&, ReturnValue*) const>
-                            (&LowLevel::C_InitToken<secure_allocator<uint8_t>>), *p11_low_level.get(), slot_vec.at(0), std::ref(SO_PIN_SECVEC),
+                            (&LowLevel::C_InitToken<secure_allocator<uint8_t>>), *p11_low_level.get(), slot_vec.at(0), SO_PIN(),
                             std::ref(label), std::placeholders::_1);
 
    return test_function("C_InitToken", sec_vec_binder);
@@ -518,7 +522,7 @@ Test::Result test_c_login_logout_security_officier()
    Flags session_flags = PKCS11::flags(Flag::SerialSession | Flag::RwSession);
    SessionHandle session_handle = p11_low_level.open_session(session_flags);
 
-   return login_logout_helper(p11_low_level, session_handle, UserType::SO, SO_PIN);
+   return login_logout_helper(p11_low_level, session_handle, UserType::SO, PKCS11_SO_PIN);
    }
 
 Test::Result test_c_login_logout_user()
@@ -528,14 +532,14 @@ Test::Result test_c_login_logout_user()
    // R/O session
    Flags session_flags = PKCS11::flags(Flag::SerialSession);
    SessionHandle session_handle = p11_low_level.open_session(session_flags);
-   Test::Result result = login_logout_helper(p11_low_level, session_handle, UserType::User, PIN);
+   Test::Result result = login_logout_helper(p11_low_level, session_handle, UserType::User, PKCS11_USER_PIN);
    p11_low_level.close_session();
 
    // R/W session
    session_flags = PKCS11::flags(Flag::SerialSession | Flag::RwSession);
    session_handle = p11_low_level.open_session(session_flags);
 
-   result.merge(login_logout_helper(p11_low_level, session_handle, UserType::User, PIN));
+   result.merge(login_logout_helper(p11_low_level, session_handle, UserType::User, PKCS11_USER_PIN));
 
    return result;
    }
@@ -548,11 +552,11 @@ Test::Result test_c_init_pin()
    Flags session_flags = PKCS11::flags(Flag::SerialSession | Flag::RwSession);
    SessionHandle session_handle = p11_low_level.open_session(session_flags);
 
-   p11_low_level.login(UserType::SO, SO_PIN_SECVEC);
+   p11_low_level.login(UserType::SO, SO_PIN());
 
    auto sec_vec_binder = std::bind(
                             static_cast< bool (LowLevel::*)(SessionHandle, const secure_vector<uint8_t>&, ReturnValue*) const>
-                            (&LowLevel::C_InitPIN<secure_allocator<uint8_t>>), *p11_low_level.get(), session_handle, std::ref(PIN_SECVEC),
+                            (&LowLevel::C_InitPIN<secure_allocator<uint8_t>>), *p11_low_level.get(), session_handle, PIN(),
                             std::placeholders::_1);
 
    return test_function("C_InitPIN", sec_vec_binder);
@@ -580,13 +584,13 @@ Test::Result test_c_set_pin()
    const std::string test_pin("654321");
    const auto test_pin_secvec = secure_vector<uint8_t>(test_pin.begin(), test_pin.end());
 
-   PKCS11_BoundTestFunction set_pin_bind = get_pin_bind(PIN_SECVEC, test_pin_secvec);
-   PKCS11_BoundTestFunction revert_pin_bind = get_pin_bind(test_pin_secvec, PIN_SECVEC);
+   PKCS11_BoundTestFunction set_pin_bind = get_pin_bind(PIN(), test_pin_secvec);
+   PKCS11_BoundTestFunction revert_pin_bind = get_pin_bind(test_pin_secvec, PIN());
 
    Test::Result result = test_function("C_SetPIN", set_pin_bind, "C_SetPIN", revert_pin_bind);
 
    // change pin in "R / W User Functions" state
-   p11_low_level.login(UserType::User, PIN_SECVEC);
+   p11_low_level.login(UserType::User, PIN());
 
    result.merge(test_function("C_SetPIN", set_pin_bind, "C_SetPIN", revert_pin_bind));
    p11_low_level.logout();
@@ -594,10 +598,10 @@ Test::Result test_c_set_pin()
    // change so_pin in "R / W SO Functions" state
    const std::string test_so_pin = "87654321";
    secure_vector<uint8_t> test_so_pin_secvec(test_so_pin.begin(), test_so_pin.end());
-   p11_low_level.login(UserType::SO, SO_PIN_SECVEC);
+   p11_low_level.login(UserType::SO, SO_PIN());
 
-   PKCS11_BoundTestFunction set_so_pin_bind = get_pin_bind(SO_PIN_SECVEC, test_so_pin_secvec);
-   PKCS11_BoundTestFunction revert_so_pin_bind = get_pin_bind(test_so_pin_secvec, SO_PIN_SECVEC);
+   PKCS11_BoundTestFunction set_so_pin_bind = get_pin_bind(SO_PIN(), test_so_pin_secvec);
+   PKCS11_BoundTestFunction revert_so_pin_bind = get_pin_bind(test_so_pin_secvec, SO_PIN());
 
    result.merge(test_function("C_SetPIN", set_so_pin_bind, "C_SetPIN", revert_so_pin_bind));
 
@@ -615,15 +619,16 @@ std::array<Attribute, 4> dtemplate =
       {
          { static_cast<CK_ATTRIBUTE_TYPE>(AttributeType::Class), &object_class, sizeof(object_class) },
          { static_cast<CK_ATTRIBUTE_TYPE>(AttributeType::Token), &btrue, sizeof(btrue) },
-         { static_cast<CK_ATTRIBUTE_TYPE>(AttributeType::Label), const_cast< char* >(label.c_str()), label.size() },
-         { static_cast<CK_ATTRIBUTE_TYPE>(AttributeType::Value), const_cast< char* >(data.c_str()), data.size() }
+         { static_cast<CK_ATTRIBUTE_TYPE>(AttributeType::Label), const_cast<char*>(label.c_str()), static_cast<CK_ULONG>(label.size()) },
+         { static_cast<CK_ATTRIBUTE_TYPE>(AttributeType::Value), const_cast<char*>(data.c_str()), static_cast<CK_ULONG>(data.size()) }
       }
    };
 
 ObjectHandle create_simple_data_object(const RAII_LowLevel& p11_low_level)
    {
    ObjectHandle object_handle;
-   p11_low_level.get()->C_CreateObject(p11_low_level.get_session_handle(), dtemplate.data(), dtemplate.size(),
+   p11_low_level.get()->C_CreateObject(p11_low_level.get_session_handle(),
+                                       dtemplate.data(), static_cast<Ulong>(dtemplate.size()),
                                        &object_handle);
    return object_handle;
    }
@@ -636,7 +641,8 @@ Test::Result test_c_create_object_c_destroy_object()
    ObjectHandle object_handle(0);
 
    auto create_bind = std::bind(&LowLevel::C_CreateObject, *p11_low_level.get(),
-                                session_handle, dtemplate.data(), dtemplate.size(), &object_handle, std::placeholders::_1);
+                                session_handle, dtemplate.data(), static_cast<Ulong>(dtemplate.size()),
+                                &object_handle, std::placeholders::_1);
 
    auto destroy_bind = std::bind(&LowLevel::C_DestroyObject, *p11_low_level.get(), session_handle,
                                  std::ref(object_handle), std::placeholders::_1);
@@ -651,7 +657,7 @@ Test::Result test_c_get_object_size()
    Flags session_flags = PKCS11::flags(Flag::SerialSession | Flag::RwSession);
    SessionHandle session_handle = p11_low_level.open_session(session_flags);
 
-   p11_low_level.login(UserType::User, PIN_SECVEC);
+   p11_low_level.login(UserType::User, PIN());
 
    ObjectHandle object_handle = create_simple_data_object(p11_low_level);
    Ulong object_size = 0;
@@ -722,7 +728,7 @@ Test::Result test_c_set_attribute_value()
    Flags session_flags = PKCS11::flags(Flag::SerialSession | Flag::RwSession);
    SessionHandle session_handle = p11_low_level.open_session(session_flags);
 
-   p11_low_level.login(UserType::User, PIN_SECVEC);
+   p11_low_level.login(UserType::User, PIN());
 
    ObjectHandle object_handle = create_simple_data_object(p11_low_level);
 
@@ -765,7 +771,9 @@ Test::Result test_c_copy_object()
 
    std::string copied_label = "A copied data object";
 
-   Attribute copy_attribute_values = { static_cast< CK_ATTRIBUTE_TYPE >(AttributeType::Label), const_cast< char* >(copied_label.c_str()), copied_label.size() };
+   Attribute copy_attribute_values = {
+      static_cast<CK_ATTRIBUTE_TYPE>(AttributeType::Label), const_cast<char*>(copied_label.c_str()), static_cast<CK_ULONG>(copied_label.size())
+   };
 
    auto binder = std::bind(&LowLevel::C_CopyObject, *p11_low_level.get(), session_handle, object_handle,
                            &copy_attribute_values, 1, &copied_object_handle, std::placeholders::_1);
@@ -793,57 +801,33 @@ class LowLevelTests final : public Test
    public:
       std::vector<Test::Result> run() override
          {
-         std::vector<Test::Result> results;
+         std::vector<std::pair<std::string, std::function<Test::Result()>>> fns = {
+            {STRING_AND_FUNCTION(test_c_get_function_list)},
+            {STRING_AND_FUNCTION(test_low_level_ctor)},
+            {STRING_AND_FUNCTION(test_initialize_finalize)},
+            {STRING_AND_FUNCTION(test_c_get_info)},
+            {STRING_AND_FUNCTION(test_c_get_slot_list)},
+            {STRING_AND_FUNCTION(test_c_get_slot_info)},
+            {STRING_AND_FUNCTION(test_c_get_token_info)},
+            {STRING_AND_FUNCTION(test_c_wait_for_slot_event)},
+            {STRING_AND_FUNCTION(test_c_get_mechanism_list)},
+            {STRING_AND_FUNCTION(test_c_get_mechanism_info)},
+            {STRING_AND_FUNCTION(test_open_close_session)},
+            {STRING_AND_FUNCTION(test_c_close_all_sessions)},
+            {STRING_AND_FUNCTION(test_c_get_session_info)},
+            {STRING_AND_FUNCTION(test_c_init_token)},
+            {STRING_AND_FUNCTION(test_c_login_logout_security_officier)}, /* only possible if token is initialized */
+            {STRING_AND_FUNCTION(test_c_init_pin)},
+            {STRING_AND_FUNCTION(test_c_login_logout_user)}, /* only possible if token is initialized and user pin is set */
+            {STRING_AND_FUNCTION(test_c_set_pin)},
+            {STRING_AND_FUNCTION(test_c_create_object_c_destroy_object)},
+            {STRING_AND_FUNCTION(test_c_get_object_size)},
+            {STRING_AND_FUNCTION(test_c_get_attribute_value)},
+            {STRING_AND_FUNCTION(test_c_set_attribute_value)},
+            {STRING_AND_FUNCTION(test_c_copy_object)}
+         };
 
-         std::vector<std::function<Test::Result()>> fns =
-            {
-            test_c_get_function_list
-            , test_low_level_ctor
-            , test_initialize_finalize
-            , test_c_get_info
-            , test_c_get_slot_list
-            , test_c_get_slot_info
-            , test_c_get_token_info
-            , test_c_wait_for_slot_event
-            , test_c_get_mechanism_list
-            , test_c_get_mechanism_info
-            , test_open_close_session
-            , test_c_close_all_sessions
-            , test_c_get_session_info
-            , test_c_init_token
-            , test_c_login_logout_security_officier /* only possible if token is initialized */
-            , test_c_init_pin
-            , test_c_login_logout_user /* only possible if token is initialized and user pin is set */
-            , test_c_set_pin
-            , test_c_create_object_c_destroy_object
-            , test_c_get_object_size
-            , test_c_get_attribute_value
-            , test_c_set_attribute_value
-            , test_c_copy_object
-            };
-
-         for(size_t i = 0; i != fns.size(); ++i)
-            {
-            try
-               {
-               results.push_back(fns[ i ]());
-               }
-            catch(PKCS11_ReturnError& e)
-               {
-               results.push_back(Test::Result::Failure("PKCS11 low level test " + std::to_string(i), e.what()));
-
-               if(e.get_return_value() == ReturnValue::PinIncorrect)
-                  {
-                  break; // Do not continue to not potentially lock the token
-                  }
-               }
-            catch(std::exception& e)
-               {
-               results.push_back(Test::Result::Failure("PKCS11 low level test " + std::to_string(i), e.what()));
-               }
-            }
-
-         return results;
+         return run_pkcs11_tests("PKCS11 low level", fns);
          }
    };
 

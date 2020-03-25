@@ -10,18 +10,21 @@
 
 #include <botan/block_cipher.h>
 
+BOTAN_FUTURE_INTERNAL_HEADER(threefish_512.h)
+
 namespace Botan {
 
 /**
 * Threefish-512
 */
-class BOTAN_PUBLIC_API(2,0) Threefish_512 final : public Block_Cipher_Fixed_Params<64, 64>
+class BOTAN_PUBLIC_API(2,0) Threefish_512 final :
+   public Block_Cipher_Fixed_Params<64, 64, 0, 1, Tweakable_Block_Cipher>
    {
    public:
       void encrypt_n(const uint8_t in[], uint8_t out[], size_t blocks) const override;
       void decrypt_n(const uint8_t in[], uint8_t out[], size_t blocks) const override;
 
-      void set_tweak(const uint8_t tweak[], size_t len);
+      void set_tweak(const uint8_t tweak[], size_t len) override;
 
       void clear() override;
       std::string provider() const override;
@@ -30,8 +33,6 @@ class BOTAN_PUBLIC_API(2,0) Threefish_512 final : public Block_Cipher_Fixed_Para
       size_t parallelism() const override;
 
    private:
-      const secure_vector<uint64_t>& get_T() const { return m_T; }
-      const secure_vector<uint64_t>& get_K() const { return m_K; }
 
 #if defined(BOTAN_HAS_THREEFISH_512_AVX2)
       void avx2_encrypt_n(const uint8_t in[], uint8_t out[], size_t blocks) const;

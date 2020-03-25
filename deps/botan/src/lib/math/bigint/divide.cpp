@@ -1,6 +1,6 @@
 /*
 * Division Algorithm
-* (C) 1999-2007,2012 Jack Lloyd
+* (C) 1999-2007,2012,2018 Jack Lloyd
 *
 * Botan is released under the Simplified BSD License (see license.txt)
 */
@@ -8,6 +8,8 @@
 #include <botan/divide.h>
 #include <botan/internal/mp_core.h>
 #include <botan/internal/mp_madd.h>
+#include <botan/internal/ct_utils.h>
+#include <botan/internal/bit_ops.h>
 
 namespace Botan {
 
@@ -18,123 +20,217 @@ namespace {
 */
 void sign_fixup(const BigInt& x, const BigInt& y, BigInt& q, BigInt& r)
    {
-   if(x.sign() == BigInt::Negative)
+   q.cond_flip_sign(x.sign() != y.sign());
+
+   if(x.is_negative() && r.is_nonzero())
       {
-      q.flip_sign();
-      if(r.is_nonzero()) { --q; r = y.abs() - r; }
+      q -= 1;
+      r = y.abs() - r;
       }
-   if(y.sign() == BigInt::Negative)
-      q.flip_sign();
    }
 
-bool division_check(word q, word y2, word y1,
-                    word x3, word x2, word x1)
+inline bool division_check(word q, word y2, word y1,
+                           word x3, word x2, word x1)
    {
-   // Compute (y3,y2,y1) = (y2,y1) * q
+   /*
+   Compute (y3,y2,y1) = (y2,y1) * q
+   and return true if (y3,y2,y1) > (x3,x2,x1)
+   */
 
    word y3 = 0;
    y1 = word_madd2(q, y1, &y3);
    y2 = word_madd2(q, y2, &y3);
 
-   // Return (y3,y2,y1) >? (x3,x2,x1)
+   const word x[3] = { x1, x2, x3 };
+   const word y[3] = { y1, y2, y3 };
 
-   if(y3 > x3) return true;
-   if(y3 < x3) return false;
-
-   if(y2 > x2) return true;
-   if(y2 < x2) return false;
-
-   if(y1 > x1) return true;
-   if(y1 < x1) return false;
-
-   return false;
+   return bigint_ct_is_lt(x, 3, y, 3).is_set();
    }
 
 }
 
+void ct_divide(const BigInt& x, const BigInt& y, BigInt& q_out, BigInt& r_out)
+   {
+   const size_t x_words = x.sig_words();
+   const size_t y_words = y.sig_words();
+
+   const size_t x_bits = x.bits();
+
+   BigInt q(BigInt::Positive, x_words);
+   BigInt r(BigInt::Positive, y_words);
+   BigInt t(BigInt::Positive, y_words); // a temporary
+
+   for(size_t i = 0; i != x_bits; ++i)
+      {
+      const size_t b = x_bits - 1 - i;
+      const bool x_b = x.get_bit(b);
+
+      r *= 2;
+      r.conditionally_set_bit(0, x_b);
+
+      const bool r_gte_y = bigint_sub3(t.mutable_data(), r.data(), r.size(), y.data(), y_words) == 0;
+
+      q.conditionally_set_bit(b, r_gte_y);
+      r.ct_cond_swap(r_gte_y, t);
+      }
+
+   sign_fixup(x, y, q, r);
+   r_out = r;
+   q_out = q;
+   }
+
+void ct_divide_u8(const BigInt& x, uint8_t y, BigInt& q_out, uint8_t& r_out)
+   {
+   const size_t x_words = x.sig_words();
+   const size_t x_bits = x.bits();
+
+   BigInt q(BigInt::Positive, x_words);
+   uint32_t r = 0;
+
+   for(size_t i = 0; i != x_bits; ++i)
+      {
+      const size_t b = x_bits - 1 - i;
+      const bool x_b = x.get_bit(b);
+
+      r *= 2;
+      r += x_b;
+
+      const auto r_gte_y = CT::Mask<uint32_t>::is_gte(r, y);
+
+      q.conditionally_set_bit(b, r_gte_y.is_set());
+      r = r_gte_y.select(r - y, r);
+      }
+
+   if(x.is_negative())
+      {
+      q.flip_sign();
+      if(r != 0)
+         {
+         --q;
+         r = y - r;
+         }
+      }
+
+   r_out = static_cast<uint8_t>(r);
+   q_out = q;
+   }
+
+BigInt ct_modulo(const BigInt& x, const BigInt& y)
+   {
+   if(y.is_negative() || y.is_zero())
+      throw Invalid_Argument("ct_modulo requires y > 0");
+
+   const size_t y_words = y.sig_words();
+
+   const size_t x_bits = x.bits();
+
+   BigInt r(BigInt::Positive, y_words);
+   BigInt t(BigInt::Positive, y_words);
+
+   for(size_t i = 0; i != x_bits; ++i)
+      {
+      const size_t b = x_bits - 1 - i;
+      const bool x_b = x.get_bit(b);
+
+      r *= 2;
+      r.conditionally_set_bit(0, x_b);
+
+      const bool r_gte_y = bigint_sub3(t.mutable_data(), r.data(), r.size(), y.data(), y_words) == 0;
+
+      r.ct_cond_swap(r_gte_y, t);
+      }
+
+   if(x.is_negative())
+      {
+      if(r.is_nonzero())
+         {
+         r = y - r;
+         }
+      }
+
+   return r;
+   }
+
 /*
 * Solve x = q * y + r
+*
+* See Handbook of Applied Cryptography section 14.2.5
 */
-void divide(const BigInt& x, const BigInt& y_arg, BigInt& q, BigInt& r)
+void divide(const BigInt& x, const BigInt& y_arg, BigInt& q_out, BigInt& r_out)
    {
    if(y_arg.is_zero())
       throw BigInt::DivideByZero();
 
-   BigInt y = y_arg;
-   const size_t y_words = y.sig_words();
+   const size_t y_words = y_arg.sig_words();
 
-   r = x;
-   q = 0;
+   BOTAN_ASSERT_NOMSG(y_words > 0);
+
+   BigInt y = y_arg;
+
+   BigInt r = x;
+   BigInt q = 0;
+   secure_vector<word> ws;
 
    r.set_sign(BigInt::Positive);
    y.set_sign(BigInt::Positive);
 
-   int32_t compare = r.cmp(y);
+   // Calculate shifts needed to normalize y with high bit set
+   const size_t shifts = y.top_bits_free();
 
-   if(compare == 0)
+   y <<= shifts;
+   r <<= shifts;
+
+   // we know y has not changed size, since we only shifted up to set high bit
+   const size_t t = y_words - 1;
+   const size_t n = std::max(y_words, r.sig_words()) - 1; // r may have changed size however
+
+   BOTAN_ASSERT_NOMSG(n >= t);
+
+   q.grow_to(n - t + 1);
+
+   word* q_words = q.mutable_data();
+
+   BigInt shifted_y = y << (BOTAN_MP_WORD_BITS * (n-t));
+
+   // Set q_{n-t} to number of times r > shifted_y
+   q_words[n-t] = r.reduce_below(shifted_y, ws);
+
+   const word y_t0  = y.word_at(t);
+   const word y_t1  = y.word_at(t-1);
+   BOTAN_DEBUG_ASSERT((y_t0 >> (BOTAN_MP_WORD_BITS-1)) == 1);
+
+   for(size_t j = n; j != t; --j)
       {
-      q = 1;
-      r = 0;
+      const word x_j0  = r.word_at(j);
+      const word x_j1 = r.word_at(j-1);
+      const word x_j2 = r.word_at(j-2);
+
+      word qjt = bigint_divop(x_j0, x_j1, y_t0);
+
+      qjt = CT::Mask<word>::is_equal(x_j0, y_t0).select(MP_WORD_MAX, qjt);
+
+      // Per HAC 14.23, this operation is required at most twice
+      qjt -= division_check(qjt, y_t0, y_t1, x_j0, x_j1, x_j2);
+      qjt -= division_check(qjt, y_t0, y_t1, x_j0, x_j1, x_j2);
+      BOTAN_DEBUG_ASSERT(division_check(qjt, y_t0, y_t1, x_j0, x_j1, x_j2) == false);
+
+      shifted_y >>= BOTAN_MP_WORD_BITS;
+      // Now shifted_y == y << (BOTAN_MP_WORD_BITS * (j-t-1))
+
+      // TODO this sequence could be better
+      r -= qjt * shifted_y;
+      qjt -= r.is_negative();
+      r += static_cast<word>(r.is_negative()) * shifted_y;
+
+      q_words[j-t-1] = qjt;
       }
-   else if(compare > 0)
-      {
-      size_t shifts = 0;
-      word y_top = y.word_at(y.sig_words()-1);
-      while(y_top < MP_WORD_TOP_BIT) { y_top <<= 1; ++shifts; }
-      y <<= shifts;
-      r <<= shifts;
 
-      const size_t n = r.sig_words() - 1, t = y_words - 1;
-
-      if(n < t)
-         throw Internal_Error("BigInt division word sizes");
-
-      q.grow_to(n - t + 1);
-
-      word* q_words = q.mutable_data();
-
-      if(n <= t)
-         {
-         while(r > y) { r -= y; ++q; }
-         r >>= shifts;
-         sign_fixup(x, y_arg, q, r);
-         return;
-         }
-
-      BigInt temp = y << (BOTAN_MP_WORD_BITS * (n-t));
-
-      while(r >= temp) { r -= temp; q_words[n-t] += 1; }
-
-      for(size_t j = n; j != t; --j)
-         {
-         const word x_j0  = r.word_at(j);
-         const word x_j1 = r.word_at(j-1);
-         const word y_t  = y.word_at(t);
-
-         if(x_j0 == y_t)
-            q_words[j-t-1] = MP_WORD_MAX;
-         else
-            q_words[j-t-1] = bigint_divop(x_j0, x_j1, y_t);
-
-         while(division_check(q_words[j-t-1],
-                              y_t, y.word_at(t-1),
-                              x_j0, x_j1, r.word_at(j-2)))
-            {
-            q_words[j-t-1] -= 1;
-            }
-
-         r -= (q_words[j-t-1] * y) << (BOTAN_MP_WORD_BITS * (j-t-1));
-
-         if(r.is_negative())
-            {
-            r += y << (BOTAN_MP_WORD_BITS * (j-t-1));
-            q_words[j-t-1] -= 1;
-            }
-         }
-      r >>= shifts;
-      }
+   r >>= shifts;
 
    sign_fixup(x, y_arg, q, r);
+
+   r_out = r;
+   q_out = q;
    }
 
 }

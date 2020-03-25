@@ -10,6 +10,7 @@
 
 #include <botan/types.h>
 #include <cstring>
+#include <type_traits>
 #include <vector>
 
 namespace Botan {
@@ -65,11 +66,25 @@ BOTAN_PUBLIC_API(2,0) void secure_scrub_memory(void* ptr, size_t n);
 * @param x a pointer to an array
 * @param y a pointer to another array
 * @param len the number of Ts in x and y
+* @return 0xFF iff x[i] == y[i] forall i in [0...n) or 0x00 otherwise
+*/
+BOTAN_PUBLIC_API(2,9) uint8_t ct_compare_u8(const uint8_t x[],
+                                            const uint8_t y[],
+                                            size_t len);
+
+/**
+* Memory comparison, input insensitive
+* @param x a pointer to an array
+* @param y a pointer to another array
+* @param len the number of Ts in x and y
 * @return true iff x[i] == y[i] forall i in [0...n)
 */
-BOTAN_PUBLIC_API(2,3) bool constant_time_compare(const uint8_t x[],
-                                     const uint8_t y[],
-                                     size_t len);
+inline bool constant_time_compare(const uint8_t x[],
+                                  const uint8_t y[],
+                                  size_t len)
+   {
+   return ct_compare_u8(x, y, len) == 0xFF;
+   }
 
 /**
 * Zero out some bytes
@@ -99,6 +114,15 @@ template<typename T> inline void clear_mem(T* ptr, size_t n)
    clear_bytes(ptr, sizeof(T)*n);
    }
 
+
+
+// is_trivially_copyable is missing in g++ < 5.0
+#if !__clang__ && __GNUG__ && __GNUC__ < 5
+#define BOTAN_IS_TRIVIALLY_COPYABLE(T) true
+#else
+#define BOTAN_IS_TRIVIALLY_COPYABLE(T) std::is_trivially_copyable<T>::value
+#endif
+
 /**
 * Copy memory
 * @param out the destination array
@@ -107,24 +131,58 @@ template<typename T> inline void clear_mem(T* ptr, size_t n)
 */
 template<typename T> inline void copy_mem(T* out, const T* in, size_t n)
    {
-   if(n > 0)
+   static_assert(std::is_trivial<typename std::decay<T>::type>::value, "");
+   BOTAN_ASSERT_IMPLICATION(n > 0, in != nullptr && out != nullptr,
+                            "If n > 0 then args are not null");
+
+   if(in != nullptr && out != nullptr && n > 0)
       {
       std::memmove(out, in, sizeof(T)*n);
       }
    }
 
+template<typename T> inline void typecast_copy(uint8_t out[], T in[], size_t N)
+   {
+   static_assert(BOTAN_IS_TRIVIALLY_COPYABLE(T), "");
+   std::memcpy(out, in, sizeof(T)*N);
+   }
+
+template<typename T> inline void typecast_copy(T out[], const uint8_t in[], size_t N)
+   {
+   static_assert(std::is_trivial<T>::value, "");
+   std::memcpy(out, in, sizeof(T)*N);
+   }
+
+template<typename T> inline void typecast_copy(uint8_t out[], T in)
+   {
+   typecast_copy(out, &in, 1);
+   }
+
+template<typename T> inline void typecast_copy(T& out, const uint8_t in[])
+   {
+   static_assert(std::is_trivial<typename std::decay<T>::type>::value, "");
+   typecast_copy(&out, in, 1);
+   }
+
+template <class To, class From> inline To typecast_copy(const From *src) noexcept
+   {
+   static_assert(BOTAN_IS_TRIVIALLY_COPYABLE(From) && std::is_trivial<To>::value, "");
+   To dst;
+   std::memcpy(&dst, src, sizeof(To));
+   return dst;
+   }
+
 /**
 * Set memory to a fixed value
-* @param ptr a pointer to an array
+* @param ptr a pointer to an array of bytes
 * @param n the number of Ts pointed to by ptr
 * @param val the value to set each byte to
 */
-template<typename T>
-inline void set_mem(T* ptr, size_t n, uint8_t val)
+inline void set_mem(uint8_t* ptr, size_t n, uint8_t val)
    {
    if(n > 0)
       {
-      std::memset(ptr, val, sizeof(T)*n);
+      std::memset(ptr, val, n);
       }
    }
 
@@ -175,27 +233,27 @@ inline void xor_buf(uint8_t out[],
                     const uint8_t in[],
                     size_t length)
    {
-   while(length >= 16)
-      {
-      uint64_t x0, x1, y0, y1;
-      std::memcpy(&x0, in, 8);
-      std::memcpy(&x1, in + 8, 8);
-      std::memcpy(&y0, out, 8);
-      std::memcpy(&y1, out + 8, 8);
+   const size_t blocks = length - (length % 32);
 
-      y0 ^= x0;
-      y1 ^= x1;
-      std::memcpy(out, &y0, 8);
-      std::memcpy(out + 8, &y1, 8);
-      out += 16; in += 16; length -= 16;
+   for(size_t i = 0; i != blocks; i += 32)
+      {
+      uint64_t x[4];
+      uint64_t y[4];
+
+      typecast_copy(x, out + i, 4);
+      typecast_copy(y, in + i, 4);
+
+      x[0] ^= y[0];
+      x[1] ^= y[1];
+      x[2] ^= y[2];
+      x[3] ^= y[3];
+
+      typecast_copy(out + i, x, 4);
       }
 
-   while(length > 0)
+   for(size_t i = blocks; i != length; ++i)
       {
-      out[0] ^= in[0];
-      out += 1;
-      in += 1;
-      length -= 1;
+      out[i] ^= in[i];
       }
    }
 
@@ -211,23 +269,28 @@ inline void xor_buf(uint8_t out[],
                     const uint8_t in2[],
                     size_t length)
    {
-   while(length >= 16)
-      {
-      uint64_t x0, x1, y0, y1;
-      std::memcpy(&x0, in, 8);
-      std::memcpy(&x1, in + 8, 8);
-      std::memcpy(&y0, in2, 8);
-      std::memcpy(&y1, in2 + 8, 8);
+   const size_t blocks = length - (length % 32);
 
-      x0 ^= y0;
-      x1 ^= y1;
-      std::memcpy(out, &x0, 8);
-      std::memcpy(out + 8, &x1, 8);
-      out += 16; in += 16; in2 += 16; length -= 16;
+   for(size_t i = 0; i != blocks; i += 32)
+      {
+      uint64_t x[4];
+      uint64_t y[4];
+
+      typecast_copy(x, in + i, 4);
+      typecast_copy(y, in2 + i, 4);
+
+      x[0] ^= y[0];
+      x[1] ^= y[1];
+      x[2] ^= y[2];
+      x[3] ^= y[3];
+
+      typecast_copy(out + i, x, 4);
       }
 
-   for(size_t i = 0; i != length; ++i)
+   for(size_t i = blocks; i != length; ++i)
+      {
       out[i] = in[i] ^ in2[i];
+      }
    }
 
 template<typename Alloc, typename Alloc2>

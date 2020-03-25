@@ -92,8 +92,9 @@ Client_Hello::Client_Hello(Handshake_IO& io,
    m_suites(policy.ciphersuite_list(m_version, !client_settings.srp_identifier().empty())),
    m_comp_methods(1)
    {
-   BOTAN_ASSERT(policy.acceptable_protocol_version(client_settings.protocol_version()),
-                "Our policy accepts the version we are offering");
+   if(!policy.acceptable_protocol_version(m_version))
+      throw Internal_Error("Offering " + m_version.to_string() +
+                           " but our own policy does not accept it");
 
    /*
    * Place all empty extensions in front to avoid a bug in some systems
@@ -106,7 +107,11 @@ Client_Hello::Client_Hello(Handshake_IO& io,
       m_extensions.add(new Encrypt_then_MAC);
 
    m_extensions.add(new Renegotiation_Extension(reneg_info));
-   m_extensions.add(new Server_Name_Indicator(client_settings.hostname()));
+
+   m_extensions.add(new Supported_Versions(m_version, policy));
+
+   if(client_settings.hostname() != "")
+      m_extensions.add(new Server_Name_Indicator(client_settings.hostname()));
 
    if(policy.support_cert_status_message())
       m_extensions.add(new Certificate_Status_Request({}, {}));
@@ -163,6 +168,10 @@ Client_Hello::Client_Hello(Handshake_IO& io,
    m_suites(policy.ciphersuite_list(m_version, (session.srp_identifier() != ""))),
    m_comp_methods(1)
    {
+   if(!policy.acceptable_protocol_version(m_version))
+      throw Internal_Error("Offering " + m_version.to_string() +
+                           " but our own policy does not accept it");
+
    if(!value_exists(m_suites, session.ciphersuite_code()))
       m_suites.push_back(session.ciphersuite_code());
 
@@ -176,6 +185,9 @@ Client_Hello::Client_Hello(Handshake_IO& io,
    m_extensions.add(new Renegotiation_Extension(reneg_info));
    m_extensions.add(new Server_Name_Indicator(session.server_info().hostname()));
    m_extensions.add(new Session_Ticket(session.session_ticket()));
+
+   if(policy.support_cert_status_message())
+      m_extensions.add(new Certificate_Status_Request({}, {}));
 
    std::unique_ptr<Supported_Groups> supported_groups(new Supported_Groups(policy.key_exchange_groups()));
 
@@ -212,7 +224,7 @@ Client_Hello::Client_Hello(Handshake_IO& io,
 void Client_Hello::update_hello_cookie(const Hello_Verify_Request& hello_verify)
    {
    if(!m_version.is_datagram_protocol())
-      throw Exception("Cannot use hello cookie with stream protocol");
+      throw Invalid_State("Cannot use hello cookie with stream protocol");
 
    m_hello_cookie = hello_verify.cookie();
    }
@@ -242,7 +254,26 @@ std::vector<uint8_t> Client_Hello::serialize() const
    * renegotiating with a modern server)
    */
 
-   buf += m_extensions.serialize();
+   buf += m_extensions.serialize(Connection_Side::CLIENT);
+
+   return buf;
+   }
+
+std::vector<uint8_t> Client_Hello::cookie_input_data() const
+   {
+   std::vector<uint8_t> buf;
+
+   buf.push_back(m_version.major_version());
+   buf.push_back(m_version.minor_version());
+   buf += m_random;
+
+   append_tls_length_value(buf, m_session_id, 1);
+
+   append_tls_length_value(buf, m_suites, 2);
+   append_tls_length_value(buf, m_comp_methods, 1);
+
+   // Here we don't serialize the extensions since the client extensions
+   // may contain values we don't know how to serialize back.
 
    return buf;
    }
@@ -273,7 +304,7 @@ Client_Hello::Client_Hello(const std::vector<uint8_t>& buf)
 
    m_comp_methods = reader.get_range_vector<uint8_t>(1, 1, 255);
 
-   m_extensions.deserialize(reader);
+   m_extensions.deserialize(reader, Connection_Side::CLIENT);
 
    if(offered_suite(static_cast<uint16_t>(TLS_EMPTY_RENEGOTIATION_INFO_SCSV)))
       {
@@ -288,15 +319,6 @@ Client_Hello::Client_Hello(const std::vector<uint8_t>& buf)
          // add fake extension
          m_extensions.add(new Renegotiation_Extension());
          }
-      }
-
-   // Parsing complete, now any additional decoding checks
-
-   if(m_version.supports_negotiable_signature_algorithms() == false)
-      {
-      if(m_extensions.has<Signature_Algorithms>())
-         throw TLS_Exception(Alert::HANDSHAKE_FAILURE,
-                             "Client sent signature_algorithms extension in version that doesn't support it");
       }
    }
 
@@ -377,6 +399,13 @@ std::vector<uint8_t> Client_Hello::renegotiation_info() const
    if(Renegotiation_Extension* reneg = m_extensions.get<Renegotiation_Extension>())
       return reneg->renegotiation_info();
    return std::vector<uint8_t>();
+   }
+
+std::vector<Protocol_Version> Client_Hello::supported_versions() const
+   {
+   if(Supported_Versions* versions = m_extensions.get<Supported_Versions>())
+      return versions->versions();
+   return {};
    }
 
 bool Client_Hello::supports_session_ticket() const

@@ -14,6 +14,7 @@ namespace Botan {
 
 /**
 * Certificate validation status code
+* Warning: reflect any changes to this in botan_cert_status_code in ffi.h
 */
 enum class Certificate_Status_Code {
    OK = 0,
@@ -29,6 +30,10 @@ enum class Certificate_Status_Code {
    FIRST_WARNING_STATUS = 500,
    CERT_SERIAL_NEGATIVE = 500,
    DN_TOO_LONG = 501,
+   OCSP_NO_REVOCATION_URL = 502,
+   OCSP_SERVER_NOT_AVAILABLE = 503,
+
+   // Typo versions of above - will be removed in future major release
    OSCP_NO_REVOCATION_URL = 502,
    OSCP_SERVER_NOT_AVAILABLE = 503,
 
@@ -47,6 +52,7 @@ enum class Certificate_Status_Code {
    OCSP_HAS_EXPIRED = 2003,
    CRL_NOT_YET_VALID = 2004,
    CRL_HAS_EXPIRED = 2005,
+   OCSP_IS_TOO_OLD = 2006,
 
    // Chain generation problems
    CERT_ISSUER_NOT_FOUND = 3000,

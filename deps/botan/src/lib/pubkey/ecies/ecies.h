@@ -15,14 +15,13 @@
 #include <botan/pubkey.h>
 #include <botan/secmem.h>
 #include <botan/symkey.h>
+#include <botan/mac.h>
 #include <memory>
 #include <string>
 #include <vector>
-#include <limits>
 
 namespace Botan {
 
-class MessageAuthenticationCode;
 class RandomNumberGenerator;
 
 enum class ECIES_Flags : uint32_t
@@ -69,7 +68,8 @@ class BOTAN_PUBLIC_API(2,0) ECIES_KA_Params
                       PointGFp::Compression_Type compression_type, ECIES_Flags flags);
 
       ECIES_KA_Params(const ECIES_KA_Params&) = default;
-      ECIES_KA_Params& operator=(const ECIES_KA_Params&) = default;
+      ECIES_KA_Params& operator=(const ECIES_KA_Params&) = delete;
+
       virtual ~ECIES_KA_Params() = default;
 
       inline const EC_Group& domain() const
@@ -150,7 +150,7 @@ class BOTAN_PUBLIC_API(2,0) ECIES_System_Params final : public ECIES_KA_Params
                           PointGFp::Compression_Type compression_type, ECIES_Flags flags);
 
       ECIES_System_Params(const ECIES_System_Params&) = default;
-      ECIES_System_Params& operator=(const ECIES_System_Params&) = default;
+      ECIES_System_Params& operator=(const ECIES_System_Params&) = delete;
       virtual ~ECIES_System_Params() = default;
 
       /// creates an instance of the message authentication code
@@ -254,13 +254,14 @@ class BOTAN_PUBLIC_API(2,0) ECIES_Encryptor final : public PK_Encryptor
    private:
       std::vector<uint8_t> enc(const uint8_t data[], size_t length, RandomNumberGenerator&) const override;
 
-      inline size_t maximum_input_size() const override
-         {
-         return std::numeric_limits<size_t>::max();
-         }
+      size_t maximum_input_size() const override;
+
+      size_t ciphertext_length(size_t ptext_len) const override;
 
       const ECIES_KA_Operation m_ka;
       const ECIES_System_Params m_params;
+      std::unique_ptr<MessageAuthenticationCode> m_mac;
+      std::unique_ptr<Cipher_Mode> m_cipher;
       std::vector<uint8_t> m_eph_public_key_bin;
       InitializationVector m_iv;
       PointGFp m_other_point;
@@ -298,8 +299,12 @@ class BOTAN_PUBLIC_API(2,0) ECIES_Decryptor final : public PK_Decryptor
    private:
       secure_vector<uint8_t> do_decrypt(uint8_t& valid_mask, const uint8_t in[], size_t in_len) const override;
 
+      size_t plaintext_length(size_t ctext_len) const override;
+
       const ECIES_KA_Operation m_ka;
       const ECIES_System_Params m_params;
+      std::unique_ptr<MessageAuthenticationCode> m_mac;
+      std::unique_ptr<Cipher_Mode> m_cipher;
       InitializationVector m_iv;
       std::vector<uint8_t> m_label;
    };

@@ -80,26 +80,17 @@ PKCS10_Request PKCS10_Request::create(const Private_Key& key,
 
    if(challenge.empty() == false)
       {
-      ASN1_String challenge_str(challenge, DIRECTORY_STRING);
-
-      tbs_req.encode(
-         Attribute("PKCS9.ChallengePassword",
-                   DER_Encoder().encode(challenge_str).get_contents_unlocked()
-            )
-         );
+      std::vector<uint8_t> value;
+      DER_Encoder(value).encode(ASN1_String(challenge, DIRECTORY_STRING));
+      tbs_req.encode(Attribute("PKCS9.ChallengePassword", value));
       }
 
-   tbs_req.encode(
-      Attribute("PKCS9.ExtensionRequest",
-                DER_Encoder()
-                   .start_cons(SEQUENCE)
-                      .encode(extensions)
-                   .end_cons()
-               .get_contents_unlocked()
-         )
-      )
-      .end_explicit()
-      .end_cons();
+   std::vector<uint8_t> extension_req;
+   DER_Encoder(extension_req).start_cons(SEQUENCE).encode(extensions).end_cons();
+   tbs_req.encode(Attribute("PKCS9.ExtensionRequest", extension_req));
+
+   // end the start_explicit above
+   tbs_req.end_explicit().end_cons();
 
    const std::vector<uint8_t> req =
       X509_Object::make_signed(signer.get(), rng, sig_algo,
@@ -148,19 +139,19 @@ std::unique_ptr<PKCS10_Data> decode_pkcs10(const std::vector<uint8_t>& body)
          const OID& oid = attr.get_oid();
          BER_Decoder value(attr.get_parameters());
 
-         if(oid == OIDS::lookup("PKCS9.EmailAddress"))
+         if(oid == OID::from_string("PKCS9.EmailAddress"))
             {
             ASN1_String email;
             value.decode(email);
             pkcs9_email.insert(email.value());
             }
-         else if(oid == OIDS::lookup("PKCS9.ChallengePassword"))
+         else if(oid == OID::from_string("PKCS9.ChallengePassword"))
             {
             ASN1_String challenge_password;
             value.decode(challenge_password);
             data->m_challenge = challenge_password.value();
             }
-         else if(oid == OIDS::lookup("PKCS9.ExtensionRequest"))
+         else if(oid == OID::from_string("PKCS9.ExtensionRequest"))
             {
             value.decode(data->m_extensions).verify_end();
             }
@@ -260,7 +251,7 @@ const Extensions& PKCS10_Request::extensions() const
 */
 Key_Constraints PKCS10_Request::constraints() const
    {
-   if(auto ext = extensions().get(OIDS::lookup("X509v3.KeyUsage")))
+   if(auto ext = extensions().get(OID::from_string("X509v3.KeyUsage")))
       {
       return dynamic_cast<Cert_Extension::Key_Usage&>(*ext).get_constraints();
       }
@@ -273,7 +264,7 @@ Key_Constraints PKCS10_Request::constraints() const
 */
 std::vector<OID> PKCS10_Request::ex_constraints() const
    {
-   if(auto ext = extensions().get(OIDS::lookup("X509v3.ExtendedKeyUsage")))
+   if(auto ext = extensions().get(OID::from_string("X509v3.ExtendedKeyUsage")))
       {
       return dynamic_cast<Cert_Extension::Extended_Key_Usage&>(*ext).get_oids();
       }
@@ -286,7 +277,7 @@ std::vector<OID> PKCS10_Request::ex_constraints() const
 */
 bool PKCS10_Request::is_CA() const
    {
-   if(auto ext = extensions().get(OIDS::lookup("X509v3.BasicConstraints")))
+   if(auto ext = extensions().get(OID::from_string("X509v3.BasicConstraints")))
       {
       return dynamic_cast<Cert_Extension::Basic_Constraints&>(*ext).get_is_ca();
       }
@@ -299,7 +290,7 @@ bool PKCS10_Request::is_CA() const
 */
 size_t PKCS10_Request::path_limit() const
    {
-   if(auto ext = extensions().get(OIDS::lookup("X509v3.BasicConstraints")))
+   if(auto ext = extensions().get(OID::from_string("X509v3.BasicConstraints")))
       {
       Cert_Extension::Basic_Constraints& basic_constraints = dynamic_cast<Cert_Extension::Basic_Constraints&>(*ext);
       if(basic_constraints.get_is_ca())

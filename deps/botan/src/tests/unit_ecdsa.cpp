@@ -82,7 +82,7 @@ Test::Result test_decode_ecdsa_X509()
    Test::Result result("ECDSA Unit");
    Botan::X509_Certificate cert(Test::data_file("x509/ecc/CSCA.CSCA.csca-germany.1.crt"));
 
-   result.test_eq("correct signature oid", Botan::OIDS::lookup(cert.signature_algorithm().get_oid()), "ECDSA/EMSA1(SHA-224)");
+   result.test_eq("correct signature oid", cert.signature_algorithm().get_oid().to_formatted_string(), "ECDSA/EMSA1(SHA-224)");
 
    result.test_eq("serial number", cert.serial_number(), Botan::hex_decode("01"));
    result.test_eq("authority key id", cert.authority_key_id(), cert.subject_key_id());
@@ -215,7 +215,7 @@ Test::Result test_ecdsa_create_save_load()
    Botan::DataSource_Memory pem_src(ecc_private_key_pem);
    std::unique_ptr<Botan::Private_Key> loaded_key(Botan::PKCS8::load_key(pem_src, Test::rng()));
    Botan::ECDSA_PrivateKey* loaded_ec_key = dynamic_cast<Botan::ECDSA_PrivateKey*>(loaded_key.get());
-   result.confirm("the loaded key could be converted into an ECDSA_PrivateKey", loaded_ec_key);
+   result.confirm("the loaded key could be converted into an ECDSA_PrivateKey", loaded_ec_key != nullptr);
 
    if(loaded_ec_key)
       {
@@ -257,7 +257,7 @@ Test::Result test_unusual_curve()
    Botan::DataSource_Memory key_data_src(key_odd_curve_str);
    std::unique_ptr<Botan::Private_Key> loaded_key(Botan::PKCS8::load_key(key_data_src, Test::rng()));
 
-   result.confirm("reloaded key", loaded_key.get());
+   result.confirm("reloaded key", loaded_key.get() != nullptr);
 
    return result;
    }
@@ -299,14 +299,13 @@ Test::Result test_encoding_options()
    result.test_eq("Hybrid point same size as uncompressed",
                   enc_uncompressed.size(), enc_hybrid.size());
 
-   if(Test::options().undefined_behavior_allowed())
-      {
-      auto invalid_format = static_cast<Botan::PointGFp::Compression_Type>(99);
+#if !defined(BOTAN_HAS_SANITIZER_UNDEFINED)
+   auto invalid_format = static_cast<Botan::PointGFp::Compression_Type>(99);
 
-      result.test_throws("Invalid point format throws",
-                         "Invalid argument Invalid point encoding for EC_PublicKey",
-                         [&] { key.set_point_encoding(invalid_format); });
-      }
+   result.test_throws("Invalid point format throws",
+                      "Invalid point encoding for EC_PublicKey",
+                      [&] { key.set_point_encoding(invalid_format); });
+#endif
 
    return result;
    }
@@ -366,9 +365,9 @@ Test::Result test_ecc_key_with_rfc5915_extensions()
       std::unique_ptr<Botan::Private_Key> pkcs8(
          Botan::PKCS8::load_key(Test::data_file("x509/ecc/ecc_private_with_rfc5915_ext.pem"), Test::rng()));
 
-      result.confirm("loaded RFC 5915 key", pkcs8.get());
+      result.confirm("loaded RFC 5915 key", pkcs8.get() != nullptr);
       result.test_eq("key is ECDSA", pkcs8->algo_name(), "ECDSA");
-      result.confirm("key type is ECDSA", dynamic_cast<Botan::ECDSA_PrivateKey*>(pkcs8.get()));
+      result.confirm("key type is ECDSA", dynamic_cast<Botan::ECDSA_PrivateKey*>(pkcs8.get()) != nullptr);
       }
    catch(std::exception& e)
       {
@@ -387,9 +386,9 @@ Test::Result test_ecc_key_with_rfc5915_parameters()
       std::unique_ptr<Botan::Private_Key> pkcs8(
          Botan::PKCS8::load_key(Test::data_file("x509/ecc/ecc_private_with_rfc5915_parameters.pem"), Test::rng()));
 
-      result.confirm("loaded RFC 5915 key", pkcs8.get());
+      result.confirm("loaded RFC 5915 key", pkcs8.get() != nullptr);
       result.test_eq("key is ECDSA", pkcs8->algo_name(), "ECDSA");
-      result.confirm("key type is ECDSA", dynamic_cast<Botan::ECDSA_PrivateKey*>(pkcs8.get()));
+      result.confirm("key type is ECDSA", dynamic_cast<Botan::ECDSA_PrivateKey*>(pkcs8.get()) != nullptr);
       }
    catch(std::exception& e)
       {

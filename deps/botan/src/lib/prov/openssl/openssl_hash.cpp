@@ -21,7 +21,7 @@ class OpenSSL_HashFunction final : public HashFunction
          {
          const EVP_MD* algo = EVP_MD_CTX_md(m_md);
          if(!EVP_DigestInit_ex(m_md, algo, nullptr))
-            throw OpenSSL_Error("EVP_DigestInit_ex");
+            throw OpenSSL_Error("EVP_DigestInit_ex", ERR_get_error());
          }
 
       std::string provider() const override { return "openssl"; }
@@ -37,7 +37,7 @@ class OpenSSL_HashFunction final : public HashFunction
          {
          std::unique_ptr<OpenSSL_HashFunction> copy(new OpenSSL_HashFunction(m_name, nullptr));
          EVP_MD_CTX_copy(copy->m_md, m_md);
-         return std::move(copy);
+         return std::unique_ptr<HashFunction>(copy.release());
          }
 
       size_t output_length() const override
@@ -52,17 +52,17 @@ class OpenSSL_HashFunction final : public HashFunction
 
       OpenSSL_HashFunction(const std::string& name, const EVP_MD* md) : m_name(name)
          {
-#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined(LIBRESSL_VERSION_NUMBER)
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
          m_md = EVP_MD_CTX_create();
 #else
          m_md = EVP_MD_CTX_new();
 #endif
 
          if(m_md == nullptr)
-            throw OpenSSL_Error("Can't allocate new context");
+            throw OpenSSL_Error("Can't allocate new context", ERR_get_error());
          EVP_MD_CTX_init(m_md);
          if(md && !EVP_DigestInit_ex(m_md, md, nullptr))
-            throw OpenSSL_Error("EVP_DigestInit_ex");
+            throw OpenSSL_Error("EVP_DigestInit_ex", ERR_get_error());
          }
 
       OpenSSL_HashFunction(EVP_MD_CTX* ctx) : m_md(ctx)
@@ -71,7 +71,7 @@ class OpenSSL_HashFunction final : public HashFunction
 
       ~OpenSSL_HashFunction()
          {
-#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined(LIBRESSL_VERSION_NUMBER)
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
          EVP_MD_CTX_destroy(m_md);
 #else
          EVP_MD_CTX_free(m_md);
@@ -82,16 +82,16 @@ class OpenSSL_HashFunction final : public HashFunction
       void add_data(const uint8_t input[], size_t length) override
          {
          if(!EVP_DigestUpdate(m_md, input, length))
-            throw OpenSSL_Error("EVP_DigestUpdate");
+            throw OpenSSL_Error("EVP_DigestUpdate", ERR_get_error());
          }
 
       void final_result(uint8_t output[]) override
          {
          if(!EVP_DigestFinal_ex(m_md, output, nullptr))
-            throw OpenSSL_Error("EVP_DigestFinal_ex");
+            throw OpenSSL_Error("EVP_DigestFinal_ex", ERR_get_error());
          const EVP_MD* algo = EVP_MD_CTX_md(m_md);
          if(!EVP_DigestInit_ex(m_md, algo, nullptr))
-            throw OpenSSL_Error("EVP_DigestInit_ex");
+            throw OpenSSL_Error("EVP_DigestInit_ex", ERR_get_error());
          }
 
       std::string m_name;
@@ -138,6 +138,11 @@ make_openssl_hash(const std::string& name)
 #if defined(BOTAN_HAS_MD4) && !defined(OPENSSL_NO_MD4)
    if(name == "MD4")
       return MAKE_OPENSSL_HASH(EVP_md4);
+#endif
+
+#if defined(BOTAN_HAS_WHIRLPOOL) && !defined(OPENSSL_NO_WHIRLPOOL)
+   if(name == "Whirlpool")
+      return MAKE_OPENSSL_HASH(EVP_whirlpool);
 #endif
 
    return nullptr;

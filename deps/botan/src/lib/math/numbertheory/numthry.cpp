@@ -1,22 +1,38 @@
 /*
 * Number Theory Functions
-* (C) 1999-2011,2016,2018 Jack Lloyd
+* (C) 1999-2011,2016,2018,2019 Jack Lloyd
 *
 * Botan is released under the Simplified BSD License (see license.txt)
 */
 
 #include <botan/numthry.h>
-#include <botan/pow_mod.h>
 #include <botan/reducer.h>
 #include <botan/monty.h>
+#include <botan/divide.h>
 #include <botan/rng.h>
 #include <botan/internal/bit_ops.h>
 #include <botan/internal/mp_core.h>
 #include <botan/internal/ct_utils.h>
 #include <botan/internal/monty_exp.h>
+#include <botan/internal/primality.h>
 #include <algorithm>
 
 namespace Botan {
+
+namespace {
+
+void sub_abs(BigInt& z, const BigInt& x, const BigInt& y)
+   {
+   const size_t x_sw = x.sig_words();
+   const size_t y_sw = y.sig_words();
+   z.resize(std::max(x_sw, y_sw));
+
+   bigint_sub_abs(z.mutable_data(),
+                  x.data(), x_sw,
+                  y.data(), y_sw);
+   }
+
+}
 
 /*
 * Return the number of 0 bits at the end of n
@@ -54,27 +70,48 @@ BigInt gcd(const BigInt& a, const BigInt& b)
    if(a == 1 || b == 1)
       return 1;
 
-   BigInt X[2] = { a, b };
-   X[0].set_sign(BigInt::Positive);
-   X[1].set_sign(BigInt::Positive);
+   BigInt f = a;
+   BigInt g = b;
+   f.set_sign(BigInt::Positive);
+   g.set_sign(BigInt::Positive);
 
-   const size_t shift = std::min(low_zero_bits(X[0]), low_zero_bits(X[1]));
+   const size_t common2s = std::min(low_zero_bits(f), low_zero_bits(g));
 
-   X[0] >>= shift;
-   X[1] >>= shift;
+   f >>= common2s;
+   g >>= common2s;
 
-   while(X[0].is_nonzero())
+   f.ct_cond_swap(f.is_even(), g);
+
+   int32_t delta = 1;
+
+   const size_t loop_cnt = 4 + 3*std::max(f.bits(), g.bits());
+
+   BigInt newg, t;
+   for(size_t i = 0; i != loop_cnt; ++i)
       {
-      X[0] >>= low_zero_bits(X[0]);
-      X[1] >>= low_zero_bits(X[1]);
+      g.shrink_to_fit();
+      f.shrink_to_fit();
+      sub_abs(newg, f, g);
 
-      const uint8_t sel = static_cast<uint8_t>(X[0] >= X[1]);
+      const bool need_swap = (g.is_odd() && delta > 0);
 
-      X[sel^1] -= X[sel];
-      X[sel^1] >>= 1;
+      // if(need_swap) delta *= -1
+      delta *= CT::Mask<uint8_t>::expand(need_swap).select(0, 2) - 1;
+      f.ct_cond_swap(need_swap, g);
+      g.ct_cond_swap(need_swap, newg);
+
+      delta += 1;
+
+      t = g;
+      t += f;
+      g.ct_cond_assign(g.is_odd(), t);
+
+      g >>= 1;
       }
 
-   return (X[1] << shift);
+   f <<= common2s;
+
+   return f;
    }
 
 /*
@@ -82,7 +119,7 @@ BigInt gcd(const BigInt& a, const BigInt& b)
 */
 BigInt lcm(const BigInt& a, const BigInt& b)
    {
-   return ((a * b) / gcd(a, b));
+   return ct_divide(a * b, gcd(a, b));
    }
 
 /*
@@ -291,9 +328,8 @@ BigInt inverse_mod(const BigInt& n, const BigInt& mod)
       throw BigInt::DivideByZero();
    if(mod.is_negative() || n.is_negative())
       throw Invalid_Argument("inverse_mod: arguments must be non-negative");
-
-   if(n.is_zero() || (n.is_even() && mod.is_even()))
-      return 0; // fast fail checks
+   if(n.is_zero())
+      return 0;
 
    if(mod.is_odd() && n < mod)
       return ct_inverse_mod_odd_modulus(n, mod);
@@ -313,83 +349,100 @@ BigInt inverse_euclid(const BigInt& n, const BigInt& mod)
 
    BigInt u = mod, v = n;
    BigInt A = 1, B = 0, C = 0, D = 1;
+   BigInt T0, T1, T2;
 
    while(u.is_nonzero())
       {
       const size_t u_zero_bits = low_zero_bits(u);
       u >>= u_zero_bits;
-      for(size_t i = 0; i != u_zero_bits; ++i)
-         {
-         if(A.is_odd() || B.is_odd())
-            { A += n; B -= mod; }
-         A >>= 1; B >>= 1;
-         }
 
       const size_t v_zero_bits = low_zero_bits(v);
       v >>= v_zero_bits;
-      for(size_t i = 0; i != v_zero_bits; ++i)
+
+      const bool u_gte_v = (u >= v);
+
+      for(size_t i = 0; i != u_zero_bits; ++i)
          {
-         if(C.is_odd() || D.is_odd())
-            { C += n; D -= mod; }
-         C >>= 1; D >>= 1;
+         const bool needs_adjust = A.is_odd() || B.is_odd();
+
+         T0 = A + n;
+         T1 = B - mod;
+
+         A.ct_cond_assign(needs_adjust, T0);
+         B.ct_cond_assign(needs_adjust, T1);
+
+         A >>= 1;
+         B >>= 1;
          }
 
-      if(u >= v) { u -= v; A -= C; B -= D; }
-      else       { v -= u; C -= A; D -= B; }
+      for(size_t i = 0; i != v_zero_bits; ++i)
+         {
+         const bool needs_adjust = C.is_odd() || D.is_odd();
+         T0 = C + n;
+         T1 = D - mod;
+
+         C.ct_cond_assign(needs_adjust, T0);
+         D.ct_cond_assign(needs_adjust, T1);
+
+         C >>= 1;
+         D >>= 1;
+         }
+
+      T0 = u - v;
+      T1 = A - C;
+      T2 = B - D;
+
+      T0.cond_flip_sign(!u_gte_v);
+      T1.cond_flip_sign(!u_gte_v);
+      T2.cond_flip_sign(!u_gte_v);
+
+      u.ct_cond_assign(u_gte_v, T0);
+      A.ct_cond_assign(u_gte_v, T1);
+      B.ct_cond_assign(u_gte_v, T2);
+
+      v.ct_cond_assign(!u_gte_v, T0);
+      C.ct_cond_assign(!u_gte_v, T1);
+      D.ct_cond_assign(!u_gte_v, T2);
       }
 
    if(v != 1)
       return 0; // no modular inverse
 
-   while(D.is_negative()) D += mod;
-   while(D >= mod) D -= mod;
+   while(D.is_negative())
+      D += mod;
+   while(D >= mod)
+      D -= mod;
 
    return D;
    }
 
-word monty_inverse(word input)
+word monty_inverse(word a)
    {
-   if(input == 0)
-      throw Exception("monty_inverse: divide by zero");
+   if(a % 2 == 0)
+      throw Invalid_Argument("monty_inverse only valid for odd integers");
 
-   word b = input;
-   word x2 = 1, x1 = 0, y2 = 0, y1 = 1;
+   /*
+   * From "A New Algorithm for Inversion mod p^k" by Çetin Kaya Koç
+   * https://eprint.iacr.org/2017/411.pdf sections 5 and 7.
+   */
 
-   // First iteration, a = n+1
-   word q = bigint_divop(1, 0, b);
-   word r = (MP_WORD_MAX - q*b) + 1;
-   word x = x2 - q*x1;
-   word y = y2 - q*y1;
+   word b = 1;
+   word r = 0;
 
-   word a = b;
-   b = r;
-   x2 = x1;
-   x1 = x;
-   y2 = y1;
-   y1 = y;
-
-   while(b > 0)
+   for(size_t i = 0; i != BOTAN_MP_WORD_BITS; ++i)
       {
-      q = a / b;
-      r = a - q*b;
-      x = x2 - q*x1;
-      y = y2 - q*y1;
+      const word bi = b % 2;
+      r >>= 1;
+      r += bi << (BOTAN_MP_WORD_BITS - 1);
 
-      a = b;
-      b = r;
-      x2 = x1;
-      x1 = x;
-      y2 = y1;
-      y1 = y;
+      b -= a * bi;
+      b >>= 1;
       }
 
-   const word check = y2 * input;
-   BOTAN_ASSERT_EQUAL(check, 1, "monty_inverse result is inverse of input");
-
    // Now invert in addition space
-   y2 = (MP_WORD_MAX - y2) + 1;
+   r = (MP_WORD_MAX - r) + 1;
 
-   return y2;
+   return r;
    }
 
 /*
@@ -409,158 +462,104 @@ BigInt power_mod(const BigInt& base, const BigInt& exp, const BigInt& mod)
       return 0;
       }
 
-   Power_Mod pow_mod(mod);
+   Modular_Reducer reduce_mod(mod);
+
+   const size_t exp_bits = exp.bits();
+
+   if(mod.is_odd())
+      {
+      const size_t powm_window = 4;
+
+      auto monty_mod = std::make_shared<Montgomery_Params>(mod, reduce_mod);
+      auto powm_base_mod = monty_precompute(monty_mod, reduce_mod.reduce(base), powm_window);
+      return monty_execute(*powm_base_mod, exp, exp_bits);
+      }
 
    /*
-   * Calling set_base before set_exponent means we end up using a
-   * minimal window. This makes sense given that here we know that any
-   * precomputation is wasted.
+   Support for even modulus is just a convenience and not considered
+   cryptographically important, so this implementation is slow ...
    */
+   BigInt accum = 1;
+   BigInt g = reduce_mod.reduce(base);
+   BigInt t;
 
-   if(base.is_negative())
+   for(size_t i = 0; i != exp_bits; ++i)
       {
-      pow_mod.set_base(-base);
-      pow_mod.set_exponent(exp);
-      if(exp.is_even())
-         return pow_mod.execute();
-      else
-         return (mod - pow_mod.execute());
+      t = reduce_mod.multiply(g, accum);
+      g = reduce_mod.square(g);
+      accum.ct_cond_assign(exp.get_bit(i), t);
       }
+   return accum;
+   }
+
+
+BigInt is_perfect_square(const BigInt& C)
+   {
+   if(C < 1)
+      throw Invalid_Argument("is_perfect_square requires C >= 1");
+   if(C == 1)
+      return 1;
+
+   const size_t n = C.bits();
+   const size_t m = (n + 1) / 2;
+   const BigInt B = C + BigInt::power_of_2(m);
+
+   BigInt X = BigInt::power_of_2(m) - 1;
+   BigInt X2 = (X*X);
+
+   for(;;)
+      {
+      X = (X2 + C) / (2*X);
+      X2 = (X*X);
+
+      if(X2 < B)
+         break;
+      }
+
+   if(X2 == C)
+      return X;
    else
-      {
-      pow_mod.set_base(base);
-      pow_mod.set_exponent(exp);
-      return pow_mod.execute();
-      }
+      return 0;
    }
-
-namespace {
-
-bool mr_witness(BigInt&& y,
-                const Modular_Reducer& reducer_n,
-                const BigInt& n_minus_1, size_t s)
-   {
-   if(y == 1 || y == n_minus_1)
-      return false;
-
-   for(size_t i = 1; i != s; ++i)
-      {
-      y = reducer_n.square(y);
-
-      if(y == 1) // found a non-trivial square root
-         return true;
-
-      /*
-      -1 is the trivial square root of unity, so ``a`` is not a
-      witness for this number - give up
-      */
-      if(y == n_minus_1)
-         return false;
-      }
-
-   return true; // is a witness
-   }
-
-size_t mr_test_iterations(size_t n_bits, size_t prob, bool random)
-   {
-   const size_t base = (prob + 2) / 2; // worst case 4^-t error rate
-
-   /*
-   * If the candidate prime was maliciously constructed, we can't rely
-   * on arguments based on p being random.
-   */
-   if(random == false)
-      return base;
-
-   /*
-   * For randomly chosen numbers we can use the estimates from
-   * http://www.math.dartmouth.edu/~carlp/PDF/paper88.pdf
-   *
-   * These values are derived from the inequality for p(k,t) given on
-   * the second page.
-   */
-   if(prob <= 128)
-      {
-      if(n_bits >= 1536)
-         return 4; // < 2^-133
-      if(n_bits >= 1024)
-         return 6; // < 2^-133
-      if(n_bits >= 512)
-         return 12; // < 2^-129
-      if(n_bits >= 256)
-         return 29; // < 2^-128
-      }
-
-   /*
-   If the user desires a smaller error probability than we have
-   precomputed error estimates for, just fall back to using the worst
-   case error rate.
-   */
-   return base;
-   }
-
-}
 
 /*
 * Test for primality using Miller-Rabin
 */
-bool is_prime(const BigInt& n, RandomNumberGenerator& rng,
-              size_t prob, bool is_random)
+bool is_prime(const BigInt& n,
+              RandomNumberGenerator& rng,
+              size_t prob,
+              bool is_random)
    {
    if(n == 2)
       return true;
    if(n <= 1 || n.is_even())
       return false;
 
+   const size_t n_bits = n.bits();
+
    // Fast path testing for small numbers (<= 65521)
-   if(n <= PRIMES[PRIME_TABLE_SIZE-1])
+   if(n_bits <= 16)
       {
       const uint16_t num = static_cast<uint16_t>(n.word_at(0));
 
       return std::binary_search(PRIMES, PRIMES + PRIME_TABLE_SIZE, num);
       }
 
-   const size_t test_iterations =
-      mr_test_iterations(n.bits(), prob, is_random && rng.is_seeded());
+   Modular_Reducer mod_n(n);
 
-   const BigInt n_minus_1 = n - 1;
-   const size_t s = low_zero_bits(n_minus_1);
-   const BigInt nm1_s = n_minus_1 >> s;
-   const size_t n_bits = n.bits();
-
-   const Modular_Reducer mod_n(n);
-   auto monty_n = std::make_shared<Montgomery_Params>(n, mod_n);
-
-   const size_t powm_window = 4;
-
-   for(size_t i = 0; i != test_iterations; ++i)
+   if(rng.is_seeded())
       {
-      BigInt a;
+      const size_t t = miller_rabin_test_iterations(n_bits, prob, is_random);
 
-      if(rng.is_seeded())
-         {
-         a = BigInt::random_integer(rng, 2, n_minus_1);
-         }
-      else
-         {
-         /*
-         * If passed a null RNG just use 2,3,5, ... as bases
-         *
-         * This is not ideal but in certain circumstances we need to
-         * test for primality but have no RNG available.
-         */
-         a = PRIMES[i];
-         }
-
-      auto powm_a_n = monty_precompute(monty_n, a, powm_window);
-
-      BigInt y = monty_execute(*powm_a_n, nm1_s, n_bits);
-
-      if(mr_witness(std::move(y), mod_n, n_minus_1, s))
+      if(is_miller_rabin_probable_prime(n, mod_n, rng, t) == false)
          return false;
-      }
 
-   return true;
+      return is_lucas_probable_prime(n, mod_n);
+      }
+   else
+      {
+      return is_bailie_psw_probable_prime(n, mod_n);
+      }
    }
 
 }

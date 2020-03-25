@@ -10,7 +10,6 @@
 #include <botan/rng.h>
 #include <botan/mgf1.h>
 #include <botan/internal/bit_ops.h>
-#include <botan/oids.h>
 #include <botan/der_enc.h>
 #include <botan/pk_keys.h>
 #include <botan/internal/padding.h>
@@ -55,9 +54,10 @@ secure_vector<uint8_t> pss_encode(HashFunction& hash,
    }
 
 bool pss_verify(HashFunction& hash,
-                const secure_vector<uint8_t>& const_coded,
-                const secure_vector<uint8_t>& raw,
-                size_t key_bits)
+                const secure_vector<uint8_t>& pss_repr,
+                const secure_vector<uint8_t>& message_hash,
+                size_t key_bits,
+                size_t* out_salt_size)
    {
    const size_t HASH_SIZE = hash.output_length();
    const size_t KEY_BYTES = (key_bits + 7) / 8;
@@ -65,16 +65,16 @@ bool pss_verify(HashFunction& hash,
    if(key_bits < 8*HASH_SIZE + 9)
       return false;
 
-   if(raw.size() != HASH_SIZE)
+   if(message_hash.size() != HASH_SIZE)
       return false;
 
-   if(const_coded.size() > KEY_BYTES || const_coded.size() <= 1)
+   if(pss_repr.size() > KEY_BYTES || pss_repr.size() <= 1)
       return false;
 
-   if(const_coded[const_coded.size()-1] != 0xBC)
+   if(pss_repr[pss_repr.size()-1] != 0xBC)
       return false;
 
-   secure_vector<uint8_t> coded = const_coded;
+   secure_vector<uint8_t> coded = pss_repr;
    if(coded.size() < KEY_BYTES)
       {
       secure_vector<uint8_t> temp(KEY_BYTES);
@@ -110,23 +110,32 @@ bool pss_verify(HashFunction& hash,
 
    for(size_t j = 0; j != 8; ++j)
       hash.update(0);
-   hash.update(raw);
+   hash.update(message_hash);
    hash.update(&DB[salt_offset], salt_size);
 
-   secure_vector<uint8_t> H2 = hash.final();
+   const secure_vector<uint8_t> H2 = hash.final();
 
-   return constant_time_compare(H, H2.data(), HASH_SIZE);
+   const bool ok = constant_time_compare(H, H2.data(), HASH_SIZE);
+
+   if(out_salt_size && ok)
+      *out_salt_size = salt_size;
+
+   return ok;
    }
 
 }
 
 PSSR::PSSR(HashFunction* h) :
-   m_hash(h), m_SALT_SIZE(m_hash->output_length())
+   m_hash(h),
+   m_salt_size(m_hash->output_length()),
+   m_required_salt_len(false)
    {
    }
 
 PSSR::PSSR(HashFunction* h, size_t salt_size) :
-   m_hash(h), m_SALT_SIZE(salt_size)
+   m_hash(h),
+   m_salt_size(salt_size),
+   m_required_salt_len(true)
    {
    }
 
@@ -150,7 +159,7 @@ secure_vector<uint8_t> PSSR::encoding_of(const secure_vector<uint8_t>& msg,
                                          size_t output_bits,
                                          RandomNumberGenerator& rng)
    {
-   secure_vector<uint8_t> salt = rng.random_vec(m_SALT_SIZE);
+   const secure_vector<uint8_t> salt = rng.random_vec(m_salt_size);
    return pss_encode(*m_hash, msg, salt, output_bits);
    }
 
@@ -161,12 +170,23 @@ bool PSSR::verify(const secure_vector<uint8_t>& coded,
                   const secure_vector<uint8_t>& raw,
                   size_t key_bits)
    {
-   return pss_verify(*m_hash, coded, raw, key_bits);
+   size_t salt_size = 0;
+   const bool ok = pss_verify(*m_hash, coded, raw, key_bits, &salt_size);
+
+   if(m_required_salt_len && salt_size != m_salt_size)
+      return false;
+
+   return ok;
+   }
+
+EMSA* PSSR::clone()
+   {
+   return new PSSR(m_hash->clone(), m_salt_size);
    }
 
 std::string PSSR::name() const
    {
-   return "EMSA4(" + m_hash->name() + ",MGF1," + std::to_string(m_SALT_SIZE) + ")";
+   return "EMSA4(" + m_hash->name() + ",MGF1," + std::to_string(m_salt_size) + ")";
    }
 
 AlgorithmIdentifier PSSR::config_for_x509(const Private_Key& key,
@@ -182,31 +202,33 @@ AlgorithmIdentifier PSSR::config_for_x509(const Private_Key& key,
          " not supported for signature algorithm " + key.algo_name());
       }
 
-   AlgorithmIdentifier sig_algo;
-   // hardcoded as RSA is the only valid algorithm for EMSA4 at the moment
-   sig_algo.oid = OIDS::lookup( "RSA/EMSA4" );
-
    const AlgorithmIdentifier hash_id(cert_hash_name, AlgorithmIdentifier::USE_NULL_PARAM);
    const AlgorithmIdentifier mgf_id("MGF1", hash_id.BER_encode());
 
-   DER_Encoder(sig_algo.parameters)
+   std::vector<uint8_t> parameters;
+   DER_Encoder(parameters)
       .start_cons(SEQUENCE)
       .start_cons(ASN1_Tag(0), CONTEXT_SPECIFIC).encode(hash_id).end_cons()
       .start_cons(ASN1_Tag(1), CONTEXT_SPECIFIC).encode(mgf_id).end_cons()
-      .start_cons(ASN1_Tag(2), CONTEXT_SPECIFIC).encode(m_SALT_SIZE).end_cons()
+      .start_cons(ASN1_Tag(2), CONTEXT_SPECIFIC).encode(m_salt_size).end_cons()
       .start_cons(ASN1_Tag(3), CONTEXT_SPECIFIC).encode(size_t(1)).end_cons() // trailer field
       .end_cons();
 
-   return sig_algo;
+   // hardcoded as RSA is the only valid algorithm for EMSA4 at the moment
+   return AlgorithmIdentifier("RSA/EMSA4", parameters);
    }
 
 PSSR_Raw::PSSR_Raw(HashFunction* h) :
-   m_hash(h), m_SALT_SIZE(m_hash->output_length())
+   m_hash(h),
+   m_salt_size(m_hash->output_length()),
+   m_required_salt_len(false)
    {
    }
 
 PSSR_Raw::PSSR_Raw(HashFunction* h, size_t salt_size) :
-   m_hash(h), m_SALT_SIZE(salt_size)
+   m_hash(h),
+   m_salt_size(salt_size),
+   m_required_salt_len(true)
    {
    }
 
@@ -236,7 +258,7 @@ secure_vector<uint8_t> PSSR_Raw::encoding_of(const secure_vector<uint8_t>& msg,
                                              size_t output_bits,
                                              RandomNumberGenerator& rng)
    {
-   secure_vector<uint8_t> salt = rng.random_vec(m_SALT_SIZE);
+   secure_vector<uint8_t> salt = rng.random_vec(m_salt_size);
    return pss_encode(*m_hash, msg, salt, output_bits);
    }
 
@@ -247,12 +269,23 @@ bool PSSR_Raw::verify(const secure_vector<uint8_t>& coded,
                       const secure_vector<uint8_t>& raw,
                       size_t key_bits)
    {
-   return pss_verify(*m_hash, coded, raw, key_bits);
+   size_t salt_size = 0;
+   const bool ok = pss_verify(*m_hash, coded, raw, key_bits, &salt_size);
+
+   if(m_required_salt_len && salt_size != m_salt_size)
+      return false;
+
+   return ok;
+   }
+
+EMSA* PSSR_Raw::clone()
+   {
+   return new PSSR_Raw(m_hash->clone(), m_salt_size);
    }
 
 std::string PSSR_Raw::name() const
    {
-   return "PSSR_Raw(" + m_hash->name() + ",MGF1," + std::to_string(m_SALT_SIZE) + ")";
+   return "PSSR_Raw(" + m_hash->name() + ",MGF1," + std::to_string(m_salt_size) + ")";
    }
 
 }

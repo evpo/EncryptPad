@@ -5,13 +5,15 @@
 */
 
 #include "tests.h"
+#include <sstream>
 
-#if defined(BOTAN_HAS_CERTSTOR_SQL)
+#if defined(BOTAN_HAS_X509_CERTIFICATES)
+   #include <botan/x509cert.h>
    #include <botan/certstor.h>
    #include <botan/internal/filesystem.h>
    #include <botan/pkcs8.h>
    #include <botan/pk_keys.h>
-   #include <sstream>
+
    #if defined(BOTAN_HAS_CERTSTOR_SQLITE3)
       #include <botan/certstor_sqlite.h>
       #include <botan/sqlite3.h>
@@ -22,7 +24,7 @@ namespace Botan_Tests {
 
 namespace {
 
-#if defined(BOTAN_HAS_CERTSTOR_SQL) && defined(BOTAN_HAS_RSA) && defined(BOTAN_TARGET_OS_HAS_FILESYSTEM)
+#if defined(BOTAN_HAS_X509_CERTIFICATES) && defined(BOTAN_HAS_RSA) && defined(BOTAN_TARGET_OS_HAS_FILESYSTEM)
 
 struct CertificateAndKey
    {
@@ -250,9 +252,9 @@ Test::Result test_certstor_sqlite3_find_all_certs_test(const std::vector<Certifi
          }
 
       Botan::X509_Certificate same_dn_1 = Botan::X509_Certificate(
-         "./src/tests/data/x509/bsi/cert_path_common_14/cert_path_common_14_sub_ca.ca.pem.crt");
+         Test::data_file("x509/bsi/cert_path_common_14/cert_path_common_14_sub_ca.ca.pem.crt"));
       Botan::X509_Certificate same_dn_2 = Botan::X509_Certificate(
-         "./src/tests/data/x509/bsi/cert_path_common_14/cert_path_common_14_wrong_sub_ca.ca.pem.crt");
+         Test::data_file("x509/bsi/cert_path_common_14/cert_path_common_14_wrong_sub_ca.ca.pem.crt"));
 
       store.insert_cert(same_dn_1);
       store.insert_cert(same_dn_2);
@@ -332,7 +334,7 @@ Test::Result test_certstor_find_hash_subject(const std::vector<CertificateAndKey
 Test::Result test_certstor_load_allcert()
    {
    Test::Result result("Certificate Store - Load every cert of every files");
-   // test_dir_bundled dir should contain only one file with 2 certificates 
+   // test_dir_bundled dir should contain only one file with 2 certificates
    // concatenated (ValidCert and root)
    const std::string test_dir_bundled = Test::data_dir() + "/x509/misc/bundledcertdir";
 
@@ -341,7 +343,7 @@ Test::Result test_certstor_load_allcert()
       result.test_note("load certs from dir: " + test_dir_bundled);
       // Certificate_Store_In_Memory constructor loads every cert of every files of the dir.
       Botan::Certificate_Store_In_Memory store(test_dir_bundled);
-      
+
       // X509_Certificate constructor loads only the first certificate found in the file.
       Botan::X509_Certificate root_cert(Test::data_dir() + "/x509/x509test/root.pem");
       Botan::X509_Certificate valid_cert(Test::data_dir() + "/x509/x509test/ValidCert.pem");

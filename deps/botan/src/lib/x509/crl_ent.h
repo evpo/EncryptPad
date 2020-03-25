@@ -18,6 +18,7 @@ struct CRL_Entry_Data;
 
 /**
 * X.509v2 CRL Reason Code.
+* This will become an enum class in a future major release
 */
 enum CRL_Code : uint32_t {
    UNSPECIFIED            = 0,
@@ -29,6 +30,7 @@ enum CRL_Code : uint32_t {
    CERTIFICATE_HOLD       = 6,
    REMOVE_FROM_CRL        = 8,
    PRIVLEDGE_WITHDRAWN    = 9,
+   PRIVILEGE_WITHDRAWN    = 9,
    AA_COMPROMISE          = 10,
 
    DELETE_CRL_ENTRY       = 0xFF00,

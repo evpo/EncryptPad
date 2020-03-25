@@ -14,6 +14,11 @@
    #include <botan/passhash9.h>
 #endif
 
+#if defined(BOTAN_HAS_ARGON2)
+   #include <botan/argon2.h>
+   #include "test_rng.h"
+#endif
+
 namespace Botan_Tests {
 
 namespace {
@@ -39,7 +44,7 @@ class Bcrypt_Tests final : public Text_Based_Test
          // self-test low levels for each test password
          for(uint16_t level = 4; level <= 6; ++level)
             {
-            const std::string gen_hash = generate_bcrypt(password, Test::rng(), level);
+            const std::string gen_hash = Botan::generate_bcrypt(password, Test::rng(), level);
             result.test_eq("generated hash accepted", Botan::check_bcrypt(password, gen_hash), true);
             }
 
@@ -58,9 +63,13 @@ class Bcrypt_Tests final : public Text_Based_Test
 
          for(uint16_t level = 4; level <= max_level; ++level)
             {
-            const std::string gen_hash = generate_bcrypt(password, Test::rng(), level);
+            const std::string gen_hash = Botan::generate_bcrypt(password, Test::rng(), level);
             result.test_eq("generated hash accepted", Botan::check_bcrypt(password, gen_hash), true);
             }
+
+         result.test_throws("Invalid bcrypt version rejected",
+                            "Unknown bcrypt version 'q'",
+                            []() { Botan::generate_bcrypt("pass", Test::rng(), 4, 'q'); });
 
          result.set_ns_consumed(Test::timestamp() - start);
 
@@ -69,6 +78,54 @@ class Bcrypt_Tests final : public Text_Based_Test
    };
 
 BOTAN_REGISTER_TEST("bcrypt", Bcrypt_Tests);
+
+#endif
+
+#if defined(BOTAN_HAS_ARGON2)
+class Argon2_Tests final : public Text_Based_Test
+   {
+   public:
+      Argon2_Tests() : Text_Based_Test("passhash/argon2.vec", "Password,Passhash", "Mode,M,T,P,Salt,OutLen") {}
+
+      Test::Result run_one_test(const std::string& header, const VarMap& vars) override
+         {
+         const std::string password = vars.get_req_str("Password");
+         const std::string passhash = vars.get_req_str("Passhash");
+
+         Test::Result result("Argon2 password hash");
+
+         if(header == "Verify")
+            {
+            const bool accepted = Botan::argon2_check_pwhash(password.data(), password.size(), passhash);
+            result.test_eq("correct hash accepted", accepted, true);
+            }
+         else if(header == "Generate")
+            {
+            const std::vector<uint8_t> salt = vars.get_req_bin("Salt");
+            const uint8_t y = vars.get_req_u8("Mode");
+            const size_t M = vars.get_req_sz("M");
+            const size_t t = vars.get_req_sz("T");
+            const size_t p = vars.get_req_sz("P");
+            const size_t out_len = vars.get_req_sz("OutLen");
+
+            Fixed_Output_RNG rng(salt);
+
+            const std::string generated = Botan::argon2_generate_pwhash(password.data(), password.size(),
+                                                                        rng,
+                                                                        p, M, t, y, salt.size(), out_len);
+
+            result.test_eq("expected hash generated", generated, passhash);
+            const bool accepted = Botan::argon2_check_pwhash(password.data(), password.size(), generated);
+            result.test_eq("generated hash accepted", accepted, true);
+            }
+         else
+            throw Test_Error("Unexpected header in Argon2 password hash test file");
+
+         return result;
+         }
+   };
+
+BOTAN_REGISTER_TEST("argon2_pass", Argon2_Tests);
 
 #endif
 
@@ -134,11 +191,11 @@ class Passhash9_Tests final : public Text_Based_Test
                         Botan::is_passhash9_alg_supported(255) == false);
 
          result.test_throws("Throws if algorithm not supported",
-                            "Invalid argument Passhash9: Algorithm id 255 is not defined",
+                            "Passhash9: Algorithm id 255 is not defined",
                             []() { Botan::generate_passhash9("pass", Test::rng(), 3, 255); });
 
          result.test_throws("Throws if iterations is too high",
-                            "Invalid argument Requested passhash9 work factor 513 is too large",
+                            "Requested passhash9 work factor 513 is too large",
                             []() { Botan::check_passhash9("floof", "$9$AgIB3c5J3kvAuML84sZ5hWT9WzJtiYRPLCEARaujS7I6IKbNCwp0"); });
          return {result};
          }

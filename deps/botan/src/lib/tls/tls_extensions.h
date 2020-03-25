@@ -1,6 +1,6 @@
 /*
 * TLS Extensions
-* (C) 2011,2012,2016,2018 Jack Lloyd
+* (C) 2011,2012,2016,2018,2019 Jack Lloyd
 * (C) 2016 Juraj Somorovsky
 * (C) 2016 Matthias Gierlings
 *
@@ -11,6 +11,8 @@
 #define BOTAN_TLS_EXTENSIONS_H_
 
 #include <botan/tls_algos.h>
+#include <botan/tls_magic.h>
+#include <botan/tls_version.h>
 #include <botan/secmem.h>
 #include <botan/x509_dn.h>
 #include <vector>
@@ -22,8 +24,11 @@ namespace Botan {
 
 namespace TLS {
 
+class Policy;
+
 class TLS_Data_Reader;
 
+// This will become an enum class in a future major release
 enum Handshake_Extension_Type {
    TLSEXT_SERVER_NAME_INDICATION = 0,
    TLSEXT_CERT_STATUS_REQUEST    = 5,
@@ -40,6 +45,8 @@ enum Handshake_Extension_Type {
    TLSEXT_EXTENDED_MASTER_SECRET = 23,
 
    TLSEXT_SESSION_TICKET         = 35,
+
+   TLSEXT_SUPPORTED_VERSIONS     = 43,
 
    TLSEXT_SAFE_RENEGOTIATION     = 65281,
 };
@@ -58,7 +65,7 @@ class BOTAN_UNSTABLE_API Extension
       /**
       * @return serialized binary for the extension
       */
-      virtual std::vector<uint8_t> serialize() const = 0;
+      virtual std::vector<uint8_t> serialize(Connection_Side whoami) const = 0;
 
       /**
       * @return if we should encode this extension or not
@@ -71,7 +78,7 @@ class BOTAN_UNSTABLE_API Extension
 /**
 * Server Name Indicator extension (RFC 3546)
 */
-class Server_Name_Indicator final : public Extension
+class BOTAN_UNSTABLE_API Server_Name_Indicator final : public Extension
    {
    public:
       static Handshake_Extension_Type static_type()
@@ -87,7 +94,7 @@ class Server_Name_Indicator final : public Extension
 
       std::string host_name() const { return m_sni_host_name; }
 
-      std::vector<uint8_t> serialize() const override;
+      std::vector<uint8_t> serialize(Connection_Side whoami) const override;
 
       bool empty() const override { return m_sni_host_name.empty(); }
    private:
@@ -98,7 +105,7 @@ class Server_Name_Indicator final : public Extension
 /**
 * SRP identifier extension (RFC 5054)
 */
-class SRP_Identifier final : public Extension
+class BOTAN_UNSTABLE_API SRP_Identifier final : public Extension
    {
    public:
       static Handshake_Extension_Type static_type()
@@ -114,7 +121,7 @@ class SRP_Identifier final : public Extension
 
       std::string identifier() const { return m_srp_identifier; }
 
-      std::vector<uint8_t> serialize() const override;
+      std::vector<uint8_t> serialize(Connection_Side whoami) const override;
 
       bool empty() const override { return m_srp_identifier.empty(); }
    private:
@@ -125,7 +132,7 @@ class SRP_Identifier final : public Extension
 /**
 * Renegotiation Indication Extension (RFC 5746)
 */
-class Renegotiation_Extension final : public Extension
+class BOTAN_UNSTABLE_API Renegotiation_Extension final : public Extension
    {
    public:
       static Handshake_Extension_Type static_type()
@@ -144,7 +151,7 @@ class Renegotiation_Extension final : public Extension
       const std::vector<uint8_t>& renegotiation_info() const
          { return m_reneg_data; }
 
-      std::vector<uint8_t> serialize() const override;
+      std::vector<uint8_t> serialize(Connection_Side whoami) const override;
 
       bool empty() const override { return false; } // always send this
    private:
@@ -154,7 +161,7 @@ class Renegotiation_Extension final : public Extension
 /**
 * ALPN (RFC 7301)
 */
-class Application_Layer_Protocol_Notification final : public Extension
+class BOTAN_UNSTABLE_API Application_Layer_Protocol_Notification final : public Extension
    {
    public:
       static Handshake_Extension_Type static_type() { return TLSEXT_ALPN; }
@@ -180,7 +187,7 @@ class Application_Layer_Protocol_Notification final : public Extension
       Application_Layer_Protocol_Notification(TLS_Data_Reader& reader,
                                               uint16_t extension_size);
 
-      std::vector<uint8_t> serialize() const override;
+      std::vector<uint8_t> serialize(Connection_Side whoami) const override;
 
       bool empty() const override { return m_protocols.empty(); }
    private:
@@ -190,7 +197,7 @@ class Application_Layer_Protocol_Notification final : public Extension
 /**
 * Session Ticket Extension (RFC 5077)
 */
-class Session_Ticket final : public Extension
+class BOTAN_UNSTABLE_API Session_Ticket final : public Extension
    {
    public:
       static Handshake_Extension_Type static_type()
@@ -219,7 +226,7 @@ class Session_Ticket final : public Extension
       */
       Session_Ticket(TLS_Data_Reader& reader, uint16_t extension_size);
 
-      std::vector<uint8_t> serialize() const override { return m_ticket; }
+      std::vector<uint8_t> serialize(Connection_Side) const override { return m_ticket; }
 
       bool empty() const override { return false; }
    private:
@@ -230,7 +237,7 @@ class Session_Ticket final : public Extension
 /**
 * Supported Groups Extension (RFC 7919)
 */
-class Supported_Groups final : public Extension
+class BOTAN_UNSTABLE_API Supported_Groups final : public Extension
    {
    public:
       static Handshake_Extension_Type static_type()
@@ -241,7 +248,7 @@ class Supported_Groups final : public Extension
       std::vector<Group_Params> ec_groups() const;
       std::vector<Group_Params> dh_groups() const;
 
-      std::vector<uint8_t> serialize() const override;
+      std::vector<uint8_t> serialize(Connection_Side whoami) const override;
 
       explicit Supported_Groups(const std::vector<Group_Params>& groups);
 
@@ -259,7 +266,7 @@ class Supported_Groups final : public Extension
 /**
 * Supported Point Formats Extension (RFC 4492)
 */
-class Supported_Point_Formats final : public Extension
+class BOTAN_UNSTABLE_API Supported_Point_Formats final : public Extension
    {
    public:
       enum ECPointFormat : uint8_t {
@@ -273,7 +280,7 @@ class Supported_Point_Formats final : public Extension
 
       Handshake_Extension_Type type() const override { return static_type(); }
 
-      std::vector<uint8_t> serialize() const override;
+      std::vector<uint8_t> serialize(Connection_Side whoami) const override;
 
       explicit Supported_Point_Formats(bool prefer_compressed) :
          m_prefers_compressed(prefer_compressed) {}
@@ -292,7 +299,7 @@ class Supported_Point_Formats final : public Extension
 /**
 * Signature Algorithms Extension for TLS 1.2 (RFC 5246)
 */
-class Signature_Algorithms final : public Extension
+class BOTAN_UNSTABLE_API Signature_Algorithms final : public Extension
    {
    public:
       static Handshake_Extension_Type static_type()
@@ -302,7 +309,7 @@ class Signature_Algorithms final : public Extension
 
       const std::vector<Signature_Scheme>& supported_schemes() const { return m_schemes; }
 
-      std::vector<uint8_t> serialize() const override;
+      std::vector<uint8_t> serialize(Connection_Side whoami) const override;
 
       bool empty() const override { return m_schemes.empty(); }
 
@@ -318,7 +325,7 @@ class Signature_Algorithms final : public Extension
 /**
 * Used to indicate SRTP algorithms for DTLS (RFC 5764)
 */
-class SRTP_Protection_Profiles final : public Extension
+class BOTAN_UNSTABLE_API SRTP_Protection_Profiles final : public Extension
    {
    public:
       static Handshake_Extension_Type static_type()
@@ -328,7 +335,7 @@ class SRTP_Protection_Profiles final : public Extension
 
       const std::vector<uint16_t>& profiles() const { return m_pp; }
 
-      std::vector<uint8_t> serialize() const override;
+      std::vector<uint8_t> serialize(Connection_Side whoami) const override;
 
       bool empty() const override { return m_pp.empty(); }
 
@@ -344,7 +351,7 @@ class SRTP_Protection_Profiles final : public Extension
 /**
 * Extended Master Secret Extension (RFC 7627)
 */
-class Extended_Master_Secret final : public Extension
+class BOTAN_UNSTABLE_API Extended_Master_Secret final : public Extension
    {
    public:
       static Handshake_Extension_Type static_type()
@@ -352,7 +359,7 @@ class Extended_Master_Secret final : public Extension
 
       Handshake_Extension_Type type() const override { return static_type(); }
 
-      std::vector<uint8_t> serialize() const override;
+      std::vector<uint8_t> serialize(Connection_Side whoami) const override;
 
       bool empty() const override { return false; }
 
@@ -364,7 +371,7 @@ class Extended_Master_Secret final : public Extension
 /**
 * Encrypt-then-MAC Extension (RFC 7366)
 */
-class Encrypt_then_MAC final : public Extension
+class BOTAN_UNSTABLE_API Encrypt_then_MAC final : public Extension
    {
    public:
       static Handshake_Extension_Type static_type()
@@ -372,7 +379,7 @@ class Encrypt_then_MAC final : public Extension
 
       Handshake_Extension_Type type() const override { return static_type(); }
 
-      std::vector<uint8_t> serialize() const override;
+      std::vector<uint8_t> serialize(Connection_Side whoami) const override;
 
       bool empty() const override { return false; }
 
@@ -384,7 +391,7 @@ class Encrypt_then_MAC final : public Extension
 /**
 * Certificate Status Request (RFC 6066)
 */
-class Certificate_Status_Request final : public Extension
+class BOTAN_UNSTABLE_API Certificate_Status_Request final : public Extension
    {
    public:
       static Handshake_Extension_Type static_type()
@@ -392,23 +399,67 @@ class Certificate_Status_Request final : public Extension
 
       Handshake_Extension_Type type() const override { return static_type(); }
 
-      std::vector<uint8_t> serialize() const override;
+      std::vector<uint8_t> serialize(Connection_Side whoami) const override;
 
       bool empty() const override { return false; }
 
+      const std::vector<uint8_t>& get_responder_id_list() const
+         {
+         return m_ocsp_names;
+         }
+
+      const std::vector<uint8_t>& get_request_extensions() const
+         {
+         return m_extension_bytes;
+         }
+
       // Server generated version: empty
-      Certificate_Status_Request();
+      Certificate_Status_Request() {}
 
       // Client version, both lists can be empty
-      Certificate_Status_Request(const std::vector<X509_DN>& ocsp_responder_ids,
+      Certificate_Status_Request(const std::vector<uint8_t>& ocsp_responder_ids,
                                  const std::vector<std::vector<uint8_t>>& ocsp_key_ids);
 
-      Certificate_Status_Request(TLS_Data_Reader& reader, uint16_t extension_size);
+      Certificate_Status_Request(TLS_Data_Reader& reader,
+                                 uint16_t extension_size,
+                                 Connection_Side side);
    private:
-      std::vector<X509_DN> m_ocsp_names;
-      std::vector<std::vector<uint8_t>> m_ocsp_keys;
+      std::vector<uint8_t> m_ocsp_names;
+      std::vector<std::vector<uint8_t>> m_ocsp_keys; // is this field really needed
       std::vector<uint8_t> m_extension_bytes;
-      bool m_server_side;
+   };
+
+/**
+* Supported Versions from RFC 8446
+*/
+class BOTAN_UNSTABLE_API Supported_Versions final : public Extension
+   {
+   public:
+      static Handshake_Extension_Type static_type()
+         { return TLSEXT_SUPPORTED_VERSIONS; }
+
+      Handshake_Extension_Type type() const override { return static_type(); }
+
+      std::vector<uint8_t> serialize(Connection_Side whoami) const override;
+
+      bool empty() const override { return m_versions.empty(); }
+
+      Supported_Versions(Protocol_Version version, const Policy& policy);
+
+      Supported_Versions(Protocol_Version version)
+         {
+         m_versions.push_back(version);
+         }
+
+      Supported_Versions(TLS_Data_Reader& reader,
+                         uint16_t extension_size,
+                         Connection_Side from);
+
+      bool supports(Protocol_Version version) const;
+
+      const std::vector<Protocol_Version> versions() const { return m_versions; }
+   private:
+      std::vector<Protocol_Version> m_versions;
    };
 
 /**
@@ -421,7 +472,7 @@ class BOTAN_UNSTABLE_API Unknown_Extension final : public Extension
                         TLS_Data_Reader& reader,
                         uint16_t extension_size);
 
-      std::vector<uint8_t> serialize() const override; // always fails
+      std::vector<uint8_t> serialize(Connection_Side whoami) const override; // always fails
 
       const std::vector<uint8_t>& value() { return m_value; }
 
@@ -432,7 +483,6 @@ class BOTAN_UNSTABLE_API Unknown_Extension final : public Extension
    private:
       Handshake_Extension_Type m_type;
       std::vector<uint8_t> m_value;
-
    };
 
 /**
@@ -469,9 +519,9 @@ class BOTAN_UNSTABLE_API Extensions final
          return nullptr;
          }
 
-      std::vector<uint8_t> serialize() const;
+      std::vector<uint8_t> serialize(Connection_Side whoami) const;
 
-      void deserialize(TLS_Data_Reader& reader);
+      void deserialize(TLS_Data_Reader& reader, Connection_Side from);
 
       /**
       * Remvoe an extension from this extensions object, if it exists.
@@ -482,7 +532,10 @@ class BOTAN_UNSTABLE_API Extensions final
 
       Extensions() = default;
 
-      explicit Extensions(TLS_Data_Reader& reader) { deserialize(reader); }
+      Extensions(TLS_Data_Reader& reader, Connection_Side side)
+         {
+         deserialize(reader, side);
+         }
 
    private:
       Extensions(const Extensions&) = delete;

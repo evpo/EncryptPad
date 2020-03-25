@@ -1,6 +1,6 @@
 /*
 * AES
-* (C) 1999-2010,2015,2017 Jack Lloyd
+* (C) 1999-2010,2015,2017,2018 Jack Lloyd
 *
 * Based on the public domain reference implementation by Paulo Baretto
 *
@@ -10,6 +10,7 @@
 #include <botan/aes.h>
 #include <botan/loadstor.h>
 #include <botan/cpuid.h>
+#include <botan/rotate.h>
 #include <type_traits>
 
 /*
@@ -18,14 +19,14 @@
 * countermeasures are used which may be helpful in some situations:
 *
 * - Only a single 256-word T-table is used, with rotations applied.
-*   Most implementations use 4 T-tables which leaks much more
-*   information via cache usage.
+*   Most implementations use 4 (or sometimes 5) T-tables, which leaks
+*   much more information via cache usage.
 *
 * - The TE and TD tables are computed at runtime to avoid flush+reload
 *   attacks using clflush. As different processes will not share the
 *   same underlying table data, an attacker can't manipulate another
 *   processes cache lines via their shared reference to the library
-*   read only segment.
+*   read only segment. (However, prime+probe attacks are still possible.)
 *
 * - Each cache line of the lookup tables is accessed at the beginning
 *   of each call to encrypt or decrypt. (See the Z variable below)
@@ -49,7 +50,7 @@ namespace Botan {
 
 namespace {
 
-BOTAN_ALIGNAS(64)
+alignas(64)
 const uint8_t SE[256] = {
    0x63, 0x7C, 0x77, 0x7B, 0xF2, 0x6B, 0x6F, 0xC5, 0x30, 0x01, 0x67, 0x2B,
    0xFE, 0xD7, 0xAB, 0x76, 0xCA, 0x82, 0xC9, 0x7D, 0xFA, 0x59, 0x47, 0xF0,
@@ -74,7 +75,7 @@ const uint8_t SE[256] = {
    0x8C, 0xA1, 0x89, 0x0D, 0xBF, 0xE6, 0x42, 0x68, 0x41, 0x99, 0x2D, 0x0F,
    0xB0, 0x54, 0xBB, 0x16 };
 
-BOTAN_ALIGNAS(64)
+alignas(64)
 const uint8_t SD[256] = {
    0x52, 0x09, 0x6A, 0xD5, 0x30, 0x36, 0xA5, 0x38, 0xBF, 0x40, 0xA3, 0x9E,
    0x81, 0xF3, 0xD7, 0xFB, 0x7C, 0xE3, 0x39, 0x82, 0x9B, 0x2F, 0xFF, 0x87,
@@ -99,15 +100,15 @@ const uint8_t SD[256] = {
    0x17, 0x2B, 0x04, 0x7E, 0xBA, 0x77, 0xD6, 0x26, 0xE1, 0x69, 0x14, 0x63,
    0x55, 0x21, 0x0C, 0x7D };
 
-inline uint8_t xtime(uint8_t s) { return static_cast<uint8_t>(s << 1) ^ ((s >> 7) * 0x1B); }
-inline uint8_t xtime4(uint8_t s) { return xtime(xtime(s)); }
-inline uint8_t xtime8(uint8_t s) { return xtime(xtime(xtime(s))); }
+inline constexpr uint8_t xtime(uint8_t s) { return static_cast<uint8_t>(s << 1) ^ ((s >> 7) * 0x1B); }
+inline constexpr uint8_t xtime4(uint8_t s) { return xtime(xtime(s)); }
+inline constexpr uint8_t xtime8(uint8_t s) { return xtime(xtime(xtime(s))); }
 
-inline uint8_t xtime3(uint8_t s) { return xtime(s) ^ s; }
-inline uint8_t xtime9(uint8_t s) { return xtime8(s) ^ s; }
-inline uint8_t xtime11(uint8_t s) { return xtime8(s) ^ xtime(s) ^ s; }
-inline uint8_t xtime13(uint8_t s) { return xtime8(s) ^ xtime4(s) ^ s; }
-inline uint8_t xtime14(uint8_t s) { return xtime8(s) ^ xtime4(s) ^ xtime(s); }
+inline constexpr uint8_t xtime3(uint8_t s) { return xtime(s) ^ s; }
+inline constexpr uint8_t xtime9(uint8_t s) { return xtime8(s) ^ s; }
+inline constexpr uint8_t xtime11(uint8_t s) { return xtime8(s) ^ xtime(s) ^ s; }
+inline constexpr uint8_t xtime13(uint8_t s) { return xtime8(s) ^ xtime4(s) ^ s; }
+inline constexpr uint8_t xtime14(uint8_t s) { return xtime8(s) ^ xtime4(s) ^ xtime(s); }
 
 inline uint32_t SE_word(uint32_t x)
    {
@@ -188,7 +189,6 @@ void aes_encrypt_n(const uint8_t in[], uint8_t out[],
    BOTAN_ASSERT(EK.size() && ME.size() == 16, "Key was set");
 
    const size_t cache_line_size = CPUID::cache_line_size();
-
    const uint32_t* TE = AES_TE();
 
    // Hit every cache line of TE
@@ -269,6 +269,10 @@ void aes_decrypt_n(const uint8_t in[], uint8_t out[], size_t blocks,
       {
       Z |= TD[i];
       }
+   for(size_t i = 0; i < 256; i += cache_line_size)
+      {
+      Z |= SD[i];
+      }
    Z &= TD[99]; // this is zero, which hopefully the compiler cannot deduce
 
    for(size_t i = 0; i != blocks; ++i)
@@ -339,8 +343,24 @@ void aes_key_schedule(const uint8_t key[], size_t length,
    // Can't happen, but make static analyzers happy
    BOTAN_ARG_CHECK(X == 4 || X == 6 || X == 8, "Invalid AES key size");
 
+   const uint32_t* TD = AES_TD();
+
+   // Prefetch TD and SE which are used later on in this function
+   volatile uint32_t Z = 0;
+   const size_t cache_line_size = CPUID::cache_line_size();
+
+   for(size_t i = 0; i < 256; i += cache_line_size / sizeof(uint32_t))
+      {
+      Z |= TD[i];
+      }
+   for(size_t i = 0; i < 256; i += cache_line_size)
+      {
+      Z |= SE[i];
+      }
+   Z &= TD[99]; // this is zero, which hopefully the compiler cannot deduce
+
    for(size_t i = 0; i != X; ++i)
-      XEK[i] = load_be<uint32_t>(key, i);
+      XEK[i] = Z ^ load_be<uint32_t>(key, i);
 
    for(size_t i = X; i < 4*(rounds+1); i += X)
       {
@@ -367,8 +387,8 @@ void aes_key_schedule(const uint8_t key[], size_t length,
 
    for(size_t i = 4; i != length + 24; ++i)
       {
-      XDK[i] = SE_word(XDK[i]);
-      XDK[i] = AES_T(AES_TD(), 0, XDK[i], XDK[i], XDK[i], XDK[i]);
+      XDK[i] = Z ^ SE_word(XDK[i]);
+      XDK[i] = AES_T(TD, 0, XDK[i], XDK[i], XDK[i], XDK[i]);
       }
 
    ME.resize(16);
@@ -410,6 +430,20 @@ size_t aes_parallelism()
       }
 #endif
 
+#if defined(BOTAN_HAS_AES_POWER8)
+   if(CPUID::has_power_crypto())
+      {
+      return 4;
+      }
+#endif
+
+#if defined(BOTAN_HAS_AES_ARMV8)
+   if(CPUID::has_arm_aes())
+      {
+      return 4;
+      }
+#endif
+
    return 1;
    }
 
@@ -422,15 +456,8 @@ const char* aes_provider()
       }
 #endif
 
-#if defined(BOTAN_HAS_AES_SSSE3)
-   if(CPUID::has_ssse3())
-      {
-      return "ssse3";
-      }
-#endif
-
 #if defined(BOTAN_HAS_AES_POWER8)
-   if(CPUID::has_ppc_crypto())
+   if(CPUID::has_power_crypto())
       {
       return "power8";
       }
@@ -440,6 +467,13 @@ const char* aes_provider()
    if(CPUID::has_arm_aes())
       {
       return "armv8";
+      }
+#endif
+
+#if defined(BOTAN_HAS_AES_VPERM)
+   if(CPUID::has_vperm())
+      {
+      return "vperm";
       }
 #endif
 
@@ -467,13 +501,6 @@ void AES_128::encrypt_n(const uint8_t in[], uint8_t out[], size_t blocks) const
       }
 #endif
 
-#if defined(BOTAN_HAS_AES_SSSE3)
-   if(CPUID::has_ssse3())
-      {
-      return ssse3_encrypt_n(in, out, blocks);
-      }
-#endif
-
 #if defined(BOTAN_HAS_AES_ARMV8)
    if(CPUID::has_arm_aes())
       {
@@ -482,9 +509,16 @@ void AES_128::encrypt_n(const uint8_t in[], uint8_t out[], size_t blocks) const
 #endif
 
 #if defined(BOTAN_HAS_AES_POWER8)
-   if(CPUID::has_ppc_crypto())
+   if(CPUID::has_power_crypto())
       {
       return power8_encrypt_n(in, out, blocks);
+      }
+#endif
+
+#if defined(BOTAN_HAS_AES_VPERM)
+   if(CPUID::has_vperm())
+      {
+      return vperm_encrypt_n(in, out, blocks);
       }
 #endif
 
@@ -502,13 +536,6 @@ void AES_128::decrypt_n(const uint8_t in[], uint8_t out[], size_t blocks) const
       }
 #endif
 
-#if defined(BOTAN_HAS_AES_SSSE3)
-   if(CPUID::has_ssse3())
-      {
-      return ssse3_decrypt_n(in, out, blocks);
-      }
-#endif
-
 #if defined(BOTAN_HAS_AES_ARMV8)
    if(CPUID::has_arm_aes())
       {
@@ -517,9 +544,16 @@ void AES_128::decrypt_n(const uint8_t in[], uint8_t out[], size_t blocks) const
 #endif
 
 #if defined(BOTAN_HAS_AES_POWER8)
-   if(CPUID::has_ppc_crypto())
+   if(CPUID::has_power_crypto())
       {
       return power8_decrypt_n(in, out, blocks);
+      }
+#endif
+
+#if defined(BOTAN_HAS_AES_VPERM)
+   if(CPUID::has_vperm())
+      {
+      return vperm_decrypt_n(in, out, blocks);
       }
 #endif
 
@@ -535,10 +569,24 @@ void AES_128::key_schedule(const uint8_t key[], size_t length)
       }
 #endif
 
-#if defined(BOTAN_HAS_AES_SSSE3)
-   if(CPUID::has_ssse3())
+#if defined(BOTAN_HAS_AES_ARMV8)
+   if(CPUID::has_arm_aes())
       {
-      return ssse3_key_schedule(key, length);
+      return aes_key_schedule(key, length, m_EK, m_DK, m_ME, m_MD);
+      }
+#endif
+
+#if defined(BOTAN_HAS_AES_POWER8)
+   if(CPUID::has_power_crypto())
+      {
+      return aes_key_schedule(key, length, m_EK, m_DK, m_ME, m_MD);
+      }
+#endif
+
+#if defined(BOTAN_HAS_AES_VPERM)
+   if(CPUID::has_vperm())
+      {
+      return vperm_key_schedule(key, length);
       }
 #endif
 
@@ -564,13 +612,6 @@ void AES_192::encrypt_n(const uint8_t in[], uint8_t out[], size_t blocks) const
       }
 #endif
 
-#if defined(BOTAN_HAS_AES_SSSE3)
-   if(CPUID::has_ssse3())
-      {
-      return ssse3_encrypt_n(in, out, blocks);
-      }
-#endif
-
 #if defined(BOTAN_HAS_AES_ARMV8)
    if(CPUID::has_arm_aes())
       {
@@ -579,9 +620,16 @@ void AES_192::encrypt_n(const uint8_t in[], uint8_t out[], size_t blocks) const
 #endif
 
 #if defined(BOTAN_HAS_AES_POWER8)
-   if(CPUID::has_ppc_crypto())
+   if(CPUID::has_power_crypto())
       {
       return power8_encrypt_n(in, out, blocks);
+      }
+#endif
+
+#if defined(BOTAN_HAS_AES_VPERM)
+   if(CPUID::has_vperm())
+      {
+      return vperm_encrypt_n(in, out, blocks);
       }
 #endif
 
@@ -599,13 +647,6 @@ void AES_192::decrypt_n(const uint8_t in[], uint8_t out[], size_t blocks) const
       }
 #endif
 
-#if defined(BOTAN_HAS_AES_SSSE3)
-   if(CPUID::has_ssse3())
-      {
-      return ssse3_decrypt_n(in, out, blocks);
-      }
-#endif
-
 #if defined(BOTAN_HAS_AES_ARMV8)
    if(CPUID::has_arm_aes())
       {
@@ -614,9 +655,16 @@ void AES_192::decrypt_n(const uint8_t in[], uint8_t out[], size_t blocks) const
 #endif
 
 #if defined(BOTAN_HAS_AES_POWER8)
-   if(CPUID::has_ppc_crypto())
+   if(CPUID::has_power_crypto())
       {
       return power8_decrypt_n(in, out, blocks);
+      }
+#endif
+
+#if defined(BOTAN_HAS_AES_VPERM)
+   if(CPUID::has_vperm())
+      {
+      return vperm_decrypt_n(in, out, blocks);
       }
 #endif
 
@@ -632,10 +680,24 @@ void AES_192::key_schedule(const uint8_t key[], size_t length)
       }
 #endif
 
-#if defined(BOTAN_HAS_AES_SSSE3)
-   if(CPUID::has_ssse3())
+#if defined(BOTAN_HAS_AES_ARMV8)
+   if(CPUID::has_arm_aes())
       {
-      return ssse3_key_schedule(key, length);
+      return aes_key_schedule(key, length, m_EK, m_DK, m_ME, m_MD);
+      }
+#endif
+
+#if defined(BOTAN_HAS_AES_POWER8)
+   if(CPUID::has_power_crypto())
+      {
+      return aes_key_schedule(key, length, m_EK, m_DK, m_ME, m_MD);
+      }
+#endif
+
+#if defined(BOTAN_HAS_AES_VPERM)
+   if(CPUID::has_vperm())
+      {
+      return vperm_key_schedule(key, length);
       }
 #endif
 
@@ -661,13 +723,6 @@ void AES_256::encrypt_n(const uint8_t in[], uint8_t out[], size_t blocks) const
       }
 #endif
 
-#if defined(BOTAN_HAS_AES_SSSE3)
-   if(CPUID::has_ssse3())
-      {
-      return ssse3_encrypt_n(in, out, blocks);
-      }
-#endif
-
 #if defined(BOTAN_HAS_AES_ARMV8)
    if(CPUID::has_arm_aes())
       {
@@ -676,9 +731,16 @@ void AES_256::encrypt_n(const uint8_t in[], uint8_t out[], size_t blocks) const
 #endif
 
 #if defined(BOTAN_HAS_AES_POWER8)
-   if(CPUID::has_ppc_crypto())
+   if(CPUID::has_power_crypto())
       {
       return power8_encrypt_n(in, out, blocks);
+      }
+#endif
+
+#if defined(BOTAN_HAS_AES_VPERM)
+   if(CPUID::has_vperm())
+      {
+      return vperm_encrypt_n(in, out, blocks);
       }
 #endif
 
@@ -696,13 +758,6 @@ void AES_256::decrypt_n(const uint8_t in[], uint8_t out[], size_t blocks) const
       }
 #endif
 
-#if defined(BOTAN_HAS_AES_SSSE3)
-   if(CPUID::has_ssse3())
-      {
-      return ssse3_decrypt_n(in, out, blocks);
-      }
-#endif
-
 #if defined(BOTAN_HAS_AES_ARMV8)
    if(CPUID::has_arm_aes())
       {
@@ -711,9 +766,16 @@ void AES_256::decrypt_n(const uint8_t in[], uint8_t out[], size_t blocks) const
 #endif
 
 #if defined(BOTAN_HAS_AES_POWER8)
-   if(CPUID::has_ppc_crypto())
+   if(CPUID::has_power_crypto())
       {
       return power8_decrypt_n(in, out, blocks);
+      }
+#endif
+
+#if defined(BOTAN_HAS_AES_VPERM)
+   if(CPUID::has_vperm())
+      {
+      return vperm_decrypt_n(in, out, blocks);
       }
 #endif
 
@@ -729,10 +791,24 @@ void AES_256::key_schedule(const uint8_t key[], size_t length)
       }
 #endif
 
-#if defined(BOTAN_HAS_AES_SSSE3)
-   if(CPUID::has_ssse3())
+#if defined(BOTAN_HAS_AES_ARMV8)
+   if(CPUID::has_arm_aes())
       {
-      return ssse3_key_schedule(key, length);
+      return aes_key_schedule(key, length, m_EK, m_DK, m_ME, m_MD);
+      }
+#endif
+
+#if defined(BOTAN_HAS_AES_POWER8)
+   if(CPUID::has_power_crypto())
+      {
+      return aes_key_schedule(key, length, m_EK, m_DK, m_ME, m_MD);
+      }
+#endif
+
+#if defined(BOTAN_HAS_AES_VPERM)
+   if(CPUID::has_vperm())
+      {
+      return vperm_key_schedule(key, length);
       }
 #endif
 

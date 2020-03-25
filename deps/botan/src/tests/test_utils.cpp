@@ -1,5 +1,5 @@
 /*
-* (C) 2015 Jack Lloyd
+* (C) 2015,2018 Jack Lloyd
 * (C) 2016 Daniel Neus, Rohde & Schwarz Cybersecurity
 * (C) 2017 René Korthaus, Rohde & Schwarz Cybersecurity
 *
@@ -15,8 +15,11 @@
 #include <botan/calendar.h>
 #include <botan/internal/rounding.h>
 #include <botan/internal/ct_utils.h>
+#include <botan/internal/bit_ops.h>
+#include <botan/cpuid.h>
 #include <botan/charset.h>
 #include <botan/parsing.h>
+#include <botan/version.h>
 
 #if defined(BOTAN_HAS_BASE64_CODEC)
    #include <botan/base64.h>
@@ -26,8 +29,16 @@
    #include <botan/base32.h>
 #endif
 
+#if defined(BOTAN_HAS_BASE58_CODEC)
+   #include <botan/base58.h>
+#endif
+
 #if defined(BOTAN_HAS_POLY_DBL)
    #include <botan/internal/poly_dbl.h>
+#endif
+
+#if defined(BOTAN_HAS_UUID)
+   #include <botan/uuid.h>
 #endif
 
 namespace Botan_Tests {
@@ -74,42 +85,8 @@ class Utility_Function_Tests final : public Text_Based_Test
          std::vector<Test::Result> results;
 
          results.push_back(test_loadstore());
-         results.push_back(test_ct_utils());
 
          return results;
-         }
-
-      Test::Result test_ct_utils()
-         {
-         Test::Result result("CT utils");
-
-         result.test_eq_sz("CT::is_zero8", Botan::CT::is_zero<uint8_t>(0), 0xFF);
-         result.test_eq_sz("CT::is_zero8", Botan::CT::is_zero<uint8_t>(1), 0x00);
-         result.test_eq_sz("CT::is_zero8", Botan::CT::is_zero<uint8_t>(0xFF), 0x00);
-
-         result.test_eq_sz("CT::is_zero16", Botan::CT::is_zero<uint16_t>(0), 0xFFFF);
-         result.test_eq_sz("CT::is_zero16", Botan::CT::is_zero<uint16_t>(1), 0x0000);
-         result.test_eq_sz("CT::is_zero16", Botan::CT::is_zero<uint16_t>(0xFF), 0x0000);
-
-         result.test_eq_sz("CT::is_zero32", Botan::CT::is_zero<uint32_t>(0), 0xFFFFFFFF);
-         result.test_eq_sz("CT::is_zero32", Botan::CT::is_zero<uint32_t>(1), 0x00000000);
-         result.test_eq_sz("CT::is_zero32", Botan::CT::is_zero<uint32_t>(0xFF), 0x00000000);
-
-         result.test_eq_sz("CT::is_less8", Botan::CT::is_less<uint8_t>(0, 1), 0xFF);
-         result.test_eq_sz("CT::is_less8", Botan::CT::is_less<uint8_t>(1, 0), 0x00);
-         result.test_eq_sz("CT::is_less8", Botan::CT::is_less<uint8_t>(0xFF, 5), 0x00);
-
-         result.test_eq_sz("CT::is_less16", Botan::CT::is_less<uint16_t>(0, 1), 0xFFFF);
-         result.test_eq_sz("CT::is_less16", Botan::CT::is_less<uint16_t>(1, 0), 0x0000);
-         result.test_eq_sz("CT::is_less16", Botan::CT::is_less<uint16_t>(0xFFFF, 5), 0x0000);
-
-         result.test_eq_sz("CT::is_less32", Botan::CT::is_less<uint32_t>(0, 1), 0xFFFFFFFF);
-         result.test_eq_sz("CT::is_less32", Botan::CT::is_less<uint32_t>(1, 0), 0x00000000);
-         result.test_eq_sz("CT::is_less32", Botan::CT::is_less<uint32_t>(0xFFFF5, 5), 0x00000000);
-         result.test_eq_sz("CT::is_less32", Botan::CT::is_less<uint32_t>(0xFFFFFFFF, 5), 0x00000000);
-         result.test_eq_sz("CT::is_less32", Botan::CT::is_less<uint32_t>(5, 0xFFFFFFFF), 0xFFFFFFFF);
-
-         return result;
          }
 
       Test::Result test_loadstore()
@@ -222,6 +199,140 @@ class Utility_Function_Tests final : public Text_Based_Test
 
 BOTAN_REGISTER_TEST("util", Utility_Function_Tests);
 
+class CT_Mask_Tests final : public Test
+   {
+   public:
+      std::vector<Test::Result> run() override
+         {
+         Test::Result result("CT utils");
+
+         result.test_eq_sz("CT::is_zero8", Botan::CT::Mask<uint8_t>::is_zero(0).value(), 0xFF);
+         result.test_eq_sz("CT::is_zero8", Botan::CT::Mask<uint8_t>::is_zero(1).value(), 0x00);
+         result.test_eq_sz("CT::is_zero8", Botan::CT::Mask<uint8_t>::is_zero(0xFF).value(), 0x00);
+
+         result.test_eq_sz("CT::is_zero16", Botan::CT::Mask<uint16_t>::is_zero(0).value(), 0xFFFF);
+         result.test_eq_sz("CT::is_zero16", Botan::CT::Mask<uint16_t>::is_zero(1).value(), 0x0000);
+         result.test_eq_sz("CT::is_zero16", Botan::CT::Mask<uint16_t>::is_zero(0xFF).value(), 0x0000);
+
+         result.test_eq_sz("CT::is_zero32", Botan::CT::Mask<uint32_t>::is_zero(0).value(), 0xFFFFFFFF);
+         result.test_eq_sz("CT::is_zero32", Botan::CT::Mask<uint32_t>::is_zero(1).value(), 0x00000000);
+         result.test_eq_sz("CT::is_zero32", Botan::CT::Mask<uint32_t>::is_zero(0xFF).value(), 0x00000000);
+
+         result.test_eq_sz("CT::is_less8", Botan::CT::Mask<uint8_t>::is_lt(0, 1).value(), 0xFF);
+         result.test_eq_sz("CT::is_less8", Botan::CT::Mask<uint8_t>::is_lt(1, 0).value(), 0x00);
+         result.test_eq_sz("CT::is_less8", Botan::CT::Mask<uint8_t>::is_lt(0xFF, 5).value(), 0x00);
+
+         result.test_eq_sz("CT::is_less16", Botan::CT::Mask<uint16_t>::is_lt(0, 1).value(), 0xFFFF);
+         result.test_eq_sz("CT::is_less16", Botan::CT::Mask<uint16_t>::is_lt(1, 0).value(), 0x0000);
+         result.test_eq_sz("CT::is_less16", Botan::CT::Mask<uint16_t>::is_lt(0xFFFF, 5).value(), 0x0000);
+
+         result.test_eq_sz("CT::is_less32", Botan::CT::Mask<uint32_t>::is_lt(0, 1).value(), 0xFFFFFFFF);
+         result.test_eq_sz("CT::is_less32", Botan::CT::Mask<uint32_t>::is_lt(1, 0).value(), 0x00000000);
+         result.test_eq_sz("CT::is_less32", Botan::CT::Mask<uint32_t>::is_lt(0xFFFF5, 5).value(), 0x00000000);
+         result.test_eq_sz("CT::is_less32", Botan::CT::Mask<uint32_t>::is_lt(0xFFFFFFFF, 5).value(), 0x00000000);
+         result.test_eq_sz("CT::is_less32", Botan::CT::Mask<uint32_t>::is_lt(5, 0xFFFFFFFF).value(), 0xFFFFFFFF);
+
+         return {result};
+         }
+   };
+
+BOTAN_REGISTER_TEST("ct_utils", CT_Mask_Tests);
+
+class BitOps_Tests final : public Test
+   {
+   public:
+      std::vector<Test::Result> run() override
+         {
+         std::vector<Test::Result> results;
+
+         results.push_back(test_power_of_2());
+         results.push_back(test_ctz());
+         results.push_back(test_sig_bytes());
+
+         return results;
+         }
+   private:
+      template<typename T>
+      void test_ctz(Test::Result& result, T val, size_t expected)
+         {
+         result.test_eq("ctz(" + std::to_string(val) + ")", Botan::ctz<T>(val), expected);
+         }
+
+      Test::Result test_ctz()
+         {
+         Test::Result result("ctz");
+         test_ctz<uint32_t>(result, 0, 32);
+         test_ctz<uint32_t>(result, 1, 0);
+         test_ctz<uint32_t>(result, 0x80, 7);
+         test_ctz<uint32_t>(result, 0x8000000, 27);
+         test_ctz<uint32_t>(result, 0x8100000, 20);
+         test_ctz<uint32_t>(result, 0x80000000, 31);
+
+         return result;
+         }
+
+      template<typename T>
+      void test_sig_bytes(Test::Result& result, T val, size_t expected)
+         {
+         result.test_eq("significant_bytes(" + std::to_string(val) + ")",
+                        Botan::significant_bytes<T>(val), expected);
+         }
+
+      Test::Result test_sig_bytes()
+         {
+         Test::Result result("significant_bytes");
+         test_sig_bytes<uint32_t>(result, 0, 0);
+         test_sig_bytes<uint32_t>(result, 1, 1);
+         test_sig_bytes<uint32_t>(result, 0x80, 1);
+         test_sig_bytes<uint32_t>(result, 255, 1);
+         test_sig_bytes<uint32_t>(result, 256, 2);
+         test_sig_bytes<uint32_t>(result, 65535, 2);
+         test_sig_bytes<uint32_t>(result, 65536, 3);
+         test_sig_bytes<uint32_t>(result, 0x80000000, 4);
+
+         test_sig_bytes<uint64_t>(result, 0, 0);
+         test_sig_bytes<uint64_t>(result, 1, 1);
+         test_sig_bytes<uint64_t>(result, 0x80, 1);
+         test_sig_bytes<uint64_t>(result, 256, 2);
+         test_sig_bytes<uint64_t>(result, 0x80000000, 4);
+         test_sig_bytes<uint64_t>(result, 0x100000000, 5);
+
+         return result;
+         }
+
+      template<typename T>
+      void test_power_of_2(Test::Result& result, T val, bool expected)
+         {
+         result.test_eq("power_of_2(" + std::to_string(val) + ")", Botan::is_power_of_2<T>(val), expected);
+         }
+
+      Test::Result test_power_of_2()
+         {
+         Test::Result result("is_power_of_2");
+
+         test_power_of_2<uint32_t>(result, 0, false);
+         test_power_of_2<uint32_t>(result, 1, false);
+         test_power_of_2<uint32_t>(result, 2, true);
+         test_power_of_2<uint32_t>(result, 3, false);
+         test_power_of_2<uint32_t>(result, 0x8000, true);
+         test_power_of_2<uint32_t>(result, 0x8001, false);
+         test_power_of_2<uint32_t>(result, 0x8000000, true);
+
+         test_power_of_2<uint64_t>(result, 0, false);
+         test_power_of_2<uint64_t>(result, 1, false);
+         test_power_of_2<uint64_t>(result, 2, true);
+         test_power_of_2<uint64_t>(result, 3, false);
+         test_power_of_2<uint64_t>(result, 0x8000, true);
+         test_power_of_2<uint64_t>(result, 0x8001, false);
+         test_power_of_2<uint64_t>(result, 0x8000000, true);
+         test_power_of_2<uint64_t>(result, 0x100000000000, true);
+
+         return result;
+         }
+   };
+
+BOTAN_REGISTER_TEST("bit_ops", BitOps_Tests);
+
 #if defined(BOTAN_HAS_POLY_DBL)
 
 class Poly_Double_Tests final : public Text_Based_Test
@@ -246,6 +357,51 @@ class Poly_Double_Tests final : public Text_Based_Test
 BOTAN_REGISTER_TEST("poly_dbl", Poly_Double_Tests);
 
 #endif
+
+class Version_Tests final : public Test
+   {
+   public:
+      std::vector<Test::Result> run() override
+         {
+         Test::Result result("Versions");
+
+         result.confirm("Version datestamp matches macro",
+                        Botan::version_datestamp() == BOTAN_VERSION_DATESTAMP);
+
+         const char* version_cstr = Botan::version_cstr();
+         std::string version_str = Botan::version_string();
+         result.test_eq("Same version string", version_str, std::string(version_cstr));
+
+         const char* sversion_cstr = Botan::short_version_cstr();
+         std::string sversion_str = Botan::short_version_string();
+         result.test_eq("Same short version string", sversion_str, std::string(sversion_cstr));
+
+         const std::string expected_sversion =
+            std::to_string(BOTAN_VERSION_MAJOR) + "." +
+            std::to_string(BOTAN_VERSION_MINOR) + "." +
+            std::to_string(BOTAN_VERSION_PATCH);
+
+         result.test_eq("Short version string has expected format",
+                        sversion_str, expected_sversion);
+
+         const std::string version_check_ok =
+            Botan::runtime_version_check(BOTAN_VERSION_MAJOR, BOTAN_VERSION_MINOR, BOTAN_VERSION_PATCH);
+
+         result.confirm("Correct version no warning", version_check_ok.empty());
+
+         const std::string version_check_bad =
+            Botan::runtime_version_check(1, 19, 42);
+
+         const std::string expected_error =
+            "Warning: linked version (" + sversion_str + ") does not match version built against (1.19.42)\n";
+
+         result.test_eq("Expected warning text", version_check_bad, expected_error);
+
+         return {result};
+         }
+   };
+
+BOTAN_REGISTER_TEST("versioning", Version_Tests);
 
 class Date_Format_Tests final : public Text_Based_Test
    {
@@ -401,6 +557,98 @@ class Base32_Tests final : public Text_Based_Test
    };
 
 BOTAN_REGISTER_TEST("base32", Base32_Tests);
+
+#endif
+
+#if defined(BOTAN_HAS_BASE58_CODEC)
+
+class Base58_Tests final : public Text_Based_Test
+   {
+   public:
+      Base58_Tests() : Text_Based_Test("base58.vec", "Base58", "Binary") {}
+
+      Test::Result run_one_test(const std::string& type, const VarMap& vars) override
+         {
+         Test::Result result("Base58");
+
+         const bool is_valid = (type == "valid");
+         const std::string base58 = vars.get_req_str("Base58");
+
+         try
+            {
+            if(is_valid)
+               {
+               const std::vector<uint8_t> binary = vars.get_req_bin("Binary");
+               result.test_eq("base58 decoding", Botan::base58_decode(base58), binary);
+               result.test_eq("base58 encoding", Botan::base58_encode(binary), base58);
+               }
+            else
+               {
+               auto res = Botan::base58_decode(base58);
+               result.test_failure("decoded invalid base58 to " + Botan::hex_encode(res));
+               }
+            }
+         catch(std::exception& e)
+            {
+            if(is_valid)
+               {
+               result.test_failure("rejected valid base58", e.what());
+               }
+            else
+               {
+               result.test_note("rejected invalid base58");
+               }
+            }
+
+         return result;
+         }
+   };
+
+BOTAN_REGISTER_TEST("base58", Base58_Tests);
+
+class Base58_Check_Tests final : public Text_Based_Test
+   {
+   public:
+      Base58_Check_Tests() : Text_Based_Test("base58c.vec", "Base58", "Binary") {}
+
+      Test::Result run_one_test(const std::string& type, const VarMap& vars) override
+         {
+         Test::Result result("Base58 Check");
+
+         const bool is_valid = (type == "valid");
+         const std::string base58 = vars.get_req_str("Base58");
+
+         try
+            {
+            if(is_valid)
+               {
+               const std::vector<uint8_t> binary = vars.get_req_bin("Binary");
+               result.test_eq("base58 decoding", Botan::base58_check_decode(base58), binary);
+               result.test_eq("base58 encoding", Botan::base58_check_encode(binary), base58);
+               }
+            else
+               {
+               auto res = Botan::base58_check_decode(base58);
+               result.test_failure("decoded invalid base58c to " + Botan::hex_encode(res));
+               }
+            }
+         catch(std::exception& e)
+            {
+            if(is_valid)
+               {
+               result.test_failure("rejected valid base58c", e.what());
+               }
+            else
+               {
+               result.test_note("rejected invalid base58c");
+               }
+            }
+
+         return result;
+         }
+   };
+
+BOTAN_REGISTER_TEST("base58c", Base58_Check_Tests);
 
 #endif
 
@@ -632,6 +880,83 @@ class Hostname_Tests final : public Text_Based_Test
 
 BOTAN_REGISTER_TEST("hostname", Hostname_Tests);
 
+class ReadKV_Tests final : public Text_Based_Test
+   {
+   public:
+      ReadKV_Tests() : Text_Based_Test("utils/read_kv.vec", "Input,Expected") {}
+
+      Test::Result run_one_test(const std::string& status, const VarMap& vars) override
+         {
+         Test::Result result("read_kv");
+
+         const bool is_valid = (status == "Valid");
+
+         const std::string input = vars.get_req_str("Input");
+         const std::string expected = vars.get_req_str("Expected");
+
+         if(is_valid)
+            {
+            confirm_kv(result, Botan::read_kv(input), split_group(expected));
+            }
+         else
+            {
+            // In this case "expected" is the expected exception message
+            result.test_throws("Invalid key value input throws exception",
+                               expected,
+                               [&]() { Botan::read_kv(input); });
+            }
+         return result;
+         }
+
+   private:
+
+      std::vector<std::string> split_group(const std::string& str)
+         {
+         std::vector<std::string> elems;
+         if(str.empty()) return elems;
+
+         std::string substr;
+         for(auto i = str.begin(); i != str.end(); ++i)
+            {
+            if(*i == '|')
+               {
+               elems.push_back(substr);
+               substr.clear();
+               }
+            else
+               {
+               substr += *i;
+               }
+            }
+
+         if(!substr.empty())
+            elems.push_back(substr);
+
+         return elems;
+         }
+
+      void confirm_kv(Test::Result& result,
+                      const std::map<std::string, std::string>& kv,
+                      const std::vector<std::string>& expected)
+         {
+         if(!result.test_eq("expected size", expected.size() % 2, size_t(0)))
+            return;
+
+         for(size_t i = 0; i != expected.size(); i += 2)
+            {
+            auto j = kv.find(expected[i]);
+            if(result.confirm("Found key", j != kv.end()))
+               {
+               result.test_eq("Matching value", j->second, expected[i+1]);
+               }
+            }
+
+         result.test_eq("KV has same size as expected", kv.size(), expected.size()/2);
+         }
+   };
+
+BOTAN_REGISTER_TEST("util_read_kv", ReadKV_Tests);
+
 class CPUID_Tests final : public Test
    {
    public:
@@ -651,6 +976,12 @@ class CPUID_Tests final : public Test
             {
             result.test_eq("If endian is big, it is not also little endian", Botan::CPUID::is_little_endian(), false);
             }
+
+         const size_t cache_line_size = Botan::CPUID::cache_line_size();
+
+         result.test_gte("Cache line size is >= 16", cache_line_size, 16);
+         result.test_lte("Cache line size is <= 256", cache_line_size, 256);
+         result.confirm("Cache line size is a power of 2", Botan::is_power_of_2(cache_line_size));
 
          const std::string cpuid_string = Botan::CPUID::to_string();
          result.test_success("CPUID::to_string doesn't crash");
@@ -675,6 +1006,76 @@ class CPUID_Tests final : public Test
    };
 
 BOTAN_REGISTER_TEST("cpuid", CPUID_Tests);
+
+#if defined(BOTAN_HAS_UUID)
+
+class UUID_Tests : public Test
+   {
+   public:
+      std::vector<Test::Result> run() override
+         {
+         Test::Result result("UUID");
+
+         const Botan::UUID empty_uuid;
+         const Botan::UUID random_uuid1(Test::rng());
+         const Botan::UUID random_uuid2(Test::rng());
+         const Botan::UUID loaded_uuid(std::vector<uint8_t>(16, 4));
+
+         result.test_throws("Cannot load wrong number of bytes", []() { Botan::UUID u(std::vector<uint8_t>(15)); });
+
+         result.test_eq("Empty UUID is empty", empty_uuid.is_valid(), false);
+         result.confirm("Empty UUID equals another empty UUID", empty_uuid == Botan::UUID());
+
+         result.test_throws("Empty UUID cannot become a string", [&]() { empty_uuid.to_string(); });
+
+         result.test_eq("Random UUID not empty", random_uuid1.is_valid(), true);
+         result.test_eq("Random UUID not empty", random_uuid2.is_valid(), true);
+
+         result.confirm("Random UUIDs are distinct", random_uuid1 != random_uuid2);
+         result.confirm("Random UUIDs not equal to empty", random_uuid1 != empty_uuid);
+
+         const std::string uuid4_str = loaded_uuid.to_string();
+         result.test_eq("String matches expected", uuid4_str, "04040404-0404-0404-0404-040404040404");
+
+         const std::string uuid_r1_str = random_uuid1.to_string();
+         result.confirm("UUID from string matches", Botan::UUID(uuid_r1_str) == random_uuid1);
+
+         class AllSame_RNG : public Botan::RandomNumberGenerator
+            {
+            public:
+               AllSame_RNG(uint8_t b) : m_val(b) {}
+
+               void randomize(uint8_t out[], size_t len) override
+                  {
+                  for(size_t i = 0; i != len; ++i)
+                     out[i] = m_val;
+                  }
+
+               std::string name() const override { return "zeros"; }
+               bool accepts_input() const override { return false; }
+               void add_entropy(const uint8_t[], size_t) override {}
+               void clear() override {}
+               bool is_seeded() const override { return true; }
+            private:
+               uint8_t m_val;
+            };
+
+         AllSame_RNG zeros(0x00);
+         const Botan::UUID zero_uuid(zeros);
+         result.test_eq("Zero UUID matches expected", zero_uuid.to_string(), "00000000-0000-4000-8000-000000000000");
+
+         AllSame_RNG ones(0xFF);
+         const Botan::UUID ones_uuid(ones);
+         result.test_eq("Ones UUID matches expected", ones_uuid.to_string(), "FFFFFFFF-FFFF-4FFF-BFFF-FFFFFFFFFFFF");
+
+         return {result};
+         }
+
+   };
+
+BOTAN_REGISTER_TEST("uuid", UUID_Tests);
+
+#endif
 
 }
 

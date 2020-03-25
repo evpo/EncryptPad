@@ -11,48 +11,13 @@
 #include <botan/tls_policy.h>
 #include <botan/tls_version.h>
 #include <botan/tls_messages.h>
+#include <botan/loadstor.h>
 #include <botan/hex.h>
 #include <sstream>
 
+#include "tls_helpers.h"
+
 namespace Botan_CLI {
-
-class TLS_All_Policy final : public Botan::TLS::Policy
-   {
-   public:
-      std::vector<std::string> allowed_ciphers() const override
-         {
-         return std::vector<std::string>
-            {
-            "ChaCha20Poly1305",
-            "AES-256/OCB(12)",
-            "AES-128/OCB(12)",
-            "AES-256/GCM",
-            "AES-128/GCM",
-            "AES-256/CCM",
-            "AES-128/CCM",
-            "AES-256/CCM(8)",
-            "AES-128/CCM(8)",
-            "Camellia-256/GCM",
-            "Camellia-128/GCM",
-            "AES-256",
-            "AES-128",
-            "Camellia-256",
-            "Camellia-128",
-            "SEED"
-            "3DES"
-            };
-         }
-
-      std::vector<std::string> allowed_key_exchange_methods() const override
-         {
-         return { "SRP_SHA", "ECDHE_PSK", "DHE_PSK", "PSK", "CECPQ1", "ECDH", "DH", "RSA" };
-         }
-
-      std::vector<std::string> allowed_signature_methods() const override
-         {
-         return { "ECDSA", "RSA", "DSA" };
-         }
-   };
 
 class TLS_Ciphersuites final : public Command
    {
@@ -104,32 +69,12 @@ class TLS_Ciphersuites final : public Command
          const Botan::TLS::Protocol_Version version(tls_version_from_str(get_arg("version")));
          const bool with_srp = false; // fixme
 
-         std::unique_ptr<Botan::TLS::Policy> policy;
+         auto policy = load_tls_policy(policy_type);
 
-         if(policy_type == "default")
+         if(policy->acceptable_protocol_version(version) == false)
             {
-            policy.reset(new Botan::TLS::Policy);
-            }
-         else if(policy_type == "suiteb_128")
-            {
-            policy.reset(new Botan::TLS::NSA_Suite_B_128);
-            }
-         else if(policy_type == "suiteb_192")
-            {
-            policy.reset(new Botan::TLS::NSA_Suite_B_192);
-            }
-         else if(policy_type == "strict")
-            {
-            policy.reset(new Botan::TLS::Strict_Policy);
-            }
-         else if(policy_type == "all")
-            {
-            policy.reset(new TLS_All_Policy);
-            }
-         else
-            {
-            const std::string policy_txt = slurp_file_as_str(policy_type);
-            policy.reset(new Botan::TLS::Text_Policy(policy_txt));
+            error_output() << "Error: the policy specified does not allow the given TLS version\n";
+            return;
             }
 
          for(uint16_t suite_id : policy->ciphersuite_list(version, with_srp))

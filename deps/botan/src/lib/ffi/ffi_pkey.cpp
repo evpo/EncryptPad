@@ -28,7 +28,7 @@ int botan_privkey_create(botan_privkey_t* key_obj,
                          const char* algo_params,
                          botan_rng_t rng_obj)
    {
-   return ffi_guard_thunk(BOTAN_CURRENT_FUNCTION, [=]() -> int {
+   return ffi_guard_thunk(__func__, [=]() -> int {
       if(key_obj == nullptr)
          return BOTAN_FFI_ERROR_NULL_POINTER;
 
@@ -58,22 +58,22 @@ int botan_privkey_load(botan_privkey_t* key, botan_rng_t rng_obj,
                        const uint8_t bits[], size_t len,
                        const char* password)
    {
+   BOTAN_UNUSED(rng_obj);
+
    *key = nullptr;
 
-   return ffi_guard_thunk(BOTAN_CURRENT_FUNCTION, [=]() -> int {
+   return ffi_guard_thunk(__func__, [=]() -> int {
       Botan::DataSource_Memory src(bits, len);
-
-      Botan::RandomNumberGenerator& rng = safe_get(rng_obj);
 
       std::unique_ptr<Botan::Private_Key> pkcs8;
 
       if(password == nullptr)
          {
-         pkcs8.reset(Botan::PKCS8::load_key(src, rng));
+         pkcs8 = Botan::PKCS8::load_key(src);
          }
       else
          {
-         pkcs8.reset(Botan::PKCS8::load_key(src, rng, static_cast<std::string>(password)));
+         pkcs8 = Botan::PKCS8::load_key(src, std::string(password));
          }
 
       if(pkcs8)
@@ -95,7 +95,7 @@ int botan_pubkey_load(botan_pubkey_t* key,
    {
    *key = nullptr;
 
-   return ffi_guard_thunk(BOTAN_CURRENT_FUNCTION, [=]() -> int {
+   return ffi_guard_thunk(__func__, [=]() -> int {
       Botan::DataSource_Memory src(bits, bits_len);
       std::unique_ptr<Botan::Public_Key> pubkey(Botan::X509::load_key(src));
 
@@ -114,13 +114,18 @@ int botan_pubkey_destroy(botan_pubkey_t key)
 
 int botan_privkey_export_pubkey(botan_pubkey_t* pubout, botan_privkey_t key_obj)
    {
-   return ffi_guard_thunk(BOTAN_CURRENT_FUNCTION, [=]() -> int {
+   return ffi_guard_thunk(__func__, [=]() -> int {
       std::unique_ptr<Botan::Public_Key>
          pubkey(Botan::X509::load_key(Botan::X509::BER_encode(safe_get(key_obj))));
 
       *pubout = new botan_pubkey_struct(pubkey.release());
       return BOTAN_FFI_SUCCESS;
       });
+   }
+
+int botan_privkey_algo_name(botan_privkey_t key, char out[], size_t* out_len)
+   {
+   return BOTAN_FFI_DO(Botan::Private_Key, key, k, { return write_str_output(out, out_len, k.algo_name()); });
    }
 
 int botan_pubkey_algo_name(botan_pubkey_t key, char out[], size_t* out_len)
@@ -132,15 +137,17 @@ int botan_pubkey_check_key(botan_pubkey_t key, botan_rng_t rng, uint32_t flags)
    {
    const bool strong = (flags & BOTAN_CHECK_KEY_EXPENSIVE_TESTS);
 
-   return BOTAN_FFI_DO(Botan::Public_Key, key, k,
-                       { return (k.check_key(safe_get(rng), strong) == true) ? 0 : -1; });
+   return BOTAN_FFI_RETURNING(Botan::Public_Key, key, k, {
+      return (k.check_key(safe_get(rng), strong) == true) ? 0 : BOTAN_FFI_ERROR_INVALID_INPUT;
+      });
    }
 
 int botan_privkey_check_key(botan_privkey_t key, botan_rng_t rng, uint32_t flags)
    {
    const bool strong = (flags & BOTAN_CHECK_KEY_EXPENSIVE_TESTS);
-   return BOTAN_FFI_DO(Botan::Private_Key, key, k,
-                       { return (k.check_key(safe_get(rng), strong) == true) ? 0 : -1; });
+   return BOTAN_FFI_RETURNING(Botan::Private_Key, key, k, {
+      return (k.check_key(safe_get(rng), strong) == true) ? 0 : BOTAN_FFI_ERROR_INVALID_INPUT;
+      });
    }
 
 int botan_pubkey_export(botan_pubkey_t key, uint8_t out[], size_t* out_len, uint32_t flags)
@@ -260,7 +267,7 @@ int botan_pubkey_fingerprint(botan_pubkey_t key, const char* hash_fn,
 int botan_pkcs_hash_id(const char* hash_name, uint8_t pkcs_id[], size_t* pkcs_id_len)
    {
 #if defined(BOTAN_HAS_HASH_ID)
-   return ffi_guard_thunk(BOTAN_CURRENT_FUNCTION, [=]() -> int {
+   return ffi_guard_thunk(__func__, [=]() -> int {
       const std::vector<uint8_t> hash_id = Botan::pkcs_hash_id(hash_name);
       return write_output(pkcs_id, pkcs_id_len, hash_id.data(), hash_id.size());
       });

@@ -16,7 +16,7 @@ BOTAN_FFI_DECLARE_STRUCT(botan_block_cipher_struct, Botan::BlockCipher, 0x64C297
 
 int botan_block_cipher_init(botan_block_cipher_t* bc, const char* bc_name)
    {
-   return ffi_guard_thunk(BOTAN_CURRENT_FUNCTION, [=]() -> int {
+   return ffi_guard_thunk(__func__, [=]() -> int {
       if(bc == nullptr || bc_name == nullptr || *bc_name == 0)
          return BOTAN_FFI_ERROR_NULL_POINTER;
 
@@ -50,6 +50,8 @@ int botan_block_cipher_clear(botan_block_cipher_t bc)
 int botan_block_cipher_set_key(botan_block_cipher_t bc,
                                const uint8_t key[], size_t len)
    {
+   if(key == nullptr)
+      return BOTAN_FFI_ERROR_NULL_POINTER;
    return BOTAN_FFI_DO(Botan::BlockCipher, bc, b, { b.set_key(key, len); });
    }
 
@@ -59,8 +61,8 @@ int botan_block_cipher_set_key(botan_block_cipher_t bc,
 */
 int botan_block_cipher_block_size(botan_block_cipher_t bc)
    {
-   return BOTAN_FFI_DO(Botan::BlockCipher, bc, b,
-                       { return static_cast<int>(b.block_size()); });
+   return BOTAN_FFI_RETURNING(Botan::BlockCipher, bc, b,
+                              { return static_cast<int>(b.block_size()); });
    }
 
 int botan_block_cipher_encrypt_blocks(botan_block_cipher_t bc,
@@ -68,6 +70,8 @@ int botan_block_cipher_encrypt_blocks(botan_block_cipher_t bc,
                                       uint8_t out[],
                                       size_t blocks)
    {
+   if(in == nullptr || out == nullptr)
+      return BOTAN_FFI_ERROR_NULL_POINTER;
    return BOTAN_FFI_DO(Botan::BlockCipher, bc, b, { b.encrypt_n(in, out, blocks); });
    }
 
@@ -76,7 +80,33 @@ int botan_block_cipher_decrypt_blocks(botan_block_cipher_t bc,
                                       uint8_t out[],
                                       size_t blocks)
    {
+   if(in == nullptr || out == nullptr)
+      return BOTAN_FFI_ERROR_NULL_POINTER;
    return BOTAN_FFI_DO(Botan::BlockCipher, bc, b, { b.decrypt_n(in, out, blocks); });
+   }
+
+int botan_block_cipher_name(botan_block_cipher_t cipher, char* name, size_t* name_len)
+   {
+   if(name_len == nullptr)
+      return BOTAN_FFI_ERROR_NULL_POINTER;
+
+   return BOTAN_FFI_DO(Botan::BlockCipher, cipher, bc, {
+      return write_str_output(name, name_len, bc.name()); });
+   }
+
+int botan_block_cipher_get_keyspec(botan_block_cipher_t cipher,
+                                   size_t* out_minimum_keylength,
+                                   size_t* out_maximum_keylength,
+                                   size_t* out_keylength_modulo)
+   {
+   return BOTAN_FFI_DO(Botan::BlockCipher, cipher, bc, {
+      if(out_minimum_keylength)
+         *out_minimum_keylength = bc.minimum_keylength();
+      if(out_maximum_keylength)
+         *out_maximum_keylength = bc.maximum_keylength();
+      if(out_keylength_modulo)
+         *out_keylength_modulo = bc.key_spec().keylength_multiple();
+      });
    }
 
 }

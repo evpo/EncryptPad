@@ -47,12 +47,20 @@ class BOTAN_PUBLIC_API(2,0) Modular_Reducer
       BigInt cube(const BigInt& x) const
          { return multiply(x, this->square(x)); }
 
+      /**
+      * Low level reduction function. Mostly for internal use.
+      * Sometimes useful for performance by reducing temporaries
+      * Reduce x mod p and place the output in out. ** X and out must not reference each other **
+      * ws is a temporary workspace.
+      */
+      void reduce(BigInt& out, const BigInt& x, secure_vector<word>& ws) const;
+
       bool initialized() const { return (m_mod_words != 0); }
 
       Modular_Reducer() { m_mod_words = 0; }
       explicit Modular_Reducer(const BigInt& mod);
    private:
-      BigInt m_modulus, m_modulus_2, m_mu;
+      BigInt m_modulus, m_mu;
       size_t m_mod_words;
    };
 

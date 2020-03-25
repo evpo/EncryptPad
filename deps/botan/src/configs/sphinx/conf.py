@@ -1,3 +1,4 @@
+# -* coding: utf-8 -*-
 # Sphinx configuration file
 
 import sys
@@ -46,7 +47,7 @@ version_patch = version_info['release_patch']
 
 is_website_build = check_for_tag('website')
 
-needs_sphinx = '1.1'
+needs_sphinx = '1.2'
 
 templates_path = ['templates']
 
@@ -188,7 +189,7 @@ htmlhelp_basename = 'botandoc'
 
 authors = u'Jack Lloyd \\and Daniel Neus \\and Ren\u00e9 Korthaus \\and Juraj Somorovsky \\and Tobias Niemann'
 latex_documents = [
-    ('contents', 'botan.tex', u'Botan Reference Manual', authors, 'manual'),
+    ('contents', 'botan.tex', u'Botan Reference Guide', authors, 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of

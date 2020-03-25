@@ -12,8 +12,8 @@
 #include <botan/datastor.h>
 #include <botan/der_enc.h>
 #include <botan/ber_dec.h>
-#include <botan/oids.h>
 #include <botan/hash.h>
+#include <botan/loadstor.h>
 #include <botan/internal/bit_ops.h>
 #include <algorithm>
 #include <set>
@@ -29,7 +29,7 @@ Extensions::create_extn_obj(const OID& oid,
                             bool critical,
                             const std::vector<uint8_t>& body)
    {
-   const std::string oid_str = oid.as_string();
+   const std::string oid_str = oid.to_string();
 
    std::unique_ptr<Certificate_Extension> extn;
 
@@ -99,9 +99,10 @@ Extensions::create_extn_obj(const OID& oid,
       {
       extn->decode_inner(body);
       }
-   catch(Decoding_Error& e)
+   catch(Decoding_Error&)
       {
-      throw Decoding_Error("Decoding X.509 extension " + oid.as_string() + " failed", e.what());
+      extn.reset(new Cert_Extension::Unknown_Extension(oid, critical));
+      extn->decode_inner(body);
       }
    return extn;
    }
@@ -123,7 +124,11 @@ void Extensions::add(Certificate_Extension* extn, bool critical)
    {
    // sanity check: we don't want to have the same extension more than once
    if(m_extension_info.count(extn->oid_of()) > 0)
-      throw Invalid_Argument(extn->oid_name() + " extension already present in Extensions::add");
+      {
+      const std::string name = extn->oid_name();
+      delete extn;
+      throw Invalid_Argument("Extension " + name + " already present in Extensions::add");
+      }
 
    const OID oid = extn->oid_of();
    Extensions_Info info(critical, extn);
@@ -146,10 +151,22 @@ bool Extensions::add_new(Certificate_Extension* extn, bool critical)
    return true;
    }
 
+bool Extensions::remove(const OID& oid)
+   {
+   const bool erased = m_extension_info.erase(oid) > 0;
+
+   if(erased)
+      {
+      m_extension_oids.erase(std::find(m_extension_oids.begin(), m_extension_oids.end(), oid));
+      }
+
+   return erased;
+   }
+
 void Extensions::replace(Certificate_Extension* extn, bool critical)
    {
    // Remove it if it existed
-   m_extension_info.erase(extn->oid_of());
+   remove(extn->oid_of());
 
    const OID oid = extn->oid_of();
    Extensions_Info info(critical, extn);
@@ -168,6 +185,15 @@ bool Extensions::critical_extension_set(const OID& oid) const
    if(i != m_extension_info.end())
       return i->second.is_critical();
    return false;
+   }
+
+std::vector<uint8_t> Extensions::get_extension_bits(const OID& oid) const
+   {
+   auto i = m_extension_info.find(oid);
+   if(i == m_extension_info.end())
+      throw Invalid_Argument("Extensions::get_extension_bits no such extension set");
+
+   return i->second.bits();
    }
 
 const Certificate_Extension* Extensions::get_extension_object(const OID& oid) const
@@ -344,7 +370,7 @@ std::vector<uint8_t> Key_Usage::encode_inner() const
    if(m_constraints == NO_CONSTRAINTS)
       throw Encoding_Error("Cannot encode zero usage constraints");
 
-   const size_t unused_bits = low_bit(m_constraints) - 1;
+   const size_t unused_bits = ctz(static_cast<uint32_t>(m_constraints));
 
    std::vector<uint8_t> der;
    der.push_back(BIT_STRING);
@@ -556,7 +582,7 @@ void Extended_Key_Usage::decode_inner(const std::vector<uint8_t>& in)
 void Extended_Key_Usage::contents_to(Data_Store& subject, Data_Store&) const
    {
    for(size_t i = 0; i != m_oids.size(); ++i)
-      subject.add("X509v3.ExtendedKeyUsage", m_oids[i].as_string());
+      subject.add("X509v3.ExtendedKeyUsage", m_oids[i].to_string());
    }
 
 /*
@@ -760,7 +786,7 @@ void Certificate_Policies::decode_inner(const std::vector<uint8_t>& in)
 void Certificate_Policies::contents_to(Data_Store& info, Data_Store&) const
    {
    for(size_t i = 0; i != m_oids.size(); ++i)
-      info.add("X509v3.CertificatePolicies", m_oids[i].as_string());
+      info.add("X509v3.CertificatePolicies", m_oids[i].to_string());
    }
 
 void Certificate_Policies::validate(
@@ -785,7 +811,7 @@ std::vector<uint8_t> Authority_Information_Access::encode_inner() const
    DER_Encoder(output)
       .start_cons(SEQUENCE)
       .start_cons(SEQUENCE)
-      .encode(OIDS::lookup("PKIX.OCSP"))
+      .encode(OID::from_string("PKIX.OCSP"))
       .add_object(ASN1_Tag(6), CONTEXT_SPECIFIC, url.value())
       .end_cons()
       .end_cons();
@@ -804,7 +830,7 @@ void Authority_Information_Access::decode_inner(const std::vector<uint8_t>& in)
 
       info.decode(oid);
 
-      if(oid == OIDS::lookup("PKIX.OCSP"))
+      if(oid == OID::from_string("PKIX.OCSP"))
          {
          BER_Object name = info.get_next_object();
 
@@ -814,7 +840,7 @@ void Authority_Information_Access::decode_inner(const std::vector<uint8_t>& in)
             }
 
          }
-      if(oid == OIDS::lookup("PKIX.CertificateAuthorityIssuers"))
+      if(oid == OID::from_string("PKIX.CertificateAuthorityIssuers"))
          {
          BER_Object name = info.get_next_object();
 

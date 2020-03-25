@@ -15,6 +15,7 @@
 #include <botan/internal/bit_ops.h>
 #include <botan/internal/code_based_util.h>
 #include <botan/internal/pk_ops_impl.h>
+#include <botan/loadstor.h>
 #include <botan/der_enc.h>
 #include <botan/ber_dec.h>
 #include <botan/rng.h>
@@ -31,7 +32,7 @@ McEliece_PrivateKey::McEliece_PrivateKey(polyn_gf2m const& goppa_polyn,
    m_sqrtmod(square_root_matrix),
    m_Linv(inverse_support),
    m_coeffs(parity_check_matrix_coeffs),
-   m_codimension(ceil_log2(inverse_support.size()) * goppa_polyn.get_degree()),
+   m_codimension(static_cast<size_t>(ceil_log2(inverse_support.size())) * goppa_polyn.get_degree()),
    m_dimension(inverse_support.size() - m_codimension)
    {
    }
@@ -42,9 +43,9 @@ McEliece_PrivateKey::McEliece_PrivateKey(RandomNumberGenerator& rng, size_t code
    *this = generate_mceliece_key(rng, ext_deg, code_length, t);
    }
 
-uint32_t McEliece_PublicKey::get_message_word_bit_length() const
+size_t McEliece_PublicKey::get_message_word_bit_length() const
    {
-   uint32_t codimension = ceil_log2(m_code_length) * m_t;
+   size_t codimension = ceil_log2(m_code_length) * m_t;
    return m_code_length - codimension;
    }
 
@@ -67,7 +68,7 @@ secure_vector<uint8_t> McEliece_PublicKey::random_plaintext_element(RandomNumber
 
 AlgorithmIdentifier McEliece_PublicKey::algorithm_identifier() const
    {
-   return AlgorithmIdentifier(get_oid(), std::vector<uint8_t>());
+   return AlgorithmIdentifier(get_oid(), AlgorithmIdentifier::USE_EMPTY_PARAM);
    }
 
 std::vector<uint8_t> McEliece_PublicKey::public_key_bits() const
@@ -121,25 +122,26 @@ secure_vector<uint8_t> McEliece_PrivateKey::private_key_bits() const
       .encode(m_public_matrix, OCTET_STRING)
       .encode(m_g.encode(), OCTET_STRING); // g as octet string
    enc.start_cons(SEQUENCE);
-   for(uint32_t i = 0; i < m_sqrtmod.size(); i++)
+   for(size_t i = 0; i < m_sqrtmod.size(); i++)
       {
       enc.encode(m_sqrtmod[i].encode(), OCTET_STRING);
       }
    enc.end_cons();
    secure_vector<uint8_t> enc_support;
-   for(uint32_t i = 0; i < m_Linv.size(); i++)
+
+   for(uint16_t Linv : m_Linv)
       {
-      enc_support.push_back(m_Linv[i] >> 8);
-      enc_support.push_back(m_Linv[i]);
+      enc_support.push_back(get_byte(0, Linv));
+      enc_support.push_back(get_byte(1, Linv));
       }
    enc.encode(enc_support, OCTET_STRING);
    secure_vector<uint8_t> enc_H;
-   for(uint32_t i = 0; i < m_coeffs.size(); i++)
+   for(uint32_t coef : m_coeffs)
       {
-      enc_H.push_back(m_coeffs[i] >> 24);
-      enc_H.push_back(m_coeffs[i] >> 16);
-      enc_H.push_back(m_coeffs[i] >> 8);
-      enc_H.push_back(m_coeffs[i]);
+      enc_H.push_back(get_byte(0, coef));
+      enc_H.push_back(get_byte(1, coef));
+      enc_H.push_back(get_byte(2, coef));
+      enc_H.push_back(get_byte(3, coef));
       }
    enc.encode(enc_H, OCTET_STRING);
    enc.end_cons();
@@ -232,7 +234,7 @@ McEliece_PrivateKey::McEliece_PrivateKey(const secure_vector<uint8_t>& key_bits)
       {
       throw Decoding_Error("encoded parity check matrix has length which is not a multiple of four");
       }
-   if(enc_H.size()/4 != bit_size_to_32bit_size(m_codimension) * m_code_length )
+   if(enc_H.size() / 4 != bit_size_to_32bit_size(m_codimension) * m_code_length)
       {
       throw Decoding_Error("encoded parity check matrix has wrong length");
       }
@@ -283,7 +285,7 @@ bool McEliece_PublicKey::operator==(const McEliece_PublicKey& other) const
       {
       return false;
       }
-   if(m_t != other.m_t )
+   if(m_t != other.m_t)
       {
       return false;
       }

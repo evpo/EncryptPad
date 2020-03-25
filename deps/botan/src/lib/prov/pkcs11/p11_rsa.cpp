@@ -15,7 +15,6 @@
 #include <botan/pk_ops.h>
 #include <botan/rng.h>
 #include <botan/blinding.h>
-#include <botan/pow_mod.h>
 
 namespace Botan {
 
@@ -35,14 +34,14 @@ RSA_PublicKeyGenerationProperties::RSA_PublicKeyGenerationProperties(Ulong bits)
    }
 
 PKCS11_RSA_PublicKey::PKCS11_RSA_PublicKey(Session& session, ObjectHandle handle)
-   : Object(session, handle)
+   : Object(session, handle),
+     RSA_PublicKey(BigInt::decode(get_attribute_value(AttributeType::Modulus)),
+                   BigInt::decode(get_attribute_value(AttributeType::PublicExponent)))
    {
-   m_n = BigInt::decode(get_attribute_value(AttributeType::Modulus));
-   m_e = BigInt::decode(get_attribute_value(AttributeType::PublicExponent));
    }
 
 PKCS11_RSA_PublicKey::PKCS11_RSA_PublicKey(Session& session, const RSA_PublicKeyImportProperties& pubkey_props)
-   : RSA_PublicKey(pubkey_props.modulus(), pubkey_props.pub_exponent()), Object(session, pubkey_props)
+   : Object(session, pubkey_props), RSA_PublicKey(pubkey_props.modulus(), pubkey_props.pub_exponent())
    {}
 
 
@@ -55,39 +54,41 @@ RSA_PrivateKeyImportProperties::RSA_PrivateKeyImportProperties(const BigInt& mod
 
 
 PKCS11_RSA_PrivateKey::PKCS11_RSA_PrivateKey(Session& session, ObjectHandle handle)
-   : Object(session, handle)
+   : Object(session, handle),
+     RSA_PublicKey(BigInt::decode(get_attribute_value(AttributeType::Modulus)),
+                   BigInt::decode(get_attribute_value(AttributeType::PublicExponent)))
    {
-   m_n = BigInt::decode(get_attribute_value(AttributeType::Modulus));
-   m_e = BigInt::decode(get_attribute_value(AttributeType::PublicExponent));
    }
 
 PKCS11_RSA_PrivateKey::PKCS11_RSA_PrivateKey(Session& session, const RSA_PrivateKeyImportProperties& priv_key_props)
-   : Object(session, priv_key_props)
+   : Object(session, priv_key_props),
+     RSA_PublicKey(priv_key_props.modulus(),
+                   BigInt::decode(get_attribute_value(AttributeType::PublicExponent)))
    {
-   m_n = priv_key_props.modulus();
-   m_e = BigInt::decode(get_attribute_value(AttributeType::PublicExponent));
    }
 
 PKCS11_RSA_PrivateKey::PKCS11_RSA_PrivateKey(Session& session, uint32_t bits,
-      const RSA_PrivateKeyGenerationProperties& priv_key_props)
-   : RSA_PublicKey(), Object(session)
+                                             const RSA_PrivateKeyGenerationProperties& priv_key_props)
+   : Object(session), RSA_PublicKey()
    {
    RSA_PublicKeyGenerationProperties pub_key_props(bits);
    pub_key_props.set_encrypt(true);
    pub_key_props.set_verify(true);
-   pub_key_props.set_token(false);	// don't create a persistent public key object
+   pub_key_props.set_token(false);    // don't create a persistent public key object
 
    ObjectHandle pub_key_handle = CK_INVALID_HANDLE;
    ObjectHandle priv_key_handle = CK_INVALID_HANDLE;
    Mechanism mechanism = { static_cast< CK_MECHANISM_TYPE >(MechanismType::RsaPkcsKeyPairGen), nullptr, 0 };
    session.module()->C_GenerateKeyPair(session.handle(), &mechanism,
-                                       pub_key_props.data(), pub_key_props.count(), priv_key_props.data(), priv_key_props.count(),
+                                       pub_key_props.data(), static_cast<Ulong>(pub_key_props.count()),
+                                       priv_key_props.data(), static_cast<Ulong>(priv_key_props.count()),
                                        &pub_key_handle, &priv_key_handle);
 
    this->reset_handle(priv_key_handle);
 
-   m_n = BigInt::decode(get_attribute_value(AttributeType::Modulus));
-   m_e = BigInt::decode(get_attribute_value(AttributeType::PublicExponent));
+   BigInt n = BigInt::decode(get_attribute_value(AttributeType::Modulus));
+   BigInt e = BigInt::decode(get_attribute_value(AttributeType::PublicExponent));
+   RSA_PublicKey::init(std::move(n), std::move(e));
    }
 
 RSA_PrivateKey PKCS11_RSA_PrivateKey::export_key() const
@@ -112,8 +113,8 @@ secure_vector<uint8_t> PKCS11_RSA_PrivateKey::private_key_bits() const
 
 
 namespace {
-// note:	multiple-part decryption operations (with C_DecryptUpdate/C_DecryptFinal)
-//			are not supported (PK_Ops::Decryption does not provide an `update` method)
+// note: multiple-part decryption operations (with C_DecryptUpdate/C_DecryptFinal)
+// are not supported (PK_Ops::Decryption does not provide an `update` method)
 class PKCS11_RSA_Decryption_Operation final : public PK_Ops::Decryption
    {
    public:
@@ -123,13 +124,14 @@ class PKCS11_RSA_Decryption_Operation final : public PK_Ops::Decryption
                                       RandomNumberGenerator& rng)
          : m_key(key),
            m_mechanism(MechanismWrapper::create_rsa_crypt_mechanism(padding)),
-           m_powermod(m_key.get_e(), m_key.get_n()),
            m_blinder(m_key.get_n(), rng,
-                     [ this ](const BigInt& k) { return m_powermod(k); },
+                     [ this ](const BigInt& k) { return power_mod(k, m_key.get_e(), m_key.get_n()); },
                      [ this ](const BigInt& k) { return inverse_mod(k, m_key.get_n()); })
          {
          m_bits = m_key.get_n().bits() - 1;
          }
+
+      size_t plaintext_length(size_t) const override { return m_key.get_n().bytes(); }
 
       secure_vector<uint8_t> decrypt(uint8_t& valid_mask, const uint8_t ciphertext[], size_t ciphertext_len) override
          {
@@ -161,12 +163,11 @@ class PKCS11_RSA_Decryption_Operation final : public PK_Ops::Decryption
       const PKCS11_RSA_PrivateKey& m_key;
       MechanismWrapper m_mechanism;
       size_t m_bits = 0;
-      Fixed_Exponent_Power_Mod m_powermod;
       Blinder m_blinder;
    };
 
-// note:	multiple-part encryption operations (with C_EncryptUpdate/C_EncryptFinal)
-//			are not supported (PK_Ops::Encryption does not provide an `update` method)
+// note: multiple-part encryption operations (with C_EncryptUpdate/C_EncryptFinal)
+// are not supported (PK_Ops::Encryption does not provide an `update` method)
 class PKCS11_RSA_Encryption_Operation final : public PK_Ops::Encryption
    {
    public:
@@ -176,6 +177,8 @@ class PKCS11_RSA_Encryption_Operation final : public PK_Ops::Encryption
          {
          m_bits = 8 * (key.get_n().bytes() - m_mechanism.padding_size()) - 1;
          }
+
+      size_t ciphertext_length(size_t) const override { return m_key.get_n().bytes(); }
 
       size_t max_input_bits() const override
          {
@@ -206,6 +209,8 @@ class PKCS11_RSA_Signature_Operation final : public PK_Ops::Signature
          : m_key(key), m_mechanism(MechanismWrapper::create_rsa_sign_mechanism(padding))
          {}
 
+      size_t signature_length() const override { return m_key.get_n().bytes(); }
+
       void update(const uint8_t msg[], size_t msg_len) override
          {
          if(!m_initialized)
@@ -224,7 +229,7 @@ class PKCS11_RSA_Signature_Operation final : public PK_Ops::Signature
             m_first_message.clear();
             }
 
-         m_key.module()->C_SignUpdate(m_key.session().handle(), const_cast< Byte* >(msg), msg_len);
+         m_key.module()->C_SignUpdate(m_key.session().handle(), const_cast< Byte* >(msg), static_cast<Ulong>(msg_len));
          }
 
       secure_vector<uint8_t> sign(RandomNumberGenerator&) override
@@ -279,7 +284,7 @@ class PKCS11_RSA_Verification_Operation final : public PK_Ops::Verification
             m_first_message.clear();
             }
 
-         m_key.module()->C_VerifyUpdate(m_key.session().handle(), const_cast< Byte* >(msg), msg_len);
+         m_key.module()->C_VerifyUpdate(m_key.session().handle(), const_cast< Byte* >(msg), static_cast<Ulong>(msg_len));
          }
 
       bool is_valid_signature(const uint8_t sig[], size_t sig_len) override
@@ -288,14 +293,15 @@ class PKCS11_RSA_Verification_Operation final : public PK_Ops::Verification
          if(!m_first_message.empty())
             {
             // single call to update: perform single-part operation
-            m_key.module()->C_Verify(m_key.session().handle(), m_first_message.data(), m_first_message.size(),
-                                     const_cast< Byte* >(sig), sig_len, &return_value);
+            m_key.module()->C_Verify(m_key.session().handle(),
+                                     m_first_message.data(), static_cast<Ulong>(m_first_message.size()),
+                                     const_cast< Byte* >(sig), static_cast<Ulong>(sig_len), &return_value);
             m_first_message.clear();
             }
          else
             {
             // multiple calls to update (or none): finish multiple-part operation
-            m_key.module()->C_VerifyFinal(m_key.session().handle(), const_cast< Byte* >(sig), sig_len, &return_value);
+            m_key.module()->C_VerifyFinal(m_key.session().handle(), const_cast< Byte* >(sig), static_cast<Ulong>(sig_len), &return_value);
             }
          m_initialized = false;
          if(return_value != ReturnValue::OK && return_value != ReturnValue::SignatureInvalid)
@@ -354,7 +360,8 @@ PKCS11_RSA_KeyPair generate_rsa_keypair(Session& session, const RSA_PublicKeyGen
    Mechanism mechanism = { static_cast< CK_MECHANISM_TYPE >(MechanismType::RsaPkcsKeyPairGen), nullptr, 0 };
 
    session.module()->C_GenerateKeyPair(session.handle(), &mechanism,
-                                       pub_props.data(), pub_props.count(), priv_props.data(), priv_props.count(),
+                                       pub_props.data(), static_cast<Ulong>(pub_props.count()),
+                                       priv_props.data(), static_cast<Ulong>(priv_props.count()),
                                        &pub_key_handle, &priv_key_handle);
 
    return std::make_pair(PKCS11_RSA_PublicKey(session, pub_key_handle), PKCS11_RSA_PrivateKey(session, priv_key_handle));

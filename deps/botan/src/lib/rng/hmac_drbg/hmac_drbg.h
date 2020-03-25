@@ -43,17 +43,17 @@ class BOTAN_PUBLIC_API(2,0) HMAC_DRBG final : public Stateful_RNG
       * @param underlying_rng is a reference to some RNG which will be used
       * to perform the periodic reseeding
       * @param reseed_interval specifies a limit of how many times
-      * the RNG will be called before automatic reseeding is performed
-      * @param max_number_of_bytes_per_request requests that are in size higher 
-      * than max_number_of_bytes_per_request are treated as if multiple single 
+      * the RNG will be called before automatic reseeding is performed (max. 2^24)
+      * @param max_number_of_bytes_per_request requests that are in size higher
+      * than max_number_of_bytes_per_request are treated as if multiple single
       * requests of max_number_of_bytes_per_request size had been made.
       * In theory SP 800-90A requires that we reject any request for a DRBG
       * output longer than max_number_of_bytes_per_request. To avoid inconveniencing
-      * the caller who wants an output larger than max_number_of_bytes_per_request, 
-      * instead treat these requests as if multiple requests of 
-      * max_number_of_bytes_per_request size had been made. NIST requires for 
-      * HMAC_DRBG that every implementation set a value no more than 2**19 bits 
-      * (or 64 KiB). Together with @p reseed_interval = 1 you can enforce that for 
+      * the caller who wants an output larger than max_number_of_bytes_per_request,
+      * instead treat these requests as if multiple requests of
+      * max_number_of_bytes_per_request size had been made. NIST requires for
+      * HMAC_DRBG that every implementation set a value no more than 2**19 bits
+      * (or 64 KiB). Together with @p reseed_interval = 1 you can enforce that for
       * example every 512 bit automatic reseeding occurs.
       */
       HMAC_DRBG(std::unique_ptr<MessageAuthenticationCode> prf,
@@ -70,17 +70,17 @@ class BOTAN_PUBLIC_API(2,0) HMAC_DRBG final : public Stateful_RNG
       * @param prf MAC to use as a PRF
       * @param entropy_sources will be polled to perform reseeding periodically
       * @param reseed_interval specifies a limit of how many times
-      * the RNG will be called before automatic reseeding is performed.
-      * @param max_number_of_bytes_per_request requests that are in size higher 
-      * than max_number_of_bytes_per_request are treated as if multiple single 
+      * the RNG will be called before automatic reseeding is performed (max. 2^24)
+      * @param max_number_of_bytes_per_request requests that are in size higher
+      * than max_number_of_bytes_per_request are treated as if multiple single
       * requests of max_number_of_bytes_per_request size had been made.
       * In theory SP 800-90A requires that we reject any request for a DRBG
       * output longer than max_number_of_bytes_per_request. To avoid inconveniencing
-      * the caller who wants an output larger than max_number_of_bytes_per_request, 
-      * instead treat these requests as if multiple requests of 
-      * max_number_of_bytes_per_request size had been made. NIST requires for 
-      * HMAC_DRBG that every implementation set a value no more than 2**19 bits 
-      * (or 64 KiB). Together with @p reseed_interval = 1 you can enforce that for 
+      * the caller who wants an output larger than max_number_of_bytes_per_request,
+      * instead treat these requests as if multiple requests of
+      * max_number_of_bytes_per_request size had been made. NIST requires for
+      * HMAC_DRBG that every implementation set a value no more than 2**19 bits
+      * (or 64 KiB). Together with @p reseed_interval = 1 you can enforce that for
       * example every 512 bit automatic reseeding occurs.
       */
       HMAC_DRBG(std::unique_ptr<MessageAuthenticationCode> prf,
@@ -100,17 +100,17 @@ class BOTAN_PUBLIC_API(2,0) HMAC_DRBG final : public Stateful_RNG
       * to perform the periodic reseeding
       * @param entropy_sources will be polled to perform reseeding periodically
       * @param reseed_interval specifies a limit of how many times
-      * the RNG will be called before automatic reseeding is performed.
-      * @param max_number_of_bytes_per_request requests that are in size higher 
-      * than max_number_of_bytes_per_request are treated as if multiple single 
+      * the RNG will be called before automatic reseeding is performed (max. 2^24)
+      * @param max_number_of_bytes_per_request requests that are in size higher
+      * than max_number_of_bytes_per_request are treated as if multiple single
       * requests of max_number_of_bytes_per_request size had been made.
       * In theory SP 800-90A requires that we reject any request for a DRBG
       * output longer than max_number_of_bytes_per_request. To avoid inconveniencing
-      * the caller who wants an output larger than max_number_of_bytes_per_request, 
-      * instead treat these requests as if multiple requests of 
-      * max_number_of_bytes_per_request size had been made. NIST requires for 
-      * HMAC_DRBG that every implementation set a value no more than 2**19 bits 
-      * (or 64 KiB). Together with @p reseed_interval = 1 you can enforce that for 
+      * the caller who wants an output larger than max_number_of_bytes_per_request,
+      * instead treat these requests as if multiple requests of
+      * max_number_of_bytes_per_request size had been made. NIST requires for
+      * HMAC_DRBG that every implementation set a value no more than 2**19 bits
+      * (or 64 KiB). Together with @p reseed_interval = 1 you can enforce that for
       * example every 512 bit automatic reseeding occurs.
       */
       HMAC_DRBG(std::unique_ptr<MessageAuthenticationCode> prf,

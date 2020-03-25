@@ -36,7 +36,7 @@ class BOTAN_PUBLIC_API(2,0) Certificate_Extension
       /*
       * @return specific OID name
       * If possible OIDS table should match oid_name to OIDS, ie
-      * OIDS::lookup(ext->oid_name()) == ext->oid_of()
+      * OID::from_string(ext->oid_name()) == ext->oid_of()
       * Should return empty string if OID is not known
       */
       virtual std::string oid_name() const = 0;
@@ -104,13 +104,18 @@ class BOTAN_PUBLIC_API(2,0) Extensions final : public ASN1_Object
          {
          if(const Certificate_Extension* extn = get_extension_object(oid))
             {
-            if(const T* extn_as_T = dynamic_cast<const T*>(extn))
+            // Unknown_Extension oid_name is empty
+            if(extn->oid_name().empty())
+               {
+               return nullptr;
+               }
+            else if(const T* extn_as_T = dynamic_cast<const T*>(extn))
                {
                return extn_as_T;
                }
             else
                {
-               throw Exception("Exception::get_extension_object_as dynamic_cast failed");
+               throw Decoding_Error("Exception::get_extension_object_as dynamic_cast failed");
                }
             }
 
@@ -172,6 +177,12 @@ class BOTAN_PUBLIC_API(2,0) Extensions final : public ASN1_Object
       void replace(Certificate_Extension* extn, bool critical = false);
 
       /**
+      * Remove an extension from the list. Returns true if the
+      * extension had been set, false otherwise.
+      */
+      bool remove(const OID& oid);
+
+      /**
       * Searches for an extension by OID and returns the result.
       * Only the known extensions types declared in this header
       * are searched for by this function.
@@ -202,7 +213,7 @@ class BOTAN_PUBLIC_API(2,0) Extensions final : public ASN1_Object
                {
                std::unique_ptr<T> ext(new T);
                ext->decode_inner(extn_info->second.bits());
-               return std::move(ext);
+               return ext;
                }
             }
          return nullptr;
@@ -228,10 +239,8 @@ class BOTAN_PUBLIC_API(2,0) Extensions final : public ASN1_Object
       Extensions(const Extensions&) = default;
       Extensions& operator=(const Extensions&) = default;
 
-#if !defined(BOTAN_BUILD_COMPILER_IS_MSVC_2013)
       Extensions(Extensions&&) = default;
       Extensions& operator=(Extensions&&) = default;
-#endif
 
    private:
       static std::unique_ptr<Certificate_Extension>

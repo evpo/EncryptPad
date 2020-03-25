@@ -35,12 +35,8 @@ class BOTAN_PUBLIC_API(2,0) AttributeContainer
 
       virtual ~AttributeContainer() = default;
 
-/* Microsoft Visual Studio <= 2013 does not support default generated move special member functions.
-   Everything else we target should support it */
-#if !defined( _MSC_VER ) || ( _MSC_VER >= 1900 )
       AttributeContainer(AttributeContainer&& other) = default;
       AttributeContainer& operator=(AttributeContainer&& other) = default;
-#endif
 
       // Warning when implementing copy/assignment: m_attributes contains pointers to the other members which must be updated after a copy
       AttributeContainer(const AttributeContainer& other) = delete;
@@ -139,17 +135,13 @@ class BOTAN_PUBLIC_API(2,0) ObjectFinder final
       ObjectFinder(Session& session, const std::vector<Attribute>& search_template);
 
       ObjectFinder(const ObjectFinder& other) = default;
-      ObjectFinder& operator=(const ObjectFinder& other) = default;
+      ObjectFinder& operator=(const ObjectFinder& other) = delete;
 
-/* Microsoft Visual Studio <= 2013 does not support default generated move special member functions.
-   Everything else we target should support it */
-#if !defined( _MSC_VER ) || ( _MSC_VER >= 1900 )
       ObjectFinder(ObjectFinder&& other) = default;
-      ObjectFinder& operator=(ObjectFinder&& other) = default;
-#endif
+      ObjectFinder& operator=(ObjectFinder&& other) = delete;
 
       /// Terminates a search for token and session objects (calls C_FindObjectsFinal)
-      ~ObjectFinder() BOTAN_NOEXCEPT;
+      ~ObjectFinder() noexcept;
 
       /**
       * Starts or continues a search for token and session objects that match a template, obtaining additional object handles (calls C_FindObjects)
@@ -357,7 +349,7 @@ class BOTAN_PUBLIC_API(2,0) KeyProperties : public StorageObjectProperties
       */
       inline void set_allowed_mechanisms(const std::vector<MechanismType>&)
          {
-         throw Exception("Not implemented (KeyProperties::set_allowed_mechanisms)");
+         throw Not_Implemented("KeyProperties::set_allowed_mechanisms");
          }
 
       /// @return the key type of this key object
@@ -424,10 +416,10 @@ class BOTAN_PUBLIC_API(2,0) PublicKeyProperties : public KeyProperties
       */
       inline void set_wrap_template(const AttributeContainer&)
          {
-         throw Exception("Not implemented (PublicKeyProperties::set_wrap_template)");
+         throw Not_Implemented("PublicKeyProperties::set_wrap_template");
          }
 
-      /// @param pubkey_info DER-encoding of the SubjectPublicKeyInfo for this public	key
+      /// @param pubkey_info DER-encoding of the SubjectPublicKeyInfo for this public key
       inline void set_public_key_info(const std::vector<uint8_t>& pubkey_info)
          {
          add_binary(AttributeType::PublicKeyInfo, pubkey_info);
@@ -503,10 +495,10 @@ class BOTAN_PUBLIC_API(2,0) PrivateKeyProperties : public KeyProperties
       */
       inline void set_unwrap_template(const AttributeContainer&)
          {
-         throw Exception("Not implemented (PrivateKeyProperties::set_unwrap_template)");
+         throw Not_Implemented("PrivateKeyProperties::set_unwrap_template");
          }
 
-      /// @param pubkey_info DER-encoding of the SubjectPublicKeyInfo for this public	key
+      /// @param pubkey_info DER-encoding of the SubjectPublicKeyInfo for this public key
       inline void set_public_key_info(const std::vector<uint8_t>& pubkey_info)
          {
          add_binary(AttributeType::PublicKeyInfo, pubkey_info);
@@ -603,7 +595,7 @@ class BOTAN_PUBLIC_API(2,0) SecretKeyProperties final : public KeyProperties
       */
       inline void set_wrap_template(const AttributeContainer&)
          {
-         throw Exception("Not implemented (SecretKeyProperties::set_wrap_template)");
+         throw Not_Implemented("SecretKeyProperties::set_wrap_template");
          }
 
       /**
@@ -614,7 +606,7 @@ class BOTAN_PUBLIC_API(2,0) SecretKeyProperties final : public KeyProperties
       */
       inline void set_unwrap_template(const AttributeContainer&)
          {
-         throw Exception("Not implemented (SecretKeyProperties::set_unwrap_template)");
+         throw Not_Implemented("SecretKeyProperties::set_unwrap_template");
          }
    };
 
@@ -657,7 +649,7 @@ class BOTAN_PUBLIC_API(2,0) Object
       Object(Session& session, const ObjectProperties& obj_props);
 
       Object(const Object&) = default;
-      Object& operator=(const Object&) = default;
+      Object& operator=(const Object&) = delete;
       virtual ~Object() = default;
 
       /// Searches for all objects of the given type that match `search_template`

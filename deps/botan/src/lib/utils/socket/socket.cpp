@@ -12,9 +12,9 @@
 
 #if defined(BOTAN_HAS_BOOST_ASIO)
   /*
-  * We don't need serial port support anyway, and asking for it
-  * causes macro conflicts with Darwin's termios.h when this
-  * file is included in the amalgamation. GH #350
+  * We don't need serial port support anyway, and asking for it causes
+  * macro conflicts with termios.h when this file is included in the
+  * amalgamation.
   */
   #define BOOST_ASIO_DISABLE_SERIAL_PORT
   #include <boost/asio.hpp>
@@ -31,10 +31,7 @@
   #include <fcntl.h>
 
 #elif defined(BOTAN_TARGET_OS_HAS_WINSOCK2)
-  #define NOMINMAX 1
-  #include <winsock2.h>
   #include <ws2tcpip.h>
-  #include <windows.h>
 #endif
 
 namespace Botan {
@@ -72,8 +69,8 @@ class Asio_Socket final : public OS::Socket
 
          if(ec)
             throw boost::system::system_error(ec);
-         if(ec || m_tcp.is_open() == false)
-            throw Exception("Connection to host " + hostname + " failed");
+         if(m_tcp.is_open() == false)
+            throw System_Error("Connection to host " + hostname + " failed");
          }
 
       void write(const uint8_t buf[], size_t len) override
@@ -82,8 +79,8 @@ class Asio_Socket final : public OS::Socket
 
          boost::system::error_code ec = boost::asio::error::would_block;
 
-         boost::asio::async_write(m_tcp, boost::asio::buffer(buf, len),
-                                  [&ec](boost::system::error_code e, size_t got) { ec = e; });
+         m_tcp.async_send(boost::asio::buffer(buf, len),
+                           [&ec](boost::system::error_code e, size_t) { ec = e; });
 
          while(ec == boost::asio::error::would_block) { m_io.run_one(); }
 
@@ -100,11 +97,8 @@ class Asio_Socket final : public OS::Socket
          boost::system::error_code ec = boost::asio::error::would_block;
          size_t got = 0;
 
-         auto read_cb = [&](const boost::system::error_code cb_ec, size_t cb_got) {
-            ec = cb_ec; got = cb_got;
-         };
-
-         m_tcp.async_read_some(boost::asio::buffer(buf, len), read_cb);
+         m_tcp.async_read_some(boost::asio::buffer(buf, len),
+                               [&](boost::system::error_code cb_ec, size_t cb_got) { ec = cb_ec; got = cb_got; });
 
          while(ec == boost::asio::error::would_block) { m_io.run_one(); }
 
@@ -144,6 +138,8 @@ class BSD_Socket final : public OS::Socket
 #if defined(BOTAN_TARGET_OS_HAS_WINSOCK2)
       typedef SOCKET socket_type;
       typedef int socket_op_ret_type;
+      typedef int socklen_type;
+      typedef int sendrecv_len_type;
       static socket_type invalid_socket() { return INVALID_SOCKET; }
       static void close_socket(socket_type s) { ::closesocket(s); }
       static std::string get_last_socket_error() { return std::to_string(::WSAGetLastError()); }
@@ -166,13 +162,13 @@ class BSD_Socket final : public OS::Socket
 
          if (::WSAStartup(wsa_version, &wsa_data) != 0)
             {
-            throw Exception("WSAStartup() failed: " + std::to_string(WSAGetLastError()));
+            throw System_Error("WSAStartup() failed", WSAGetLastError());
             }
 
          if (LOBYTE(wsa_data.wVersion) != 2 || HIBYTE(wsa_data.wVersion) != 2)
             {
             ::WSACleanup();
-            throw Exception("Could not find a usable version of Winsock.dll");
+            throw System_Error("Could not find a usable version of Winsock.dll");
             }
          }
 
@@ -183,6 +179,8 @@ class BSD_Socket final : public OS::Socket
 #else
       typedef int socket_type;
       typedef ssize_t socket_op_ret_type;
+      typedef socklen_t socklen_type;
+      typedef size_t sendrecv_len_type;
       static socket_type invalid_socket() { return -1; }
       static void close_socket(socket_type s) { ::close(s); }
       static std::string get_last_socket_error() { return ::strerror(errno); }
@@ -190,7 +188,7 @@ class BSD_Socket final : public OS::Socket
       static void set_nonblocking(socket_type s)
          {
          if(::fcntl(s, F_SETFL, O_NONBLOCK) < 0)
-            throw Exception("Setting socket to non-blocking state failed");
+            throw System_Error("Setting socket to non-blocking state failed", errno);
          }
 
       static void socket_init() {}
@@ -207,14 +205,16 @@ class BSD_Socket final : public OS::Socket
          m_socket = invalid_socket();
 
          addrinfo hints;
-         ::memset(&hints, 0, sizeof(addrinfo));
+         clear_mem(&hints, 1);
          hints.ai_family = AF_UNSPEC;
          hints.ai_socktype = SOCK_STREAM;
          addrinfo* res;
 
-         if(::getaddrinfo(hostname.c_str(), service.c_str(), &hints, &res) != 0)
+         int rc = ::getaddrinfo(hostname.c_str(), service.c_str(), &hints, &res);
+
+         if(rc != 0)
             {
-            throw Exception("Name resolution failed for " + hostname);
+            throw System_Error("Name resolution failed for " + hostname, rc);
             }
 
          for(addrinfo* rp = res; (m_socket == invalid_socket()) && (rp != nullptr); rp = rp->ai_next)
@@ -232,7 +232,7 @@ class BSD_Socket final : public OS::Socket
 
             set_nonblocking(m_socket);
 
-            int err = ::connect(m_socket, rp->ai_addr, rp->ai_addrlen);
+            int err = ::connect(m_socket, rp->ai_addr, static_cast<socklen_type>(rp->ai_addrlen));
 
             if(err == -1)
                {
@@ -242,9 +242,10 @@ class BSD_Socket final : public OS::Socket
                   struct timeval timeout_tv = make_timeout_tv();
                   fd_set write_set;
                   FD_ZERO(&write_set);
-                  FD_SET(m_socket, &write_set);
+                  // Weirdly, Winsock uses a SOCKET type but wants FD_SET to get an int instead
+                  FD_SET(static_cast<int>(m_socket), &write_set);
 
-                  active = ::select(m_socket + 1, nullptr, &write_set, nullptr, &timeout_tv);
+                  active = ::select(static_cast<int>(m_socket + 1), nullptr, &write_set, nullptr, &timeout_tv);
 
                   if(active)
                      {
@@ -252,7 +253,7 @@ class BSD_Socket final : public OS::Socket
                      socklen_t len = sizeof(socket_error);
 
                      if(::getsockopt(m_socket, SOL_SOCKET, SO_ERROR, reinterpret_cast<char*>(&socket_error), &len) < 0)
-                        throw Exception("Error calling getsockopt");
+                        throw System_Error("Error calling getsockopt", errno);
 
                      if(socket_error != 0)
                         {
@@ -274,8 +275,8 @@ class BSD_Socket final : public OS::Socket
 
          if(m_socket == invalid_socket())
             {
-            throw Exception("Connecting to " + hostname +
-                            " for service " + service + " failed");
+            throw System_Error("Connecting to " + hostname +
+                                " for service " + service + " failed", errno);
             }
          }
 
@@ -296,16 +297,15 @@ class BSD_Socket final : public OS::Socket
          while(sent_so_far != len)
             {
             struct timeval timeout = make_timeout_tv();
-            int active = ::select(m_socket + 1, nullptr, &write_set, nullptr, &timeout);
+            int active = ::select(static_cast<int>(m_socket + 1), nullptr, &write_set, nullptr, &timeout);
 
             if(active == 0)
-               throw Exception("Timeout during socket write");
+               throw System_Error("Timeout during socket write");
 
             const size_t left = len - sent_so_far;
-            socket_op_ret_type sent = ::send(m_socket, cast_uint8_ptr_to_char(&buf[sent_so_far]), left, 0);
+            socket_op_ret_type sent = ::send(m_socket, cast_uint8_ptr_to_char(&buf[sent_so_far]), static_cast<sendrecv_len_type>(left), 0);
             if(sent < 0)
-               throw Exception("Socket write failed with error '" +
-                               std::string(::strerror(errno)) + "'");
+               throw System_Error("Socket write failed", errno);
             else
                sent_so_far += static_cast<size_t>(sent);
             }
@@ -318,16 +318,16 @@ class BSD_Socket final : public OS::Socket
          FD_SET(m_socket, &read_set);
 
          struct timeval timeout = make_timeout_tv();
-         int active = ::select(m_socket + 1, &read_set, nullptr, nullptr, &timeout);
+         int active = ::select(static_cast<int>(m_socket + 1), &read_set, nullptr, nullptr, &timeout);
 
          if(active == 0)
-            throw Exception("Timeout during socket read");
+            throw System_Error("Timeout during socket read");
 
-         socket_op_ret_type got = ::recv(m_socket, cast_uint8_ptr_to_char(buf), len, 0);
+         socket_op_ret_type got = ::recv(m_socket, cast_uint8_ptr_to_char(buf), static_cast<sendrecv_len_type>(len), 0);
 
          if(got < 0)
-            throw Exception("Socket read failed with error '" +
-                            std::string(::strerror(errno)) + "'");
+            throw System_Error("Socket read failed", errno);
+
          return static_cast<size_t>(got);
          }
 
@@ -335,8 +335,8 @@ class BSD_Socket final : public OS::Socket
       struct timeval make_timeout_tv() const
          {
          struct timeval tv;
-         tv.tv_sec = m_timeout.count() / 1000000;
-         tv.tv_usec = m_timeout.count() % 1000000;
+         tv.tv_sec = static_cast<decltype(timeval::tv_sec)>(m_timeout.count() / 1000000);
+         tv.tv_usec = static_cast<decltype(timeval::tv_usec)>(m_timeout.count() % 1000000);;
          return tv;
          }
 
@@ -360,6 +360,9 @@ OS::open_socket(const std::string& hostname,
    return std::unique_ptr<OS::Socket>(new BSD_Socket(hostname, service, timeout));
 
 #else
+   BOTAN_UNUSED(hostname);
+   BOTAN_UNUSED(service);
+   BOTAN_UNUSED(timeout);
    // No sockets for you
    return std::unique_ptr<Socket>();
 #endif

@@ -50,7 +50,13 @@ secure_vector<uint8_t> EME_PKCS1v15::pad(const uint8_t in[], size_t inlen,
 secure_vector<uint8_t> EME_PKCS1v15::unpad(uint8_t& valid_mask,
                                         const uint8_t in[], size_t inlen) const
    {
-   if(inlen < 2)
+   /*
+   * RSA decryption pads the ciphertext up to the modulus size, so this only
+   * occurs with very (!) small keys, or when fuzzing.
+   *
+   * 11 bytes == 00,02 + 8 bytes mandatory padding + 00
+   */
+   if(inlen < 11)
       {
       valid_mask = false;
       return secure_vector<uint8_t>();
@@ -58,33 +64,34 @@ secure_vector<uint8_t> EME_PKCS1v15::unpad(uint8_t& valid_mask,
 
    CT::poison(in, inlen);
 
-   uint8_t bad_input_m = 0;
-   uint8_t seen_zero_m = 0;
-   size_t delim_idx = 0;
+   CT::Mask<uint8_t> bad_input_m = CT::Mask<uint8_t>::cleared();
+   CT::Mask<uint8_t> seen_zero_m = CT::Mask<uint8_t>::cleared();
+   size_t delim_idx = 2; // initial 0002
 
-   bad_input_m |= ~CT::is_equal<uint8_t>(in[0], 0);
-   bad_input_m |= ~CT::is_equal<uint8_t>(in[1], 2);
+   bad_input_m |= ~CT::Mask<uint8_t>::is_equal(in[0], 0);
+   bad_input_m |= ~CT::Mask<uint8_t>::is_equal(in[1], 2);
 
    for(size_t i = 2; i < inlen; ++i)
       {
-      const uint8_t is_zero_m = CT::is_zero<uint8_t>(in[i]);
-
-      delim_idx += CT::select<uint8_t>(~seen_zero_m, 1, 0);
-
-      bad_input_m |= is_zero_m & CT::expand_mask<uint8_t>(i < 10);
+      const auto is_zero_m = CT::Mask<uint8_t>::is_zero(in[i]);
+      delim_idx += seen_zero_m.if_not_set_return(1);
       seen_zero_m |= is_zero_m;
       }
 
+   // no zero delim -> bad padding
    bad_input_m |= ~seen_zero_m;
-   bad_input_m |= CT::is_less<size_t>(delim_idx, 8);
+   /*
+   delim indicates < 8 bytes padding -> bad padding
+
+   We require 11 here because we are counting also the 00 delim byte
+   */
+   bad_input_m |= CT::Mask<uint8_t>(CT::Mask<size_t>::is_lt(delim_idx, 11));
+
+   valid_mask = (~bad_input_m).unpoisoned_value();
+   const secure_vector<uint8_t> output = CT::copy_output(bad_input_m, in, inlen, delim_idx);
 
    CT::unpoison(in, inlen);
-   CT::unpoison(bad_input_m);
-   CT::unpoison(delim_idx);
 
-   secure_vector<uint8_t> output(&in[delim_idx + 2], &in[inlen]);
-   CT::cond_zero_mem(bad_input_m, output.data(), output.size());
-   valid_mask = ~bad_input_m;
    return output;
    }
 

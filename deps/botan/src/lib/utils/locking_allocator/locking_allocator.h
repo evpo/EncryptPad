@@ -12,6 +12,8 @@
 #include <vector>
 #include <memory>
 
+BOTAN_FUTURE_INTERNAL_HEADER(locking_allocator.h)
+
 namespace Botan {
 
 class Memory_Pool;
@@ -23,7 +25,7 @@ class BOTAN_PUBLIC_API(2,0) mlock_allocator final
 
       void* allocate(size_t num_elems, size_t elem_size);
 
-      bool deallocate(void* p, size_t num_elems, size_t elem_size) BOTAN_NOEXCEPT;
+      bool deallocate(void* p, size_t num_elems, size_t elem_size) noexcept;
 
       mlock_allocator(const mlock_allocator&) = delete;
 
@@ -35,8 +37,7 @@ class BOTAN_PUBLIC_API(2,0) mlock_allocator final
       ~mlock_allocator();
 
       std::unique_ptr<Memory_Pool> m_pool;
-      uint8_t* m_locked_pages = nullptr;
-      size_t m_locked_pages_size = 0;
+      std::vector<void*> m_locked_pages;
    };
 
 }

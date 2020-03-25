@@ -13,7 +13,6 @@
 #include <botan/ocsp.h>
 #include <botan/dh.h>
 #include <botan/ecdh.h>
-#include <botan/oids.h>
 #include <botan/tls_exceptn.h>
 #include <botan/internal/ct_utils.h>
 
@@ -29,6 +28,11 @@ void TLS::Callbacks::tls_inspect_handshake_msg(const Handshake_Message&)
    }
 
 std::string TLS::Callbacks::tls_server_choose_app_protocol(const std::vector<std::string>&)
+   {
+   return "";
+   }
+
+std::string TLS::Callbacks::tls_peer_network_identity()
    {
    return "";
    }
@@ -71,7 +75,10 @@ void TLS::Callbacks::tls_verify_cert_chain(
                          ocsp_responses);
 
    if(!result.successful_validation())
-      throw Exception("Certificate validation failure: " + result.result_string());
+      {
+      throw TLS_Exception(Alert::BAD_CERTIFICATE,
+                          "Certificate validation failure: " + result.result_string());
+      }
    }
 
 std::vector<uint8_t> TLS::Callbacks::tls_sign_message(
@@ -116,7 +123,7 @@ std::pair<secure_vector<uint8_t>, std::vector<uint8_t>> TLS::Callbacks::tls_dh_a
     * advantage to bogus keys anyway.
     */
    if(Y <= 1 || Y >= p - 1)
-      throw TLS_Exception(Alert::INSUFFICIENT_SECURITY,
+      throw TLS_Exception(Alert::ILLEGAL_PARAMETER,
                           "Server sent bad DH key for DHE exchange");
 
    DL_Group group(p, g);
@@ -169,7 +176,7 @@ std::pair<secure_vector<uint8_t>, std::vector<uint8_t>> TLS::Callbacks::tls_ecdh
       }
    else
       {
-      EC_Group group(OIDS::lookup(curve_name));
+      EC_Group group(OID::from_string(curve_name));
       ECDH_PublicKey peer_key(group, group.OS2ECP(peer_public_value));
       policy.check_peer_key_acceptable(peer_key);
       ECDH_PrivateKey priv_key(rng, group);

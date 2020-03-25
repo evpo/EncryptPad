@@ -149,14 +149,14 @@ void ASN1_Formatter::decode(std::ostream& output,
          OID oid;
          data.decode(oid);
 
-         std::string out = OIDS::lookup(oid);
+         std::string out = OIDS::oid2str_or_empty(oid);
          if(out.empty())
             {
-            out = oid.as_string();
+            out = oid.to_string();
             }
          else
             {
-            out += " [" + oid.as_string() + "]";
+            out += " [" + oid.to_string() + "]";
             }
 
          output << format(type_tag, class_tag, level, length, out);
@@ -174,7 +174,7 @@ void ASN1_Formatter::decode(std::ostream& output,
             data.decode(number, ENUMERATED, class_tag);
             }
 
-         std::vector<uint8_t> rep = BigInt::encode(number, BigInt::Binary);
+         std::vector<uint8_t> rep = BigInt::encode(number);
          if(rep.empty()) // if zero
             rep.resize(1);
 

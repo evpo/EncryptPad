@@ -7,9 +7,41 @@
 */
 
 #include <botan/sha2_32.h>
+#include <botan/loadstor.h>
+#include <botan/rotate.h>
 #include <botan/cpuid.h>
 
 namespace Botan {
+
+namespace {
+
+std::string sha256_provider()
+   {
+#if defined(BOTAN_HAS_SHA2_32_X86)
+   if(CPUID::has_intel_sha())
+      {
+      return "shani";
+      }
+#endif
+
+#if defined(BOTAN_HAS_SHA2_32_X86_BMI2)
+   if(CPUID::has_bmi2())
+      {
+      return "bmi2";
+      }
+#endif
+
+#if defined(BOTAN_HAS_SHA2_32_ARMV8)
+   if(CPUID::has_arm_sha2())
+      {
+      return "armv8";
+      }
+#endif
+
+   return "base";
+   }
+
+}
 
 std::unique_ptr<HashFunction> SHA_224::copy_state() const
    {
@@ -167,6 +199,16 @@ void SHA_256::compress_digest(secure_vector<uint32_t>& digest,
 
       input += 64;
       }
+   }
+
+std::string SHA_224::provider() const
+   {
+   return sha256_provider();
+   }
+
+std::string SHA_256::provider() const
+   {
+   return sha256_provider();
    }
 
 /*

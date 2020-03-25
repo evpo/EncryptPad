@@ -107,6 +107,12 @@ class BOTAN_PUBLIC_API(2,0) EC_Group final
 
       ~EC_Group();
 
+      EC_Group(const EC_Group&) = default;
+      EC_Group(EC_Group&&) = default;
+
+      EC_Group& operator=(const EC_Group&) = default;
+      EC_Group& operator=(EC_Group&&) = default;
+
       /**
       * Create the DER encoding of this domain
       * @param form of encoding to use
@@ -236,7 +242,7 @@ class BOTAN_PUBLIC_API(2,0) EC_Group final
       * Return the OID of these domain parameters
       * @result the OID as a string
       */
-      std::string BOTAN_DEPRECATED("Use get_curve_oid") get_oid() const { return get_curve_oid().as_string(); }
+      std::string BOTAN_DEPRECATED("Use get_curve_oid") get_oid() const { return get_curve_oid().to_string(); }
 
       /**
       * Return the OID of these domain parameters
@@ -301,6 +307,8 @@ class BOTAN_PUBLIC_API(2,0) EC_Group final
       * Return the zero (or infinite) point on this curve
       */
       PointGFp zero_point() const;
+
+      size_t point_size(PointGFp::Compression_Type format) const;
 
       PointGFp OS2ECP(const uint8_t bits[], size_t len) const;
 

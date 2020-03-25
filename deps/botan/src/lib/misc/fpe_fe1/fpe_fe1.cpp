@@ -6,6 +6,7 @@
 */
 
 #include <botan/fpe_fe1.h>
+#include <botan/loadstor.h>
 #include <botan/numthry.h>
 #include <botan/divide.h>
 #include <botan/reducer.h>
@@ -50,7 +51,7 @@ void factor(BigInt n, BigInt& a, BigInt& b)
    a *= n;
 
    if(a <= 1 || b <= 1)
-      throw Exception("Could not factor n for use in FPE");
+      throw Internal_Error("Could not factor n for use in FPE");
    }
 
 }
@@ -69,7 +70,7 @@ FPE_FE1::FPE_FE1(const BigInt& n,
    m_n_bytes = BigInt::encode(n);
 
    if(m_n_bytes.size() > MAX_N_BYTES)
-      throw Exception("N is too large for FPE encryption");
+      throw Invalid_Argument("N is too large for FPE encryption");
 
    factor(n, m_a, m_b);
 
@@ -134,7 +135,8 @@ secure_vector<uint8_t> FPE_FE1::compute_tweak_mac(const uint8_t tweak[], size_t 
    m_mac->update(m_n_bytes.data(), m_n_bytes.size());
 
    m_mac->update_be(static_cast<uint32_t>(tweak_len));
-   m_mac->update(tweak, tweak_len);
+   if(tweak_len > 0)
+      m_mac->update(tweak, tweak_len);
 
    return m_mac->final();
    }
@@ -150,7 +152,7 @@ BigInt FPE_FE1::encrypt(const BigInt& input, const uint8_t tweak[], size_t tweak
    BigInt L, R, Fi;
    for(size_t i = 0; i != m_rounds; ++i)
       {
-      divide(X, m_b, L, R);
+      ct_divide(X, m_b, L, R);
       Fi = F(R, i, tweak_mac, tmp);
       X = m_a * R + mod_a->reduce(L + Fi);
       }
@@ -168,7 +170,7 @@ BigInt FPE_FE1::decrypt(const BigInt& input, const uint8_t tweak[], size_t tweak
    BigInt W, R, Fi;
    for(size_t i = 0; i != m_rounds; ++i)
       {
-      divide(X, m_a, R, W);
+      ct_divide(X, m_a, R, W);
 
       Fi = F(R, m_rounds-i-1, tweak_mac, tmp);
       X = m_b * mod_a->reduce(W - Fi) + R;

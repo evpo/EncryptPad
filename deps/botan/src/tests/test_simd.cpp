@@ -9,6 +9,9 @@
 #if defined(BOTAN_HAS_SIMD_32)
    #include <botan/internal/simd_32.h>
    #include <botan/cpuid.h>
+   #include <botan/rotate.h>
+   #include <botan/loadstor.h>
+   #include <botan/bswap.h>
 #endif
 
 namespace Botan_Tests {
@@ -32,6 +35,13 @@ class SIMD_32_Tests final : public Test
          const uint32_t pat2 = 0x87654321;
          const uint32_t pat3 = 0x01234567;
          const uint32_t pat4 = 0xC0D0E0F0;
+
+         // pat1 + pat{1,2,3,4}
+         // precomputed to avoid integer overflow warnings
+         const uint32_t pat1_1 = 0x557799BA;
+         const uint32_t pat1_2 = 0x32210FFE;
+         const uint32_t pat1_3 = 0xABDF1244;
+         const uint32_t pat1_4 = 0x6B8CADCD;
 
          test_eq(result, "default init", Botan::SIMD_4x32(), 0, 0, 0, 0);
          test_eq(result, "SIMD scalar constructor", Botan::SIMD_4x32(1, 2, 3, 4), 1, 2, 3, 4);
@@ -59,13 +69,13 @@ class SIMD_32_Tests final : public Test
                  Botan::rotr<9>(pat4));
 
          Botan::SIMD_4x32 add = input + splat;
-         test_eq(result, "add +", add, pat1 + pat1, pat2 + pat1, pat3 + pat1, pat4 + pat1);
+         test_eq(result, "add +", add, pat1_1, pat1_2, pat1_3, pat1_4);
 
          add -= splat;
          test_eq(result, "sub -=", add, pat1, pat2, pat3, pat4);
 
          add += splat;
-         test_eq(result, "add +=", add, pat1 + pat1, pat2 + pat1, pat3 + pat1, pat4 + pat1);
+         test_eq(result, "add +=", add, pat1_1, pat1_2, pat1_3, pat1_4);
 
          test_eq(result, "xor", input ^ splat, 0, pat2 ^ pat1, pat3 ^ pat1, pat4 ^ pat1);
          test_eq(result, "or", input | splat, pat1, pat2 | pat1, pat3 | pat1, pat4 | pat1);
@@ -113,6 +123,14 @@ class SIMD_32_Tests final : public Test
          test_eq(result, "transpose t2", t2, pat2, pat2 + 1, pat2 + 2, pat2 + 3);
          test_eq(result, "transpose t3", t3, pat3, pat3 + 1, pat3 + 2, pat3 + 3);
          test_eq(result, "transpose t4", t4, pat4, pat4 + 1, pat4 + 2, pat4 + 3);
+
+         test_eq(result, "shift left 1", input.shift_elems_left<1>(), 0, pat1, pat2, pat3);
+         test_eq(result, "shift left 2", input.shift_elems_left<2>(), 0, 0, pat1, pat2);
+         test_eq(result, "shift left 3", input.shift_elems_left<3>(), 0, 0, 0, pat1);
+
+         test_eq(result, "shift right 1", input.shift_elems_right<1>(), pat2, pat3, pat4, 0);
+         test_eq(result, "shift right 2", input.shift_elems_right<2>(), pat3, pat4, 0, 0);
+         test_eq(result, "shift right 3", input.shift_elems_right<3>(), pat4, 0, 0, 0);
 
          return {result};
          }

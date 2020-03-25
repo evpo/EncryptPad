@@ -60,8 +60,8 @@ int main(int argc, char* argv[])
       {
       const std::string arg_spec =
          "botan-test --verbose --help --data-dir= --pkcs11-lib= --provider= "
-         "--log-success --abort-on-first-fail --no-avoid-undefined "
-         "--run-long-tests --run-online-tests --test-runs=1 --drbg-seed= "
+         "--log-success --abort-on-first-fail --no-avoid-undefined --skip-tests= "
+         "--test-threads=0 --run-long-tests --run-online-tests --test-runs=1 --drbg-seed= "
          "*suites";
 
       Botan_CLI::Argument_Parser parser(arg_spec);
@@ -74,19 +74,31 @@ int main(int argc, char* argv[])
          return 0;
          }
 
+#if defined(BOTAN_TARGET_OS_HAS_POSIX1) && defined(BOTAN_HAS_THREAD_UTILS)
+      /*
+      The mlock pool becomes a major contention point when many threads are running,
+      so disable it unless it was explicitly asked for via setting the env variable
+      */
+      if(parser.get_arg_sz("test-threads") != 1)
+         {
+         ::setenv("BOTAN_MLOCK_POOL_SIZE", "0", /*overwrite=*/0);
+         }
+#endif
+
       const Botan_Tests::Test_Options opts(
          parser.get_arg_list("suites"),
+         parser.get_arg_list("skip-tests"),
          parser.get_arg_or("data-dir", "src/tests/data"),
          parser.get_arg("pkcs11-lib"),
          parser.get_arg("provider"),
          parser.get_arg("drbg-seed"),
          parser.get_arg_sz("test-runs"),
+         parser.get_arg_sz("test-threads"),
          parser.flag_set("verbose"),
          parser.flag_set("log-success"),
          parser.flag_set("run-online-tests"),
          parser.flag_set("run-long-tests"),
-         parser.flag_set("abort-on-first-fail"),
-         parser.flag_set("no-avoid-undefined"));
+         parser.flag_set("abort-on-first-fail"));
 
 #if defined(BOTAN_HAS_OPENSSL)
       if(opts.provider().empty() || opts.provider() == "openssl")
@@ -97,7 +109,17 @@ int main(int argc, char* argv[])
 
       Botan_Tests::Test_Runner tests(std::cout);
 
-      return tests.run(opts);
+      int rc = tests.run(opts);
+
+#if defined(BOTAN_HAS_OPENSSL) && defined(OPENSSL_VERSION_NUMBER) && (OPENSSL_VERSION_NUMBER < 0x01010000)
+      if(opts.provider().empty() || opts.provider() == "openssl")
+         {
+         ERR_free_strings();
+         ::ERR_remove_thread_state(nullptr);
+         }
+#endif
+
+      return rc;
       }
    catch(std::exception& e)
       {

@@ -19,15 +19,95 @@
   #include <botan/rfc6979.h>
 #endif
 
-#if defined(BOTAN_HAS_BEARSSL)
-  #include <botan/internal/bearssl.h>
-#endif
-
 #if defined(BOTAN_HAS_OPENSSL)
   #include <botan/internal/openssl.h>
 #endif
 
 namespace Botan {
+
+namespace {
+
+PointGFp recover_ecdsa_public_key(const EC_Group& group,
+                                  const std::vector<uint8_t>& msg,
+                                  const BigInt& r,
+                                  const BigInt& s,
+                                  uint8_t v)
+   {
+   if(group.get_cofactor() != 1)
+      throw Invalid_Argument("ECDSA public key recovery only supported for prime order groups");
+
+   if(v > 4)
+      throw Invalid_Argument("Unexpected v param for ECDSA public key recovery");
+
+   const uint8_t y_odd = v % 2;
+   const uint8_t add_order = v >> 1;
+
+   const BigInt& group_order = group.get_order();
+   const size_t p_bytes = group.get_p_bytes();
+
+   try
+      {
+      const BigInt e(msg.data(), msg.size(), group.get_order_bits());
+      const BigInt r_inv = group.inverse_mod_order(r);
+
+      BigInt x = r + add_order*group_order;
+
+      std::vector<uint8_t> X(p_bytes + 1);
+
+      X[0] = 0x02 | y_odd;
+      BigInt::encode_1363(&X[1], p_bytes, x);
+
+      const PointGFp R = group.OS2ECP(X);
+
+      if((R*group_order).is_zero() == false)
+         throw Decoding_Error("Unable to recover ECDSA public key");
+
+      // Compute r_inv * (s*R - eG)
+      PointGFp_Multi_Point_Precompute RG_mul(R, group.get_base_point());
+      const BigInt ne = group.mod_order(group_order - e);
+      return r_inv * RG_mul.multi_exp(s, ne);
+      }
+   catch(...)
+      {
+      // continue on and throw
+      }
+
+   throw Decoding_Error("Failed to recover ECDSA public key from signature/msg pair");
+   }
+
+}
+
+ECDSA_PublicKey::ECDSA_PublicKey(const EC_Group& group,
+                                 const std::vector<uint8_t>& msg,
+                                 const BigInt& r,
+                                 const BigInt& s,
+                                 uint8_t v) :
+   EC_PublicKey(group, recover_ecdsa_public_key(group, msg, r, s, v)) {}
+
+
+uint8_t ECDSA_PublicKey::recovery_param(const std::vector<uint8_t>& msg,
+                                        const BigInt& r,
+                                        const BigInt& s) const
+   {
+   for(uint8_t v = 0; v != 4; ++v)
+      {
+      try
+         {
+         PointGFp R = recover_ecdsa_public_key(this->domain(), msg, r, s, v);
+
+         if(R == this->public_point())
+            {
+            return v;
+            }
+         }
+      catch(Decoding_Error&)
+         {
+         // try the next v
+         }
+      }
+
+   throw Internal_Error("Could not determine ECDSA recovery parameter");
+   }
 
 bool ECDSA_PrivateKey::check_key(RandomNumberGenerator& rng,
                                  bool strong) const
@@ -58,12 +138,14 @@ class ECDSA_Signature_Operation final : public PK_Ops::Signature_with_EMSA
          m_x(ecdsa.private_value())
          {
 #if defined(BOTAN_HAS_RFC6979_GENERATOR)
-         m_rfc6979_hash = hash_for_emsa(emsa);
+         m_rfc6979.reset(new RFC6979_Nonce_Generator(hash_for_emsa(emsa), m_group.get_order(), m_x));
 #endif
 
          m_b = m_group.random_scalar(rng);
          m_b_inv = m_group.inverse_mod_order(m_b);
          }
+
+      size_t signature_length() const override { return 2*m_group.get_order_bytes(); }
 
       size_t max_input_bits() const override { return m_group.get_order_bits(); }
 
@@ -75,7 +157,7 @@ class ECDSA_Signature_Operation final : public PK_Ops::Signature_with_EMSA
       const BigInt& m_x;
 
 #if defined(BOTAN_HAS_RFC6979_GENERATOR)
-      std::string m_rfc6979_hash;
+      std::unique_ptr<RFC6979_Nonce_Generator> m_rfc6979;
 #endif
 
       std::vector<BigInt> m_ws;
@@ -90,7 +172,7 @@ ECDSA_Signature_Operation::raw_sign(const uint8_t msg[], size_t msg_len,
    BigInt m(msg, msg_len, m_group.get_order_bits());
 
 #if defined(BOTAN_HAS_RFC6979_GENERATOR)
-   const BigInt k = generate_rfc6979_nonce(m_x, m_group.get_order(), m, m_rfc6979_hash);
+   const BigInt k = m_rfc6979->nonce_for(m);
 #else
    const BigInt k = m_group.random_scalar(rng);
 #endif
@@ -106,10 +188,10 @@ ECDSA_Signature_Operation::raw_sign(const uint8_t msg[], size_t msg_len,
    m_b = m_group.square_mod_order(m_b);
    m_b_inv = m_group.square_mod_order(m_b_inv);
 
-   m = m_group.multiply_mod_order(m_b, m);
-   const BigInt xr = m_group.multiply_mod_order(m_x, m_b, r);
+   m = m_group.multiply_mod_order(m_b, m_group.mod_order(m));
+   const BigInt xr_m = m_group.mod_order(m_group.multiply_mod_order(m_x, m_b, r) + m);
 
-   const BigInt s = m_group.multiply_mod_order(k_inv, xr + m, m_b_inv);
+   const BigInt s = m_group.multiply_mod_order(k_inv, xr_m, m_b_inv);
 
    // With overwhelming probability, a bug rather than actual zero r/s
    if(r.is_zero() || s.is_zero())
@@ -176,21 +258,6 @@ std::unique_ptr<PK_Ops::Verification>
 ECDSA_PublicKey::create_verification_op(const std::string& params,
                                         const std::string& provider) const
    {
-#if defined(BOTAN_HAS_BEARSSL)
-   if(provider == "bearssl" || provider.empty())
-      {
-      try
-         {
-         return make_bearssl_ecdsa_ver_op(*this, params);
-         }
-      catch(Lookup_Error& e)
-         {
-         if(provider == "bearssl")
-            throw;
-         }
-      }
-#endif
-
 #if defined(BOTAN_HAS_OPENSSL)
    if(provider == "openssl" || provider.empty())
       {
@@ -217,21 +284,6 @@ ECDSA_PrivateKey::create_signature_op(RandomNumberGenerator& rng,
                                       const std::string& params,
                                       const std::string& provider) const
    {
-#if defined(BOTAN_HAS_BEARSSL)
-   if(provider == "bearssl" || provider.empty())
-      {
-      try
-         {
-         return make_bearssl_ecdsa_sig_op(*this, params);
-         }
-      catch(Lookup_Error& e)
-         {
-         if(provider == "bearssl")
-            throw;
-         }
-      }
-#endif
-
 #if defined(BOTAN_HAS_OPENSSL)
    if(provider == "openssl" || provider.empty())
       {

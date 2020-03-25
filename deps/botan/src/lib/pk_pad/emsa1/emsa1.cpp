@@ -7,7 +7,6 @@
 
 #include <botan/emsa1.h>
 #include <botan/exceptn.h>
-#include <botan/oids.h>
 #include <botan/pk_keys.h>
 #include <botan/internal/padding.h>
 
@@ -109,25 +108,26 @@ AlgorithmIdentifier EMSA1::config_for_x509(const Private_Key& key,
          " not supported for signature algorithm " + key.algo_name());
       }
 
-   AlgorithmIdentifier sig_algo;
-   sig_algo.oid = OIDS::lookup( key.algo_name() + "/" + name() );
+   const OID oid = OID::from_string(key.algo_name() + "/" + name());
 
-   std::string algo_name = key.algo_name();
+   const std::string algo_name = key.algo_name();
+   std::vector<uint8_t> parameters;
    if(algo_name == "DSA" ||
       algo_name == "ECDSA" ||
       algo_name == "ECGDSA" ||
       algo_name == "ECKCDSA" ||
-      algo_name == "GOST-34.10")
+      algo_name == "GOST-34.10" ||
+      algo_name == "GOST-34.10-2012-256" ||
+      algo_name == "GOST-34.10-2012-512")
       {
       // for DSA, ECDSA, GOST parameters "SHALL" be empty
-      sig_algo.parameters = {};
       }
    else
       {
-      sig_algo.parameters = key.algorithm_identifier().parameters;
+      parameters = key.algorithm_identifier().get_parameters();
       }
 
-   return sig_algo;
+   return AlgorithmIdentifier(oid, parameters);
    }
 
 }

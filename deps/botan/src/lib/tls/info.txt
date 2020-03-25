@@ -1,8 +1,6 @@
 <defines>
-TLS -> 20150319
+TLS -> 20191210
 </defines>
-
-load_on auto
 
 <header:public>
 credentials_manager.h
@@ -47,12 +45,9 @@ eme_pkcs1
 emsa_pkcs1
 gcm
 hmac
-md5
-par_hash
 prf_tls
 rng
 rsa
-sha1
 sha2_32
 sha2_64
 x509

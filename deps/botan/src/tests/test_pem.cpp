@@ -19,9 +19,7 @@ class PEM_Tests : public Test
          {
          Test::Result result("PEM encoding");
 
-         std::vector<uint8_t> vec(5);
-         for(size_t i = 0; i != vec.size(); ++i)
-            vec[i] = i;
+         std::vector<uint8_t> vec = { 0, 1, 2, 3, 4 };
 
          const std::string pem1 = Botan::PEM_Code::encode(vec, "BUNNY", 3);
 
@@ -33,17 +31,17 @@ class PEM_Tests : public Test
          result.test_eq("PEM decoding label", label1, "BUNNY");
 
          result.test_throws("PEM decoding unexpected label",
-                            "Invalid argument Decoding error: PEM: Label mismatch, wanted FLOOFY, got BUNNY",
+                            "PEM: Label mismatch, wanted FLOOFY, got BUNNY",
                             [pem1]() { Botan::PEM_Code::decode_check_label(pem1, "FLOOFY"); });
 
          const std::string malformed_pem1 = "---BEGIN BUNNY-----\n-----END BUNNY-----";
          result.test_throws("PEM decoding bad init label",
-                            "Invalid argument Decoding error: PEM: No PEM header found",
+                            "PEM: No PEM header found",
                             [malformed_pem1]() { Botan::PEM_Code::decode_check_label(malformed_pem1, "BUNNY"); });
 
          const std::string malformed_pem2 = "-----BEGIN BUNNY-----\n-----END FLOOFY-----";
          result.test_throws("PEM decoding bad init label",
-                            "Invalid argument Decoding error: PEM: Malformed PEM trailer",
+                            "PEM: Malformed PEM trailer",
                             [malformed_pem2]() { Botan::PEM_Code::decode_check_label(malformed_pem2, "BUNNY"); });
 
 

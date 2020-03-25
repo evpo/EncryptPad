@@ -25,6 +25,7 @@ class BOTAN_PUBLIC_API(2,0) TPM_Error final : public Exception
    {
    public:
       TPM_Error(const std::string& err) : Exception(err) {}
+      ErrorType error_type() const noexcept override { return ErrorType::TPMError; }
    };
 
 /**
@@ -71,12 +72,15 @@ class BOTAN_PUBLIC_API(2,0) TPM_Context final
       TSS_HCONTEXT m_ctx;
       TSS_HKEY m_srk;
       TSS_HTPM m_tpm;
+      TSS_HPOLICY m_srk_policy;
    };
 
 class BOTAN_PUBLIC_API(2,0) TPM_RNG final : public Hardware_RNG
    {
    public:
       TPM_RNG(TPM_Context& ctx) : m_ctx(ctx) {}
+
+      bool accepts_input() const override { return true; }
 
       void add_entropy(const uint8_t in[], size_t in_len) override
          {
@@ -159,6 +163,10 @@ class BOTAN_PUBLIC_API(2,0) TPM_PrivateKey final : public Private_Key
 
       bool check_key(RandomNumberGenerator& rng, bool) const override;
 
+      BigInt get_n() const;
+
+      BigInt get_e() const;
+
       std::string algo_name() const override { return "RSA"; } // ???
 
       std::unique_ptr<PK_Ops::Signature>
@@ -167,9 +175,6 @@ class BOTAN_PUBLIC_API(2,0) TPM_PrivateKey final : public Private_Key
                              const std::string& provider) const override;
 
    private:
-      BigInt get_n() const;
-      BigInt get_e() const;
-
       TPM_Context& m_ctx;
       TSS_HKEY m_key;
 

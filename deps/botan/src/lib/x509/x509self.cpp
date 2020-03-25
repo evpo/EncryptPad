@@ -10,7 +10,6 @@
 #include <botan/x509_ca.h>
 #include <botan/der_enc.h>
 #include <botan/pubkey.h>
-#include <botan/oids.h>
 #include <botan/hash.h>
 
 namespace Botan {
@@ -29,9 +28,13 @@ void load_info(const X509_Cert_Options& opts, X509_DN& subject_dn,
    subject_dn.add_attribute("X520.Locality", opts.locality);
    subject_dn.add_attribute("X520.Organization", opts.organization);
    subject_dn.add_attribute("X520.OrganizationalUnit", opts.org_unit);
+   for(auto extra_ou : opts.more_org_units) {
+      subject_dn.add_attribute("X520.OrganizationalUnit", extra_ou);
+   }
+
    subject_dn.add_attribute("X520.SerialNumber", opts.serial_number);
    subject_alt = AlternativeName(opts.email, opts.uri, opts.dns, opts.ip);
-   subject_alt.add_othername(OIDS::lookup("PKIX.XMPPAddr"),
+   subject_alt.add_othername(OID::from_string("PKIX.XMPPAddr"),
                              opts.xmpp, UTF8_STRING);
 
    for(auto dns : opts.more_dns)
@@ -58,6 +61,7 @@ X509_Certificate create_self_signed_cert(const X509_Cert_Options& opts,
 
    const std::vector<uint8_t> pub_key = X509::BER_encode(key);
    std::unique_ptr<PK_Signer> signer(choose_sig_format(key, sig_opts, rng, hash_fn, sig_algo));
+   BOTAN_ASSERT_NOMSG(sig_algo.get_oid().has_value());
    load_info(opts, subject_dn, subject_alt);
 
    Extensions extensions = opts.extensions;

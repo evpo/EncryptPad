@@ -3,7 +3,7 @@
  * A Winternitz One Time Signature public key for use with Extended Hash-Based
  * Signatures.
  *
- * (C) 2016,2017 Matthias Gierlings
+ * (C) 2016,2017,2018 Matthias Gierlings
  *
  * Botan is released under the Simplified BSD License (see license.txt)
  **/
@@ -26,7 +26,7 @@ XMSS_WOTS_PublicKey::chain(secure_vector<uint8_t>& result,
          i < (start_idx + steps) && i < m_wots_params.wots_parameter();
          i++)
       {
-      adrs.set_hash_address(i);
+      adrs.set_hash_address(static_cast<uint32_t>(i));
 
       //Calculate tmp XOR bitmask
       adrs.set_key_mask_mode(XMSS_Address::Key_Mask::Mask_Mode);
@@ -58,7 +58,7 @@ XMSS_WOTS_PublicKey::pub_key_from_signature(const secure_vector<uint8_t>& msg,
 
    for(size_t i = 0; i < m_wots_params.len(); i++)
       {
-      adrs.set_chain_address(i);
+      adrs.set_chain_address(static_cast<uint32_t>(i));
       chain(result[i],
             msg_digest[i],
             m_wots_params.wots_parameter() - 1 - msg_digest[i],

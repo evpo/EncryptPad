@@ -14,6 +14,8 @@
 #include <botan/mem_ops.h>
 #include <vector>
 
+BOTAN_FUTURE_INTERNAL_HEADER(loadstor.h)
+
 #if defined(BOTAN_TARGET_CPU_IS_BIG_ENDIAN)
    #define BOTAN_ENDIAN_N2L(x) reverse_bytes(x)
    #define BOTAN_ENDIAN_L2N(x) reverse_bytes(x)
@@ -36,7 +38,7 @@ namespace Botan {
 * @param input the value to extract from
 * @return byte byte_num of input
 */
-template<typename T> inline uint8_t get_byte(size_t byte_num, T input)
+template<typename T> inline constexpr uint8_t get_byte(size_t byte_num, T input)
    {
    return static_cast<uint8_t>(
       input >> (((~byte_num)&(sizeof(T)-1)) << 3)
@@ -49,7 +51,7 @@ template<typename T> inline uint8_t get_byte(size_t byte_num, T input)
 * @param i1 the second byte
 * @return i0 || i1
 */
-inline uint16_t make_uint16(uint8_t i0, uint8_t i1)
+inline constexpr uint16_t make_uint16(uint8_t i0, uint8_t i1)
    {
    return static_cast<uint16_t>((static_cast<uint16_t>(i0) << 8) | i1);
    }
@@ -62,7 +64,7 @@ inline uint16_t make_uint16(uint8_t i0, uint8_t i1)
 * @param i3 the fourth byte
 * @return i0 || i1 || i2 || i3
 */
-inline uint32_t make_uint32(uint8_t i0, uint8_t i1, uint8_t i2, uint8_t i3)
+inline constexpr uint32_t make_uint32(uint8_t i0, uint8_t i1, uint8_t i2, uint8_t i3)
    {
    return ((static_cast<uint32_t>(i0) << 24) |
            (static_cast<uint32_t>(i1) << 16) |
@@ -71,7 +73,7 @@ inline uint32_t make_uint32(uint8_t i0, uint8_t i1, uint8_t i2, uint8_t i3)
    }
 
 /**
-* Make a uint32_t from eight bytes
+* Make a uint64_t from eight bytes
 * @param i0 the first byte
 * @param i1 the second byte
 * @param i2 the third byte
@@ -82,8 +84,8 @@ inline uint32_t make_uint32(uint8_t i0, uint8_t i1, uint8_t i2, uint8_t i3)
 * @param i7 the eighth byte
 * @return i0 || i1 || i2 || i3 || i4 || i5 || i6 || i7
 */
-inline uint64_t make_uint64(uint8_t i0, uint8_t i1, uint8_t i2, uint8_t i3,
-                          uint8_t i4, uint8_t i5, uint8_t i6, uint8_t i7)
+inline constexpr uint64_t make_uint64(uint8_t i0, uint8_t i1, uint8_t i2, uint8_t i3,
+                                      uint8_t i4, uint8_t i5, uint8_t i6, uint8_t i7)
     {
    return ((static_cast<uint64_t>(i0) << 56) |
            (static_cast<uint64_t>(i1) << 48) |
@@ -140,7 +142,7 @@ inline uint16_t load_be<uint16_t>(const uint8_t in[], size_t off)
 
 #if defined(BOTAN_ENDIAN_N2B)
    uint16_t x;
-   std::memcpy(&x, in, sizeof(x));
+   typecast_copy(x, in);
    return BOTAN_ENDIAN_N2B(x);
 #else
    return make_uint16(in[0], in[1]);
@@ -160,7 +162,7 @@ inline uint16_t load_le<uint16_t>(const uint8_t in[], size_t off)
 
 #if defined(BOTAN_ENDIAN_N2L)
    uint16_t x;
-   std::memcpy(&x, in, sizeof(x));
+   typecast_copy(x, in);
    return BOTAN_ENDIAN_N2L(x);
 #else
    return make_uint16(in[1], in[0]);
@@ -179,7 +181,7 @@ inline uint32_t load_be<uint32_t>(const uint8_t in[], size_t off)
    in += off * sizeof(uint32_t);
 #if defined(BOTAN_ENDIAN_N2B)
    uint32_t x;
-   std::memcpy(&x, in, sizeof(x));
+   typecast_copy(x, in);
    return BOTAN_ENDIAN_N2B(x);
 #else
    return make_uint32(in[0], in[1], in[2], in[3]);
@@ -198,7 +200,7 @@ inline uint32_t load_le<uint32_t>(const uint8_t in[], size_t off)
    in += off * sizeof(uint32_t);
 #if defined(BOTAN_ENDIAN_N2L)
    uint32_t x;
-   std::memcpy(&x, in, sizeof(x));
+   typecast_copy(x, in);
    return BOTAN_ENDIAN_N2L(x);
 #else
    return make_uint32(in[3], in[2], in[1], in[0]);
@@ -217,7 +219,7 @@ inline uint64_t load_be<uint64_t>(const uint8_t in[], size_t off)
    in += off * sizeof(uint64_t);
 #if defined(BOTAN_ENDIAN_N2B)
    uint64_t x;
-   std::memcpy(&x, in, sizeof(x));
+   typecast_copy(x, in);
    return BOTAN_ENDIAN_N2B(x);
 #else
    return make_uint64(in[0], in[1], in[2], in[3],
@@ -237,7 +239,7 @@ inline uint64_t load_le<uint64_t>(const uint8_t in[], size_t off)
    in += off * sizeof(uint64_t);
 #if defined(BOTAN_ENDIAN_N2L)
    uint64_t x;
-   std::memcpy(&x, in, sizeof(x));
+   typecast_copy(x, in);
    return BOTAN_ENDIAN_N2L(x);
 #else
    return make_uint64(in[7], in[6], in[5], in[4],
@@ -317,9 +319,11 @@ inline void load_le(T out[],
    if(count > 0)
       {
 #if defined(BOTAN_TARGET_CPU_IS_LITTLE_ENDIAN)
-      std::memcpy(out, in, sizeof(T)*count);
+      typecast_copy(out, in, count);
+
 #elif defined(BOTAN_TARGET_CPU_IS_BIG_ENDIAN)
-      std::memcpy(out, in, sizeof(T)*count);
+      typecast_copy(out, in, count);
+
       const size_t blocks = count - (count % 4);
       const size_t left = count - blocks;
 
@@ -407,10 +411,10 @@ inline void load_be(T out[],
    if(count > 0)
       {
 #if defined(BOTAN_TARGET_CPU_IS_BIG_ENDIAN)
-      std::memcpy(out, in, sizeof(T)*count);
+      typecast_copy(out, in, count);
 
 #elif defined(BOTAN_TARGET_CPU_IS_LITTLE_ENDIAN)
-      std::memcpy(out, in, sizeof(T)*count);
+      typecast_copy(out, in, count);
       const size_t blocks = count - (count % 4);
       const size_t left = count - blocks;
 
@@ -435,7 +439,7 @@ inline void store_be(uint16_t in, uint8_t out[2])
    {
 #if defined(BOTAN_ENDIAN_N2B)
    uint16_t o = BOTAN_ENDIAN_N2B(in);
-   std::memcpy(out, &o, sizeof(o));
+   typecast_copy(out, o);
 #else
    out[0] = get_byte(0, in);
    out[1] = get_byte(1, in);
@@ -451,7 +455,7 @@ inline void store_le(uint16_t in, uint8_t out[2])
    {
 #if defined(BOTAN_ENDIAN_N2L)
    uint16_t o = BOTAN_ENDIAN_N2L(in);
-   std::memcpy(out, &o, sizeof(o));
+   typecast_copy(out, o);
 #else
    out[0] = get_byte(1, in);
    out[1] = get_byte(0, in);
@@ -467,7 +471,7 @@ inline void store_be(uint32_t in, uint8_t out[4])
    {
 #if defined(BOTAN_ENDIAN_B2N)
    uint32_t o = BOTAN_ENDIAN_B2N(in);
-   std::memcpy(out, &o, sizeof(o));
+   typecast_copy(out, o);
 #else
    out[0] = get_byte(0, in);
    out[1] = get_byte(1, in);
@@ -485,7 +489,7 @@ inline void store_le(uint32_t in, uint8_t out[4])
    {
 #if defined(BOTAN_ENDIAN_L2N)
    uint32_t o = BOTAN_ENDIAN_L2N(in);
-   std::memcpy(out, &o, sizeof(o));
+   typecast_copy(out, o);
 #else
    out[0] = get_byte(3, in);
    out[1] = get_byte(2, in);
@@ -503,7 +507,7 @@ inline void store_be(uint64_t in, uint8_t out[8])
    {
 #if defined(BOTAN_ENDIAN_B2N)
    uint64_t o = BOTAN_ENDIAN_B2N(in);
-   std::memcpy(out, &o, sizeof(o));
+   typecast_copy(out, o);
 #else
    out[0] = get_byte(0, in);
    out[1] = get_byte(1, in);
@@ -525,7 +529,7 @@ inline void store_le(uint64_t in, uint8_t out[8])
    {
 #if defined(BOTAN_ENDIAN_L2N)
    uint64_t o = BOTAN_ENDIAN_L2N(in);
-   std::memcpy(out, &o, sizeof(o));
+   typecast_copy(out, o);
 #else
    out[0] = get_byte(7, in);
    out[1] = get_byte(6, in);

@@ -13,7 +13,7 @@ namespace Botan {
 Montgomery_Params::Montgomery_Params(const BigInt& p,
                                      const Modular_Reducer& mod_p)
    {
-   if(p.is_negative() || p.is_even())
+   if(p.is_even() || p < 3)
       throw Invalid_Argument("Montgomery_Params invalid modulus");
 
    m_p = p;
@@ -39,6 +39,7 @@ Montgomery_Params::Montgomery_Params(const BigInt& p)
 
    const BigInt r = BigInt::power_of_2(m_p_words * BOTAN_MP_WORD_BITS);
 
+   // It might be faster to use ct_modulo here vs setting up Barrett reduction?
    Modular_Reducer mod_p(p);
 
    m_r1 = mod_p.reduce(r);
@@ -230,8 +231,9 @@ Montgomery_Int::Montgomery_Int(const std::shared_ptr<const Montgomery_Params> pa
       }
    else
       {
+      BOTAN_ASSERT_NOMSG(m_v < m_params->p());
       secure_vector<word> ws;
-      m_v = m_params->mul(v % m_params->p(), m_params->R2(), ws);
+      m_v = m_params->mul(v, m_params->R2(), ws);
       }
    }
 
@@ -243,8 +245,9 @@ Montgomery_Int::Montgomery_Int(std::shared_ptr<const Montgomery_Params> params,
    {
    if(redc_needed)
       {
+      BOTAN_ASSERT_NOMSG(m_v < m_params->p());
       secure_vector<word> ws;
-      m_v = m_params->mul(m_v % m_params->p(), m_params->R2(), ws);
+      m_v = m_params->mul(m_v, m_params->R2(), ws);
       }
    }
 
@@ -256,8 +259,9 @@ Montgomery_Int::Montgomery_Int(std::shared_ptr<const Montgomery_Params> params,
    {
    if(redc_needed)
       {
+      BOTAN_ASSERT_NOMSG(m_v < m_params->p());
       secure_vector<word> ws;
-      m_v = m_params->mul(m_v % m_params->p(), m_params->R2(), ws);
+      m_v = m_params->mul(m_v, m_params->R2(), ws);
       }
    }
 
@@ -312,17 +316,17 @@ BigInt Montgomery_Int::value() const
 
 Montgomery_Int Montgomery_Int::operator+(const Montgomery_Int& other) const
    {
-   BigInt z = m_v + other.m_v;
    secure_vector<word> ws;
-   z.reduce_below(m_params->p(), ws);
+   BigInt z = m_v;
+   z.mod_add(other.m_v, m_params->p(), ws);
    return Montgomery_Int(m_params, z, false);
    }
 
 Montgomery_Int Montgomery_Int::operator-(const Montgomery_Int& other) const
    {
-   BigInt z = m_v - other.m_v;
-   if(z.is_negative())
-      z += m_params->p();
+   secure_vector<word> ws;
+   BigInt z = m_v;
+   z.mod_sub(other.m_v, m_params->p(), ws);
    return Montgomery_Int(m_params, z, false);
    }
 
@@ -420,29 +424,25 @@ Montgomery_Int Montgomery_Int::additive_inverse() const
 
 Montgomery_Int& Montgomery_Int::mul_by_2(secure_vector<word>& ws)
    {
-   m_v <<= 1;
-   m_v.reduce_below(m_params->p(), ws);
+   m_v.mod_mul(2, m_params->p(), ws);
    return (*this);
    }
 
 Montgomery_Int& Montgomery_Int::mul_by_3(secure_vector<word>& ws)
    {
-   m_v *= 3;
-   m_v.reduce_below(m_params->p(), ws);
+   m_v.mod_mul(3, m_params->p(), ws);
    return (*this);
    }
 
 Montgomery_Int& Montgomery_Int::mul_by_4(secure_vector<word>& ws)
    {
-   m_v <<= 2;
-   m_v.reduce_below(m_params->p(), ws);
+   m_v.mod_mul(4, m_params->p(), ws);
    return (*this);
    }
 
 Montgomery_Int& Montgomery_Int::mul_by_8(secure_vector<word>& ws)
    {
-   m_v <<= 3;
-   m_v.reduce_below(m_params->p(), ws);
+   m_v.mod_mul(8, m_params->p(), ws);
    return (*this);
    }
 

@@ -1,6 +1,6 @@
 /*
 * BigInt Binary Operators
-* (C) 1999-2007 Jack Lloyd
+* (C) 1999-2007,2018 Jack Lloyd
 *     2016 Matthias Gierlings
 *
 * Botan is released under the Simplified BSD License (see license.txt)
@@ -14,87 +14,29 @@
 
 namespace Botan {
 
-namespace {
-
-BigInt bigint_add(const BigInt& x, const word y[], size_t y_sw, BigInt::Sign y_sign)
+//static
+BigInt BigInt::add2(const BigInt& x, const word y[], size_t y_words, BigInt::Sign y_sign)
    {
    const size_t x_sw = x.sig_words();
 
-   BigInt z(x.sign(), std::max(x_sw, y_sw) + 1);
+   BigInt z(x.sign(), std::max(x_sw, y_words) + 1);
 
    if(x.sign() == y_sign)
-      bigint_add3(z.mutable_data(), x.data(), x_sw, y, y_sw);
+      {
+      bigint_add3(z.mutable_data(), x.data(), x_sw, y, y_words);
+      }
    else
       {
-      int32_t relative_size = bigint_cmp(x.data(), x_sw, y, y_sw);
+      const int32_t relative_size = bigint_sub_abs(z.mutable_data(), x.data(), x_sw, y, y_words);
 
+      //z.sign_fixup(relative_size, y_sign);
       if(relative_size < 0)
-         {
-         bigint_sub3(z.mutable_data(), y, y_sw, x.data(), x_sw);
          z.set_sign(y_sign);
-         }
       else if(relative_size == 0)
          z.set_sign(BigInt::Positive);
-      else if(relative_size > 0)
-         bigint_sub3(z.mutable_data(), x.data(), x_sw, y, y_sw);
       }
 
    return z;
-   }
-
-BigInt bigint_sub(const BigInt& x, const word y[], size_t y_sw, BigInt::Sign y_sign)
-   {
-   const size_t x_sw = x.sig_words();
-
-   int32_t relative_size = bigint_cmp(x.data(), x_sw, y, y_sw);
-
-   BigInt z(BigInt::Positive, std::max(x_sw, y_sw) + 1);
-
-   if(relative_size < 0)
-      {
-      if(x.sign() == y_sign)
-         bigint_sub3(z.mutable_data(), y, y_sw, x.data(), x_sw);
-      else
-         bigint_add3(z.mutable_data(), x.data(), x_sw, y, y_sw);
-      z.set_sign(y_sign == BigInt::Positive ? BigInt::Negative : BigInt::Positive);
-      }
-   else if(relative_size == 0)
-      {
-      if(x.sign() != y_sign)
-         bigint_shl2(z.mutable_data(), x.data(), x_sw, 0, 1);
-      z.set_sign(y_sign == BigInt::Positive ? BigInt::Negative : BigInt::Positive);
-      }
-   else if(relative_size > 0)
-      {
-      if(x.sign() == y_sign)
-         bigint_sub3(z.mutable_data(), x.data(), x_sw, y, y_sw);
-      else
-         bigint_add3(z.mutable_data(), x.data(), x_sw, y, y_sw);
-      z.set_sign(x.sign());
-      }
-   return z;
-   }
-
-}
-
-BigInt operator+(const BigInt& x, const BigInt& y)
-   {
-   return bigint_add(x, y.data(), y.sig_words(), y.sign());
-   }
-
-BigInt operator+(const BigInt& x, word y)
-   {
-   return bigint_add(x, &y, 1, BigInt::Positive);
-   }
-
-BigInt operator-(const BigInt& x, const BigInt& y)
-   {
-   return bigint_sub(x, y.data(), y.sig_words(), y.sign());
-   }
-
-BigInt operator-(const BigInt& x, word y)
-   {
-   return bigint_sub(x, &y, 1, BigInt::Positive);
    }
 
 /*
@@ -102,7 +44,8 @@ BigInt operator-(const BigInt& x, word y)
 */
 BigInt operator*(const BigInt& x, const BigInt& y)
    {
-   const size_t x_sw = x.sig_words(), y_sw = y.sig_words();
+   const size_t x_sw = x.sig_words();
+   const size_t y_sw = y.sig_words();
 
    BigInt z(BigInt::Positive, x.size() + y.size());
 
@@ -120,8 +63,26 @@ BigInt operator*(const BigInt& x, const BigInt& y)
                  workspace.data(), workspace.size());
       }
 
-   if(x_sw && y_sw && x.sign() != y.sign())
-      z.flip_sign();
+   z.cond_flip_sign(x_sw > 0 && y_sw > 0 && x.sign() != y.sign());
+
+   return z;
+   }
+
+/*
+* Multiplication Operator
+*/
+BigInt operator*(const BigInt& x, word y)
+   {
+   const size_t x_sw = x.sig_words();
+
+   BigInt z(BigInt::Positive, x_sw + 1);
+
+   if(x_sw && y)
+      {
+      bigint_linmul3(z.mutable_data(), x.data(), x_sw, y);
+      z.set_sign(x.sign());
+      }
+
    return z;
    }
 
@@ -166,13 +127,20 @@ word operator%(const BigInt& n, word mod)
    if(mod == 1)
       return 0;
 
-   if(is_power_of_2(mod))
-      return (n.word_at(0) & (mod - 1));
-
    word remainder = 0;
 
-   for(size_t j = n.sig_words(); j > 0; --j)
-      remainder = bigint_modop(remainder, n.word_at(j-1), mod);
+   if(is_power_of_2(mod))
+      {
+      remainder = (n.word_at(0) & (mod - 1));
+      }
+   else
+      {
+      const size_t sw = n.sig_words();
+      for(size_t i = sw; i > 0; --i)
+         {
+         remainder = bigint_modop(remainder, n.word_at(i-1), mod);
+         }
+      }
 
    if(remainder && n.sign() == BigInt::Negative)
       return mod - remainder;
@@ -184,9 +152,6 @@ word operator%(const BigInt& n, word mod)
 */
 BigInt operator<<(const BigInt& x, size_t shift)
    {
-   if(shift == 0)
-      return x;
-
    const size_t shift_words = shift / BOTAN_MP_WORD_BITS,
                 shift_bits  = shift % BOTAN_MP_WORD_BITS;
 
@@ -202,17 +167,16 @@ BigInt operator<<(const BigInt& x, size_t shift)
 */
 BigInt operator>>(const BigInt& x, size_t shift)
    {
-   if(shift == 0)
-      return x;
-   if(x.bits() <= shift)
-      return 0;
-
-   const size_t shift_words = shift / BOTAN_MP_WORD_BITS,
-                shift_bits  = shift % BOTAN_MP_WORD_BITS,
-                x_sw = x.sig_words();
+   const size_t shift_words = shift / BOTAN_MP_WORD_BITS;
+   const size_t shift_bits  = shift % BOTAN_MP_WORD_BITS;
+   const size_t x_sw = x.sig_words();
 
    BigInt y(x.sign(), x_sw - shift_words);
    bigint_shr2(y.mutable_data(), x.data(), x_sw, shift_words, shift_bits);
+
+   if(x.is_negative() && y.is_zero())
+      y.set_sign(BigInt::Positive);
+
    return y;
    }
 

@@ -1,6 +1,6 @@
 /*
 * TLS Server Hello and Server Hello Done
-* (C) 2004-2011,2015,2016 Jack Lloyd
+* (C) 2004-2011,2015,2016,2019 Jack Lloyd
 *     2016 Matthias Gierlings
 *     2017 Harry Reimann, Rohde & Schwarz Cybersecurity
 *
@@ -20,6 +20,35 @@ namespace Botan {
 
 namespace TLS {
 
+namespace {
+
+const uint64_t DOWNGRADE_TLS11 = 0x444F574E47524400;
+//const uint64_t DOWNGRADE_TLS12 = 0x444F574E47524401;
+
+std::vector<uint8_t>
+make_server_hello_random(RandomNumberGenerator& rng,
+                         Protocol_Version offered_version,
+                         const Policy& policy)
+   {
+   auto random = make_hello_random(rng, policy);
+
+   if((offered_version == Protocol_Version::TLS_V10 ||
+       offered_version == Protocol_Version::TLS_V11) &&
+      policy.allow_tls12())
+      {
+      store_be(DOWNGRADE_TLS11, &random[24]);
+      }
+
+   if(offered_version == Protocol_Version::DTLS_V10 && policy.allow_dtls12())
+      {
+      store_be(DOWNGRADE_TLS11, &random[24]);
+      }
+
+   return random;
+   }
+
+}
+
 // New session case
 Server_Hello::Server_Hello(Handshake_IO& io,
                            Handshake_Hash& hash,
@@ -32,7 +61,7 @@ Server_Hello::Server_Hello(Handshake_IO& io,
                            const std::string next_protocol) :
    m_version(server_settings.protocol_version()),
    m_session_id(server_settings.session_id()),
-   m_random(make_hello_random(rng, policy)),
+   m_random(make_server_hello_random(rng, m_version, policy)),
    m_ciphersuite(server_settings.ciphersuite()),
    m_comp_method(0)
    {
@@ -110,10 +139,6 @@ Server_Hello::Server_Hello(Handshake_IO& io,
    if(client_hello.supports_extended_master_secret())
       m_extensions.add(new Extended_Master_Secret);
 
-   // Sending the extension back does not commit us to sending a stapled response
-   if(client_hello.supports_cert_status_message() && policy.support_cert_status_message())
-      m_extensions.add(new Certificate_Status_Request);
-
    if(client_hello.supports_encrypt_then_mac() && policy.negotiate_encrypt_then_mac())
       {
       Ciphersuite c = resumed_session.ciphersuite();
@@ -163,7 +188,7 @@ Server_Hello::Server_Hello(const std::vector<uint8_t>& buf)
 
    m_comp_method = reader.get_byte();
 
-   m_extensions.deserialize(reader);
+   m_extensions.deserialize(reader, Connection_Side::SERVER);
    }
 
 /*
@@ -184,9 +209,15 @@ std::vector<uint8_t> Server_Hello::serialize() const
 
    buf.push_back(m_comp_method);
 
-   buf += m_extensions.serialize();
+   buf += m_extensions.serialize(Connection_Side::SERVER);
 
    return buf;
+   }
+
+bool Server_Hello::random_signals_downgrade() const
+   {
+   const uint64_t last8 = load_be<uint64_t>(m_random.data(), 3);
+   return (last8 == DOWNGRADE_TLS11);
    }
 
 /*

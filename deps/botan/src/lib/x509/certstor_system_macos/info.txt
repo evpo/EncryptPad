@@ -1,0 +1,15 @@
+<defines>
+CERTSTOR_MACOS -> 20190207
+</defines>
+
+<os_features>
+apple_keychain
+</os_features>
+
+<header:public>
+certstor_macos.h
+</header:public>
+
+<frameworks>
+macos -> CoreFoundation,Security
+</frameworks>

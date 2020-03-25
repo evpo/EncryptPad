@@ -7,7 +7,6 @@
 */
 
 #include <botan/dlies.h>
-#include <botan/internal/ct_utils.h>
 #include <limits>
 
 namespace Botan {
@@ -70,11 +69,9 @@ std::vector<uint8_t> DLIES_Encryptor::enc(const uint8_t in[], size_t length,
       SymmetricKey enc_key(secret_keys.data(), cipher_key_len);
       m_cipher->set_key(enc_key);
 
-      if(m_iv.size())
-         {
-         m_cipher->start(m_iv.bits_of());
-         }
-
+      if(m_iv.size() == 0 && !m_cipher->valid_nonce_length(m_iv.size()))
+         throw Invalid_Argument("DLIES with " + m_cipher->name() + " requires an IV be set");
+      m_cipher->start(m_iv.bits_of());
       m_cipher->finish(ciphertext);
       }
    else
@@ -97,20 +94,17 @@ std::vector<uint8_t> DLIES_Encryptor::enc(const uint8_t in[], size_t length,
 
 /**
 * Return the max size, in bytes, of a message
-* Not_Implemented if DLIES is used in XOR encryption mode
+* We assume DLIES is only used for key transport and limit the maximum size
+* to 512 bits
 */
 size_t DLIES_Encryptor::maximum_input_size() const
    {
-   if(m_cipher)
-      {
-      // no limit in block cipher mode
-      return std::numeric_limits<size_t>::max();
-      }
-   else
-      {
-      // No way to determine if the KDF will output enough bits for XORing with the plaintext?!
-      throw Not_Implemented("Not implemented for XOR encryption mode");
-      }
+   return 64;
+   }
+
+size_t DLIES_Encryptor::ciphertext_length(size_t ptext_len) const
+   {
+   return m_own_pub_key.size() + m_mac->output_length() + m_cipher->output_length(ptext_len);
    }
 
 DLIES_Decryptor::DLIES_Decryptor(const DH_PrivateKey& own_priv_key,
@@ -140,6 +134,14 @@ DLIES_Decryptor::DLIES_Decryptor(const DH_PrivateKey& own_priv_key,
                                  size_t mac_key_length) :
    DLIES_Decryptor(own_priv_key, rng, kdf, nullptr, 0, mac, mac_key_length)
    {}
+
+size_t DLIES_Decryptor::plaintext_length(size_t ctext_len) const
+   {
+   if(ctext_len < m_pub_key_size + m_mac->output_length())
+      return 0; // will throw if attempted
+
+   return ctext_len - (m_pub_key_size + m_mac->output_length());
+   }
 
 secure_vector<uint8_t> DLIES_Decryptor::do_decrypt(uint8_t& valid_mask,
       const uint8_t msg[], size_t length) const
@@ -175,7 +177,7 @@ secure_vector<uint8_t> DLIES_Decryptor::do_decrypt(uint8_t& valid_mask,
    secure_vector<uint8_t> tag(msg + m_pub_key_size + ciphertext_len,
                            msg + m_pub_key_size + ciphertext_len + m_mac->output_length());
 
-   valid_mask = CT::expand_mask<uint8_t>(constant_time_compare(tag.data(), calculated_tag.data(), tag.size()));
+   valid_mask = ct_compare_u8(tag.data(), calculated_tag.data(), tag.size());
 
    // decrypt
    if(m_cipher)
@@ -188,13 +190,11 @@ secure_vector<uint8_t> DLIES_Decryptor::do_decrypt(uint8_t& valid_mask,
          try
             {
             // the decryption can fail:
-            // e.g. Integrity_Failure is thrown if GCM is used and the message does not have a valid tag
+            // e.g. Invalid_Authentication_Tag is thrown if GCM is used and the message does not have a valid tag
 
-            if(m_iv.size())
-               {
-               m_cipher->start(m_iv.bits_of());
-               }
-
+            if(m_iv.size() == 0 && !m_cipher->valid_nonce_length(m_iv.size()))
+               throw Invalid_Argument("DLIES with " + m_cipher->name() + " requires an IV be set");
+            m_cipher->start(m_iv.bits_of());
             m_cipher->finish(ciphertext);
             }
          catch(...)

@@ -46,13 +46,17 @@ class OpenSSL_Cipher_Mode final : public Cipher_Mode
       const Cipher_Dir m_direction;
       size_t m_block_size;
       EVP_CIPHER_CTX* m_cipher;
+      bool m_key_set;
+      bool m_nonce_set;
    };
 
 OpenSSL_Cipher_Mode::OpenSSL_Cipher_Mode(const std::string& name,
                                          const EVP_CIPHER* algo,
                                          Cipher_Dir direction) :
    m_mode_name(name),
-   m_direction(direction)
+   m_direction(direction),
+   m_key_set(false),
+   m_nonce_set(false)
    {
    m_block_size = EVP_CIPHER_block_size(algo);
 
@@ -61,14 +65,14 @@ OpenSSL_Cipher_Mode::OpenSSL_Cipher_Mode(const std::string& name,
 
    m_cipher = EVP_CIPHER_CTX_new();
    if (m_cipher == nullptr)
-     throw OpenSSL_Error("Can't allocate new context");
+      throw OpenSSL_Error("Can't allocate new context", ERR_get_error());
 
    EVP_CIPHER_CTX_init(m_cipher);
    if(!EVP_CipherInit_ex(m_cipher, algo, nullptr, nullptr, nullptr,
                          m_direction == ENCRYPTION ? 1 : 0))
-      throw OpenSSL_Error("EVP_CipherInit_ex");
+      throw OpenSSL_Error("EVP_CipherInit_ex", ERR_get_error());
    if(!EVP_CIPHER_CTX_set_padding(m_cipher, 0))
-      throw OpenSSL_Error("EVP_CIPHER_CTX_set_padding");
+      throw OpenSSL_Error("EVP_CIPHER_CTX_set_padding", ERR_get_error());
    }
 
 OpenSSL_Cipher_Mode::~OpenSSL_Cipher_Mode()
@@ -78,17 +82,32 @@ OpenSSL_Cipher_Mode::~OpenSSL_Cipher_Mode()
 
 void OpenSSL_Cipher_Mode::start_msg(const uint8_t nonce[], size_t nonce_len)
    {
+   verify_key_set(m_key_set);
+
    if(!valid_nonce_length(nonce_len))
       throw Invalid_IV_Length(name(), nonce_len);
+
    if(nonce_len)
       {
       if(!EVP_CipherInit_ex(m_cipher, nullptr, nullptr, nullptr, nonce, -1))
-         throw OpenSSL_Error("EVP_CipherInit_ex nonce");
+         throw OpenSSL_Error("EVP_CipherInit_ex nonce", ERR_get_error());
       }
+   else if(m_nonce_set == false)
+      {
+      const std::vector<uint8_t> zeros(m_block_size);
+      if(!EVP_CipherInit_ex(m_cipher, nullptr, nullptr, nullptr, zeros.data(), -1))
+         throw OpenSSL_Error("EVP_CipherInit_ex nonce", ERR_get_error());
+      }
+   // otherwise existing CBC state left unchanged
+
+   m_nonce_set = true;
    }
 
 size_t OpenSSL_Cipher_Mode::process(uint8_t msg[], size_t msg_len)
    {
+   verify_key_set(m_key_set);
+   BOTAN_STATE_CHECK(m_nonce_set);
+
    if(msg_len == 0)
       return 0;
    if(msg_len > INT_MAX)
@@ -97,14 +116,17 @@ size_t OpenSSL_Cipher_Mode::process(uint8_t msg[], size_t msg_len)
    secure_vector<uint8_t> out(outl);
 
    if(!EVP_CipherUpdate(m_cipher, out.data(), &outl, msg, msg_len))
-      throw OpenSSL_Error("EVP_CipherUpdate");
-   memcpy(msg, out.data(), outl);
+      throw OpenSSL_Error("EVP_CipherUpdate", ERR_get_error());
+   copy_mem(msg, out.data(), outl);
    return outl;
    }
 
 void OpenSSL_Cipher_Mode::finish(secure_vector<uint8_t>& buffer,
                                  size_t offset)
    {
+   verify_key_set(m_key_set);
+   BOTAN_STATE_CHECK(m_nonce_set);
+
    BOTAN_ASSERT(buffer.size() >= offset, "Offset ok");
    uint8_t* buf = buffer.data() + offset;
    const size_t buf_size = buffer.size() - offset;
@@ -114,8 +136,8 @@ void OpenSSL_Cipher_Mode::finish(secure_vector<uint8_t>& buffer,
    secure_vector<uint8_t> out(outl);
 
    if(!EVP_CipherFinal_ex(m_cipher, out.data(), &outl))
-      throw OpenSSL_Error("EVP_CipherFinal_ex");
-   memcpy(buf + written, out.data(), outl);
+      throw OpenSSL_Error("EVP_CipherFinal_ex", ERR_get_error());
+   copy_mem(buf + written, out.data(), outl);
    written += outl;
    buffer.resize(offset + written);
    }
@@ -150,22 +172,26 @@ size_t OpenSSL_Cipher_Mode::output_length(size_t input_length) const
 
 void OpenSSL_Cipher_Mode::clear()
    {
+   m_key_set = false;
+   m_nonce_set = false;
+
    const EVP_CIPHER* algo = EVP_CIPHER_CTX_cipher(m_cipher);
 
    if(!EVP_CIPHER_CTX_cleanup(m_cipher))
-      throw OpenSSL_Error("EVP_CIPHER_CTX_cleanup");
+      throw OpenSSL_Error("EVP_CIPHER_CTX_cleanup", ERR_get_error());
    EVP_CIPHER_CTX_init(m_cipher);
    if(!EVP_CipherInit_ex(m_cipher, algo, nullptr, nullptr, nullptr,
                          m_direction == ENCRYPTION ? 1 : 0))
-      throw OpenSSL_Error("EVP_CipherInit_ex clear");
+      throw OpenSSL_Error("EVP_CipherInit_ex clear", ERR_get_error());
    if(!EVP_CIPHER_CTX_set_padding(m_cipher, 0))
-      throw OpenSSL_Error("EVP_CIPHER_CTX_set_padding clear");
+      throw OpenSSL_Error("EVP_CIPHER_CTX_set_padding clear", ERR_get_error());
    }
 
 void OpenSSL_Cipher_Mode::reset()
    {
    if(!EVP_CipherInit_ex(m_cipher, nullptr, nullptr, nullptr, nullptr, -1))
-      throw OpenSSL_Error("EVP_CipherInit_ex clear");
+      throw OpenSSL_Error("EVP_CipherInit_ex clear", ERR_get_error());
+   m_nonce_set = false;
    }
 
 Key_Length_Specification OpenSSL_Cipher_Mode::key_spec() const
@@ -176,9 +202,11 @@ Key_Length_Specification OpenSSL_Cipher_Mode::key_spec() const
 void OpenSSL_Cipher_Mode::key_schedule(const uint8_t key[], size_t length)
    {
    if(!EVP_CIPHER_CTX_set_key_length(m_cipher, length))
-      throw OpenSSL_Error("EVP_CIPHER_CTX_set_key_length");
+      throw OpenSSL_Error("EVP_CIPHER_CTX_set_key_length", ERR_get_error());
    if(!EVP_CipherInit_ex(m_cipher, nullptr, nullptr, key, nullptr, -1))
-      throw OpenSSL_Error("EVP_CipherInit_ex key");
+      throw OpenSSL_Error("EVP_CipherInit_ex key", ERR_get_error());
+   m_key_set = true;
+   m_nonce_set = false;
    }
 
 }

@@ -32,6 +32,13 @@ def run_and_check(cmd_line, cwd=None):
         print(stderr)
         sys.exit(1)
 
+def rmtree_ignore_missing(path):
+    try:
+        shutil.rmtree(path)
+    except OSError:
+        # check errno?
+        pass
+
 def configure_build(botan_dir, build_dir):
 
     run_and_check([os.path.join(botan_dir, 'configure.py'),
@@ -59,7 +66,7 @@ def run_sphinx(botan_dir, tmp_dir, output_dir):
    index
    news
    security
-   Users Manual <https://botan.randombit.net/manual>
+   User Guide <https://botan.randombit.net/handbook>
    API Reference <https://botan.randombit.net/doxygen>
 """
 
@@ -69,30 +76,30 @@ def run_sphinx(botan_dir, tmp_dir, output_dir):
 
     sphinx_invoke = ['sphinx-build', '-t', 'website', '-c', sphinx_config, '-b', 'html']
 
-    manual_dir = os.path.join(botan_dir, 'doc/manual')
+    handbook_dir = os.path.join(botan_dir, 'doc')
 
     run_and_check(sphinx_invoke + [sphinx_dir, output_dir])
-    run_and_check(sphinx_invoke + [manual_dir, os.path.join(output_dir, 'manual')])
+    run_and_check(sphinx_invoke + [handbook_dir, os.path.join(output_dir, 'handbook')])
 
-    shutil.rmtree(os.path.join(output_dir, '.doctrees'))
-    shutil.rmtree(os.path.join(output_dir, 'manual', '.doctrees'))
+    rmtree_ignore_missing(os.path.join(output_dir, '.doctrees'))
+    rmtree_ignore_missing(os.path.join(output_dir, 'handbook', '.doctrees'))
     os.remove(os.path.join(output_dir, '.buildinfo'))
-    os.remove(os.path.join(output_dir, 'manual', '.buildinfo'))
+    os.remove(os.path.join(output_dir, 'handbook', '.buildinfo'))
 
     # share _static subdirs
-    shutil.rmtree(os.path.join(output_dir, 'manual', '_static'))
-    os.symlink('../_static', os.path.join(output_dir, 'manual', '_static'))
+    shutil.rmtree(os.path.join(output_dir, 'handbook', '_static'))
+    os.symlink('../_static', os.path.join(output_dir, 'handbook', '_static'))
 
     # Build PDF
     latex_output = os.path.join(tmp_dir, 'latex')
-    run_and_check(['sphinx-build', '-c', sphinx_config, '-b', 'latex', manual_dir, latex_output])
+    run_and_check(['sphinx-build', '-c', sphinx_config, '-b', 'latex', handbook_dir, latex_output])
 
     # Have to run twice because TeX
     run_and_check(['pdflatex', 'botan.tex'], cwd=latex_output)
     run_and_check(['pdflatex', 'botan.tex'], cwd=latex_output)
 
     shutil.copy(os.path.join(latex_output, 'botan.pdf'),
-                os.path.join(output_dir, 'manual'))
+                os.path.join(output_dir, 'handbook'))
 
 
 def main(args):
@@ -112,7 +119,7 @@ def main(args):
 
     if os.access(os.path.join(botan_dir, 'configure.py'), os.X_OK) is False:
         print("Can't find configure.py in %s", botan_dir)
-        sys.exit(1)
+        return 1
 
     if output_dir is None:
         cwd = os.getcwd()
@@ -130,7 +137,7 @@ def main(args):
                 else:
                     raise e
 
-    for subdir in ['_static', '_sources', 'doxygen', 'manual']:
+    for subdir in ['_static', '_sources', 'doxygen', 'handbook']:
         try:
             shutil.rmtree(os.path.join(output_dir, subdir))
         except OSError as e:
@@ -138,7 +145,7 @@ def main(args):
                 pass
             else:
                 print("Error removing dir", e)
-                sys.exit(1)
+                return 1
 
     configure_build(botan_dir, tmp_dir)
     run_doxygen(tmp_dir, output_dir)
@@ -152,6 +159,8 @@ def main(args):
     favicon.close()
 
     shutil.rmtree(tmp_dir)
+
+    return 0
 
 if __name__ == '__main__':
     sys.exit(main(sys.argv))

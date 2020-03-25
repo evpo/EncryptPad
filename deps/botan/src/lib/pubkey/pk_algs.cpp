@@ -6,7 +6,6 @@
 */
 
 #include <botan/pk_algs.h>
-#include <botan/oids.h>
 #include <botan/parsing.h>
 
 #if defined(BOTAN_HAS_RSA)
@@ -65,13 +64,12 @@
   #include <botan/mceliece.h>
 #endif
 
-#if defined(BOTAN_HAS_XMSS)
+#if defined(BOTAN_HAS_XMSS_RFC8391)
   #include <botan/xmss.h>
 #endif
 
 #if defined(BOTAN_HAS_SM2)
   #include <botan/sm2.h>
-  #include <botan/sm2_enc.h>
 #endif
 
 #if defined(BOTAN_HAS_OPENSSL)
@@ -84,11 +82,8 @@ std::unique_ptr<Public_Key>
 load_public_key(const AlgorithmIdentifier& alg_id,
                 const std::vector<uint8_t>& key_bits)
    {
-   const std::vector<std::string> alg_info = split_on(OIDS::lookup(alg_id.get_oid()), '/');
-
-   if(alg_info.empty())
-      throw Decoding_Error("Unknown algorithm OID: " + alg_id.get_oid().as_string());
-
+   const std::string oid_str = alg_id.get_oid().to_formatted_string();
+   const std::vector<std::string> alg_info = split_on(oid_str, '/');
    const std::string alg_name = alg_info[0];
 
 #if defined(BOTAN_HAS_RSA)
@@ -147,32 +142,28 @@ load_public_key(const AlgorithmIdentifier& alg_id,
 #endif
 
 #if defined(BOTAN_HAS_GOST_34_10_2001)
-   if(alg_name == "GOST-34.10")
+   if(alg_name == "GOST-34.10" || alg_name == "GOST-34.10-2012-256" || alg_name == "GOST-34.10-2012-512")
       return std::unique_ptr<Public_Key>(new GOST_3410_PublicKey(alg_id, key_bits));
 #endif
 
 #if defined(BOTAN_HAS_SM2)
-   if(alg_name == "SM2_Sig")
-      return std::unique_ptr<Public_Key>(new SM2_Signature_PublicKey(alg_id, key_bits));
-   if(alg_name == "SM2_Enc")
-      return std::unique_ptr<Public_Key>(new SM2_Encryption_PublicKey(alg_id, key_bits));
+   if(alg_name == "SM2" || alg_name == "SM2_Sig" || alg_name == "SM2_Enc")
+      return std::unique_ptr<Public_Key>(new SM2_PublicKey(alg_id, key_bits));
 #endif
 
-#if defined(BOTAN_HAS_XMSS)
+#if defined(BOTAN_HAS_XMSS_RFC8391)
    if(alg_name == "XMSS")
       return std::unique_ptr<Public_Key>(new XMSS_PublicKey(key_bits));
 #endif
 
-   throw Decoding_Error("Unhandled PK algorithm " + alg_name);
+   throw Decoding_Error("Unknown or unavailable public key algorithm " + alg_name);
    }
 
 std::unique_ptr<Private_Key>
 load_private_key(const AlgorithmIdentifier& alg_id,
                  const secure_vector<uint8_t>& key_bits)
    {
-   const std::string alg_name = OIDS::lookup(alg_id.get_oid());
-   if(alg_name == "")
-      throw Decoding_Error("Unknown algorithm OID: " + alg_id.get_oid().as_string());
+   const std::string alg_name = alg_id.get_oid().to_formatted_string();
 
 #if defined(BOTAN_HAS_RSA)
    if(alg_name == "RSA")
@@ -225,15 +216,13 @@ load_private_key(const AlgorithmIdentifier& alg_id,
 #endif
 
 #if defined(BOTAN_HAS_GOST_34_10_2001)
-   if(alg_name == "GOST-34.10")
+   if(alg_name == "GOST-34.10" || alg_name == "GOST-34.10-2012-256" || alg_name == "GOST-34.10-2012-512")
       return std::unique_ptr<Private_Key>(new GOST_3410_PrivateKey(alg_id, key_bits));
 #endif
 
 #if defined(BOTAN_HAS_SM2)
-   if(alg_name == "SM2_Sig")
-      return std::unique_ptr<Private_Key>(new SM2_Signature_PrivateKey(alg_id, key_bits));
-   if(alg_name == "SM2_Enc")
-      return std::unique_ptr<Private_Key>(new SM2_Encryption_PrivateKey(alg_id, key_bits));
+   if(alg_name == "SM2" || alg_name == "SM2_Sig" || alg_name == "SM2_Enc")
+      return std::unique_ptr<Private_Key>(new SM2_PrivateKey(alg_id, key_bits));
 #endif
 
 #if defined(BOTAN_HAS_ELGAMAL)
@@ -241,12 +230,12 @@ load_private_key(const AlgorithmIdentifier& alg_id,
       return std::unique_ptr<Private_Key>(new ElGamal_PrivateKey(alg_id, key_bits));
 #endif
 
-#if defined(BOTAN_HAS_XMSS)
+#if defined(BOTAN_HAS_XMSS_RFC8391)
    if(alg_name == "XMSS")
       return std::unique_ptr<Private_Key>(new XMSS_PrivateKey(key_bits));
 #endif
 
-   throw Decoding_Error("Unhandled PK algorithm " + alg_name);
+   throw Decoding_Error("Unknown or unavailable public key algorithm " + alg_name);
    }
 
 #if defined(BOTAN_HAS_ECC_GROUP)
@@ -255,10 +244,12 @@ namespace {
 
 std::string default_ec_group_for(const std::string& alg_name)
    {
-   if(alg_name == "SM2_Enc" || alg_name == "SM2_Sig")
+   if(alg_name == "SM2" || alg_name == "SM2_Enc" || alg_name == "SM2_Sig")
       return "sm2p256v1";
-   if(alg_name == "GOST-34.10")
+   if(alg_name == "GOST-34.10" || alg_name == "GOST-34.10-2012-256")
       return "gost_256A";
+   if(alg_name == "GOST-34.10-2012-512")
+      return "gost_512A";
    if(alg_name == "ECGDSA")
       return "brainpool256r1";
    return "secp256r1";
@@ -319,11 +310,11 @@ create_private_key(const std::string& alg_name,
       }
 #endif
 
-#if defined(BOTAN_HAS_XMSS)
+#if defined(BOTAN_HAS_XMSS_RFC8391)
    if(alg_name == "XMSS")
       {
       return std::unique_ptr<Private_Key>(
-         new XMSS_PrivateKey(XMSS_Parameters(params.empty() ? "XMSS_SHA2-512_W16_H10" : params).oid(), rng));
+         new XMSS_PrivateKey(XMSS_Parameters(params.empty() ? "XMSS-SHA2_10_512" : params).oid(), rng));
       }
 #endif
 
@@ -341,9 +332,12 @@ create_private_key(const std::string& alg_name,
       alg_name == "ECDH" ||
       alg_name == "ECKCDSA" ||
       alg_name == "ECGDSA" ||
+      alg_name == "SM2" ||
       alg_name == "SM2_Sig" ||
       alg_name == "SM2_Enc" ||
-      alg_name == "GOST-34.10")
+      alg_name == "GOST-34.10" ||
+      alg_name == "GOST-34.10-2012-256" ||
+      alg_name == "GOST-34.10-2012-512")
       {
       const EC_Group ec_group(params.empty() ? default_ec_group_for(alg_name) : params);
 
@@ -363,15 +357,13 @@ create_private_key(const std::string& alg_name,
 #endif
 
 #if defined(BOTAN_HAS_GOST_34_10_2001)
-      if(alg_name == "GOST-34.10")
+      if(alg_name == "GOST-34.10" || alg_name == "GOST-34.10-2012-256" || alg_name == "GOST-34.10-2012-512")
          return std::unique_ptr<Private_Key>(new GOST_3410_PrivateKey(rng, ec_group));
 #endif
 
 #if defined(BOTAN_HAS_SM2)
-      if(alg_name == "SM2_Sig")
-         return std::unique_ptr<Private_Key>(new SM2_Signature_PrivateKey(rng, ec_group));
-      if(alg_name == "SM2_Enc")
-         return std::unique_ptr<Private_Key>(new SM2_Encryption_PrivateKey(rng, ec_group));
+      if(alg_name == "SM2" || alg_name == "SM2_Sig" || alg_name == "SM2_Enc")
+         return std::unique_ptr<Private_Key>(new SM2_PrivateKey(rng, ec_group));
 #endif
 
 #if defined(BOTAN_HAS_ECGDSA)

@@ -86,13 +86,28 @@ static std::map<std::string, RSA_SignMechanism> SignMechanisms =
       { "EMSA3(SHA-384)", RSA_SignMechanism(MechanismType::Sha384RsaPkcs) },
       { "EMSA3(SHA-512)", RSA_SignMechanism(MechanismType::Sha512RsaPkcs) },
 
+      { "EMSA_PKCS1(SHA-1)", RSA_SignMechanism(MechanismType::Sha1RsaPkcs) },
+      { "EMSA_PKCS1(SHA-224)", RSA_SignMechanism(MechanismType::Sha224RsaPkcs) },
+      { "EMSA_PKCS1(SHA-256)", RSA_SignMechanism(MechanismType::Sha256RsaPkcs) },
+      { "EMSA_PKCS1(SHA-384)", RSA_SignMechanism(MechanismType::Sha384RsaPkcs) },
+      { "EMSA_PKCS1(SHA-512)", RSA_SignMechanism(MechanismType::Sha512RsaPkcs) },
+
       // RSASSA PKCS#1 PSS
       { "EMSA4(Raw)", RSA_SignMechanism(MechanismType::RsaPkcsPss) },
       { "EMSA4(SHA-1)", RSA_SignMechanism(MechanismType::Sha1RsaPkcsPss) },
       { "EMSA4(SHA-224)", RSA_SignMechanism(MechanismType::Sha224RsaPkcsPss) },
+
       { "EMSA4(SHA-256)", RSA_SignMechanism(MechanismType::Sha256RsaPkcsPss) },
+      { "EMSA4(SHA-256,MGF1,32)", RSA_SignMechanism(MechanismType::Sha256RsaPkcsPss) },
+      { "PSSR(SHA-256,MGF1,32)", RSA_SignMechanism(MechanismType::Sha256RsaPkcsPss) },
+
       { "EMSA4(SHA-384)", RSA_SignMechanism(MechanismType::Sha384RsaPkcsPss) },
+      { "EMSA4(SHA-384,MGF1,48)", RSA_SignMechanism(MechanismType::Sha384RsaPkcsPss) },
+      { "PSSR(SHA-384,MGF1,48)", RSA_SignMechanism(MechanismType::Sha384RsaPkcsPss) },
+
       { "EMSA4(SHA-512)", RSA_SignMechanism(MechanismType::Sha512RsaPkcsPss) },
+      { "EMSA4(SHA-512,MGF1,64)", RSA_SignMechanism(MechanismType::Sha512RsaPkcsPss) },
+      { "PSSR(SHA-512,MGF1,64)", RSA_SignMechanism(MechanismType::Sha512RsaPkcsPss) },
 
       { "ISO9796", RSA_SignMechanism(MechanismType::Rsa9796) }
    };
@@ -198,7 +213,7 @@ MechanismWrapper MechanismWrapper::create_rsa_sign_mechanism(const std::string& 
       mech.m_parameters = std::make_shared<MechanismParameters>();
       mech.m_parameters->pss_params.hashAlg = static_cast<CK_MECHANISM_TYPE>(mechanism_info.hash);
       mech.m_parameters->pss_params.mgf = static_cast<CK_RSA_PKCS_MGF_TYPE>(mechanism_info.mgf);
-      mech.m_parameters->pss_params.sLen = mechanism_info.salt_size;
+      mech.m_parameters->pss_params.sLen = static_cast<Ulong>(mechanism_info.salt_size);
       mech.m_mechanism.pParameter = mech.m_parameters.get();
       mech.m_mechanism.ulParameterLen = sizeof(RsaPkcsPssParams);
       }

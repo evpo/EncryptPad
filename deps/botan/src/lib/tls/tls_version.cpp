@@ -32,7 +32,7 @@ std::string Protocol_Version::to_string() const
 
 bool Protocol_Version::is_datagram_protocol() const
    {
-   return major_version() == 254;
+   return major_version() > 250;
    }
 
 bool Protocol_Version::operator>(const Protocol_Version& other) const
@@ -59,28 +59,28 @@ bool Protocol_Version::known_version() const
 
 bool Protocol_Version::supports_negotiable_signature_algorithms() const
    {
-   return (m_version == Protocol_Version::TLS_V12 ||
-           m_version == Protocol_Version::DTLS_V12);
+   return (m_version != Protocol_Version::TLS_V10 &&
+           m_version != Protocol_Version::TLS_V11 &&
+           m_version != Protocol_Version::DTLS_V10);
    }
 
 bool Protocol_Version::supports_explicit_cbc_ivs() const
    {
-   return (m_version == Protocol_Version::TLS_V11 ||
-           m_version == Protocol_Version::TLS_V12 ||
-           m_version == Protocol_Version::DTLS_V10 ||
-           m_version == Protocol_Version::DTLS_V12);
+   return (m_version != Protocol_Version::TLS_V10);
    }
 
 bool Protocol_Version::supports_ciphersuite_specific_prf() const
    {
-   return (m_version == Protocol_Version::TLS_V12 ||
-           m_version == Protocol_Version::DTLS_V12);
+   return (m_version != Protocol_Version::TLS_V10 &&
+           m_version != Protocol_Version::TLS_V11 &&
+           m_version != Protocol_Version::DTLS_V10);
    }
 
 bool Protocol_Version::supports_aead_modes() const
    {
-   return (m_version == Protocol_Version::TLS_V12 ||
-           m_version == Protocol_Version::DTLS_V12);
+   return (m_version != Protocol_Version::TLS_V10 &&
+           m_version != Protocol_Version::TLS_V11 &&
+           m_version != Protocol_Version::DTLS_V10);
    }
 
 }

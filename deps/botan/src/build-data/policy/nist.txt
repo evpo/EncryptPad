@@ -48,26 +48,26 @@ rfc3394
 <if_available>
 # block
 aes_ni
-aes_ssse3
+aes_vperm
+aes_armv8
+aes_power8
 
 # hash
-sha1_sse2
-sha1_x86
-sha1_armv8
 sha2_32_x86
 sha2_32_armv8
+sha2_32_bmi2
+sha2_64_bmi2
+sha3_bmi2
 
 # modes
-clmul
+clmul_cpu
 clmul_ssse3
-pmull
 
 # hash
 sha2_32_x86
 sha2_32_armv8
 
 # entropy sources
-darwin_secrandom
 dev_random
 proc_walk
 rdrand
@@ -90,7 +90,8 @@ aria
 blowfish
 camellia
 cascade
-cast
+cast128
+cast256
 gost_28147
 idea
 idea_sse2
@@ -102,6 +103,7 @@ noekeon_simd
 seed
 serpent
 serpent_simd
+serpent_avx2
 sm4
 shacal2
 shacal2_x86
@@ -120,7 +122,8 @@ cfb
 
 # stream
 chacha
-chacha_sse2
+chacha_simd32
+chacha_avx2
 shake_cipher
 ofb
 rc4
@@ -157,12 +160,11 @@ emsa_x931
 blake2
 comb4p
 gost_3411
+md5
 md4
-#md5 // needed for tls
 rmd160
-#sha1 // needed for tls
-#sha1_sse2 // needed for tls
 skein
+#sha1 // needed for x509
 sm3
 streebog
 tiger
@@ -179,4 +181,9 @@ x919_mac
 
 # misc
 bcrypt
+
+# tls
+tls_10
+tls_cbc
+
 </prohibited>

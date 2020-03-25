@@ -30,7 +30,6 @@
 
 #if defined(BOTAN_HAS_RDRAND_RNG)
    #include <botan/rdrand_rng.h>
-   #include <botan/cpuid.h>
 #endif
 
 #if defined(BOTAN_HAS_ENTROPY_SOURCE)
@@ -56,13 +55,24 @@ class Stateful_RNG_Tests : public Test
          std::vector<Test::Result> results;
          results.push_back(test_reseed_kat());
          results.push_back(test_reseed());
+         results.push_back(test_reseed_interval_limits());
          results.push_back(test_max_number_of_bytes_per_request());
          results.push_back(test_broken_entropy_input());
          results.push_back(test_check_nonce());
          results.push_back(test_prediction_resistance());
-         results.push_back(test_fork_safety());
          results.push_back(test_randomize_with_ts_input());
          results.push_back(test_security_level());
+
+         /*
+         * This test uses the library in both parent and child processes. But
+         * this causes a race with other threads, where if any other test thread
+         * is holding the mlock pool mutex, it is killed after the fork. Then,
+         * in the child, any attempt to allocate or free memory will cause a
+         * deadlock.
+         */
+         if(Test::options().test_threads() == 1)
+            results.push_back(test_fork_safety());
+
          return results;
          }
 
@@ -98,6 +108,8 @@ class Stateful_RNG_Tests : public Test
       virtual Test::Result test_security_level() = 0;
 
       virtual Test::Result test_max_number_of_bytes_per_request() = 0;
+
+      virtual Test::Result test_reseed_interval_limits() = 0;
    private:
       Test::Result test_reseed()
          {
@@ -150,7 +162,7 @@ class Stateful_RNG_Tests : public Test
 
                size_t poll(Botan::RandomNumberGenerator&) override
                   {
-                  throw Botan::Exception("polling not available");
+                  throw Botan::Not_Implemented("polling not available");
                   }
             };
 
@@ -296,7 +308,11 @@ class Stateful_RNG_Tests : public Test
          pid_t pid = ::fork();
          if(pid == -1)
             {
+#if defined(BOTAN_TARGET_OS_IS_EMSCRIPTEN)
+            result.test_note("failed to fork process");
+#else
             result.test_failure("failed to fork process");
+#endif
             return result;
             }
          else if(pid != 0)
@@ -476,6 +492,29 @@ class HMAC_DRBG_Unit_Tests final : public Stateful_RNG_Tests
          return result;
          }
 
+      Test::Result test_reseed_interval_limits() override
+         {
+         Test::Result result("HMAC_DRBG reseed_interval limits");
+
+         const std::string mac_string = "HMAC(SHA-256)";
+
+         Request_Counting_RNG counting_rng;
+
+         result.test_throws("HMAC_DRBG does not accept 0 for reseed_interval",
+                            [&mac_string, &counting_rng]()
+            {
+            Botan::HMAC_DRBG failing_rng(Botan::MessageAuthenticationCode::create(mac_string), counting_rng, 0);
+            });
+
+         result.test_throws("HMAC_DRBG does not accept values higher than 2^24 for reseed_interval",
+                            [&mac_string, &counting_rng]()
+            {
+            Botan::HMAC_DRBG failing_rng(Botan::MessageAuthenticationCode::create(mac_string), counting_rng, (static_cast<size_t>(1) << 24) + 1);
+            });
+
+         return result;
+         }
+
       Test::Result test_security_level() override
          {
          Test::Result result("HMAC_DRBG Security Level");
@@ -574,6 +613,13 @@ class ChaCha_RNG_Unit_Tests final : public Stateful_RNG_Tests
          {
          Test::Result result("ChaCha_RNG max_number_of_bytes_per_request");
          // ChaCha_RNG doesn't have this notion
+         return result;
+         }
+
+      Test::Result test_reseed_interval_limits() override
+         {
+         Test::Result result("ChaCha_RNG reseed_interval limits");
+         // ChaCha_RNG doesn't apply any limits to reseed_interval
          return result;
          }
 
@@ -742,7 +788,7 @@ class RDRAND_RNG_Tests final : public Test
          {
          Test::Result result("RDRAND_RNG");
 
-         if(Botan::CPUID::has_rdrand())
+         if(Botan::RDRAND_RNG::available())
             {
             Botan::RDRAND_RNG rng;
 

@@ -4,8 +4,8 @@
 * Botan is released under the Simplified BSD License (see license.txt)
 */
 
-#ifndef BOTAN_ARGPARSE_H_
-#define BOTAN_ARGPARSE_H_
+#ifndef BOTAN_CLI_ARGPARSE_H_
+#define BOTAN_CLI_ARGPARSE_H_
 
 #include <string>
 #include <map>
@@ -16,7 +16,7 @@
 
 namespace Botan_CLI {
 
-class Argument_Parser
+class Argument_Parser final
    {
    public:
       Argument_Parser(const std::string& spec,
@@ -206,7 +206,7 @@ Argument_Parser::Argument_Parser(const std::string& spec,
                                  const std::vector<std::string>& extra_flags,
                                  const std::vector<std::string>& extra_opts)
    {
-   class CLI_Error_Invalid_Spec : public CLI_Error
+   class CLI_Error_Invalid_Spec final : public CLI_Error
       {
       public:
          explicit CLI_Error_Invalid_Spec(const std::string& bad_spec)

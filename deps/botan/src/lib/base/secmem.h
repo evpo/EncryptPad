@@ -35,36 +35,13 @@ class secure_allocator
       typedef T          value_type;
       typedef std::size_t size_type;
 
-#ifdef BOTAN_BUILD_COMPILER_IS_MSVC_2013
-      secure_allocator() = default;
-      secure_allocator(const secure_allocator&) = default;
-      secure_allocator& operator=(const secure_allocator&) = default;
-      ~secure_allocator() = default;
-
-      template <typename U>
-      struct rebind
-         {
-         typedef secure_allocator<U> other;
-         };
-
-      void construct(value_type* mem, const value_type& value)
-         {
-         std::_Construct(mem, value);
-         }
-
-      void destroy(value_type* mem)
-         {
-         std::_Destroy(mem);
-         }
-#else
-      secure_allocator() BOTAN_NOEXCEPT = default;
-      secure_allocator(const secure_allocator&) BOTAN_NOEXCEPT = default;
-      secure_allocator& operator=(const secure_allocator&) BOTAN_NOEXCEPT = default;
-      ~secure_allocator() BOTAN_NOEXCEPT = default;
-#endif
+      secure_allocator() noexcept = default;
+      secure_allocator(const secure_allocator&) noexcept = default;
+      secure_allocator& operator=(const secure_allocator&) noexcept = default;
+      ~secure_allocator() noexcept = default;
 
       template<typename U>
-      secure_allocator(const secure_allocator<U>&) BOTAN_NOEXCEPT {}
+      secure_allocator(const secure_allocator<U>&) noexcept {}
 
       T* allocate(std::size_t n)
          {
@@ -88,7 +65,7 @@ operator!=(const secure_allocator<T>&, const secure_allocator<U>&)
 template<typename T> using secure_vector = std::vector<T, secure_allocator<T>>;
 template<typename T> using secure_deque = std::deque<T, secure_allocator<T>>;
 
-// For better compatability with 1.10 API
+// For better compatibility with 1.10 API
 template<typename T> using SecureVector = secure_vector<T>;
 
 template<typename T>

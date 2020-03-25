@@ -11,6 +11,8 @@
 #include <botan/emsa.h>
 #include <botan/hash.h>
 
+BOTAN_FUTURE_INTERNAL_HEADER(pssr.h)
+
 namespace Botan {
 
 /**
@@ -31,7 +33,7 @@ class BOTAN_PUBLIC_API(2,0) PSSR final : public EMSA
       */
       PSSR(HashFunction* hash, size_t salt_size);
 
-      EMSA* clone() override { return new PSSR(m_hash->clone(), m_SALT_SIZE); }
+      EMSA* clone() override;
 
       std::string name() const override;
 
@@ -51,7 +53,8 @@ class BOTAN_PUBLIC_API(2,0) PSSR final : public EMSA
                   size_t key_bits) override;
 
       std::unique_ptr<HashFunction> m_hash;
-      size_t m_SALT_SIZE;
+      size_t m_salt_size;
+      bool m_required_salt_len;
    };
 
 /**
@@ -73,7 +76,7 @@ class BOTAN_PUBLIC_API(2,3) PSSR_Raw final : public EMSA
       */
       PSSR_Raw(HashFunction* hash, size_t salt_size);
 
-      EMSA* clone() override { return new PSSR_Raw(m_hash->clone(), m_SALT_SIZE); }
+      EMSA* clone() override;
 
       std::string name() const override;
    private:
@@ -90,8 +93,9 @@ class BOTAN_PUBLIC_API(2,3) PSSR_Raw final : public EMSA
                   size_t key_bits) override;
 
       std::unique_ptr<HashFunction> m_hash;
-      size_t m_SALT_SIZE;
       secure_vector<uint8_t> m_msg;
+      size_t m_salt_size;
+      bool m_required_salt_len;
    };
 
 }

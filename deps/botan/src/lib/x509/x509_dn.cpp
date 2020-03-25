@@ -12,6 +12,7 @@
 #include <botan/internal/stl_util.h>
 #include <botan/oids.h>
 #include <ostream>
+#include <sstream>
 #include <cctype>
 
 namespace Botan {
@@ -22,7 +23,7 @@ namespace Botan {
 void X509_DN::add_attribute(const std::string& type,
                             const std::string& str)
    {
-   add_attribute(OIDS::lookup(type), str);
+   add_attribute(OID::from_string(type), str);
    }
 
 /*
@@ -58,18 +59,18 @@ std::multimap<std::string, std::string> X509_DN::contents() const
 
    for(auto& i : m_rdn)
       {
-      std::string str_value = OIDS::oid2str(i.first);
-
-      if(str_value.empty())
-         str_value = i.first.as_string();
-      multimap_insert(retval, str_value, i.second.value());
+      multimap_insert(retval, i.first.to_formatted_string(), i.second.value());
       }
    return retval;
    }
 
 bool X509_DN::has_field(const std::string& attr) const
    {
-   return has_field(OIDS::lookup(deref_info_field(attr)));
+   const OID o = OIDS::str2oid_or_empty(deref_info_field(attr));
+   if(o.has_value())
+      return has_field(o);
+   else
+      return false;
    }
 
 bool X509_DN::has_field(const OID& oid) const
@@ -85,7 +86,7 @@ bool X509_DN::has_field(const OID& oid) const
 
 std::string X509_DN::get_first_attribute(const std::string& attr) const
    {
-   const OID oid = OIDS::lookup(deref_info_field(attr));
+   const OID oid = OID::from_string(deref_info_field(attr));
    return get_first_attribute(oid).value();
    }
 
@@ -107,7 +108,7 @@ ASN1_String X509_DN::get_first_attribute(const OID& oid) const
 */
 std::vector<std::string> X509_DN::get_attribute(const std::string& attr) const
    {
-   const OID oid = OIDS::lookup(deref_info_field(attr));
+   const OID oid = OID::from_string(deref_info_field(attr));
 
    std::vector<std::string> values;
 
@@ -183,16 +184,54 @@ bool operator<(const X509_DN& dn1, const X509_DN& dn2)
    auto attr1 = dn1.get_attributes();
    auto attr2 = dn2.get_attributes();
 
-   if(attr1.size() < attr2.size()) return true;
-   if(attr1.size() > attr2.size()) return false;
+   // If they are not the same size, choose the smaller as the "lessor"
+   if(attr1.size() < attr2.size())
+      return true;
+   if(attr1.size() > attr2.size())
+      return false;
 
-   for(auto p1 = attr1.begin(); p1 != attr1.end(); ++p1)
+   // We know they are the same # of elements, now compare the OIDs:
+   auto p1 = attr1.begin();
+   auto p2 = attr2.begin();
+
+   while(p1 != attr1.end() && p2 != attr2.end())
       {
-      auto p2 = attr2.find(p1->first);
-      if(p2 == attr2.end())       return false;
-      if(p1->second > p2->second) return false;
-      if(p1->second < p2->second) return true;
+      if(p1->first != p2->first)
+         {
+         return (p1->first < p2->first);
+         }
+
+      ++p1;
+      ++p2;
       }
+
+   // We know this is true because maps have the same size
+   BOTAN_ASSERT_NOMSG(p1 == attr1.end());
+   BOTAN_ASSERT_NOMSG(p2 == attr2.end());
+
+   // Now we know all elements have the same OIDs, compare
+   // their string values:
+
+   p1 = attr1.begin();
+   p2 = attr2.begin();
+   while(p1 != attr1.end() && p2 != attr2.end())
+      {
+      BOTAN_DEBUG_ASSERT(p1->first == p2->first);
+
+      // They may be binary different but same by X.500 rules, check this
+      if(!x500_name_cmp(p1->second, p2->second))
+         {
+         // If they are not (by X.500) the same string, pick the
+         // lexicographic first as the lessor
+         return (p1->second < p2->second);
+         }
+
+      ++p1;
+      ++p2;
+      }
+
+   // if we reach here, then the DNs should be identical
+   BOTAN_DEBUG_ASSERT(dn1 == dn2);
    return false;
    }
 
@@ -249,7 +288,10 @@ void X509_DN::decode_from(BER_Decoder& source)
          OID oid;
          ASN1_String str;
 
-         rdn.start_cons(SEQUENCE).decode(oid).decode(str).end_cons();
+         rdn.start_cons(SEQUENCE)
+            .decode(oid)
+            .decode(str) // TODO support Any
+            .end_cons().verify_end("Invalid X509_DN, data follows RDN");
 
          add_attribute(oid, str);
          }
@@ -262,10 +304,7 @@ namespace {
 
 std::string to_short_form(const OID& oid)
    {
-   const std::string long_id = OIDS::oid2str(oid);
-
-   if(long_id.empty())
-      return oid.to_string();
+   const std::string long_id = oid.to_formatted_string();
 
    if(long_id == "X520.CommonName")
       return "CN";
@@ -283,6 +322,13 @@ std::string to_short_form(const OID& oid)
    }
 
 }
+
+std::string X509_DN::to_string() const
+   {
+   std::ostringstream out;
+   out << *this;
+   return out.str();
+   }
 
 std::ostream& operator<<(std::ostream& out, const X509_DN& dn)
    {

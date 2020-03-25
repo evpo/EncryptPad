@@ -41,10 +41,12 @@ Montgomery_Exponentation_State::Montgomery_Exponentation_State(std::shared_ptr<c
    m_window_bits(window_bits == 0 ? 4 : window_bits),
    m_const_time(const_time)
    {
+   BOTAN_ARG_CHECK(g < m_params->p(), "Montgomery base too big");
+
    if(m_window_bits < 1 || m_window_bits > 12) // really even 8 is too large ...
       throw Invalid_Argument("Invalid window bits for Montgomery exponentiation");
 
-   const size_t window_size = (1U << m_window_bits);
+   const size_t window_size = (static_cast<size_t>(1) << m_window_bits);
 
    m_g.reserve(window_size);
 
@@ -52,11 +54,9 @@ Montgomery_Exponentation_State::Montgomery_Exponentation_State(std::shared_ptr<c
 
    m_g.push_back(Montgomery_Int(m_params, g));
 
-   const Montgomery_Int& monty_g = m_g[1];
-
    for(size_t i = 2; i != window_size; ++i)
       {
-      m_g.push_back(monty_g * m_g[i - 1]);
+      m_g.push_back(m_g[1] * m_g[i - 1]);
       }
 
    // Resize each element to exactly p words
@@ -74,21 +74,27 @@ void const_time_lookup(secure_vector<word>& output,
                        const std::vector<Montgomery_Int>& g,
                        size_t nibble)
    {
+   BOTAN_ASSERT_NOMSG(g.size() % 2 == 0); // actually a power of 2
+
    const size_t words = output.size();
 
    clear_mem(output.data(), output.size());
 
-   for(size_t i = 0; i != g.size(); ++i)
+   for(size_t i = 0; i != g.size(); i += 2)
       {
-      const secure_vector<word>& vec = g[i].repr().get_word_vector();
+      const secure_vector<word>& vec_0 = g[i  ].repr().get_word_vector();
+      const secure_vector<word>& vec_1 = g[i+1].repr().get_word_vector();
 
-      BOTAN_ASSERT(vec.size() >= words,
-                   "Word size as expected in const_time_lookup");
+      BOTAN_ASSERT_NOMSG(vec_0.size() >= words && vec_1.size() >= words);
 
-      const word mask = CT::is_equal<word>(i, nibble);
+      const auto mask_0 = CT::Mask<word>::is_equal(nibble, i);
+      const auto mask_1 = CT::Mask<word>::is_equal(nibble, i+1);
 
       for(size_t w = 0; w != words; ++w)
-         output[w] |= (mask & vec[w]);
+         {
+         output[w] |= mask_0.if_set_return(vec_0[w]);
+         output[w] |= mask_1.if_set_return(vec_1[w]);
+         }
       }
    }
 
@@ -233,10 +239,10 @@ BigInt monty_multi_exp(std::shared_ptr<const Montgomery_Params> params_p,
          H.square_this(ws);
          }
 
-      const uint8_t z1_b = z1.get_substring(z_bits - i - 2, 2);
-      const uint8_t z2_b = z2.get_substring(z_bits - i - 2, 2);
+      const uint32_t z1_b = z1.get_substring(z_bits - i - 2, 2);
+      const uint32_t z2_b = z2.get_substring(z_bits - i - 2, 2);
 
-      const uint8_t z12 = (4*z2_b) + z1_b;
+      const uint32_t z12 = (4*z2_b) + z1_b;
 
       H.mul_by(*M[z12], ws);
       }

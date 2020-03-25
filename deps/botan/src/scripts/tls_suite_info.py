@@ -118,7 +118,6 @@ def to_ciphersuite_info(code, name):
     if cipher_algo in ['AES', 'Camellia', 'ARIA']:
         cipher_algo += '-%d' % (cipher_keylen*8)
 
-    modestr = ''
     mode = ''
 
     if cipher[0] == 'CHACHA20' and cipher[1] == 'POLY1305':
@@ -136,14 +135,9 @@ def to_ciphersuite_info(code, name):
 
     if mode == 'CBC':
         return (name, code, sig_algo, kex_algo, cipher_algo, cipher_keylen, mac_algo, mac_keylen[mac_algo], mac_algo, 'CBC_MODE')
-
     elif mode == 'OCB':
         return (name, code, sig_algo, kex_algo, cipher_algo, cipher_keylen, "AEAD", 0, mac_algo, 'AEAD_XOR_12')
-
     else:
-        iv_bytes_from_hs = 4
-        iv_bytes_from_rec = 8
-
         return (name, code, sig_algo, kex_algo, cipher_algo, cipher_keylen, "AEAD", 0, mac_algo, 'AEAD_IMPLICIT_4')
 
 def open_input(args):
@@ -152,7 +146,7 @@ def open_input(args):
     if len(args) == 1:
         try:
             return open('tls-parameters.txt')
-        except:
+        except OSError:
             pass
 
         import urllib2
@@ -200,10 +194,10 @@ def main(args = None):
     if args is None:
         args = sys.argv
 
-    weak_crypto = ['EXPORT', 'RC2', 'IDEA', 'RC4', '_DES_', 'WITH_NULL']
+    weak_crypto = ['EXPORT', 'RC2', 'IDEA', 'RC4', '_DES_', 'WITH_NULL', 'GOST']
     static_dh = ['ECDH_ECDSA', 'ECDH_RSA', 'DH_DSS', 'DH_RSA'] # not supported
     protocol_goop = ['SCSV', 'KRB5']
-    maybe_someday = ['RSA_PSK']
+    maybe_someday = ['RSA_PSK', 'ECCPWD']
     not_supported = weak_crypto + static_dh + protocol_goop + maybe_someday
 
     (options, args) = process_command_line(args)
@@ -214,7 +208,6 @@ def main(args = None):
     ciphersuite_re = re.compile(' +0x([0-9a-fA-F][0-9a-fA-F]),0x([0-9a-fA-F][0-9a-fA-F]) + TLS_([A-Za-z_0-9]+) ')
 
     suites = {}
-    suite_codes = {}
 
     contents = ''
 
@@ -230,7 +223,7 @@ def main(args = None):
                 if ns in name:
                     should_use = False
 
-            if should_use:
+            if should_use and name.find('_WITH_') > 0:
                 suites[code] = to_ciphersuite_info(code, name)
 
     sha1 = hashlib.sha1()
@@ -320,11 +313,11 @@ const std::vector<Ciphersuite>& Ciphersuite::all_known_ciphersuites()
     for code in sorted(suites.keys()):
         info = suites[code]
         assert len(info) == 10
+
         suite_expr = 'Ciphersuite(0x%s, "%s", Auth_Method::%s, Kex_Algo::%s, "%s", %d, "%s", %d, KDF_Algo::%s, Nonce_Format::%s)' % (
             code, info[0], info[2], info[3], info[4], info[5], info[6], info[7], info[8].replace('-','_'), info[9])
 
         suite_info += "      " + suite_expr + ",\n"
-        
 
     suite_info += """      };
 
@@ -342,6 +335,8 @@ const std::vector<Ciphersuite>& Ciphersuite::all_known_ciphersuites()
         out = open(options.output, 'w')
         out.write(suite_info)
         out.close()
+
+    return 0
 
 if __name__ == '__main__':
     sys.exit(main())

@@ -10,6 +10,7 @@
 #include <botan/keypair.h>
 #include <botan/reducer.h>
 #include <botan/rng.h>
+#include <botan/divide.h>
 #include <botan/internal/pk_ops_impl.h>
 
 #if defined(BOTAN_HAS_RFC6979_GENERATOR)
@@ -89,7 +90,8 @@ class DSA_Signature_Operation final : public PK_Ops::Signature_with_EMSA
          m_b_inv = m_group.inverse_mod_q(m_b);
          }
 
-      size_t max_input_bits() const override { return m_group.get_q().bits(); }
+      size_t signature_length() const override { return 2*m_group.q_bytes(); }
+      size_t max_input_bits() const override { return m_group.q_bits(); }
 
       secure_vector<uint8_t> raw_sign(const uint8_t msg[], size_t msg_len,
                                    RandomNumberGenerator& rng) override;
@@ -123,7 +125,16 @@ DSA_Signature_Operation::raw_sign(const uint8_t msg[], size_t msg_len,
 
    const BigInt k_inv = m_group.inverse_mod_q(k);
 
-   const BigInt r = m_group.mod_q(m_group.power_g_p(k, m_group.q_bits()));
+   /*
+   * It may not be strictly necessary for the reduction (g^k mod p) mod q to be
+   * const time, since r is published as part of the signature, and deriving
+   * anything useful about k from g^k mod p would seem to require computing a
+   * discrete logarithm.
+   *
+   * However it only increases the cost of signatures by about 7-10%, and DSA is
+   * only for legacy use anyway so we don't care about the performance so much.
+   */
+   const BigInt r = ct_modulo(m_group.power_g_p(k, m_group.q_bits()), m_group.get_q());
 
    /*
    * Blind the input message and compute x*r+m as (x*r*b + m*b)/b
@@ -157,7 +168,7 @@ class DSA_Verification_Operation final : public PK_Ops::Verification_with_EMSA
          {
          }
 
-      size_t max_input_bits() const override { return m_group.get_q().bits(); }
+      size_t max_input_bits() const override { return m_group.q_bits(); }
 
       bool with_recovery() const override { return false; }
 
@@ -191,7 +202,8 @@ bool DSA_Verification_Operation::verify(const uint8_t msg[], size_t msg_len,
 
    s = m_group.multi_exponentiate(si, m_y, sr);
 
-   return (m_group.mod_q(s) == r);
+   // s is too big for Barrett, and verification doesn't need to be const-time
+   return (s % m_group.get_q() == r);
    }
 
 }

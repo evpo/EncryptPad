@@ -32,7 +32,7 @@ void encode_tag(std::vector<uint8_t>& encoded_tag,
       }
    else
       {
-      size_t blocks = high_bit(type_tag) + 6;
+      size_t blocks = high_bit(static_cast<uint32_t>(type_tag)) + 6;
       blocks = (blocks - (blocks % 7)) / 7;
 
       BOTAN_ASSERT_NOMSG(blocks > 0);
@@ -342,7 +342,7 @@ DER_Encoder& DER_Encoder::encode(const BigInt& n,
 
    const size_t extra_zero = (n.bits() % 8 == 0) ? 1 : 0;
    secure_vector<uint8_t> contents(extra_zero + n.bytes());
-   BigInt::encode(&contents[extra_zero], n);
+   n.binary_encode(&contents[extra_zero]);
    if(n < 0)
       {
       for(size_t i = 0; i != contents.size(); ++i)

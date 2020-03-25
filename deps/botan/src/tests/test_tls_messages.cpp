@@ -14,6 +14,7 @@
    #include <botan/tls_handshake_msg.h>
    #include <botan/tls_messages.h>
    #include <botan/tls_alert.h>
+   #include <botan/loadstor.h>
 #endif
 
 namespace Botan_Tests {
@@ -35,8 +36,8 @@ Test::Result test_hello_verify_request()
    // Compute HMAC
    std::unique_ptr<Botan::MessageAuthenticationCode> hmac(Botan::MessageAuthenticationCode::create("HMAC(SHA-256)"));
    hmac->set_key(sk);
-   hmac->update_be(size_t(0));
-   hmac->update_be(size_t(0));
+   hmac->update_be(uint64_t(0)); // length of client hello
+   hmac->update_be(uint64_t(0)); // length of client identity
    std::vector<uint8_t> test = unlock(hmac->final());
 
    result.test_eq("Cookie comparison", hfr.cookie(), test);
@@ -78,7 +79,7 @@ class TLS_Message_Parsing_Test final : public Text_Based_Test
                   std::vector<uint8_t> buf;
                   for(Botan::TLS::Handshake_Extension_Type const& type : message.extension_types())
                      {
-                     uint16_t u16type = type;
+                     uint16_t u16type = static_cast<uint16_t>(type);
                      buf.push_back(Botan::get_byte(0, u16type));
                      buf.push_back(Botan::get_byte(1, u16type));
                      }
@@ -107,7 +108,7 @@ class TLS_Message_Parsing_Test final : public Text_Based_Test
                   std::vector<uint8_t> buf;
                   for(Botan::TLS::Handshake_Extension_Type const& type : message.extension_types())
                      {
-                     uint16_t u16type = type;
+                     uint16_t u16type = static_cast<uint16_t>(type);
                      buf.push_back(Botan::get_byte(0, u16type));
                      buf.push_back(Botan::get_byte(1, u16type));
                      }
@@ -123,17 +124,15 @@ class TLS_Message_Parsing_Test final : public Text_Based_Test
                else if(algo == "cert_status")
                   {
                   Botan::TLS::Certificate_Status message(buffer);
-                  std::shared_ptr<const Botan::OCSP::Response> resp = message.response();
 
-                  if(result.confirm("Decoded response", resp != nullptr))
+                  Botan::OCSP::Response resp(message.response());
+
+                  const std::vector<std::string> CNs = resp.signer_name().get_attribute("CN");
+
+                  // This is not requird by OCSP protocol, we are just using it as a test here
+                  if(result.test_eq("OCSP response has signer name", CNs.size(), 1))
                      {
-                     const std::vector<std::string> CNs = resp->signer_name().get_attribute("CN");
-
-                     // This is not requird by OCSP protocol, we are just using it as a test here
-                     if(result.test_eq("OCSP response has signer name", CNs.size(), 1))
-                        {
-                        result.test_eq("Expected name", CNs[0], expected_name);
-                        }
+                     result.test_eq("Expected name", CNs[0], expected_name);
                      }
                   }
                else

@@ -1,17 +1,21 @@
+
+# This makefile was generated using '%{command_line}'
+
 # Paths to relevant programs
 
 CXX            = %{cxx}
 LINKER         = %{linker}
 AR             = %{ar_command}
+AR_OPTIONS     = %{ar_options}
 PYTHON_EXE     = %{python_exe}
 
 # Compiler Flags
 
 ABI_FLAGS      = %{cc_sysroot} %{cxx_abi_flags}
-LANG_FLAGS     = %{cc_lang_flags}
-CXXFLAGS       = %{cc_compile_flags}
+LANG_FLAGS     = %{cc_lang_flags} %{os_feature_macros}
+CXXFLAGS       = %{cc_compile_flags} -DBOTAN_IS_BEING_BUILT
 WARN_FLAGS     = %{cc_warning_flags}
-SO_OBJ_FLAGS   = %{shared_flags}
+LIB_FLAGS      = %{lib_flags}
 LDFLAGS        = %{ldflags}
 
 EXE_LINK_CMD   = %{exe_link_cmd}
@@ -23,10 +27,10 @@ EXE_LINKS_TO   = %{link_to_botan} $(LIB_LINKS_TO)
 BUILD_FLAGS    = $(ABI_FLAGS) $(LANG_FLAGS) $(CXXFLAGS) $(WARN_FLAGS)
 
 SCRIPTS_DIR    = %{scripts_dir}
-INSTALLED_LIB_DIR = %{prefix}/%{libdir}
+INSTALLED_LIB_DIR = %{libdir}
 
 # The primary target
-all: libs cli docs tests
+all: %{all_targets}
 
 # Executable targets
 CLI           = %{cli_exe}
@@ -41,10 +45,10 @@ docs: %{doc_stamp_file}
 # Misc targets
 
 %{if make_supports_phony}
-.PHONY = all cli libs tests docs clean distclean install
+.PHONY: all cli libs tests docs clean distclean install
 %{endif}
 
-%{doc_stamp_file}: %{doc_dir}/manual/*.rst
+%{doc_stamp_file}: %{doc_dir}/*.rst %{doc_dir}/api_ref/*.rst %{doc_dir}/dev_ref/*.rst
 	$(PYTHON_EXE) $(SCRIPTS_DIR)/build_docs.py --build-dir="%{build_dir}"
 
 clean:
@@ -53,8 +57,8 @@ clean:
 distclean:
 	$(PYTHON_EXE) $(SCRIPTS_DIR)/cleanup.py --build-dir="%{build_dir}" --distclean
 
-install: libs cli docs
-	$(PYTHON_EXE) $(SCRIPTS_DIR)/install.py --prefix=%{prefix} --build-dir="%{build_dir}" --bindir=%{bindir} --libdir=%{libdir} --docdir=%{docdir} --includedir=%{includedir}
+install: %{install_targets}
+	$(PYTHON_EXE) $(SCRIPTS_DIR)/install.py --prefix="%{prefix}" --build-dir="%{build_dir}" --bindir=%{bindir} --libdir=%{libdir} --docdir=%{docdir} --includedir=%{includedir}
 
 # Object Files
 LIBOBJS = %{join lib_objs}
@@ -66,18 +70,18 @@ TESTOBJS = %{join test_objs}
 # Executable targets
 
 $(CLI): $(LIBRARIES) $(CLIOBJS)
-	$(EXE_LINK_CMD) $(ABI_FLAGS) $(LDFLAGS) $(CLIOBJS) $(EXE_LINKS_TO) %{output_to_exe}$@
+	$(EXE_LINK_CMD) $(ABI_FLAGS) $(CLIOBJS) $(EXE_LINKS_TO) $(LDFLAGS) %{output_to_exe}$@
 	$(POST_LINK_CMD)
 
 $(TEST): $(LIBRARIES) $(TESTOBJS)
-	$(EXE_LINK_CMD) $(ABI_FLAGS) $(LDFLAGS) $(TESTOBJS) $(EXE_LINKS_TO) %{output_to_exe}$@
+	$(EXE_LINK_CMD) $(ABI_FLAGS) $(TESTOBJS) $(EXE_LINKS_TO) $(LDFLAGS) %{output_to_exe}$@
 	$(POST_LINK_CMD)
 
 %{if build_fuzzers}
 
 FUZZERS = %{fuzzer_bin}
 
-fuzzers: libs $(FUZZERS)
+fuzzers: $(LIBRARIES) $(FUZZERS)
 
 fuzzer_corpus:
 	git clone --depth=1 https://github.com/randombit/crypto-corpus.git fuzzer_corpus
@@ -87,12 +91,22 @@ fuzzer_corpus_zip: fuzzer_corpus
 
 %{endif}
 
+%{if build_bogo_shim}
+
+bogo_shim: %{out_dir}/botan_bogo_shim
+
+# BoGo shim
+%{out_dir}/botan_bogo_shim: %{bogo_shim_src} $(LIBRARIES)
+	$(CXX) $(BUILD_FLAGS) %{include_paths} %{bogo_shim_src} $(EXE_LINKS_TO) $(LDFLAGS) %{output_to_exe}$@
+
+%{endif}
+
 # Library targets
 
 %{if build_static_lib}
 
 %{out_dir}/%{static_lib_name}: $(LIBOBJS)
-	$(AR) %{ar_options} %{ar_output_to}$@ $(LIBOBJS)
+	$(AR) $(AR_OPTIONS) %{ar_output_to}$@ $(LIBOBJS)
 
 %{endif}
 
@@ -110,7 +124,7 @@ fuzzer_corpus_zip: fuzzer_corpus
 
 %{for lib_build_info}
 %{obj}: %{src}
-	$(CXX) $(SO_OBJ_FLAGS) $(BUILD_FLAGS) %{isa_flags} %{include_paths} %{dash_c} %{src} %{dash_o}$@
+	$(CXX) $(LIB_FLAGS) $(BUILD_FLAGS) %{isa_flags} %{include_paths} %{dash_c} %{src} %{dash_o}$@
 %{endfor}
 
 %{for cli_build_info}

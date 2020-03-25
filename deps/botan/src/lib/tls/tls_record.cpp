@@ -1,6 +1,6 @@
 /*
 * TLS Record Handling
-* (C) 2012,2013,2014,2015,2016 Jack Lloyd
+* (C) 2012,2013,2014,2015,2016,2019 Jack Lloyd
 *     2016 Juraj Somorovsky
 *     2016 Matthias Gierlings
 *
@@ -33,25 +33,14 @@ Connection_Cipher_State::Connection_Cipher_State(Protocol_Version version,
                                                  bool uses_encrypt_then_mac) :
    m_start_time(std::chrono::system_clock::now())
    {
-   SymmetricKey mac_key, cipher_key;
-   InitializationVector iv;
-
-   if(side == CLIENT)
-      {
-      cipher_key = keys.client_cipher_key();
-      iv = keys.client_iv();
-      mac_key = keys.client_mac_key();
-      }
-   else
-      {
-      cipher_key = keys.server_cipher_key();
-      iv = keys.server_iv();
-      mac_key = keys.server_mac_key();
-      }
-
-   m_nonce = unlock(iv.bits_of());
-   m_nonce_bytes_from_handshake = m_nonce.size();
    m_nonce_format = suite.nonce_format();
+   m_nonce_bytes_from_record = suite.nonce_bytes_from_record(version);
+   m_nonce_bytes_from_handshake = suite.nonce_bytes_from_handshake();
+
+   const secure_vector<uint8_t>& aead_key = keys.aead_key(side);
+   m_nonce = keys.nonce(side);
+
+   BOTAN_ASSERT_NOMSG(m_nonce.size() == m_nonce_bytes_from_handshake);
 
    if(nonce_format() == Nonce_Format::CBC_MODE)
       {
@@ -67,7 +56,7 @@ Connection_Cipher_State::Connection_Cipher_State(Protocol_Version version,
                          std::move(mac),
                          suite.cipher_keylen(),
                          suite.mac_keylen(),
-                         version.supports_explicit_cbc_ivs(),
+                         version,
                          uses_encrypt_then_mac));
          }
       else
@@ -77,38 +66,21 @@ Connection_Cipher_State::Connection_Cipher_State(Protocol_Version version,
                          std::move(mac),
                          suite.cipher_keylen(),
                          suite.mac_keylen(),
-                         version.supports_explicit_cbc_ivs(),
+                         version,
                          uses_encrypt_then_mac));
          }
 
-      m_aead->set_key(cipher_key + mac_key);
-
-      m_nonce_bytes_from_record = 0;
-
-      if(version.supports_explicit_cbc_ivs())
-         m_nonce_bytes_from_record = m_nonce_bytes_from_handshake;
-      else if(our_side == false)
-         m_aead->start(iv.bits_of());
 #else
-      throw Exception("Negotiated disabled TLS CBC+HMAC ciphersuite");
+      BOTAN_UNUSED(uses_encrypt_then_mac);
+      throw Internal_Error("Negotiated disabled TLS CBC+HMAC ciphersuite");
 #endif
       }
    else
       {
       m_aead = AEAD_Mode::create_or_throw(suite.cipher_algo(), our_side ? ENCRYPTION : DECRYPTION);
-
-      m_aead->set_key(cipher_key + mac_key);
-
-      if(nonce_format() == Nonce_Format::AEAD_IMPLICIT_4)
-         {
-         m_nonce_bytes_from_record = 8;
-         m_nonce.resize(m_nonce.size() + 8);
-         }
-      else if(nonce_format() != Nonce_Format::AEAD_XOR_12)
-         {
-         throw Invalid_State("Invalid AEAD nonce format used");
-         }
       }
+
+   m_aead->set_key(aead_key);
    }
 
 std::vector<uint8_t> Connection_Cipher_State::aead_nonce(uint64_t seq, RandomNumberGenerator& rng)
@@ -136,7 +108,9 @@ std::vector<uint8_t> Connection_Cipher_State::aead_nonce(uint64_t seq, RandomNum
          }
       case Nonce_Format::AEAD_IMPLICIT_4:
          {
-         std::vector<uint8_t> nonce = m_nonce;
+         BOTAN_ASSERT_NOMSG(m_nonce.size() == 4);
+         std::vector<uint8_t> nonce(12);
+         copy_mem(&nonce[0], m_nonce.data(), 4);
          store_be(seq, &nonce[nonce_bytes_from_handshake()]);
          return nonce;
          }
@@ -152,6 +126,12 @@ Connection_Cipher_State::aead_nonce(const uint8_t record[], size_t record_len, u
       {
       case Nonce_Format::CBC_MODE:
          {
+         if(nonce_bytes_from_record() == 0 && m_nonce.size())
+            {
+            std::vector<uint8_t> nonce;
+            nonce.swap(m_nonce);
+            return nonce;
+            }
          if(record_len < nonce_bytes_from_record())
             throw Decoding_Error("Invalid CBC packet too short to be valid");
          std::vector<uint8_t> nonce(record, record + nonce_bytes_from_record());
@@ -166,9 +146,11 @@ Connection_Cipher_State::aead_nonce(const uint8_t record[], size_t record_len, u
          }
       case Nonce_Format::AEAD_IMPLICIT_4:
          {
+         BOTAN_ASSERT_NOMSG(m_nonce.size() == 4);
          if(record_len < nonce_bytes_from_record())
             throw Decoding_Error("Invalid AEAD packet too short to be valid");
-         std::vector<uint8_t> nonce = m_nonce;
+         std::vector<uint8_t> nonce(12);
+         copy_mem(&nonce[0], m_nonce.data(), 4);
          copy_mem(&nonce[nonce_bytes_from_handshake()], record, nonce_bytes_from_record());
          return nonce;
          }
@@ -208,41 +190,43 @@ inline void append_u16_len(secure_vector<uint8_t>& output, size_t len_field)
 }
 
 void write_record(secure_vector<uint8_t>& output,
-                  Record_Message msg,
+                  uint8_t record_type,
                   Protocol_Version version,
-                  uint64_t seq,
+                  uint64_t record_sequence,
+                  const uint8_t* message,
+                  size_t message_len,
                   Connection_Cipher_State* cs,
                   RandomNumberGenerator& rng)
    {
    output.clear();
 
-   output.push_back(msg.get_type());
+   output.push_back(record_type);
    output.push_back(version.major_version());
    output.push_back(version.minor_version());
 
    if(version.is_datagram_protocol())
       {
       for(size_t i = 0; i != 8; ++i)
-         output.push_back(get_byte(i, seq));
+         output.push_back(get_byte(i, record_sequence));
       }
 
    if(!cs) // initial unencrypted handshake records
       {
-      append_u16_len(output, msg.get_size());
-      output.insert(output.end(), msg.get_data(), msg.get_data() + msg.get_size());
+      append_u16_len(output, message_len);
+      output.insert(output.end(), message, message + message_len);
       return;
       }
 
-   AEAD_Mode* aead = cs->aead();
-   std::vector<uint8_t> aad = cs->format_ad(seq, msg.get_type(), version, static_cast<uint16_t>(msg.get_size()));
+   AEAD_Mode& aead = cs->aead();
+   std::vector<uint8_t> aad = cs->format_ad(record_sequence, record_type, version, static_cast<uint16_t>(message_len));
 
-   const size_t ctext_size = aead->output_length(msg.get_size());
+   const size_t ctext_size = aead.output_length(message_len);
 
    const size_t rec_size = ctext_size + cs->nonce_bytes_from_record();
 
-   aead->set_ad(aad);
+   aead.set_ad(aad);
 
-   const std::vector<uint8_t> nonce = cs->aead_nonce(seq, rng);
+   const std::vector<uint8_t> nonce = cs->aead_nonce(record_sequence, rng);
 
    append_u16_len(output, rec_size);
 
@@ -255,10 +239,10 @@ void write_record(secure_vector<uint8_t>& output,
       }
 
    const size_t header_size = output.size();
-   output += std::make_pair(msg.get_data(), msg.get_size());
+   output += std::make_pair(message, message_len);
 
-   aead->start(nonce);
-   aead->finish(output, header_size);
+   aead.start(nonce);
+   aead.finish(output, header_size);
 
    BOTAN_ASSERT(output.size() < MAX_CIPHERTEXT_SIZE,
                 "Produced ciphertext larger than protocol allows");
@@ -292,8 +276,7 @@ void decrypt_record(secure_vector<uint8_t>& output,
                     Record_Type record_type,
                     Connection_Cipher_State& cs)
    {
-   AEAD_Mode* aead = cs.aead();
-   BOTAN_ASSERT(aead, "Cannot decrypt without cipher");
+   AEAD_Mode& aead = cs.aead();
 
    const std::vector<uint8_t> nonce = cs.aead_nonce(record_contents, record_len, record_sequence);
    const uint8_t* msg = &record_contents[cs.nonce_bytes_from_record()];
@@ -306,47 +289,50 @@ void decrypt_record(secure_vector<uint8_t>& output,
    * tools which are attempting automated detection of padding oracles,
    * including older versions of TLS-Attacker.
    */
-   if(msg_length < aead->minimum_final_size())
+   if(msg_length < aead.minimum_final_size())
       throw TLS_Exception(Alert::BAD_RECORD_MAC, "AEAD packet is shorter than the tag");
 
-   const size_t ptext_size = aead->output_length(msg_length);
+   const size_t ptext_size = aead.output_length(msg_length);
 
-   aead->set_associated_data_vec(
+   aead.set_associated_data_vec(
       cs.format_ad(record_sequence,
                    static_cast<uint8_t>(record_type),
                    record_version,
                    static_cast<uint16_t>(ptext_size))
       );
 
-   aead->start(nonce);
+   aead.start(nonce);
 
-   const size_t offset = output.size();
-   output += std::make_pair(msg, msg_length);
-   aead->finish(output, offset);
+   output.assign(msg, msg + msg_length);
+   aead.finish(output, 0);
    }
 
-size_t read_tls_record(secure_vector<uint8_t>& readbuf,
-                       Record_Raw_Input& raw_input,
-                       Record& rec,
-                       Connection_Sequence_Numbers* sequence_numbers,
-                       get_cipherstate_fn get_cipherstate)
+Record_Header read_tls_record(secure_vector<uint8_t>& readbuf,
+                              const uint8_t input[],
+                              size_t input_len,
+                              size_t& consumed,
+                              secure_vector<uint8_t>& recbuf,
+                              Connection_Sequence_Numbers* sequence_numbers,
+                              get_cipherstate_fn get_cipherstate)
    {
    if(readbuf.size() < TLS_HEADER_SIZE) // header incomplete?
       {
-      if(size_t needed = fill_buffer_to(readbuf,
-                                        raw_input.get_data(), raw_input.get_size(), raw_input.get_consumed(),
-                                        TLS_HEADER_SIZE))
-         return needed;
+      if(size_t needed = fill_buffer_to(readbuf, input, input_len, consumed, TLS_HEADER_SIZE))
+         {
+         return Record_Header(needed);
+         }
 
       BOTAN_ASSERT_EQUAL(readbuf.size(), TLS_HEADER_SIZE, "Have an entire header");
       }
 
-   *rec.get_protocol_version() = Protocol_Version(readbuf[1], readbuf[2]);
+   const Protocol_Version version(readbuf[1], readbuf[2]);
 
-   BOTAN_ASSERT(!rec.get_protocol_version()->is_datagram_protocol(), "Expected TLS");
+   if(version.is_datagram_protocol())
+      throw TLS_Exception(Alert::PROTOCOL_VERSION,
+                          "Expected TLS but got a record with DTLS version");
 
    const size_t record_size = make_uint16(readbuf[TLS_HEADER_SIZE-2],
-                                         readbuf[TLS_HEADER_SIZE-1]);
+                                          readbuf[TLS_HEADER_SIZE-1]);
 
    if(record_size > MAX_CIPHERTEXT_SIZE)
       throw TLS_Exception(Alert::RECORD_OVERFLOW,
@@ -356,38 +342,36 @@ size_t read_tls_record(secure_vector<uint8_t>& readbuf,
       throw TLS_Exception(Alert::DECODE_ERROR,
                           "Received a completely empty record");
 
-   if(size_t needed = fill_buffer_to(readbuf,
-                                     raw_input.get_data(), raw_input.get_size(), raw_input.get_consumed(),
-                                     TLS_HEADER_SIZE + record_size))
-      return needed;
+   if(size_t needed = fill_buffer_to(readbuf, input, input_len, consumed, TLS_HEADER_SIZE + record_size))
+      {
+      return Record_Header(needed);
+      }
 
    BOTAN_ASSERT_EQUAL(static_cast<size_t>(TLS_HEADER_SIZE) + record_size,
                       readbuf.size(),
                       "Have the full record");
 
-   *rec.get_type() = static_cast<Record_Type>(readbuf[0]);
+   const Record_Type type = static_cast<Record_Type>(readbuf[0]);
 
    uint16_t epoch = 0;
 
+   uint64_t sequence = 0;
    if(sequence_numbers)
       {
-      *rec.get_sequence() = sequence_numbers->next_read_sequence();
+      sequence = sequence_numbers->next_read_sequence();
       epoch = sequence_numbers->current_read_epoch();
       }
    else
       {
       // server initial handshake case
-      *rec.get_sequence() = 0;
       epoch = 0;
       }
 
-   uint8_t* record_contents = &readbuf[TLS_HEADER_SIZE];
-
    if(epoch == 0) // Unencrypted initial handshake
       {
-      rec.get_data().assign(readbuf.begin() + TLS_HEADER_SIZE, readbuf.begin() + TLS_HEADER_SIZE + record_size);
+      recbuf.assign(readbuf.begin() + TLS_HEADER_SIZE, readbuf.begin() + TLS_HEADER_SIZE + record_size);
       readbuf.clear();
-      return 0; // got a full record
+      return Record_Header(sequence, version, type);
       }
 
    // Otherwise, decrypt, check MAC, return plaintext
@@ -395,79 +379,89 @@ size_t read_tls_record(secure_vector<uint8_t>& readbuf,
 
    BOTAN_ASSERT(cs, "Have cipherstate for this epoch");
 
-   decrypt_record(rec.get_data(),
-                  record_contents,
+   decrypt_record(recbuf,
+                  &readbuf[TLS_HEADER_SIZE],
                   record_size,
-                  *rec.get_sequence(),
-                  *rec.get_protocol_version(),
-                  *rec.get_type(),
+                  sequence,
+                  version,
+                  type,
                   *cs);
 
    if(sequence_numbers)
-      sequence_numbers->read_accept(*rec.get_sequence());
+      sequence_numbers->read_accept(sequence);
 
    readbuf.clear();
-   return 0;
+   return Record_Header(sequence, version, type);
    }
 
-size_t read_dtls_record(secure_vector<uint8_t>& readbuf,
-                        Record_Raw_Input& raw_input,
-                        Record& rec,
-                        Connection_Sequence_Numbers* sequence_numbers,
-                        get_cipherstate_fn get_cipherstate)
+Record_Header read_dtls_record(secure_vector<uint8_t>& readbuf,
+                               const uint8_t input[],
+                               size_t input_len,
+                               size_t& consumed,
+                               secure_vector<uint8_t>& recbuf,
+                               Connection_Sequence_Numbers* sequence_numbers,
+                               get_cipherstate_fn get_cipherstate,
+                               bool allow_epoch0_restart)
    {
    if(readbuf.size() < DTLS_HEADER_SIZE) // header incomplete?
       {
-      if(fill_buffer_to(readbuf, raw_input.get_data(), raw_input.get_size(), raw_input.get_consumed(), DTLS_HEADER_SIZE))
+      if(fill_buffer_to(readbuf, input, input_len, consumed, DTLS_HEADER_SIZE))
          {
          readbuf.clear();
-         return 0;
+         return Record_Header(0);
          }
 
       BOTAN_ASSERT_EQUAL(readbuf.size(), DTLS_HEADER_SIZE, "Have an entire header");
       }
 
-   *rec.get_protocol_version() = Protocol_Version(readbuf[1], readbuf[2]);
+   const Protocol_Version version(readbuf[1], readbuf[2]);
 
-   BOTAN_ASSERT(rec.get_protocol_version()->is_datagram_protocol(), "Expected DTLS");
+   if(version.is_datagram_protocol() == false)
+      {
+      readbuf.clear();
+      return Record_Header(0);
+      }
 
    const size_t record_size = make_uint16(readbuf[DTLS_HEADER_SIZE-2],
                                           readbuf[DTLS_HEADER_SIZE-1]);
 
    if(record_size > MAX_CIPHERTEXT_SIZE)
-      throw TLS_Exception(Alert::RECORD_OVERFLOW,
-                          "Got message that exceeds maximum size");
+      {
+      // Too large to be valid, ignore it
+      readbuf.clear();
+      return Record_Header(0);
+      }
 
-   if(fill_buffer_to(readbuf, raw_input.get_data(), raw_input.get_size(), raw_input.get_consumed(), DTLS_HEADER_SIZE + record_size))
+   if(fill_buffer_to(readbuf, input, input_len, consumed, DTLS_HEADER_SIZE + record_size))
       {
       // Truncated packet?
       readbuf.clear();
-      return 0;
+      return Record_Header(0);
       }
 
    BOTAN_ASSERT_EQUAL(static_cast<size_t>(DTLS_HEADER_SIZE) + record_size, readbuf.size(),
                       "Have the full record");
 
-   *rec.get_type() = static_cast<Record_Type>(readbuf[0]);
+   const Record_Type type = static_cast<Record_Type>(readbuf[0]);
 
-   uint16_t epoch = 0;
+   const uint64_t sequence = load_be<uint64_t>(&readbuf[3], 0);
+   const uint16_t epoch = (sequence >> 48);
 
-   *rec.get_sequence() = load_be<uint64_t>(&readbuf[3], 0);
-   epoch = (*rec.get_sequence() >> 48);
+   const bool already_seen = sequence_numbers && sequence_numbers->already_seen(sequence);
 
-   if(sequence_numbers && sequence_numbers->already_seen(*rec.get_sequence()))
+   if(already_seen && !(epoch == 0 && allow_epoch0_restart))
       {
       readbuf.clear();
-      return 0;
+      return Record_Header(0);
       }
-
-   uint8_t* record_contents = &readbuf[DTLS_HEADER_SIZE];
 
    if(epoch == 0) // Unencrypted initial handshake
       {
-      rec.get_data().assign(readbuf.begin() + DTLS_HEADER_SIZE, readbuf.begin() + DTLS_HEADER_SIZE + record_size);
+      recbuf.assign(readbuf.begin() + DTLS_HEADER_SIZE, readbuf.begin() + DTLS_HEADER_SIZE + record_size);
       readbuf.clear();
-      return 0; // got a full record
+      if(sequence_numbers)
+         sequence_numbers->read_accept(sequence);
+      return Record_Header(sequence, version, type);
       }
 
    try
@@ -477,42 +471,45 @@ size_t read_dtls_record(secure_vector<uint8_t>& readbuf,
 
       BOTAN_ASSERT(cs, "Have cipherstate for this epoch");
 
-      decrypt_record(rec.get_data(),
-                     record_contents,
+      decrypt_record(recbuf,
+                     &readbuf[DTLS_HEADER_SIZE],
                      record_size,
-                     *rec.get_sequence(),
-                     *rec.get_protocol_version(),
-                     *rec.get_type(),
+                     sequence,
+                     version,
+                     type,
                      *cs);
       }
    catch(std::exception&)
       {
       readbuf.clear();
-      *rec.get_type() = NO_RECORD;
-      return 0;
+      return Record_Header(0);
       }
 
    if(sequence_numbers)
-      sequence_numbers->read_accept(*rec.get_sequence());
+      sequence_numbers->read_accept(sequence);
 
    readbuf.clear();
-   return 0;
+   return Record_Header(sequence, version, type);
    }
 
 }
 
-size_t read_record(secure_vector<uint8_t>& readbuf,
-                   Record_Raw_Input& raw_input,
-                   Record& rec,
-                   Connection_Sequence_Numbers* sequence_numbers,
-                   get_cipherstate_fn get_cipherstate)
+Record_Header read_record(bool is_datagram,
+                          secure_vector<uint8_t>& readbuf,
+                          const uint8_t input[],
+                          size_t input_len,
+                          size_t& consumed,
+                          secure_vector<uint8_t>& recbuf,
+                          Connection_Sequence_Numbers* sequence_numbers,
+                          get_cipherstate_fn get_cipherstate,
+                          bool allow_epoch0_restart)
    {
-   if(raw_input.is_datagram())
-      return read_dtls_record(readbuf, raw_input, rec,
-                              sequence_numbers, get_cipherstate);
+   if(is_datagram)
+      return read_dtls_record(readbuf, input, input_len, consumed,
+                              recbuf, sequence_numbers, get_cipherstate, allow_epoch0_restart);
    else
-      return read_tls_record(readbuf, raw_input, rec,
-                             sequence_numbers, get_cipherstate);
+      return read_tls_record(readbuf, input, input_len, consumed,
+                             recbuf, sequence_numbers, get_cipherstate);
    }
 
 }

@@ -7,7 +7,7 @@
 
 #include "tests.h"
 
-#if defined(BOTAN_HAS_XMSS)
+#if defined(BOTAN_HAS_XMSS_RFC8391)
    #include <botan/xmss.h>
    #include "test_pubkey.h"
 #endif
@@ -16,7 +16,7 @@ namespace Botan_Tests {
 
 namespace {
 
-#if defined(BOTAN_HAS_XMSS)
+#if defined(BOTAN_HAS_XMSS_RFC8391)
 
 class XMSS_Signature_Tests final : public PK_Signature_Generation_Test
    {
@@ -34,7 +34,7 @@ class XMSS_Signature_Tests final : public PK_Signature_Generation_Test
             {
             const std::string params = vars.get_req_str("Params");
 
-            if(params == "SHAKE128_W16_H10")
+            if(params == "SHAKE_10_256")
                {
                return false;
                }
@@ -109,7 +109,7 @@ class XMSS_Keygen_Tests final : public PK_Key_Generation_Test
    public:
       std::vector<std::string> keygen_params() const override
          {
-         return { "XMSS_SHA2-256_W16_H10" };
+         return { "XMSS-SHA2_10_256" };
          }
       std::string algo_name() const override
          {

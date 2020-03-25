@@ -1,96 +1,177 @@
 language: cpp
 
-os:
-  - linux
-  - osx
-
-dist: trusty
 sudo: required
-
-compiler:
-  - clang
-  - gcc
 
 env:
   global:
-    - CCACHE_MAXSIZE=250M
-    - CCACHE_MAXFILES=2000
-    - CCACHE_COMPRESS=1
+    - CCACHE_MAXSIZE=1G
+    - PKCS11_LIB=/usr/lib/softhsm/libsofthsm2.so
 
-  matrix:
-    - BUILD_MODE="shared"
-    - BUILD_MODE="sonar"
-    - BUILD_MODE="fuzzers"
-    - BUILD_MODE="coverage"
-    - BUILD_MODE="cross-ppc32"
-    - BUILD_MODE="cross-ppc64"
-    - BUILD_MODE="cross-arm32"
-    - BUILD_MODE="cross-arm64"
-    - BUILD_MODE="cross-win32"
-    - BUILD_MODE="valgrind"
-    - BUILD_MODE="static"
-    - BUILD_MODE="mini-shared"
-    - BUILD_MODE="bsi"
-    - BUILD_MODE="nist"
-    - BUILD_MODE="docs"
-    - BUILD_MODE="lint"
-
-matrix:
-  exclude:
-    # Skip GCC on OS X entirely
-    - os: osx
+jobs:
+  include:
+    - os: linux
+      dist: bionic
+      name: Linux/GCC
       compiler: gcc
+      env:
+       - TARGET="shared"
+
+    - os: linux
+      dist: bionic
+      name: Linux/Clang
+      compiler: clang
+      env:
+       - TARGET="shared"
+
+    - os: linux
+      dist: xenial
+      name: Coverage
+      compiler: gcc
+      env:
+       - TARGET="coverage"
+
+    - os: linux
+      dist: bionic
+      arch: arm64
+      name: Fuzzers
+      compiler: gcc
+      env:
+       - TARGET="fuzzers"
+
+    - os: linux
+      dist: bionic
+      name: Valgrind
+      compiler: gcc
+      env:
+       - TARGET="valgrind"
+
+    - os: linux
+      dist: bionic
+      name: Linux arm64
+      arch: arm64
+      compiler: gcc
+      env:
+       - TARGET="shared"
+
+    - os: linux
+      dist: bionic
+      name: Linux ppc64le
+      arch: ppc64le
+      compiler: gcc
+      env:
+       - TARGET="shared"
+
+    - os: linux
+      name: Linux s390x
+      arch: s390x
+      compiler: gcc
+      env:
+       - TARGET="shared"
+
+    - os: linux
+      dist: bionic
+      name: Linux i386 cross
+      compiler: gcc
+      env:
+       - TARGET="cross-i386"
+
+    - os: linux
+      dist: xenial
+      name: Linux ppc32 cross
+      compiler: gcc
+      env:
+       - TARGET="cross-ppc32"
+
+    - os: linux
+      dist: bionic
+      name: Linux arm32 cross
+      compiler: gcc
+      env:
+       - TARGET="cross-arm32"
+
+    - os: linux
+      dist: bionic
+      name: Android arm32 cross
+      compiler: clang
+      env:
+       - TARGET="cross-android-arm32"
+       - ANDROID_NDK=android-ndk-r20
+
+    - os: linux
+      dist: bionic
+      name: Android arm64 cross
+      compiler: clang
+      env:
+       - TARGET="cross-android-arm64"
+       - ANDROID_NDK=android-ndk-r20
+
+    - os: linux
+      dist: bionic
+      name: MinGW x86-64 cross
+      compiler: gcc
+      env:
+       - TARGET="cross-win64"
 
     - os: osx
-      env: BUILD_MODE="sonar"
-
-    # Run static, docs, lint, bsi, nist, fuzzers, coverage, valgrind,
-    # sonar, sanitizer, minimized and non-ARM cross builds only on Linux/gcc.
-    # The sanitizer builds under Clang run the tests very slowly and
-    # cause CI timeouts.
-
-    - compiler: clang
-      env: BUILD_MODE="static"
-    - compiler: clang
-      env: BUILD_MODE="bsi"
-    - compiler: clang
-      env: BUILD_MODE="nist"
-    - compiler: clang
-      env: BUILD_MODE="lint"
-    - compiler: clang
-      env: BUILD_MODE="docs"
-    - compiler: clang
-      env: BUILD_MODE="coverage"
-    - compiler: clang
-      env: BUILD_MODE="fuzzers"
-    - compiler: clang
-      env: BUILD_MODE="valgrind"
-    - compiler: clang
-      env: BUILD_MODE="mini-shared"
-    - compiler: clang
-      env: BUILD_MODE="cross-win32"
-    - compiler: clang
-      env: BUILD_MODE="cross-ppc32"
-    - compiler: clang
-      env: BUILD_MODE="cross-ppc64"
-
-    # Use clang coverage for Sonar
-    - compiler: gcc
-      env: BUILD_MODE="sonar"
-
-    # No ARM Clang compiler on Linux
-    - os: linux
+      name: macOS
       compiler: clang
-      env: BUILD_MODE="cross-arm32"
-    - os: linux
+      env:
+       - TARGET="shared"
+
+    - os: osx
+      name: iOS
       compiler: clang
-      env: BUILD_MODE="cross-arm64"
+      env:
+       - TARGET="cross-arm64"
+
+    - os: linux
+      dist: bionic
+      name: Linux GCC 4.8
+      compiler: gcc
+      env:
+       - TARGET="gcc4.8"
+       - EXTRA_FLAGS="--disable-werror"
+
+    - os: linux
+      dist: bionic
+      name: Minimized
+      compiler: gcc
+      env:
+       - TARGET="mini-shared"
+
+    - os: linux
+      dist: bionic
+      name: BSI policy
+      compiler: gcc
+      env:
+       - TARGET="bsi"
+
+    - os: linux
+      dist: bionic
+      name: NIST policy
+      compiler: gcc
+      env:
+       - TARGET="nist"
+
+    - os: linux
+      dist: bionic
+      name: Pylint
+      compiler: gcc
+      env:
+       - TARGET="lint"
+
+    - os: linux
+      dist: bionic
+      name: Documentation
+      compiler: gcc
+      env:
+       - TARGET="docs"
 
 install:
   - ./src/scripts/ci/setup_travis.sh
 
 script:
-  - ./src/scripts/ci_build.py --os=$TRAVIS_OS_NAME --cc=$CC --cc-bin=$CXX --pkcs11-lib=/tmp/softhsm/lib/softhsm/libsofthsm2.so $BUILD_MODE
+  - ./src/scripts/ci_build.py --os=$TRAVIS_OS_NAME --cc=$CC --cc-bin=$CXX --without-pylint3 --pkcs11-lib=$PKCS11_LIB $EXTRA_FLAGS $TARGET
 
 # whitelist branches to avoid testing feature branches twice (as branch and as pull request)
 branches:
@@ -99,23 +180,13 @@ branches:
     - release-2
     - coverity_scan
 
-notifications:
-  email: botan-commits@lists.randombit.net
-
 git:
-  depth: 5
+  depth: 10
 
 cache:
   ccache: true
-  directories:
-    - $HOME/.sonar/cache
 
 addons:
-  sonarcloud:
-    organization: "randombit-github"
-    token:
-      secure: "JYwDxEZyCJ1aKLjAYB9YlyyIRkjeaY48iYqcMhmidx6/ploWXMbUzVpv5plLFbMGgeMy9sqa2I7Pbo7u3OdcBbbsogGtk/jomnjiauuNS6KcCHEEcVjBILfadxGJPL9F8/0KbcS2vnPpz/jVlRp18Uemud0yGGXXcDaY471sA50="
-
   coverity_scan:
     project:
       name: "randombit/botan"

@@ -8,5 +8,10 @@ dev_random
 
 sockets
 threads
+thread_local
 filesystem
 </target_features>
+
+<feature_macros>
+_QNX_SOURCE
+</feature_macros>

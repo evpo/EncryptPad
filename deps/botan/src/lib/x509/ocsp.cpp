@@ -92,6 +92,7 @@ std::string Request::base64_encode() const
 
 Response::Response(Certificate_Status_Code status)
    {
+   m_status = Response_Status_Code::Successful;
    m_dummy_response_status = status;
    }
 
@@ -106,8 +107,10 @@ Response::Response(const uint8_t response_bits[], size_t response_bits_len) :
 
    response_outer.decode(resp_status, ENUMERATED, UNIVERSAL);
 
-   if(resp_status != 0)
-      throw Exception("OCSP response status " + std::to_string(resp_status));
+   m_status = static_cast<Response_Status_Code>(resp_status);
+
+   if(m_status != Response_Status_Code::Successful)
+      { return; }
 
    if(response_outer.more_items())
       {
@@ -155,19 +158,19 @@ Certificate_Status_Code Response::verify_signature(const X509_Certificate& issue
    {
    if (m_responses.empty())
       return m_dummy_response_status;
-      
+
    try
       {
       std::unique_ptr<Public_Key> pub_key(issuer.subject_public_key());
 
       const std::vector<std::string> sig_info =
-         split_on(OIDS::lookup(m_sig_algo.get_oid()), '/');
+         split_on(m_sig_algo.get_oid().to_formatted_string(), '/');
 
       if(sig_info.size() != 2 || sig_info[0] != pub_key->algo_name())
          return Certificate_Status_Code::OCSP_RESPONSE_INVALID;
 
       std::string padding = sig_info[1];
-      Signature_Format format = (pub_key->message_parts() >= 2) ? DER_SEQUENCE : IEEE_1363;
+      const Signature_Format format = pub_key->default_x509_signature_format();
 
       PK_Verifier verifier(*pub_key, padding, format);
 
@@ -266,11 +269,12 @@ Certificate_Status_Code Response::check_signature(const std::vector<Certificate_
    }
 
 Certificate_Status_Code Response::status_for(const X509_Certificate& issuer,
-                                             const X509_Certificate& subject,
-                                             std::chrono::system_clock::time_point ref_time) const
+      const X509_Certificate& subject,
+      std::chrono::system_clock::time_point ref_time,
+      std::chrono::seconds max_age) const
    {
-   if (m_responses.empty())
-      return m_dummy_response_status;
+   if(m_responses.empty())
+      { return m_dummy_response_status; }
 
    for(const auto& response : m_responses)
       {
@@ -279,18 +283,23 @@ Certificate_Status_Code Response::status_for(const X509_Certificate& issuer,
          X509_Time x509_ref_time(ref_time);
 
          if(response.cert_status() == 1)
-            return Certificate_Status_Code::CERT_IS_REVOKED;
+            { return Certificate_Status_Code::CERT_IS_REVOKED; }
 
          if(response.this_update() > x509_ref_time)
-            return Certificate_Status_Code::OCSP_NOT_YET_VALID;
+            { return Certificate_Status_Code::OCSP_NOT_YET_VALID; }
 
-         if(response.next_update().time_is_set() && x509_ref_time > response.next_update())
-            return Certificate_Status_Code::OCSP_HAS_EXPIRED;
+         if(response.next_update().time_is_set())
+            {
+            if(x509_ref_time > response.next_update())
+               { return Certificate_Status_Code::OCSP_HAS_EXPIRED; }
+            }
+         else if(max_age > std::chrono::seconds::zero() && ref_time - response.this_update().to_std_timepoint() > max_age)
+            { return Certificate_Status_Code::OCSP_IS_TOO_OLD; }
 
          if(response.cert_status() == 0)
-            return Certificate_Status_Code::OCSP_RESPONSE_GOOD;
+            { return Certificate_Status_Code::OCSP_RESPONSE_GOOD; }
          else
-            return Certificate_Status_Code::OCSP_BAD_STATUS;
+            { return Certificate_Status_Code::OCSP_BAD_STATUS; }
          }
       }
 

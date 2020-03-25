@@ -36,7 +36,7 @@ std::string http_transact(const std::string& hostname,
       {
       socket = OS::open_socket(hostname, "http", timeout);
       if(!socket)
-         throw Exception("No socket support enabled in build");
+         throw Not_Implemented("No socket support enabled in build");
       }
    catch(std::exception& e)
       {
@@ -195,7 +195,8 @@ Response http_sync(http_exch_fn http_transact,
    while(io.good())
       {
       io.read(cast_uint8_ptr_to_char(buf.data()), buf.size());
-      resp_body.insert(resp_body.end(), buf.data(), &buf[io.gcount()]);
+      const size_t got = static_cast<size_t>(io.gcount());
+      resp_body.insert(resp_body.end(), buf.data(), &buf[got]);
       }
 
    const std::string header_size = search_map(headers, std::string("Content-Length"));

@@ -53,7 +53,7 @@ void X509_Time::decode_from(BER_Decoder& source)
 std::string X509_Time::to_string() const
    {
    if(time_is_set() == false)
-      throw Invalid_State("X509_Time::as_string: No time set");
+      throw Invalid_State("X509_Time::to_string: No time set");
 
    uint32_t full_year = m_year;
 
@@ -217,7 +217,8 @@ void X509_Time::set_to(const std::string& t_spec, ASN1_Tag spec_tag)
 */
 bool X509_Time::passes_sanity_check() const
    {
-   if(m_year < 1950 || m_year > 2200)
+   // AppVeyor's trust store includes a cert with expiration date in 3016 ...
+   if(m_year < 1950 || m_year > 3100)
       return false;
    if(m_month == 0 || m_month > 12)
       return false;
@@ -248,7 +249,7 @@ bool X509_Time::passes_sanity_check() const
 
       http://www.itu.int/ITU-T/studygroups/com17/languages/
       */
-      if (m_hour > 23 || m_minute > 59 || m_second > 59)
+      if(m_second > 59)
          {
          return false;
          }
@@ -260,6 +261,12 @@ bool X509_Time::passes_sanity_check() const
 std::chrono::system_clock::time_point X509_Time::to_std_timepoint() const
    {
    return calendar_point(m_year, m_month, m_day, m_hour, m_minute, m_second).to_std_timepoint();
+   }
+
+uint64_t X509_Time::time_since_epoch() const
+   {
+   auto tp = this->to_std_timepoint();
+   return std::chrono::duration_cast<std::chrono::seconds>(tp.time_since_epoch()).count();
    }
 
 /*

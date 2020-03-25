@@ -10,9 +10,11 @@
 
 #include <botan/types.h>
 
+BOTAN_FUTURE_INTERNAL_HEADER(mul128.h)
+
 namespace Botan {
 
-#if defined(__SIZEOF_INT128__) && defined(BOTAN_TARGET_CPU_HAS_NATIVE_64BIT) && !defined(__xlc__)
+#if defined(__SIZEOF_INT128__) && defined(BOTAN_TARGET_CPU_HAS_NATIVE_64BIT)
    #define BOTAN_TARGET_HAS_NATIVE_UINT128
 
    // Prefer TI mode over __int128 as GCC rejects the latter in pendantic mode

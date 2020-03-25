@@ -1,6 +1,6 @@
 /*
  * XMSS_PrivateKey.h
- * (C) 2016,2017 Matthias Gierlings
+ * (C) 2016,2017,2018 Matthias Gierlings
  *
  * Botan is released under the Simplified BSD License (see license.txt)
  **/
@@ -29,11 +29,10 @@ namespace Botan {
  * The XMSS private key does not support the X509 and PKCS7 standard. Instead
  * the raw format described in [1] is used.
  *
- *   [1] XMSS: Extended Hash-Based Signatures,
- *       draft-itrf-cfrg-xmss-hash-based-signatures-06
- *       Release: July 2016.
- *       https://datatracker.ietf.org/doc/
- *       draft-irtf-cfrg-xmss-hash-based-signatures/?include_text=1
+ * [1] XMSS: Extended Hash-Based Signatures,
+ *     Request for Comments: 8391
+ *     Release: May 2018.
+ *     https://datatracker.ietf.org/doc/rfc8391/
  **/
 class BOTAN_PUBLIC_API(2,0) XMSS_PrivateKey final : public virtual XMSS_PublicKey,
    public XMSS_Common_Ops,
@@ -92,6 +91,8 @@ class BOTAN_PUBLIC_API(2,0) XMSS_PrivateKey final : public virtual XMSS_PublicKe
          set_unused_leaf_index(idx_leaf);
          }
 
+      bool stateful_operation() const override { return true; }
+
       /**
        * Retrieves the last unused leaf index of the private key. Reusing a leaf
        * by utilizing leaf indices lower than the last unused leaf index will
@@ -115,8 +116,7 @@ class BOTAN_PUBLIC_API(2,0) XMSS_PrivateKey final : public virtual XMSS_PublicKe
          {
          if(idx >= (1ull << XMSS_PublicKey::m_xmss_params.tree_height()))
             {
-            throw Integrity_Failure("XMSS private key leaf index out of "
-                                    "bounds.");
+            throw Decoding_Error("XMSS private key leaf index out of bounds");
             }
          else
             {
@@ -140,8 +140,7 @@ class BOTAN_PUBLIC_API(2,0) XMSS_PrivateKey final : public virtual XMSS_PublicKe
                           *recover_global_leaf_index())).fetch_add(1);
          if(idx >= (1ull << XMSS_PublicKey::m_xmss_params.tree_height()))
             {
-            throw Integrity_Failure("XMSS private key, one time signatures "
-                                    "exhausted.");
+            throw Decoding_Error("XMSS private key, one time signatures exhaused");
             }
          return idx;
          }
@@ -203,13 +202,13 @@ class BOTAN_PUBLIC_API(2,0) XMSS_PrivateKey final : public virtual XMSS_PublicKe
 
       secure_vector<uint8_t> private_key_bits() const override
          {
-         return raw_private_key();
+         return DER_Encoder().encode(raw_private_key(), OCTET_STRING).get_contents();
          }
 
       size_t size() const override
          {
          return XMSS_PublicKey::size() +
-                sizeof(uint64_t) +
+                sizeof(uint32_t) +
                 2 * XMSS_PublicKey::m_xmss_params.element_size();
          }
 

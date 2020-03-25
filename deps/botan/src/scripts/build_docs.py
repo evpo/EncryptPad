@@ -40,6 +40,14 @@ def have_prog(prog):
             return True
     return False
 
+def find_rst2man():
+    possible_names = ['rst2man', 'rst2man.py']
+
+    for name in possible_names:
+        if have_prog(name):
+            return name
+    raise Exception("Was configured with rst2man but could not be located in PATH")
+
 def touch(fname):
     try:
         os.utime(fname, None)
@@ -48,7 +56,14 @@ def touch(fname):
 
 def copy_files(src_path, dest_dir):
 
+    logging.debug("Copying %s to %s", src_path, dest_dir)
+
     file_mode = os.stat(src_path).st_mode
+
+    try:
+        os.mkdir(dest_dir)
+    except OSError:
+        pass
 
     if stat.S_ISREG(file_mode):
         logging.debug("Copying file %s to %s", src_path, dest_dir)
@@ -56,36 +71,25 @@ def copy_files(src_path, dest_dir):
     else:
         for f in os.listdir(src_path):
             src_file = os.path.join(src_path, f)
-            dest_file = os.path.join(dest_dir, f)
-            logging.debug("Copying dir %s to %s", src_file, dest_file)
-            shutil.copyfile(src_file, dest_file)
+            file_mode = os.stat(src_file).st_mode
+            if stat.S_ISREG(file_mode):
+                dest_file = os.path.join(dest_dir, f)
+                shutil.copyfile(src_file, dest_file)
+            elif stat.S_ISDIR(file_mode):
+                copy_files(os.path.join(src_path, f), os.path.join(dest_dir, f))
 
 def run_and_check(cmd_line, cwd=None):
 
-    logging.debug("Executing %s", ' '.join(cmd_line))
-
-    stdout = None
-    stderr = None
+    logging.info("Starting %s", ' '.join(cmd_line))
 
     try:
-        proc = subprocess.Popen(cmd_line,
-                                stdout=subprocess.PIPE,
-                                stderr=subprocess.PIPE,
-                                cwd=cwd)
+        proc = subprocess.Popen(cmd_line, cwd=cwd)
 
-        (stdout, stderr) = proc.communicate()
+        proc.communicate()
     except OSError as e:
         logging.error("Executing %s failed (%s)", ' '.join(cmd_line), e)
 
-    if stdout:
-        logging.debug(stdout.decode())
-
-    if stderr:
-        logging.debug(stderr.decode())
-
     if proc.returncode != 0:
-        logging.info(stdout.decode())
-        logging.info(stderr.decode())
         logging.error("Error running %s", ' '.join(cmd_line))
         sys.exit(1)
 
@@ -135,10 +139,20 @@ def sphinx_supports_concurrency():
     match = re.match(r'^(?:[a-zA-Z_-]+) v?(([0-9]+)\.([0-9]+))', output)
     # default to using concurrency when uncertain
     version = StrictVersion(match.group(1)) if match else StrictVersion('1.2')
-    return version >= StrictVersion('1.2')
+    return version >= StrictVersion('1.4')
+
+def read_config(config):
+    try:
+        f = open(config)
+        cfg = json.load(f)
+        f.close()
+    except OSError:
+        raise Exception('Failed to load build config %s - is build dir correct?' % (config))
+
+    return cfg
 
 def main(args=None):
-    # pylint: disable=too-many-branches,too-many-locals
+    # pylint: disable=too-many-branches
 
     if args is None:
         args = sys.argv
@@ -151,8 +165,7 @@ def main(args=None):
     if options is None:
         return 1
 
-    with open(os.path.join(options.build_dir, 'build_config.json')) as f:
-        cfg = json.load(f)
+    cfg = read_config(os.path.join(options.build_dir, 'build_config.json'))
 
     with_docs = bool(cfg['with_documentation'])
     with_sphinx = bool(cfg['with_sphinx'])
@@ -162,8 +175,8 @@ def main(args=None):
 
     doc_stamp_file = cfg['doc_stamp_file']
 
-    manual_src = os.path.join(cfg['doc_dir'], 'manual')
-    manual_output = os.path.join(cfg['doc_output_dir'], 'manual')
+    handbook_src = cfg['doc_dir']
+    handbook_output = cfg['handbook_output_dir']
 
     if with_docs is False:
         logging.debug('Documentation build disabled')
@@ -175,30 +188,20 @@ def main(args=None):
         cmds.append(['doxygen', os.path.join(cfg['build_dir'], 'botan.doxy')])
 
     if with_sphinx:
-        sphinx_build = ['sphinx-build',
-                        '-c', cfg['sphinx_config_dir']]
+        sphinx_build = ['sphinx-build', '-q', '-c', cfg['sphinx_config_dir']]
         if sphinx_supports_concurrency():
             sphinx_build += ['-j', str(get_concurrency())]
 
-        cmds.append(sphinx_build + ['-b', 'html', manual_src, manual_output])
+        cmds.append(sphinx_build + ['-b', 'html', handbook_src, handbook_output])
 
         if with_pdf:
             latex_output = tempfile.mkdtemp(prefix='botan_latex_')
-            cmds.append(sphinx_build + ['-b', 'latex', manual_src, latex_output])
+            cmds.append(sphinx_build + ['-b', 'latex', handbook_src, latex_output])
             cmds.append(['make', '-C', latex_output])
-            cmds.append(['cp', os.path.join(latex_output, 'botan.pdf'), manual_output])
+            cmds.append(['cp', os.path.join(latex_output, 'botan.pdf'), handbook_output])
     else:
         # otherwise just copy it
-        cmds.append(['cp', manual_src, manual_output])
-
-    def find_rst2man():
-        possible_names = ['rst2man', 'rst2man.py']
-
-        for name in possible_names:
-            if have_prog(name):
-                return name
-
-        raise Exception("Was configured with rst2man but could not be located in PATH")
+        cmds.append(['cp', handbook_src, handbook_output])
 
     if with_rst2man:
         cmds.append([find_rst2man(),

@@ -57,7 +57,7 @@ Certificate_Req::Certificate_Req(Handshake_IO& io,
                                  const std::vector<X509_DN>& ca_certs,
                                  Protocol_Version version) :
    m_names(ca_certs),
-   m_cert_key_types({ "RSA", "DSA", "ECDSA" })
+   m_cert_key_types({ "RSA", "ECDSA", "DSA" })
    {
    if(version.supports_negotiable_signature_algorithms())
       {
@@ -87,7 +87,7 @@ Certificate_Req::Certificate_Req(const std::vector<uint8_t>& buf,
       if(cert_type_name.empty()) // something we don't know
          continue;
 
-      m_cert_key_types.push_back(cert_type_name);
+      m_cert_key_types.emplace_back(cert_type_name);
       }
 
    if(version.supports_negotiable_signature_algorithms())
@@ -115,7 +115,7 @@ Certificate_Req::Certificate_Req(const std::vector<uint8_t>& buf,
       BER_Decoder decoder(name_bits.data(), name_bits.size());
       X509_DN name;
       decoder.decode(name);
-      m_names.push_back(name);
+      m_names.emplace_back(name);
       }
    }
 
@@ -134,7 +134,7 @@ std::vector<uint8_t> Certificate_Req::serialize() const
    append_tls_length_value(buf, cert_types, 1);
 
    if(m_schemes.size() > 0)
-      buf += Signature_Algorithms(m_schemes).serialize();
+      buf += Signature_Algorithms(m_schemes).serialize(Connection_Side::SERVER);
 
    std::vector<uint8_t> encoded_names;
 

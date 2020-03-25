@@ -9,16 +9,16 @@
 #include "tests.h"
 
 #if defined(BOTAN_HAS_ECC_GROUP)
-   #include <botan/bigint.h>
-   #include <botan/numthry.h>
-   #include <botan/curve_nistp.h>
-   #include <botan/pk_keys.h>
-   #include <botan/point_gfp.h>
-   #include <botan/ec_group.h>
-   #include <botan/reducer.h>
-   #include <botan/hex.h>
-   #include <botan/data_src.h>
-   #include <botan/x509_key.h>
+  #include <botan/bigint.h>
+  #include <botan/numthry.h>
+  #include <botan/curve_nistp.h>
+  #include <botan/pk_keys.h>
+  #include <botan/point_gfp.h>
+  #include <botan/ec_group.h>
+  #include <botan/reducer.h>
+  #include <botan/hex.h>
+  #include <botan/data_src.h>
+  #include <botan/x509_key.h>
 #endif
 
 namespace Botan_Tests {
@@ -36,23 +36,23 @@ Botan::BigInt test_integer(Botan::RandomNumberGenerator& rng, size_t bits, BigIn
    Botan::BigInt x = 0;
 
    auto flip_prob = [](size_t i) -> double
-      {
-      if(i % 64 == 0)
-         {
-         return .5;
-         }
-      if(i % 32 == 0)
-         {
-         return .4;
-         }
-      if(i % 8 == 0)
-         {
-         return .05;
-         }
-      return .01;
-      };
+                       {
+                       if(i % 64 == 0)
+                          {
+                          return .5;
+                          }
+                       if(i % 32 == 0)
+                          {
+                          return .4;
+                          }
+                       if(i % 8 == 0)
+                          {
+                          return .05;
+                          }
+                       return .01;
+                       };
 
-   bool active = rng.next_byte() % 2;
+   bool active = (rng.next_byte() > 128) ? true : false;
    for(size_t i = 0; i != bits; ++i)
       {
       x <<= 1;
@@ -119,7 +119,7 @@ std::vector<Test::Result> ECC_Randomized_Tests::run()
 
       Botan::EC_Group group(group_name);
 
-      const Botan::PointGFp& pt = create_random_point(Test::rng(), group);
+      const Botan::PointGFp pt = create_random_point(Test::rng(), group);
       const Botan::BigInt& group_order = group.get_order();
 
       std::vector<Botan::BigInt> blind_ws;
@@ -185,49 +185,38 @@ class NIST_Curve_Reduction_Tests final : public Test
    {
    public:
       typedef std::function<void (Botan::BigInt&, Botan::secure_vector<Botan::word>&)> reducer_fn;
+
       std::vector<Test::Result> run() override
          {
          std::vector<Test::Result> results;
 
          // Using lambdas here to avoid strange UbSan warning (#1370)
 
-#if defined(BOTAN_HAS_NIST_PRIME_REDUCERS_W32)
-         results.push_back(random_redc_test(
-	    "P-384",
-	    Botan::prime_p384(),
-	    [](Botan::BigInt& p, Botan::secure_vector<Botan::word>& ws) -> void
-	        {
-		Botan::redc_p384(p, ws);
-		}));
-         results.push_back(random_redc_test(
-	    "P-256",
-	    Botan::prime_p256(),
-	    [](Botan::BigInt& p, Botan::secure_vector<Botan::word>& ws) -> void
-	        {
-		Botan::redc_p256(p, ws);
-		}));
-         results.push_back(random_redc_test(
-	    "P-224",
-	    Botan::prime_p224(),
-	    [](Botan::BigInt& p, Botan::secure_vector<Botan::word>& ws) -> void
-	        {
-		Botan::redc_p224(p, ws);
-		}));
-         results.push_back(random_redc_test(
-	    "P-192",
-	    Botan::prime_p192(),
-	    [](Botan::BigInt& p, Botan::secure_vector<Botan::word>& ws) -> void
-	        {
-		Botan::redc_p192(p, ws);
-		}));
-#endif
-         results.push_back(random_redc_test(
-	    "P-521",
-	    Botan::prime_p521(),
-	    [](Botan::BigInt& p, Botan::secure_vector<Botan::word>& ws) -> void
-	        {
-	        Botan::redc_p521(p, ws);
-	        }));
+         results.push_back(random_redc_test("P-384", Botan::prime_p384(),
+                              [](Botan::BigInt& p, Botan::secure_vector<Botan::word>& ws) -> void
+                                 {
+                                 Botan::redc_p384(p, ws);
+                                 }));
+         results.push_back(random_redc_test("P-256", Botan::prime_p256(),
+                              [](Botan::BigInt& p, Botan::secure_vector<Botan::word>& ws) -> void
+                                 {
+                                 Botan::redc_p256(p, ws);
+                                 }));
+         results.push_back(random_redc_test("P-224", Botan::prime_p224(),
+                              [](Botan::BigInt& p, Botan::secure_vector<Botan::word>& ws) -> void
+                                 {
+                                 Botan::redc_p224(p, ws);
+                                 }));
+         results.push_back(random_redc_test("P-192", Botan::prime_p192(),
+                              [](Botan::BigInt& p, Botan::secure_vector<Botan::word>& ws) -> void
+                                 {
+                                 Botan::redc_p192(p, ws);
+                                 }));
+         results.push_back(random_redc_test("P-521", Botan::prime_p521(),
+                              [](Botan::BigInt& p, Botan::secure_vector<Botan::word>& ws) -> void
+                                 {
+                                 Botan::redc_p521(p, ws);
+                                 }));
 
          return results;
          }
@@ -259,7 +248,7 @@ class NIST_Curve_Reduction_Tests final : public Test
             redc_fn(v3, ws);
 
             if(!result.test_eq("reference redc", v1, v2) ||
-                  !result.test_eq("specialized redc", v2, v3))
+               !result.test_eq("specialized redc", v2, v3))
                {
                result.test_note("failing input" + Botan::hex_encode(Botan::BigInt::encode(x)));
                }
@@ -284,13 +273,23 @@ class EC_Group_Tests : public Test
             {
             Test::Result result("EC_Group " + group_name);
 
-            const Botan::EC_Group group(group_name);
+            const Botan::OID oid = Botan::OID::from_string(group_name);
+
+            const Botan::EC_Group group(oid);
 
             result.confirm("EC_Group is known", !group.get_curve_oid().empty());
             result.confirm("EC_Group is considered valid", group.verify_group(Test::rng(), true));
 
             result.test_eq("EC_Group has correct bit size", group.get_p().bits(), group.get_p_bits());
             result.test_eq("EC_Group has byte size", group.get_p().bytes(), group.get_p_bytes());
+
+            result.confirm("Same group is same", group == Botan::EC_Group(group_name));
+
+            const Botan::EC_Group copy(group.get_p(), group.get_a(), group.get_b(),
+                                       group.get_g_x(), group.get_g_y(),
+                                       group.get_order(), group.get_cofactor());
+
+            result.confirm("Same group is same even with copy", group == copy);
 
             const auto pt_mult_by_order = group.get_base_point() * group.get_order();
             result.confirm("Multiplying point by the order results in zero point", pt_mult_by_order.is_zero());
@@ -341,8 +340,8 @@ class EC_Group_Tests : public Test
          const Botan::PointGFp zero = group.zero_point();
 
          for(auto scheme : { Botan::PointGFp::UNCOMPRESSED,
-                             Botan::PointGFp::COMPRESSED,
-                             Botan::PointGFp::HYBRID })
+                  Botan::PointGFp::COMPRESSED,
+                  Botan::PointGFp::HYBRID })
             {
             result.test_eq("encoded/decode rt works", group.OS2ECP(pt.encode(scheme)), pt);
             result.test_eq("encoded/decode rt works", group.OS2ECP(zero.encode(scheme)), zero);
@@ -361,6 +360,10 @@ class EC_Group_Tests : public Test
          p1 -= G * 2;
 
          result.test_eq("point subtraction", p1, G);
+
+         // The scalar multiplication algorithm relies on this being true:
+         Botan::PointGFp zero_coords = group.point(0, 0);
+         result.confirm("point (0,0) is not on the curve", !zero_coords.on_the_curve());
          }
 
       void test_point_swap(Test::Result& result, const Botan::EC_Group& group)
@@ -379,7 +382,13 @@ class EC_Group_Tests : public Test
 
       void test_zeropoint(Test::Result& result, const Botan::EC_Group& group)
          {
-         const Botan::PointGFp zero = group.zero_point();
+         Botan::PointGFp zero = group.zero_point();
+
+         result.test_throws("Zero point throws", "Cannot convert zero point to affine",
+                            [&]() { zero.get_affine_x(); });
+         result.test_throws("Zero point throws", "Cannot convert zero point to affine",
+                            [&]() { zero.get_affine_y(); });
+
          const Botan::PointGFp p1 = group.get_base_point() * 2;
 
          result.confirm("point is on the curve", p1.on_the_curve());
@@ -407,8 +416,8 @@ class EC_Group_Tests : public Test
          result.confirm("zero times anything is the zero point", (zero * 39193).is_zero());
 
          for(auto scheme : { Botan::PointGFp::UNCOMPRESSED,
-                             Botan::PointGFp::COMPRESSED,
-                             Botan::PointGFp::HYBRID })
+                  Botan::PointGFp::COMPRESSED,
+                  Botan::PointGFp::HYBRID })
             {
             const std::vector<uint8_t> v = zero.encode(scheme);
             result.test_eq("encoded/decode rt works", group.OS2ECP(v), zero);
@@ -558,10 +567,7 @@ Test::Result test_basic_operations()
    result.test_eq("point addition", simplePlus, exp_simplePlus);
 
    const Botan::PointGFp simpleMinus = p1 - p0;
-   const Botan::PointGFp exp_simpleMinus=  secp160r1.point(Botan::BigInt("425826231723888350446541592701409065913635568770"),
-                                                           Botan::BigInt("203520114162904107873991457957346892027982641970"));
-
-   result.test_eq("point subtraction", simpleMinus, exp_simpleMinus);
+   result.test_eq("point subtraction", simpleMinus, p_G);
 
    const Botan::PointGFp simpleMult = p1 * 123456789;
 
@@ -579,12 +585,9 @@ Test::Result test_enc_dec_compressed_160()
 
    // Test for compressed conversion (02/03) 160bit
    Botan::EC_Group secp160r1("secp160r1");
-
    const std::vector<uint8_t> G_comp = Botan::hex_decode("024A96B5688EF573284664698968C38BB913CBFC82");
-
    const Botan::PointGFp p = secp160r1.OS2ECP(G_comp);
-
-   std::vector<uint8_t> sv_result = p.encode(Botan::PointGFp::COMPRESSED);
+   const std::vector<uint8_t> sv_result = p.encode(Botan::PointGFp::COMPRESSED);
 
    result.test_eq("result", sv_result, G_comp);
    return result;

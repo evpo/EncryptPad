@@ -18,7 +18,7 @@ namespace Botan {
 OctetString::OctetString(RandomNumberGenerator& rng,
                          size_t len)
    {
-   m_data = rng.random_vec(len);
+   rng.random_vec(m_data, len);
    }
 
 /*
@@ -26,8 +26,11 @@ OctetString::OctetString(RandomNumberGenerator& rng,
 */
 OctetString::OctetString(const std::string& hex_string)
    {
-   m_data.resize(1 + hex_string.length() / 2);
-   m_data.resize(hex_decode(m_data.data(), hex_string));
+   if(!hex_string.empty())
+      {
+      m_data.resize(1 + hex_string.length() / 2);
+      m_data.resize(hex_decode(m_data.data(), hex_string));
+      }
    }
 
 /*
@@ -74,7 +77,7 @@ void OctetString::set_odd_parity()
 /*
 * Hex encode an OctetString
 */
-std::string OctetString::as_string() const
+std::string OctetString::to_string() const
    {
    return hex_encode(m_data.data(), m_data.size());
    }

@@ -10,6 +10,7 @@
 #include <cstdint>
 #include <memory>
 #include <stdexcept>
+#include <functional>
 #include <botan/exceptn.h>
 #include <botan/mem_ops.h>
 
@@ -18,7 +19,17 @@ namespace Botan_FFI {
 class BOTAN_UNSTABLE_API FFI_Error final : public Botan::Exception
    {
    public:
-      explicit FFI_Error(const std::string& what) : Exception("FFI error", what) {}
+      FFI_Error(const std::string& what, int err_code) :
+         Exception("FFI error", what),
+         m_err_code(err_code)
+         {}
+
+      int error_code() const noexcept override { return m_err_code; }
+
+      Botan::ErrorType error_type() const noexcept override { return Botan::ErrorType::InvalidArgument; }
+
+   private:
+      int m_err_code;
    };
 
 template<typename T, uint32_t MAGIC>
@@ -43,45 +54,24 @@ struct botan_struct
    struct NAME final : public Botan_FFI::botan_struct<TYPE, MAGIC> { explicit NAME(TYPE* x) : botan_struct(x) {} }
 
 // Declared in ffi.cpp
-int ffi_error_exception_thrown(const char* func_name, const char* exn);
+int ffi_error_exception_thrown(const char* func_name, const char* exn,
+                               int rc = BOTAN_FFI_ERROR_EXCEPTION_THROWN);
 
 template<typename T, uint32_t M>
 T& safe_get(botan_struct<T,M>* p)
    {
    if(!p)
-      throw FFI_Error("Null pointer argument");
+      throw FFI_Error("Null pointer argument", BOTAN_FFI_ERROR_NULL_POINTER);
    if(p->magic_ok() == false)
-      throw FFI_Error("Bad magic in ffi object");
+      throw FFI_Error("Bad magic in ffi object", BOTAN_FFI_ERROR_INVALID_OBJECT);
 
-   T* t = p->unsafe_get();
-   if(t)
+   if(T* t = p->unsafe_get())
       return *t;
-   else
-      throw FFI_Error("Invalid object pointer");
+
+   throw FFI_Error("Invalid object pointer", BOTAN_FFI_ERROR_INVALID_OBJECT);
    }
 
-template<typename Thunk>
-int ffi_guard_thunk(const char* func_name, Thunk thunk)
-   {
-   try
-      {
-      return thunk();
-      }
-   catch(std::bad_alloc&)
-      {
-      return ffi_error_exception_thrown(func_name, "bad_alloc");
-      }
-   catch(std::exception& e)
-      {
-      return ffi_error_exception_thrown(func_name, e.what());
-      }
-   catch(...)
-      {
-      return ffi_error_exception_thrown(func_name, "unknown exception");
-      }
-
-   return BOTAN_FFI_ERROR_UNKNOWN_ERROR;
-   }
+int ffi_guard_thunk(const char* func_name, std::function<int ()>);
 
 template<typename T, uint32_t M, typename F>
 int apply_fn(botan_struct<T, M>* o, const char* func_name, F func)
@@ -92,12 +82,25 @@ int apply_fn(botan_struct<T, M>* o, const char* func_name, F func)
    if(o->magic_ok() == false)
       return BOTAN_FFI_ERROR_INVALID_OBJECT;
 
-   return ffi_guard_thunk(func_name, [&]() { return func(*o->unsafe_get()); });
+   T* p = o->unsafe_get();
+   if(p == nullptr)
+      return BOTAN_FFI_ERROR_INVALID_OBJECT;
+
+   return ffi_guard_thunk(func_name, [&]() { return func(*p); });
    }
 
-#define BOTAN_FFI_DO(T, obj, param, block)                              \
-   apply_fn(obj, BOTAN_CURRENT_FUNCTION,                                \
+#define BOTAN_FFI_DO(T, obj, param, block)                \
+   apply_fn(obj, __func__,                                \
             [=](T& param) -> int { do { block } while(0); return BOTAN_FFI_SUCCESS; })
+
+/*
+* Like BOTAN_FFI_DO but with no trailing return with the expectation
+* that the block always returns a value. This exists because otherwise
+* MSVC warns about the dead return after the block in FFI_DO.
+*/
+#define BOTAN_FFI_RETURNING(T, obj, param, block)         \
+   apply_fn(obj, __func__,                                \
+            [=](T& param) -> int { do { block } while(0); })
 
 template<typename T, uint32_t M>
 int ffi_delete_object(botan_struct<T, M>* obj, const char* func_name)
@@ -123,21 +126,27 @@ int ffi_delete_object(botan_struct<T, M>* obj, const char* func_name)
       }
    }
 
-#define BOTAN_FFI_CHECKED_DELETE(o) ffi_delete_object(o, BOTAN_CURRENT_FUNCTION)
+#define BOTAN_FFI_CHECKED_DELETE(o) ffi_delete_object(o, __func__)
 
 inline int write_output(uint8_t out[], size_t* out_len, const uint8_t buf[], size_t buf_len)
    {
+   if(out_len == nullptr)
+      return BOTAN_FFI_ERROR_NULL_POINTER;
+
    const size_t avail = *out_len;
    *out_len = buf_len;
 
-   if(avail >= buf_len)
+   if((avail >= buf_len) && (out != nullptr))
       {
       Botan::copy_mem(out, buf, buf_len);
       return BOTAN_FFI_SUCCESS;
       }
    else
       {
-      Botan::clear_mem(out, avail);
+      if(out != nullptr)
+         {
+         Botan::clear_mem(out, avail);
+         }
       return BOTAN_FFI_ERROR_INSUFFICIENT_BUFFER_SPACE;
       }
    }

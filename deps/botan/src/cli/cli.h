@@ -28,7 +28,7 @@ class Argument_Parser;
 
 /* Declared in cli_rng.cpp */
 std::unique_ptr<Botan::RandomNumberGenerator>
-cli_make_rng(const std::string& type, const std::string& hex_drbg_seed);
+cli_make_rng(const std::string& type = "", const std::string& hex_drbg_seed = "");
 
 class Command
    {
@@ -118,9 +118,27 @@ class Command
          return flag_set("verbose");
          }
 
+      std::string get_passphrase(const std::string& prompt);
+
       bool flag_set(const std::string& flag_name) const;
 
+      static std::string format_blob(const std::string& format, const uint8_t bits[], size_t len);
+
+      template<typename Alloc>
+      static std::string format_blob(const std::string& format,
+                                     const std::vector<uint8_t, Alloc>& vec)
+         {
+         return format_blob(format, vec.data(), vec.size());
+         }
+
       std::string get_arg(const std::string& opt_name) const;
+
+      /**
+      * Like get_arg but if the value is '-' then reads a passphrase from
+      * the terminal with echo suppressed.
+      */
+      std::string get_passphrase_arg(const std::string& prompt,
+                                     const std::string& opt_name);
 
       /*
       * Like get_arg() but if the argument was not specified or is empty, returns otherwise
@@ -128,6 +146,10 @@ class Command
       std::string get_arg_or(const std::string& opt_name, const std::string& otherwise) const;
 
       size_t get_arg_sz(const std::string& opt_name) const;
+
+      uint16_t get_arg_u16(const std::string& opt_name) const;
+
+      uint32_t get_arg_u32(const std::string& opt_name) const;
 
       std::vector<std::string> get_arg_list(const std::string& what) const;
 

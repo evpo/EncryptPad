@@ -116,14 +116,14 @@ PKIX::check_chain(const std::vector<std::shared_ptr<const X509_Certificate>>& ce
 
       std::unique_ptr<Public_Key> issuer_key(issuer->subject_public_key());
 
-      // Check the signature algorithm
-      if(OIDS::lookup(subject->signature_algorithm().oid).empty())
+      // Check the signature algorithm is known
+      if(OIDS::oid2str_or_empty(subject->signature_algorithm().get_oid()).empty())
          {
          status.insert(Certificate_Status_Code::SIGNATURE_ALGO_UNKNOWN);
          }
-      // only perform the following checks if the signature algorithm is known
       else
          {
+         // only perform the following checks if the signature algorithm is known
          if(!issuer_key)
             {
             status.insert(Certificate_Status_Code::CERT_PUBKEY_INVALID);
@@ -204,7 +204,8 @@ CertificatePathStatusCodes
 PKIX::check_ocsp(const std::vector<std::shared_ptr<const X509_Certificate>>& cert_path,
                  const std::vector<std::shared_ptr<const OCSP::Response>>& ocsp_responses,
                  const std::vector<Certificate_Store*>& trusted_certstores,
-                 std::chrono::system_clock::time_point ref_time)
+                 std::chrono::system_clock::time_point ref_time,
+                 std::chrono::seconds max_ocsp_age)
    {
    if(cert_path.empty())
       throw Invalid_Argument("PKIX::check_ocsp cert_path empty");
@@ -218,7 +219,8 @@ PKIX::check_ocsp(const std::vector<std::shared_ptr<const X509_Certificate>>& cer
       std::shared_ptr<const X509_Certificate> subject = cert_path.at(i);
       std::shared_ptr<const X509_Certificate> ca = cert_path.at(i+1);
 
-      if(i < ocsp_responses.size() && (ocsp_responses.at(i) != nullptr))
+      if(i < ocsp_responses.size() && (ocsp_responses.at(i) != nullptr)
+            && (ocsp_responses.at(i)->status() == OCSP::Response_Status_Code::Successful))
          {
          try
             {
@@ -227,7 +229,7 @@ PKIX::check_ocsp(const std::vector<std::shared_ptr<const X509_Certificate>>& cer
             if(ocsp_signature_status == Certificate_Status_Code::OCSP_SIGNATURE_OK)
                {
                // Signature ok, so check the claimed status
-               Certificate_Status_Code ocsp_status = ocsp_responses.at(i)->status_for(*ca, *subject, ref_time);
+               Certificate_Status_Code ocsp_status = ocsp_responses.at(i)->status_for(*ca, *subject, ref_time, max_ocsp_age);
                status.insert(ocsp_status);
                }
             else
@@ -297,8 +299,11 @@ PKIX::check_crl(const std::vector<std::shared_ptr<const X509_Certificate>>& cert
 
          for(const auto& extension : crls[i]->extensions().extensions())
             {
+            // XXX this is wrong - the OID might be defined but the extention not full parsed
+            // for example see #1652
+
             // is the extension critical and unknown?
-            if(extension.second && OIDS::lookup(extension.first->oid_of()) == "")
+            if(extension.second && OIDS::oid2str_or_empty(extension.first->oid_of()) == "")
                {
                /* NIST Certificate Path Valiadation Testing document: "When an implementation does not recognize a critical extension in the
                 * crlExtensions field, it shall assume that identified certificates have been revoked and are no longer valid"
@@ -350,7 +355,8 @@ PKIX::check_ocsp_online(const std::vector<std::shared_ptr<const X509_Certificate
                         const std::vector<Certificate_Store*>& trusted_certstores,
                         std::chrono::system_clock::time_point ref_time,
                         std::chrono::milliseconds timeout,
-                        bool ocsp_check_intermediate_CAs)
+                        bool ocsp_check_intermediate_CAs,
+                        std::chrono::seconds max_ocsp_age)
    {
    if(cert_path.empty())
       throw Invalid_Argument("PKIX::check_ocsp_online cert_path empty");
@@ -372,7 +378,7 @@ PKIX::check_ocsp_online(const std::vector<std::shared_ptr<const X509_Certificate
       if(subject->ocsp_responder() == "")
          {
          ocsp_response_futures.emplace_back(std::async(std::launch::deferred, [&]() -> std::shared_ptr<const OCSP::Response> {
-                  return std::make_shared<const OCSP::Response>(Certificate_Status_Code::OSCP_NO_REVOCATION_URL);
+                  return std::make_shared<const OCSP::Response>(Certificate_Status_Code::OCSP_NO_REVOCATION_URL);
                   }));
          }
       else
@@ -389,12 +395,12 @@ PKIX::check_ocsp_online(const std::vector<std::shared_ptr<const X509_Certificate
                                                 /*redirects*/1,
                                                 timeout);
                   }
-               catch(std::exception& e)
+               catch(std::exception&)
                   {
                   // log e.what() ?
                   }
                if (http.status_code() != 200)
-                  return std::make_shared<const OCSP::Response>(Certificate_Status_Code::OSCP_SERVER_NOT_AVAILABLE);
+                  return std::make_shared<const OCSP::Response>(Certificate_Status_Code::OCSP_SERVER_NOT_AVAILABLE);
                // Check the MIME type?
 
                return std::make_shared<const OCSP::Response>(http.body());
@@ -409,7 +415,7 @@ PKIX::check_ocsp_online(const std::vector<std::shared_ptr<const X509_Certificate
       ocsp_responses.push_back(ocsp_response_futures[i].get());
       }
 
-   return PKIX::check_ocsp(cert_path, ocsp_responses, trusted_certstores, ref_time);
+   return PKIX::check_ocsp(cert_path, ocsp_responses, trusted_certstores, ref_time, max_ocsp_age);
    }
 
 CertificatePathStatusCodes
@@ -452,7 +458,7 @@ PKIX::check_crl_online(const std::vector<std::shared_ptr<const X509_Certificate>
          {
          // Avoid creating a thread for this case
          future_crls.emplace_back(std::async(std::launch::deferred, [&]() -> std::shared_ptr<const X509_CRL> {
-               throw Exception("No CRL distribution point for this certificate");
+               throw Not_Implemented("No CRL distribution point for this certificate");
                }));
          }
       else
@@ -476,7 +482,7 @@ PKIX::check_crl_online(const std::vector<std::shared_ptr<const X509_Certificate>
             {
             crls[i] = future_crls[i].get();
             }
-         catch(std::exception& e)
+         catch(std::exception&)
             {
             // crls[i] left null
             // todo: log exception e.what() ?
@@ -741,7 +747,7 @@ PKIX::build_all_certificate_paths(std::vector<std::vector<std::shared_ptr<const 
    if(cert_paths_out.empty())
       {
       if(stats.empty())
-         throw Exception("X509 path building failed for unknown reasons");
+         throw Internal_Error("X509 path building failed for unknown reasons");
       else
          // arbitrarily return the first error
          return stats[0];
@@ -783,8 +789,8 @@ void PKIX::merge_revocation_status(CertificatePathStatusCodes& chain_status,
          for(auto&& code : ocsp[i])
             {
             if(code == Certificate_Status_Code::OCSP_RESPONSE_GOOD ||
-               code == Certificate_Status_Code::OSCP_NO_REVOCATION_URL ||  // softfail
-               code == Certificate_Status_Code::OSCP_SERVER_NOT_AVAILABLE) // softfail
+               code == Certificate_Status_Code::OCSP_NO_REVOCATION_URL ||  // softfail
+               code == Certificate_Status_Code::OCSP_SERVER_NOT_AVAILABLE) // softfail
                {
                had_ocsp = true;
                }
@@ -875,7 +881,7 @@ Path_Validation_Result x509_path_validate(
 
       if(ocsp_resp.size() > 0)
          {
-         ocsp_status = PKIX::check_ocsp(cert_path, ocsp_resp, trusted_roots, ref_time);
+         ocsp_status = PKIX::check_ocsp(cert_path, ocsp_resp, trusted_roots, ref_time, restrictions.max_ocsp_age());
          }
 
       if(ocsp_status.empty() && ocsp_timeout != std::chrono::milliseconds(0))
@@ -957,14 +963,16 @@ Path_Validation_Result x509_path_validate(
    }
 
 Path_Validation_Restrictions::Path_Validation_Restrictions(bool require_rev,
-                                                           size_t key_strength,
-                                                           bool ocsp_intermediates) :
+      size_t key_strength,
+      bool ocsp_intermediates,
+      std::chrono::seconds max_ocsp_age) :
    m_require_revocation_information(require_rev),
    m_ocsp_all_intermediates(ocsp_intermediates),
-   m_minimum_key_strength(key_strength)
+   m_minimum_key_strength(key_strength),
+   m_max_ocsp_age(max_ocsp_age)
    {
    if(key_strength <= 80)
-      m_trusted_hashes.insert("SHA-160");
+      { m_trusted_hashes.insert("SHA-160"); }
 
    m_trusted_hashes.insert("SHA-224");
    m_trusted_hashes.insert("SHA-256");
@@ -1005,9 +1013,9 @@ Path_Validation_Result::Path_Validation_Result(CertificatePathStatusCodes status
 const X509_Certificate& Path_Validation_Result::trust_root() const
    {
    if(m_cert_path.empty())
-      throw Exception("Path_Validation_Result::trust_root no path set");
+      throw Invalid_State("Path_Validation_Result::trust_root no path set");
    if(result() != Certificate_Status_Code::VERIFIED)
-      throw Exception("Path_Validation_Result::trust_root meaningless with invalid status");
+      throw Invalid_State("Path_Validation_Result::trust_root meaningless with invalid status");
 
    return *m_cert_path[m_cert_path.size()-1];
    }
@@ -1029,7 +1037,7 @@ bool Path_Validation_Result::successful_validation() const
 
 bool Path_Validation_Result::no_warnings() const
    {
-   for(auto status_set_i : m_warnings) 
+   for(auto status_set_i : m_warnings)
       if(!status_set_i.empty())
          return false;
    return true;

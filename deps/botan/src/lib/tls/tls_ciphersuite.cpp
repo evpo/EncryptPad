@@ -37,6 +37,30 @@ size_t Ciphersuite::nonce_bytes_from_handshake() const
    throw Invalid_State("In Ciphersuite::nonce_bytes_from_handshake invalid enum value");
    }
 
+size_t Ciphersuite::nonce_bytes_from_record(Protocol_Version version) const
+   {
+   switch(m_nonce_format)
+      {
+      case Nonce_Format::CBC_MODE:
+         {
+         if(version.supports_explicit_cbc_ivs())
+            {
+            return cipher_algo() == "3DES" ? 8 : 16;
+            }
+         else
+            {
+            return 0;
+            }
+         }
+      case Nonce_Format::AEAD_IMPLICIT_4:
+         return 8;
+      case Nonce_Format::AEAD_XOR_12:
+         return 0;
+      }
+
+   throw Invalid_State("In Ciphersuite::nonce_bytes_from_handshake invalid enum value");
+   }
+
 bool Ciphersuite::is_scsv(uint16_t suite)
    {
    // TODO: derive from IANA file in script
@@ -55,6 +79,18 @@ bool Ciphersuite::ecc_ciphersuite() const
    return kex_method() == Kex_Algo::ECDH ||
           kex_method() == Kex_Algo::ECDHE_PSK ||
           auth_method() == Auth_Method::ECDSA;
+   }
+
+bool Ciphersuite::usable_in_version(Protocol_Version version) const
+   {
+   if(!version.supports_aead_modes())
+      {
+      // Old versions do not support AEAD, or any MAC but SHA-1
+      if(mac_algo() != "SHA-1")
+         return false;
+      }
+
+   return true;
    }
 
 bool Ciphersuite::cbc_ciphersuite() const
@@ -76,6 +112,19 @@ Ciphersuite Ciphersuite::by_id(uint16_t suite)
    if(s != all_suites.end() && s->ciphersuite_code() == suite)
       {
       return *s;
+      }
+
+   return Ciphersuite(); // some unknown ciphersuite
+   }
+
+Ciphersuite Ciphersuite::from_name(const std::string& name)
+   {
+   const std::vector<Ciphersuite>& all_suites = all_known_ciphersuites();
+
+   for(auto suite : all_suites)
+      {
+      if(suite.to_string() == name)
+         return suite;
       }
 
    return Ciphersuite(); // some unknown ciphersuite

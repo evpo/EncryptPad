@@ -18,7 +18,12 @@
   PPC64
 
 #elif defined(__powerpc__) || defined(__ppc__) || defined(_ARCH_PPC)
-  PPC32
+
+  #if defined(__SPE__)
+     POWERPCSPE
+  #else
+     PPC32
+  #endif
 
 #elif defined(__mips__) || defined(__mips)
 
@@ -56,6 +61,14 @@
 
 #elif defined(__s390__)
   S390
+
+#elif defined(__riscv)
+
+  #if defined(__LP64__)
+     RISCV64
+  #else
+     RISCV32
+  #endif
 
 #else
   UNKNOWN

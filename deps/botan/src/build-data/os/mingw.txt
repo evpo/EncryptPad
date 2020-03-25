@@ -3,11 +3,17 @@ program_suffix .exe
 obj_suffix o
 static_suffix a
 
-
 install_root /mingw
 header_dir include
 lib_dir lib
 doc_dir share/doc
+
+# see https://sourceforge.net/p/mingw-w64/bugs/755/
+use_stack_protector no
+
+<feature_macros>
+_WIN32_WINNT=0x0600
+</feature_macros>
 
 <aliases>
 msys
@@ -20,5 +26,6 @@ rtlgenrandom
 virtual_lock
 
 threads
+thread_local
 filesystem
 </target_features>

@@ -18,6 +18,7 @@
 
 #include <botan/aria.h>
 #include <botan/loadstor.h>
+#include <botan/rotate.h>
 #include <botan/cpuid.h>
 
 namespace Botan {
@@ -26,7 +27,7 @@ namespace {
 
 namespace ARIA_F {
 
-BOTAN_ALIGNAS(16)
+alignas(16)
 const uint32_t S1[256]={
    0x00636363,0x007c7c7c,0x00777777,0x007b7b7b,0x00f2f2f2,0x006b6b6b,0x006f6f6f,0x00c5c5c5,
    0x00303030,0x00010101,0x00676767,0x002b2b2b,0x00fefefe,0x00d7d7d7,0x00ababab,0x00767676,
@@ -62,7 +63,7 @@ const uint32_t S1[256]={
    0x00414141,0x00999999,0x002d2d2d,0x000f0f0f,0x00b0b0b0,0x00545454,0x00bbbbbb,0x00161616
 };
 
-BOTAN_ALIGNAS(16)
+alignas(16)
 const uint32_t S2[256]={
    0xe200e2e2,0x4e004e4e,0x54005454,0xfc00fcfc,0x94009494,0xc200c2c2,0x4a004a4a,0xcc00cccc,
    0x62006262,0x0d000d0d,0x6a006a6a,0x46004646,0x3c003c3c,0x4d004d4d,0x8b008b8b,0xd100d1d1,
@@ -98,7 +99,7 @@ const uint32_t S2[256]={
    0x89008989,0xde00dede,0x71007171,0x1a001a1a,0xaf00afaf,0xba00baba,0xb500b5b5,0x81008181
 };
 
-BOTAN_ALIGNAS(16)
+alignas(16)
 const uint32_t X1[256]={
    0x52520052,0x09090009,0x6a6a006a,0xd5d500d5,0x30300030,0x36360036,0xa5a500a5,0x38380038,
    0xbfbf00bf,0x40400040,0xa3a300a3,0x9e9e009e,0x81810081,0xf3f300f3,0xd7d700d7,0xfbfb00fb,
@@ -134,7 +135,7 @@ const uint32_t X1[256]={
    0xe1e100e1,0x69690069,0x14140014,0x63630063,0x55550055,0x21210021,0x0c0c000c,0x7d7d007d
 };
 
-BOTAN_ALIGNAS(16)
+alignas(16)
 const uint32_t X2[256]={
    0x30303000,0x68686800,0x99999900,0x1b1b1b00,0x87878700,0xb9b9b900,0x21212100,0x78787800,
    0x50505000,0x39393900,0xdbdbdb00,0xe1e1e100,0x72727200,0x09090900,0x62626200,0x3c3c3c00,
@@ -220,17 +221,18 @@ inline void ARIA_FE(uint32_t& T0, uint32_t& T1, uint32_t& T2, uint32_t& T3)
 void transform(const uint8_t in[], uint8_t out[], size_t blocks,
                const secure_vector<uint32_t>& KS)
    {
-   // Hit every cache line of S1 and S2
+   /*
+   * Hit every cache line of S1, S2, X1, X2
+   *
+   * The initializer of Z ensures Z == 0xFFFFFFFF for any cache line
+   * size that is a power of 2 and <= 512
+   */
    const size_t cache_line_size = CPUID::cache_line_size();
 
-   /*
-   * This initializer ensures Z == 0xFFFFFFFF for any cache line size
-   * in {32,64,128,256,512}
-   */
    volatile uint32_t Z = 0x11101010;
    for(size_t i = 0; i < 256; i += cache_line_size / sizeof(uint32_t))
       {
-      Z |= S1[i] | S2[i];
+      Z |= S1[i] | S2[i] | X1[i] | X2[i];
       }
 
    const size_t ROUNDS = (KS.size() / 4) - 1;
@@ -279,12 +281,13 @@ void transform(const uint8_t in[], uint8_t out[], size_t blocks,
    }
 
 // n-bit right shift of Y XORed to X
-template <unsigned int N>
+template<size_t N>
 inline void ARIA_ROL128(const uint32_t X[4], const uint32_t Y[4], uint32_t KS[4])
    {
    // MSVC is not generating a "rotate immediate". Constify to help it along.
-   static const unsigned int Q = 4 - (N / 32);
-   static const unsigned int R = N % 32;
+   static const size_t Q = 4 - (N / 32);
+   static const size_t R = N % 32;
+   static_assert(R > 0 && R < 32, "Rotation in range for type");
    KS[0] = (X[0]) ^ ((Y[(Q  )%4])>>R) ^ ((Y[(Q+3)%4])<<(32-R));
    KS[1] = (X[1]) ^ ((Y[(Q+1)%4])>>R) ^ ((Y[(Q  )%4])<<(32-R));
    KS[2] = (X[2]) ^ ((Y[(Q+2)%4])>>R) ^ ((Y[(Q+1)%4])<<(32-R));

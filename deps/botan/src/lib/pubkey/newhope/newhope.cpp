@@ -45,7 +45,7 @@ inline uint16_t barrett_reduce(uint16_t a)
    {
    uint32_t u = (static_cast<uint32_t>(a) * 5) >> 16;
    u *= PARAM_Q;
-   a -= u;
+   a = static_cast<uint16_t>(a - u);
    return a;
    }
 
@@ -63,7 +63,7 @@ inline void ntt(uint16_t* a, const uint16_t* omega)
    for(size_t i = 0; i < 10; i+=2)
       {
       // Even level
-      size_t distance = (1<<i);
+      size_t distance = (1ULL << i);
       for(size_t start = 0; start < distance; start++)
          {
          size_t jTwiddle = 0;
@@ -138,12 +138,12 @@ inline void poly_tobytes(uint8_t* r, const poly* p)
       t3 = m ^ ((t3^m)&c); // <Make sure that coefficients are in [0,q]
 
       r[7*i+0] =  t0 & 0xff;
-      r[7*i+1] = (t0 >> 8) | (t1 << 6);
-      r[7*i+2] = (t1 >> 2);
-      r[7*i+3] = (t1 >> 10) | (t2 << 4);
-      r[7*i+4] = (t2 >> 4);
-      r[7*i+5] = (t2 >> 12) | (t3 << 2);
-      r[7*i+6] = (t3 >> 6);
+      r[7*i+1] = static_cast<uint8_t>((t0 >> 8) | (t1 << 6));
+      r[7*i+2] = static_cast<uint8_t>((t1 >> 2));
+      r[7*i+3] = static_cast<uint8_t>((t1 >> 10) | (t2 << 4));
+      r[7*i+4] = static_cast<uint8_t>((t2 >> 4));
+      r[7*i+5] = static_cast<uint8_t>((t2 >> 12) | (t3 << 2));
+      r[7*i+6] = static_cast<uint8_t>((t3 >> 6));
       }
    }
 
@@ -163,7 +163,7 @@ inline void poly_getnoise(Botan::RandomNumberGenerator& rng, poly* r)
          }
       const uint32_t a = ((d >> 8) & 0xff) + (d & 0xff);
       const uint32_t b = (d >> 24) + ((d >> 16) & 0xff);
-      r->coeffs[i] = a + PARAM_Q - b;
+      r->coeffs[i] = static_cast<uint16_t>(a + PARAM_Q - b);
       }
    }
 
@@ -537,7 +537,10 @@ inline void encode_b(uint8_t* r, const poly* b, const poly* c)
    poly_tobytes(r, b);
    for(size_t i = 0; i < PARAM_N/4; i++)
       {
-      r[NEWHOPE_POLY_BYTES+i] = c->coeffs[4*i] | (c->coeffs[4*i+1] << 2) | (c->coeffs[4*i+2] << 4) | (c->coeffs[4*i+3] << 6);
+      r[NEWHOPE_POLY_BYTES+i] = static_cast<uint8_t>(c->coeffs[4*i] |
+                                                     (c->coeffs[4*i+1] << 2) |
+                                                     (c->coeffs[4*i+2] << 4) |
+                                                     (c->coeffs[4*i+3] << 6));
       }
    }
 

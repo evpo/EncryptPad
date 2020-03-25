@@ -12,6 +12,7 @@
 #include <botan/loadstor.h>
 #include <botan/mul128.h>
 #include <botan/internal/donna128.h>
+#include <botan/internal/ct_utils.h>
 
 namespace Botan {
 
@@ -49,34 +50,41 @@ void poly1305_blocks(secure_vector<uint64_t>& X, const uint8_t *m, size_t blocks
    const uint64_t r1 = X[1];
    const uint64_t r2 = X[2];
 
+   const uint64_t M44 = 0xFFFFFFFFFFF;
+   const uint64_t M42 = 0x3FFFFFFFFFF;
+
    uint64_t h0 = X[3+0];
    uint64_t h1 = X[3+1];
    uint64_t h2 = X[3+2];
 
-   const uint64_t s1 = r1 * (5 << 2);
-   const uint64_t s2 = r2 * (5 << 2);
+   const uint64_t s1 = r1 * 20;
+   const uint64_t s2 = r2 * 20;
 
-   while(blocks--)
+   for(size_t i = 0; i != blocks; ++i)
       {
-      /* h += m[i] */
       const uint64_t t0 = load_le<uint64_t>(m, 0);
       const uint64_t t1 = load_le<uint64_t>(m, 1);
 
-      h0 += (( t0                    ) & 0xfffffffffff);
-      h1 += (((t0 >> 44) | (t1 << 20)) & 0xfffffffffff);
-      h2 += (((t1 >> 24)             ) & 0x3ffffffffff) | hibit;
+      h0 += (( t0                    ) & M44);
+      h1 += (((t0 >> 44) | (t1 << 20)) & M44);
+      h2 += (((t1 >> 24)             ) & M42) | hibit;
 
-      /* h *= r */
-      uint128_t d0 = uint128_t(h0) * r0 + uint128_t(h1) * s2 + uint128_t(h2) * s1;
-      uint128_t d1 = uint128_t(h0) * r1 + uint128_t(h1) * r0 + uint128_t(h2) * s2;
-      uint128_t d2 = uint128_t(h0) * r2 + uint128_t(h1) * r1 + uint128_t(h2) * r0;
+      const uint128_t d0 = uint128_t(h0) * r0 + uint128_t(h1) * s2 + uint128_t(h2) * s1;
+      const uint64_t c0 = carry_shift(d0, 44);
 
-      /* (partial) h %= p */
-      uint64_t     c = carry_shift(d0, 44); h0 = d0 & 0xfffffffffff;
-      d1 += c;     c = carry_shift(d1, 44); h1 = d1 & 0xfffffffffff;
-      d2 += c;     c = carry_shift(d2, 42); h2 = d2 & 0x3ffffffffff;
-      h0 += c * 5; c = carry_shift(h0, 44); h0 = h0 & 0xfffffffffff;
-      h1 += c;
+      const uint128_t d1 = uint128_t(h0) * r1 + uint128_t(h1) * r0 + uint128_t(h2) * s2 + c0;
+      const uint64_t c1 = carry_shift(d1, 44);
+
+      const uint128_t d2 = uint128_t(h0) * r2 + uint128_t(h1) * r1 + uint128_t(h2) * r0 + c1;
+      const uint64_t c2 = carry_shift(d2, 42);
+
+      h0 = d0 & M44;
+      h1 = d1 & M44;
+      h2 = d2 & M42;
+
+      h0 += c2 * 5;
+      h1 += carry_shift(h0, 44);
+      h0 = h0 & M44;
 
       m += 16;
       }
@@ -88,42 +96,41 @@ void poly1305_blocks(secure_vector<uint64_t>& X, const uint8_t *m, size_t blocks
 
 void poly1305_finish(secure_vector<uint64_t>& X, uint8_t mac[16])
    {
+   const uint64_t M44 = 0xFFFFFFFFFFF;
+   const uint64_t M42 = 0x3FFFFFFFFFF;
+
    /* fully carry h */
    uint64_t h0 = X[3+0];
    uint64_t h1 = X[3+1];
    uint64_t h2 = X[3+2];
 
    uint64_t c;
-                c = (h1 >> 44); h1 &= 0xfffffffffff;
-   h2 += c;     c = (h2 >> 42); h2 &= 0x3ffffffffff;
-   h0 += c * 5; c = (h0 >> 44); h0 &= 0xfffffffffff;
-   h1 += c;     c = (h1 >> 44); h1 &= 0xfffffffffff;
-   h2 += c;     c = (h2 >> 42); h2 &= 0x3ffffffffff;
-   h0 += c * 5; c = (h0 >> 44); h0 &= 0xfffffffffff;
+                c = (h1 >> 44); h1 &= M44;
+   h2 += c;     c = (h2 >> 42); h2 &= M42;
+   h0 += c * 5; c = (h0 >> 44); h0 &= M44;
+   h1 += c;     c = (h1 >> 44); h1 &= M44;
+   h2 += c;     c = (h2 >> 42); h2 &= M42;
+   h0 += c * 5; c = (h0 >> 44); h0 &= M44;
    h1 += c;
 
    /* compute h + -p */
-   uint64_t g0 = h0 + 5; c = (g0 >> 44); g0 &= 0xfffffffffff;
-   uint64_t g1 = h1 + c; c = (g1 >> 44); g1 &= 0xfffffffffff;
+   uint64_t g0 = h0 + 5; c = (g0 >> 44); g0 &= M44;
+   uint64_t g1 = h1 + c; c = (g1 >> 44); g1 &= M44;
    uint64_t g2 = h2 + c - (static_cast<uint64_t>(1) << 42);
 
    /* select h if h < p, or h + -p if h >= p */
-   c = (g2 >> ((sizeof(uint64_t) * 8) - 1)) - 1;
-   g0 &= c;
-   g1 &= c;
-   g2 &= c;
-   c = ~c;
-   h0 = (h0 & c) | g0;
-   h1 = (h1 & c) | g1;
-   h2 = (h2 & c) | g2;
+   const auto c_mask = CT::Mask<uint64_t>::expand(c);
+   h0 = c_mask.select(g0, h0);
+   h1 = c_mask.select(g1, h1);
+   h2 = c_mask.select(g2, h2);
 
    /* h = (h + pad) */
    const uint64_t t0 = X[6];
    const uint64_t t1 = X[7];
 
-   h0 += (( t0                    ) & 0xfffffffffff)    ; c = (h0 >> 44); h0 &= 0xfffffffffff;
-   h1 += (((t0 >> 44) | (t1 << 20)) & 0xfffffffffff) + c; c = (h1 >> 44); h1 &= 0xfffffffffff;
-   h2 += (((t1 >> 24)             ) & 0x3ffffffffff) + c;                 h2 &= 0x3ffffffffff;
+   h0 += (( t0                    ) & M44)    ; c = (h0 >> 44); h0 &= M44;
+   h1 += (((t0 >> 44) | (t1 << 20)) & M44) + c; c = (h1 >> 44); h1 &= M44;
+   h2 += (((t1 >> 24)             ) & M42) + c;                 h2 &= M42;
 
    /* mac = h % (2^128) */
    h0 = ((h0      ) | (h1 << 44));

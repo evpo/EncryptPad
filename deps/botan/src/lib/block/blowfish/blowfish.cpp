@@ -1,6 +1,6 @@
 /*
 * Blowfish
-* (C) 1999-2011 Jack Lloyd
+* (C) 1999-2011,2018 Jack Lloyd
 *
 * Botan is released under the Simplified BSD License (see license.txt)
 */
@@ -205,35 +205,45 @@ void Blowfish::encrypt_n(const uint8_t in[], uint8_t out[], size_t blocks) const
    {
    verify_key_set(m_S.empty() == false);
 
-   while(blocks >= 2)
+   while(blocks >= 4)
       {
-      uint32_t L0, R0, L1, R1;
-      load_be(in, L0, R0, L1, R1);
+      uint32_t L0, R0, L1, R1, L2, R2, L3, R3;
+      load_be(in, L0, R0, L1, R1, L2, R2, L3, R3);
 
       for(size_t r = 0; r != 16; r += 2)
          {
          L0 ^= m_P[r];
          L1 ^= m_P[r];
+         L2 ^= m_P[r];
+         L3 ^= m_P[r];
          R0 ^= BFF(L0, m_S);
          R1 ^= BFF(L1, m_S);
+         R2 ^= BFF(L2, m_S);
+         R3 ^= BFF(L3, m_S);
 
          R0 ^= m_P[r+1];
          R1 ^= m_P[r+1];
+         R2 ^= m_P[r+1];
+         R3 ^= m_P[r+1];
          L0 ^= BFF(R0, m_S);
          L1 ^= BFF(R1, m_S);
+         L2 ^= BFF(R2, m_S);
+         L3 ^= BFF(R3, m_S);
          }
 
       L0 ^= m_P[16]; R0 ^= m_P[17];
       L1 ^= m_P[16]; R1 ^= m_P[17];
+      L2 ^= m_P[16]; R2 ^= m_P[17];
+      L3 ^= m_P[16]; R3 ^= m_P[17];
 
-      store_be(out, R0, L0, R1, L1);
+      store_be(out, R0, L0, R1, L1, R2, L2, R3, L3);
 
-      in += 2*BLOCK_SIZE;
-      out += 2*BLOCK_SIZE;
-      blocks -= 2;
+      in += 4*BLOCK_SIZE;
+      out += 4*BLOCK_SIZE;
+      blocks -= 4;
       }
 
-   if(blocks)
+   while(blocks)
       {
       uint32_t L, R;
       load_be(in, L, R);
@@ -250,6 +260,10 @@ void Blowfish::encrypt_n(const uint8_t in[], uint8_t out[], size_t blocks) const
       L ^= m_P[16]; R ^= m_P[17];
 
       store_be(out, R, L);
+
+      in += BLOCK_SIZE;
+      out += BLOCK_SIZE;
+      blocks--;
       }
    }
 
@@ -260,35 +274,46 @@ void Blowfish::decrypt_n(const uint8_t in[], uint8_t out[], size_t blocks) const
    {
    verify_key_set(m_S.empty() == false);
 
-   while(blocks >= 2)
+   while(blocks >= 4)
       {
-      uint32_t L0, R0, L1, R1;
-      load_be(in, L0, R0, L1, R1);
+      uint32_t L0, R0, L1, R1, L2, R2, L3, R3;
+      load_be(in, L0, R0, L1, R1, L2, R2, L3, R3);
 
       for(size_t r = 17; r != 1; r -= 2)
          {
          L0 ^= m_P[r];
          L1 ^= m_P[r];
+         L2 ^= m_P[r];
+         L3 ^= m_P[r];
          R0 ^= BFF(L0, m_S);
          R1 ^= BFF(L1, m_S);
+         R2 ^= BFF(L2, m_S);
+         R3 ^= BFF(L3, m_S);
 
          R0 ^= m_P[r-1];
          R1 ^= m_P[r-1];
+         R2 ^= m_P[r-1];
+         R3 ^= m_P[r-1];
+
          L0 ^= BFF(R0, m_S);
          L1 ^= BFF(R1, m_S);
+         L2 ^= BFF(R2, m_S);
+         L3 ^= BFF(R3, m_S);
          }
 
       L0 ^= m_P[1]; R0 ^= m_P[0];
       L1 ^= m_P[1]; R1 ^= m_P[0];
+      L2 ^= m_P[1]; R2 ^= m_P[0];
+      L3 ^= m_P[1]; R3 ^= m_P[0];
 
-      store_be(out, R0, L0, R1, L1);
+      store_be(out, R0, L0, R1, L1, R2, L2, R3, L3);
 
-      in += 2*BLOCK_SIZE;
-      out += 2*BLOCK_SIZE;
-      blocks -= 2;
+      in += 4*BLOCK_SIZE;
+      out += 4*BLOCK_SIZE;
+      blocks -= 4;
       }
 
-   if(blocks)
+   while(blocks)
       {
       uint32_t L, R;
       load_be(in, L, R);
@@ -305,6 +330,10 @@ void Blowfish::decrypt_n(const uint8_t in[], uint8_t out[], size_t blocks) const
       L ^= m_P[1]; R ^= m_P[0];
 
       store_be(out, R, L);
+
+      in += BLOCK_SIZE;
+      out += BLOCK_SIZE;
+      blocks--;
       }
    }
 
@@ -319,39 +348,36 @@ void Blowfish::key_schedule(const uint8_t key[], size_t length)
    m_S.resize(1024);
    copy_mem(m_S.data(), S_INIT, 1024);
 
-   const uint8_t null_salt[16] = { 0 };
-
-   key_expansion(key, length, null_salt);
+   key_expansion(key, length, nullptr, 0);
    }
 
 void Blowfish::key_expansion(const uint8_t key[],
                              size_t length,
-                             const uint8_t salt[16])
+                             const uint8_t salt[],
+                             size_t salt_length)
    {
+   BOTAN_ASSERT_NOMSG(salt_length % 4 == 0);
+
    for(size_t i = 0, j = 0; i != 18; ++i, j += 4)
       m_P[i] ^= make_uint32(key[(j  ) % length], key[(j+1) % length],
                             key[(j+2) % length], key[(j+3) % length]);
 
+   const size_t P_salt_offset = (salt_length > 0) ? 18 % (salt_length / 4) : 0;
+
    uint32_t L = 0, R = 0;
-   generate_sbox(m_P, L, R, salt, 0);
-   generate_sbox(m_S, L, R, salt, 2);
+   generate_sbox(m_P, L, R, salt, salt_length, 0);
+   generate_sbox(m_S, L, R, salt, salt_length, P_salt_offset);
    }
 
 /*
 * Modified key schedule used for bcrypt password hashing
 */
-void Blowfish::eks_key_schedule(const uint8_t key[], size_t length,
-                                const uint8_t salt[16], size_t workfactor)
+void Blowfish::salted_set_key(const uint8_t key[], size_t length,
+                              const uint8_t salt[], size_t salt_length,
+                              size_t workfactor, bool salt_first)
    {
-
-   /*
-   * On a 2.8 GHz Core-i7, workfactor == 18 takes about 25 seconds to
-   * hash a password. This seems like a reasonable upper bound for the
-   * time being.
-   * Bcrypt allows up to work factor 31 (2^31 iterations)
-   */
-   BOTAN_ARG_CHECK(workfactor >= 4 && workfactor <= 18,
-                   "Invalid bcrypt work factor");
+   BOTAN_ARG_CHECK(salt_length > 0 && salt_length % 4 == 0,
+                   "Invalid salt length for Blowfish salted key schedule");
 
    if(length > 72)
       {
@@ -364,15 +390,25 @@ void Blowfish::eks_key_schedule(const uint8_t key[], size_t length,
 
    m_S.resize(1024);
    copy_mem(m_S.data(), S_INIT, 1024);
-   key_expansion(key, length, salt);
+   key_expansion(key, length, salt, salt_length);
 
-   const uint8_t null_salt[16] = { 0 };
-   const size_t rounds = static_cast<size_t>(1) << workfactor;
-
-   for(size_t r = 0; r != rounds; ++r)
+   if(workfactor > 0)
       {
-      key_expansion(key, length, null_salt);
-      key_expansion(salt, 16, null_salt);
+      const size_t rounds = static_cast<size_t>(1) << workfactor;
+
+      for(size_t r = 0; r != rounds; ++r)
+         {
+         if(salt_first)
+            {
+            key_expansion(salt, salt_length, nullptr, 0);
+            key_expansion(key, length, nullptr, 0);
+            }
+         else
+            {
+            key_expansion(key, length, nullptr, 0);
+            key_expansion(salt, salt_length, nullptr, 0);
+            }
+         }
       }
    }
 
@@ -381,13 +417,17 @@ void Blowfish::eks_key_schedule(const uint8_t key[], size_t length,
 */
 void Blowfish::generate_sbox(secure_vector<uint32_t>& box,
                              uint32_t& L, uint32_t& R,
-                             const uint8_t salt[16],
+                             const uint8_t salt[],
+                             size_t salt_length,
                              size_t salt_off) const
    {
    for(size_t i = 0; i != box.size(); i += 2)
       {
-      L ^= load_be<uint32_t>(salt, (i + salt_off) % 4);
-      R ^= load_be<uint32_t>(salt, (i + salt_off + 1) % 4);
+      if(salt_length > 0)
+         {
+         L ^= load_be<uint32_t>(salt, (i + salt_off) % (salt_length / 4));
+         R ^= load_be<uint32_t>(salt, (i + salt_off + 1) % (salt_length / 4));
+         }
 
       for(size_t r = 0; r != 16; r += 2)
          {

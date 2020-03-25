@@ -45,6 +45,7 @@ class PKCS11_ECDH_KA_Operation final : public PK_Ops::Key_Agreement
          : PK_Ops::Key_Agreement(), m_key(key), m_mechanism(MechanismWrapper::create_ecdh_mechanism(params))
          {}
 
+      size_t agreed_value_size() const override { return m_key.domain().get_p_bytes(); }
 
       /// The encoding in V2.20 was not specified and resulted in different implementations choosing different encodings.
       /// Applications relying only on a V2.20 encoding (e.g. the DER variant) other than the one specified now (raw) may not work with all V2.30 compliant tokens.
@@ -54,7 +55,7 @@ class PKCS11_ECDH_KA_Operation final : public PK_Ops::Key_Agreement
          std::vector<uint8_t> der_encoded_other_key;
          if(m_key.point_encoding() == PublicPointEncoding::Der)
             {
-            der_encoded_other_key = DER_Encoder().encode(other_key, other_key_len, OCTET_STRING).get_contents_unlocked();
+            DER_Encoder(der_encoded_other_key).encode(other_key, other_key_len, OCTET_STRING);
             m_mechanism.set_ecdh_other_key(der_encoded_other_key.data(), der_encoded_other_key.size());
             }
          else
@@ -73,9 +74,9 @@ class PKCS11_ECDH_KA_Operation final : public PK_Ops::Key_Agreement
          attributes.add_bool(AttributeType::Extractable, true);
          attributes.add_numeric(AttributeType::Class, static_cast< CK_OBJECT_CLASS >(ObjectClass::SecretKey));
          attributes.add_numeric(AttributeType::KeyType, static_cast< CK_KEY_TYPE >(KeyType::GenericSecret));
-         attributes.add_numeric(AttributeType::ValueLen, key_len);
+         attributes.add_numeric(AttributeType::ValueLen, static_cast< CK_ULONG >(key_len));
          m_key.module()->C_DeriveKey(m_key.session().handle(), m_mechanism.data(), m_key.handle(), attributes.data(),
-                                     attributes.count(), &secret_handle);
+                                     static_cast<Ulong>(attributes.count()), &secret_handle);
 
          Object secret_object(m_key.session(), secret_handle);
          secure_vector<uint8_t> secret = secret_object.get_attribute_value(AttributeType::Value);
@@ -111,7 +112,8 @@ PKCS11_ECDH_KeyPair generate_ecdh_keypair(Session& session, const EC_PublicKeyGe
    Mechanism mechanism = { static_cast< CK_MECHANISM_TYPE >(MechanismType::EcKeyPairGen), nullptr, 0 };
 
    session.module()->C_GenerateKeyPair(session.handle(), &mechanism,
-                                       pub_props.data(), pub_props.count(), priv_props.data(), priv_props.count(),
+                                       pub_props.data(), static_cast<Ulong>(pub_props.count()),
+                                       priv_props.data(), static_cast<Ulong>(priv_props.count()),
                                        &pub_key_handle, &priv_key_handle);
 
    return std::make_pair(PKCS11_ECDH_PublicKey(session, pub_key_handle), PKCS11_ECDH_PrivateKey(session, priv_key_handle));

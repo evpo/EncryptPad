@@ -60,8 +60,6 @@ class CurveGFp_Montgomery final : public CurveGFp_Repr
 
       size_t get_ws_size() const override { return 2*m_p_words + 4; }
 
-      void redc_mod_p(BigInt& z, secure_vector<word>& ws) const override;
-
       BigInt invert_element(const BigInt& x, secure_vector<word>& ws) const override;
 
       void to_curve_rep(BigInt& x, secure_vector<word>& ws) const override;
@@ -92,11 +90,6 @@ class CurveGFp_Montgomery final : public CurveGFp_Repr
       bool m_a_is_zero;
       bool m_a_is_minus_3;
    };
-
-void CurveGFp_Montgomery::redc_mod_p(BigInt& z, secure_vector<word>& ws) const
-   {
-   z.reduce_below(m_p, ws);
-   }
 
 BigInt CurveGFp_Montgomery::invert_element(const BigInt& x, secure_vector<word>& ws) const
    {
@@ -207,6 +200,8 @@ class CurveGFp_NIST : public CurveGFp_Repr
       void from_curve_rep(BigInt& x, secure_vector<word>& ws) const override
          { redc_mod_p(x, ws); }
 
+      virtual void redc_mod_p(BigInt& z, secure_vector<word>& ws) const = 0;
+
       BigInt invert_element(const BigInt& x, secure_vector<word>& ws) const override;
 
       void curve_mul_words(BigInt& z,
@@ -284,8 +279,6 @@ void CurveGFp_NIST::curve_sqr_words(BigInt& z, const word x[], size_t x_size,
    this->redc_mod_p(z, ws);
    }
 
-#if defined(BOTAN_HAS_NIST_PRIME_REDUCERS_W32)
-
 /**
 * The NIST P-192 curve
 */
@@ -338,7 +331,7 @@ BigInt CurveGFp_P256::invert_element(const BigInt& x, secure_vector<word>& ws) c
    curve_sqr(r, p4, ws);
    for(size_t i = 0; i != 3; ++i)
       curve_sqr_tmp(r, tmp, ws);
-   curve_mul(p8, r, p4, ws);;
+   curve_mul(p8, r, p4, ws);
 
    curve_sqr(r, p8, ws);
    for(size_t i = 0; i != 7; ++i)
@@ -400,6 +393,8 @@ class CurveGFp_P384 final : public CurveGFp_NIST
 
 BigInt CurveGFp_P384::invert_element(const BigInt& x, secure_vector<word>& ws) const
    {
+   // From https://briansmith.org/ecc-inversion-addition-chains-01
+
    BigInt r, x2, x3, x15, x30, tmp, rl;
 
    r = x;
@@ -469,8 +464,6 @@ BigInt CurveGFp_P384::invert_element(const BigInt& x, secure_vector<word>& ws) c
    return r;
    }
 
-#endif
-
 /**
 * The NIST P-521 curve
 */
@@ -486,6 +479,8 @@ class CurveGFp_P521 final : public CurveGFp_NIST
 
 BigInt CurveGFp_P521::invert_element(const BigInt& x, secure_vector<word>& ws) const
    {
+   // Addition chain from https://eprint.iacr.org/2014/852.pdf section
+
    BigInt r;
    BigInt rl;
    BigInt a7;
@@ -556,7 +551,6 @@ BigInt CurveGFp_P521::invert_element(const BigInt& x, secure_vector<word>& ws) c
 std::shared_ptr<CurveGFp_Repr>
 CurveGFp::choose_repr(const BigInt& p, const BigInt& a, const BigInt& b)
    {
-#if defined(BOTAN_HAS_NIST_PRIME_REDUCERS_W32)
    if(p == prime_p192())
       return std::shared_ptr<CurveGFp_Repr>(new CurveGFp_P192(a, b));
    if(p == prime_p224())
@@ -565,8 +559,6 @@ CurveGFp::choose_repr(const BigInt& p, const BigInt& a, const BigInt& b)
       return std::shared_ptr<CurveGFp_Repr>(new CurveGFp_P256(a, b));
    if(p == prime_p384())
       return std::shared_ptr<CurveGFp_Repr>(new CurveGFp_P384(a, b));
-#endif
-
    if(p == prime_p521())
       return std::shared_ptr<CurveGFp_Repr>(new CurveGFp_P521(a, b));
 

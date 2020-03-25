@@ -10,6 +10,8 @@
 
 #include <botan/bigint.h>
 
+BOTAN_FUTURE_INTERNAL_HEADER(curve_nistp.h)
+
 namespace Botan {
 
 /**
@@ -23,8 +25,11 @@ namespace Botan {
 BOTAN_PUBLIC_API(2,0) const BigInt& prime_p521();
 BOTAN_PUBLIC_API(2,0) void redc_p521(BigInt& x, secure_vector<word>& ws);
 
-#if (BOTAN_MP_WORD_BITS == 32) || (BOTAN_MP_WORD_BITS == 64)
-
+/*
+Previously this macro indicated if the P-{192,224,256,384} reducers
+were available. Now they are always enabled and this macro has no meaning.
+The define will be removed in a future major release.
+*/
 #define BOTAN_HAS_NIST_PRIME_REDUCERS_W32
 
 BOTAN_PUBLIC_API(2,0) const BigInt& prime_p384();
@@ -38,8 +43,6 @@ BOTAN_PUBLIC_API(2,0) void redc_p224(BigInt& x, secure_vector<word>& ws);
 
 BOTAN_PUBLIC_API(2,0) const BigInt& prime_p192();
 BOTAN_PUBLIC_API(2,0) void redc_p192(BigInt& x, secure_vector<word>& ws);
-
-#endif
 
 }
 

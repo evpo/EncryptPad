@@ -57,6 +57,12 @@ void EAX_Mode::reset()
    {
    m_ad_mac.clear();
    m_nonce_mac.clear();
+
+   // Clear out any data added to the CMAC calculation
+   try {
+      m_cmac->final();
+   }
+   catch(Key_Not_Set&) {}
    }
 
 std::string EAX_Mode::name() const
@@ -96,6 +102,8 @@ void EAX_Mode::key_schedule(const uint8_t key[], size_t length)
 */
 void EAX_Mode::set_associated_data(const uint8_t ad[], size_t length)
    {
+   if(m_nonce_mac.empty() == false)
+      throw Invalid_State("Cannot set AD for EAX while processing a message");
    m_ad_mac = eax_prf(1, block_size(), *m_cmac, ad, length);
    }
 
@@ -115,6 +123,7 @@ void EAX_Mode::start_msg(const uint8_t nonce[], size_t nonce_len)
 
 size_t EAX_Encryption::process(uint8_t buf[], size_t sz)
    {
+   BOTAN_STATE_CHECK(m_nonce_mac.size() > 0);
    m_ctr->cipher(buf, buf, sz);
    m_cmac->update(buf, sz);
    return sz;
@@ -122,6 +131,7 @@ size_t EAX_Encryption::process(uint8_t buf[], size_t sz)
 
 void EAX_Encryption::finish(secure_vector<uint8_t>& buffer, size_t offset)
    {
+   BOTAN_ASSERT_NOMSG(m_nonce_mac.empty() == false);
    update(buffer, offset);
 
    secure_vector<uint8_t> data_mac = m_cmac->final();
@@ -139,6 +149,7 @@ void EAX_Encryption::finish(secure_vector<uint8_t>& buffer, size_t offset)
 
 size_t EAX_Decryption::process(uint8_t buf[], size_t sz)
    {
+   BOTAN_STATE_CHECK(m_nonce_mac.size() > 0);
    m_cmac->update(buf, sz);
    m_ctr->cipher(buf, buf, sz);
    return sz;
@@ -173,9 +184,11 @@ void EAX_Decryption::finish(secure_vector<uint8_t>& buffer, size_t offset)
    mac ^= m_ad_mac;
 
    if(!constant_time_compare(mac.data(), included_tag, tag_size()))
-      throw Integrity_Failure("EAX tag check failed");
+      throw Invalid_Authentication_Tag("EAX tag check failed");
 
    buffer.resize(offset + remaining);
+
+   m_nonce_mac.clear();
    }
 
 }

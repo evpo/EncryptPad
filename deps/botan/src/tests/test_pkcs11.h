@@ -1,5 +1,6 @@
 /*
 * (C) 2016 Daniel Neus
+* (C) 2019 Michael Boric
 *
 * Botan is released under the Simplified BSD License (see license.txt)
 */
@@ -13,36 +14,51 @@
    #include <botan/p11.h>
 #endif
 
-#include <botan/secmem.h>
-
 #include <string>
 #include <vector>
-#include <functional>
 
 namespace Botan_Tests {
 
 #if defined(BOTAN_HAS_PKCS11)
 
+#define STRING_AND_FUNCTION(x) #x, x
+
 // PIN is expected to be set to "123456" prior to running the tests
-const std::string PIN = "123456";
-const auto PIN_SECVEC = Botan::PKCS11::secure_string(PIN.begin(), PIN.end());
-
-const std::string TEST_PIN = "654321";
-const auto TEST_PIN_SECVEC = Botan::PKCS11::secure_string(TEST_PIN.begin(), TEST_PIN.end());
-
+const std::string PKCS11_USER_PIN = "123456";
 // SO PIN is expected to be set to "12345678" prior to running the tests
-const std::string SO_PIN = "12345678";
-const auto SO_PIN_SECVEC = Botan::PKCS11::secure_string(SO_PIN.begin(), SO_PIN.end());
+const std::string PKCS11_SO_PIN = "12345678";
 
-const std::string TEST_SO_PIN = "87654321";
-const auto TEST_SO_PIN_SECVEC = Botan::PKCS11::secure_string(TEST_SO_PIN.begin(), TEST_SO_PIN.end());
+// These are pins that should just not match the above (valid) PINs
+const std::string PKCS11_TEST_USER_PIN = "654321";
+const std::string PKCS11_TEST_SO_PIN = "87654321";
 
-class PKCS11_Test : public Test
+inline Botan::PKCS11::secure_string to_sec_string(const std::string& str)
    {
-   protected:
-      static std::vector<Test::Result> run_pkcs11_tests(const std::string& name,
-            std::vector<std::function<Test::Result()>>& fns);
-   };
+   return Botan::PKCS11::secure_string(str.begin(), str.end());
+   }
+
+inline Botan::PKCS11::secure_string PIN()
+   {
+   return to_sec_string(PKCS11_USER_PIN);
+   }
+
+inline Botan::PKCS11::secure_string SO_PIN()
+   {
+   return to_sec_string(PKCS11_SO_PIN);
+   }
+
+inline Botan::PKCS11::secure_string TEST_PIN()
+   {
+   return to_sec_string(PKCS11_TEST_USER_PIN);
+   }
+
+inline Botan::PKCS11::secure_string TEST_SO_PIN()
+   {
+   return to_sec_string(PKCS11_TEST_SO_PIN);
+   }
+
+std::vector<Test::Result> run_pkcs11_tests(const std::string& name,
+   std::vector<std::pair<std::string, std::function<Test::Result()>>>& fns);
 
 #endif
 }

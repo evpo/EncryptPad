@@ -20,8 +20,7 @@ namespace {
 inline uint16_t mul(uint16_t x, uint16_t y)
    {
    const uint32_t P = static_cast<uint32_t>(x) * y;
-
-   const uint16_t Z_mask = static_cast<uint16_t>(CT::expand_mask(P) & 0xFFFF);
+   const auto P_mask = CT::Mask<uint16_t>(CT::Mask<uint32_t>::is_zero(P));
 
    const uint32_t P_hi = P >> 16;
    const uint32_t P_lo = P & 0xFFFF;
@@ -30,7 +29,7 @@ inline uint16_t mul(uint16_t x, uint16_t y)
    const uint16_t r_1 = static_cast<uint16_t>((P_lo - P_hi) + carry);
    const uint16_t r_2 = 1 - x - y;
 
-   return CT::select(Z_mask, r_1, r_2);
+   return P_mask.select(r_2, r_1);
    }
 
 /*
@@ -80,10 +79,10 @@ void idea_op(const uint8_t in[], uint8_t out[], size_t blocks, const uint16_t K[
          X3 += K[6*j+2];
          X4 = mul(X4, K[6*j+3]);
 
-         uint16_t T0 = X3;
+         const uint16_t T0 = X3;
          X3 = mul(X3 ^ X1, K[6*j+4]);
 
-         uint16_t T1 = X2;
+         const uint16_t T1 = X2;
          X2 = mul((X2 ^ X4) + X3, K[6*j+5]);
          X3 += X2;
 
@@ -198,7 +197,7 @@ void IDEA::key_schedule(const uint8_t key[], size_t)
    for(size_t off = 0; off != 48; off += 8)
       {
       for(size_t i = 0; i != 8; ++i)
-         m_EK[off+i] = K[i/4] >> (48-16*(i % 4));
+         m_EK[off+i] = static_cast<uint16_t>(K[i/4] >> (48-16*(i % 4)));
 
       const uint64_t Kx = (K[0] >> 39);
       const uint64_t Ky = (K[1] >> 39);
@@ -208,7 +207,7 @@ void IDEA::key_schedule(const uint8_t key[], size_t)
       }
 
    for(size_t i = 0; i != 4; ++i)
-      m_EK[48+i] = K[i/4] >> (48-16*(i % 4));
+      m_EK[48+i] = static_cast<uint16_t>(K[i/4] >> (48-16*(i % 4)));
 
    m_DK[0] = mul_inv(m_EK[48]);
    m_DK[1] = -m_EK[49];

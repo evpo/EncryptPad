@@ -25,6 +25,8 @@ std::vector<Signature_Scheme> Policy::allowed_signature_schemes() const
 
    for(Signature_Scheme scheme : all_signature_schemes())
       {
+      if(signature_scheme_is_known(scheme) == false)
+         continue;
       const bool sig_allowed = allowed_signature_method(signature_algorithm_of_scheme(scheme));
       const bool hash_allowed = allowed_signature_hash(hash_function_of_scheme(scheme));
 
@@ -45,19 +47,19 @@ std::vector<std::string> Policy::allowed_ciphers() const
       "ChaCha20Poly1305",
       "AES-256/GCM",
       "AES-128/GCM",
-      "AES-256/CCM",
-      "AES-128/CCM",
+      //"AES-256/CCM",
+      //"AES-128/CCM",
       //"AES-256/CCM(8)",
       //"AES-128/CCM(8)",
       //"Camellia-256/GCM",
       //"Camellia-128/GCM",
       //"ARIA-256/GCM",
       //"ARIA-128/GCM",
-      "AES-256",
-      "AES-128",
+      //"AES-256",
+      //"AES-128",
       //"Camellia-256",
       //"Camellia-128",
-      //"SEED"
+      //"SEED",
       //"3DES",
       };
    }
@@ -257,7 +259,7 @@ void Policy::check_peer_key_acceptable(const Public_Key& public_key) const
 
    if(keylength < expected_keylength)
       throw TLS_Exception(Alert::INSUFFICIENT_SECURITY,
-                          "Peer sent " + 
+                          "Peer sent " +
                            std::to_string(keylength) + " bit " + algo_name + " key"
                            ", policy requires at least " +
                            std::to_string(expected_keylength));
@@ -275,37 +277,48 @@ bool Policy::send_fallback_scsv(Protocol_Version version) const
 
 bool Policy::acceptable_protocol_version(Protocol_Version version) const
    {
-   // Uses boolean optimization:
-   // First check the current version (left part), then if it is allowed 
-   // (right part)
-   // checks are ordered according to their probability
-   return (
-           ( ( version == Protocol_Version::TLS_V12)  && allow_tls12()  ) ||
-           ( ( version == Protocol_Version::TLS_V10)  && allow_tls10()  ) ||
-           ( ( version == Protocol_Version::TLS_V11)  && allow_tls11()  ) ||
-           ( ( version == Protocol_Version::DTLS_V12) && allow_dtls12() ) ||
-           ( ( version == Protocol_Version::DTLS_V10) && allow_dtls10() )
-        );
+   if(version == Protocol_Version::TLS_V12 && allow_tls12())
+      return true;
+
+   if(version == Protocol_Version::DTLS_V12 && allow_dtls12())
+      return true;
+
+#if defined(BOTAN_HAS_TLS_V10)
+
+   if(version == Protocol_Version::TLS_V11 && allow_tls11())
+      return true;
+   if(version == Protocol_Version::TLS_V10 && allow_tls10())
+      return true;
+   if(version == Protocol_Version::DTLS_V10 && allow_dtls10())
+      return true;
+
+#endif
+
+   return false;
    }
 
 Protocol_Version Policy::latest_supported_version(bool datagram) const
    {
    if(datagram)
       {
-      if(allow_dtls12())
+      if(acceptable_protocol_version(Protocol_Version::DTLS_V12))
          return Protocol_Version::DTLS_V12;
-      if(allow_dtls10())
+#if defined(BOTAN_HAS_TLS_V10)
+      if(acceptable_protocol_version(Protocol_Version::DTLS_V10))
          return Protocol_Version::DTLS_V10;
+#endif
       throw Invalid_State("Policy forbids all available DTLS version");
       }
    else
       {
-      if(allow_tls12())
+      if(acceptable_protocol_version(Protocol_Version::TLS_V12))
          return Protocol_Version::TLS_V12;
-      if(allow_tls11())
+#if defined(BOTAN_HAS_TLS_V10)
+      if(acceptable_protocol_version(Protocol_Version::TLS_V11))
          return Protocol_Version::TLS_V11;
-      if(allow_tls10())
+      if(acceptable_protocol_version(Protocol_Version::TLS_V10))
          return Protocol_Version::TLS_V10;
+#endif
       throw Invalid_State("Policy forbids all available TLS version");
       }
    }
@@ -319,8 +332,8 @@ bool Policy::acceptable_ciphersuite(const Ciphersuite& ciphersuite) const
 bool Policy::allow_client_initiated_renegotiation() const { return false; }
 bool Policy::allow_server_initiated_renegotiation() const { return false; }
 bool Policy::allow_insecure_renegotiation() const { return false; }
-bool Policy::allow_tls10()  const { return true; }
-bool Policy::allow_tls11()  const { return true; }
+bool Policy::allow_tls10()  const { return false; }
+bool Policy::allow_tls11()  const { return false; }
 bool Policy::allow_tls12()  const { return true; }
 bool Policy::allow_dtls10() const { return false; }
 bool Policy::allow_dtls12() const { return true; }
@@ -329,6 +342,14 @@ bool Policy::hide_unknown_users() const { return false; }
 bool Policy::server_uses_own_ciphersuite_preferences() const { return true; }
 bool Policy::negotiate_encrypt_then_mac() const { return true; }
 bool Policy::support_cert_status_message() const { return true; }
+bool Policy::allow_resumption_for_renegotiation() const { return true; }
+bool Policy::only_resume_with_exact_version() const { return true; }
+bool Policy::require_client_certificate_authentication() const { return false; }
+bool Policy::request_client_certificate_authentication() const { return require_client_certificate_authentication(); }
+bool Policy::abort_connection_on_undesired_renegotiation() const { return false; }
+bool Policy::allow_dtls_epoch0_restart() const { return false; }
+
+size_t Policy::maximum_certificate_chain_size() const { return 0; }
 
 // 1 second initial timeout, 60 second max - see RFC 6347 sec 4.2.4.1
 size_t Policy::dtls_initial_timeout() const { return 1*1000; }
@@ -431,7 +452,11 @@ std::vector<uint16_t> Policy::ciphersuite_list(Protocol_Version version,
    for(auto&& suite : Ciphersuite::all_known_ciphersuites())
       {
       // Can we use it?
-      if(suite.valid() == false)
+      if(!suite.valid())
+         continue;
+
+      // Can we use it in this version?
+      if(!suite.usable_in_version(version))
          continue;
 
       // Is it acceptable to the policy?
@@ -441,17 +466,6 @@ std::vector<uint16_t> Policy::ciphersuite_list(Protocol_Version version,
       // Are we doing SRP?
       if(!have_srp && suite.kex_method() == Kex_Algo::SRP_SHA)
          continue;
-
-      if(!version.supports_aead_modes())
-         {
-         // Are we doing AEAD in a non-AEAD version?
-         if(suite.mac_algo() == "AEAD")
-            continue;
-
-         // Older (v1.0/v1.1) versions also do not support any hash but SHA-1
-         if(suite.mac_algo() != "SHA-1")
-            continue;
-         }
 
       if(!value_exists(kex, suite.kex_algo()))
          continue; // unsupported key exchange
@@ -486,7 +500,7 @@ std::vector<uint16_t> Policy::ciphersuite_list(Protocol_Version version,
 
    if(ciphersuites.empty())
       {
-      throw Exception("Policy does not allow any available cipher suite");
+      throw Invalid_State("Policy does not allow any available cipher suite");
       }
 
    Ciphersuite_Preference_Ordering order(ciphers, macs, kex, sigs);

@@ -5,8 +5,8 @@
 * Botan is released under the Simplified BSD License (see license.txt)
 */
 
-#ifndef BOTAN_PARSER_H_
-#define BOTAN_PARSER_H_
+#ifndef BOTAN_PARSING_UTILS_H_
+#define BOTAN_PARSING_UTILS_H_
 
 #include <botan/types.h>
 #include <string>
@@ -16,6 +16,8 @@
 #include <istream>
 #include <functional>
 #include <map>
+
+BOTAN_FUTURE_INTERNAL_HEADER(parsing.h)
 
 namespace Botan {
 
@@ -40,6 +42,8 @@ BOTAN_PUBLIC_API(2,0) std::vector<std::string> split_on(
 * Split a string on a character predicate
 * @param str the input string
 * @param pred the predicate
+*
+* This function will likely be removed in a future release
 */
 BOTAN_PUBLIC_API(2,0) std::vector<std::string>
 split_on_pred(const std::string& str,
@@ -93,7 +97,8 @@ std::string string_join(const std::vector<std::string>& strs,
 * @param oid the OID in string form
 * @return OID components
 */
-BOTAN_PUBLIC_API(2,0) std::vector<uint32_t> parse_asn1_oid(const std::string& oid);
+BOTAN_PUBLIC_API(2,0) std::vector<uint32_t>
+BOTAN_DEPRECATED("Use OID::from_string(oid).get_components()") parse_asn1_oid(const std::string& oid);
 
 /**
 * Compare two names using the X.509 comparison algorithm
@@ -143,9 +148,30 @@ BOTAN_PUBLIC_API(2,0) std::string ipv4_to_string(uint32_t ip_addr);
 
 std::map<std::string, std::string> BOTAN_PUBLIC_API(2,0) read_cfg(std::istream& is);
 
+/**
+* Accepts key value pairs deliminated by commas:
+*
+* "" (returns empty map)
+* "K=V" (returns map {'K': 'V'})
+* "K1=V1,K2=V2"
+* "K1=V1,K2=V2,K3=V3"
+* "K1=V1,K2=V2,K3=a_value\,with\,commas_and_\=equals"
+*
+* Values may be empty, keys must be non-empty and unique. Duplicate
+* keys cause an exception.
+*
+* Within both key and value, comma and equals can be escaped with
+* backslash. Backslash can also be escaped.
+*/
+std::map<std::string, std::string> BOTAN_PUBLIC_API(2,8) read_kv(const std::string& kv);
+
 std::string BOTAN_PUBLIC_API(2,0) clean_ws(const std::string& s);
 
-bool BOTAN_PUBLIC_API(2,0) host_wildcard_match(const std::string& wildcard, const std::string& host);
+/**
+* Check if the given hostname is a match for the specified wildcard
+*/
+bool BOTAN_PUBLIC_API(2,0) host_wildcard_match(const std::string& wildcard,
+                                               const std::string& host);
 
 
 }

@@ -10,11 +10,9 @@
 
 namespace Botan {
 
-namespace OIDS {
-
 namespace {
 
-class OID_Map
+class OID_Map final
    {
    public:
       void add_oid(const OID& oid, const std::string& str)
@@ -28,21 +26,21 @@ class OID_Map
          lock_guard_type<mutex_type> lock(m_mutex);
          auto i = m_str2oid.find(str);
          if(i == m_str2oid.end())
-            m_str2oid.insert(std::make_pair(str, oid.as_string()));
+            m_str2oid.insert(std::make_pair(str, oid));
          }
 
       void add_oid2str(const OID& oid, const std::string& str)
          {
-         const std::string oid_str = oid.as_string();
+         const std::string oid_str = oid.to_string();
          lock_guard_type<mutex_type> lock(m_mutex);
          auto i = m_oid2str.find(oid_str);
          if(i == m_oid2str.end())
             m_oid2str.insert(std::make_pair(oid_str, str));
          }
 
-      std::string lookup(const OID& oid)
+      std::string oid2str(const OID& oid)
          {
-         const std::string oid_str = oid.as_string();
+         const std::string oid_str = oid.to_string();
 
          lock_guard_type<mutex_type> lock(m_mutex);
 
@@ -53,7 +51,7 @@ class OID_Map
          return "";
          }
 
-      OID lookup(const std::string& str)
+      OID str2oid(const std::string& str)
          {
          lock_guard_type<mutex_type> lock(m_mutex);
          auto i = m_str2oid.find(str);
@@ -79,8 +77,8 @@ class OID_Map
 
       OID_Map()
          {
-         m_str2oid = load_str2oid_map();
-         m_oid2str = load_oid2str_map();
+         m_str2oid = OIDS::load_str2oid_map();
+         m_oid2str = OIDS::load_oid2str_map();
          }
 
       mutex_type m_mutex;
@@ -90,46 +88,47 @@ class OID_Map
 
 }
 
-void add_oid(const OID& oid, const std::string& name)
+void OIDS::add_oid(const OID& oid, const std::string& name)
    {
    OID_Map::global_registry().add_oid(oid, name);
    }
 
-void add_oidstr(const char* oidstr, const char* name)
+void OIDS::add_oidstr(const char* oidstr, const char* name)
    {
    add_oid(OID(oidstr), name);
    }
 
-void add_oid2str(const OID& oid, const std::string& name)
+void OIDS::add_oid2str(const OID& oid, const std::string& name)
    {
    OID_Map::global_registry().add_oid2str(oid, name);
    }
 
-void add_str2oid(const OID& oid, const std::string& name)
+void OIDS::add_str2oid(const OID& oid, const std::string& name)
    {
    OID_Map::global_registry().add_str2oid(oid, name);
    }
 
-std::string lookup(const OID& oid)
+std::string OIDS::oid2str_or_empty(const OID& oid)
    {
-   return OID_Map::global_registry().lookup(oid);
+   return OID_Map::global_registry().oid2str(oid);
    }
 
-OID lookup(const std::string& name)
+OID OIDS::str2oid_or_empty(const std::string& name)
    {
-   return OID_Map::global_registry().lookup(name);
+   return OID_Map::global_registry().str2oid(name);
    }
 
-bool have_oid(const std::string& name)
+std::string OIDS::oid2str_or_throw(const OID& oid)
+   {
+   const std::string s = OIDS::oid2str_or_empty(oid);
+   if(s.empty())
+      throw Lookup_Error("No name associated with OID " + oid.to_string());
+   return s;
+   }
+
+bool OIDS::have_oid(const std::string& name)
    {
    return OID_Map::global_registry().have_oid(name);
    }
-
-bool name_of(const OID& oid, const std::string& name)
-   {
-   return (oid == lookup(name));
-   }
-
-}
 
 }

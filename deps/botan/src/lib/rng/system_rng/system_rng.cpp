@@ -14,17 +14,21 @@
   #include <windows.h>
 
 #elif defined(BOTAN_TARGET_OS_HAS_CRYPTO_NG)
-   #include <bcrypt.h>
+  #include <bcrypt.h>
 
 #elif defined(BOTAN_TARGET_OS_HAS_ARC4RANDOM)
-   #include <stdlib.h>
+  #include <stdlib.h>
+
+#elif defined(BOTAN_TARGET_OS_HAS_GETRANDOM)
+  #include <sys/random.h>
+  #include <errno.h>
 
 #elif defined(BOTAN_TARGET_OS_HAS_DEV_RANDOM)
-   #include <sys/types.h>
-   #include <sys/stat.h>
-   #include <fcntl.h>
-   #include <unistd.h>
-   #include <errno.h>
+  #include <sys/types.h>
+  #include <sys/stat.h>
+  #include <fcntl.h>
+  #include <unistd.h>
+  #include <errno.h>
 #endif
 
 namespace Botan {
@@ -44,13 +48,14 @@ class System_RNG_Impl final : public RandomNumberGenerator
 
       void randomize(uint8_t buf[], size_t len) override
          {
-         bool success = m_rtlgenrandom(buf, len) == TRUE;
+         bool success = m_rtlgenrandom(buf, ULONG(len)) == TRUE;
          if(!success)
-            throw Exception("RtlGenRandom failed");
+            throw System_Error("RtlGenRandom failed");
          }
 
       void add_entropy(const uint8_t[], size_t) override { /* ignored */ }
       bool is_seeded() const override { return true; }
+      bool accepts_input() const override { return false; }
       void clear() override { /* not possible */ }
       std::string name() const override { return "RtlGenRandom"; }
    private:
@@ -74,7 +79,7 @@ class System_RNG_Impl final : public RandomNumberGenerator
                                                       BCRYPT_RNG_ALGORITHM,
                                                       MS_PRIMITIVE_PROVIDER, 0);
          if(ret != STATUS_SUCCESS)
-            throw Exception("System_RNG failed to acquire crypto provider");
+            throw System_Error("System_RNG failed to acquire crypto provider", ret);
          }
 
       ~System_RNG_Impl()
@@ -86,7 +91,7 @@ class System_RNG_Impl final : public RandomNumberGenerator
          {
          NTSTATUS ret = ::BCryptGenRandom(m_prov, static_cast<PUCHAR>(buf), static_cast<ULONG>(len), 0);
          if(ret != STATUS_SUCCESS)
-            throw Exception("System_RNG call to BCryptGenRandom failed");
+            throw System_Error("System_RNG call to BCryptGenRandom failed", ret);
          }
 
       void add_entropy(const uint8_t in[], size_t length) override
@@ -98,10 +103,11 @@ class System_RNG_Impl final : public RandomNumberGenerator
          }
 
       bool is_seeded() const override { return true; }
+      bool accepts_input() const override { return false; }
       void clear() override { /* not possible */ }
       std::string name() const override { return "crypto_ng"; }
    private:
-      BCRYPT_ALG_HANDLE m_handle;
+      BCRYPT_ALG_HANDLE m_prov;
    };
 
 #elif defined(BOTAN_TARGET_OS_HAS_ARC4RANDOM)
@@ -116,11 +122,47 @@ class System_RNG_Impl final : public RandomNumberGenerator
          ::arc4random_buf(buf, len);
          }
 
+      bool accepts_input() const override { return false; }
       void add_entropy(const uint8_t[], size_t) override { /* ignored */ }
       bool is_seeded() const override { return true; }
       void clear() override { /* not possible */ }
       std::string name() const override { return "arc4random"; }
    };
+
+#elif defined(BOTAN_TARGET_OS_HAS_GETRANDOM)
+
+class System_RNG_Impl final : public RandomNumberGenerator
+   {
+   public:
+      // No constructor or destructor needed as no userland state maintained
+
+      void randomize(uint8_t buf[], size_t len) override
+         {
+         const unsigned int flags = 0;
+
+         while(len > 0)
+            {
+            const ssize_t got = ::getrandom(buf, len, flags);
+
+            if(got < 0)
+               {
+               if(errno == EINTR)
+                  continue;
+               throw System_Error("System_RNG getrandom failed", errno);
+               }
+
+            buf += got;
+            len -= got;
+            }
+         }
+
+      bool accepts_input() const override { return false; }
+      void add_entropy(const uint8_t[], size_t) override { /* ignored */ }
+      bool is_seeded() const override { return true; }
+      void clear() override { /* not possible */ }
+      std::string name() const override { return "getrandom"; }
+   };
+
 
 #elif defined(BOTAN_TARGET_OS_HAS_DEV_RANDOM)
 
@@ -131,21 +173,28 @@ class System_RNG_Impl final : public RandomNumberGenerator
    public:
       System_RNG_Impl()
          {
-         #ifndef O_NOCTTY
-            #define O_NOCTTY 0
-         #endif
+#ifndef O_NOCTTY
+#define O_NOCTTY 0
+#endif
 
          m_fd = ::open(BOTAN_SYSTEM_RNG_DEVICE, O_RDWR | O_NOCTTY);
 
-         /*
-         Cannot open in read-write mode. Fall back to read-only,
-         calls to add_entropy will fail, but randomize will work
-         */
-         if(m_fd < 0)
+         if(m_fd >= 0)
+            {
+            m_writable = true;
+            }
+         else
+            {
+            /*
+            Cannot open in read-write mode. Fall back to read-only,
+            calls to add_entropy will fail, but randomize will work
+            */
             m_fd = ::open(BOTAN_SYSTEM_RNG_DEVICE, O_RDONLY | O_NOCTTY);
+            m_writable = false;
+            }
 
          if(m_fd < 0)
-            throw Exception("System_RNG failed to open RNG device");
+            throw System_Error("System_RNG failed to open RNG device", errno);
          }
 
       ~System_RNG_Impl()
@@ -157,10 +206,12 @@ class System_RNG_Impl final : public RandomNumberGenerator
       void randomize(uint8_t buf[], size_t len) override;
       void add_entropy(const uint8_t in[], size_t length) override;
       bool is_seeded() const override { return true; }
+      bool accepts_input() const override { return m_writable; }
       void clear() override { /* not possible */ }
       std::string name() const override { return BOTAN_SYSTEM_RNG_DEVICE; }
    private:
       int m_fd;
+      bool m_writable;
    };
 
 void System_RNG_Impl::randomize(uint8_t buf[], size_t len)
@@ -173,10 +224,10 @@ void System_RNG_Impl::randomize(uint8_t buf[], size_t len)
          {
          if(errno == EINTR)
             continue;
-         throw Exception("System_RNG read failed error " + std::to_string(errno));
+         throw System_Error("System_RNG read failed", errno);
          }
       if(got == 0)
-         throw Exception("System_RNG EOF on device"); // ?!?
+         throw System_Error("System_RNG EOF on device"); // ?!?
 
       buf += got;
       len -= got;
@@ -185,6 +236,9 @@ void System_RNG_Impl::randomize(uint8_t buf[], size_t len)
 
 void System_RNG_Impl::add_entropy(const uint8_t input[], size_t len)
    {
+   if(!m_writable)
+      return;
+
    while(len)
       {
       ssize_t got = ::write(m_fd, input, len);
@@ -196,21 +250,21 @@ void System_RNG_Impl::add_entropy(const uint8_t input[], size_t len)
 
          /*
          * This is seen on OS X CI, despite the fact that the man page
-         * for Darwin urandom explicitly states that writing to it is
+         * for macOS urandom explicitly states that writing to it is
          * supported, and write(2) does not document EPERM at all.
          * But in any case EPERM seems indicative of a policy decision
          * by the OS or sysadmin that additional entropy is not wanted
          * in the system pool, so we accept that and return here,
          * since there is no corrective action possible.
-	 *
-	 * In Linux EBADF or EPERM is returned if m_fd is not opened for
-	 * writing.
+         *
+         * In Linux EBADF or EPERM is returned if m_fd is not opened for
+         * writing.
          */
          if(errno == EPERM || errno == EBADF)
             return;
 
          // maybe just ignore any failure here and return?
-         throw Exception("System_RNG write failed error " + std::to_string(errno));
+         throw System_Error("System_RNG write failed", errno);
          }
 
       input += got;

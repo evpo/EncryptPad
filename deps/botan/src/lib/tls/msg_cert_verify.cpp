@@ -51,6 +51,7 @@ Certificate_Verify::Certificate_Verify(const std::vector<uint8_t>& buf,
       }
 
    m_signature = reader.get_range<uint8_t>(2, 0, 65535);
+   reader.assert_done();
    }
 
 /*
@@ -66,6 +67,9 @@ std::vector<uint8_t> Certificate_Verify::serialize() const
       buf.push_back(get_byte(0, scheme_code));
       buf.push_back(get_byte(1, scheme_code));
       }
+
+   if(m_signature.size() > 0xFFFF)
+      throw Encoding_Error("Certificate_Verify signature too long to encode");
 
    const uint16_t sig_len = static_cast<uint16_t>(m_signature.size());
    buf.push_back(get_byte(0, sig_len));
@@ -94,6 +98,7 @@ bool Certificate_Verify::verify(const X509_Certificate& cert,
                                            state.hash().get_contents(), m_signature);
 
 #if defined(BOTAN_UNSAFE_FUZZER_MODE)
+   BOTAN_UNUSED(signature_valid);
    return true;
 #else
    return signature_valid;

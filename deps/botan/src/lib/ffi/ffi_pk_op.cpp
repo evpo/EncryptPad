@@ -25,13 +25,14 @@ int botan_pk_op_encrypt_create(botan_pk_op_encrypt_t* op,
                                const char* padding,
                                uint32_t flags)
    {
-   return ffi_guard_thunk(BOTAN_CURRENT_FUNCTION, [=]() -> int {
-      BOTAN_ASSERT_NONNULL(op);
+   if(op == nullptr)
+      return BOTAN_FFI_ERROR_NULL_POINTER;
 
+   if(flags != 0)
+      return BOTAN_FFI_ERROR_BAD_FLAG;
+
+   return ffi_guard_thunk(__func__, [=]() -> int {
       *op = nullptr;
-
-      if(flags != 0)
-         return BOTAN_FFI_ERROR_BAD_FLAG;
 
       std::unique_ptr<Botan::PK_Encryptor> pk(new Botan::PK_Encryptor_EME(safe_get(key_obj), Botan::system_rng(), padding));
       *op = new botan_pk_op_encrypt_struct(pk.release());
@@ -42,6 +43,13 @@ int botan_pk_op_encrypt_create(botan_pk_op_encrypt_t* op,
 int botan_pk_op_encrypt_destroy(botan_pk_op_encrypt_t op)
    {
    return BOTAN_FFI_CHECKED_DELETE(op);
+   }
+
+int botan_pk_op_encrypt_output_length(botan_pk_op_encrypt_t op, size_t ptext_len, size_t* ctext_len)
+   {
+   if(ctext_len == nullptr)
+      return BOTAN_FFI_ERROR_NULL_POINTER;
+   return BOTAN_FFI_DO(Botan::PK_Encryptor, op, o, { *ctext_len = o.ciphertext_length(ptext_len); });
    }
 
 int botan_pk_op_encrypt(botan_pk_op_encrypt_t op,
@@ -62,13 +70,14 @@ int botan_pk_op_decrypt_create(botan_pk_op_decrypt_t* op,
                                const char* padding,
                                uint32_t flags)
    {
-   return ffi_guard_thunk(BOTAN_CURRENT_FUNCTION, [=]() -> int {
-      BOTAN_ASSERT_NONNULL(op);
+   if(op == nullptr)
+      return BOTAN_FFI_ERROR_NULL_POINTER;
 
+   if(flags != 0)
+      return BOTAN_FFI_ERROR_BAD_FLAG;
+
+   return ffi_guard_thunk(__func__, [=]() -> int {
       *op = nullptr;
-
-      if(flags != 0)
-         return BOTAN_FFI_ERROR_BAD_FLAG;
 
       std::unique_ptr<Botan::PK_Decryptor> pk(new Botan::PK_Decryptor_EME(safe_get(key_obj), Botan::system_rng(), padding));
       *op = new botan_pk_op_decrypt_struct(pk.release());
@@ -79,6 +88,13 @@ int botan_pk_op_decrypt_create(botan_pk_op_decrypt_t* op,
 int botan_pk_op_decrypt_destroy(botan_pk_op_decrypt_t op)
    {
    return BOTAN_FFI_CHECKED_DELETE(op);
+   }
+
+int botan_pk_op_decrypt_output_length(botan_pk_op_decrypt_t op, size_t ctext_len, size_t* ptext_len)
+   {
+   if(ptext_len == nullptr)
+      return BOTAN_FFI_ERROR_NULL_POINTER;
+   return BOTAN_FFI_DO(Botan::PK_Decryptor, op, o, { *ptext_len = o.plaintext_length(ctext_len); });
    }
 
 int botan_pk_op_decrypt(botan_pk_op_decrypt_t op,
@@ -98,15 +114,16 @@ int botan_pk_op_sign_create(botan_pk_op_sign_t* op,
                             const char* hash,
                             uint32_t flags)
    {
-   return ffi_guard_thunk(BOTAN_CURRENT_FUNCTION, [=]() -> int {
-      BOTAN_ASSERT_NONNULL(op);
+   if(op == nullptr)
+      return BOTAN_FFI_ERROR_NULL_POINTER;
 
+   if(flags != 0)
+      return BOTAN_FFI_ERROR_BAD_FLAG;
+
+   return ffi_guard_thunk(__func__, [=]() -> int {
       *op = nullptr;
 
-      if(flags != 0)
-         return BOTAN_FFI_ERROR_BAD_FLAG;
-
-      std::unique_ptr<Botan::PK_Signer> pk(new Botan::PK_Signer(safe_get(key_obj),Botan::system_rng(),  hash));
+      std::unique_ptr<Botan::PK_Signer> pk(new Botan::PK_Signer(safe_get(key_obj), Botan::system_rng(), hash));
       *op = new botan_pk_op_sign_struct(pk.release());
       return BOTAN_FFI_SUCCESS;
       });
@@ -115,6 +132,14 @@ int botan_pk_op_sign_create(botan_pk_op_sign_t* op,
 int botan_pk_op_sign_destroy(botan_pk_op_sign_t op)
    {
    return BOTAN_FFI_CHECKED_DELETE(op);
+   }
+
+int botan_pk_op_sign_output_length(botan_pk_op_sign_t op, size_t* sig_len)
+   {
+   if(sig_len == nullptr)
+      return BOTAN_FFI_ERROR_NULL_POINTER;
+
+   return BOTAN_FFI_DO(Botan::PK_Signer, op, o, { *sig_len = o.signature_length(); });
    }
 
 int botan_pk_op_sign_update(botan_pk_op_sign_t op, const uint8_t in[], size_t in_len)
@@ -134,12 +159,14 @@ int botan_pk_op_verify_create(botan_pk_op_verify_t* op,
                               const char* hash,
                               uint32_t flags)
    {
-   return ffi_guard_thunk(BOTAN_CURRENT_FUNCTION, [=]() -> int {
-      BOTAN_ASSERT_NONNULL(op);
+   if(op == nullptr)
+      return BOTAN_FFI_ERROR_NULL_POINTER;
 
-      if(flags != 0)
-         return BOTAN_FFI_ERROR_BAD_FLAG;
+   if(flags != 0)
+      return BOTAN_FFI_ERROR_BAD_FLAG;
 
+   return ffi_guard_thunk(__func__, [=]() -> int {
+      *op = nullptr;
       std::unique_ptr<Botan::PK_Verifier> pk(new Botan::PK_Verifier(safe_get(key_obj), hash));
       *op = new botan_pk_op_verify_struct(pk.release());
       return BOTAN_FFI_SUCCESS;
@@ -158,7 +185,7 @@ int botan_pk_op_verify_update(botan_pk_op_verify_t op, const uint8_t in[], size_
 
 int botan_pk_op_verify_finish(botan_pk_op_verify_t op, const uint8_t sig[], size_t sig_len)
    {
-   return BOTAN_FFI_DO(Botan::PK_Verifier, op, o, {
+   return BOTAN_FFI_RETURNING(Botan::PK_Verifier, op, o, {
       const bool legit = o.check_signature(sig, sig_len);
 
       if(legit)
@@ -173,14 +200,14 @@ int botan_pk_op_key_agreement_create(botan_pk_op_ka_t* op,
                                      const char* kdf,
                                      uint32_t flags)
    {
-   return ffi_guard_thunk(BOTAN_CURRENT_FUNCTION, [=]() -> int {
-      BOTAN_ASSERT_NONNULL(op);
+   if(op == nullptr)
+      return BOTAN_FFI_ERROR_NULL_POINTER;
 
+   if(flags != 0)
+      return BOTAN_FFI_ERROR_BAD_FLAG;
+
+   return ffi_guard_thunk(__func__, [=]() -> int {
       *op = nullptr;
-
-      if(flags != 0)
-         return BOTAN_FFI_ERROR_BAD_FLAG;
-
       std::unique_ptr<Botan::PK_Key_Agreement> pk(new Botan::PK_Key_Agreement(safe_get(key_obj), Botan::system_rng(), kdf));
       *op = new botan_pk_op_ka_struct(pk.release());
       return BOTAN_FFI_SUCCESS;
@@ -199,6 +226,15 @@ int botan_pk_op_key_agreement_export_public(botan_privkey_t key,
       if(auto kak = dynamic_cast<const Botan::PK_Key_Agreement_Key*>(&k))
          return write_vec_output(out, out_len, kak->public_value());
       return BOTAN_FFI_ERROR_BAD_FLAG;
+      });
+   }
+
+int botan_pk_op_key_agreement_size(botan_pk_op_ka_t op, size_t* out_len)
+   {
+   return BOTAN_FFI_DO(Botan::PK_Key_Agreement, op, o, {
+      if(out_len == nullptr)
+         return BOTAN_FFI_ERROR_NULL_POINTER;
+      *out_len = o.agreed_value_size();
       });
    }
 

@@ -92,6 +92,15 @@ std::string make_bcrypt(const std::string& pass,
                         uint16_t work_factor,
                         char version)
    {
+   /*
+   * On a 4 GHz Skylake, workfactor == 18 takes about 15 seconds to
+   * hash a password. This seems like a reasonable upper bound for the
+   * time being.
+   * Bcrypt allows up to work factor 31 (2^31 iterations)
+   */
+   BOTAN_ARG_CHECK(work_factor >= 4 && work_factor <= 18,
+                   "Invalid bcrypt work factor");
+
    static const uint8_t BCRYPT_MAGIC[8*3] = {
       0x4F, 0x72, 0x70, 0x68, 0x65, 0x61, 0x6E, 0x42,
       0x65, 0x68, 0x6F, 0x6C, 0x64, 0x65, 0x72, 0x53,
@@ -101,10 +110,11 @@ std::string make_bcrypt(const std::string& pass,
    Blowfish blowfish;
 
    // Include the trailing NULL byte, so we need c_str() not data()
-   blowfish.eks_key_schedule(cast_char_ptr_to_uint8(pass.c_str()),
-                             pass.length() + 1,
-                             salt.data(),
-                             work_factor);
+   blowfish.salted_set_key(cast_char_ptr_to_uint8(pass.c_str()),
+                           pass.length() + 1,
+                           salt.data(),
+                           salt.size(),
+                           work_factor);
 
    std::vector<uint8_t> ctext(BCRYPT_MAGIC, BCRYPT_MAGIC + 8*3);
 
@@ -136,7 +146,10 @@ std::string generate_bcrypt(const std::string& pass,
 
    if(version != 'a' && version != 'b' && version != 'y')
       throw Invalid_Argument("Unknown bcrypt version '" + std::string(1, version) + "'");
-   return make_bcrypt(pass, unlock(rng.random_vec(16)), work_factor, version);
+
+   std::vector<uint8_t> salt;
+   rng.random_vec(salt, 16);
+   return make_bcrypt(pass, salt, work_factor, version);
    }
 
 bool check_bcrypt(const std::string& pass, const std::string& hash)

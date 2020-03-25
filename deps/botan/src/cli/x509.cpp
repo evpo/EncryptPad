@@ -23,7 +23,65 @@
    #include <botan/ocsp.h>
 #endif
 
+#if defined(BOTAN_HAS_CERTSTOR_SYSTEM)
+   #include <botan/certstor_system.h>
+#endif
+
 namespace Botan_CLI {
+
+#if defined(BOTAN_HAS_CERTSTOR_SYSTEM)
+
+class Trust_Root_Info final : public Command
+   {
+   public:
+      Trust_Root_Info() : Command("trust_roots --dn --dn-only --display") {}
+
+      std::string group() const override
+         {
+         return "x509";
+         }
+
+      std::string description() const override
+         {
+         return "List certs in the system trust store";
+         }
+
+      void go() override
+         {
+         Botan::System_Certificate_Store trust_roots;
+
+         const auto dn_list = trust_roots.all_subjects();
+
+         if(flag_set("dn-only"))
+            {
+            for(auto dn : dn_list)
+               output() << dn << "\n";
+            }
+         else
+            {
+            for(auto dn : dn_list)
+               {
+               // Some certstores have more than one cert with a particular DN
+               for(auto cert : trust_roots.find_all_certs(dn, std::vector<uint8_t>()))
+                  {
+                  if(flag_set("dn"))
+                     output() << "# " << dn << "\n";
+
+                  if(flag_set("display"))
+                     output() << cert->to_string() << "\n";
+
+                  output() << cert->PEM_encode() << "\n";
+                  }
+               }
+
+            }
+         }
+
+   };
+
+BOTAN_REGISTER_COMMAND("trust_roots", Trust_Root_Info);
+
+#endif
 
 class Sign_Cert final : public Command
    {
@@ -45,23 +103,25 @@ class Sign_Cert final : public Command
       void go() override
          {
          Botan::X509_Certificate ca_cert(get_arg("ca_cert"));
-         std::unique_ptr<Botan::Private_Key> key;
-         const std::string pass = get_arg("ca-key-pass");
+
+         const std::string key_file = get_arg("ca_key");
+         const std::string pass = get_passphrase_arg("Password for " + key_file, "ca-key-pass");
          const std::string emsa = get_arg("emsa");
          const std::string hash = get_arg("hash");
 
+         std::unique_ptr<Botan::Private_Key> key;
          if(!pass.empty())
             {
-            key.reset(Botan::PKCS8::load_key(get_arg("ca_key"), rng(), pass));
+            key.reset(Botan::PKCS8::load_key(key_file, rng(), pass));
             }
          else
             {
-            key.reset(Botan::PKCS8::load_key(get_arg("ca_key"), rng()));
+            key.reset(Botan::PKCS8::load_key(key_file, rng()));
             }
 
          if(!key)
             {
-            throw CLI_Error("Failed to load key from " + get_arg("ca_key"));
+            throw CLI_Error("Failed to load key from " + key_file);
             }
 
          std::map<std::string, std::string> options;
@@ -237,7 +297,7 @@ class Gen_Self_Signed final : public Command
    public:
       Gen_Self_Signed()
          : Command("gen_self_signed key CN --country= --dns= "
-                   "--organization= --email= --days=365 --key-pass= --ca --hash=SHA-256 --emsa= --der") {}
+                   "--organization= --email= --path-limit=1 --days=365 --key-pass= --ca --hash=SHA-256 --emsa= --der") {}
 
       std::string group() const override
          {
@@ -251,16 +311,18 @@ class Gen_Self_Signed final : public Command
 
       void go() override
          {
-         std::unique_ptr<Botan::Private_Key> key(Botan::PKCS8::load_key(get_arg("key"), rng(), get_arg("key-pass")));
+         const std::string key_file = get_arg("key");
+         const std::string passphrase = get_passphrase_arg("Passphrase for " + key_file, "key-pass");
+         std::unique_ptr<Botan::Private_Key> key(Botan::PKCS8::load_key(key_file, rng(), passphrase));
 
          if(!key)
             {
             throw CLI_Error("Failed to load key from " + get_arg("key"));
             }
 
-         const size_t days = get_arg_sz("days");
+         const uint32_t lifetime = static_cast<uint32_t>(get_arg_sz("days") * 24 * 60 * 60);
 
-         Botan::X509_Cert_Options opts("", days * 24 * 60 * 60);
+         Botan::X509_Cert_Options opts("", lifetime);
 
          opts.common_name  = get_arg("CN");
          opts.country      = get_arg("country");
@@ -276,7 +338,7 @@ class Gen_Self_Signed final : public Command
 
          if(flag_set("ca"))
             {
-            opts.CA_key();
+            opts.CA_key(get_arg_sz("path-limit"));
             }
 
          Botan::X509_Certificate cert = Botan::X509::create_self_signed_cert(opts, *key, get_arg("hash"), rng());
@@ -298,7 +360,7 @@ class Generate_PKCS10 final : public Command
    public:
       Generate_PKCS10()
          : Command("gen_pkcs10 key CN --country= --organization= "
-                   "--email= --dns= --ext-ku= --key-pass= --hash=SHA-256 --emsa=") {}
+                   "--ca --path-limit=1 --email= --dns= --ext-ku= --key-pass= --hash=SHA-256 --emsa=") {}
 
       std::string group() const override
          {
@@ -326,6 +388,11 @@ class Generate_PKCS10 final : public Command
          opts.organization = get_arg("organization");
          opts.email        = get_arg("email");
          opts.more_dns     = Botan::split_on(get_arg("dns"), ',');
+
+         if(flag_set("ca"))
+            {
+            opts.CA_key(get_arg_sz("path-limit"));
+            }
 
          for(std::string ext_ku : Botan::split_on(get_arg("ext-ku"), ','))
             {

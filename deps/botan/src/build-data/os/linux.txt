@@ -10,8 +10,13 @@ proc_fs
 clock_gettime
 getauxval
 
+# these are not enabled by default as only available in newer kernel/glibc
+#getrandom
+#getentropy
+
 sockets
 threads
+thread_local
 filesystem
 </target_features>
 

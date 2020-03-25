@@ -9,10 +9,7 @@
 
 #if defined(BOTAN_TARGET_CPU_IS_ARM_FAMILY)
 
-#if defined(BOTAN_TARGET_OS_HAS_GETAUXVAL)
-  #include <sys/auxv.h>
-
-#elif defined(BOTAN_TARGET_OS_IS_IOS)
+#if defined(BOTAN_TARGET_OS_IS_IOS)
   #include <sys/types.h>
   #include <sys/sysctl.h>
 
@@ -102,11 +99,11 @@ uint64_t flags_by_ios_machine_type(const std::string& machine)
 
 #endif
 
-uint64_t CPUID::detect_cpu_features(size_t* cache_line_size)
+uint64_t CPUID::CPUID_Data::detect_cpu_features(size_t* cache_line_size)
    {
    uint64_t detected_features = 0;
 
-#if defined(BOTAN_TARGET_OS_HAS_GETAUXVAL)
+#if defined(BOTAN_TARGET_OS_HAS_GETAUXVAL) || defined(BOTAN_TARGET_OS_HAS_ELF_AUX_INFO)
    /*
    * On systems with getauxval these bits should normally be defined
    * in bits/auxv.h but some buggy? glibc installs seem to miss them.
@@ -130,6 +127,11 @@ uint64_t CPUID::detect_cpu_features(size_t* cache_line_size)
       PMULL_bit = (1 << 4),
       SHA1_bit  = (1 << 5),
       SHA2_bit  = (1 << 6),
+      SHA3_bit  = (1 << 17),
+      SM3_bit  = (1 << 18),
+      SM4_bit  = (1 << 19),
+      SHA2_512_bit  = (1 << 21),
+      SVE_bit = (1 << 22),
 
       ARCH_hwcap_neon   = 16, // AT_HWCAP
       ARCH_hwcap_crypto = 16, // AT_HWCAP
@@ -137,14 +139,17 @@ uint64_t CPUID::detect_cpu_features(size_t* cache_line_size)
    };
 
 #if defined(AT_DCACHEBSIZE)
+   // Exists only on Linux
    const unsigned long dcache_line = ::getauxval(AT_DCACHEBSIZE);
 
    // plausibility check
    if(dcache_line == 32 || dcache_line == 64 || dcache_line == 128)
       *cache_line_size = static_cast<size_t>(dcache_line);
+#else
+   BOTAN_UNUSED(cache_line_size);
 #endif
 
-   const unsigned long hwcap_neon = ::getauxval(ARM_hwcap_bit::ARCH_hwcap_neon);
+   const unsigned long hwcap_neon = OS::get_auxval(ARM_hwcap_bit::ARCH_hwcap_neon);
    if(hwcap_neon & ARM_hwcap_bit::NEON_bit)
       detected_features |= CPUID::CPUID_ARM_NEON_BIT;
 
@@ -153,7 +158,7 @@ uint64_t CPUID::detect_cpu_features(size_t* cache_line_size)
    It doesn't seem worth optimizing this out, since getauxval is
    just reading a field in the ELF header.
    */
-   const unsigned long hwcap_crypto = ::getauxval(ARM_hwcap_bit::ARCH_hwcap_crypto);
+   const unsigned long hwcap_crypto = OS::get_auxval(ARM_hwcap_bit::ARCH_hwcap_crypto);
    if(hwcap_crypto & ARM_hwcap_bit::AES_bit)
       detected_features |= CPUID::CPUID_ARM_AES_BIT;
    if(hwcap_crypto & ARM_hwcap_bit::PMULL_bit)
@@ -162,6 +167,19 @@ uint64_t CPUID::detect_cpu_features(size_t* cache_line_size)
       detected_features |= CPUID::CPUID_ARM_SHA1_BIT;
    if(hwcap_crypto & ARM_hwcap_bit::SHA2_bit)
       detected_features |= CPUID::CPUID_ARM_SHA2_BIT;
+
+#if defined(BOTAN_TARGET_ARCH_IS_ARM64)
+   if(hwcap_crypto & ARM_hwcap_bit::SHA3_bit)
+      detected_features |= CPUID::CPUID_ARM_SHA3_BIT;
+   if(hwcap_crypto & ARM_hwcap_bit::SM3_bit)
+      detected_features |= CPUID::CPUID_ARM_SM3_BIT;
+   if(hwcap_crypto & ARM_hwcap_bit::SM4_bit)
+      detected_features |= CPUID::CPUID_ARM_SM4_BIT;
+   if(hwcap_crypto & ARM_hwcap_bit::SHA2_512_bit)
+      detected_features |= CPUID::CPUID_ARM_SHA2_512_BIT;
+   if(hwcap_crypto & ARM_hwcap_bit::SVE_bit)
+      detected_features |= CPUID::CPUID_ARM_SVE_BIT;
+#endif
 
 #elif defined(BOTAN_TARGET_OS_IS_IOS)
 
@@ -182,11 +200,11 @@ uint64_t CPUID::detect_cpu_features(size_t* cache_line_size)
    NEON registers v0-v7 are caller saved in Aarch64
    */
 
-   auto neon_probe  = []() -> int { asm("and v0.16b, v0.16b, v0.16b"); return 1; };
-   auto aes_probe   = []() -> int { asm(".word 0x4e284800"); return 1; };
-   auto pmull_probe = []() -> int { asm(".word 0x0ee0e000"); return 1; };
-   auto sha1_probe  = []() -> int { asm(".word 0x5e280800"); return 1; };
-   auto sha2_probe  = []() -> int { asm(".word 0x5e282800"); return 1; };
+   auto neon_probe  = []() noexcept -> int { asm("and v0.16b, v0.16b, v0.16b"); return 1; };
+   auto aes_probe   = []() noexcept -> int { asm(".word 0x4e284800"); return 1; };
+   auto pmull_probe = []() noexcept -> int { asm(".word 0x0ee0e000"); return 1; };
+   auto sha1_probe  = []() noexcept -> int { asm(".word 0x5e280800"); return 1; };
+   auto sha2_probe  = []() noexcept -> int { asm(".word 0x5e282800"); return 1; };
 
    // Only bother running the crypto detection if we found NEON
 

@@ -8,7 +8,8 @@ output_to_exe "/OUT:"
 
 add_include_dir_option "/I"
 add_lib_dir_option "/LIBPATH:"
-add_lib_option ""
+add_compile_definition_option "/D"
+add_lib_option "%s.lib"
 
 compile_flags "/nologo /c"
 
@@ -23,8 +24,15 @@ debug_info_flags "/Zi /FS"
 
 preproc_flags "/nologo /EP"
 
-lang_flags "/EHs /GR"
-warning_flags "/W4 /wd4250 /wd4251 /wd4275"
+lang_flags "/EHs /GR /D_ENABLE_EXTENDED_ALIGNED_STORAGE"
+
+# 4250: diamond inheritence warning
+# 4251: STL types used in DLL interface
+# 4275: ???
+# 4127: conditional expression is constant, consider using if constexpr
+warning_flags "/W4 /wd4250 /wd4251 /wd4275 /wd4127"
+
+werror_flags "/WX"
 
 visibility_build_flags "/DBOTAN_DLL=__declspec(dllexport)"
 visibility_attribute "__declspec(dllimport)"
@@ -33,12 +41,18 @@ ar_command lib
 ar_options "/nologo"
 ar_output_to "/OUT:"
 
+<sanitizers>
+default -> iterator
+
+iterator -> "/D_ITERATOR_DEBUG_LEVEL=1"
+</sanitizers>
+
 <isa_flags>
 sse2   -> ""
 ssse3  -> ""
 sse41 -> ""
 sse42 -> ""
-x86_64:avx2   -> ""
+x86_64:avx2   -> "/arch:AVX"
 bmi2   -> ""
 aesni  -> ""
 clmul  -> ""
@@ -46,6 +60,10 @@ rdrand -> ""
 rdseed -> ""
 sha    -> ""
 </isa_flags>
+
+<lib_flags>
+debug -> "/Fd%{build_dir}/%{libname}%{lib_suffix}.pdb"
+</lib_flags>
 
 <so_link_commands>
 default       -> "$(LINKER) /DLL"

@@ -7,9 +7,10 @@
 
 #include <botan/serpent.h>
 #include <botan/loadstor.h>
+#include <botan/rotate.h>
 #include <botan/internal/serpent_sbox.h>
 
-#if defined(BOTAN_HAS_SERPENT_SIMD)
+#if defined(BOTAN_HAS_SERPENT_SIMD) || defined(BOTAN_HAS_SERPENT_AVX2)
   #include <botan/cpuid.h>
 #endif
 
@@ -58,6 +59,19 @@ inline void i_transform(uint32_t& B0, uint32_t& B1, uint32_t& B2, uint32_t& B3)
 void Serpent::encrypt_n(const uint8_t in[], uint8_t out[], size_t blocks) const
    {
    verify_key_set(m_round_key.empty() == false);
+
+#if defined(BOTAN_HAS_SERPENT_AVX2)
+   if(CPUID::has_avx2())
+      {
+      while(blocks >= 8)
+         {
+         avx2_encrypt_8(in, out);
+         in += 8 * BLOCK_SIZE;
+         out += 8 * BLOCK_SIZE;
+         blocks -= 8;
+         }
+      }
+#endif
 
 #if defined(BOTAN_HAS_SERPENT_SIMD)
    if(CPUID::has_simd_32())
@@ -120,6 +134,19 @@ void Serpent::encrypt_n(const uint8_t in[], uint8_t out[], size_t blocks) const
 void Serpent::decrypt_n(const uint8_t in[], uint8_t out[], size_t blocks) const
    {
    verify_key_set(m_round_key.empty() == false);
+
+#if defined(BOTAN_HAS_SERPENT_AVX2)
+   if(CPUID::has_avx2())
+      {
+      while(blocks >= 8)
+         {
+         avx2_decrypt_8(in, out);
+         in += 8 * BLOCK_SIZE;
+         out += 8 * BLOCK_SIZE;
+         blocks -= 8;
+         }
+      }
+#endif
 
 #if defined(BOTAN_HAS_SERPENT_SIMD)
    if(CPUID::has_simd_32())
@@ -250,6 +277,13 @@ void Serpent::clear()
 
 std::string Serpent::provider() const
    {
+#if defined(BOTAN_HAS_SERPENT_AVX2)
+   if(CPUID::has_avx2())
+      {
+      return "avx2";
+      }
+#endif
+
 #if defined(BOTAN_HAS_SERPENT_SIMD)
    if(CPUID::has_simd_32())
       {
@@ -259,5 +293,7 @@ std::string Serpent::provider() const
 
    return "base";
    }
+
+#undef key_xor
 
 }

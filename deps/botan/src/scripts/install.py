@@ -16,6 +16,7 @@ import os
 import shutil
 import sys
 import subprocess
+import traceback
 
 def parse_command_line(args):
 
@@ -153,10 +154,11 @@ def main(args):
     target_os = cfg['os']
     build_shared_lib = bool(cfg['build_shared_lib'])
     build_static_lib = bool(cfg['build_static_lib'])
+    build_cli = bool(cfg['build_cli_exe'])
     out_dir = cfg['out_dir']
 
-    bin_dir = os.path.join(options.prefix, options.bindir)
-    lib_dir = os.path.join(options.prefix, options.libdir)
+    bin_dir = options.bindir
+    lib_dir = options.libdir
     target_include_dir = os.path.join(options.prefix,
                                       options.includedir,
                                       'botan-%d' % (ver_major),
@@ -189,7 +191,7 @@ def main(args):
             libname = cfg['libname']
             soname_base = libname + '.dll'
             copy_executable(os.path.join(out_dir, soname_base),
-                            prepend_destdir(os.path.join(lib_dir, soname_base)))
+                            prepend_destdir(os.path.join(bin_dir, soname_base)))
         else:
             soname_patch = cfg['soname_patch']
             soname_abi = cfg['soname_abi']
@@ -207,14 +209,15 @@ def main(args):
                 finally:
                     os.chdir(prev_cwd)
 
-    copy_executable(cfg['cli_exe'], prepend_destdir(os.path.join(bin_dir, cfg['cli_exe_name'])))
+    if build_cli:
+        copy_executable(cfg['cli_exe'], prepend_destdir(os.path.join(bin_dir, cfg['cli_exe_name'])))
 
-    # On Darwin, if we are using shared libraries and we install, we should fix
+    # On MacOS, if we are using shared libraries and we install, we should fix
     # up the library name, otherwise the botan command won't work; ironically
     # we only need to do this because we previously changed it from a setting
     # that would be correct for installation to one that lets us run it from
     # the build directory
-    if target_os == 'darwin' and build_shared_lib:
+    if target_os == 'macos' and build_shared_lib and build_cli:
         soname_abi = cfg['soname_abi']
 
         subprocess.check_call(['install_name_tool',
@@ -229,7 +232,7 @@ def main(args):
         copy_file(cfg['botan_pkgconfig'],
                   prepend_destdir(os.path.join(pkgconfig_dir, os.path.basename(cfg['botan_pkgconfig']))))
 
-    if 'ffi' in cfg['mod_list']:
+    if 'ffi' in cfg['mod_list'] and cfg['build_shared_lib'] is True and cfg['install_python_module'] is True:
         for ver in cfg['python_version'].split(','):
             py_lib_path = os.path.join(lib_dir, 'python%s' % (ver), 'site-packages')
             logging.debug('Installing python module to %s' % (py_lib_path))
@@ -269,6 +272,5 @@ if __name__ == '__main__':
         sys.exit(main(sys.argv))
     except Exception as e: # pylint: disable=broad-except
         logging.error('Failure: %s' % (e))
-        import traceback
         logging.info(traceback.format_exc())
         sys.exit(1)

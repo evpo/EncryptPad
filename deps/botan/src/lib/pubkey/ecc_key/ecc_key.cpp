@@ -127,15 +127,17 @@ EC_PrivateKey::EC_PrivateKey(RandomNumberGenerator& rng,
       m_private_key = x;
       }
 
-   // Can't use rng here because ffi load functions use Null_RNG
+   std::vector<BigInt> ws;
+
    if(with_modular_inverse)
       {
       // ECKCDSA
-      m_public_key = domain().get_base_point() * m_domain_params.inverse_mod_order(m_private_key);
+      m_public_key = domain().blinded_base_point_multiply(
+         m_domain_params.inverse_mod_order(m_private_key), rng, ws);
       }
    else
       {
-      m_public_key = domain().get_base_point() * m_private_key;
+      m_public_key = domain().blinded_base_point_multiply(m_private_key, rng, ws);
       }
 
    BOTAN_ASSERT(m_public_key.on_the_curve(),
@@ -147,8 +149,10 @@ secure_vector<uint8_t> EC_PrivateKey::private_key_bits() const
    return DER_Encoder()
       .start_cons(SEQUENCE)
          .encode(static_cast<size_t>(1))
-         .encode(BigInt::encode_1363(m_private_key, m_private_key.bytes()),
-                 OCTET_STRING)
+         .encode(BigInt::encode_1363(m_private_key, m_private_key.bytes()), OCTET_STRING)
+         .start_cons(ASN1_Tag(1), PRIVATE)
+            .encode(m_public_key.encode(PointGFp::Compression_Type::UNCOMPRESSED), BIT_STRING)
+         .end_cons()
       .end_cons()
       .get_contents();
    }

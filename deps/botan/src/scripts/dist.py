@@ -47,9 +47,9 @@ def check_subprocess_results(subproc, name):
         if stderr != '':
             logging.error(stderr)
         raise Exception('Running %s failed' % (name))
-    else:
-        if stderr != '':
-            logging.warning(stderr)
+
+    if stderr != '':
+        logging.warning(stderr)
 
     return raw_stdout
 
@@ -100,7 +100,7 @@ def gpg_sign(keyid, passphrase_file, files, detached=True):
     options = ['--armor', '--detach-sign'] if detached else ['--clearsign']
 
     gpg_cmd = ['gpg', '--batch'] + options + ['--local-user', keyid]
-    if passphrase_file != None:
+    if passphrase_file is not None:
         gpg_cmd[1:1] = ['--passphrase-file', passphrase_file]
 
     for filename in files:
@@ -136,7 +136,7 @@ def parse_args(args):
     parser.add_option('--print-output-names', action='store_true',
                       help='Print output archive filenames to stdout')
 
-    parser.add_option('--archive-types', metavar='LIST', default='tgz',
+    parser.add_option('--archive-types', metavar='LIST', default='txz',
                       help='Set archive types to generate (default %default)')
 
     parser.add_option('--pgp-key-id', metavar='KEYID',
@@ -206,7 +206,20 @@ def rewrite_version_file(version_file, target_version, snapshot_branch, rev_id, 
     open(version_file, 'w').write(''.join(list(content_rewriter())))
 
 def write_archive(output_basename, archive_type, rel_epoch, all_files, hash_file):
-    output_archive = output_basename + '.' + archive_type
+
+    def archive_suffix(archive_type):
+        if archive_type == 'tgz':
+            return 'tgz'
+        elif archive_type == 'tbz':
+            return 'tar.bz2'
+        elif archive_type == 'txz':
+            return 'tar.xz'
+        elif archive_type == 'tar':
+            return 'tar'
+        else:
+            raise Exception("Unknown archive type '%s'" % (archive_type))
+
+    output_archive = output_basename + '.' + archive_suffix(archive_type)
     logging.info('Writing archive "%s"' % (output_archive))
 
     remove_file_if_exists(output_archive)
@@ -217,6 +230,8 @@ def write_archive(output_basename, archive_type, rel_epoch, all_files, hash_file
             return 'w:gz'
         elif archive_type == 'tbz':
             return 'w:bz2'
+        elif archive_type == 'txz':
+            return 'w:xz'
         elif archive_type == 'tar':
             return 'w'
         else:
@@ -231,7 +246,8 @@ def write_archive(output_basename, archive_type, rel_epoch, all_files, hash_file
                                fileobj=open(output_archive, 'wb'))
     else:
         archive = tarfile.open(output_basename + '.tar',
-                               write_mode(archive_type))
+                               write_mode(archive_type),
+                               fileobj=open(output_archive, 'wb'))
 
     for f in all_files:
         tarinfo = archive.gettarinfo(f)
@@ -243,12 +259,15 @@ def write_archive(output_basename, archive_type, rel_epoch, all_files, hash_file
         archive.addfile(tarinfo, open(f, 'rb'))
     archive.close()
 
+    archive_contents = open(output_archive, 'rb').read()
+
     sha256 = hashlib.new('sha256')
-    sha256.update(open(output_archive, 'rb').read())
+    sha256.update(archive_contents)
     archive_hash = sha256.hexdigest().upper()
 
+    logging.info('%s is %.2f MiB' % (output_archive, len(archive_contents) / (1024.0*1024.0)))
     logging.info('SHA-256(%s) = %s' % (output_archive, archive_hash))
-    if hash_file != None:
+    if hash_file is not None:
         hash_file.write("%s  %s\n" % (archive_hash, output_archive))
 
     return output_archive
@@ -259,7 +278,7 @@ def configure_logging(options):
             super(ExitOnErrorLogHandler, self).emit(record)
             # Exit script if and ERROR or worse occurred
             if record.levelno >= logging.ERROR:
-                if sys.exc_info()[2] != None:
+                if sys.exc_info()[2] is not None:
                     logging.info(traceback.format_exc())
                 sys.exit(1)
 
@@ -276,7 +295,7 @@ def configure_logging(options):
     logging.getLogger().setLevel(log_level())
 
 def main(args=None):
-    # pylint: disable=too-many-branches,too-many-locals
+    # pylint: disable=too-many-branches,too-many-locals,too-many-statements
     if args is None:
         args = sys.argv[1:]
 
@@ -292,7 +311,7 @@ def main(args=None):
 
     archives = options.archive_types.split(',') if options.archive_types != '' else []
     for archive_type in archives:
-        if archive_type not in ['tar', 'tgz', 'tbz']:
+        if archive_type not in ['tar', 'tgz', 'tbz', 'txz']:
             logging.error('Unknown archive type "%s"' % (archive_type))
 
     if args[0] == 'snapshot':
@@ -311,10 +330,9 @@ def main(args=None):
         try:
             logging.info('Creating release for version %s' % (target_version))
 
-            (major, minor, patch) = map(int, target_version.split('.'))
+            (major, minor, patch) = [int(x) for x in target_version.split('.')]
 
             assert target_version == '%d.%d.%d' % (major, minor, patch)
-            target_version = target_version
         except ValueError as e:
             logging.error('Invalid version number %s' % (target_version))
 
@@ -382,19 +400,19 @@ def main(args=None):
     output_files = []
 
     hash_file = None
-    if options.write_hash_file != None:
+    if options.write_hash_file is not None:
         hash_file = open(options.write_hash_file, 'w')
 
     for archive_type in archives:
         output_files.append(write_archive(output_basename, archive_type, rel_epoch, all_files, hash_file))
 
-    if hash_file != None:
+    if hash_file is not None:
         hash_file.close()
 
     shutil.rmtree(output_basename)
 
     if options.pgp_key_id != 'none':
-        if options.write_hash_file != None:
+        if options.write_hash_file is not None:
             output_files += gpg_sign(options.pgp_key_id, options.pgp_passphrase_file,
                                      [options.write_hash_file], False)
         else:

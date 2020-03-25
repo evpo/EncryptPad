@@ -1,90 +1,82 @@
 #!/bin/bash
-set -ev
-which shellcheck > /dev/null && shellcheck "$0" # Run shellcheck on this if available
 
-git clone --depth 1 https://github.com/randombit/botan-ci-tools
+# Travis CI setup script for Botan build
+#
+# (C) 2015,2017 Simon Warta
+# (C) 2016,2017,2018 Jack Lloyd
+
+command -v shellcheck > /dev/null && shellcheck "$0" # Run shellcheck on this if available
+
+set -ev
 
 if [ "$TRAVIS_OS_NAME" = "linux" ]; then
 
-    # ccache in Trusty is too old, use version from Xenial
-    sudo dpkg -i botan-ci-tools/ubuntu/ccache_3.2.4-1_amd64.deb
+    if [ "$TRAVIS_ARCH" = "aarch64" ]; then
+        sudo apt-get -qq update
+        sudo apt-get install liblzma-dev libbz2-dev ccache
+    fi
 
-    if [ "$BUILD_MODE" = "valgrind" ]; then
+    if [ "$TARGET" = "valgrind" ]; then
         sudo apt-get -qq update
         sudo apt-get install valgrind
 
-    elif [ "$BUILD_MODE" = "cross-win32" ]; then
-        # See https://github.com/travis-ci/travis-ci/issues/6460
-        sudo dpkg --add-architecture i386
-        sudo apt-get -qq update # have to run this after --add-architecture
-        sudo apt-get install wine g++-mingw-w64-i686 mingw-w64-i686-dev
-
-    elif [ "${BUILD_MODE:0:5}" = "cross" ]; then
-         # Need updated qemu
-         sudo add-apt-repository -y ppa:ubuntu-cloud-archive/kilo-staging
-         sudo apt-get -qq update
-         sudo apt-get install qemu-user
-
-         if [ "$BUILD_MODE" = "cross-arm32" ]; then
-             sudo apt-get install g++-arm-linux-gnueabihf libc6-dev-armhf-cross
-         elif [ "$BUILD_MODE" = "cross-arm64" ]; then
-             sudo apt-get install g++-aarch64-linux-gnu libc6-dev-arm64-cross
-         elif [ "$BUILD_MODE" = "cross-ppc32" ]; then
-             sudo apt-get install g++-powerpc-linux-gnu libc6-dev-powerpc-cross
-         elif [ "$BUILD_MODE" = "cross-ppc64" ]; then
-             sudo apt-get install g++-powerpc64le-linux-gnu libc6-dev-ppc64el-cross
-         fi
-
-    elif [ "$BUILD_MODE" = "lint" ]; then
-        pip install --user pylint
-
-        sudo apt-get install python3-pip
-        pip3 install --user pylint
-
-    elif [ "$BUILD_MODE" = "coverage" ]; then
+    elif [ "$TARGET" = "gcc4.8" ]; then
         sudo apt-get -qq update
-        sudo apt-get install trousers libtspi-dev
+        sudo apt-get install g++-4.8
 
-        # SoftHSMv1 in 14.04 does not work
-        # Installs prebuilt SoftHSMv2 binaries into /tmp
-        tar -C / -xvjf botan-ci-tools/softhsm2-trusty-bin.tar.bz2
-        /tmp/softhsm/bin/softhsm2-util --init-token --free --label test --pin 123456 --so-pin 12345678
+    elif [ "$TARGET" = "cross-i386" ]; then
+        sudo apt-get -qq update
+        sudo apt-get install g++-multilib linux-libc-dev libc6-dev-i386
 
-        # need updated lcov for gcc 4.8 coverage format
-        sudo dpkg -i botan-ci-tools/ubuntu/lcov_1.12-2_all.deb
+    elif [ "$TARGET" = "cross-win64" ]; then
+        sudo apt-get -qq update
+        sudo apt-get install wine-development g++-mingw-w64-x86-64
 
-        (cd /home/travis/bin && ln -s gcov-4.8 gcov)
+    elif [ "$TARGET" = "cross-arm32" ]; then
+        sudo apt-get -qq update
+        sudo apt-get install qemu-user g++-arm-linux-gnueabihf
 
-        pip install --user coverage
+    elif [ "$TARGET" = "cross-arm64" ]; then
+        sudo apt-get -qq update
+        sudo apt-get install qemu-user g++-aarch64-linux-gnu
+
+    elif [ "$TARGET" = "cross-ppc32" ]; then
+        sudo apt-get -qq update
+        sudo apt-get install qemu-user g++-powerpc-linux-gnu
+
+    elif [ "$TARGET" = "cross-ppc64" ]; then
+        sudo apt-get -qq update
+        sudo apt-get install qemu-user g++-powerpc64le-linux-gnu
+
+    elif [ "$TARGET" = "cross-mips64" ]; then
+        sudo apt-get -qq update
+        sudo apt-get install qemu-user g++-mips64-linux-gnuabi64
+
+    elif [ "$TARGET" = "cross-android-arm32" ] || [ "$TARGET" = "cross-android-arm64" ]; then
+        wget -nv https://dl.google.com/android/repository/"$ANDROID_NDK"-linux-x86_64.zip
+        unzip -qq "$ANDROID_NDK"-linux-x86_64.zip
+
+    elif [ "$TARGET" = "lint" ]; then
+        sudo apt-get -qq update
+        sudo apt-get install pylint
+
+    elif [ "$TARGET" = "coverage" ]; then
+        # need updated softhsm to avoid https://github.com/opendnssec/SoftHSMv2/issues/239
+        sudo add-apt-repository -y ppa:pkg-opendnssec/ppa
+        sudo apt-get -qq update
+        sudo apt-get install softhsm2 trousers libtspi-dev lcov python-coverage libboost-all-dev golang-1.10 gdb
         pip install --user codecov==2.0.10
+        git clone --depth 1 --branch runner-changes-golang1.10 https://github.com/randombit/boringssl.git
 
-    elif [ "$BUILD_MODE" = "sonar" ]; then
+        sudo chgrp -R "$(id -g)" /var/lib/softhsm/ /etc/softhsm
+        sudo mkdir /var/lib/softhsm/tokens
+        sudo chmod g+w /var/lib/softhsm/tokens
+
+        softhsm2-util --init-token --free --label test --pin 123456 --so-pin 12345678
+
+    elif [ "$TARGET" = "docs" ]; then
         sudo apt-get -qq update
-        sudo apt-get install trousers libtspi-dev
-        # installed llvm-3.4 conflicts with clang-3.9 in /usr/local
-        # we need a more recent llvm-cov for coverage reports
-        sudo apt-get remove llvm
-
-        tar -C / -xvjf botan-ci-tools/softhsm2-trusty-bin.tar.bz2
-        /tmp/softhsm/bin/softhsm2-util --init-token --free --label test --pin 123456 --so-pin 12345678
-
-        wget https://sonarqube.com/static/cpp/build-wrapper-linux-x86.zip
-        unzip build-wrapper-linux-x86.zip
-
-    elif [ "$BUILD_MODE" = "docs" ]; then
-        sudo apt-get -qq update
-        sudo apt-get install doxygen python-docutils
-
-        # The version of Sphinx in 14.04 is too old (1.2.2) and does not support
-        # all C++ features used in the manual. Install python-requests to avoid
-        # problem in Ubuntu packaged version, see
-        # http://stackoverflow.com/questions/32779919/no-module-named-for-requests
-        #
-        # Reinstall roman due to https://github.com/sphinx-doc/sphinx/issues/5022
-        #
-
-        sudo apt-get remove python-requests python-openssl python-roman
-        sudo pip install requests pyopenssl roman sphinx
+        sudo apt-get install doxygen python-docutils python-sphinx
     fi
 
 elif [ "$TRAVIS_OS_NAME" = "osx" ]; then

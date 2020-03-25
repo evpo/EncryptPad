@@ -26,10 +26,10 @@ const char* to_string(Certificate_Status_Code code)
          return "Certificate serial number is negative";
       case Certificate_Status_Code::DN_TOO_LONG:
          return "Distinguished name too long";
-      case Certificate_Status_Code::OSCP_NO_REVOCATION_URL:
+      case Certificate_Status_Code::OCSP_NO_REVOCATION_URL:
          return "OCSP URL not available";
-      case Certificate_Status_Code::OSCP_SERVER_NOT_AVAILABLE:
-         return "OSCP server not available";
+      case Certificate_Status_Code::OCSP_SERVER_NOT_AVAILABLE:
+         return "OCSP server not available";
 
       case Certificate_Status_Code::NO_REVOCATION_DATA:
          return "No revocation data";
@@ -46,6 +46,8 @@ const char* to_string(Certificate_Status_Code code)
          return "OCSP is not yet valid";
       case Certificate_Status_Code::OCSP_HAS_EXPIRED:
          return "OCSP response has expired";
+      case Certificate_Status_Code::OCSP_IS_TOO_OLD:
+         return "OCSP response is too old";
       case Certificate_Status_Code::CRL_NOT_YET_VALID:
          return "CRL response is not yet valid";
       case Certificate_Status_Code::CRL_HAS_EXPIRED:

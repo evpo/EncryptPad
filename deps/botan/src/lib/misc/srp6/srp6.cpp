@@ -1,6 +1,6 @@
 /*
 * SRP-6a (RFC 5054 compatatible)
-* (C) 2011,2012 Jack Lloyd
+* (C) 2011,2012,2019 Jack Lloyd
 *
 * Botan is released under the Simplified BSD License (see license.txt)
 */
@@ -64,13 +64,13 @@ std::string srp6_group_identifier(const BigInt& N, const BigInt& g)
 
       if(group.get_p() == N && group.get_g() == g)
          return group_name;
-
-      throw Exception("Unknown SRP params");
       }
    catch(...)
       {
-      throw Invalid_Argument("Bad SRP group parameters");
       }
+
+   // If we didn't return, the group was unknown or did not match
+   throw Invalid_Argument("Invalid or unknown SRP group parameters");
    }
 
 std::pair<BigInt, SymmetricKey>
@@ -82,16 +82,29 @@ srp6_client_agree(const std::string& identifier,
                   const BigInt& B,
                   RandomNumberGenerator& rng)
    {
-   const size_t a_bits = 256;
-
    DL_Group group(group_id);
+   const size_t a_bits = group.exponent_bits();
+
+   return srp6_client_agree(identifier, password, group, hash_id, salt, B, a_bits, rng);
+   }
+
+std::pair<BigInt, SymmetricKey>
+srp6_client_agree(const std::string& identifier,
+                  const std::string& password,
+                  const DL_Group& group,
+                  const std::string& hash_id,
+                  const std::vector<uint8_t>& salt,
+                  const BigInt& B,
+                  const size_t a_bits,
+                  RandomNumberGenerator& rng)
+   {
    const BigInt& g = group.get_g();
    const BigInt& p = group.get_p();
 
    const size_t p_bytes = group.p_bytes();
 
    if(B <= 0 || B >= p)
-      throw Exception("Invalid SRP parameter from server");
+      throw Decoding_Error("Invalid SRP parameter from server");
 
    const BigInt k = hash_seq(hash_id, p_bytes, p, g);
 
@@ -103,7 +116,8 @@ srp6_client_agree(const std::string& identifier,
 
    const BigInt x = compute_x(hash_id, identifier, password, salt);
 
-   const BigInt S = power_mod((B - (k * power_mod(g, x, p))) % p, (a + (u * x)), p);
+   const BigInt S = power_mod(group.mod_p(B - (k * power_mod(g, x, p))),
+                              group.mod_p(a + (u * x)), p);
 
    const SymmetricKey Sk(BigInt::encode_1363(S, p_bytes));
 
@@ -116,10 +130,18 @@ BigInt generate_srp6_verifier(const std::string& identifier,
                               const std::string& group_id,
                               const std::string& hash_id)
    {
-   const BigInt x = compute_x(hash_id, identifier, password, salt);
-
    DL_Group group(group_id);
-   // FIXME: x should be size of hash fn
+   return generate_srp6_verifier(identifier, password, salt, group, hash_id);
+   }
+
+BigInt generate_srp6_verifier(const std::string& identifier,
+                              const std::string& password,
+                              const std::vector<uint8_t>& salt,
+                              const DL_Group& group,
+                              const std::string& hash_id)
+   {
+   const BigInt x = compute_x(hash_id, identifier, password, salt);
+   // FIXME: x should be size of hash fn so avoid computing x.bits() here
    return group.power_g_p(x, x.bits());
    }
 
@@ -128,9 +150,18 @@ BigInt SRP6_Server_Session::step1(const BigInt& v,
                                   const std::string& hash_id,
                                   RandomNumberGenerator& rng)
    {
-   const size_t b_bits = 256;
-
    DL_Group group(group_id);
+   const size_t b_bits = group.exponent_bits();
+
+   return this->step1(v, group, hash_id, b_bits, rng);
+   }
+
+BigInt SRP6_Server_Session::step1(const BigInt& v,
+                                  const DL_Group& group,
+                                  const std::string& hash_id,
+                                  size_t b_bits,
+                                  RandomNumberGenerator& rng)
+   {
    const BigInt& g = group.get_g();
    const BigInt& p = group.get_p();
 
@@ -150,7 +181,7 @@ BigInt SRP6_Server_Session::step1(const BigInt& v,
 SymmetricKey SRP6_Server_Session::step2(const BigInt& A)
    {
    if(A <= 0 || A >= m_p)
-      throw Exception("Invalid SRP parameter from client");
+      throw Decoding_Error("Invalid SRP parameter from client");
 
    const BigInt u = hash_seq(m_hash_id, m_p_bytes, A, m_B);
 

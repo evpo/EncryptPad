@@ -8,6 +8,8 @@ and beautification by scripts. The fields are name (N), email (E),
 web-address (W), PGP key ID and fingerprint (P), description (D),
 snail-mail address (S), and Bitcoin address (B).
 
+.. highlight:: none
+
 ::
 
   N: Alexander Bluhm
@@ -145,5 +147,10 @@ snail-mail address (S), and Bitcoin address (B).
   S: Bochum, Germany
 
   N: Erwan Chaussy
-  D: Base32
+  D: Base32, Base64 matching Base32 implementation
   S: France
+
+  N: Daniel Wyatt (on behalf of Ribose Inc)
+  E: daniel.wyatt@ribose.com
+  W: https://www.ribose.com/
+  D: SM3, Streebog, various minor contributions

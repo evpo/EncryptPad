@@ -10,36 +10,28 @@
 #include <botan/internal/ct_utils.h>
 #include <botan/loadstor.h>
 #include <botan/cpuid.h>
+#include <botan/exceptn.h>
 
-#if defined(BOTAN_HAS_GCM_CLMUL)
-  #include <botan/internal/clmul.h>
+#if defined(BOTAN_HAS_GCM_CLMUL_CPU)
+  #include <botan/internal/clmul_cpu.h>
 #endif
 
 #if defined(BOTAN_HAS_GCM_CLMUL_SSSE3)
   #include <botan/internal/clmul_ssse3.h>
 #endif
 
-#if defined(BOTAN_HAS_GCM_PMULL)
-  #include <botan/internal/pmull.h>
-#endif
-
 namespace Botan {
 
 std::string GHASH::provider() const
    {
-#if defined(BOTAN_HAS_GCM_CLMUL)
-   if(CPUID::has_clmul())
+#if defined(BOTAN_HAS_GCM_CLMUL_CPU)
+   if(CPUID::has_carryless_multiply())
       return "clmul";
 #endif
 
 #if defined(BOTAN_HAS_GCM_CLMUL_SSSE3)
    if(CPUID::has_ssse3())
       return "ssse3";
-#endif
-
-#if defined(BOTAN_HAS_GCM_PMULL)
-   if(CPUID::has_arm_pmull())
-      return "pmull";
 #endif
 
    return "base";
@@ -49,8 +41,8 @@ void GHASH::gcm_multiply(secure_vector<uint8_t>& x,
                          const uint8_t input[],
                          size_t blocks)
    {
-#if defined(BOTAN_HAS_GCM_CLMUL)
-   if(CPUID::has_clmul())
+#if defined(BOTAN_HAS_GCM_CLMUL_CPU)
+   if(CPUID::has_carryless_multiply())
       {
       return gcm_multiply_clmul(x.data(), m_H_pow.data(), input, blocks);
       }
@@ -60,13 +52,6 @@ void GHASH::gcm_multiply(secure_vector<uint8_t>& x,
    if(CPUID::has_ssse3())
       {
       return gcm_multiply_ssse3(x.data(), m_HM.data(), input, blocks);
-      }
-#endif
-
-#if defined(BOTAN_HAS_GCM_PMULL)
-   if(CPUID::has_arm_pmull())
-      {
-      return gcm_multiply_pmull(x.data(), m_H_pow.data(), input, blocks);
       }
 #endif
 
@@ -111,6 +96,8 @@ void GHASH::gcm_multiply(secure_vector<uint8_t>& x,
 void GHASH::ghash_update(secure_vector<uint8_t>& ghash,
                          const uint8_t input[], size_t length)
    {
+   verify_key_set(!m_HM.empty());
+
    /*
    This assumes if less than block size input then we're just on the
    final block and should pad with zeros
@@ -126,9 +113,10 @@ void GHASH::ghash_update(secure_vector<uint8_t>& ghash,
 
    if(final_bytes)
       {
-      secure_vector<uint8_t> last_block(GCM_BS);
-      copy_mem(last_block.data(), input + full_blocks * GCM_BS, final_bytes);
-      gcm_multiply(ghash, last_block.data(), 1);
+      uint8_t last_block[GCM_BS] = { 0 };
+      copy_mem(last_block, input + full_blocks * GCM_BS, final_bytes);
+      gcm_multiply(ghash, last_block, 1);
+      secure_scrub_memory(last_block, final_bytes);
       }
    }
 
@@ -165,32 +153,27 @@ void GHASH::key_schedule(const uint8_t key[], size_t length)
          }
       }
 
-#if defined(BOTAN_HAS_GCM_CLMUL)
-   if(CPUID::has_clmul())
+#if defined(BOTAN_HAS_GCM_CLMUL_CPU)
+   if(CPUID::has_carryless_multiply())
       {
       m_H_pow.resize(8);
       gcm_clmul_precompute(m_H.data(), m_H_pow.data());
       }
 #endif
-
-#if defined(BOTAN_HAS_GCM_PMULL)
-   if(CPUID::has_arm_pmull())
-      {
-      m_H_pow.resize(8);
-      gcm_pmull_precompute(m_H.data(), m_H_pow.data());
-      }
-#endif
-
    }
 
 void GHASH::start(const uint8_t nonce[], size_t len)
    {
+   BOTAN_ARG_CHECK(len == 16, "GHASH requires a 128-bit nonce");
    m_nonce.assign(nonce, nonce + len);
    m_ghash = m_H_ad;
    }
 
 void GHASH::set_associated_data(const uint8_t input[], size_t length)
    {
+   if(m_ghash.empty() == false)
+      throw Invalid_State("Too late to set AD in GHASH");
+
    zeroise(m_H_ad);
 
    ghash_update(m_H_ad, input, length);
@@ -206,7 +189,7 @@ void GHASH::update_associated_data(const uint8_t ad[], size_t length)
 
 void GHASH::update(const uint8_t input[], size_t length)
    {
-   BOTAN_ASSERT(m_ghash.size() == GCM_BS, "Key was set");
+   verify_key_set(m_ghash.size() == GCM_BS);
    m_text_len += length;
    ghash_update(m_ghash, input, length);
    }
@@ -223,33 +206,30 @@ void GHASH::add_final_block(secure_vector<uint8_t>& hash,
    ghash_update(hash, final_block, GCM_BS);
    }
 
-secure_vector<uint8_t> GHASH::final()
+void GHASH::final(uint8_t mac[], size_t mac_len)
    {
+   BOTAN_ARG_CHECK(mac_len > 0 && mac_len <= 16, "GHASH output length");
    add_final_block(m_ghash, m_ad_len, m_text_len);
 
-   secure_vector<uint8_t> mac;
-   mac.swap(m_ghash);
+   for(size_t i = 0; i != mac_len; ++i)
+      mac[i] = m_ghash[i] ^ m_nonce[i];
 
-   mac ^= m_nonce;
+   m_ghash.clear();
    m_text_len = 0;
-   return mac;
    }
 
-secure_vector<uint8_t> GHASH::nonce_hash(const uint8_t nonce[], size_t nonce_len)
+void GHASH::nonce_hash(secure_vector<uint8_t>& y0, const uint8_t nonce[], size_t nonce_len)
    {
    BOTAN_ASSERT(m_ghash.size() == 0, "nonce_hash called during wrong time");
-   secure_vector<uint8_t> y0(GCM_BS);
 
    ghash_update(y0, nonce, nonce_len);
    add_final_block(y0, 0, nonce_len);
-
-   return y0;
    }
 
 void GHASH::clear()
    {
-   zeroise(m_H);
-   zeroise(m_HM);
+   zap(m_H);
+   zap(m_HM);
    reset();
    }
 

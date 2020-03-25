@@ -3,6 +3,7 @@
 aes
 
 # modes
+ccm
 gcm
 cbc
 mode_pad
@@ -51,19 +52,22 @@ hmac_drbg
 <if_available>
 # block
 aes_ni
-aes_ssse3
+aes_vperm
+aes_armv8
+aes_power8
 
 # modes
-clmul
+clmul_cpu
 clmul_ssse3
-pmull
 
 # hash
 sha2_32_x86
 sha2_32_armv8
+sha2_32_bmi2
+sha2_64_bmi2
+sha3_bmi2
 
 # entropy sources
-darwin_secrandom
 dev_random
 proc_walk
 rdrand
@@ -86,7 +90,8 @@ aria
 blowfish
 camellia
 cascade
-cast
+cast128
+cast256
 des
 gost_28147
 idea
@@ -99,6 +104,7 @@ noekeon_simd
 seed
 serpent
 serpent_simd
+serpent_avx2
 shacal2
 shacal2_x86
 shacal2_simd
@@ -109,7 +115,6 @@ twofish
 xtea
 
 # modes
-ccm
 chacha20poly1305
 eax
 ocb
@@ -118,7 +123,8 @@ cfb
 
 # stream
 chacha
-chacha_sse2
+chacha_simd32
+chacha_avx2
 ofb
 rc4
 salsa20
@@ -154,12 +160,11 @@ blake2
 comb4p
 gost_3411
 md4
-#md5 // needed for tls
+md5
 rmd160
-#sha1 // needed for tls
-#sha1_sse2 // needed for tls
 shake
 skein
+#sha1 // needed for x509
 sm3
 streebog
 tiger
@@ -177,5 +182,8 @@ x919_mac
 
 # misc
 bcrypt
+
+# tls
+tls_10
 
 </prohibited>

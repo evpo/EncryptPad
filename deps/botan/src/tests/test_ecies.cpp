@@ -16,7 +16,7 @@ namespace Botan_Tests {
 
 namespace {
 
-#if defined(BOTAN_HAS_ECIES)
+#if defined(BOTAN_HAS_ECIES) && defined(BOTAN_HAS_AES) && defined(BOTAN_HAS_MODE_CBC)
 
 using Flags = Botan::ECIES_Flags;
 
@@ -51,22 +51,22 @@ void check_encrypt_decrypt(Test::Result& result, const Botan::ECDH_PrivateKey& p
                            const Botan::InitializationVector& iv, const std::string& label,
                            const std::vector<uint8_t>& plaintext, const std::vector<uint8_t>& ciphertext)
    {
-   Botan::ECIES_Encryptor ecies_enc(private_key, ecies_params, Test::rng());
-   ecies_enc.set_other_key(other_private_key.public_point());
-   Botan::ECIES_Decryptor ecies_dec(other_private_key, ecies_params, Test::rng());
-   if(!iv.bits_of().empty())
-      {
-      ecies_enc.set_initialization_vector(iv);
-      ecies_dec.set_initialization_vector(iv);
-      }
-   if(!label.empty())
-      {
-      ecies_enc.set_label(label);
-      ecies_dec.set_label(label);
-      }
-
    try
       {
+      Botan::ECIES_Encryptor ecies_enc(private_key, ecies_params, Test::rng());
+      ecies_enc.set_other_key(other_private_key.public_point());
+      Botan::ECIES_Decryptor ecies_dec(other_private_key, ecies_params, Test::rng());
+      if(!iv.bits_of().empty())
+         {
+         ecies_enc.set_initialization_vector(iv);
+         ecies_dec.set_initialization_vector(iv);
+         }
+      if(!label.empty())
+         {
+         ecies_enc.set_label(label);
+         ecies_dec.set_label(label);
+         }
+
       const std::vector<uint8_t> encrypted = ecies_enc.encrypt(plaintext, Test::rng());
       if(!ciphertext.empty())
          {
@@ -196,8 +196,9 @@ class ECIES_Tests final : public Text_Based_Test
       ECIES_Tests()
          : Text_Based_Test(
               "pubkey/ecies.vec",
-              "Curve,PrivateKey,OtherPrivateKey,Kdf,Dem,DemKeyLen,Iv,Mac,MacKeyLen,Format,"
-              "CofactorMode,OldCofactorMode,CheckMode,SingleHashMode,Label,Plaintext,Ciphertext") {}
+              "Curve,PrivateKey,OtherPrivateKey,Kdf,Dem,DemKeyLen,Mac,MacKeyLen,Format,"
+              "CofactorMode,OldCofactorMode,CheckMode,SingleHashMode,Label,Plaintext,Ciphertext",
+              "Iv") {}
 
       Test::Result run_one_test(const std::string&, const VarMap& vars) override
          {
@@ -209,7 +210,7 @@ class ECIES_Tests final : public Text_Based_Test
          const std::string kdf = vars.get_req_str("Kdf");
          const std::string dem = vars.get_req_str("Dem");
          const size_t dem_key_len = vars.get_req_sz("DemKeyLen");
-         const std::vector<uint8_t> iv = vars.get_req_bin("Iv");
+         const std::vector<uint8_t> iv = vars.get_opt_bin("Iv");
          const std::string mac = vars.get_req_str("Mac");
          const size_t mac_key_len = vars.get_req_sz("MacKeyLen");
          const Botan::PointGFp::Compression_Type compression_type = get_compression_type(vars.get_req_str("Format"));
@@ -237,7 +238,7 @@ class ECIES_Tests final : public Text_Based_Test
 
 BOTAN_REGISTER_TEST("ecies", ECIES_Tests);
 
-#if defined(BOTAN_HAS_KDF1_18033) && defined(BOTAN_HAS_HMAC) && defined(BOTAN_HAS_AES)
+#if defined(BOTAN_HAS_KDF1_18033) && defined(BOTAN_HAS_HMAC) && defined(BOTAN_HAS_AES) && defined(BOTAN_HAS_SHA2_64)
 
 Test::Result test_other_key_not_set()
    {
@@ -279,10 +280,9 @@ Test::Result test_kdf_not_found()
          "HMAC(SHA-512)", 20, Botan::PointGFp::Compression_Type::COMPRESSED,
          flags);
 
-   Botan::ECIES_Encryptor ecies_enc(private_key, ecies_params, Test::rng());
-
-   result.test_throws("kdf not found", [ &ecies_enc ]()
+   result.test_throws("kdf not found", [&]()
       {
+      Botan::ECIES_Encryptor ecies_enc(private_key, ecies_params, Test::rng());
       ecies_enc.encrypt(std::vector<uint8_t>(8), Test::rng());
       });
 
@@ -304,10 +304,9 @@ Test::Result test_mac_not_found()
          "XYZMAC(SHA-512)", 20, Botan::PointGFp::Compression_Type::COMPRESSED,
          flags);
 
-   Botan::ECIES_Encryptor ecies_enc(private_key, ecies_params, Test::rng());
-
-   result.test_throws("mac not found", [ &ecies_enc ]()
+   result.test_throws("mac not found", [&]()
       {
+      Botan::ECIES_Encryptor ecies_enc(private_key, ecies_params, Test::rng());
       ecies_enc.encrypt(std::vector<uint8_t>(8), Test::rng());
       });
 
@@ -329,10 +328,9 @@ Test::Result test_cipher_not_found()
          "HMAC(SHA-512)", 20, Botan::PointGFp::Compression_Type::COMPRESSED,
          flags);
 
-   Botan::ECIES_Encryptor ecies_enc(private_key, ecies_params, Test::rng());
-
-   result.test_throws("cipher not found", [ &ecies_enc ]()
+   result.test_throws("cipher not found", [&]()
       {
+      Botan::ECIES_Encryptor ecies_enc(private_key, ecies_params, Test::rng());
       ecies_enc.encrypt(std::vector<uint8_t>(8), Test::rng());
       });
 
@@ -428,11 +426,11 @@ class ECIES_Unit_Tests final : public Test
             {
             try
                {
-               results.push_back(fns[ i ]());
+               results.emplace_back(fns[ i ]());
                }
             catch(std::exception& e)
                {
-               results.push_back(Test::Result::Failure("ECIES unit tests " + std::to_string(i), e.what()));
+               results.emplace_back(Test::Result::Failure("ECIES unit tests " + std::to_string(i), e.what()));
                }
             }
 

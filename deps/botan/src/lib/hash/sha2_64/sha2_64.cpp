@@ -6,8 +6,27 @@
 */
 
 #include <botan/sha2_64.h>
+#include <botan/loadstor.h>
+#include <botan/rotate.h>
+#include <botan/cpuid.h>
 
 namespace Botan {
+
+namespace {
+
+std::string sha512_provider()
+   {
+#if defined(BOTAN_HAS_SHA2_64_BMI2)
+   if(CPUID::has_bmi2())
+      {
+      return "bmi2";
+      }
+#endif
+
+   return "base";
+   }
+
+}
 
 std::unique_ptr<HashFunction> SHA_384::copy_state() const
    {
@@ -23,8 +42,6 @@ std::unique_ptr<HashFunction> SHA_512_256::copy_state() const
    {
    return std::unique_ptr<HashFunction>(new SHA_512_256(*this));
    }
-
-namespace {
 
 /*
 * SHA-512 F1 Function
@@ -47,12 +64,20 @@ namespace {
 /*
 * SHA-{384,512} Compression Function
 */
-void SHA64_compress(secure_vector<uint64_t>& digest,
-                    const uint8_t input[], size_t blocks)
+//static
+void SHA_512::compress_digest(secure_vector<uint64_t>& digest,
+                              const uint8_t input[], size_t blocks)
    {
+#if defined(BOTAN_HAS_SHA2_64_BMI2)
+   if(CPUID::has_bmi2())
+      {
+      return compress_digest_bmi2(digest, input, blocks);
+      }
+#endif
+
    uint64_t A = digest[0], B = digest[1], C = digest[2],
-          D = digest[3], E = digest[4], F = digest[5],
-          G = digest[6], H = digest[7];
+            D = digest[3], E = digest[4], F = digest[5],
+            G = digest[6], H = digest[7];
 
    for(size_t i = 0; i != blocks; ++i)
       {
@@ -167,21 +192,36 @@ void SHA64_compress(secure_vector<uint64_t>& digest,
       }
    }
 
-}
+#undef SHA2_64_F
+
+std::string SHA_512_256::provider() const
+   {
+   return sha512_provider();
+   }
+
+std::string SHA_384::provider() const
+   {
+   return sha512_provider();
+   }
+
+std::string SHA_512::provider() const
+   {
+   return sha512_provider();
+   }
 
 void SHA_512_256::compress_n(const uint8_t input[], size_t blocks)
    {
-   SHA64_compress(m_digest, input, blocks);
+   SHA_512::compress_digest(m_digest, input, blocks);
    }
 
 void SHA_384::compress_n(const uint8_t input[], size_t blocks)
    {
-   SHA64_compress(m_digest, input, blocks);
+   SHA_512::compress_digest(m_digest, input, blocks);
    }
 
 void SHA_512::compress_n(const uint8_t input[], size_t blocks)
    {
-   SHA64_compress(m_digest, input, blocks);
+   SHA_512::compress_digest(m_digest, input, blocks);
    }
 
 void SHA_512_256::copy_out(uint8_t output[])

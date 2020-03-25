@@ -10,6 +10,7 @@
 #include <botan/internal/tls_seq_numbers.h>
 #include <botan/tls_messages.h>
 #include <botan/exceptn.h>
+#include <botan/loadstor.h>
 #include <chrono>
 
 namespace Botan {
@@ -39,18 +40,6 @@ uint64_t steady_clock_ms()
       std::chrono::steady_clock::now().time_since_epoch()).count();
    }
 
-size_t split_for_mtu(size_t mtu, size_t msg_size)
-   {
-   const size_t DTLS_HEADERS_SIZE = 25; // DTLS record+handshake headers
-
-   const size_t parts = (msg_size + mtu) / mtu;
-
-   if(parts + DTLS_HEADERS_SIZE > mtu)
-      return parts + 1;
-
-   return parts;
-   }
-
 }
 
 Protocol_Version Stream_Handshake_IO::initial_record_version() const
@@ -58,16 +47,17 @@ Protocol_Version Stream_Handshake_IO::initial_record_version() const
    return Protocol_Version::TLS_V10;
    }
 
-void Stream_Handshake_IO::add_record(const std::vector<uint8_t>& record,
+void Stream_Handshake_IO::add_record(const uint8_t record[],
+                                     size_t record_len,
                                      Record_Type record_type, uint64_t)
    {
    if(record_type == HANDSHAKE)
       {
-      m_queue.insert(m_queue.end(), record.begin(), record.end());
+      m_queue.insert(m_queue.end(), record, record + record_len);
       }
    else if(record_type == CHANGE_CIPHER_SPEC)
       {
-      if(record.size() != 1 || record[0] != 1)
+      if(record_len != 1 || record[0] != 1)
          throw Decoding_Error("Invalid ChangeCipherSpec");
 
       // Pretend it's a regular handshake message of zero length
@@ -89,6 +79,9 @@ Stream_Handshake_IO::get_next_record(bool)
          {
          Handshake_Type type = static_cast<Handshake_Type>(m_queue[0]);
 
+         if(type == HANDSHAKE_NONE)
+            throw Decoding_Error("Invalid handshake message type");
+
          std::vector<uint8_t> contents(m_queue.begin() + 4,
                                        m_queue.begin() + length);
 
@@ -109,7 +102,7 @@ Stream_Handshake_IO::format(const std::vector<uint8_t>& msg,
 
    const size_t buf_size = msg.size();
 
-   send_buf[0] = type;
+   send_buf[0] = static_cast<uint8_t>(type);
 
    store_be24(&send_buf[1], buf_size);
 
@@ -119,6 +112,11 @@ Stream_Handshake_IO::format(const std::vector<uint8_t>& msg,
       }
 
    return send_buf;
+   }
+
+std::vector<uint8_t> Stream_Handshake_IO::send_under_epoch(const Handshake_Message& /*msg*/, uint16_t /*epoch*/)
+   {
+   throw Invalid_State("Not possible to send under arbitrary epoch with stream based TLS");
    }
 
 std::vector<uint8_t> Stream_Handshake_IO::send(const Handshake_Message& msg)
@@ -193,7 +191,8 @@ bool Datagram_Handshake_IO::timeout_check()
    return true;
    }
 
-void Datagram_Handshake_IO::add_record(const std::vector<uint8_t>& record,
+void Datagram_Handshake_IO::add_record(const uint8_t record[],
+                                       size_t record_len,
                                        Record_Type record_type,
                                        uint64_t record_sequence)
    {
@@ -201,6 +200,9 @@ void Datagram_Handshake_IO::add_record(const std::vector<uint8_t>& record,
 
    if(record_type == CHANGE_CIPHER_SPEC)
       {
+      if(record_len != 1 || record[0] != 1)
+         throw Decoding_Error("Invalid ChangeCipherSpec");
+
       // TODO: check this is otherwise empty
       m_ccs_epochs.insert(epoch);
       return;
@@ -208,28 +210,25 @@ void Datagram_Handshake_IO::add_record(const std::vector<uint8_t>& record,
 
    const size_t DTLS_HANDSHAKE_HEADER_LEN = 12;
 
-   const uint8_t* record_bits = record.data();
-   size_t record_size = record.size();
-
-   while(record_size)
+   while(record_len)
       {
-      if(record_size < DTLS_HANDSHAKE_HEADER_LEN)
+      if(record_len < DTLS_HANDSHAKE_HEADER_LEN)
          return; // completely bogus? at least degenerate/weird
 
-      const uint8_t msg_type = record_bits[0];
-      const size_t msg_len = load_be24(&record_bits[1]);
-      const uint16_t message_seq = load_be<uint16_t>(&record_bits[4], 0);
-      const size_t fragment_offset = load_be24(&record_bits[6]);
-      const size_t fragment_length = load_be24(&record_bits[9]);
+      const uint8_t msg_type = record[0];
+      const size_t msg_len = load_be24(&record[1]);
+      const uint16_t message_seq = load_be<uint16_t>(&record[4], 0);
+      const size_t fragment_offset = load_be24(&record[6]);
+      const size_t fragment_length = load_be24(&record[9]);
 
       const size_t total_size = DTLS_HANDSHAKE_HEADER_LEN + fragment_length;
 
-      if(record_size < total_size)
+      if(record_len < total_size)
          throw Decoding_Error("Bad lengths in DTLS header");
 
       if(message_seq >= m_in_message_seq)
          {
-         m_messages[message_seq].add_fragment(&record_bits[DTLS_HANDSHAKE_HEADER_LEN],
+         m_messages[message_seq].add_fragment(&record[DTLS_HANDSHAKE_HEADER_LEN],
                                               fragment_length,
                                               fragment_offset,
                                               epoch,
@@ -241,8 +240,8 @@ void Datagram_Handshake_IO::add_record(const std::vector<uint8_t>& record,
          // TODO: detect retransmitted flight
          }
 
-      record_bits += total_size;
-      record_size -= total_size;
+      record += total_size;
+      record_len -= total_size;
       }
    }
 
@@ -268,7 +267,9 @@ Datagram_Handshake_IO::get_next_record(bool expecting_ccs)
    auto i = m_messages.find(m_in_message_seq);
 
    if(i == m_messages.end() || !i->second.complete())
+      {
       return std::make_pair(HANDSHAKE_NONE, std::vector<uint8_t>());
+      }
 
    m_in_message_seq += 1;
 
@@ -354,7 +355,7 @@ Datagram_Handshake_IO::format_fragment(const uint8_t fragment[],
    {
    std::vector<uint8_t> send_buf(12 + frag_len);
 
-   send_buf[0] = type;
+   send_buf[0] = static_cast<uint8_t>(type);
 
    store_be24(&send_buf[1], msg_len);
 
@@ -386,18 +387,28 @@ Datagram_Handshake_IO::format(const std::vector<uint8_t>& msg,
    return format_w_seq(msg, type, m_in_message_seq - 1);
    }
 
+std::vector<uint8_t> Datagram_Handshake_IO::send(const Handshake_Message& msg)
+   {
+   return this->send_under_epoch(msg, m_seqs.current_write_epoch());
+   }
 
 std::vector<uint8_t>
-Datagram_Handshake_IO::send(const Handshake_Message& msg)
+Datagram_Handshake_IO::send_under_epoch(const Handshake_Message& msg, uint16_t epoch)
    {
    const std::vector<uint8_t> msg_bits = msg.serialize();
-   const uint16_t epoch = m_seqs.current_write_epoch();
    const Handshake_Type msg_type = msg.type();
 
    if(msg_type == HANDSHAKE_CCS)
       {
       m_send_hs(epoch, CHANGE_CIPHER_SPEC, msg_bits);
       return std::vector<uint8_t>(); // not included in handshake hashes
+      }
+   else if(msg_type == HELLO_VERIFY_REQUEST)
+      {
+      // This message is not included in the handshake hashes
+      send_message(m_out_message_seq, epoch, msg_type, msg_bits);
+      m_out_message_seq += 1;
+      return std::vector<uint8_t>();
       }
 
    // Note: not saving CCS, instead we know it was there due to change in epoch
@@ -416,6 +427,8 @@ std::vector<uint8_t> Datagram_Handshake_IO::send_message(uint16_t msg_seq,
                                                       Handshake_Type msg_type,
                                                       const std::vector<uint8_t>& msg_bits)
    {
+   const size_t DTLS_HANDSHAKE_HEADER_LEN = 12;
+
    const std::vector<uint8_t> no_fragment =
       format_w_seq(msg_bits, msg_type, msg_seq);
 
@@ -425,26 +438,36 @@ std::vector<uint8_t> Datagram_Handshake_IO::send_message(uint16_t msg_seq,
       }
    else
       {
-      const size_t parts = split_for_mtu(m_mtu, msg_bits.size());
-
-      const size_t parts_size = (msg_bits.size() + parts) / parts;
-
       size_t frag_offset = 0;
+
+      /**
+      * Largest possible overhead is for SHA-384 CBC ciphers, with 16 byte IV,
+      * 16+ for padding and 48 bytes for MAC. 128 is probably a strict
+      * over-estimate here. When CBC ciphers are removed this can be reduced
+      * since AEAD modes have no padding, at most 16 byte mac, and smaller
+      * per-record nonce.
+      */
+      const size_t ciphersuite_overhead = (epoch > 0) ? 128 : 0;
+      const size_t header_overhead = DTLS_HEADER_SIZE + DTLS_HANDSHAKE_HEADER_LEN;
+
+      if(m_mtu <= (header_overhead + ciphersuite_overhead))
+         throw Invalid_Argument("DTLS MTU is too small to send headers");
+
+      const size_t max_rec_size = m_mtu - (header_overhead + ciphersuite_overhead);
 
       while(frag_offset != msg_bits.size())
          {
-         const size_t frag_len =
-            std::min<size_t>(msg_bits.size() - frag_offset,
-                             parts_size);
+         const size_t frag_len = std::min<size_t>(msg_bits.size() - frag_offset, max_rec_size);
 
-         m_send_hs(epoch,
-                   HANDSHAKE,
-                   format_fragment(&msg_bits[frag_offset],
-                                   frag_len,
-                                   static_cast<uint16_t>(frag_offset),
-                                   static_cast<uint16_t>(msg_bits.size()),
-                                   msg_type,
-                                   msg_seq));
+         const std::vector<uint8_t> frag =
+            format_fragment(&msg_bits[frag_offset],
+                            frag_len,
+                            static_cast<uint16_t>(frag_offset),
+                            static_cast<uint16_t>(msg_bits.size()),
+                            msg_type,
+                            msg_seq);
+
+         m_send_hs(epoch, HANDSHAKE, frag);
 
          frag_offset += frag_len;
          }

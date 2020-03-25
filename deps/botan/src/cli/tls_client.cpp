@@ -8,8 +8,7 @@
 
 #include "cli.h"
 
-#if defined(BOTAN_HAS_TLS) && defined(BOTAN_TARGET_OS_HAS_FILESYSTEM) && \
-   (defined(BOTAN_TARGET_OS_HAS_SOCKETS) || defined(BOTAN_TARGET_OS_HAS_WINSOCK2))
+#if defined(BOTAN_HAS_TLS) && defined(BOTAN_TARGET_OS_HAS_FILESYSTEM) && defined(BOTAN_TARGET_OS_HAS_SOCKETS)
 
 #include <botan/tls_client.h>
 #include <botan/tls_policy.h>
@@ -27,15 +26,40 @@
 #include <memory>
 
 #include "socket_utils.h"
-#include "credentials.h"
+#include "tls_helpers.h"
 
 namespace Botan_CLI {
+
+class CLI_Policy final : public Botan::TLS::Policy
+   {
+   public:
+
+      CLI_Policy(Botan::TLS::Protocol_Version req_version) : m_version(req_version) {}
+
+      std::vector<std::string> allowed_ciphers() const override
+         {
+         // Allow CBC mode only in versions which don't support AEADs
+         if(m_version.supports_aead_modes() == false)
+            {
+            return { "AES-256", "AES-128" };
+            }
+
+         return Botan::TLS::Policy::allowed_ciphers();
+         }
+
+      bool allow_tls10() const override { return m_version == Botan::TLS::Protocol_Version::TLS_V10; }
+      bool allow_tls11() const override { return m_version == Botan::TLS::Protocol_Version::TLS_V11; }
+      bool allow_tls12() const override { return m_version == Botan::TLS::Protocol_Version::TLS_V12; }
+
+   private:
+      Botan::TLS::Protocol_Version m_version;
+   };
 
 class TLS_Client final : public Command, public Botan::TLS::Callbacks
    {
    public:
       TLS_Client()
-         : Command("tls_client host --port=443 --print-certs --policy= "
+         : Command("tls_client host --port=443 --print-certs --policy=default "
                    "--tls1.0 --tls1.1 --tls1.2 "
                    "--skip-system-cert-store --trusted-cas= "
                    "--session-db= --session-db-pass= --next-protocols= --type=tcp")
@@ -66,17 +90,16 @@ class TLS_Client final : public Command, public Botan::TLS::Callbacks
 
          const std::string sessions_db = get_arg("session-db");
          const std::string host = get_arg("host");
-         const uint16_t port = get_arg_sz("port");
+         const uint16_t port = get_arg_u16("port");
          const std::string transport = get_arg("type");
          const std::string next_protos = get_arg("next-protocols");
-         std::string policy_file = get_arg("policy");
          const bool use_system_cert_store = flag_set("skip-system-cert-store") == false;
          const std::string trusted_CAs = get_arg("trusted-cas");
 
          if(!sessions_db.empty())
             {
 #if defined(BOTAN_HAS_TLS_SQLITE3_SESSION_MANAGER)
-            const std::string sessions_passphrase = get_arg("session-db-pass");
+            const std::string sessions_passphrase = get_passphrase_arg("Session DB passphrase", "session-db-pass");
             session_mgr.reset(new Botan::TLS::Session_Manager_SQLite(sessions_passphrase, rng(), sessions_db));
 #else
             error_output() << "Ignoring session DB file, sqlite not enabled\n";
@@ -88,23 +111,7 @@ class TLS_Client final : public Command, public Botan::TLS::Callbacks
             session_mgr.reset(new Botan::TLS::Session_Manager_In_Memory(rng()));
             }
 
-         std::unique_ptr<Botan::TLS::Policy> policy;
-
-         if(policy_file.size() > 0)
-            {
-            std::ifstream policy_stream(policy_file);
-            if(!policy_stream.good())
-               {
-               error_output() << "Failed reading policy file\n";
-               return;
-               }
-            policy.reset(new Botan::TLS::Text_Policy(policy_stream));
-            }
-
-         if(!policy)
-            {
-            policy.reset(new Botan::TLS::Policy);
-            }
+         auto policy = load_tls_policy(get_arg("policy"));
 
          if(transport != "tcp" && transport != "udp")
             {
@@ -115,19 +122,35 @@ class TLS_Client final : public Command, public Botan::TLS::Callbacks
 
          const std::vector<std::string> protocols_to_offer = Botan::split_on(next_protos, ',');
 
-         m_sockfd = connect_to_host(host, port, use_tcp);
-
-         using namespace std::placeholders;
-
-         auto version = policy->latest_supported_version(!use_tcp);
+         Botan::TLS::Protocol_Version version =
+            use_tcp ? Botan::TLS::Protocol_Version::TLS_V12 : Botan::TLS::Protocol_Version::DTLS_V12;
 
          if(flag_set("tls1.0"))
             {
             version = Botan::TLS::Protocol_Version::TLS_V10;
+            if(!policy)
+               policy.reset(new CLI_Policy(version));
             }
          else if(flag_set("tls1.1"))
             {
             version = Botan::TLS::Protocol_Version::TLS_V11;
+            if(!policy)
+               policy.reset(new CLI_Policy(version));
+            }
+         else if(flag_set("tls1.2"))
+            {
+            version = Botan::TLS::Protocol_Version::TLS_V12;
+            if(!policy)
+               policy.reset(new CLI_Policy(version));
+            }
+         else if(!policy)
+            {
+            policy.reset(new Botan::TLS::Policy);
+            }
+
+         if(policy->acceptable_protocol_version(version) == false)
+            {
+            throw CLI_Usage_Error("The policy specified does not allow the requested TLS version");
             }
 
          struct sockaddr_storage addrbuf;
@@ -138,6 +161,8 @@ class TLS_Client final : public Command, public Botan::TLS::Callbacks
             {
             hostname = host;
             }
+
+         m_sockfd = connect_to_host(host, port, use_tcp);
 
          Basic_Credentials_Manager creds(use_system_cert_store, trusted_CAs);
 
@@ -169,7 +194,7 @@ class TLS_Client final : public Command, public Botan::TLS::Callbacks
 
             struct timeval timeout = { 1, 0 };
 
-            ::select(m_sockfd + 1, &readfds, nullptr, nullptr, &timeout);
+            ::select(static_cast<int>(m_sockfd + 1), &readfds, nullptr, nullptr, &timeout);
 
             if(FD_ISSET(m_sockfd, &readfds))
                {
@@ -184,7 +209,7 @@ class TLS_Client final : public Command, public Botan::TLS::Callbacks
                   }
                else if(got == -1)
                   {
-                  output() << "Socket error: " << errno << " " << std::strerror(errno) << "\n";
+                  output() << "Socket error: " << errno << " " << err_to_string(errno) << "\n";
                   continue;
                   }
 
@@ -204,7 +229,7 @@ class TLS_Client final : public Command, public Botan::TLS::Callbacks
                   }
                else if(got == -1)
                   {
-                  output() << "Stdin error: " << errno << " " << std::strerror(errno) << "\n";
+                  output() << "Stdin error: " << errno << " " << err_to_string(errno) << "\n";
                   continue;
                   }
 
@@ -239,10 +264,10 @@ class TLS_Client final : public Command, public Botan::TLS::Callbacks
          }
 
    private:
-      int connect_to_host(const std::string& host, uint16_t port, bool tcp)
+      socket_type connect_to_host(const std::string& host, uint16_t port, bool tcp)
          {
          addrinfo hints;
-         std::memset(&hints, 0, sizeof(hints));
+         Botan::clear_mem(&hints, 1);
          hints.ai_family = AF_UNSPEC;
          hints.ai_socktype = tcp ? SOCK_STREAM : SOCK_DGRAM;
          addrinfo* res, *rp = nullptr;
@@ -252,18 +277,18 @@ class TLS_Client final : public Command, public Botan::TLS::Callbacks
             throw CLI_Error("getaddrinfo failed for " + host);
             }
 
-         int fd = 0;
+         socket_type fd = 0;
 
          for(rp = res; rp != nullptr; rp = rp->ai_next)
             {
             fd = ::socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
 
-            if(fd == -1)
+            if(fd == invalid_socket())
                {
                continue;
                }
 
-            if(::connect(fd, rp->ai_addr, rp->ai_addrlen) != 0)
+            if(::connect(fd, rp->ai_addr, static_cast<socklen_t>(rp->ai_addrlen)) != 0)
                {
                ::close(fd);
                continue;
@@ -292,7 +317,7 @@ class TLS_Client final : public Command, public Botan::TLS::Callbacks
          {
          if(cert_chain.empty())
             {
-            throw std::invalid_argument("Certificate chain was empty");
+            throw Botan::Invalid_Argument("Certificate chain was empty");
             }
 
          Botan::Path_Validation_Restrictions restrictions(
@@ -401,7 +426,7 @@ class TLS_Client final : public Command, public Botan::TLS::Callbacks
             }
          }
 
-      int m_sockfd = -1;
+      socket_type m_sockfd = invalid_socket();
    };
 
 BOTAN_REGISTER_COMMAND("tls_client", TLS_Client);

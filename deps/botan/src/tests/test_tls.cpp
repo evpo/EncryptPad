@@ -9,6 +9,7 @@
 #include <memory>
 
 #if defined(BOTAN_HAS_TLS)
+  #include "test_rng.h"
   #include <botan/tls_alert.h>
   #include <botan/tls_policy.h>
   #include <botan/tls_session.h>
@@ -52,17 +53,34 @@ class TLS_Session_Tests final : public Test
                                      "SRP username",
                                      0x0000);
 
+         const std::string pem = session.PEM_encode();
+         Botan::TLS::Session session_from_pem(pem);
+         result.test_eq("Roundtrip from pem", session.DER_encode(), session_from_pem.DER_encode());
+
          const Botan::SymmetricKey key("ABCDEF");
-         std::vector<uint8_t> ctext1 = session.encrypt(key, Test::rng());
-         std::vector<uint8_t> ctext2 = session.encrypt(key, Test::rng());
+         const std::vector<uint8_t> ctext1 = session.encrypt(key, Test::rng());
+         const std::vector<uint8_t> ctext2 = session.encrypt(key, Test::rng());
 
          result.test_ne("TLS session encryption is non-determinsitic",
                         ctext1.data(), ctext1.size(),
                         ctext2.data(), ctext2.size());
 
-         Botan::TLS::Session dsession = Botan::TLS::Session::decrypt(ctext1.data(), ctext1.size(), key);
+         const std::vector<uint8_t> expected_hdr = Botan::hex_decode("068B5A9D396C0000F2322CAE");
 
+         result.test_eq("tls", "TLS session encryption same header",
+                        ctext1.data(), 12, expected_hdr.data(), 12);
+         result.test_eq("tls", "TLS session encryption same header",
+                        ctext2.data(), 12, expected_hdr.data(), 12);
+
+         Botan::TLS::Session dsession = Botan::TLS::Session::decrypt(ctext1.data(), ctext1.size(), key);
          result.test_eq("Decrypted session access works", dsession.srp_identifier(), "SRP username");
+
+         Fixed_Output_RNG frng1("00112233445566778899AABBCCDDEEFF802802802802802802802802");
+         const std::vector<uint8_t> ctextf1 = session.encrypt(key, frng1);
+         Fixed_Output_RNG frng2("00112233445566778899AABBCCDDEEFF802802802802802802802802");
+         const std::vector<uint8_t> ctextf2 = session.encrypt(key, frng2);
+
+         result.test_eq("Only randomness comes from RNG", ctextf1, ctextf2);
 
          return {result};
          }
@@ -110,7 +128,8 @@ class TLS_CBC_Tests final : public Text_Based_Test
 
             void final_result(uint8_t out[]) override
                {
-               std::memset(out, 0, m_mac_len);
+               for(size_t i = 0; i != m_mac_len; ++i)
+                  out[i] = 0;
                }
 
             Botan::Key_Length_Specification key_spec() const override
@@ -133,12 +152,12 @@ class TLS_CBC_Tests final : public Text_Based_Test
 
             void encrypt_n(const uint8_t in[], uint8_t out[], size_t blocks) const override
                {
-               std::memmove(out, in, blocks * m_bs);
+               Botan::copy_mem(out, in, blocks * m_bs);
                }
 
             void decrypt_n(const uint8_t in[], uint8_t out[], size_t blocks) const override
                {
-               std::memmove(out, in, blocks * m_bs);
+               Botan::copy_mem(out, in, blocks * m_bs);
                }
 
             size_t block_size() const override { return m_bs; }
@@ -169,13 +188,12 @@ class TLS_CBC_Tests final : public Text_Based_Test
          const bool is_valid = vars.get_req_sz("Valid") == 1;
 
          // todo test permutations
-         bool explicit_iv = true;
          bool encrypt_then_mac = false;
 
          Botan::TLS::TLS_CBC_HMAC_AEAD_Decryption tls_cbc(
             std::unique_ptr<Botan::BlockCipher>(new Noop_Block_Cipher(block_size)),
             std::unique_ptr<Botan::MessageAuthenticationCode>(new ZeroMac(mac_len)),
-            0, 0, explicit_iv, encrypt_then_mac);
+            0, 0, Botan::TLS::Protocol_Version::TLS_V11, encrypt_then_mac);
 
          tls_cbc.set_key(std::vector<uint8_t>(0));
          std::vector<uint8_t> ad(13);
@@ -191,7 +209,7 @@ class TLS_CBC_Tests final : public Text_Based_Test
             else
                result.test_failure("Accepted invalid TLS-CBC ciphertext");
             }
-         catch(std::exception& e)
+         catch(std::exception&)
             {
             if(is_valid)
                result.test_failure("Rejected valid TLS-CBC ciphertext");
@@ -357,11 +375,12 @@ class Test_TLS_Ciphersuites : public Test
 
          for(size_t csuite_id = 0; csuite_id <= 0xFFFF; ++csuite_id)
             {
-            Botan::TLS::Ciphersuite ciphersuite = Botan::TLS::Ciphersuite::by_id(csuite_id);
+            const uint16_t csuite_id16 = static_cast<uint16_t>(csuite_id);
+            Botan::TLS::Ciphersuite ciphersuite = Botan::TLS::Ciphersuite::by_id(csuite_id16);
 
             if(ciphersuite.valid())
                {
-               result.test_eq("Valid Ciphersuite is not SCSV", Botan::TLS::Ciphersuite::is_scsv(csuite_id), false);
+               result.test_eq("Valid Ciphersuite is not SCSV", Botan::TLS::Ciphersuite::is_scsv(csuite_id16), false);
 
                if(ciphersuite.cbc_ciphersuite() == false)
                   {

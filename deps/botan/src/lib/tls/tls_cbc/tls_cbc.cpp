@@ -13,6 +13,7 @@
 
 #include <botan/internal/rounding.h>
 #include <botan/internal/ct_utils.h>
+#include <botan/loadstor.h>
 #include <botan/tls_alert.h>
 #include <botan/tls_exceptn.h>
 
@@ -28,7 +29,7 @@ TLS_CBC_HMAC_AEAD_Mode::TLS_CBC_HMAC_AEAD_Mode(Cipher_Dir dir,
                                                std::unique_ptr<MessageAuthenticationCode> mac,
                                                size_t cipher_keylen,
                                                size_t mac_keylen,
-                                               bool use_explicit_iv,
+                                               Protocol_Version version,
                                                bool use_encrypt_then_mac) :
    m_cipher_name(cipher->name()),
    m_mac_name(mac->name()),
@@ -39,7 +40,9 @@ TLS_CBC_HMAC_AEAD_Mode::TLS_CBC_HMAC_AEAD_Mode(Cipher_Dir dir,
    m_tag_size = mac->output_length();
    m_block_size = cipher->block_size();
 
-   m_iv_size = use_explicit_iv ? m_block_size : 0;
+   m_iv_size = version.supports_explicit_cbc_ivs() ? m_block_size : 0;
+
+   m_is_datagram = version.is_datagram_protocol();
 
    m_mac = std::move(mac);
 
@@ -92,8 +95,8 @@ void TLS_CBC_HMAC_AEAD_Mode::key_schedule(const uint8_t key[], size_t keylen)
    if(keylen != m_cipher_keylen + m_mac_keylen)
       throw Invalid_Key_Length(name(), keylen);
 
-   cbc().set_key(&key[0], m_cipher_keylen);
-   mac().set_key(&key[m_cipher_keylen], m_mac_keylen);
+   mac().set_key(&key[0], m_mac_keylen);
+   cbc().set_key(&key[m_mac_keylen], m_cipher_keylen);
    }
 
 void TLS_CBC_HMAC_AEAD_Mode::start_msg(const uint8_t nonce[], size_t nonce_len)
@@ -129,7 +132,7 @@ std::vector<uint8_t> TLS_CBC_HMAC_AEAD_Mode::assoc_data_with_len(uint16_t len)
 void TLS_CBC_HMAC_AEAD_Mode::set_associated_data(const uint8_t ad[], size_t ad_len)
    {
    if(ad_len != 13)
-      throw Exception("Invalid TLS AEAD associated data length");
+      throw Invalid_Argument("Invalid TLS AEAD associated data length");
    m_ad.assign(ad, ad + ad_len);
    }
 
@@ -141,7 +144,7 @@ void TLS_CBC_HMAC_AEAD_Encryption::set_associated_data(const uint8_t ad[], size_
       {
       // AAD hack for EtM
       const uint16_t pt_size = make_uint16(assoc_data()[11], assoc_data()[12]);
-      const uint16_t enc_size = round_up(iv_size() + pt_size + 1, block_size());
+      const uint16_t enc_size = static_cast<uint16_t>(round_up(iv_size() + pt_size + 1, block_size()));
       assoc_data()[11] = get_byte<uint16_t>(0, enc_size);
       assoc_data()[12] = get_byte<uint16_t>(1, enc_size);
       }
@@ -231,21 +234,21 @@ uint16_t check_tls_cbc_padding(const uint8_t record[], size_t record_len)
    * and allows up to 255 bytes.
    */
 
-   const uint16_t to_check = std::min<uint16_t>(256, record_len);
+   const uint16_t to_check = std::min<uint16_t>(256, static_cast<uint16_t>(record_len));
    const uint8_t pad_byte = record[record_len-1];
    const uint16_t pad_bytes = 1 + pad_byte;
 
-   uint16_t pad_invalid = CT::is_less<uint16_t>(rec16, pad_bytes);
+   auto pad_invalid = CT::Mask<uint16_t>::is_lt(rec16, pad_bytes);
 
    for(uint16_t i = rec16 - to_check; i != rec16; ++i)
       {
       const uint16_t offset = rec16 - i;
-      const uint16_t in_pad_range = CT::is_lte<uint16_t>(offset, pad_bytes);
-      pad_invalid |= (in_pad_range & (record[i] ^ pad_byte));
+      const auto in_pad_range = CT::Mask<uint16_t>::is_lte(offset, pad_bytes);
+      const auto pad_correct = CT::Mask<uint16_t>::is_equal(record[i], pad_byte);
+      pad_invalid |= in_pad_range & ~pad_correct;
       }
 
-   const uint16_t pad_invalid_mask = CT::expand_mask<uint16_t>(pad_invalid);
-   return CT::select<uint16_t>(pad_invalid_mask, 0, pad_byte + 1);
+   return pad_invalid.if_not_set_return(pad_bytes);
    }
 
 void TLS_CBC_HMAC_AEAD_Decryption::cbc_decrypt_record(uint8_t record_contents[], size_t record_len)
@@ -269,46 +272,46 @@ size_t TLS_CBC_HMAC_AEAD_Decryption::output_length(size_t) const
    }
 
 /*
-* This function performs additional compression calls in order 
-* to protect from the Lucky 13 attack. It adds new compression 
+* This function performs additional compression calls in order
+* to protect from the Lucky 13 attack. It adds new compression
 * function calls over dummy data, by computing additional HMAC updates.
 *
 * The countermeasure was described (in a similar way) in the Lucky 13 paper.
-* 
+*
 * Background:
 * - One SHA-1/SHA-256 compression is performed with 64 bytes of data.
 * - HMAC adds 8 byte length field and padding (at least 1 byte) so that we have:
 *   - 0 - 55 bytes: 1 compression
 *   - 56 - 55+64 bytes: 2 compressions
 *   - 56+64 - 55+2*64 bytes: 3 compressions ...
-* - For SHA-384, this works similarly, but we have 128 byte blocks and 16 byte 
+* - For SHA-384, this works similarly, but we have 128 byte blocks and 16 byte
 *   long length field. This results in:
 *   - 0 - 111 bytes: 1 compression
 *   - 112 - 111+128 bytes: 2 compressions ...
-* 
+*
 * The implemented countermeasure works as follows:
 * 1) It computes max_compressions: number of maximum compressions performed on
 *    the decrypted data
-* 2) It computes current_compressions: number of compressions performed on the 
+* 2) It computes current_compressions: number of compressions performed on the
 *    decrypted data, after padding has been removed
-* 3) If current_compressions != max_compressions: It invokes an HMAC update 
-*    over dummy data so that (max_compressions - current_compressions) 
+* 3) If current_compressions != max_compressions: It invokes an HMAC update
+*    over dummy data so that (max_compressions - current_compressions)
 *    compressions are performed. Otherwise, it invokes an HMAC update so that
 *    no compressions are performed.
-* 
+*
 * Note that the padding validation in Botan is always performed over
 * min(plen,256) bytes, see the function check_tls_cbc_padding. This differs
 * from the countermeasure described in the paper.
-* 
+*
 * Note that the padding length padlen does also count the last byte
 * of the decrypted plaintext. This is different from the Lucky 13 paper.
-* 
-* This countermeasure leaves a difference of about 100 clock cycles (in 
+*
+* This countermeasure leaves a difference of about 100 clock cycles (in
 * comparison to >1000 clock cycles observed without it).
-* 
+*
 * plen represents the length of the decrypted plaintext message P
 * padlen represents the padding length
-* 
+*
 */
 void TLS_CBC_HMAC_AEAD_Decryption::perform_additional_compressions(size_t plen, size_t padlen)
    {
@@ -327,7 +330,7 @@ void TLS_CBC_HMAC_AEAD_Decryption::perform_additional_compressions(size_t plen, 
    // number of maximum MACed bytes
    const uint16_t L1 = static_cast<uint16_t>(13 + plen - tag_size());
    // number of current MACed bytes (L1 - padlen)
-   // Here the Lucky 13 paper is different because the padlen length in the paper 
+   // Here the Lucky 13 paper is different because the padlen length in the paper
    // does not count the last message byte.
    const uint16_t L2 = static_cast<uint16_t>(13 + plen - padlen - tag_size());
    // From the paper, for SHA-256/SHA-1 compute: ceil((L1-55)/64) and ceil((L2-55)/64)
@@ -337,13 +340,13 @@ void TLS_CBC_HMAC_AEAD_Decryption::perform_additional_compressions(size_t plen, 
    const uint16_t current_compressions = ((L2 + block_size - 1 - max_bytes_in_first_block) / block_size);
    // number of additional compressions we have to perform
    const uint16_t add_compressions = max_compresssions - current_compressions;
-   const uint8_t equal = CT::is_equal(max_compresssions, current_compressions) & 0x01;
+   const uint16_t equal = CT::Mask<uint16_t>::is_equal(max_compresssions, current_compressions).if_set_return(1);
    // We compute the data length we need to achieve the number of compressions.
    // If there are no compressions, we just add 55/111 dummy bytes so that no
    // compression is performed.
    const uint16_t data_len = block_size * add_compressions + equal * max_bytes_in_first_block;
-   secure_vector<uint8_t> data(data_len);
-   mac().update(unlock(data));
+   std::vector<uint8_t> data(data_len);
+   mac().update(data);
    // we do not need to clear the MAC since the connection is broken anyway
    }
 
@@ -365,8 +368,11 @@ void TLS_CBC_HMAC_AEAD_Decryption::finish(secure_vector<uint8_t>& buffer, size_t
    if(use_encrypt_then_mac())
       {
       const size_t enc_size = record_len - tag_size();
+      const size_t enc_iv_size = enc_size + iv_size();
 
-      mac().update(assoc_data_with_len(iv_size() + enc_size));
+      BOTAN_ASSERT_NOMSG(enc_iv_size <= 0xFFFF);
+
+      mac().update(assoc_data_with_len(static_cast<uint16_t>(enc_iv_size)));
       if(iv_size() > 0)
          {
          mac().update(cbc_state());
@@ -388,7 +394,7 @@ void TLS_CBC_HMAC_AEAD_Decryption::finish(secure_vector<uint8_t>& buffer, size_t
       cbc_decrypt_record(record_contents, enc_size);
 
       // 0 if padding was invalid, otherwise 1 + padding_bytes
-      uint16_t pad_size = check_tls_cbc_padding(record_contents, enc_size);
+      const uint16_t pad_size = check_tls_cbc_padding(record_contents, enc_size);
 
       // No oracle here, whoever sent us this had the key since MAC check passed
       if(pad_size == 0)
@@ -418,8 +424,12 @@ void TLS_CBC_HMAC_AEAD_Decryption::finish(secure_vector<uint8_t>& buffer, size_t
       (sending empty records, instead of 1/(n-1) splitting)
       */
 
-      const uint16_t size_ok_mask = CT::is_lte<uint16_t>(static_cast<uint16_t>(tag_size() + pad_size), static_cast<uint16_t>(record_len));
-      pad_size &= size_ok_mask;
+      // We know the cast cannot overflow as pad_size <= 256 && tag_size <= 32
+      const auto size_ok_mask = CT::Mask<uint16_t>::is_lte(
+         static_cast<uint16_t>(tag_size() + pad_size),
+         static_cast<uint16_t>(record_len));
+
+      pad_size = size_ok_mask.if_set_return(pad_size);
 
       CT::unpoison(record_contents, record_len);
 
@@ -442,17 +452,25 @@ void TLS_CBC_HMAC_AEAD_Decryption::finish(secure_vector<uint8_t>& buffer, size_t
 
       const bool mac_ok = constant_time_compare(&record_contents[mac_offset], mac_buf.data(), tag_size());
 
-      const uint16_t ok_mask = size_ok_mask & CT::expand_mask<uint16_t>(mac_ok) & CT::expand_mask<uint16_t>(pad_size);
+      const auto ok_mask = size_ok_mask & CT::Mask<uint16_t>::expand(mac_ok) & CT::Mask<uint16_t>::expand(pad_size);
 
       CT::unpoison(ok_mask);
 
-      if(ok_mask)
+      if(ok_mask.is_set())
          {
          buffer.insert(buffer.end(), plaintext_block, plaintext_block + plaintext_length);
          }
       else
          {
          perform_additional_compressions(record_len, pad_size);
+
+         /*
+         * In DTLS case we have to finish computing the MAC since we require the
+         * MAC state be reset for future packets. This extra timing channel may
+         * be exploitable in a Lucky13 variant.
+         */
+         if(is_datagram_protocol())
+            mac().final(mac_buf);
          throw TLS_Exception(Alert::BAD_RECORD_MAC, "Message authentication failure");
          }
       }

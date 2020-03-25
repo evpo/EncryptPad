@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
 """
-(C) 2015,2017,2018 Jack Lloyd
+(C) 2015,2017,2018,2019 Jack Lloyd
 
 Botan is released under the Simplified BSD License (see license.txt)
 """
 
-import sys
+import unittest
 import binascii
 import botan2
 
@@ -16,91 +16,164 @@ def hex_encode(buf):
 def hex_decode(buf):
     return binascii.unhexlify(buf.encode('ascii'))
 
-def test():
+class BotanPythonTests(unittest.TestCase):
+    # pylint: disable=too-many-public-methods,too-many-locals
 
-    def test_version():
+    def test_version(self):
+        version_str = botan2.version_string()
+        self.assertTrue(version_str.startswith('Botan '))
 
-        print("\n%s" % botan2.version_string())
-        print("v%d.%d.%d\n" % (botan2.version_major(), botan2.version_minor(), botan2.version_patch()))
-        print("\nPython %s\n" % sys.version.replace('\n', ' '))
+        self.assertEqual(botan2.version_major(), 2)
+        self.assertGreaterEqual(botan2.version_minor(), 8)
 
-    def test_kdf():
-        print("KDF2(SHA-1)   %s" %
-              hex_encode(botan2.kdf('KDF2(SHA-1)',
-                                    hex_decode('701F3480DFE95F57941F804B1B2413EF'), 7,
-                                    hex_decode('55A4E9DD5F4CA2EF82'), hex_decode(''))))
+        self.assertGreaterEqual(botan2.ffi_api_version(), 20180713)
 
-    def test_pbkdf():
-        print("PBKDF2(SHA-1) %s" %
-              hex_encode(botan2.pbkdf('PBKDF2(SHA-1)', '', 32, 10000, hex_decode('0001020304050607'))[2]))
-        print("good output   %s\n" %
-              '59B2B1143B4CB1059EC58D9722FB1C72471E0D85C6F7543BA5228526375B0127')
+    def test_compare(self):
 
-        (salt, iterations, psk) = botan2.pbkdf_timed('PBKDF2(SHA-256)', 'xyz', 32, 200)
+        x = "1234"
+        y = "1234"
+        z = "1233"
+        self.assertTrue(botan2.const_time_compare(x, y))
+        self.assertFalse(botan2.const_time_compare(x, z))
+        self.assertFalse(botan2.const_time_compare(x, x + z))
 
-        print("PBKDF2(SHA-256) x=timed, y=iterated; salt = %s (len=%d)  #iterations = %d\n" %
-              (hex_encode(salt), len(salt), iterations))
+    def test_block_cipher(self):
+        aes = botan2.BlockCipher("AES-128")
+        self.assertEqual(aes.algo_name(), "AES-128")
+        self.assertEqual(aes.block_size(), 16)
+        self.assertEqual(aes.minimum_keylength(), 16)
+        self.assertEqual(aes.maximum_keylength(), 16)
 
-        print('x %s' % hex_encode(psk))
-        print('y %s\n' % (hex_encode(botan2.pbkdf('PBKDF2(SHA-256)', 'xyz', 32, iterations, salt)[2])))
+        aes.set_key(hex_decode("000102030405060708090a0b0c0d0e0f"))
+        ct = aes.encrypt(hex_decode("00112233445566778899aabbccddeeff"))
 
-    def test_bcrypt():
-        print("Testing Bcrypt...")
-        r = botan2.rng()
+        self.assertEqual(hex_encode(ct), "69c4e0d86a7b0430d8cdb78070b4c55a")
+
+        pt = aes.decrypt(ct)
+
+        self.assertEqual(hex_encode(pt), "00112233445566778899aabbccddeeff")
+
+    def test_kdf(self):
+
+        secret = hex_decode('6FD4C3C0F38E5C7A6F83E99CD9BD')
+        salt = hex_decode('DBB986')
+        label = hex_decode('')
+        expected = hex_decode('02AEB40A3D4B66FBA540F9D4B20006F2046E0F3A029DEAB201FC692B79EB27CEF7E16069046A')
+
+        produced = botan2.kdf('KDF2(SHA-1)', secret, 38, salt, label)
+
+        self.assertEqual(hex_encode(produced), hex_encode(expected))
+
+    def test_pbkdf(self):
+
+        (salt, iterations, pbkdf) = botan2.pbkdf('PBKDF2(SHA-1)', '', 32, 10000, hex_decode('0001020304050607'))
+
+        self.assertEqual(iterations, 10000)
+        self.assertEqual(hex_encode(pbkdf),
+                         '59b2b1143b4cb1059ec58d9722fb1c72471e0d85c6f7543ba5228526375b0127')
+
+        (salt, iterations, pbkdf) = botan2.pbkdf_timed('PBKDF2(SHA-256)', 'xyz', 32, 200)
+
+        cmp_pbkdf = botan2.pbkdf('PBKDF2(SHA-256)', 'xyz', 32, iterations, salt)[2]
+
+        self.assertEqual(pbkdf, cmp_pbkdf)
+
+    def test_scrypt(self):
+        scrypt = botan2.scrypt(10, '', '', 16, 1, 1)
+        self.assertEqual(hex_encode(scrypt), "77d6576238657b203b19")
+
+        scrypt = botan2.scrypt(32, 'password', 'NaCl', 1024, 8, 16)
+        self.assertEqual(hex_encode(scrypt), "fdbabe1c9d3472007856e7190d01e9fe7c6ad7cbc8237830e77376634b373162")
+
+    def test_bcrypt(self):
+        r = botan2.RandomNumberGenerator()
         phash = botan2.bcrypt('testing', r)
-        print("bcrypt returned %s (%d bytes)" % (hex_encode(phash), len(phash)))
-        print("validating the hash produced: %r" % (botan2.check_bcrypt('testing', phash)))
-        print("\n")
+        self.assertTrue(isinstance(phash, str))
+        self.assertTrue(phash.startswith("$2a$"))
 
-    def test_hmac():
+        self.assertTrue(botan2.check_bcrypt('testing', phash))
+        self.assertFalse(botan2.check_bcrypt('live fire', phash))
 
-        hmac = botan2.message_authentication_code('HMAC(SHA-256)')
+        self.assertTrue(botan2.check_bcrypt('test', '$2a$04$wjen1fAA.UW6UxthpKK.huyOoxvCR7ATRCVC4CBIEGVDOCtr8Oj1C'))
+
+    def test_mac(self):
+
+        hmac = botan2.MsgAuthCode('HMAC(SHA-256)')
+        self.assertEqual(hmac.algo_name(), 'HMAC(SHA-256)')
+        self.assertEqual(hmac.minimum_keylength(), 0)
+        self.assertEqual(hmac.maximum_keylength(), 4096)
         hmac.set_key(hex_decode('0102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E1F20'))
         hmac.update(hex_decode('616263'))
 
-        hmac_vec = hex_decode('A21B1F5D4CF4F73A4DD939750F7A066A7F98CC131CB16A6692759021CFAB8181')
-        hmac_output = hmac.final()
+        expected = hex_decode('A21B1F5D4CF4F73A4DD939750F7A066A7F98CC131CB16A6692759021CFAB8181')
+        produced = hmac.final()
 
-        if hmac_output != hmac_vec:
-            print("Bad HMAC:\t%s" % hex_encode(hmac_output))
-            print("vs good: \t%s" % hex_encode(hmac_vec))
-        else:
-            print("HMAC output correct: %s\n" % hex_encode(hmac_output))
+        self.assertEqual(hex_encode(expected), hex_encode(produced))
 
-    def test_rng():
-        user_rng = botan2.rng("user")
+    def test_rng(self):
+        user_rng = botan2.RandomNumberGenerator("user")
 
-        print("rng output:\n\t%s\n\t%s\n\t%s\n" %
-              (hex_encode(user_rng.get(42)),
-               hex_encode(user_rng.get(13)),
-               hex_encode(user_rng.get(9))))
+        output1 = user_rng.get(32)
+        output2 = user_rng.get(32)
 
-    def test_hash():
-        md5 = botan2.hash_function('MD5')
-        assert md5.output_length() == 16
-        md5.update('h')
-        md5.update('i')
-        h1 = md5.final()
-        print("md5 hash: %s (%s)\n" % (hex_encode(h1), '49f68a5c8493ec2c0bf489821c21fc3b'))
+        self.assertEqual(len(output1), 32)
+        self.assertEqual(len(output2), 32)
+        self.assertNotEqual(output1, output2)
 
-        md5.update(hex_decode('f468025b'))
-        h2 = md5.final()
-        print("md5 hash: %s (%s)\n" % (hex_encode(h2), '47efd2be302a937775e93dea281b6751'))
+        output3 = user_rng.get(1021)
+        self.assertEqual(len(output3), 1021)
 
-    def test_cipher():
+        system_rng = botan2.RandomNumberGenerator('system')
+
+        user_rng.reseed_from_rng(system_rng, 256)
+
+        user_rng.add_entropy('seed material...')
+
+    def test_hash(self):
+
+        try:
+            _h = botan2.HashFunction('NoSuchHash')
+        except botan2.BotanException as e:
+            self.assertEqual(str(e), "botan_hash_init failed: -40 (Not implemented)")
+
+        sha256 = botan2.HashFunction('SHA-256')
+        self.assertEqual(sha256.algo_name(), 'SHA-256')
+        self.assertEqual(sha256.output_length(), 32)
+        self.assertEqual(sha256.block_size(), 64)
+        sha256.update('ignore this please')
+        sha256.clear()
+        sha256.update('a')
+        hash1 = sha256.final()
+
+        self.assertEqual(hex_encode(hash1), "ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb")
+
+        sha256.update(hex_decode('61'))
+        sha256_2 = sha256.copy_state()
+        sha256.update(hex_decode('6263'))
+        h2 = sha256.final()
+        self.assertEqual(hex_encode(h2), "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad")
+
+        self.assertEqual(hex_encode(sha256_2.final()), hex_encode(hash1))
+
+    def test_cipher(self):
         for mode in ['AES-128/CTR-BE', 'Serpent/GCM', 'ChaCha20Poly1305']:
-            enc = botan2.cipher(mode, encrypt=True)
+            enc = botan2.SymmetricCipher(mode, encrypt=True)
+
+            if mode == 'AES-128/CTR-BE':
+                self.assertEqual(enc.algo_name(), 'CTR-BE(AES-128)')
+            elif mode == 'Serpent/GCM':
+                self.assertEqual(enc.algo_name(), 'Serpent/GCM(16)')
+            else:
+                self.assertEqual(enc.algo_name(), mode)
 
             (kmin, kmax) = enc.key_length()
-            print("%s: default nonce=%d update_size=%d key_min=%d key_max=%d" %
-                  (mode, enc.default_nonce_length(), enc.update_granularity(), kmin, kmax))
 
-            rng = botan2.rng()
+            self.assertLessEqual(kmin, kmax)
+
+            rng = botan2.RandomNumberGenerator()
             iv = rng.get(enc.default_nonce_length())
             key = rng.get(kmax)
             pt = rng.get(21)
-
-            print("  plaintext  %s (%d)"   % (hex_encode(pt), len(pt)))
 
             enc.set_key(key)
             enc.start(iv)
@@ -109,157 +182,509 @@ def test():
             assert not update_result
 
             ct = enc.finish(pt)
-            print("  ciphertext %s (%d)" % (hex_encode(ct), len(ct)))
 
-            dec = botan2.cipher(mode, encrypt=False)
+            dec = botan2.SymmetricCipher(mode, encrypt=False)
             dec.set_key(key)
             dec.start(iv)
             decrypted = dec.finish(ct)
 
-            print("  decrypted  %s (%d)\n" % (hex_encode(decrypted), len(decrypted)))
+            self.assertEqual(decrypted, pt)
 
 
-    def test_mceliece():
-        mce_priv = botan2.private_key('mce', [2960, 57], botan2.rng())
+    def test_mceliece(self):
+        rng = botan2.RandomNumberGenerator()
+        mce_priv = botan2.PrivateKey.create('McEliece', '2960,57', rng)
         mce_pub = mce_priv.get_public_key()
+        self.assertEqual(mce_pub.estimated_strength(), 128)
 
-        mce_plaintext = 'mce plaintext'
-        mce_ad = 'mce AD'
-        mce_ciphertext = botan2.mceies_encrypt(mce_pub, botan2.rng(), 'ChaCha20Poly1305', mce_plaintext, mce_ad)
-
-        print("mceies len(pt)=%d  len(ct)=%d" % (len(mce_plaintext), len(mce_ciphertext)))
+        mce_plaintext = rng.get(16)
+        mce_ad = rng.get(48)
+        mce_ciphertext = botan2.mceies_encrypt(mce_pub, rng, 'ChaCha20Poly1305', mce_plaintext, mce_ad)
 
         mce_decrypt = botan2.mceies_decrypt(mce_priv, 'ChaCha20Poly1305', mce_ciphertext, mce_ad)
-        print("  mceies plaintext  \'%s\' (%d)" % (mce_plaintext, len(mce_plaintext)))
 
-        # Since mceies_decrypt() returns bytes in Python3, the following line
-        # needs .decode('utf-8') to convert mce_decrypt from bytes to a
-        # text string (Unicode).
-        # You don't need to add .decode() if
-        # (a) your expected output is bytes rather than a text string, or
-        # (b) you are using Python2 rather than Python3.
-        print("  mceies decrypted  \'%s\' (%d)" % (mce_decrypt.decode('utf-8'), len(mce_decrypt)))
+        self.assertEqual(mce_plaintext, mce_decrypt)
 
-        print("mce_pub %s/SHA-1 fingerprint: %s\nEstimated strength %s bits (len %d)\n" % (
-            mce_pub.algo_name(), mce_pub.fingerprint("SHA-1"),
-            mce_pub.estimated_strength(), len(mce_pub.encoding())
-        ))
+    def test_rsa_load_store(self):
 
-    def test_rsa():
-        rsapriv = botan2.private_key('rsa', 1536, botan2.rng())
+        rsa_priv_pem = """-----BEGIN PRIVATE KEY-----
+MIICeAIBADANBgkqhkiG9w0BAQEFAASCAmIwggJeAgEAAoGBALWtiBjcofJW/4+r
+CIjQZn2V3yCYsNIBpMdVkNPr36FZ3ZHGSv2ggmCe+IWy0fTcBVyP+fo3HC8zmOC2
+EsYDFRExyB2zIsjRXlPrVrTfcyXwUEaInLJQId5CguFrmyj1y7K43ezg+OTop39n
+TyaukrciCSCh++Q/UQOanHnR8ctrAgMBAAECgYBPfKySgBmk31ZyA7k4rsFgye01
+JEkcoNZ41iGG7ujJffl4maLew9a3MmZ2jI3azVbVMDMFPA5rQm5tRowBMYEJ5oBc
+LP4AP41Lujfa+vua6l3t94bAV+CufZiY0297FcPbGqNu+xSQ2Bol2uHh9mrcgQUs
+fevA50KOLR9hv4zH6QJBAPCOKiExONtVhJn8qVPCBlJ8Vjjnt9Uno5EzMBAKMbZi
+OySkGwo9/9LUWO03r7tjrGSy5jJk+iOrcLeDl6zETfkCQQDBV6PpD/3ccQ1IfWcw
+jG8yik0bIuXgrD0uW4g8Cvj+05wrv7RYPHuFtj3Rtb94YjtgYn7QvjH7y88XmTC4
+2k2DAkEA4E9Ae7kBUoz42/odDswyxwHICMIRyoJu5Ht9yscmufH5Ql6AFFnhzf9S
+eMjfZfY4j6G+Q6mjElXQAl+DtIdMSQJBAJzdMkuBggI8Zv6NYA9voThsJSsDIWcr
+12epM9sjO+nkXizQmM2OJNnThkyDHRna+Tm2MBXEemFEdn06+ODBnWkCQQChAbG4
+255RiCuYdrfiTPF/WLtvRyGd1LRwHcYIW4mJFPzxYAMTwQKbppLAnxw73vyef/zC
+2BgXEW02tjRBtgZ+
+-----END PRIVATE KEY-----
+"""
+
+        rsa_pub_pem = """-----BEGIN PUBLIC KEY-----
+MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC1rYgY3KHyVv+PqwiI0GZ9ld8g
+mLDSAaTHVZDT69+hWd2Rxkr9oIJgnviFstH03AVcj/n6NxwvM5jgthLGAxURMcgd
+syLI0V5T61a033Ml8FBGiJyyUCHeQoLha5so9cuyuN3s4Pjk6Kd/Z08mrpK3Igkg
+ofvkP1EDmpx50fHLawIDAQAB
+-----END PUBLIC KEY-----
+"""
+
+        rsapriv = botan2.PrivateKey.load(rsa_priv_pem)
+
+        self.assertEqual(rsapriv.to_pem(), rsa_priv_pem)
+
         rsapub = rsapriv.get_public_key()
+        self.assertEqual(rsapub.to_pem(), rsa_pub_pem)
 
-        print("rsapub %s SHA-1 fingerprint: %s estimated strength %d (len %d)" % (
-            rsapub.algo_name(), rsapub.fingerprint("SHA-1"),
-            rsapub.estimated_strength(), len(rsapub.encoding())
-        ))
+        rsapub = botan2.PublicKey.load(rsa_pub_pem)
+        self.assertEqual(rsapub.to_pem(), rsa_pub_pem)
 
-        dec = botan2.pk_op_decrypt(rsapriv, "EME1(SHA-256)")
-        enc = botan2.pk_op_encrypt(rsapub, "EME1(SHA-256)")
+        n = 0xB5AD8818DCA1F256FF8FAB0888D0667D95DF2098B0D201A4C75590D3EBDFA159DD91C64AFDA082609EF885B2D1F4DC055C8FF9FA371C2F3398E0B612C603151131C81DB322C8D15E53EB56B4DF7325F05046889CB25021DE4282E16B9B28F5CBB2B8DDECE0F8E4E8A77F674F26AE92B7220920A1FBE43F51039A9C79D1F1CB6B # pylint: disable=line-too-long
+        e = 0x10001
 
-        sys_rng = botan2.rng()
-        symkey = sys_rng.get(32)
-        ctext = enc.encrypt(symkey, sys_rng)
-        print("ptext   \'%s\' (%d)" % (hex_encode(symkey), len(symkey)))
-        print("ctext   \'%s\' (%d)" % (hex_encode(ctext), len(ctext)))
-        print("decrypt \'%s\' (%d)\n" % (hex_encode(dec.decrypt(ctext)),
-                                         len(dec.decrypt(ctext))))
+        rsapub2 = botan2.PublicKey.load_rsa(n, e)
+        self.assertEqual(rsapub2.to_pem(), rsa_pub_pem)
 
-        signer = botan2.pk_op_sign(rsapriv, 'EMSA4(SHA-384)')
+        self.assertEqual(rsapub2.get_field("n"), n)
+        self.assertEqual(rsapub2.get_field("e"), e)
+
+    def test_key_crypto(self):
+        rng = botan2.RandomNumberGenerator()
+        priv = botan2.PrivateKey.create('RSA', '1024', rng)
+        passphrase = "super secret tell noone"
+
+        for is_pem in [True, False]:
+            ref_val = priv.export(is_pem)
+
+            enc1 = priv.export_encrypted(passphrase, rng, True, msec=10)
+            dec1 = botan2.PrivateKey.load(enc1, passphrase)
+            self.assertEqual(dec1.export(is_pem), ref_val)
+
+            pem2 = priv.export_encrypted(passphrase, rng, True, msec=10, cipher="AES-128/SIV")
+            dec2 = botan2.PrivateKey.load(pem2, passphrase)
+            self.assertEqual(dec2.export(is_pem), ref_val)
+
+            pem3 = priv.export_encrypted(passphrase, rng, True, msec=10, cipher="AES-128/GCM", pbkdf="Scrypt")
+            dec3 = botan2.PrivateKey.load(pem3, passphrase)
+            self.assertEqual(dec3.export(is_pem), ref_val)
+
+    def test_check_key(self):
+        # valid (if rather small) RSA key
+        n = 273279220906618527352827457840955116141
+        e = 0x10001
+
+        rng = botan2.RandomNumberGenerator()
+
+        rsapub = botan2.PublicKey.load_rsa(n, e)
+        self.assertTrue(rsapub.check_key(rng))
+
+        # invalid
+        try:
+            rsapub = botan2.PublicKey.load_rsa(n - 1, e)
+        except botan2.BotanException as e:
+            self.assertEqual(str(e), "botan_pubkey_load_rsa failed: -1 (Invalid input)")
+
+    def test_rsa(self):
+        # pylint: disable=too-many-locals
+        rng = botan2.RandomNumberGenerator()
+        rsapriv = botan2.PrivateKey.create('RSA', '1024', rng)
+        self.assertEqual(rsapriv.algo_name(), 'RSA')
+
+        priv_pem = rsapriv.to_pem()
+        priv_der = rsapriv.to_der()
+
+        self.assertEqual(priv_pem[0:28], "-----BEGIN PRIVATE KEY-----\n")
+        self.assertGreater(len(priv_pem), len(priv_der))
+
+        rsapub = rsapriv.get_public_key()
+        self.assertEqual(rsapub.algo_name(), 'RSA')
+        self.assertEqual(rsapub.estimated_strength(), 80)
+
+        pub_pem = rsapub.to_pem()
+        pub_der = rsapub.to_der()
+
+        self.assertEqual(pub_pem[0:27], "-----BEGIN PUBLIC KEY-----\n")
+        self.assertGreater(len(pub_pem), len(pub_der))
+
+        enc = botan2.PKEncrypt(rsapub, "OAEP(SHA-256)")
+        dec = botan2.PKDecrypt(rsapriv, "OAEP(SHA-256)")
+
+        symkey = rng.get(32)
+        ctext = enc.encrypt(symkey, rng)
+
+        ptext = dec.decrypt(ctext)
+
+        self.assertEqual(ptext, symkey)
+
+        signer = botan2.PKSign(rsapriv, 'EMSA4(SHA-384)')
 
         signer.update('messa')
         signer.update('ge')
-        sig = signer.finish(botan2.rng())
+        sig = signer.finish(botan2.RandomNumberGenerator())
 
-        print("EMSA4(SHA-384) signature: %s" % hex_encode(sig))
-
-        verify = botan2.pk_op_verify(rsapub, 'EMSA4(SHA-384)')
+        verify = botan2.PKVerify(rsapub, 'EMSA4(SHA-384)')
 
         verify.update('mess')
         verify.update('age')
-        print("good sig accepted? %s" % verify.check_signature(sig))
+        self.assertTrue(verify.check_signature(sig))
 
         verify.update('mess of things')
         verify.update('age')
-        print("bad sig accepted?  %s" % verify.check_signature(sig))
+        self.assertFalse(verify.check_signature(sig))
 
         verify.update('message')
-        print("good sig accepted? %s\n" % verify.check_signature(sig))
+        self.assertTrue(verify.check_signature(sig))
 
-    def test_dh():
-        a_rng = botan2.rng('user')
-        b_rng = botan2.rng('user')
+    def test_ecdsa(self):
+        rng = botan2.RandomNumberGenerator()
 
-        for dh_grp in ['secp256r1', 'curve25519']:
-            dh_kdf = 'KDF2(SHA-384)'.encode('utf-8')
-            a_dh_priv = botan2.private_key('ecdh', dh_grp, botan2.rng())
-            b_dh_priv = botan2.private_key('ecdh', dh_grp, botan2.rng())
+        hash_fn = 'EMSA1(SHA-256)'
+        group = 'secp256r1'
+        msg = 'test message'
 
-            a_dh = botan2.pk_op_key_agreement(a_dh_priv, dh_kdf)
-            b_dh = botan2.pk_op_key_agreement(b_dh_priv, dh_kdf)
+        priv = botan2.PrivateKey.create('ECDSA', group, rng)
+        pub = priv.get_public_key()
+        self.assertEqual(pub.get_field('public_x'), priv.get_field('public_x'))
+        self.assertEqual(pub.get_field('public_y'), priv.get_field('public_y'))
 
-            a_dh_pub = a_dh.public_value()
-            b_dh_pub = b_dh.public_value()
+        signer = botan2.PKSign(priv, hash_fn)
+        signer.update(msg)
+        signature = signer.finish(rng)
 
-            a_salt = a_rng.get(8)
-            b_salt = b_rng.get(8)
+        verifier = botan2.PKVerify(pub, hash_fn)
+        verifier.update(msg)
+        self.assertTrue(verifier.check_signature(signature))
 
-            print("ecdh %s pubs:\n  %s (salt %s)\n  %s (salt %s)\n" %
-                  (dh_grp,
-                   hex_encode(a_dh_pub), hex_encode(a_salt),
-                   hex_encode(b_dh_pub), hex_encode(b_salt)))
+        pub_x = pub.get_field('public_x')
+        pub_y = priv.get_field('public_y')
+        pub2 = botan2.PublicKey.load_ecdsa(group, pub_x, pub_y)
+        verifier = botan2.PKVerify(pub2, hash_fn)
+        verifier.update(msg)
+        self.assertTrue(verifier.check_signature(signature))
 
-            a_key = a_dh.agree(b_dh_pub, 32, a_salt + b_salt)
-            b_key = b_dh.agree(a_dh_pub, 32, a_salt + b_salt)
+        priv2 = botan2.PrivateKey.load_ecdsa(group, priv.get_field('x'))
+        signer = botan2.PKSign(priv2, hash_fn)
+        # sign empty message
+        signature = signer.finish(rng)
 
-            print("ecdh %s shared:\n  %s\n  %s\n" %
-                  (dh_grp, hex_encode(a_key), hex_encode(b_key)))
+        # verify empty message
+        self.assertTrue(verifier.check_signature(signature))
 
-    def test_certs():
-        cert = botan2.x509_cert(filename="src/tests/data/x509/ecc/CSCA.CSCA.csca-germany.1.crt")
-        print("CSCA (Germany) Certificate\nDetails:")
-        print("SHA-1 fingerprint:   %s" % cert.fingerprint("SHA-1"))
-        print("Expected:            32:42:1C:C3:EC:54:D7:E9:43:EC:51:F0:19:23:BD:85:1D:F2:1B:B9")
+    def test_sm2(self):
+        rng = botan2.RandomNumberGenerator()
 
-        print("Not before:          %s" % cert.time_starts())
-        print("Not after:           %s" % cert.time_expires())
+        hash_fn = 'EMSA1(SM3)'
+        group = 'sm2p256v1'
+        msg = 'test message'
 
-        print("Serial number:       %s" % hex_encode(cert.serial_number()))
-        print("Authority Key ID:    %s" % hex_encode(cert.authority_key_id()))
-        print("Subject   Key ID:    %s" % hex_encode(cert.subject_key_id()))
-        print("Public key bits:\n%s\n" % binascii.b2a_base64(cert.subject_public_key_bits()))
+        priv = botan2.PrivateKey.create('SM2', group, rng)
+        pub = priv.get_public_key()
+        self.assertEqual(pub.get_field('public_x'), priv.get_field('public_x'))
+        self.assertEqual(pub.get_field('public_y'), priv.get_field('public_y'))
 
+        signer = botan2.PKSign(priv, hash_fn)
+        signer.update(msg)
+        signature = signer.finish(rng)
+
+        verifier = botan2.PKVerify(pub, hash_fn)
+        verifier.update(msg)
+        self.assertTrue(verifier.check_signature(signature))
+
+        pub_x = pub.get_field('public_x')
+        pub_y = priv.get_field('public_y')
+        pub2 = botan2.PublicKey.load_sm2(group, pub_x, pub_y)
+        verifier = botan2.PKVerify(pub2, hash_fn)
+        verifier.update(msg)
+        self.assertTrue(verifier.check_signature(signature))
+
+        priv2 = botan2.PrivateKey.load_sm2(group, priv.get_field('x'))
+        signer = botan2.PKSign(priv2, hash_fn)
+        # sign empty message
+        signature = signer.finish(rng)
+
+        # verify empty message
+        self.assertTrue(verifier.check_signature(signature))
+
+    def test_ecdh(self):
+        # pylint: disable=too-many-locals
+        a_rng = botan2.RandomNumberGenerator('user')
+        b_rng = botan2.RandomNumberGenerator('user')
+
+        kdf = 'KDF2(SHA-384)'
+
+        for grp in ['secp256r1', 'secp384r1', 'brainpool256r1']:
+            a_priv = botan2.PrivateKey.create('ECDH', grp, a_rng)
+            b_priv = botan2.PrivateKey.create('ECDH', grp, b_rng)
+
+            a_op = botan2.PKKeyAgreement(a_priv, kdf)
+            b_op = botan2.PKKeyAgreement(b_priv, kdf)
+
+            a_pub = a_op.public_value()
+            b_pub = b_op.public_value()
+
+            salt = a_rng.get(8) + b_rng.get(8)
+
+            a_key = a_op.agree(b_pub, 32, salt)
+            b_key = b_op.agree(a_pub, 32, salt)
+
+            self.assertEqual(a_key, b_key)
+
+            a_pem = a_priv.to_pem()
+
+            a_priv_x = a_priv.get_field('x')
+
+            new_a = botan2.PrivateKey.load_ecdh(grp, a_priv_x)
+
+            self.assertEqual(a_pem, new_a.to_pem())
+
+    def test_certs(self):
+        # pylint: disable=too-many-statements
+        cert = botan2.X509Cert(filename="src/tests/data/x509/ecc/CSCA.CSCA.csca-germany.1.crt")
         pubkey = cert.subject_public_key()
-        print("Public key algo:     %s" % pubkey.algo_name())
-        print("Public key strength: %s" % pubkey.estimated_strength() + " bits")
 
-        dn_fields = ("Name", "Email", "Organization", "Organizational Unit", "Country")
-        for field in dn_fields:
-            try:
-                print("%s: %s" % (field, cert.subject_dn(field, 0)))
-            except botan2.BotanException:
-                print("Field: %s not found in certificate" % field)
+        self.assertEqual(pubkey.algo_name(), 'ECDSA')
+        self.assertEqual(pubkey.estimated_strength(), 112)
 
-        print(cert.to_string())
+        self.assertEqual(cert.fingerprint("SHA-1"),
+                         "32:42:1C:C3:EC:54:D7:E9:43:EC:51:F0:19:23:BD:85:1D:F2:1B:B9")
 
-    test_version()
-    test_kdf()
-    test_pbkdf()
-    test_bcrypt()
-    test_hmac()
-    test_rng()
-    test_hash()
-    test_cipher()
-    test_mceliece()
-    test_rsa()
-    test_dh()
-    test_certs()
+        self.assertEqual(hex_encode(cert.serial_number()), "01")
+        self.assertEqual(hex_encode(cert.authority_key_id()),
+                         "0096452de588f966c4ccdf161dd1f3f5341b71e7")
+
+        self.assertEqual(cert.subject_dn('Name', 0), 'csca-germany')
+        self.assertEqual(cert.subject_dn('Email', 0), 'csca-germany@bsi.bund.de')
+        self.assertEqual(cert.subject_dn('Organization', 0), 'bund')
+        self.assertEqual(cert.subject_dn('Organizational Unit', 0), 'bsi')
+        self.assertEqual(cert.subject_dn('Country', 0), 'DE')
+
+        self.assertTrue(cert.to_string().startswith("Version: 3"))
+
+        self.assertEqual(cert.issuer_dn('Name', 0), 'csca-germany')
+        self.assertEqual(cert.issuer_dn('Organization', 0), 'bund')
+        self.assertEqual(cert.issuer_dn('Organizational Unit', 0), 'bsi')
+        self.assertEqual(cert.issuer_dn('Country', 0), 'DE')
+
+        self.assertTrue(cert.hostname_match('csca-germany'))
+        self.assertFalse(cert.hostname_match('csca-slovakia'))
+
+        self.assertEqual(cert.not_before(), 1184858838)
+        self.assertEqual(cert.not_after(), 1831907880)
+
+        self.assertTrue(cert.allowed_usage(["CRL_SIGN", "KEY_CERT_SIGN"]))
+        self.assertTrue(cert.allowed_usage(["KEY_CERT_SIGN"]))
+        self.assertFalse(cert.allowed_usage(["DIGITAL_SIGNATURE"]))
+        self.assertFalse(cert.allowed_usage(["DIGITAL_SIGNATURE", "CRL_SIGN"]))
+
+        root = botan2.X509Cert("src/tests/data/x509/nist/root.crt")
+
+        int09 = botan2.X509Cert("src/tests/data/x509/nist/test09/int.crt")
+        end09 = botan2.X509Cert("src/tests/data/x509/nist/test09/end.crt")
+        self.assertEqual(end09.verify([int09], [root]), 2001)
+
+        end04 = botan2.X509Cert("src/tests/data/x509/nist/test04/end.crt")
+        int04_1 = botan2.X509Cert("src/tests/data/x509/nist/test04/int1.crt")
+        int04_2 = botan2.X509Cert("src/tests/data/x509/nist/test04/int2.crt")
+        self.assertEqual(end04.verify([int04_1, int04_2], [], "src/tests/data/x509/nist/", required_strength=80), 0)
+        self.assertEqual(end04.verify([int04_1, int04_2], [], required_strength=80), 3000)
+        self.assertEqual(end04.verify([int04_1, int04_2], [root], required_strength=80, hostname="User1-CP.02.01"), 0)
+        self.assertEqual(end04.verify([int04_1, int04_2], [root], required_strength=80, hostname="invalid"), 4008)
+        self.assertEqual(end04.verify([int04_1, int04_2], [root], required_strength=80, reference_time=1), 2000)
+
+        self.assertEqual(botan2.X509Cert.validation_status(0), 'Verified')
+        self.assertEqual(botan2.X509Cert.validation_status(3000), 'Certificate issuer not found')
+        self.assertEqual(botan2.X509Cert.validation_status(4008), 'Certificate does not match provided name')
+
+        rootcrl = botan2.X509CRL("src/tests/data/x509/nist/root.crl")
+
+        end01 = botan2.X509Cert("src/tests/data/x509/nist/test01/end.crt")
+        self.assertEqual(end01.verify([], [root], required_strength=80, crls=[rootcrl]), 0)
+
+        int20 = botan2.X509Cert("src/tests/data/x509/nist/test20/int.crt")
+        end20 = botan2.X509Cert("src/tests/data/x509/nist/test20/end.crt")
+        int20crl = botan2.X509CRL("src/tests/data/x509/nist/test20/int.crl")
+
+        self.assertEqual(end20.verify([int20], [root], required_strength=80, crls=[int20crl, rootcrl]), 5000)
+        self.assertEqual(botan2.X509Cert.validation_status(5000), 'Certificate is revoked')
+
+        int21 = botan2.X509Cert("src/tests/data/x509/nist/test21/int.crt")
+        end21 = botan2.X509Cert("src/tests/data/x509/nist/test21/end.crt")
+        int21crl = botan2.X509CRL("src/tests/data/x509/nist/test21/int.crl")
+        self.assertEqual(end21.verify([int21], [root], required_strength=80, crls=[int21crl, rootcrl]), 5000)
+
+        self.assertTrue(int20.is_revoked(rootcrl))
+        self.assertFalse(int04_1.is_revoked(rootcrl))
+        self.assertTrue(end21.is_revoked(int21crl))
 
 
-def main(args=None):
-    if args is None:
-        args = sys.argv
-    test()
+    def test_mpi(self):
+        # pylint: disable=too-many-statements,too-many-locals
+        z = botan2.MPI()
+        self.assertEqual(z.bit_count(), 0)
+        five = botan2.MPI('5')
+        self.assertEqual(five.bit_count(), 3)
+        big = botan2.MPI('0x85839682368923476892367235')
+        self.assertEqual(big.bit_count(), 104)
+        small = botan2.MPI(0xDEADBEEF)
+        radix = botan2.MPI("DEADBEEF", 16)
+
+        self.assertEqual(hex_encode(small.to_bytes()), "deadbeef")
+        self.assertEqual(hex_encode(big.to_bytes()), "85839682368923476892367235")
+
+        self.assertEqual(int(small), 0xDEADBEEF)
+        self.assertEqual(int(radix), int(small))
+
+        self.assertEqual(int(small >> 16), 0xDEAD)
+
+        small >>= 15
+
+        self.assertEqual(int(small), 0x1BD5B)
+
+        small <<= 15
+
+        self.assertEqual(int(small), 0xDEAD8000)
+
+        ten = botan2.MPI(10)
+
+        self.assertEqual(ten, five + five)
+        self.assertNotEqual(ten, five)
+        self.assertLess(five, ten)
+        self.assertLessEqual(five, ten)
+
+        x = botan2.MPI(five)
+
+        self.assertEqual(x, five)
+
+        x += botan2.MPI(1)
+        self.assertNotEqual(x, five)
+
+        self.assertEqual(int(x * five), 30)
+
+        x *= five
+        x *= five
+        self.assertEqual(int(x), 150)
+
+        self.assertTrue(not x.is_negative())
+
+        x.flip_sign()
+        self.assertTrue(x.is_negative())
+        self.assertEqual(int(x), -150)
+
+        x.flip_sign()
+
+        x.set_bit(0)
+        self.assertTrue(int(x), 151)
+        self.assertTrue(x.get_bit(0))
+        self.assertTrue(x.get_bit(4))
+        self.assertFalse(x.get_bit(6))
+
+        x.clear_bit(4)
+        self.assertEqual(int(x), 135)
+
+        rng = botan2.RandomNumberGenerator()
+        self.assertFalse(x.is_prime(rng))
+
+        two = botan2.MPI(2)
+
+        x += two
+        self.assertTrue(x.is_prime(rng))
+
+        mod = x + two
+
+        inv = x.inverse_mod(mod)
+        self.assertEqual(int(inv), 69)
+        self.assertEqual(int((inv * x) % mod), 1)
+
+        p = inv.pow_mod(botan2.MPI(46), mod)
+        self.assertEqual(int(p), 42)
+
+        one = botan2.MPI(1)
+        twelve = botan2.MPI("C", 16)
+        eight = botan2.MPI(8)
+
+        mul = twelve.mod_mul(eight, inv)
+        self.assertEqual(int(mul), 27)
+
+        gcd = one.gcd(one)
+        self.assertEqual(one, gcd)
+        gcd = one.gcd(twelve)
+        self.assertEqual(one, gcd)
+        gcd = twelve.gcd(eight)
+        self.assertEqual(4, int(gcd))
+
+    def test_mpi_random(self):
+        rng = botan2.RandomNumberGenerator()
+
+        u = botan2.MPI.random(rng, 512)
+        self.assertEqual(u.bit_count(), 512)
+
+        l = u >> 32
+        self.assertEqual(l.bit_count(), 512-32)
+
+        for _i in range(10):
+            x = botan2.MPI.random_range(rng, l, u)
+            self.assertLess(x, u)
+            self.assertGreater(x, l)
+
+    def test_fpe(self):
+
+        modulus = botan2.MPI('1000000000')
+        key = b'001122334455'
+
+        fpe = botan2.FormatPreservingEncryptionFE1(modulus, key)
+
+        value = botan2.MPI('392910392')
+        tweak = 'tweak value'
+
+        ctext = fpe.encrypt(value, tweak)
+
+        ptext = fpe.decrypt(ctext, tweak)
+
+        self.assertEqual(value, ptext)
+
+    def test_keywrap(self):
+        key = hex_decode('00112233445566778899aabbccddeeff')
+        kek = hex_decode('000102030405060708090a0b0c0d0e0f')
+
+        wrapped = botan2.nist_key_wrap(kek, key)
+        self.assertEqual(hex_encode(wrapped), '1fa68b0a8112b447aef34bd8fb5a7b829d3e862371d2cfe5')
+
+        self.assertEqual(len(wrapped), 16+8)
+        unwrapped = botan2.nist_key_unwrap(kek, wrapped)
+        self.assertEqual(hex_encode(unwrapped), '00112233445566778899aabbccddeeff')
+
+    def test_hotp(self):
+
+        hotp = botan2.HOTP(b'12345678901234567890')
+
+        self.assertEqual(hotp.generate(0), 755224)
+        self.assertEqual(hotp.generate(1), 287082)
+        self.assertEqual(hotp.generate(9), 520489)
+
+        self.assertEqual(hotp.check(520489, 8), (False, 8))
+        self.assertEqual(hotp.check(520489, 8, 1), (True, 10))
+        self.assertEqual(hotp.check(520489, 7, 2), (True, 10))
+        self.assertEqual(hotp.check(520489, 0, 9), (True, 10))
+
+    def test_totp(self):
+
+        totp = botan2.TOTP(b'12345678901234567890', digest="SHA-1", digits=8)
+
+        self.assertEqual(totp.generate(59), 94287082)
+        self.assertEqual(totp.generate(1111111109), 7081804)
+        self.assertEqual(totp.generate(1111111111), 14050471)
+        self.assertEqual(totp.generate(1234567890), 89005924)
+        self.assertEqual(totp.generate(1234567890), 89005924)
+        self.assertEqual(totp.generate(2000000000), 69279037)
+
+        self.assertTrue(totp.check(7081804, 1111111109))
+        self.assertTrue(totp.check(7081804, 1111111109 - 29))
+        self.assertFalse(totp.check(7081804, 1111111109 + 1))
+        self.assertTrue(totp.check(7081804, 1111111109 + 30, 1))
 
 if __name__ == '__main__':
-    sys.exit(main())
+    unittest.main()

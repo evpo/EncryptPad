@@ -89,13 +89,14 @@ PKCS11_EC_PrivateKey::PKCS11_EC_PrivateKey(Session& session, const std::vector<u
    EC_PublicKeyGenerationProperties pub_key_props(ec_params);
    pub_key_props.set_verify(true);
    pub_key_props.set_private(false);
-   pub_key_props.set_token(false);	// don't create a persistent public key object
+   pub_key_props.set_token(false);    // don't create a persistent public key object
 
    ObjectHandle pub_key_handle = CK_INVALID_HANDLE;
    ObjectHandle priv_key_handle = CK_INVALID_HANDLE;
    Mechanism mechanism = { CKM_EC_KEY_PAIR_GEN, nullptr, 0 };
    session.module()->C_GenerateKeyPair(session.handle(), &mechanism,
-                                       pub_key_props.data(), pub_key_props.count(), props.data(), props.count(),
+                                       pub_key_props.data(), static_cast<Ulong>(pub_key_props.count()),
+                                       props.data(), static_cast<Ulong>(props.count()),
                                        &pub_key_handle, &priv_key_handle);
 
    this->reset_handle(priv_key_handle);

@@ -16,6 +16,10 @@
 #include <limits>
 #include <set>
 
+#if defined(BOTAN_HAS_ASN1)
+  #include <botan/asn1_oid.h>
+#endif
+
 namespace Botan {
 
 uint16_t to_uint16(const std::string& str)
@@ -194,32 +198,12 @@ std::string string_join(const std::vector<std::string>& strs, char delim)
 */
 std::vector<uint32_t> parse_asn1_oid(const std::string& oid)
    {
-   std::string substring;
-   std::vector<uint32_t> oid_elems;
-
-   for(auto i = oid.begin(); i != oid.end(); ++i)
-      {
-      char c = *i;
-
-      if(c == '.')
-         {
-         if(substring.empty())
-            throw Invalid_OID(oid);
-         oid_elems.push_back(to_u32bit(substring));
-         substring.clear();
-         }
-      else
-         substring += c;
-      }
-
-   if(substring.empty())
-      throw Invalid_OID(oid);
-   oid_elems.push_back(to_u32bit(substring));
-
-   if(oid_elems.size() < 2)
-      throw Invalid_OID(oid);
-
-   return oid_elems;
+#if defined(BOTAN_HAS_ASN1)
+   return OID(oid).get_components();
+#else
+   BOTAN_UNUSED(oid);
+   throw Not_Implemented("ASN1 support not available");
+#endif
    }
 
 /*
@@ -347,8 +331,9 @@ std::string tolower_string(const std::string& in)
    std::string s = in;
    for(size_t i = 0; i != s.size(); ++i)
       {
-      if(std::isalpha(static_cast<unsigned char>(s[i])))
-         s[i] = std::tolower(static_cast<unsigned char>(s[i]));
+      const int cu = static_cast<unsigned char>(s[i]);
+      if(std::isalpha(cu))
+         s[i] = static_cast<char>(std::tolower(cu));
       }
    return s;
    }
@@ -415,7 +400,7 @@ bool host_wildcard_match(const std::string& issued_, const std::string& host_)
    /*
    Now walk through the issued string, making sure every character
    matches. When we come to the (singular) '*', jump forward in the
-   hostname by the cooresponding amount. We know exactly how much
+   hostname by the corresponding amount. We know exactly how much
    space the wildcard takes because it must be exactly `len(host) -
    len(issued) + 1 chars`.
 

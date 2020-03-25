@@ -12,6 +12,12 @@
 
 namespace Botan {
 
+namespace {
+
+const size_t PointGFp_SCALAR_BLINDING_BITS = 80;
+
+}
+
 PointGFp multi_exponentiate(const PointGFp& x, const BigInt& z1,
                             const PointGFp& y, const BigInt& z2)
    {
@@ -57,25 +63,30 @@ PointGFp_Base_Point_Precompute::PointGFp_Base_Point_Precompute(const PointGFp& b
    * the size of the prime modulus. In all cases they are at most 1 bit
    * longer. The +1 compensates for this.
    */
-   const size_t T_bits = round_up(p_bits + PointGFp_SCALAR_BLINDING_BITS + 1, 2) / 2;
+   const size_t T_bits = round_up(p_bits + PointGFp_SCALAR_BLINDING_BITS + 1, WINDOW_BITS) / WINDOW_BITS;
 
-   std::vector<PointGFp> T(3*T_bits);
-   T.resize(3*T_bits);
+   std::vector<PointGFp> T(WINDOW_SIZE*T_bits);
 
-   T[0] = base;
-   T[1] = T[0];
-   T[1].mult2(ws);
-   T[2] = T[1];
-   T[2].add(T[0], ws);
+   PointGFp g = base;
+   PointGFp g2, g4;
 
-   for(size_t i = 1; i != T_bits; ++i)
+   for(size_t i = 0; i != T_bits; i++)
       {
-      T[3*i+0] = T[3*i - 2];
-      T[3*i+0].mult2(ws);
-      T[3*i+1] = T[3*i+0];
-      T[3*i+1].mult2(ws);
-      T[3*i+2] = T[3*i+1];
-      T[3*i+2].add(T[3*i+0], ws);
+      g2 = g;
+      g2.mult2(ws);
+      g4 = g2;
+      g4.mult2(ws);
+
+      T[7*i+0] = g;
+      T[7*i+1] = std::move(g2);
+      T[7*i+2] = T[7*i+1].plus(T[7*i+0], ws); // g2+g
+      T[7*i+3] = g4;
+      T[7*i+4] = T[7*i+3].plus(T[7*i+0], ws); // g4+g
+      T[7*i+5] = T[7*i+3].plus(T[7*i+1], ws); // g4+g2
+      T[7*i+6] = T[7*i+3].plus(T[7*i+2], ws); // g4+g2+g
+
+      g.swap(g4);
+      g.mult2(ws);
       }
 
    PointGFp::force_all_affine(T, ws[0].get_word_vector());
@@ -100,13 +111,30 @@ PointGFp PointGFp_Base_Point_Precompute::mul(const BigInt& k,
    if(k.is_negative())
       throw Invalid_Argument("PointGFp_Base_Point_Precompute scalar must be positive");
 
-   // Choose a small mask m and use k' = k + m*order (Coron's 1st countermeasure)
-   const BigInt mask(rng, PointGFp_SCALAR_BLINDING_BITS);
-
    // Instead of reducing k mod group order should we alter the mask size??
-   const BigInt scalar = m_mod_order.reduce(k) + group_order * mask;
+   BigInt scalar = m_mod_order.reduce(k);
 
-   const size_t windows = round_up(scalar.bits(), 2) / 2;
+   if(rng.is_seeded())
+      {
+      // Choose a small mask m and use k' = k + m*order (Coron's 1st countermeasure)
+      const BigInt mask(rng, PointGFp_SCALAR_BLINDING_BITS);
+      scalar += group_order * mask;
+      }
+   else
+      {
+      /*
+      When we don't have an RNG we cannot do scalar blinding. Instead use the
+      same trick as OpenSSL and add one or two copies of the order to normalize
+      the length of the scalar at order.bits()+1. This at least ensures the loop
+      bound does not leak information about the high bits of the scalar.
+      */
+      scalar += group_order;
+      if(scalar.bits() == group_order.bits())
+         scalar += group_order;
+      BOTAN_DEBUG_ASSERT(scalar.bits() == group_order.bits() + 1);
+      }
+
+   const size_t windows = round_up(scalar.bits(), WINDOW_BITS) / WINDOW_BITS;
 
    const size_t elem_size = 2*m_p_words;
 
@@ -124,26 +152,34 @@ PointGFp PointGFp_Base_Point_Precompute::mul(const BigInt& k,
    for(size_t i = 0; i != windows; ++i)
       {
       const size_t window = windows - i - 1;
-      const size_t base_addr = (3*window)*elem_size;
+      const size_t base_addr = (WINDOW_SIZE*window)*elem_size;
 
-      const word w = scalar.get_substring(2*window, 2);
+      const word w = scalar.get_substring(WINDOW_BITS*window, WINDOW_BITS);
 
-      const word w_is_1 = CT::is_equal<word>(w, 1);
-      const word w_is_2 = CT::is_equal<word>(w, 2);
-      const word w_is_3 = CT::is_equal<word>(w, 3);
+      const auto w_is_1 = CT::Mask<word>::is_equal(w, 1);
+      const auto w_is_2 = CT::Mask<word>::is_equal(w, 2);
+      const auto w_is_3 = CT::Mask<word>::is_equal(w, 3);
+      const auto w_is_4 = CT::Mask<word>::is_equal(w, 4);
+      const auto w_is_5 = CT::Mask<word>::is_equal(w, 5);
+      const auto w_is_6 = CT::Mask<word>::is_equal(w, 6);
+      const auto w_is_7 = CT::Mask<word>::is_equal(w, 7);
 
       for(size_t j = 0; j != elem_size; ++j)
          {
-         const word w1 = m_W[base_addr + 0*elem_size + j];
-         const word w2 = m_W[base_addr + 1*elem_size + j];
-         const word w3 = m_W[base_addr + 2*elem_size + j];
+         const word w1 = w_is_1.if_set_return(m_W[base_addr + 0*elem_size + j]);
+         const word w2 = w_is_2.if_set_return(m_W[base_addr + 1*elem_size + j]);
+         const word w3 = w_is_3.if_set_return(m_W[base_addr + 2*elem_size + j]);
+         const word w4 = w_is_4.if_set_return(m_W[base_addr + 3*elem_size + j]);
+         const word w5 = w_is_5.if_set_return(m_W[base_addr + 4*elem_size + j]);
+         const word w6 = w_is_6.if_set_return(m_W[base_addr + 5*elem_size + j]);
+         const word w7 = w_is_7.if_set_return(m_W[base_addr + 6*elem_size + j]);
 
-         Wt[j] = CT::select3<word>(w_is_1, w1, w_is_2, w2, w_is_3, w3, 0);
+         Wt[j] = w1 | w2 | w3 | w4 | w5 | w6 | w7;
          }
 
       R.add_affine(&Wt[0], m_p_words, &Wt[m_p_words], m_p_words, ws);
 
-      if(i == 0)
+      if(i == 0 && rng.is_seeded())
          {
          /*
          * Since we start with the top bit of the exponent we know the
@@ -170,7 +206,7 @@ PointGFp_Var_Point_Precompute::PointGFp_Var_Point_Precompute(const PointGFp& poi
    if(ws.size() < PointGFp::WORKSPACE_SIZE)
       ws.resize(PointGFp::WORKSPACE_SIZE);
 
-   std::vector<PointGFp> U(1U << m_window_bits);
+   std::vector<PointGFp> U(static_cast<size_t>(1) << m_window_bits);
    U[0] = point.zero();
    U[1] = point;
 
@@ -255,11 +291,11 @@ PointGFp PointGFp_Var_Point_Precompute::mul(const BigInt& k,
       clear_mem(e.data(), e.size());
       for(size_t i = 1; i != window_elems; ++i)
          {
-         const word wmask = CT::is_equal<word>(w, i);
+         const auto wmask = CT::Mask<word>::is_equal(w, i);
 
          for(size_t j = 0; j != elem_size; ++j)
             {
-            e[j] |= wmask & m_T[i * elem_size + j];
+            e[j] |= wmask.if_set_return(m_T[i * elem_size + j]);
             }
          }
 
@@ -282,10 +318,12 @@ PointGFp PointGFp_Var_Point_Precompute::mul(const BigInt& k,
       clear_mem(e.data(), e.size());
       for(size_t i = 1; i != window_elems; ++i)
          {
-         const word wmask = CT::is_equal<word>(w, i);
+         const auto wmask = CT::Mask<word>::is_equal(w, i);
 
          for(size_t j = 0; j != elem_size; ++j)
-            e[j] |= wmask & m_T[i * elem_size + j];
+            {
+            e[j] |= wmask.if_set_return(m_T[i * elem_size + j]);
+            }
          }
 
       R.add(&e[0], m_p_words, &e[m_p_words], m_p_words, &e[2*m_p_words], m_p_words, ws);
@@ -354,10 +392,10 @@ PointGFp PointGFp_Multi_Point_Precompute::multi_exp(const BigInt& z1,
          H.mult2i(2, ws);
          }
 
-      const uint8_t z1_b = z1.get_substring(z_bits - i - 2, 2);
-      const uint8_t z2_b = z2.get_substring(z_bits - i - 2, 2);
+      const uint32_t z1_b = z1.get_substring(z_bits - i - 2, 2);
+      const uint32_t z2_b = z2.get_substring(z_bits - i - 2, 2);
 
-      const uint8_t z12 = (4*z2_b) + z1_b;
+      const uint32_t z12 = (4*z2_b) + z1_b;
 
       // This function is not intended to be const time
       if(z12)

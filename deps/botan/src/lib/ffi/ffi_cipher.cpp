@@ -20,7 +20,7 @@ struct botan_cipher_struct final : public botan_struct<Botan::Cipher_Mode, 0xB4A
 
 int botan_cipher_init(botan_cipher_t* cipher, const char* cipher_name, uint32_t flags)
    {
-   return ffi_guard_thunk(BOTAN_CURRENT_FUNCTION, [=]() -> int {
+   return ffi_guard_thunk(__func__, [=]() -> int {
       const bool encrypt_p = ((flags & BOTAN_CIPHER_INIT_FLAG_MASK_DIRECTION) == BOTAN_CIPHER_INIT_FLAG_ENCRYPT);
       const Botan::Cipher_Dir dir = encrypt_p ? Botan::ENCRYPTION : Botan::DECRYPTION;
       std::unique_ptr<Botan::Cipher_Mode> mode(Botan::Cipher_Mode::create(cipher_name, dir));
@@ -41,6 +41,19 @@ int botan_cipher_clear(botan_cipher_t cipher)
    return BOTAN_FFI_DO(Botan::Cipher_Mode, cipher, c, { c.clear(); });
    }
 
+int botan_cipher_reset(botan_cipher_t cipher)
+   {
+   return BOTAN_FFI_DO(Botan::Cipher_Mode, cipher, c, { c.reset(); });
+   }
+
+int botan_cipher_output_length(botan_cipher_t cipher, size_t in_len, size_t* out_len)
+   {
+   if(out_len == nullptr)
+      return BOTAN_FFI_ERROR_NULL_POINTER;
+
+   return BOTAN_FFI_DO(Botan::Cipher_Mode, cipher, c, { *out_len = c.output_length(in_len); });
+   }
+
 int botan_cipher_query_keylen(botan_cipher_t cipher,
                               size_t* out_minimum_keylength,
                               size_t* out_maximum_keylength)
@@ -48,6 +61,21 @@ int botan_cipher_query_keylen(botan_cipher_t cipher,
    return BOTAN_FFI_DO(Botan::Cipher_Mode, cipher, c, {
       *out_minimum_keylength = c.key_spec().minimum_keylength();
       *out_maximum_keylength = c.key_spec().maximum_keylength();
+      });
+   }
+
+int botan_cipher_get_keyspec(botan_cipher_t cipher,
+                             size_t* out_minimum_keylength,
+                             size_t* out_maximum_keylength,
+                             size_t* out_keylength_modulo)
+   {
+   return BOTAN_FFI_DO(Botan::Cipher_Mode, cipher, c, {
+      if(out_minimum_keylength)
+         *out_minimum_keylength = c.key_spec().minimum_keylength();
+      if(out_maximum_keylength)
+         *out_maximum_keylength = c.key_spec().maximum_keylength();
+      if(out_keylength_modulo)
+         *out_keylength_modulo = c.key_spec().keylength_multiple();
       });
    }
 
@@ -60,7 +88,7 @@ int botan_cipher_set_key(botan_cipher_t cipher,
 int botan_cipher_start(botan_cipher_t cipher_obj,
                        const uint8_t* nonce, size_t nonce_len)
    {
-   return ffi_guard_thunk(BOTAN_CURRENT_FUNCTION, [=]() -> int {
+   return ffi_guard_thunk(__func__, [=]() -> int {
       Botan::Cipher_Mode& cipher = safe_get(cipher_obj);
       cipher.start(nonce, nonce_len);
       cipher_obj->m_buf.reserve(cipher.update_granularity());
@@ -77,7 +105,7 @@ int botan_cipher_update(botan_cipher_t cipher_obj,
                         size_t orig_input_size,
                         size_t* input_consumed)
    {
-   return ffi_guard_thunk(BOTAN_CURRENT_FUNCTION, [=]() -> int {
+   return ffi_guard_thunk(__func__, [=]() -> int {
 
       size_t input_size = orig_input_size;
       size_t output_size = orig_output_size;
@@ -100,7 +128,7 @@ int botan_cipher_update(botan_cipher_t cipher_obj,
             {
             cipher.finish(mbuf);
             }
-         catch(Integrity_Failure&)
+         catch(Invalid_Authentication_Tag&)
             {
             return BOTAN_FFI_ERROR_BAD_MAC;
             }
@@ -139,6 +167,7 @@ int botan_cipher_update(botan_cipher_t cipher_obj,
 
       while(input_size >= ud && output_size >= ud)
          {
+         // FIXME we can use process here and avoid the copy
          copy_mem(mbuf.data(), input, ud);
          cipher.update(mbuf);
 
@@ -163,7 +192,7 @@ int botan_cipher_set_associated_data(botan_cipher_t cipher,
                                      const uint8_t* ad,
                                      size_t ad_len)
    {
-   return BOTAN_FFI_DO(Botan::Cipher_Mode, cipher, c, {
+   return BOTAN_FFI_RETURNING(Botan::Cipher_Mode, cipher, c, {
       if(Botan::AEAD_Mode* aead = dynamic_cast<Botan::AEAD_Mode*>(&c))
          {
          aead->set_associated_data(ad, ad_len);
@@ -175,7 +204,9 @@ int botan_cipher_set_associated_data(botan_cipher_t cipher,
 
 int botan_cipher_valid_nonce_length(botan_cipher_t cipher, size_t nl)
    {
-   return BOTAN_FFI_DO(Botan::Cipher_Mode, cipher, c, { return c.valid_nonce_length(nl) ? 1 : 0; });
+   return BOTAN_FFI_RETURNING(Botan::Cipher_Mode, cipher, c, {
+      return c.valid_nonce_length(nl) ? 1 : 0;
+      });
    }
 
 int botan_cipher_get_default_nonce_length(botan_cipher_t cipher, size_t* nl)
@@ -191,6 +222,12 @@ int botan_cipher_get_update_granularity(botan_cipher_t cipher, size_t* ug)
 int botan_cipher_get_tag_length(botan_cipher_t cipher, size_t* tl)
    {
    return BOTAN_FFI_DO(Botan::Cipher_Mode, cipher, c, { *tl = c.tag_size(); });
+   }
+
+int botan_cipher_name(botan_cipher_t cipher, char* name, size_t* name_len)
+   {
+   return BOTAN_FFI_DO(Botan::Cipher_Mode, cipher, c, {
+      return write_str_output(name, name_len, c.name()); });
    }
 
 }

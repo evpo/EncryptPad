@@ -8,8 +8,21 @@
 #include "argparse.h"
 #include <botan/rng.h>
 #include <botan/parsing.h>
+#include <botan/internal/os_utils.h>
 #include <iostream>
 #include <fstream>
+
+#if defined(BOTAN_HAS_HEX_CODEC)
+   #include <botan/hex.h>
+#endif
+
+#if defined(BOTAN_HAS_BASE64_CODEC)
+   #include <botan/base64.h>
+#endif
+
+#if defined(BOTAN_HAS_BASE58_CODEC)
+   #include <botan/base58.h>
+#endif
 
 namespace Botan_CLI {
 
@@ -115,6 +128,22 @@ size_t Command::get_arg_sz(const std::string& opt_name) const
    return m_args->get_arg_sz(opt_name);
    }
 
+uint16_t Command::get_arg_u16(const std::string& opt_name) const
+   {
+   const size_t val = get_arg_sz(opt_name);
+   if(static_cast<uint16_t>(val) != val)
+      throw CLI_Usage_Error("Argument " + opt_name + " has value out of allowed range");
+   return static_cast<uint16_t>(val);
+   }
+
+uint32_t Command::get_arg_u32(const std::string& opt_name) const
+   {
+   const size_t val = get_arg_sz(opt_name);
+   if(static_cast<uint32_t>(val) != val)
+      throw CLI_Usage_Error("Argument " + opt_name + " has value out of allowed range");
+   return static_cast<uint32_t>(val);
+   }
+
 std::vector<std::string> Command::get_arg_list(const std::string& what) const
    {
    return m_args->get_arg_list(what);
@@ -182,8 +211,8 @@ void Command::read_file(const std::string& input_file,
    }
 
 void Command::do_read_file(std::istream& in,
-                  std::function<void (uint8_t[], size_t)> consumer_fn,
-                  size_t buf_size) const
+                           std::function<void (uint8_t[], size_t)> consumer_fn,
+                           size_t buf_size) const
    {
    // Avoid an infinite loop on --buf-size=0
    std::vector<uint8_t> buf(buf_size == 0 ? 4096 : buf_size);
@@ -204,6 +233,72 @@ Botan::RandomNumberGenerator& Command::rng()
       }
 
    return *m_rng.get();
+   }
+
+std::string Command::get_passphrase_arg(const std::string& prompt, const std::string& opt_name)
+   {
+   const std::string s = get_arg(opt_name);
+   if(s != "-")
+      return s;
+   return get_passphrase(prompt);
+   }
+
+namespace {
+
+bool echo_suppression_supported()
+   {
+   auto echo = Botan::OS::suppress_echo_on_terminal();
+   return (echo != nullptr);
+   }
+
+}
+
+std::string Command::get_passphrase(const std::string& prompt)
+   {
+   if(echo_suppression_supported() == false)
+      error_output() << "Warning: terminal echo suppression not enabled for this platform\n";
+
+   error_output() << prompt << ": " << std::flush;
+   std::string pass;
+
+   auto echo_suppress = Botan::OS::suppress_echo_on_terminal();
+
+   std::getline(std::cin, pass);
+
+   return pass;
+   }
+
+//static
+std::string Command::format_blob(const std::string& format,
+                                 const uint8_t bits[], size_t len)
+   {
+#if defined(BOTAN_HAS_HEX_CODEC)
+   if(format == "hex")
+      {
+      return Botan::hex_encode(bits, len);
+      }
+#endif
+
+#if defined(BOTAN_HAS_BASE64_CODEC)
+   if(format == "base64")
+      {
+      return Botan::base64_encode(bits, len);
+      }
+#endif
+
+#if defined(BOTAN_HAS_BASE58_CODEC)
+   if(format == "base58")
+      {
+      return Botan::base58_encode(bits, len);
+      }
+   if(format == "base58check")
+      {
+      return Botan::base58_check_encode(bits, len);
+      }
+#endif
+
+   // If we supported format, we would have already returned
+   throw CLI_Usage_Error("Unknown or unsupported format type");
    }
 
 // Registration code

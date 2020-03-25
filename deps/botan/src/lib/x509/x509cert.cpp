@@ -147,8 +147,8 @@ std::unique_ptr<X509_Certificate_Data> parse_x509_cert_body(const X509_Object& o
    AlgorithmIdentifier public_key_alg_id;
    BER_Decoder(public_key).decode(public_key_alg_id).discard_remaining();
 
-   std::vector<std::string> public_key_info =
-      split_on(OIDS::oid2str(public_key_alg_id.get_oid()), '/');
+   const std::vector<std::string> public_key_info =
+      split_on(OIDS::oid2str_or_empty(public_key_alg_id.get_oid()), '/');
 
    if(!public_key_info.empty() && public_key_info[0] == "RSA")
       {
@@ -176,17 +176,13 @@ std::unique_ptr<X509_Certificate_Data> parse_x509_cert_body(const X509_Object& o
                throw Decoding_Error("Algorithm identifier mismatch");
                }
             }
-         if(public_key_info[1] == "OAEP")
-            {
-            throw Decoding_Error("Decoding subject public keys of type RSAES-OAEP is currently not supported");
-            }
          }
       else
          {
          // oid = rsaEncryption -> parameters field MUST contain NULL
          if(public_key_alg_id != AlgorithmIdentifier(public_key_alg_id.get_oid(), AlgorithmIdentifier::USE_NULL_PARAM))
             {
-            throw Decoding_Error("Parameters field MUST contain NULL");
+            throw Decoding_Error("RSA algorithm parameters field MUST contain NULL");
             }
          }
       }
@@ -201,10 +197,13 @@ std::unique_ptr<X509_Certificate_Data> parse_x509_cert_body(const X509_Object& o
 
    if(v3_exts_data.is_a(3, ASN1_Tag(CONSTRUCTED | CONTEXT_SPECIFIC)))
       {
+      // Path validation will reject a v1/v2 cert with v3 extensions
       BER_Decoder(v3_exts_data).decode(data->m_v3_extensions).verify_end();
       }
    else if(v3_exts_data.is_set())
+      {
       throw BER_Bad_Tag("Unknown tag in X.509 cert", v3_exts_data.tagging());
+      }
 
    // Now cache some fields from the extensions
    if(auto ext = data->m_v3_extensions.get_extension_object_as<Cert_Extension::Key_Usage>())
@@ -284,6 +283,13 @@ std::unique_ptr<X509_Certificate_Data> parse_x509_cert_body(const X509_Object& o
          }
       else
          {
+         /*
+         If a parse error or unknown algorithm is encountered, default
+         to assuming it is self signed. We have no way of being certain but
+         that is usually the default case (self-issued is rare in practice).
+         */
+         data->m_self_signed = true;
+
          try
             {
             std::unique_ptr<Public_Key> pub_key(X509::load_key(data->m_subject_public_key_bits_seq));
@@ -294,6 +300,10 @@ std::unique_ptr<X509_Certificate_Data> parse_x509_cert_body(const X509_Object& o
                sig_status == Certificate_Status_Code::SIGNATURE_ALGO_UNKNOWN)
                {
                data->m_self_signed = true;
+               }
+            else
+               {
+               data->m_self_signed = false;
                }
             }
          catch(...)
@@ -343,7 +353,7 @@ const X509_Certificate_Data& X509_Certificate::data() const
 
 uint32_t X509_Certificate::x509_version() const
    {
-   return data().m_version;
+   return static_cast<uint32_t>(data().m_version);
    }
 
 bool X509_Certificate::is_self_signed() const
@@ -442,12 +452,18 @@ const std::vector<uint8_t>& X509_Certificate::raw_subject_dn() const
 
 bool X509_Certificate::is_CA_cert() const
    {
+   if(data().m_version < 3 && data().m_self_signed)
+      return true;
+
    return data().m_is_ca_certificate;
    }
 
 uint32_t X509_Certificate::path_limit() const
    {
-   return data().m_path_len_constraint;
+   if(data().m_version < 3 && data().m_self_signed)
+      return 32; // in theory infinite, but this is more than enough
+
+   return static_cast<uint32_t>(data().m_path_len_constraint);
    }
 
 Key_Constraints X509_Certificate::constraints() const
@@ -484,7 +500,7 @@ bool X509_Certificate::allowed_usage(Key_Constraints usage) const
 
 bool X509_Certificate::allowed_extended_usage(const std::string& usage) const
    {
-   return allowed_extended_usage(OIDS::str2oid(usage));
+   return allowed_extended_usage(OID::from_string(usage));
    }
 
 bool X509_Certificate::allowed_extended_usage(const OID& usage) const
@@ -519,6 +535,9 @@ bool X509_Certificate::allowed_usage(Usage_Type usage) const
 
       case Usage_Type::CERTIFICATE_AUTHORITY:
          return is_CA_cert();
+
+      case Usage_Type::ENCRYPTION:
+         return (allowed_usage(KEY_ENCIPHERMENT) || allowed_usage(DATA_ENCIPHERMENT));
       }
 
    return false;
@@ -536,7 +555,7 @@ bool X509_Certificate::has_constraints(Key_Constraints constraints) const
 
 bool X509_Certificate::has_ex_constraint(const std::string& ex_constraint) const
    {
-   return has_ex_constraint(OIDS::str2oid(ex_constraint));
+   return has_ex_constraint(OID::from_string(ex_constraint));
    }
 
 bool X509_Certificate::has_ex_constraint(const OID& usage) const
@@ -550,7 +569,7 @@ bool X509_Certificate::has_ex_constraint(const OID& usage) const
 */
 bool X509_Certificate::is_critical(const std::string& ex_name) const
    {
-   return v3_extensions().critical_extension_set(OIDS::str2oid(ex_name));
+   return v3_extensions().critical_extension_set(OID::from_string(ex_name));
    }
 
 std::string X509_Certificate::ocsp_responder() const
@@ -650,7 +669,7 @@ std::unique_ptr<Public_Key> X509_Certificate::load_subject_public_key() const
       }
    catch(std::exception& e)
       {
-      throw Decoding_Error("X509_Certificate::load_subject_public_key", e.what());
+      throw Decoding_Error("X509_Certificate::load_subject_public_key", e);
       }
    }
 
@@ -679,7 +698,7 @@ std::vector<std::string> lookup_oids(const std::vector<OID>& oids)
 
    for(const OID& oid : oids)
       {
-      out.push_back(OIDS::oid2str(oid));
+      out.push_back(oid.to_formatted_string());
       }
    return out;
    }
@@ -793,20 +812,22 @@ std::string X509_Certificate::to_string() const
          out << "   Decipher Only\n";
       }
 
-   const std::vector<OID> policies = this->certificate_policy_oids();
+   const std::vector<OID>& policies = this->certificate_policy_oids();
    if(!policies.empty())
       {
       out << "Policies: " << "\n";
       for(auto oid : policies)
-         out << "   " << oid.as_string() << "\n";
+         out << "   " << oid.to_string() << "\n";
       }
 
-   std::vector<OID> ex_constraints = this->extended_key_usage();
+   const std::vector<OID>& ex_constraints = this->extended_key_usage();
    if(!ex_constraints.empty())
       {
       out << "Extended Constraints:\n";
-      for(size_t i = 0; i != ex_constraints.size(); i++)
-         out << "   " << OIDS::oid2str(ex_constraints[i]) << "\n";
+      for(auto&& oid : ex_constraints)
+         {
+         out << "   " << oid.to_formatted_string() << "\n";
+         }
       }
 
    const NameConstraints& name_constraints = this->name_constraints();
@@ -839,7 +860,7 @@ std::string X509_Certificate::to_string() const
    if(!ocsp_responder().empty())
       out << "OCSP responder " << ocsp_responder() << "\n";
 
-   std::vector<std::string> ca_issuers = this->ca_issuers();
+   const std::vector<std::string> ca_issuers = this->ca_issuers();
    if(!ca_issuers.empty())
       {
       out << "CA Issuers:\n";
@@ -850,8 +871,7 @@ std::string X509_Certificate::to_string() const
    if(!crl_distribution_point().empty())
       out << "CRL " << crl_distribution_point() << "\n";
 
-   out << "Signature algorithm: " <<
-      OIDS::oid2str(this->signature_algorithm().get_oid()) << "\n";
+   out << "Signature algorithm: " << this->signature_algorithm().get_oid().to_formatted_string() << "\n";
 
    out << "Serial number: " << hex_encode(this->serial_number()) << "\n";
 
@@ -870,7 +890,7 @@ std::string X509_Certificate::to_string() const
    catch(Decoding_Error&)
       {
       const AlgorithmIdentifier& alg_id = this->subject_public_key_algo();
-      out << "Failed to decode key with oid " << alg_id.get_oid().as_string() << "\n";
+      out << "Failed to decode key with oid " << alg_id.get_oid().to_string() << "\n";
       }
 
    return out.str();
