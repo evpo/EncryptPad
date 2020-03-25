@@ -1,0 +1,38 @@
+<defines>
+libencryptmsg -> 20190126
+</defines>
+
+<header:public>
+emsg_symmetric_key.h
+message_decryption.h
+message_encryption.h
+openpgp_conversions.h
+passphrase_provider.h
+algo_spec.h
+emsg_exception.h
+emsg_mem.h
+emsg_types.h
+emsg_utility.h
+message_config.h
+utility.h
+version.h
+</header:public>
+
+<header:internal>
+context.h
+emsg_constants.h
+graph_builder.h
+logger_init.h
+memory_stream.h
+packet_parsers.h
+packet_reader.h
+packet_writer.h
+session_state.h
+state_handlers.h
+state_id.h
+</header:internal>
+
+<frameworks>
+darwin -> Security,CoreFoundation
+ios -> Security
+</frameworks>

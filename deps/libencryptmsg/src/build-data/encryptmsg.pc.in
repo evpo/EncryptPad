@@ -1,0 +1,10 @@
+prefix=%{prefix}
+libdir=%{prefix}/%{libdir}
+includedir=%{prefix}/include/libencryptmsg
+
+Name: libencryptmsg
+Description: Symmetric encryption OpenPGP library
+Version: $VERSION
+
+Libs: -L\${libdir} -lencryptmsg %{cxx_abi_flags}
+Cflags: -I\${includedir}

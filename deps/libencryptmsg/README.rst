@@ -11,7 +11,7 @@ Official web site: `https://evpo.net/libencryptmsg <https://evpo.net/libencryptm
 License
 -------
 
-LibEncryptMsg Copyright 2018 Evgeny Pokhilko
+LibEncryptMsg Copyright 2020 Evgeny Pokhilko
 https://www.evpo.net/libencryptmsg
 
 LibEncryptMsg is released under the Simplified BSD License (see license.txt)

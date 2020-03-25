@@ -1,21 +1,47 @@
 language: cpp
-os: linux
+os:
+   - linux
+   - osx
+
 compiler: gcc
 env: CONFIG=Debug
+group: stable
+dist: trusty
 
 install:
-    - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 50
-    - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-5 50
-    - ./ci/prepare.sh
-    - sudo make -j2 -C $HOME/botan install
+    - |
+        if [[ "$TRAVIS_OS_NAME" == "linux" ]]
+        then
+            sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 50
+            sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-5 50
+            ./ci/prepare.sh linux
+            sudo make -j2 -C $HOME/botan install
+        fi
+    - |
+        if [[ "$TRAVIS_OS_NAME" == "osx" ]]
+        then
+            ./ci/prepare.sh osx
+            sudo make -j2 -C $HOME/botan libs
+        fi
 script:
-    - ./configure --debug-mode
-    - make
-    - make tests
-    - pushd ./bin/debug/ && ./encryptmsg-tests && popd
+    - |
+        if [[ "$TRAVIS_OS_NAME" == "linux" ]]
+        then
+            ./configure.py --debug-mode --test --build-shared-lib --build-cli
+            make
+            pushd ./bin/debug/ && ./encryptmsg-test && popd
+        fi
+    - |
+        if [[ "$TRAVIS_OS_NAME" == "osx" ]]
+        then
+            ./configure.py --debug-mode --test --build-cli --botan-include-dir $HOME/botan/build/include --botan-lib-dir $HOME/botan
+            make
+            pushd ./bin/debug/ && ./encryptmsg-test && popd
+        fi
 addons:
     apt:
         sources:
             - ubuntu-toolchain-r-test
         packages:
+            - zlib1g-dev
             - g++-5

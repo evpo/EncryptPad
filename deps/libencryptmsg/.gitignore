@@ -7,3 +7,4 @@ MACOS-*
 *.swp
 *.log
 cscope.out
+Makefile

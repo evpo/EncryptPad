@@ -1,0 +1,179 @@
+# Paths to relevant programs
+
+CXX            = %{cxx}
+LINKER         = %{linker}
+AR             = %{ar_command}
+PYTHON_EXE     = %{python_exe}
+MKDIR_P        = mkdir -p
+
+# Compiler Flags
+
+ABI_FLAGS      = %{cc_sysroot} %{cxx_abi_flags}
+LANG_FLAGS     = %{cc_lang_flags}
+CXXFLAGS       = %{cc_compile_flags}
+WARN_FLAGS     = %{cc_warning_flags}
+SO_OBJ_FLAGS   = %{shared_flags}
+LDFLAGS        = %{ldflags}
+
+EXE_LINK_CMD   = %{exe_link_cmd}
+POST_LINK_CMD  = %{post_link_cmd}
+
+LIB_LINKS_TO   = %{link_to}
+EXE_LINKS_TO   = %{library_target} $(LIB_LINKS_TO)
+
+BUILD_FLAGS    = $(ABI_FLAGS) $(LANG_FLAGS) $(CXXFLAGS) $(WARN_FLAGS)
+TEST_BUILD_FLAGS = $(ABI_FLAGS) $(LANG_FLAGS) $(CXXFLAGS)
+DEPS_BUILD_FLAGS = $(ABI_FLAGS) $(LANG_FLAGS) $(CXXFLAGS)
+
+INSTALLED_LIB_DIR = %{prefix}/libdir
+SCRIPTS_DIR = scripts
+
+BOTAN_CXXFLAGS = %{botan_cxxflags}
+BOTAN_LDFLAGS = %{botan_ldflags}
+
+INCLUDE_PATHS = %{include_paths}
+
+%{if debug_mode}
+RELEASE=
+CONFIG_DIR=debug
+%{endif}
+
+%{unless debug_mode}
+RELEASE=on
+CONFIG_DIR=release
+%{endif}
+
+# The primary target
+all: %{default_targets}
+
+# Executable targets
+CLI           = %{cli_exe}
+TEST          = %{test_exe}
+LIBRARIES     = %{library_target}
+SHAREDSO      = %{sharedso_target}
+
+cli: $(CLI)
+test: $(TEST)
+libs: $(LIBRARIES)
+shared: $(SHAREDSO)
+
+# Zlib
+EXE_LINKS_TO += %{zlib_ldflags}
+
+# Gtest build
+# ###########
+
+GTEST_DIR = deps/gtest/googletest
+GTEST_TARGET_DIR = %{build_dir}/gtest
+# Flags passed to the preprocessor.
+# Set Google Test's header directory as a system directory, such that
+# the compiler doesn't generate warnings in Google Test headers.
+GTEST_CPPFLAGS += -isystem $(GTEST_DIR)/include
+# All Google Test headers.  Usually you shouldn't change this
+# definition.
+GTEST_HEADERS = $(GTEST_DIR)/include/gtest/*.h \
+                $(GTEST_DIR)/include/gtest/internal/*.h
+
+# Usually you shouldn't tweak such internal variables, indicated by a
+# trailing _.
+GTEST_SRCS_ = $(GTEST_DIR)/src/*.cc $(GTEST_DIR)/src/*.h $(GTEST_HEADERS)
+GTEST = $(GTEST_TARGET_DIR)/libgtest_main.a $(GTEST_TARGET_DIR)/libgtest.a
+
+clean_gtest :
+	rm -f $(GTEST_TARGET_DIR)/libgtest.a $(GTEST_TARGET_DIR)/libgtest_main.a $(GTEST_TARGET_DIR)/*.o
+
+# For simplicity and to avoid depending on Google Test's
+# implementation details, the dependencies specified below are
+# conservative and not optimized.  This is fine as Google Test
+# compiles fast and for ordinary users its source rarely changes.
+$(GTEST_TARGET_DIR)/gtest-all.o : $(GTEST_SRCS_)
+	$(MKDIR_P) $(@D)
+	$(CXX) $(ABI_FLAGS) $(CPPFLAGS) $(GTEST_CPPFLAGS) -I$(GTEST_DIR) $(CXXFLAGS) -c \
+            $(GTEST_DIR)/src/gtest-all.cc -o $@
+
+$(GTEST_TARGET_DIR)/gtest_main.o : $(GTEST_SRCS_)
+	$(MKDIR_P) $(@D)
+	$(CXX) $(ABI_FLAGS) $(CPPFLAGS) $(GTEST_CPPFLAGS) -I$(GTEST_DIR) $(CXXFLAGS) -c \
+            $(GTEST_DIR)/src/gtest_main.cc -o $@
+
+$(GTEST_TARGET_DIR)/libgtest.a : $(GTEST_TARGET_DIR)/gtest-all.o
+	$(AR) $(ARFLAGS) $@ $^
+
+$(GTEST_TARGET_DIR)/libgtest_main.a : $(GTEST_TARGET_DIR)/gtest-all.o $(GTEST_TARGET_DIR)/gtest_main.o
+	$(AR) $(ARFLAGS) $@ $^
+
+# End Gtest build
+# ###############
+
+# Unit tests
+
+TEST_INCLUDES = -isystem $(GTEST_DIR)/include
+TEST_LINKS_TO = $(GTEST_TARGET_DIR)/libgtest_main.a $(GTEST_TARGET_DIR)/libgtest.a
+
+# Misc targets
+
+%{if make_supports_phony}
+.PHONY: all cli libs test test_clean clean_gtest clean distclean install
+%{endif}
+
+clean: clean_gtest
+	$(PYTHON_EXE) $(SCRIPTS_DIR)/cleanup.py --build-dir="%{build_dir}"
+
+distclean:
+	$(PYTHON_EXE) $(SCRIPTS_DIR)/cleanup.py --build-dir="%{build_dir}" --distclean
+
+install: libs shared
+	$(PYTHON_EXE) $(SCRIPTS_DIR)/install.py --prefix=%{prefix} --build-dir="%{build_dir}" --bindir=%{bindir} --libdir=%{libdir} --includedir=%{includedir}
+
+# Object Files
+LIBOBJS = %{join lib_objs}
+
+DEPSOBJS = %{join deps_objs}
+
+CLIOBJS = %{join cli_objs}
+
+TESTOBJS = %{join test_objs}
+
+# Executable targets
+
+$(CLI): $(LIBRARIES) $(CLIOBJS) $(BOTAN_TARGET) $(ZLIB)
+	$(EXE_LINK_CMD) $(ABI_FLAGS) $(LDFLAGS) $(CLIOBJS) $(BOTAN_LDFLAGS) $(EXE_LINKS_TO) %{output_to_exe}$@
+	$(POST_LINK_CMD)
+
+$(TEST): $(LIBRARIES) $(TESTOBJS) $(GTEST) $(BOTAN_TARGET) $(ZLIB)
+	$(EXE_LINK_CMD) $(ABI_FLAGS) $(LDFLAGS) $(TESTOBJS) $(BOTAN_LDFLAGS) $(EXE_LINKS_TO) $(TEST_LINKS_TO) %{output_to_exe}$@
+	$(POST_LINK_CMD)
+
+$(SHAREDSO): $(LIBOBJS) $(DEPSOBJS)
+	$(EXE_LINK_CMD) -shared $(ABI_FLAGS) $(LDFLAGS) $(LIBOBJS) $(DEPSOBJS) -o $(SHAREDSO)
+%{if symlink_shared_lib}
+	cd %{out_dir} && ln -fs %{shared_lib_name} %{soname_base}
+	cd %{out_dir} && ln -fs %{shared_lib_name} %{soname_patch}
+%{endif}
+
+# Library targets
+
+%{library_target}: $(LIBOBJS) $(DEPSOBJS)
+	$(AR) %{ar_options} %{ar_output_to}$@ $(LIBOBJS) $(DEPSOBJS)
+
+# Build Commands
+
+%{for lib_build_info}
+%{obj}: %{src}
+	$(CXX) $(SO_OBJ_FLAGS) $(BUILD_FLAGS) %{isa_flags} $(BOTAN_CXXFLAGS) $(INCLUDE_PATHS) %{dash_c} %{src} %{dash_o}$@
+%{endfor}
+
+%{for deps_build_info}
+%{obj}: %{src}
+	$(CXX) $(SO_OBJ_FLAGS) $(DEPS_BUILD_FLAGS) $(BOTAN_CXXFLAGS) $(INCLUDE_PATHS) %{dash_c} %{src} %{dash_o}$@
+%{endfor}
+
+%{for cli_build_info}
+%{obj}: %{src}
+	$(CXX) $(BUILD_FLAGS) %{isa_flags} $(BOTAN_CXXFLAGS) $(INCLUDE_PATHS) %{dash_c} %{src} %{dash_o}$@
+%{endfor}
+
+%{for test_build_info}
+%{obj}: %{src}
+	$(CXX) $(TEST_BUILD_FLAGS) %{isa_flags} $(BOTAN_CXXFLAGS) $(INCLUDE_PATHS) $(TEST_INCLUDES) %{dash_c} %{src} %{dash_o}$@
+%{endfor}

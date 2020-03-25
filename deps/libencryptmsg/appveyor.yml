@@ -1,0 +1,40 @@
+# AppVeyor build configuration
+#
+# doc: http://www.appveyor.com/docs/build-configuration
+# Qt-versions: https://www.appveyor.com/docs/build-environment/#qt
+# validator: https://ci.appveyor.com/tools/validate-yaml
+
+skip_tags: true
+
+environment:
+  matrix:
+    - qtdir: "C:\\Qt\\5.11\\mingw53_32"
+      gpp: win32-g++
+
+install:
+  # Qt-versions: https://www.appveyor.com/docs/build-environment/#qt
+  - ps: |
+      $path = [Environment]::GetEnvironmentVariable("path", "machine")
+      $newPath = ($path.Split(';') | Where-Object { $_ -eq 'C:\ProgramData\chocolatey\bin' }) -join ';'
+      [Environment]::SetEnvironmentVariable("path", $newPath, "machine")
+  - set QTDIR=%qtdir%
+  - set QTTOOLS=C:\Qt\Tools\mingw530_32
+  - set PATH=%QTTOOLS%\bin;%QTDIR%\bin;%PATH%;C:\MinGW\bin
+  - set BOTAN=c:\Users\appveyor\botan
+  - set ZLIB=c:\Users\appveyor\zlib-1.2.11
+
+build_script:
+  - echo %PATH%
+  - appveyor DownloadFile http://zlib.net/zlib-1.2.11.tar.gz -FileName zlib-1.2.11.tar.gz
+  - 7z x zlib-1.2.11.tar.gz > NUL
+  - 7z x zlib-1.2.11.tar > NUL
+  - bash -c "mv zlib-1.2.11 /c/Users/appveyor/"
+  - mingw32-make -C c:\Users\appveyor\zlib-1.2.11 -f win32/Makefile.gcc
+  - bash .\ci\prepare.sh appveyor
+  - which g++
+  - g++ --version
+  - uname
+  - mingw32-make -j2 -C c:\Users\appveyor\botan libs
+  - python configure.py --debug-mode --test --build-cli --botan-include-dir %BOTAN%\build\include --botan-lib-dir %BOTAN% --zlib-include-dir %ZLIB% --zlib-lib-dir %ZLIB%
+  - mingw32-make -j2
+  - bash -c "cd bin/debug && ./encryptmsg-test"
