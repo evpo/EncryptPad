@@ -11,6 +11,6 @@ windows -> ws2_32.lib
 </libs>
 
 <frameworks>
-darwin -> Security
-ios -> Security
+darwin -> CoreFoundation,Security
+ios -> CoreFoundation,Security
 </frameworks>
