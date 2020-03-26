@@ -1739,7 +1739,7 @@ def external_command(cmd):
         result, errs = proc.communicate()
     except OSError as e:
         raise UserError('Error while executing command: %s' % e)
-    return result
+    return result if result is str else result.decode("ascii")
 
 def set_zlib_variables(options, template_vars, cc):
     if options.zlib_include_dir:
