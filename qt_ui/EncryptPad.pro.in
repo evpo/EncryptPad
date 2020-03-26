@@ -7,9 +7,15 @@ EXE_LINKS_TO = %{library_target} %{link_to}
 # botan
 BOTAN_LDFLAGS = %{botan_ldflags}
 BOTAN_CXXFLAGS = %{botan_cxxflags}
-
 LIBS += $$BOTAN_LDFLAGS
+
 LIBS += $$EXE_LINKS_TO
+
+# encryptmsg
+ENCRYPTMSG_LDFLAGS = %{encryptmsg_ldflags}
+ENCRYPTMSG_CXXFLAGS = %{encryptmsg_cxxflags}
+LIBS += $$ENCRYPTMSG_LDFLAGS
+QMAKE_CXXFLAGS += $$ENCRYPTMSG_CXXFLAGS
 
 # zlib
 LIBS += %{zlib_ldflags}
@@ -50,7 +56,6 @@ FORMS += \
 QMAKE_CXXFLAGS += -D_FILE_OFFSET_BITS=64
 
 INCLUDEPATH += $$PROJ/build/include
-INCLUDEPATH += $$PROJ/deps/libencryptmsg/include
 INCLUDEPATH += $$PROJ/deps/plog/include
 
 SOURCES += \

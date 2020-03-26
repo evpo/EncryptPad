@@ -63,7 +63,7 @@ EXE_LINKS_TO += %{zlib_ldflags}
 # Gtest build
 # ###########
 
-GTEST_DIR = deps/gtest/googletest
+GTEST_DIR = %{deps_dir}/gtest/googletest
 GTEST_TARGET_DIR = %{build_dir}/gtest
 # Flags passed to the preprocessor.
 # Set Google Test's header directory as a system directory, such that

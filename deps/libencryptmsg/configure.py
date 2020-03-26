@@ -1865,6 +1865,8 @@ def process_command_line(args):
     build_group.add_option('--static-linking', action='store_true', dest='static_linking', default=False,
                            help='static linking')
 
+    build_group.add_option('--deps-dir', metavar='DIR', dest='deps_dir', default='deps',
+            help='dependencies directory (default: deps)')
     # install section
     build_group.add_option('--prefix', metavar='DIR',
                              help='set the install prefix')
@@ -1916,7 +1918,7 @@ def configure_encryptmsg(system_command, options):
     # for mod in ['state_machine','botan_1_openpgp_codec','stlplus']:
     for mod in ['state_machine','stlplus']:
         info_modules.update(
-                load_info_files(os.path.join('deps', mod),
+                load_info_files(os.path.join(options.deps_dir, mod),
                 'Modules', 'info.txt', ModuleInfo)
                 )
 
@@ -1936,14 +1938,13 @@ def configure_encryptmsg(system_command, options):
     template_vars['cli_exe_name'] = 'encryptmsg'
     template_vars['test_exe'] = os.path.join(build_paths.target_dir, 'encryptmsg-test')
     template_vars['with_documentation'] = False
-    # template_vars['shared_flags'] = '-fvisibility=default'
 
     include_paths = template_vars['include_paths']
     include_paths += ' ' + cc.add_include_dir_option + build_paths.internal_include_dir
 
     include_paths_items = [
-            ('deps','stlplus','containers'),
-            ('deps','plog','include'),
+            (options.deps_dir,'stlplus','containers'),
+            (options.deps_dir,'plog','include'),
             ]
     for item in include_paths_items:
         include_paths += ' -isystem ' + os.path.join(get_project_dir(), *item)
@@ -1963,6 +1964,7 @@ def configure_encryptmsg(system_command, options):
         default_targets.append('shared')
 
     template_vars['default_targets'] = ' '.join(default_targets)
+    template_vars['deps_dir'] = options.deps_dir
 
     set_botan_variables(options, template_vars, cc)
     set_zlib_variables(options, template_vars, cc)

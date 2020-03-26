@@ -1650,7 +1650,7 @@ def configure_botan(options):
         botan_proc = subprocess.Popen(cmd, cwd = botan_dir)
         result = botan_proc.wait()
     except OSError as e:
-        raise UserError('Error while executing qmake: %s' % e)
+        raise UserError('Error while executing commands: %s' % e)
 
 def get_zlib_dir():
     return os.path.join(get_project_dir(), 'deps', 'zlib')
@@ -1671,7 +1671,47 @@ def configure_zlib(options):
         zlib_proc = subprocess.Popen(cmd, cwd = zlib_dir)
         result = zlib_proc.wait()
     except OSError as e:
-        raise UserError('Error while executing qmake: %s' % e)
+        raise UserError('Error while executing commands: %s' % e)
+
+def get_encryptmsg_dir():
+    return os.path.join(get_project_dir(), 'deps', 'libencryptmsg')
+
+def configure_encryptmsg(options):
+    dir = get_encryptmsg_dir()
+    cmd = [
+            sys.executable,
+            './configure.py',
+            '--cc', options.compiler,
+            '--cpu', options.cpu,
+            '--os', options.os,
+            '--static-linking',
+            '--deps-dir', os.path.join(get_project_dir(), 'deps'),
+            ]
+
+    if options.debug_mode:
+        cmd.extend(['--debug-mode'])
+    if options.link_method:
+        cmd.extend(['--link-method', options.link_method])
+    if options.cxxflags:
+        cmd.extend(['--cxxflags', options.cxxflags])
+    if options.ldflags:
+        cmd.extend(['--ldflags', options.ldflags])
+    if options.build_botan:
+        cmd.extend([
+            '--botan-include-dir', get_botan_include_dir(),
+            '--botan-lib-dir', get_botan_build_dir(),
+            ])
+    if options.build_zlib:
+        cmd.extend([
+            '--zlib-include-dir', get_zlib_dir(),
+            '--zlib-lib-dir', get_zlib_dir(),
+            ])
+    logging.info('Executing: %s', ' '.join(cmd))
+    try:
+        encryptmsg_proc = subprocess.Popen(cmd, cwd = dir)
+        result = encryptmsg_proc.wait()
+    except OSError as e:
+        raise UserError('Error while executing commands: %s' % e)
 
 def external_command(cmd):
     logging.info('Executing: %s', ' '.join(cmd))
@@ -1706,6 +1746,9 @@ def set_zlib_variables(options, template_vars, cc):
         template_vars['zlib_cxxflags'] = external_command(['pkg-config', '--cflags', 'zlib'])
         template_vars['zlib_ldflags'] = external_command(['pkg-config', '--libs', 'zlib'])
 
+def get_botan_include_dir():
+    return os.path.join(get_project_dir(), 'deps', 'botan', 'build', 'include')
+
 def set_botan_variables(options, template_vars, cc):
     template_vars['build_botan'] = options.build_botan
     if not options.build_botan:
@@ -1726,11 +1769,18 @@ def set_botan_variables(options, template_vars, cc):
         botan_target = os.path.join(botan_build_dir, 'libbotan-2.a')
         template_vars['botan_target'] = botan_target
         template_vars['botan_build_dir'] = botan_build_dir
-        botan_cxxflags = cc.add_include_dir_option + os.path.join(get_project_dir(), 'deps', 'botan', 'build', 'include')
+        botan_cxxflags = cc.add_include_dir_option + get_botan_include_dir()
         botan_ldflags = botan_target
 
     template_vars['botan_cxxflags'] = botan_cxxflags
     template_vars['botan_ldflags'] = botan_ldflags
+
+def set_encryptmsg_variables(options, template_vars, cc):
+    dir = os.path.join(get_project_dir(), 'deps', 'libencryptmsg')
+    template_vars['encryptmsg_build_dir'] = dir
+    template_vars['encryptmsg_target'] = os.path.join(dir, 'build', 'libencryptmsg.a')
+    template_vars['encryptmsg_cxxflags'] = '-I' + os.path.join(dir, 'build', 'include')
+    template_vars['encryptmsg_ldflags'] = os.path.join(dir, 'build', 'libencryptmsg.a')
 
 def process_command_line(args):
 
@@ -1851,7 +1901,7 @@ def configure_back_end(system_command, options):
                  platform.system(), platform.machine(), platform.processor())
 
     info_modules = load_info_files('src', 'Modules', 'info.txt', ModuleInfo)
-    for mod in ['state_machine','botan_1_openpgp_codec','stlplus','libencryptmsg']:
+    for mod in ['state_machine','botan_1_openpgp_codec','stlplus']:
         info_modules.update(
                 load_info_files(os.path.join('deps', mod),
                 'Modules', 'info.txt', ModuleInfo)
@@ -1869,9 +1919,10 @@ def configure_back_end(system_command, options):
         robust_makedirs(target_dir)
     template_vars['cli_exe'] = os.path.join(target_dir, 'encryptcli')
     template_vars['test_exe'] = os.path.join(target_dir, 'encryptpad_test')
+    template_vars['deps_dir'] = os.path.join(get_project_dir(), 'deps')
 
     include_paths_items = [
-            ('deps','libencryptmsg','include'),
+            ('deps','libencryptmsg','build','include'),
             ('build','include','internal'),
             ]
 
@@ -1905,6 +1956,7 @@ def configure_back_end(system_command, options):
 
     set_botan_variables(options, template_vars, cc)
     set_zlib_variables(options, template_vars, cc)
+    set_encryptmsg_variables(options, template_vars, cc)
 
     do_io_for_build(cc, arch, osinfo, info_modules.values(), build_paths, source_paths, template_vars, options)
 
@@ -1926,6 +1978,7 @@ def main(argv):
         configure_botan(options)
     if options.build_zlib:
         configure_zlib(options)
+    configure_encryptmsg(options)
     return 0
 
 if __name__ == '__main__':
