@@ -9,12 +9,26 @@
 #include <openpgp.h>
 
 #include <botan/filters.h>
-#include <botan/basefilt.h>
-#include <botan/charset.h>
-#include <botan/crc24.h>
+#include <botan/hash.h>
 
+namespace
+{
+    bool is_space(char c)
+    {
+        if(c == ' ' || c == '\t' || c == '\n' || c == '\r')
+            return true;
+        return false;
+    }
+}
 namespace Botan {
 
+    HashFunction *CreateCRC24Hash()
+    {
+        auto hash_func_ptr = HashFunction::create_or_throw("CRC24");
+        auto *ret_val = hash_func_ptr.get();
+        hash_func_ptr.release();
+        return ret_val;
+    }
 /*
 * OpenPGP Base64 encoding
 */
@@ -40,10 +54,9 @@ std::string PGP_encode(
       ++i;
       }
    pgp_encoded += '\n';
-
    Pipe pipe(new Fork(
                 new Base64_Encoder(true, PGP_WIDTH),
-                new Chain(new Hash_Filter(new CRC24), new Base64_Encoder)
+                new Chain(new Hash_Filter(CreateCRC24Hash()), new Base64_Encoder)
                 )
       );
 
@@ -122,7 +135,7 @@ SecureVector<byte> PGP_decode(DataSource& source,
 
       end_of_headers = true;
       for(size_t j = 0; j != this_header.length(); ++j)
-         if(!Charset::is_space(this_header[j]))
+         if(!is_space(this_header[j]))
             end_of_headers = false;
 
       if(!end_of_headers)
@@ -139,7 +152,7 @@ SecureVector<byte> PGP_decode(DataSource& source,
 
    Pipe base64(new Base64_Decoder,
                new Fork(0,
-                        new Chain(new Hash_Filter(new CRC24),
+                        new Chain(new Hash_Filter(CreateCRC24Hash()),
                                   new Base64_Encoder)
                   )
       );

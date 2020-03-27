@@ -19,7 +19,6 @@
 //**********************************************************************************
 #pragma once
 #include <string>
-#include "packet_typedef.h"
 #include "epad_result.h"
 
 namespace EncryptPad

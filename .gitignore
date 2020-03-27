@@ -35,3 +35,4 @@ deps/libencryptmsg/deps
 *~
 Makefile
 build/
+compiler_options.txt

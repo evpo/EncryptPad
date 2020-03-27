@@ -67,7 +67,6 @@ namespace EncryptPad
             return EpadResult::CurlExitNonZero;
 
         key = sub_proc.get_output();
-        // key = Botan::OctetString(Botan::base64_decode(sub_proc.get_output()));
         return EpadResult::Success;
     }
 }
