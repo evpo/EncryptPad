@@ -10,7 +10,7 @@
 #include <algorithm>
 #include "botan/cipher_mode.h"
 #include "botan/compression.h"
-#include "botan/sha160.h"
+#include "botan/hash.h"
 #include "plog/Log.h"
 #include "session_state.h"
 #include "openpgp_conversions.h"
@@ -84,8 +84,8 @@ namespace EncryptMsg
             EmsgResult DoFinish() override;
         private:
             const size_t kMDCLength = 20 + 2;
+            std::unique_ptr<Botan::HashFunction> hash_;
             bool version_read_;
-            Botan::SHA_160 hash_;
             Botan::secure_vector<uint8_t> mdc_;
     };
 
@@ -207,7 +207,10 @@ namespace EncryptMsg
         : SymmetricRWBase(state), read_prefix_(true){}
 
     SymmetricIntegProtectedRW::SymmetricIntegProtectedRW(SessionState &state)
-        : SymmetricRWBase(state), version_read_(false){}
+        : SymmetricRWBase(state),
+        hash_(Botan::HashFunction::create("SHA-160")),
+        version_read_(false)
+    {}
 
     EmsgResult SymmetricRW::DoRead(OutStream &out)
     {
@@ -345,7 +348,7 @@ namespace EncryptMsg
                 auto result = CheckPrefix(prefix_);
                 if(result != EmsgResult::Success)
                     return result;
-                hash_.update(prefix_);
+                hash_->update(prefix_);
             }
         }
 
@@ -356,7 +359,7 @@ namespace EncryptMsg
             if(mdc_.size() == kMDCLength) // not first iteration
             {
                 // previous left bytes
-                hash_.update(mdc_.data(), kMDCLength);
+                hash_->update(mdc_.data(), kMDCLength);
                 out.Write(mdc_.data(), kMDCLength);
             }
             else
@@ -364,7 +367,7 @@ namespace EncryptMsg
                 mdc_.resize(kMDCLength);
             }
 
-            hash_.update(buf.data(), buf.size() - kMDCLength);
+            hash_->update(buf.data(), buf.size() - kMDCLength);
             out.Write(buf.data(), buf.size() - kMDCLength);
 
             // new left bytes
@@ -374,7 +377,7 @@ namespace EncryptMsg
         else
         {
             assert(state_.finish_packets);
-            hash_.update(mdc_.data(), buf.size());
+            hash_->update(mdc_.data(), buf.size());
             out.Write(mdc_.data(), buf.size());
 
             // this is a move to the left. Hopefully it handles overlapping ranges.
@@ -400,10 +403,10 @@ namespace EncryptMsg
         if(stm.Get() != 0x14)
             return EmsgResult::UnexpectedFormat;
 
-        hash_.update(0xD3);
-        hash_.update(0x14);
+        hash_->update(0xD3);
+        hash_->update(0x14);
 
-        secure_vector<uint8_t> actual_sha1 = hash_.final();
+        secure_vector<uint8_t> actual_sha1 = hash_->final();
         secure_vector<uint8_t> expected_sha1;
         expected_sha1.resize(20);
         stm.Read(expected_sha1.data(), 20);

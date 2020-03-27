@@ -8,7 +8,7 @@
 #include <memory>
 #include "assert.h"
 #include "botan/compression.h"
-#include "botan/sha160.h"
+#include "botan/hash.h"
 #include "botan/cipher_mode.h"
 #include "botan/auto_rng.h"
 #include "openpgp_conversions.h"
@@ -112,7 +112,7 @@ namespace EncryptMsg
             void DoFinish(OutStream &out) override;
             void DoWriteHeader(OutStream &out) override;
         private:
-            Botan::SHA_160 hash_;
+            std::unique_ptr<Botan::HashFunction> hash_;
             std::unique_ptr<Botan::Cipher_Mode> cipher_mode_;
             bool write_version_;
         public:
@@ -316,6 +316,7 @@ namespace EncryptMsg
 
     SymmetricIntegProtectedWriter::SymmetricIntegProtectedWriter(const MessageConfig &config, Salt salt, const EncryptionKey &encryption_key)
         :PacketWriter(config, salt, encryption_key),
+        hash_(Botan::HashFunction::create("SHA-160")),
         write_version_(true)
     {
         auto &algo_spec = GetAlgoSpec(config_.GetCipherAlgo());
@@ -367,7 +368,7 @@ namespace EncryptMsg
 
         SafeVector buf(bytes2update);
         in_.Read(buf.data(), bytes2update);
-        hash_.update(buf.data(), bytes2update);
+        hash_->update(buf.data(), bytes2update);
 
         if(!finish_)
         {
@@ -375,12 +376,12 @@ namespace EncryptMsg
         }
         else
         {
-            hash_.update(0xD3);
-            hash_.update(0x14);
+            hash_->update(0xD3);
+            hash_->update(0x14);
             buf.push_back(0xD3);
             buf.push_back(0x14);
 
-            SafeVector sha1 = hash_.final();
+            SafeVector sha1 = hash_->final();
             buf.insert(buf.end(), sha1.begin(), sha1.begin() + sha1.size());
             assert(buf.size() == bytes2update + kMDCLength);
             cipher_mode_->finish(buf);
