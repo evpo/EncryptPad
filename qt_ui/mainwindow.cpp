@@ -629,7 +629,7 @@ void MainWindow::createNewKey()
             GenerateNewKey(filePath.toStdString(), preferences.kfKeyLength);
         }
     }
-    catch(EncryptPad::IoException)
+    catch(EncryptPad::IoException&)
     {
         QMessageBox::warning(
             this,
