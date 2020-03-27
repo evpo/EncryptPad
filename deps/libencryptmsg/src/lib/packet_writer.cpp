@@ -316,7 +316,7 @@ namespace EncryptMsg
 
     SymmetricIntegProtectedWriter::SymmetricIntegProtectedWriter(const MessageConfig &config, Salt salt, const EncryptionKey &encryption_key)
         :PacketWriter(config, salt, encryption_key),
-        hash_(Botan::HashFunction::create("SHA-160")),
+        hash_(Botan::HashFunction::create_or_throw("SHA-160")),
         write_version_(true)
     {
         auto &algo_spec = GetAlgoSpec(config_.GetCipherAlgo());

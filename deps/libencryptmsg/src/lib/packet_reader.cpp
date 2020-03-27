@@ -207,7 +207,7 @@ namespace EncryptMsg
 
     SymmetricIntegProtectedRW::SymmetricIntegProtectedRW(SessionState &state)
         : SymmetricRWBase(state),
-        hash_(Botan::HashFunction::create("SHA-160")),
+        hash_(Botan::HashFunction::create_or_throw("SHA-160")),
         version_read_(false)
     {}
 
