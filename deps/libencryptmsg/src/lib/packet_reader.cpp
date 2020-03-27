@@ -16,6 +16,7 @@
 #include "openpgp_conversions.h"
 #include "message_encryption.h"
 #include "emsg_constants.h"
+#include "emsg_mem.h"
 
 using namespace std;
 using namespace EncryptMsg;
@@ -38,8 +39,6 @@ namespace
 
 namespace EncryptMsg
 {
-    using SafeVector = Botan::secure_vector<uint8_t>;
-
     class SymmetricKeyESKRW : public PacketRWBase
     {
     public:

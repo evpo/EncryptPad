@@ -12,10 +12,10 @@
 #include "botan/cipher_mode.h"
 #include "botan/auto_rng.h"
 #include "openpgp_conversions.h"
+#include "emsg_mem.h"
 
 using namespace std;
 using namespace EncryptMsg;
-using SafeVector = Botan::secure_vector<uint8_t>;
 
 namespace
 {
