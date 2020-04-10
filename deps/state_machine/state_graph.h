@@ -8,7 +8,7 @@
 #include <map>
 #include "digraph.hpp"
 #include "state.h"
-#include "utility.h"
+#include "state_machine_utility.h"
 #include "state_machine_utility.h"
 #include "state_machine.h"
 
