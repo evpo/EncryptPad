@@ -71,6 +71,7 @@ namespace
             "--key-file <key-file>                 key file\n"
             "--key-only                            key only, no passphrase\n"
             "--persist-key                         persist key location in the encrypted file\n"
+            "--armor                               enable ascii armor\n"
             "--key-pwd-fd <file-descriptor>        file descriptor from which to read the key file passphrase\n"
             "--key-pwd-file <file>                 file with key passphrase\n"
             "--libcurl-path <libcurl-path>         path to libcurl executable to download a remote key file\n"
@@ -82,7 +83,7 @@ namespace
             "--compress-algo <compression-algo>    compression algorithm (ZIP, ZLIB, NONE; default: ZLIB)\n"
             "--s2k-digest-algo <s2k-digest-algo>   s2k digest algorithm (SHA1, SHA256; SHA512; default: SHA256)\n"
             "--s2k-count <s2k-count>               s2k iteration count\n"
-            "--key-file-length                     key file random sequence length in bytes. Use with --generate-key. default: 64\n"
+            "--key-file-length <length>            key file random sequence length in bytes. Use with --generate-key. default: 64\n"
             "\n"
             "Feedback: evpo.net/encryptpad\n"
             ;
@@ -231,6 +232,13 @@ int main(int argc, char *argv[])
             ""
         },
         {
+            "armor",
+            cli_kind_t::cli_switch_kind,
+            cli_mode_t::cli_single_mode,
+            "enable ascii armor",
+            ""
+        },
+        {
             "force",
             cli_kind_t::cli_switch_kind,
             cli_mode_t::cli_single_mode,
@@ -375,6 +383,7 @@ int main(int argc, char *argv[])
     bool persist_key = false;
     bool key_file_passphrase_required = false;
     bool encrypted_kf = true;
+    bool is_armor = false;
 
     std::string out_file;
     std::string out_file_ext;
@@ -419,6 +428,10 @@ int main(int argc, char *argv[])
         else if(parser.name(i) == "force")
         {
             overwrite_out_file = true;
+        }
+        else if(parser.name(i) == "armor")
+        {
+            is_armor = true;
         }
         else if(parser.name(i) == "key-file")
         {
@@ -517,13 +530,13 @@ int main(int argc, char *argv[])
 
     // Disable passphrase entry when gpg format and key provided
     if(encrypt && !key_only && !key_file.empty() && !out_file_ext.empty() && 
-            (out_file_ext == "gpg" || out_file_ext == "GPG"))
+            (out_file_ext == "gpg" || out_file_ext == "GPG" || out_file_ext == "asc" || out_file_ext == "ASC"))
     {
         key_only = true;
     }
 
     if(decrypt && !key_only && !key_file.empty() && !in_file_ext.empty() && 
-            (in_file_ext == "gpg" || in_file_ext == "GPG"))
+            (in_file_ext == "gpg" || in_file_ext == "GPG" || in_file_ext == "asc" || in_file_ext == "ASC"))
     {
         key_only = true;
     }
@@ -779,7 +792,9 @@ int main(int argc, char *argv[])
     metadata.key_only = key_only;
     metadata.key_file = key_file;
     metadata.persist_key_path = persist_key;
-    metadata.cannot_use_wad = (encrypt && out_file_ext == "gpg") || (decrypt && in_file_ext == "gpg");
+    metadata.cannot_use_wad = (encrypt && (out_file_ext == "gpg" || is_armor)) ||
+        (decrypt && (in_file_ext == "gpg" || in_file_ext == "asc"));
+    metadata.is_armor = is_armor;
 
     if(encrypt)
     {

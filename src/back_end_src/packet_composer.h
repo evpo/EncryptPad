@@ -110,6 +110,7 @@ namespace EncryptPad
         std::string file_name;
         FileDate file_date;
         bool is_binary;
+        bool is_armor;
         bool cannot_use_wad;
         EncryptMsg::Salt salt;
 
@@ -119,8 +120,10 @@ namespace EncryptPad
         bool persist_key_path;
 
         PacketMetadata()
-            :iterations(0), compression(EncryptMsg::Compression::Unknown), cipher_algo(EncryptMsg::CipherAlgo::Unknown), hash_algo(EncryptMsg::HashAlgo::Unknown), 
-            file_name(), file_date(0), is_binary(false), cannot_use_wad(false), salt(), key_file(), key_only(false), persist_key_path(false)
+            :iterations(0), compression(EncryptMsg::Compression::Unknown),
+            cipher_algo(EncryptMsg::CipherAlgo::Unknown), hash_algo(EncryptMsg::HashAlgo::Unknown),
+            file_name(), file_date(0), is_binary(false), is_armor(false), cannot_use_wad(false),
+            salt(), key_file(), key_only(false), persist_key_path(false)
         {
         }
     };

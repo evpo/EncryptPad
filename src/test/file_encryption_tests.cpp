@@ -28,9 +28,28 @@ using namespace EncryptPad;
 using namespace EncryptMsg;
 using namespace Botan;
 
+struct ParamItem
+{
+    std::string content;
+    Compression compression;
+    bool is_armor;
+};
+
+std::vector<ParamItem> &GetParameters()
+{
+    static std::vector<ParamItem> parameters =
+    {
+        {"test01", Compression::ZLIB, false},
+        {"", Compression::ZLIB, false},
+        {"da", Compression::Uncompressed, false},
+        {"test01", Compression::ZLIB, true},
+        {"", Compression::ZLIB, true},
+    };
+    return parameters;
+}
 
 // PacketStream tests
-class FileEncryptionFixture : public ::testing::Test
+class FileEncryptionFixture : public ::testing::TestWithParam<ParamItem>
 {
     protected:
         std::string passphrase_;
@@ -78,51 +97,29 @@ class FileEncryptionFixture : public ::testing::Test
         }
 };
 
-TEST_F(FileEncryptionFixture, When_text_encrypted_then_decrypted_It_is_the_same)
+INSTANTIATE_TEST_CASE_P(Common, FileEncryptionFixture,
+        ::testing::ValuesIn(GetParameters()));
+
+TEST_P(FileEncryptionFixture, When_text_encrypted_then_decrypted_It_is_the_same)
 {
     // Prepare
-    std::string text = "test01";
-    AssignBuffer(text);
+    auto param_item = GetParam();
+    std::string armor_head = "-----BEGIN PGP";
+    AssignBuffer(param_item.content);
+    metadata_.compression = param_item.compression;
+    metadata_.is_armor = param_item.is_armor;
 
     // Act
     EpadResult encrypt_result = EncryptBuffer(in_buffer_, enc_params_, out_buffer_, metadata_);
     EpadResult decrypt_result = DecryptBuffer(out_buffer_, enc_params_, result_buffer_, metadata_);
 
     // Assert
+    if(metadata_.is_armor)
+    {
+        EXPECT_TRUE(out_buffer_.size() >= armor_head.size());
+        EXPECT_TRUE(std::equal(armor_head.begin(), armor_head.end(), out_buffer_.begin()));
+    }
     ASSERT_EQ(EpadResult::Success, encrypt_result);
     ASSERT_EQ(EpadResult::Success, decrypt_result);
-    ASSERT_EQ(text, ResultString());
-}
-
-TEST_F(FileEncryptionFixture, When_empty_string_encrypted_It_is_decrypted_as_empty)
-{
-    // Prepare
-    std::string text = "";
-    AssignBuffer(text);
-
-    // Act
-    EpadResult encrypt_result = EncryptBuffer(in_buffer_, enc_params_, out_buffer_, metadata_);
-    EpadResult decrypt_result = DecryptBuffer(out_buffer_, enc_params_, result_buffer_, metadata_);
-
-    // Assert
-    ASSERT_EQ(EpadResult::Success, encrypt_result);
-    ASSERT_EQ(EpadResult::Success, decrypt_result);
-    ASSERT_TRUE(ResultString().empty());
-}
-
-TEST_F(FileEncryptionFixture, When_two_chars_encrypted_without_compression_then_decrypted_They_are_the_same)
-{
-    // Prepare
-    std::string text = "da";
-    AssignBuffer(text);
-    metadata_.compression = Compression::Uncompressed;
-
-    // Act
-    EpadResult encrypt_result = EncryptBuffer(in_buffer_, enc_params_, out_buffer_, metadata_);
-    EpadResult decrypt_result = DecryptBuffer(out_buffer_, enc_params_, result_buffer_, metadata_);
-
-    // Assert
-    ASSERT_EQ(EpadResult::Success, encrypt_result);
-    ASSERT_EQ(EpadResult::Success, decrypt_result);
-    ASSERT_EQ(text, ResultString());
+    ASSERT_EQ(param_item.content, ResultString());
 }

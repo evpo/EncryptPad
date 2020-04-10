@@ -202,6 +202,7 @@ namespace
         if(is_passphrase_session)
         {
             passphrase_config = ConvertToMessageConfig(metadata);
+            passphrase_config.SetArmor(metadata.is_armor);
             passphrase_session = PreparePassphraseSession(encrypt_params, passphrase_config);
             if(!passphrase_session.IsValid())
                 return passphrase_session.preparation_result;
@@ -211,6 +212,7 @@ namespace
         if(is_key_file_session)
         {
             key_file_config = ConvertToMessageConfig(metadata);
+            key_file_config.SetArmor(mode == FileNestingMode::SimpleGPGWithKey && metadata.is_armor);
             key_file_session = PrepareKeyFileSession(encrypt_params, metadata, key_file_config);
             if(!key_file_session.IsValid())
                 return key_file_session.preparation_result;

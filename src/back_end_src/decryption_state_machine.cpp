@@ -285,7 +285,7 @@ namespace EncryptPad
         if(filter_count_ == 0)
         {
             uint8_t b = pending_buffer_[0];
-            if(b & 0x80 && b != 0xEF)
+            if((b & 0x80 && b != 0xEF) || b == '-')
             {
                 if(metadata_.key_only)
                 {
