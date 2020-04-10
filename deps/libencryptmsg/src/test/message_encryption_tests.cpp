@@ -54,12 +54,8 @@ namespace EncryptMsg
             buffer_size_ = GetParam();
         }
 
-        TEST_P(MessageEncryptionFixture, When_message_writer_finishes_Then_message_is_encrypted)
+        MessageConfig GetMessageConfig()
         {
-            //Arrange
-            MessageWriter writer;
-            string pwd_str("123456");
-            SafeVector passphrase(FromChar(pwd_str.data()), FromChar(pwd_str.data()) + pwd_str.size());
             MessageConfig config;
             config.SetCipherAlgo(CipherAlgo::AES256);
             config.SetHashAlgo(HashAlgo::SHA256);
@@ -70,6 +66,39 @@ namespace EncryptMsg
             config.SetFileDate(0);
             config.SetBinary(true);
             config.SetPartialLengthPower(4); // 2^4 is the partial length size. It's not legal in rfc. The length should not be less than 512
+            return config;
+        }
+
+        TEST_P(MessageEncryptionFixture, When_message_writer_finishes_Then_message_matches)
+        {
+            //Arrange
+            MessageWriter writer;
+            string pwd_str("123456");
+            SafeVector passphrase(FromChar(pwd_str.data()), FromChar(pwd_str.data()) + pwd_str.size());
+            MessageConfig config = GetMessageConfig();
+
+            Salt salt = GenerateRandomSalt();
+
+            //Act
+            writer.Start(passphrase, config, salt);
+            auto buf = Update(writer);
+
+            //Assert
+            buf_ = buf;
+            auto output = Decrypt(passphrase);
+            ASSERT_EQ(plain_file_.size(), output.size());
+            bool result = std::equal(output.begin(), output.end(), plain_file_.begin());
+            ASSERT_TRUE(result);
+        }
+
+        TEST_P(MessageEncryptionFixture, When_encrypted_with_armor_Then_message_matches)
+        {
+            //Arrange
+            MessageWriter writer;
+            string pwd_str("123456");
+            SafeVector passphrase(FromChar(pwd_str.data()), FromChar(pwd_str.data()) + pwd_str.size());
+            MessageConfig config = GetMessageConfig();
+            config.SetArmor(true);
 
             Salt salt = GenerateRandomSalt();
 

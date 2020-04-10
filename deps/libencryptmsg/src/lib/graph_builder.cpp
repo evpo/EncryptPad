@@ -13,86 +13,49 @@ using namespace LightStateMachine;
 
 namespace EncryptMsg
 {
-    inline int ToInt(StateID state_id)
+    LightStateMachine::StateGraph &BuildStateGraph()
     {
-        return static_cast<int>(state_id);
-    }
-
-    StateGraphInfo BuildStateGraph()
-    {
-        static StateGraph state_graph;
-        static StateGraph::iterator start_node;
-        static StateGraph::iterator fail_node;
-        if(!state_graph.empty())
-        {
-            return {
-                &state_graph,
-                start_node,
-                fail_node
-            };
-        }
-
-        // Insert new state
-        auto I = [&](State s)->StateGraph::iterator
-        {
-            return state_graph.insert(s);
-        };
-
-        // Link states
-        auto L = [&](StateGraph::iterator l, StateGraph::iterator r)
-        {
-            state_graph.arc_insert(l, r);
-        };
+        static StateGraph sg;
 
         // Stub functions
         auto T = [](StateMachineContext &){ return true; };
         auto F = [](StateMachineContext &){ return false; };
         auto Stub = [](StateMachineContext &){};
 
-        // Start state
-        start_node = I(State(ToInt(StateID::Start)));
+        sg.Create(StateID::Start);
+        sg.Create(StateID::Fail, Stub, Stub, T, F);
 
-        // Fail state
-        fail_node = I(State(ToInt(StateID::Fail), Stub, Stub, T, F));
+        sg.SetStartStateID(StateID::Start);
+        sg.SetFailStateID(StateID::Fail);
 
-        // Init state
-        auto init_node = I(State(ToInt(StateID::Init), InitOnEnter, Stub, InitCanEnter, T));
+        sg.Create(StateID::Init, InitOnEnter, Stub, InitCanEnter, T);
+        sg.Create(StateID::End, Stub, Stub, EndCanEnter, F);
+        sg.Create(StateID::Packet, PacketOnEnter, Stub, PacketCanEnter, PacketCanExit);
+        sg.Create(StateID::FinishPacket, FinishOnEnter, Stub, FinishCanEnter, FinishCanExit);
+        sg.Create(StateID::Header, HeaderOnEnter, Stub, HeaderCanEnter, T);
+        sg.Create(StateID::Armor, ArmorOnEnter, Stub, ArmorCanEnter, T);
 
-        // End state
-        auto end_node = I(State(ToInt(StateID::End), Stub, Stub, EndCanEnter, F));
-
-        // Packet
-        auto packet_node = I(State(ToInt(StateID::Packet), PacketOnEnter, Stub, PacketCanEnter, PacketCanExit));
-
-        // FinishPacket
-        auto finish_node = I(State(ToInt(StateID::FinishPacket), FinishOnEnter, Stub, FinishCanEnter, FinishCanExit));
-
-        // Header
-        auto header_node = I(State(ToInt(StateID::Header), HeaderOnEnter, Stub, HeaderCanEnter, T));
-
-        L(start_node, init_node);
-        L(init_node, packet_node);
-        L(init_node, header_node);
-        L(header_node, packet_node);
-        L(packet_node, header_node);
-        L(packet_node, finish_node);
-        L(packet_node, packet_node);
-        L(finish_node, packet_node);
-        L(finish_node, header_node);
-        L(finish_node, end_node);
+        sg.Link(StateID::Start, StateID::Init);
+        sg.Link(StateID::Init, StateID::Armor);
+        sg.Link(StateID::Armor, StateID::Packet);
+        sg.Link(StateID::Armor, StateID::Header);
+        sg.Link(StateID::Header, StateID::Packet);
+        sg.Link(StateID::Packet, StateID::Header);
+        sg.Link(StateID::Packet, StateID::FinishPacket);
+        sg.Link(StateID::Packet, StateID::Packet);
+        sg.Link(StateID::FinishPacket, StateID::Packet);
+        sg.Link(StateID::FinishPacket, StateID::Header);
+        sg.Link(StateID::FinishPacket, StateID::End);
 
         // BufferEmpty
-        auto buffer_empty_node = I(State(ToInt(StateID::BufferEmpty), BufferEmptyOnEnter, Stub, BufferEmptyCanEnter, T));
-        L(buffer_empty_node, header_node);
-        L(buffer_empty_node, end_node);
-        L(header_node, buffer_empty_node);
-        L(packet_node, buffer_empty_node);
+        sg.Create(StateID::BufferEmpty, BufferEmptyOnEnter, Stub, BufferEmptyCanEnter, T);
+        sg.Link(StateID::BufferEmpty, StateID::Header);
+        sg.Link(StateID::BufferEmpty, StateID::End);
+        sg.Link(StateID::Header, StateID::BufferEmpty);
+        sg.Link(StateID::Packet, StateID::BufferEmpty);
+        sg.Link(StateID::Armor, StateID::BufferEmpty);
 
-        return {
-            &state_graph,
-            start_node,
-            fail_node
-        };
+        return sg;
     }
 }
 

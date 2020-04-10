@@ -14,6 +14,7 @@
 #include "emsg_utility.h"
 #include "message_config.h"
 #include "passphrase_provider.h"
+#include "armor_reader.h"
 
 namespace EncryptMsg
 {
@@ -28,6 +29,8 @@ namespace EncryptMsg
         PacketChain::iterator packet_chain_it;
         SymmetricKeyProvider *key_provider;
         std::unique_ptr<EncryptionKey> encryption_key;
+        ArmorReader armor_reader;
+
         // Stack of buffer that should be processed from top onwards
         // The invariant is that there are no empty buffers. If a buffer is empty, it should be popped.
         std::stack<SafeVector> buffer_stack;

@@ -16,8 +16,21 @@ namespace LightStateMachine
     {
         failed_ = value;
     }
+
+    bool StateMachineContext::IsReentry() const
+    {
+        return is_reentry_;
+    }
+
+    // It's for internal use from the state machine
+    void StateMachineContext::SetIsReentry(bool is_reentry)
+    {
+        is_reentry_ = is_reentry;
+    }
+
     StateMachineContext::StateMachineContext():
-        failed_(false)
+        failed_(false),
+        is_reentry_(false)
     {
     }
 }

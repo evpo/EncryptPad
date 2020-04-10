@@ -17,10 +17,12 @@ namespace EncryptMsg
 
     bool EndCanEnter(LightStateMachine::StateMachineContext &context);
 
+    void ArmorOnEnter(LightStateMachine::StateMachineContext &context);
     void HeaderOnEnter(LightStateMachine::StateMachineContext &context);
     void PacketOnEnter(LightStateMachine::StateMachineContext &context);
     void BufferEmptyOnEnter(LightStateMachine::StateMachineContext &context);
 
+    bool ArmorCanEnter(LightStateMachine::StateMachineContext &context);
     bool HeaderCanEnter(LightStateMachine::StateMachineContext &context);
     bool HeaderCanExit(LightStateMachine::StateMachineContext &context);
     bool PacketCanEnter(LightStateMachine::StateMachineContext &context);

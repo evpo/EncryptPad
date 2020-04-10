@@ -16,6 +16,7 @@ namespace EncryptMsg
         {
             {StateID::Start, "Start"},
             {StateID::Init, "Init"},
+            {StateID::Armor, "Armor"},
             {StateID::Header,"Header"},
             {StateID::Packet,"Packet"},
             {StateID::BufferEmpty, "BufferEmpty"},
@@ -24,5 +25,10 @@ namespace EncryptMsg
             {StateID::Fail, "Fail"}
         };
         return state_id2string[state_id];
+    }
+
+    std::string EmsgStateIDToStringConverter(LightStateMachine::StateMachineStateID state_id)
+    {
+        return string("emsg:") + PrintStateID(static_cast<StateID>(state_id));
     }
 }

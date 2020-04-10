@@ -76,6 +76,13 @@ namespace EncryptMsg
         stm.Read(buf.data(), stm.GetCount());
     }
 
+    void PushBackToBuffer(InBufferStream &stm, SafeVector &buf)
+    {
+        size_t prev_count = buf.size();
+        buf.resize(prev_count + stm.GetCount());
+        stm.Read(buf.data() + prev_count, stm.GetCount());
+    }
+
     SafeVector::const_iterator InBufferStream::ReadLength(SafeVector::const_iterator it, SafeVector::const_iterator end)
     {
         assert(static_cast<size_t>(end - it) >= 5U);

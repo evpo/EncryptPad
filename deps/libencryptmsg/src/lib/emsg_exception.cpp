@@ -29,6 +29,8 @@ namespace EncryptMsg
                 return "File integrity check failed"; 
             case EmsgResult::InvalidPassphrase:
                 return "Key service does not containt a suitable key";
+            case EmsgResult::UnexpectedError:
+                return "Unexpected error";
             default:
                 assert(false);
                 return "";

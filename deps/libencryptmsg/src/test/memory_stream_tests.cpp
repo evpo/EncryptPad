@@ -14,9 +14,8 @@ namespace EncryptMsg
         using SafeVector = Botan::secure_vector<uint8_t>;
         const uint8_t kLen16 = 0xE4;
 
-        class InputMemoryStreamFixture : public ::testing::Test // Param is buffer size
+        class InputMemoryStreamFixture : public ::testing::Test
         {
-                // virtual void SetUp() override;
         };
 
 

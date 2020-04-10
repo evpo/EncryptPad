@@ -55,6 +55,12 @@ namespace EncryptMsg
             {128, "simple_text.txt.cast5.gpg", 65536, "E688F0DA9651F2F6"},
             {512, "simple_text.txt.cast5.gpg", 65536, "E688F0DA9651F2F6"},
             {1024, "simple_text.txt.cast5.gpg", 65536, "E688F0DA9651F2F6"},
+
+            {8, "simple_text.txt.asc", 35651584, "5FF41A59F11682F1"},
+            {24, "simple_text.txt.asc", 35651584, "5FF41A59F11682F1"},
+            {128, "simple_text.txt.asc", 35651584, "5FF41A59F11682F1"},
+            {512, "simple_text.txt.asc", 35651584, "5FF41A59F11682F1"},
+            {1024, "simple_text.txt.asc", 35651584, "5FF41A59F11682F1"},
         };
 
         INSTANTIATE_TEST_CASE_P(Common, MessageDecryptionFixture,
@@ -133,6 +139,11 @@ namespace EncryptMsg
             if(parameters_.encrypted_file == "simple_text.txt.cast5.gpg")
             {
                 ASSERT_EQ(CipherAlgo::CAST5, config.GetCipherAlgo());
+                ASSERT_EQ(HashAlgo::SHA160, config.GetHashAlgo());
+            }
+            else if(parameters_.encrypted_file == "simple_text.txt.asc")
+            {
+                ASSERT_EQ(CipherAlgo::AES128, config.GetCipherAlgo());
                 ASSERT_EQ(HashAlgo::SHA160, config.GetHashAlgo());
             }
             else

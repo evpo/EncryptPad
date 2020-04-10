@@ -23,6 +23,7 @@ namespace EncryptMsg
             std::string file_name_;
             FileDate file_date_;
             bool binary_;
+            bool armor_;
             uint8_t partial_length_power_;
         public:
             PUBIF MessageConfig();
@@ -47,6 +48,10 @@ namespace EncryptMsg
             // Binary or text
             PUBIF bool GetBinary() const;
             PUBIF void SetBinary(bool binary);
+
+            // ASCII armor
+            PUBIF bool GetArmor() const;
+            PUBIF void SetArmor(bool armor);
 
             // Power of 2 to specify the length of segments
             PUBIF uint8_t GetPartialLengthPower() const;

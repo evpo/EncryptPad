@@ -74,6 +74,18 @@ namespace EncryptMsg
         binary_ = binary;
     }
 
+    // ASCII armor
+    bool MessageConfig::GetArmor() const
+    {
+        return armor_;
+    }
+
+    void MessageConfig::SetArmor(bool armor)
+    {
+        armor_ = armor;
+
+    }
+
     // Power of 2 to specify the length of segments
     uint8_t MessageConfig::GetPartialLengthPower() const
     {
@@ -92,6 +104,7 @@ namespace EncryptMsg
             file_name_(""),
             file_date_(0),
             binary_(kDefaultBinary),
+            armor_(kDefaultArmor),
             partial_length_power_(kDefaultPartialLengthPower)
     {
     }

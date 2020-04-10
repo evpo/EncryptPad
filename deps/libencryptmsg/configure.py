@@ -1569,7 +1569,7 @@ def do_io_for_build(cc, arch, osinfo, using_mods, build_paths, source_paths, tem
         logging.debug('Linking test assets in %s' % (build_paths.target_dir))
         for (dirpath, _, filenames) in os.walk(os.path.join('src','test_assets')):
             for filename in filenames:
-                if (filename.endswith('.gpg') or filename.endswith('.txt')) and not filename.startswith('.'):
+                if (filename.endswith('.asc') or filename.endswith('.gpg') or filename.endswith('.txt')) and not filename.startswith('.'):
                     try:
                         portable_symlink(os.path.join(dirpath, filename), build_paths.target_dir, link_method)
                     except OSError as e:

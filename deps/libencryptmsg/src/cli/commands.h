@@ -5,7 +5,7 @@ namespace EncryptMsg
 {
     namespace Cli
     {
-        void Encrypt(const std::string &input, const std::string &output, const std::string &pwd_file);
+        void Encrypt(const std::string &input, const std::string &output, const std::string &pwd_file, bool armor);
         void Decrypt(const std::string &input, const std::string &output, const std::string &pwd_file);
     }
 }

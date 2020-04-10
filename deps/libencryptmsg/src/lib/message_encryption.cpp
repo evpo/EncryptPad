@@ -16,6 +16,7 @@
 #include "openpgp_conversions.h"
 #include "emsg_symmetric_key.h"
 #include "emsg_constants.h"
+#include "armor_writer.h"
 
 using namespace std;
 using namespace LightStateMachine;
@@ -32,6 +33,7 @@ namespace EncryptMsg
             std::array<PacketType, kMaxPacketChainLength> packet_chain_;
             PacketWriterFactory packet_writer_factory_;
             bool write_esk_;
+            ArmorWriter armor_writer_;
 
             void WriteESK(OutStream &out);
         public:
@@ -82,6 +84,9 @@ namespace EncryptMsg
         salt_ = salt;
         encryption_key_ = std::move(encryption_key);
 
+        if(message_config_.GetArmor())
+            armor_writer_.Start();
+
         auto it = packet_chain_.begin();
         *it = PacketType::Literal;
         if(message_config.GetCompression() != Compression::Uncompressed)
@@ -116,13 +121,25 @@ namespace EncryptMsg
     void MessageWriterImpl::Update(SafeVector& buf, bool finish)
     {
         assert(encryption_key_);
-        SafeVector target_buf;
-        auto target_stm = MakeOutStream(target_buf);
-        WriteESK(*target_stm);
 
         SafeVector temp_buf;
-        temp_buf.swap(buf);
         auto temp_out = MakeOutStream(temp_buf);
+
+        SafeVector target_buf;
+        auto target_stm = MakeOutStream(target_buf);
+
+        if(message_config_.GetArmor())
+        {
+            WriteESK(*temp_out);
+            armor_writer_.GetInStream().Push(temp_buf);
+            armor_writer_.Write(*target_stm, false);
+        }
+        else
+        {
+            WriteESK(*target_stm);
+        }
+
+        temp_buf.swap(buf);
         auto it = packet_chain_.begin();
         for(;it != packet_chain_.end() && *it != PacketType::Unknown; it++)
         {
@@ -133,6 +150,13 @@ namespace EncryptMsg
                 packet_writer->Write(*temp_out);
             else
                 packet_writer->Finish(*temp_out);
+        }
+
+        if(message_config_.GetArmor())
+        {
+            armor_writer_.GetInStream().Push(temp_buf);
+            temp_out->Reset();
+            armor_writer_.Write(*temp_out, finish);
         }
 
         target_stm->Write(temp_buf.data(), temp_buf.size());

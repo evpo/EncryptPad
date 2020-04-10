@@ -14,6 +14,7 @@ namespace EncryptMsg
     {
         Start,
         Init,
+        Armor,
         Header,
         Packet,
         FinishPacket,
@@ -22,18 +23,5 @@ namespace EncryptMsg
         Fail
     };
     const std::string &PrintStateID(StateID state_id);
-
-    class EmsgStateIDToStringConverter : public LightStateMachine::StateIDToStringConverter
-    {
-        public:
-            std::string Convert(LightStateMachine::StateMachineStateID state_id)
-            {
-                return PrintStateID(static_cast<StateID>(state_id));
-            }
-
-            std::string StateMachineName()
-            {
-                return "emsg";
-            }
-    };
+    std::string EmsgStateIDToStringConverter(LightStateMachine::StateMachineStateID state_id);
 }

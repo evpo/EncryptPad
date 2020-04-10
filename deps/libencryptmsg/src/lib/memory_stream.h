@@ -68,4 +68,5 @@ namespace EncryptMsg
     std::unique_ptr<OutStream> MakeOutStream(SafeVector &cnt);
 
     void AppendToBuffer(InBufferStream &stm, SafeVector &buf);
+    void PushBackToBuffer(InBufferStream &stm, SafeVector &buf);
 }

@@ -68,6 +68,13 @@ int main(int, char *argv[])
             ""
         },
         {
+            "armor",
+            cli_kind_t::cli_switch_kind,
+            cli_mode_t::cli_single_mode,
+            "armor",
+            ""
+        },
+        {
             "o",
             cli_kind_t::cli_value_kind,
             cli_mode_t::cli_single_mode,
@@ -96,6 +103,7 @@ int main(int, char *argv[])
     string file_name;
     string pwd_file;
     string output;
+    bool armor = false;
     Action action = Action::None;
 
     for(unsigned i = 0; i < parser.size(); i++)
@@ -112,6 +120,10 @@ int main(int, char *argv[])
         else if(parser.name(i) == "pwd-file")
         {
             pwd_file = parser.string_value(i);
+        }
+        else if(parser.name(i) == "armor")
+        {
+            armor = true;
         }
         else if(parser.name(i) == "o")
         {
@@ -152,7 +164,7 @@ int main(int, char *argv[])
     }
     else if(action == Action::Encrypt)
     {
-        Encrypt(file_name, output, pwd_file);
+        Encrypt(file_name, output, pwd_file, armor);
     }
 
     return 0;

@@ -21,6 +21,22 @@ namespace
         StateMachineContext *p = &ctx;
         return *(static_cast<Context*>(p));
     }
+
+    bool EvaluateResult(Context &context)
+    {
+        auto &state = context.State();
+
+        switch(state.emsg_result)
+        {
+            case EmsgResult::Success:
+            case EmsgResult::Pending:
+                break;
+            default:
+                context.SetFailed(true);
+                return false;
+        }
+        return true;
+    }
 }
 
 namespace EncryptMsg
@@ -95,6 +111,63 @@ namespace EncryptMsg
         }
     }
 
+    bool ArmorCanEnter(LightStateMachine::StateMachineContext &ctx)
+    {
+        auto &state = ToContext(ctx).State();
+        return (!state.buffer_stack.empty() || state.finish_packets);
+    }
+
+    void ArmorOnEnter(LightStateMachine::StateMachineContext &ctx)
+    {
+        Context &context = ToContext(ctx);
+        auto &state = context.State();
+
+        if(state.armor_reader.GetStatus() == ArmorStatus::Disabled)
+            return;
+
+        auto &reader = state.armor_reader;
+        auto &buffer_stack = state.buffer_stack;
+        SafeVector output;
+        auto out_stm = EncryptMsg::MakeOutStream(output);
+
+        // it can be empty when finishing
+        if(!buffer_stack.empty())
+        {
+            reader.GetInStream().Push(buffer_stack.top());
+            buffer_stack.pop();
+        }
+
+        if(state.finish_packets)
+        {
+            state.emsg_result = reader.Finish(*out_stm);
+        }
+        else
+        {
+            state.emsg_result = reader.Read(*out_stm);
+        }
+
+        if(!EvaluateResult(context))
+            return;
+
+        switch(reader.GetStatus())
+        {
+            case ArmorStatus::Disabled:
+                state.message_config.SetArmor(false);
+                buffer_stack.emplace();
+                AppendToBuffer(reader.GetInStream(), buffer_stack.top());
+                break;
+            case ArmorStatus::Enabled:
+                state.message_config.SetArmor(true);
+                break;
+            default:
+                break;
+        }
+
+        if(!output.empty())
+        {
+            buffer_stack.push(move(output));
+        }
+    }
 
     bool PacketCanExit(StateMachineContext &ctx)
     {

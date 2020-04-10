@@ -7,5 +7,6 @@ state_graph.h
 state.h
 state_machine.h
 state_machine_interface.h
+state_machine_type_erasure.h
 state_machine_utility.h
 </header:internal>

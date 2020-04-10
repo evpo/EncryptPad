@@ -99,7 +99,7 @@ namespace EncryptMsg
     {
         private:
             SessionState session_state_;
-            StateGraphInfo graph_info_;
+            StateGraph &state_graph_;
             Context context_;
             LightStateMachine::StateMachine state_machine_;
             PacketFactory packet_factory_;
@@ -134,13 +134,12 @@ namespace EncryptMsg
     };
 
     MessageReaderImpl::MessageReaderImpl(bool analyze_only):
-        graph_info_(BuildStateGraph()),
-        state_machine_(*graph_info_.state_graph, graph_info_.start_node, graph_info_.fail_node, context_),
+        state_graph_(BuildStateGraph()),
+        state_machine_(state_graph_, context_),
         packet_factory_(session_state_), analyze_only_(analyze_only)
     {
         context_.SetState(session_state_);
-        state_machine_.SetStateIDToStringConverter(
-                std::unique_ptr<EmsgStateIDToStringConverter>(new EmsgStateIDToStringConverter()));
+        state_machine_.SetStateIDToStringConverter(EmsgStateIDToStringConverter);
     }
 
     void MessageReaderImpl::Start()

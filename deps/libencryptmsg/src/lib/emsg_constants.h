@@ -22,5 +22,6 @@ namespace EncryptMsg
     const Compression kDefaultCompression = Compression::ZLIB;
     const uint8_t kDefaultPartialLengthPower = 4;
     const bool kDefaultBinary = true;
+    const bool kDefaultArmor = false;
 }
 

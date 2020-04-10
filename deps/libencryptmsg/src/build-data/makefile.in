@@ -107,7 +107,7 @@ $(GTEST_TARGET_DIR)/libgtest_main.a : $(GTEST_TARGET_DIR)/gtest-all.o $(GTEST_TA
 
 # Unit tests
 
-TEST_INCLUDES = -isystem $(GTEST_DIR)/include
+TEST_INCLUDES = -isystem $(GTEST_DIR)/include -Isrc/lib
 TEST_LINKS_TO = $(GTEST_TARGET_DIR)/libgtest_main.a $(GTEST_TARGET_DIR)/libgtest.a
 
 # Misc targets

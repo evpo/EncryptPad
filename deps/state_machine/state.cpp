@@ -9,17 +9,6 @@
 namespace LightStateMachine
 {
 
-    State::State(StateMachineStateID id, VoidFunction on_enter, VoidFunction on_exit,
-            BoolFunction can_enter, BoolFunction can_exit)
-        :
-        state_id_(id),
-        on_enter_(on_enter),
-        on_exit_(on_exit),
-        can_enter_(can_enter),
-        can_exit_(can_exit)
-    {
-    }
-
     StateMachineStateID State::GetID() const
     {
         return state_id_;
@@ -45,6 +34,26 @@ namespace LightStateMachine
         on_exit_(context);
     }
 
+    void State::SetCanEnter(BoolFunction can_enter)
+    {
+        can_enter_ = can_enter;
+    }
+
+    void State::SetCanExit(BoolFunction can_exit)
+    {
+        can_exit_ = can_exit;
+    }
+
+    void State::SetOnEnter(VoidFunction on_enter)
+    {
+        on_enter_ = on_enter;
+    }
+
+    void State::SetOnExit(VoidFunction on_exit)
+    {
+        on_exit_ = on_exit;
+    }
+
     void StubVoidFunction(StateMachineContext&)
     {
     }
@@ -52,5 +61,10 @@ namespace LightStateMachine
     bool StubBoolFunction(StateMachineContext&)
     {
         return true;
+    }
+
+    bool AlwaysFalseBoolFunction(StateMachineContext&)
+    {
+        return false;
     }
 }
