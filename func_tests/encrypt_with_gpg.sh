@@ -15,20 +15,28 @@ CIPHERS=`awk '$1 == "cipher" { print $2 }' algos.txt`
 S2K_ALGOS=`awk '$1 == "s2k_algo" { print $2 }' algos.txt`
 
 mkdir -p $OUT_DIR
-for COMPRESS in $COMPRESSIONS
+for EXT in gpg asc
 do
-    for CIPHER in $CIPHERS
+    for COMPRESS in $COMPRESSIONS
     do
-        for S2K_ALGO in $S2K_ALGOS
+        for CIPHER in $CIPHERS
         do
-            if [ "$COMPRESS" = "none" ]
-            then
-                COMPRESS_CLAUSE="--compress-level 0"
-            else
-                COMPRESS_CLAUSE="--compress-algo $COMPRESS"
-            fi
+            for S2K_ALGO in $S2K_ALGOS
+            do
+                if [ "$COMPRESS" = "none" ]
+                then
+                    COMPRESS_CLAUSE="--compress-level 0"
+                else
+                    COMPRESS_CLAUSE="--compress-algo $COMPRESS"
+                fi
 
-            $CMD -o ${OUT_DIR}/${CIPHER}_${S2K_ALGO}_${COMPRESS}.gpg $COMPRESS_CLAUSE --s2k-digest-algo $S2K_ALGO --cipher-algo $CIPHER $PLAIN_TEXT_FILE
+                ARMOR_CLAUSE=""
+                if [[ "$EXT" == "asc" ]]; then
+                    ARMOR_CLAUSE="--armor"
+                fi
+
+                $CMD -o ${OUT_DIR}/${CIPHER}_${S2K_ALGO}_${COMPRESS}.${EXT} $ARMOR_CLAUSE $COMPRESS_CLAUSE --s2k-digest-algo $S2K_ALGO --cipher-algo $CIPHER $PLAIN_TEXT_FILE
+            done
         done
     done
 done

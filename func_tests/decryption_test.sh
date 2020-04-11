@@ -39,10 +39,10 @@ do
 
     if diff $PLAIN_TEXT_FILE $TMP_DIR/out_file.txt
     then
-        echo ok
+        echo "${FILE} : ok"
     else
         RESULT=1
-        echo fail
+        echo "${FILE} : fail"
     fi
     rm $TMP_DIR/out_file.txt
 done

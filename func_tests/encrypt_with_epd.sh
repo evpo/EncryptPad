@@ -20,13 +20,21 @@ CIPHERS=`awk '$1 == "cipher" { print $2 }' algos.txt`
 S2K_ALGOS=`awk '$1 == "s2k_algo" { print $2 }' algos.txt`
 
 mkdir -p $OUT_DIR
-for COMPRESS in $COMPRESSIONS
+for EXT in epd asc
 do
-    for CIPHER in $CIPHERS
+    for COMPRESS in $COMPRESSIONS
     do
-        for S2K_ALGO in $S2K_ALGOS
+        for CIPHER in $CIPHERS
         do
-            cat $PASSPHRASE_FILE | $CMD -o ${OUT_DIR}/${CIPHER}_${S2K_ALGO}_${COMPRESS}.epd --compress-algo $COMPRESS --s2k-digest-algo $S2K_ALGO --cipher-algo $CIPHER $IN
+            for S2K_ALGO in $S2K_ALGOS
+            do
+                ARMOR_CLAUSE=""
+                if [[ "$EXT" == "asc" ]]; then
+                    ARMOR_CLAUSE="--armor"
+                fi
+
+                cat $PASSPHRASE_FILE | $CMD -o ${OUT_DIR}/${CIPHER}_${S2K_ALGO}_${COMPRESS}.${EXT} --compress-algo $COMPRESS --s2k-digest-algo $S2K_ALGO --cipher-algo $CIPHER $ARMOR_CLAUSE $IN
+            done
         done
     done
 done
