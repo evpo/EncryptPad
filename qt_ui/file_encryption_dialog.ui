@@ -208,6 +208,16 @@
             </property>
            </widget>
           </item>
+          <item>
+           <widget class="QRadioButton" name="uiAscRadio">
+            <property name="toolTip">
+             <string>OpenPGP Armor</string>
+            </property>
+            <property name="text">
+             <string>ASC</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </item>
        </layout>
@@ -729,10 +739,75 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>uiEncryptRadio</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>uiAscRadio</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>325</x>
+     <y>54</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>564</x>
+     <y>128</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>uiEpdRadio</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>FileEncryptionDialog</receiver>
+   <slot>on_toggleExtension(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>213</x>
+     <y>128</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>378</x>
+     <y>262</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>uiGpgRadio</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>FileEncryptionDialog</receiver>
+   <slot>on_toggleExtension(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>388</x>
+     <y>128</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>378</x>
+     <y>262</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>uiAscRadio</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>FileEncryptionDialog</receiver>
+   <slot>on_toggleExtension(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>564</x>
+     <y>128</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>378</x>
+     <y>262</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <signal>ToggleWorkInProgress(bool)</signal>
   <slot>on_toggleWorkInProgress(bool)</slot>
   <slot>on_uiCancel_clicked()</slot>
+  <slot>on_toggleExtension(bool)</slot>
  </slots>
 </ui>

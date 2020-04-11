@@ -171,6 +171,24 @@ void FileEncryptionDialog::StartDecryption(const QString &fileName, const QStrin
     async.Start();
 }
 
+QString FileEncryptionDialog::getSelectedExtension() const
+{
+    QString ext;
+    if(ui->uiEpdRadio->isChecked())
+    {
+        ext = ".epd";
+    }
+    else if(ui->uiGpgRadio->isChecked())
+    {
+        ext = ".gpg";
+    }
+    else if(ui->uiAscRadio->isChecked())
+    {
+        ext = ".asc";
+    }
+    return ext;
+}
+
 void FileEncryptionDialog::suggestOutput()
 {
     QString inputFile = ui->uiInputFile->text();
@@ -183,7 +201,7 @@ void FileEncryptionDialog::suggestOutput()
     if(ui->uiEncryptRadio->isChecked())
     {
         // Encrypt
-        ui->uiOutputFile->setText(inputFile + (ui->uiEpdRadio->isChecked() ? ".epd" : ".gpg"));
+        ui->uiOutputFile->setText(inputFile + getSelectedExtension());
     }
     else
     {
@@ -205,20 +223,22 @@ void FileEncryptionDialog::suggestOutput()
     }
 }
 
-void FileEncryptionDialog::on_uiEpdRadio_toggled(bool toggled)
+// void FileEncryptionDialog::on_uiEpdRadio_toggled(bool toggled)
+void FileEncryptionDialog::on_toggleExtension(bool toggled)
 {
     QString file = ui->uiOutputFile->text();
     QString epd(".epd");
     QString gpg(".gpg");
+    QString asc(".asc");
     if(file.isEmpty() || file.length() <= epd.length())
         return;
 
     QString ext = file.right(epd.length()).toLower();
-    if(ext != epd && ext != gpg)
+    if(ext != epd && ext != gpg && ext != asc)
         return;
 
     file = file.left(file.length() - epd.length());
-    ui->uiOutputFile->setText(file + (ui->uiEpdRadio->isChecked() ? epd : gpg));
+    ui->uiOutputFile->setText(file + getSelectedExtension());
 }
 
 void FileEncryptionDialog::on_uiInputBrowse_clicked()
