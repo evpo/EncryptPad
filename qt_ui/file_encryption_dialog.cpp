@@ -150,7 +150,6 @@ void FileEncryptionDialog::StartEncryption(const QString &fileName, std::string 
 
     bool encryption = true;
     async.Set(encryption, ui->uiInputFile->text(), fileName, &keyService, std::string(), &kfKeyService, kf_passphrase);
-    //this->setEnabled(false);
     emit ToggleWorkInProgress(true);
     async.Start();
 }
@@ -169,7 +168,6 @@ void FileEncryptionDialog::StartDecryption(const QString &fileName, const QStrin
     bool encryption = true;
     async.Set(!encryption, fileName, ui->uiOutputFile->text(), &keyService, passphrase, &kfKeyService, kf_passphrase);
     emit ToggleWorkInProgress(true);
-    //this->setEnabled(false);
     async.Start();
 }
 

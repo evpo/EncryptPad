@@ -153,6 +153,8 @@ namespace EncryptPad
     {
         bool passphraseSet = !client.IsPassphraseNotSet();
         bool isGpg = IsGpgFormat(fileName);
+        bool isArmor = IsArmorFormat(fileName);
+
         bool isEncryptedFormat = IsEncryptPadFormat(fileName) || isGpg;
 
         if(isGpg)
@@ -224,6 +226,8 @@ namespace EncryptPad
         }
 
         metadata.cannot_use_wad = isGpg;
+        metadata.is_armor = (isGpg && isArmor);
+
         client.StartSave(fileName, kf_passphrase);
         std::fill(std::begin(kf_passphrase), std::end(kf_passphrase), '0');
         return true;

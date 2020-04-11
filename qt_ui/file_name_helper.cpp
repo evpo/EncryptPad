@@ -33,11 +33,12 @@ namespace
     {
         {".epd", "EncryptPad (*.epd)"},
         {".gpg", "GnuPG (*.gpg)"},
+        {".asc", "GnuPG (*.asc)"},
         {".txt", QT_TRANSLATE_NOOP("FileExtensions", "Plain Text (*.txt)")},
         {nullptr, nullptr}
     };
 
-    const char *sOpenDialogFilter = QT_TRANSLATE_NOOP("FileExtensions", "Encrypted Files (*.epd *.gpg);; Plain Text (*.txt)");
+    const char *sOpenDialogFilter = QT_TRANSLATE_NOOP("FileExtensions", "Encrypted Files (*.epd *.gpg *.asc);; Plain Text (*.txt)");
     const char *sKeyDialogFilter = QT_TRANSLATE_NOOP("FileExtensions", "Key (*.key)");
 
 #if defined(__APPLE__) || defined(unix) || defined(__unix__) || defined(__unix)
@@ -105,6 +106,7 @@ namespace
         {
             {"(*.epd)", ".epd"},
             {"(*.gpg)", ".gpg"},
+            {"(*.asc)", ".asc"},
             {"(*.txt)", ".txt"},
             {"(*.key)", ".key"},
             {nullptr, nullptr},
@@ -148,9 +150,14 @@ bool IsEncryptPadFormat(const QString &fileName)
     return fileName.endsWith(".epd", Qt::CaseInsensitive);
 }
 
+bool IsArmorFormat(const QString &fileName)
+{
+    return fileName.endsWith(".asc", Qt::CaseInsensitive);
+}
+
 bool IsGpgFormat(const QString &fileName)
 {
-    return fileName.endsWith(".gpg", Qt::CaseInsensitive);
+    return fileName.endsWith(".gpg", Qt::CaseInsensitive) || fileName.endsWith(".asc", Qt::CaseInsensitive);;
 }
 
 QString GetFileFilterFromFileName(const QString &fileName)

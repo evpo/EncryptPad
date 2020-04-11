@@ -29,6 +29,7 @@ QString AppendExtensionForFileDialog(QString fileName, QString selectedFilter);
 
 bool IsEncryptPadFormat(const QString &fileName);
 bool IsGpgFormat(const QString &fileName);
+bool IsArmorFormat(const QString &fileName);
 QString GetFileFilterFromFileName(const QString &fileName);
 QString GetLibcurlFilter();
 
