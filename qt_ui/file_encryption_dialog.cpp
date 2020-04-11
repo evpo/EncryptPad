@@ -223,7 +223,6 @@ void FileEncryptionDialog::suggestOutput()
     }
 }
 
-// void FileEncryptionDialog::on_uiEpdRadio_toggled(bool toggled)
 void FileEncryptionDialog::on_toggleExtension(bool toggled)
 {
     QString file = ui->uiOutputFile->text();

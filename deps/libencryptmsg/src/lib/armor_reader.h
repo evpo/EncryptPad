@@ -15,7 +15,7 @@ namespace EncryptMsg
         Enabled,
     };
 
-    class ArmorReaderImpl;
+    struct ArmorReaderImpl;
     class ArmorReader final : public NonCopyableNonMovable
     {
         private:
