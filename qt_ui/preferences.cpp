@@ -13,6 +13,7 @@ namespace
     const int kDefaultTabSize = 4;
     const EncryptMsg::Compression kDefaultKeyFileCompression
         = EncryptMsg::Compression::Uncompressed;
+    const bool kDefaultKeyFileArmor = true;
 #if defined(__MINGW__) || defined(__MINGW32__)
     const bool kDefaultWindowsEol = true;
 #else
@@ -153,6 +154,7 @@ void SetDefaultPreferences(PersistentPreferences &preferences)
     preferences.keyFileProperties.hash_algo = EncryptPad::kDefaultHashAlgo;
     preferences.keyFileProperties.compression = kDefaultKeyFileCompression;;
     preferences.keyFileProperties.iterations = EncryptPad::kDefaultIterations;
+    preferences.keyFileProperties.is_armor = kDefaultKeyFileArmor;
 
     preferences.font = QFontDatabase::systemFont(QFontDatabase::FixedFont);
     preferences.tabSize = kDefaultTabSize;

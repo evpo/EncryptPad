@@ -28,6 +28,8 @@ using namespace EncryptPad;
 
 namespace
 {
+    static const bool kDefaultKeyFileArmor = true;
+
     void WriteKeyFile(const std::string &key_file_path, const std::string &content)
     {
         const char *exception_msg = "Cannot write to the file";
@@ -103,6 +105,7 @@ namespace EncryptPad
         // Key file is too small for compression
         metadata.compression = EncryptMsg::Compression::Uncompressed;
         metadata.hash_algo = kDefaultHashAlgo;
+        metadata.is_armor = kDefaultKeyFileArmor;
         return metadata;
     }
 

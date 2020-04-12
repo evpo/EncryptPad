@@ -1,5 +1,4 @@
 #include "key_file_converter.h"
-#include "openpgp.h"
 #include "botan/base64.h"
 #include "botan/exceptn.h"
 #include "file_encryption.h"
@@ -24,8 +23,7 @@ namespace EncryptPad
         }
 
         std::string label;
-        DataSource_Memory data_source(key);
-        SecureVector<byte> buffer = PGP_decode(data_source, label);
+        SecureVector<byte> buffer(key.begin(), key.end());
         SecureVector<byte> out_buffer;
 
         PacketMetadata metadata;
@@ -48,7 +46,7 @@ namespace EncryptPad
         if(result != EpadResult::Success)
             return false;
 
-        out = PGP_encode(out_buffer.data(), out_buffer.size(), "MESSAGE");
+        out.assign(out_buffer.begin(), out_buffer.end());
         return true;
     }
 
