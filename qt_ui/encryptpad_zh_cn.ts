@@ -255,12 +255,12 @@ Do you want to replace it?</source>
         <translation>文本文件 (*.txt)</translation>
     </message>
     <message>
-        <location filename="file_name_helper.cpp" line="40"/>
-        <source>Encrypted Files (*.epd *.gpg);; Plain Text (*.txt)</source>
-        <translation>加密的文件 (*.epd *.gpg);; 文本文件 (*.txt) </translation>
+        <location filename="file_name_helper.cpp" line="41"/>
+        <source>Encrypted Files (*.epd *.gpg *.asc);; Plain Text (*.txt)</source>
+        <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="file_name_helper.cpp" line="41"/>
+        <location filename="file_name_helper.cpp" line="42"/>
         <source>Key (*.key)</source>
         <translation>密钥文件 (*.key)</translation>
     </message>

@@ -252,15 +252,15 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="file_name_helper.cpp" line="36"/>
         <source>Plain Text (*.txt)</source>
-        <translation>Texte en clair (*.txt)</translation>
-    </message>
-    <message>
-        <location filename="file_name_helper.cpp" line="40"/>
-        <source>Encrypted Files (*.epd *.gpg);; Plain Text (*.txt)</source>
-        <translation>Fichiers chiffrés (*.epd *.gpg);; Texte en clair (*.txt)</translation>
+        <translation>Texte brut (*.txt)</translation>
     </message>
     <message>
         <location filename="file_name_helper.cpp" line="41"/>
+        <source>Encrypted Files (*.epd *.gpg *.asc);; Plain Text (*.txt)</source>
+        <translation>Fichiers chiffrés (*.epd *.gpg *.asc);; Texte brut (*.txt)</translation>
+    </message>
+    <message>
+        <location filename="file_name_helper.cpp" line="42"/>
         <source>Key (*.key)</source>
         <translation>Clé (*.key)</translation>
     </message>
@@ -584,7 +584,7 @@ Souhaitez-vous le remplacer ?</translation>
         <location filename="mainwindow.cpp" line="259"/>
         <location filename="mainwindow.cpp" line="275"/>
         <source>Cannot open &apos;%1&apos;</source>
-        <translation>Impossible d’ouvrir « %1 »</translation>
+        <translation>Impossible d’ouvrir « %1 »</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="295"/>
@@ -654,7 +654,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="mainwindow.cpp" line="637"/>
         <source>Cannot generate the key &apos;%1&apos; Check the path and permissions.</source>
-        <translation>Impossible de générer la clé « %1 ». Vérifier le chemin et les droits.</translation>
+        <translation>Impossible de générer la clé « %1 ». Vérifier le chemin et les droits.</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="639"/>
@@ -1078,7 +1078,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="mainwindow.cpp" line="1336"/>
         <source>Cannot save &apos;%1&apos;</source>
-        <translation>Impossible d’enregistrer « %1 »</translation>
+        <translation>Impossible d’enregistrer « %1 »</translation>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="1339"/>

@@ -85,7 +85,7 @@
     <message>
         <location filename="file_encryption_dialog.ui" line="170"/>
         <source>Input file:</source>
-        <translation>Входной Файл:</translation>
+        <translation>Входной файл:</translation>
     </message>
     <message>
         <location filename="file_encryption_dialog.ui" line="188"/>
@@ -115,7 +115,7 @@
     <message>
         <location filename="file_encryption_dialog.ui" line="231"/>
         <source>Key file path:</source>
-        <translation>Путь к Ключу:</translation>
+        <translation>Путь к ключу:</translation>
     </message>
     <message>
         <location filename="file_encryption_dialog.ui" line="244"/>
@@ -125,7 +125,7 @@
     <message>
         <location filename="file_encryption_dialog.ui" line="254"/>
         <source>Passphrase</source>
-        <translation>Кодовое Слово</translation>
+        <translation>Кодовое слово</translation>
     </message>
     <message>
         <location filename="file_encryption_dialog.ui" line="266"/>
@@ -254,12 +254,12 @@ Do you want to replace it?</source>
         <translation>Открытый Текст (*.txt)</translation>
     </message>
     <message>
-        <location filename="file_name_helper.cpp" line="40"/>
-        <source>Encrypted Files (*.epd *.gpg);; Plain Text (*.txt)</source>
-        <translation>Шифрованные Файлы (*.epd *.gpg);; Открытый Текст (*.txt)</translation>
+        <location filename="file_name_helper.cpp" line="41"/>
+        <source>Encrypted Files (*.epd *.gpg *.asc);; Plain Text (*.txt)</source>
+        <translation>Зашифрованные файлы (*.epd *.gpg *.asc);; Открытый текст (*.txt)</translation>
     </message>
     <message>
-        <location filename="file_name_helper.cpp" line="41"/>
+        <location filename="file_name_helper.cpp" line="42"/>
         <source>Key (*.key)</source>
         <translation>Ключ (*.key)</translation>
     </message>
@@ -1181,12 +1181,12 @@ Do you want to replace it?</source>
     <message>
         <location filename="new_key_dialog.ui" line="49"/>
         <source>&amp;Key path</source>
-        <translation>&amp;Путь К Ключу</translation>
+        <translation>&amp;Путь к ключу</translation>
     </message>
     <message>
         <location filename="new_key_dialog.ui" line="59"/>
         <source>Key in &amp;repository</source>
-        <translation>Ключ в &amp;Хранилище</translation>
+        <translation>Ключ в &amp;хранилище</translation>
     </message>
     <message>
         <location filename="new_key_dialog.ui" line="66"/>
@@ -1279,7 +1279,7 @@ Do you want to replace it?</source>
     <message>
         <location filename="passphrase_generation_dialog.ui" line="223"/>
         <source>Insert &amp;all</source>
-        <translation>Вставить &amp;Все</translation>
+        <translation>Вставить &amp;все</translation>
     </message>
     <message>
         <location filename="passphrase_generation_dialog.ui" line="271"/>
@@ -1289,12 +1289,12 @@ Do you want to replace it?</source>
     <message>
         <location filename="passphrase_generation_dialog.ui" line="281"/>
         <source>Select &amp;passphrase:</source>
-        <translation>Выбрать &amp;Пароль:</translation>
+        <translation>Выбрать &amp;пароль:</translation>
     </message>
     <message>
         <location filename="passphrase_generation_dialog.ui" line="304"/>
         <source>Limit group occurrence (1 to max chars)</source>
-        <translation>Предел Для Групп (1 до макс. символов)</translation>
+        <translation>Предел для групп (1 до макс. символов)</translation>
     </message>
     <message>
         <location filename="passphrase_generation_dialog.ui" line="314"/>
@@ -1498,7 +1498,7 @@ Do you want to replace it?</source>
     <message>
         <location filename="set_key_dialog.ui" line="150"/>
         <source>&amp;Key file path:</source>
-        <translation>&amp;Путь ключа:</translation>
+        <translation>&amp;Путь к ключу:</translation>
     </message>
     <message>
         <location filename="set_key_dialog.ui" line="160"/>

@@ -1,22 +1,22 @@
-# Ouvrir un fichier texte en clair, le protéger par phrase de passe et l’enregistrer comme fichier GPG
+# Ouvrir un fichier texte brut, le protéger par phrase de passe et l’enregistrer comme fichier GPG
 
-Nous allons ouvrir un fichier texte en clair, le protéger par phrase de passe et l’enregistrer comme fichier GPG.
+Nous allons ouvrir un fichier texte brut, le protéger par phrase de passe et l’enregistrer comme fichier GPG.
 
-## Ouvrir un fichier texte en clair
+## Ouvrir un fichier texte brut
 
 1\. Cliquer sur le bouton Ouvrir un fichier
 
 ![Bouton Ouvrir un fichier](images/open_text_file.png)
 
-2\. Sélectionner le type de fichier Texte en clair et cliquer sur Enregistrer
+2\. Sélectionner le type de fichier Texte brut et cliquer sur Enregistrer
 
-![Type de fichier « Texte en clair »](images/open_file_dialog_text_file.png)
+![Type de fichier « Texte brut »](images/open_file_dialog_text_file.png)
 
-3\. Le fichier texte en clair ouvert
+3\. Le fichier texte brut ouvert
 
 ![Fichier texte ouvert](images/text_file_opened.png)
 
-EncryptPad est maintenant en mode texte en clair non protégé. Elle fonctionne comme un éditeur de texte ordinaire.
+EncryptPad est maintenant en mode texte brut non protégé. Elle fonctionne comme un éditeur de texte ordinaire.
 
 ![Mode non protégé](images/unprotected_status.png)
 
@@ -66,14 +66,14 @@ Sortie de la commande --list-packets du paquet GPG :
 
 Si vous modifiez maintenant le texte et cliquez sur le bouton Enregistrer, EncryptPad ne vous demandera pas de saisir la phrase de passe de nouveau, car elle stocke plusieurs hachages salés de votre phrase de passe.
 
-## Ouvrir un autre fichier texte en clair
+## Ouvrir un autre fichier texte brut
 
-Si vous tentez d’ouvrir un fichier texte en clair maintenant, cela échouera avec le message suivant :
+Si vous tentez d’ouvrir un fichier texte brut maintenant, cela échouera avec le message suivant :
 
-![Impossible d’ouvrir le texte en clair](images/open_another_plain_text.png)
+![Impossible d’ouvrir le texte brut](images/open_another_plain_text.png)
 
-EncryptPad pense que le fichier est chiffré avec une phrase de passe, car son mode est «&nbsp;Protégé par phrase de passe&nbsp;», comme vous pouvez le voir dans la barre d’état. Elle a tenté de déchiffrer le texte en clair et a échoué. Pour poursuivre l’ouverture du fichier, effacez la protection par phrase de passe en cliquant sur le bouton Effacer la phrase de passe, ou mieux encore, en cliquant sur Fermer et réinitialiser ce qui fermera le fichier texte et réinitialisera la protection.
+EncryptPad pense que le fichier est chiffré avec une phrase de passe, car son mode est « Protégé par phrase de passe », comme vous pouvez le voir dans la barre d’état. Elle a tenté de déchiffrer le texte brut et a échoué. Pour poursuivre l’ouverture du fichier, effacez la protection par phrase de passe en cliquant sur le bouton Effacer la phrase de passe, ou mieux encore, en cliquant sur Fermer et réinitialiser ce qui fermera le fichier texte et réinitialisera la protection.
 
 ![Effacer la phrase de passe ou Fermer et réinitialiser](images/clear_pwd_or_close_and_reset.png)
 
-Vous pouvez maintenant ouvrir votre fichier texte en clair.
+Vous pouvez maintenant ouvrir votre fichier texte brut.

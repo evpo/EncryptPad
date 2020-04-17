@@ -1,20 +1,20 @@
-# Ouvrir un fichier texte en clair, le protéger par fichier clé et l’enregistrer comme fichier GPG
+# Ouvrir un fichier texte brut, le protéger par fichier clé et l’enregistrer comme fichier GPG
 
-## Ouvrir un fichier texte en clair
+## Ouvrir un fichier texte brut
 
 1\. Cliquer sur le bouton Ouvrir un fichier
 
 ![Bouton Ouvrir un fichier](images/open_text_file.png)
 
-2\. Sélectionner le type de fichier texte en clair et cliquer sur le bouton Enregistrer
+2\. Sélectionner le type de fichier texte brut et cliquer sur le bouton Enregistrer
 
-![Type de fichier Texte en clair](images/open_file_dialog_text_file.png)
+![Type de fichier Texte brut](images/open_file_dialog_text_file.png)
 
-3\. Le fichier texte en clair ouvert
+3\. Le fichier texte brut ouvert
 
 ![Fichier texte ouvert](images/text_file_opened.png)
 
-EncryptPad est maintenant en mode texte en clair non protégé. Elle fonctionne comme un éditeur de texte ordinaire.
+EncryptPad est maintenant en mode texte brut non protégé. Elle fonctionne comme un éditeur de texte ordinaire.
 
 ![Mode non protégé](images/unprotected_status.png)
 
@@ -108,14 +108,14 @@ Les fichiers sans chemin sont d’abord cherchés dans le répertoire d’Encryp
 
 `Emplacement de clé persistante dans le fichier chiffré` n’est pas pris en charge pour les fichiers GPG (voir README.md). Laissez vide pour l’instant. À FAIRE : ajouter le lien vers le guide sur le double chiffrement EPD.
 
-## Ouvrir un autre fichier texte en clair
+## Ouvrir un autre fichier texte brut
 
-Si vous tentez d’ouvrir un fichier texte en clair maintenant, cela échouera avec le message suivant :
+Si vous tentez d’ouvrir un fichier texte brut maintenant, cela échouera avec le message suivant :
 
-![Impossible d’ouvrir le texte en clair](images/open_another_plain_text.png)
+![Impossible d’ouvrir le texte brut](images/open_another_plain_text.png)
 
-EncryptPad pense que le fichier est chiffré avec un fichier clé, car son mode est «&nbsp;Protégé par une clé&nbsp;», comme vous pouvez le voir dans la barre d’état. Elle a tenté de déchiffrer le texte en clair et a échoué. Pour poursuivre l’ouverture du fichier, effacez la protection par fichier clé en cliquant sur le bouton Effacer la clé de chiffrement, ou mieux encore, en cliquant sur Fermer et réinitialiser ce qui fermera le fichier texte et réinitialisera la protection.
+EncryptPad pense que le fichier est chiffré avec un fichier clé, car son mode est «&nbsp;Protégé par une clé&nbsp;», comme vous pouvez le voir dans la barre d’état. Elle a tenté de déchiffrer le texte brut et a échoué. Pour poursuivre l’ouverture du fichier, effacez la protection par fichier clé en cliquant sur le bouton Effacer la clé de chiffrement, ou mieux encore, en cliquant sur Fermer et réinitialiser ce qui fermera le fichier texte et réinitialisera la protection.
 
 ![Effacer la clé ou Fermer et réinitialiser](images/clear_key_or_close_and_reset.png)
 
-Vous pouvez maintenant ouvrir votre fichier texte en clair.
+Vous pouvez maintenant ouvrir votre fichier texte brut.

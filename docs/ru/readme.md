@@ -24,8 +24,10 @@ EncryptPad это приложение для просмотра и редакт
   - [Prerequisites](#prerequisites)
   - [Steps](#steps)
 * [Compile EncryptPad on Mac/Linux](#compile-on-mac-linux)
-    - [Dynamic build](#dynamic-build)
     - [Fedora](#build-on-fedora)
+    - [Debian](#build-on-debian)
+    - [openSUSE](#build-on-opensuse)
+    - [FreeBSD](#build-on-freebsd)
 * [Portable mode](#portable-mode)
 * [Does EncryptPad store passphrases in the memory to reopen files?](#passphrases-in-memory)
 * [Acknowledgements](#acknowledgements)
@@ -333,7 +335,7 @@ Below are steps to verify the SHA-1 hashes of the source files in [Launchpad web
 
 ### Prerequisites
 
-1. [**Qt framework**](http://www.qt.io/download-open-source/) based on MingW 32 bit (the latest build has been tested with Qt 5.3.2).
+1. [**Qt framework**](http://www.qt.io/download-open-source/) based on MingW 32 bit (the latest build has been tested with Qt 5.10.1).
 2. MSYS: you can use one bundled with [**Git For Windows**](http://git-scm.com/download/win). You probably use Git anyway.
 3. Python: any recent version will work.
 
@@ -341,21 +343,17 @@ Below are steps to verify the SHA-1 hashes of the source files in [Launchpad web
 
 ### Steps
 
-1. Modify the session **PATH** environment variable to include the Qt build toolset and Python. **mingw32-make**, **g++**, **qmake**, **python.exe** should be in the global search path in your Git Bash session. I personally modify bash.bashrc and add a line like `PATH=$PATH:/c/Python35-32:...` not to pollute the system wide PATH variable.
+1. Modify the session **PATH** environment variable to include the Qt build toolset and Python. **mingw32-make**, **g++**, **qmake**, **python.exe** should be in the global search path in your Git Bash session. I personally modify bash.bashrc and add a line like `PATH=/c/Python35-32:/c/Qt/5.10.1/mingw53_32/bin:/c/Qt/Tools/mingw530_32/bin:/c/MinGW/msys/1.0/bin:/bin` not to pollute the system wide PATH variable.
 
 2. Extract the EncryptPad source files to a directory.
 
-3. Run **configure.sh** script without parameters to see available options. To build everything:
+3. Run **configure.py --help** script to see available options. To build everything:
 
-    ./configure.sh --all
+    ./configure.py --cpu x86 --os mingw --static
+    make
 
-For localized binaries:
-
-    ./configure.sh --all-cultures
-
-The Makefiles system uses **uname** to identify the OS and platform. You may need to modify uname parameters in **./deps/makefiles/platform.mak** to make it work. See Makefiles documentation and configure.sh script if you have any problems.
-
-If the build is successful, you should see the executable **./bin/release/EncryptPad.exe**
+The configure command will always work if your console is running with administrative privileges. If you don't want to run as administrator, add `--link-method hardlink` to the options.
+If the build is successful, you should see the executable **./bin/release/encryptpad.exe**
 
 Note that if you want EncryptPad to work as a single executable without dlls, you need to build Qt framework yourself statically. It takes a few hours. There are plenty of instructions on how to do this in the Internet. The most popular article recommends using a PowerShell script. While it is convenient and I did it once, sometimes you don't want to upgrade your PowerShell and install heavy dependencies coming with it. So the next time I had to do that, I read the script and did everything manually. Luckily there are not too many steps in it.
 
@@ -363,19 +361,13 @@ Note that if you want EncryptPad to work as a single executable without dlls, yo
 
 ## Compile EncryptPad on Mac/Linux
 
-It is easier than building on Windows. All you need is to install Qt, Python and run:
+All you need is to install Qt, Python and run:
 
-    ./configure.sh --all
+    export PATH=$HOME/Qt/5.10.1/clang_64/bin/:$PATH
+    ./configure.py --build-botan --ldflags "-mmacosx-version-min=10.10" --cxxflags "-mmacosx-version-min=10.10"
+    make
 
-<div id="dynamic-build"></div>
-
-### Dynamic build
-
-    ./configure.sh --all --use-system-libs
-
-Build with dynamic linking to libraries. It also uses `Botan` and `Zlib` installed on the system instead
-of compiling their source code under `deps`. On Ubuntu, install `libbotan1.10-dev` and `zlib1g-dev`
-packages before building.
+Change the Qt path and replace the minimal macOS versions as needed. The command will work without them but the result will be limited to the current version.
 
 <div id="build-on-fedora"></div>
 
@@ -389,12 +381,69 @@ Install dependencies and tools:
 
 Open the EncryptPad directory:
 
-    ./configure.sh --all
+    ./configure.py --build-botan --build-zlib
+    make
 
 For a dynamic build with using the system libraries:
 
     dnf install botan-devel
-    ./configure.sh --all --use-system-libs
+    ./configure.py
+    make
+
+<div id="build-on-debian"></div>
+
+### Debian
+
+Install dependencies and tools:
+
+    apt-get install qtbase5-dev qt5-default gcc g++ make python zlib1g-dev pkg-config
+
+Open the EncryptPad source directory:
+
+    ./configure.py --build-botan --build-zlib
+    make
+
+You can also use the system `libbotan-2-dev` instead of building it. If `libbotan-2-dev` is not available, add `stretch-backports` to the repository:
+
+    echo "deb http://deb.debian.org/debian/ stretch-backports main" >> /etc/apt/sources.list
+
+    apt-get install libbotan-2-dev
+
+    ./configure.py
+    make
+
+<div id="build-on-opensuse"></div>
+
+### openSUSE
+
+Install dependencies and tools:
+
+    zypper install gcc gcc-c++ make python pkg-config zlib-devel libqt5-qtbase-devel
+    ln -s qmake-qt5 /usr/bin/qmake
+
+You can also install later compiler versions and link them to the default commands:
+
+    zypper install gcc7 gcc7-c++
+    ln -sf gcc-7 /usr/bin/gcc
+    ln -sf g++-7 /usr/bin/g++
+
+Open the EncryptPad source directory:
+
+    ./configure.py --build-botan --build-zlib
+    make
+
+<div id="build-on-freebsd"></div>
+
+### FreeBSD
+
+Install dependencies and tools:
+
+    pkg install python pkgconf botan2 qt5
+
+Open the EncryptPad source directory:
+
+    ./configure.py
+    make
 
 <div id="portable-mode"></div>
 
