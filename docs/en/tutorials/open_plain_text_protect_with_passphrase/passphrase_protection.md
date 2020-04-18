@@ -68,7 +68,7 @@ If you modify the text now and click Save tool button, EncryptPad will not ask y
 
 ## Open another plain text file
 
-If you try to open a plain text file now, it will fail with the following message.
+If you try to open a plain text file now, it will fail with the following message:
 
 ![Cannot open plain text](images/open_another_plain_text.png)
 
