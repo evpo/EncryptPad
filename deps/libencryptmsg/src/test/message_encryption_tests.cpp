@@ -18,23 +18,39 @@ namespace EncryptMsg
 {
     namespace UnitTests
     {
-        class MessageEncryptionFixture : public ::testing::TestWithParam<size_t> // Param is buffer size
+        struct Config
+        {
+            size_t buffer;
+            CipherAlgo cipher;
+            HashAlgo hash;
+        };
+
+        class MessageEncryptionFixture : public ::testing::TestWithParam<Config> // Param is buffer size
         {
             public:
-                static size_t ParameterCombination[];
+                static Config ParameterCombination[];
             protected:
-                size_t buffer_size_;
+                Config config_;
                 vector<uint8_t> plain_file_;
                 vector<uint8_t> encrypted_file_;
                 secure_vector<uint8_t> buf_;
 
                 virtual void SetUp() override;
+                MessageConfig GetMessageConfig();
 
                 SafeVector Update(MessageWriter &writer);
                 SafeVector Decrypt(const SafeVector &passphrase);
         };
 
-        size_t MessageEncryptionFixture::ParameterCombination[] = {8, 24, 128, 512, 1024};
+        Config MessageEncryptionFixture::ParameterCombination[] = {
+            {buffer: 8, cipher: CipherAlgo::Twofish, hash: HashAlgo::SHA512},
+            {buffer: 24, cipher: CipherAlgo::Twofish, hash: HashAlgo::SHA224},
+            {buffer: 128, cipher: CipherAlgo::AES256, hash: HashAlgo::SHA160},
+            {buffer: 512, cipher: CipherAlgo::AES128, hash: HashAlgo::SHA384},
+            {buffer: 1024, cipher: CipherAlgo::AES128, hash: HashAlgo::SHA224},
+            {buffer: 1024, cipher: CipherAlgo::CAST5, hash: HashAlgo::SHA160},
+            {buffer: 1024, cipher: CipherAlgo::TripleDES, hash: HashAlgo::SHA160},
+        };
 
         INSTANTIATE_TEST_CASE_P(Common, MessageEncryptionFixture,
                 ::testing::ValuesIn(MessageEncryptionFixture::ParameterCombination));
@@ -51,14 +67,14 @@ namespace EncryptMsg
             std::copy(istreambuf_iterator<char>(stm2), istreambuf_iterator<char>(),
                     back_inserter(encrypted_file_));
 
-            buffer_size_ = GetParam();
+            config_ = GetParam();
         }
 
-        MessageConfig GetMessageConfig()
+        MessageConfig MessageEncryptionFixture::GetMessageConfig()
         {
             MessageConfig config;
-            config.SetCipherAlgo(CipherAlgo::AES256);
-            config.SetHashAlgo(HashAlgo::SHA256);
+            config.SetCipherAlgo(config_.cipher);
+            config.SetHashAlgo(config_.hash);
             config.SetIterations(EncodeS2KIterations(1600000));
 
             config.SetCompression(Compression::ZLIB);
@@ -117,11 +133,11 @@ namespace EncryptMsg
         SafeVector MessageEncryptionFixture::Update(MessageWriter &writer)
         {
             SafeVector ret_val;
-            buf_.resize(buffer_size_);
+            buf_.resize(config_.buffer);
             auto it = plain_file_.begin();
             while(it != plain_file_.end())
             {
-                auto it_next = std::min(it + buffer_size_, plain_file_.end());
+                auto it_next = std::min(it + config_.buffer, plain_file_.end());
                 buf_.resize(it_next - it);
                 std::copy(it, it_next, buf_.begin());
                 if(it_next == plain_file_.end())

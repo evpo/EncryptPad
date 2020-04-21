@@ -432,10 +432,12 @@ namespace EncryptMsg
         state_.message_config.SetCipherAlgo(static_cast<CipherAlgo>(in_.Get()));
         switch(state_.message_config.GetCipherAlgo())
         {
-            case CipherAlgo::AES128:
             case CipherAlgo::TripleDES:
             case CipherAlgo::CAST5:
+            case CipherAlgo::AES128:
+            case CipherAlgo::AES192:
             case CipherAlgo::AES256:
+            case CipherAlgo::Twofish:
                 break;
             default:
                 return EmsgResult::UnsupportedAlgo;
@@ -449,7 +451,9 @@ namespace EncryptMsg
         {
             case HashAlgo::SHA160:
             case HashAlgo::SHA256:
+            case HashAlgo::SHA384:
             case HashAlgo::SHA512:
+            case HashAlgo::SHA224:
                 break;
             default:
                 return EmsgResult::UnsupportedS2K;

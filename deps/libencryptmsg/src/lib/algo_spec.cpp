@@ -44,6 +44,17 @@ namespace EncryptMsg
                 };
                 return aes128;
 
+            case CipherAlgo::AES192:
+
+                static AlgoSpec aes192 =
+                {
+                    CipherAlgo::AES192,
+                    "AES-192/CFB",
+                    16,
+                    192
+                };
+                return aes192;
+
             case CipherAlgo::AES256:
 
                 static AlgoSpec aes256 =
@@ -54,6 +65,17 @@ namespace EncryptMsg
                     256
                 };
                 return aes256;
+
+            case CipherAlgo::Twofish:
+
+                static AlgoSpec twofish =
+                {
+                    CipherAlgo::Twofish,
+                    "Twofish/CFB",
+                    16,
+                    256
+                };
+                return twofish;
 
             default:
                 static AlgoSpec unknown =
@@ -85,6 +107,13 @@ namespace EncryptMsg
                     "OpenPGP-S2K(SHA-256)"
                 };
                 return sha256;
+            case HashAlgo::SHA384:
+                static HashSpec sha384 =
+                {
+                    HashAlgo::SHA384,
+                    "OpenPGP-S2K(SHA-384)"
+                };
+                return sha384;
             case HashAlgo::SHA512:
                 static HashSpec sha512 =
                 {
@@ -92,6 +121,13 @@ namespace EncryptMsg
                     "OpenPGP-S2K(SHA-512)"
                 };
                 return sha512;
+            case HashAlgo::SHA224:
+                static HashSpec sha224 =
+                {
+                    HashAlgo::SHA224,
+                    "OpenPGP-S2K(SHA-224)"
+                };
+                return sha224;
             default:
                 static HashSpec unknown =
                 {

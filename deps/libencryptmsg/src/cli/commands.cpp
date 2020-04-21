@@ -12,6 +12,7 @@ using namespace Botan;
 
 namespace
 {
+    fstream::char_type *ToChar(uint8_t *p);
     fstream::char_type *ToChar(uint8_t *p)
     {
         return reinterpret_cast<fstream::char_type*>(p);
@@ -59,7 +60,8 @@ namespace EncryptMsg
             FilePassphraseProvider pwd_provider(pwd_file);
 
             MessageConfig config;
-            config.SetCipherAlgo(CipherAlgo::AES256);
+            config.SetCipherAlgo(CipherAlgo::Twofish);
+            config.SetHashAlgo(HashAlgo::SHA224);
             config.SetCompression(Compression::ZIP);
             config.SetFileName("test.txt");
             config.SetFileDate(0); //TODO: see how to set the date in EncryptPad

@@ -17,7 +17,7 @@ void PrintUsage()
     const char *usage =
         VER_PRODUCTNAME_STR " " VER_PRODUCTVERSION_STR "\n"
         "\n"
-        "Usage: encrypt-msg --help | -e|-d <file-name>\n";
+        "Usage: encryptmsg --help | -e|-d --armor --pwd-file <pwd-file> -o <output-file> <file-name>\n";
 
     std::cout << usage << std::endl;
 }

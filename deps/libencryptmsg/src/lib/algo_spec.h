@@ -25,7 +25,9 @@ namespace EncryptMsg
         TripleDES = 2,
         CAST5 = 3,
         AES128 = 7,
+        AES192 =  8,
         AES256 = 9,
+        Twofish = 10,
     };
 
     enum class HashAlgo
@@ -33,7 +35,9 @@ namespace EncryptMsg
         Unknown = -1,
         SHA160 = 2,
         SHA256 = 8,
+        SHA384 = 9,
         SHA512 = 10,
+        SHA224 = 11,
     };
 
     struct AlgoSpec
