@@ -32,7 +32,7 @@ do
                 if [[ "$EXT" == "asc" ]]; then
                     ARMOR_CLAUSE="--armor"
                 fi
-
+                echo "encrypting ${CIPHER} ${S2K_ALGO} ${COMPRESS} ${EXT}"
                 cat $PASSPHRASE_FILE | $CMD -o ${OUT_DIR}/${CIPHER}_${S2K_ALGO}_${COMPRESS}.${EXT} --compress-algo $COMPRESS --s2k-digest-algo $S2K_ALGO --cipher-algo $CIPHER $ARMOR_CLAUSE $IN
             done
         done

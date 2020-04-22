@@ -81,7 +81,12 @@ void FilePropertiesDialog::PopulateItems()
         {"Triple DES", ToInt(CipherAlgo::TripleDES)},
         {"CAST5", ToInt(CipherAlgo::CAST5)},
         {"AES-128", ToInt(CipherAlgo::AES128)},
+        {"AES-192", ToInt(CipherAlgo::AES192)},
         {QT_TRANSLATE_NOOP("FilePropertiesDialog", "AES-256 (recommended)"), ToInt(CipherAlgo::AES256)},
+        {"Twofish", ToInt(CipherAlgo::Twofish)},
+        {"Camellia-128", ToInt(CipherAlgo::Camellia128)},
+        {"Camellia-192", ToInt(CipherAlgo::Camellia192)},
+        {"Camellia-256", ToInt(CipherAlgo::Camellia256)},
         {nullptr, 0}
     };
 
@@ -89,7 +94,9 @@ void FilePropertiesDialog::PopulateItems()
     {
         {"SHA-1", ToInt(HashAlgo::SHA160)},
         {"SHA-256", ToInt(HashAlgo::SHA256)},
+        {"SHA-384", ToInt(HashAlgo::SHA384)},
         {"SHA-512", ToInt(HashAlgo::SHA512)},
+        {"SHA-224", ToInt(HashAlgo::SHA224)},
         {nullptr, 0}
     };
 
