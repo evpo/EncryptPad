@@ -106,11 +106,16 @@ namespace
 
     EncryptMsg::CipherAlgo ParseCipherAlgo(std::string str)
     {
+
         using namespace EncryptPad;
         using namespace EncryptMsg;
 
         StringToUpper(str);
-        if(str == "CAST5")
+        if(str == "3DES")
+        {
+            return CipherAlgo::TripleDES;
+        }
+        else if(str == "CAST5")
         {
             return CipherAlgo::CAST5;
         }
@@ -118,13 +123,29 @@ namespace
         {
             return CipherAlgo::AES128;
         }
+        else if(str == "AES192")
+        {
+            return CipherAlgo::AES192;
+        }
         else if(str == "AES256")
         {
             return CipherAlgo::AES256;
         }
-        else if(str == "3DES")
+        else if(str == "CAMELLIA128")
         {
-            return CipherAlgo::TripleDES;
+            return CipherAlgo::Camellia128;
+        }
+        else if(str == "CAMELLIA192")
+        {
+            return CipherAlgo::Camellia192;
+        }
+        else if(str == "CAMELLIA256")
+        {
+            return CipherAlgo::Camellia256;
+        }
+        else if(str == "TWOFISH")
+        {
+            return CipherAlgo::Twofish;
         }
         else
         {
@@ -145,9 +166,17 @@ namespace
         {
             return HashAlgo::SHA256;
         }
+        else if(str == "SHA384")
+        {
+            return HashAlgo::SHA384;
+        }
         else if(str == "SHA512")
         {
             return HashAlgo::SHA512;
+        }
+        else if(str == "SHA224")
+        {
+            return HashAlgo::SHA224;
         }
         else
         {

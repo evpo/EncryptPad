@@ -438,6 +438,9 @@ namespace EncryptMsg
             case CipherAlgo::AES192:
             case CipherAlgo::AES256:
             case CipherAlgo::Twofish:
+            case CipherAlgo::Camellia128:
+            case CipherAlgo::Camellia192:
+            case CipherAlgo::Camellia256:
                 break;
             default:
                 return EmsgResult::UnsupportedAlgo;

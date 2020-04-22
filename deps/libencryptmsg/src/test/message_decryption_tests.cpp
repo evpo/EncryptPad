@@ -49,6 +49,9 @@ namespace EncryptMsg
             {1024, "simple_text.txt.aes256.sha512.gpg", 37748736, "02F89FB223F53ED5"},
             {1024, "simple_text.txt.aes256.sha384.gpg", 37748736, "DD6C4862CEE8586B"},
             {1024, "simple_text.txt.aes256.sha224.gpg", 37748736, "2EBD66CAD3F95805"},
+            {1024, "simple_text.txt.camellia128.sha256.gpg", 37748736, "53B1EACAA05AE179"},
+            {1024, "simple_text.txt.camellia192.sha256.gpg", 37748736, "0DD33E7B3AF69909"},
+            {1024, "simple_text.txt.camellia256.sha256.gpg", 37748736, "2252062DE97661F0"},
             {8, "simple_text.txt.aes256.sha256.gpg", 1015808, "04D58C5C071A5B3F"},
             {24, "simple_text.txt.aes256.sha256.gpg", 1015808, "04D58C5C071A5B3F"},
             {128, "simple_text.txt.aes256.sha256.gpg", 1015808, "04D58C5C071A5B3F"},
@@ -165,6 +168,10 @@ namespace EncryptMsg
             {
                 ASSERT_EQ(CipherAlgo::CAST5, config.GetCipherAlgo());
             }
+            else if(cipher == "aes128")
+            {
+                ASSERT_EQ(CipherAlgo::AES128, config.GetCipherAlgo());
+            }
             else if(cipher == "aes192")
             {
                 ASSERT_EQ(CipherAlgo::AES192, config.GetCipherAlgo());
@@ -172,6 +179,18 @@ namespace EncryptMsg
             else if(cipher == "aes256")
             {
                 ASSERT_EQ(CipherAlgo::AES256, config.GetCipherAlgo());
+            }
+            else if(cipher == "camellia128")
+            {
+                ASSERT_EQ(CipherAlgo::Camellia128, config.GetCipherAlgo());
+            }
+            else if(cipher == "camellia192")
+            {
+                ASSERT_EQ(CipherAlgo::Camellia192, config.GetCipherAlgo());
+            }
+            else if(cipher == "camellia256")
+            {
+                ASSERT_EQ(CipherAlgo::Camellia256, config.GetCipherAlgo());
             }
             else if(cipher == "twofish")
             {

@@ -28,6 +28,9 @@ namespace EncryptMsg
         AES192 =  8,
         AES256 = 9,
         Twofish = 10,
+        Camellia128 = 11,
+        Camellia192 =  12,
+        Camellia256 = 13,
     };
 
     enum class HashAlgo

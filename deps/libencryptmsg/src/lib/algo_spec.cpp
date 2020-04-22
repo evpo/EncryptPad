@@ -66,6 +66,39 @@ namespace EncryptMsg
                 };
                 return aes256;
 
+            case CipherAlgo::Camellia128:
+
+                static AlgoSpec camellia128 =
+                {
+                    CipherAlgo::Camellia128,
+                    "Camellia-128/CFB",
+                    16,
+                    128
+                };
+                return camellia128;
+
+            case CipherAlgo::Camellia192:
+
+                static AlgoSpec camellia192 =
+                {
+                    CipherAlgo::Camellia192,
+                    "Camellia-192/CFB",
+                    16,
+                    192
+                };
+                return camellia192;
+
+            case CipherAlgo::Camellia256:
+
+                static AlgoSpec camellia256 =
+                {
+                    CipherAlgo::Camellia256,
+                    "Camellia-256/CFB",
+                    16,
+                    256
+                };
+                return camellia256;
+
             case CipherAlgo::Twofish:
 
                 static AlgoSpec twofish =
