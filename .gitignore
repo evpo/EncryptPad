@@ -31,6 +31,7 @@ deps/gtest
 deps/makefiles
 deps/stlplus
 deps/zlib
+deps/bzip2
 deps/libencryptmsg/deps
 *~
 Makefile

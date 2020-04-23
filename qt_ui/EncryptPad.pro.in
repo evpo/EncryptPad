@@ -19,6 +19,10 @@ QMAKE_CXXFLAGS += $$ENCRYPTMSG_CXXFLAGS
 
 # zlib
 LIBS += %{zlib_ldflags}
+
+#bzip2
+LIBS += %{bzip2_ldflags}
+
 QMAKE_CXXFLAGS += $$BOTAN_CXXFLAGS
 
 LIBS += %{cxx_abi_flags}

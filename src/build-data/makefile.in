@@ -52,6 +52,7 @@ cli: $(CLI)
 test: $(TEST)
 libs: $(LIBRARIES)
 zlib: $(ZLIB)
+bzip2: $(BZIP2)
 
 # Botan
 %{if build_botan}
@@ -109,6 +110,26 @@ zlib_clean:
 zlib_distclean:
 %{if build_zlib}
 	$(MAKE) -C $(ZLIB_DIR) %{zlib_makefile} %{zlib_distclean_target}
+%{endif}
+
+# BZip2
+%{if build_bzip2}
+BZIP2 = %{bzip2_target}
+BZIP2_DIR = %{bzip2_dir}
+$(BZIP2) :
+	$(MAKE) %{bzip2_target} -C $(BZIP2_DIR)
+%{endif}
+
+EXE_LINKS_TO += %{bzip2_ldflags}
+
+bzip2_clean:
+%{if build_bzip2}
+	$(MAKE) -C $(BZIP2_DIR) clean
+%{endif}
+
+bzip2_distclean:
+%{if build_bzip2}
+	$(MAKE) -C $(BZIP2_DIR) distclean
 %{endif}
 
 # QT UI build

@@ -568,6 +568,7 @@ def set_defaults_for_unset_options(options, info_arch, info_cc): # pylint: disab
     if is_windows(options):
         options.build_botan = True
         options.build_zlib = True
+        options.build_bzip2 = True
 
 class EncryptPadConfigureLogHandler(logging.StreamHandler, object):
     def emit(self, record):
@@ -1642,6 +1643,7 @@ def configure_botan(options):
     cmd.extend(['--amalgamation',
             '--disable-shared',
             '--with-zlib',
+            '--with-bzip2',
             '--enable-modules', 'aes,pbkdf2,auto_rng,compression'])
 
     logging.info('Executing: %s', ' '.join(cmd))
@@ -1654,6 +1656,9 @@ def configure_botan(options):
 
 def get_zlib_dir():
     return os.path.join(get_project_dir(), 'deps', 'zlib')
+
+def get_bzip2_dir():
+    return os.path.join(get_project_dir(), 'deps', 'bzip2')
 
 def is_windows(options):
     return options.os in ['windows','mingw']
@@ -1706,6 +1711,11 @@ def configure_encryptmsg(options):
             '--zlib-include-dir', get_zlib_dir(),
             '--zlib-lib-dir', get_zlib_dir(),
             ])
+    if options.build_bzip2:
+        cmd.extend([
+            '--bzip2-include-dir', get_bzip2_dir(),
+            '--bzip2-lib-dir', get_bzip2_dir(),
+            ])
     logging.info('Executing: %s', ' '.join(cmd))
     try:
         encryptmsg_proc = subprocess.Popen(cmd, cwd = dir)
@@ -1722,6 +1732,19 @@ def external_command(cmd):
     except OSError as e:
         raise UserError('Error while executing command: %s' % e)
     return result if result is str else result.decode("ascii")
+
+def set_bzip2_variables(options, template_vars, cc):
+    template_vars['build_bzip2'] = options.build_bzip2
+    if options.build_bzip2:
+        bzip2_dir = get_bzip2_dir()
+        template_vars['bzip2_dir'] = bzip2_dir
+        template_vars['bzip2_target'] = os.path.join(bzip2_dir, 'libbz2.a')
+
+        template_vars['bzip2_cxxflags'] =  cc.add_include_dir_option + bzip2_dir
+        template_vars['bzip2_ldflags'] = os.path.join(bzip2_dir, 'libbz2.a')
+    else:
+        template_vars['bzip2_cxxflags'] = external_command(['pkg-config', '--cflags', 'bzip2'])
+        template_vars['bzip2_ldflags'] = external_command(['pkg-config', '--libs', 'bzip2'])
 
 def set_zlib_variables(options, template_vars, cc):
     template_vars['build_zlib'] = options.build_zlib
@@ -1860,6 +1883,8 @@ def process_command_line(args):
 
     build_group.add_option('--build-zlib', action='store_true', dest='build_zlib', default=False,
                             help='build zlib from source. If not set, use the system library')
+    build_group.add_option('--build-bzip2', action='store_true', dest='build_bzip2', default=False,
+                            help='build bzip2 from source. If not set, use the system library')
     build_group.add_option('--build-botan', action='store_true', dest='build_botan', default=False,
                             help='build botan from source. If not set, use the system library')
 
@@ -1956,6 +1981,7 @@ def configure_back_end(system_command, options):
 
     set_botan_variables(options, template_vars, cc)
     set_zlib_variables(options, template_vars, cc)
+    set_bzip2_variables(options, template_vars, cc)
     set_encryptmsg_variables(options, template_vars, cc)
 
     do_io_for_build(cc, arch, osinfo, info_modules.values(), build_paths, source_paths, template_vars, options)
