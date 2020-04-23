@@ -1708,12 +1708,10 @@ def configure_encryptmsg(options):
             ])
     if options.build_zlib:
         cmd.extend([
-            '--zlib-include-dir', get_zlib_dir(),
             '--zlib-lib-dir', get_zlib_dir(),
             ])
     if options.build_bzip2:
         cmd.extend([
-            '--bzip2-include-dir', get_bzip2_dir(),
             '--bzip2-lib-dir', get_bzip2_dir(),
             ])
     logging.info('Executing: %s', ' '.join(cmd))
@@ -1739,6 +1737,7 @@ def set_bzip2_variables(options, template_vars, cc):
         bzip2_dir = get_bzip2_dir()
         template_vars['bzip2_dir'] = bzip2_dir
         template_vars['bzip2_target'] = os.path.join(bzip2_dir, 'libbz2.a')
+        template_vars['bzip2_make_target'] = 'libbz2.a'
 
         template_vars['bzip2_cxxflags'] =  cc.add_include_dir_option + bzip2_dir
         template_vars['bzip2_ldflags'] = os.path.join(bzip2_dir, 'libbz2.a')

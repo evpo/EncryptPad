@@ -117,7 +117,7 @@ zlib_distclean:
 BZIP2 = %{bzip2_target}
 BZIP2_DIR = %{bzip2_dir}
 $(BZIP2) :
-	$(MAKE) %{bzip2_target} -C $(BZIP2_DIR)
+	$(MAKE) %{bzip2_make_target} -C $(BZIP2_DIR)
 %{endif}
 
 EXE_LINKS_TO += %{bzip2_ldflags}
@@ -136,7 +136,7 @@ bzip2_distclean:
 
 QT_BUILD_DIR = %{qt_build_dir}
 
-qt_ui: libs $(BOTAN_TARGET) $(ENCRYPTMSG_TARGET) $(ZLIB)
+qt_ui: libs $(BOTAN_TARGET) $(ENCRYPTMSG_TARGET) $(ZLIB) $(BZIP2)
 	$(MAKE) -C $(QT_BUILD_DIR) RELEASE=$(RELEASE)
 
 qt_ui_clean:
@@ -208,13 +208,13 @@ TEST_LINKS_TO = $(GTEST_TARGET_DIR)/libgtest_main.a $(GTEST_TARGET_DIR)/libgtest
 # Misc targets
 
 %{if make_supports_phony}
-.PHONY: all cli libs qt_ui test botan botan_clean botan_distclean encryptmsg encryptmsg_clean encryptmsg_distclean zlib qt_ui_clean test_clean clean_gtest clean distclean install macos_deployment
+.PHONY: all cli libs qt_ui test botan botan_clean botan_distclean encryptmsg encryptmsg_clean encryptmsg_distclean zlib bzip2 qt_ui_clean test_clean clean_gtest clean distclean install macos_deployment
 %{endif}
 
 clean: qt_ui_clean clean_gtest
 	$(PYTHON_EXE) $(SCRIPTS_DIR)/cleanup.py --build-dir="%{build_dir}"
 
-distclean: qt_ui_distclean zlib_distclean botan_distclean encryptmsg_distclean
+distclean: qt_ui_distclean zlib_distclean bzip2_distclean botan_distclean encryptmsg_distclean
 	$(PYTHON_EXE) $(SCRIPTS_DIR)/cleanup.py --build-dir="%{build_dir}" --distclean
 
 # MacOS packaging
@@ -237,11 +237,11 @@ TESTOBJS = %{join test_objs}
 
 # Executable targets
 
-$(CLI): $(LIBRARIES) $(CLIOBJS) $(BOTAN_TARGET) $(ENCRYPTMSG_TARGET) $(ZLIB)
+$(CLI): $(LIBRARIES) $(CLIOBJS) $(BOTAN_TARGET) $(ENCRYPTMSG_TARGET) $(ZLIB) $(BZIP2)
 	$(EXE_LINK_CMD) $(ABI_FLAGS) $(LDFLAGS) $(CLIOBJS) $(BOTAN_LDFLAGS) $(EXE_LINKS_TO) $(ENCRYPTMSG_LDFLAGS) %{output_to_exe}$@
 	$(POST_LINK_CMD)
 
-$(TEST): $(LIBRARIES) $(TESTOBJS) $(GTEST) $(BOTAN_TARGET) $(ENCRYPTMSG_TARGET) $(ZLIB)
+$(TEST): $(LIBRARIES) $(TESTOBJS) $(GTEST) $(BOTAN_TARGET) $(ENCRYPTMSG_TARGET) $(ZLIB) $(BZIP2)
 	$(EXE_LINK_CMD) $(ABI_FLAGS) $(LDFLAGS) $(TESTOBJS) $(BOTAN_LDFLAGS) $(EXE_LINKS_TO) $(ENCRYPTMSG_LDFLAGS) $(TEST_LINKS_TO) %{output_to_exe}$@
 	$(POST_LINK_CMD)
 

@@ -105,6 +105,7 @@ void FilePropertiesDialog::PopulateItems()
         {QT_TRANSLATE_NOOP("FilePropertiesDialog", "Uncompressed"), ToInt(Compression::Uncompressed)},
         {"ZIP", ToInt(Compression::ZIP)},
         {"ZLIB", ToInt(Compression::ZLIB)},
+        {"BZip2", ToInt(Compression::BZip2)},
         {nullptr, 0}
     };
 
