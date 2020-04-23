@@ -4,14 +4,10 @@ compress none
 cipher CAST5
 cipher 3DES
 cipher AES
-cipher AES192
 cipher AES256
 cipher TWOFISH
-cipher CAMELLIA128
-cipher CAMELLIA192
 cipher CAMELLIA256
 s2k_algo SHA1
 s2k_algo SHA256
-s2k_algo SHA384
 s2k_algo SHA512
 s2k_algo SHA224
