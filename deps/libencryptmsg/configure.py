@@ -1741,12 +1741,18 @@ def external_command(cmd):
         raise UserError('Error while executing command: %s' % e)
     return result if result is str else result.decode("ascii")
 
-def set_zlib_variables(options, template_vars, cc):
-    if options.zlib_include_dir:
-        template_vars['zlib_cxxflags'] = '{0} {1}'.format(cc.add_include_dir_option, options.zlib_include_dir)
+def set_bzip2_variables(options, template_vars, cc):
+    if options.build_cli or options.test:
+        if options.bzip2_lib_dir:
+            bzip2_name = 'bz2'
+            template_vars['bzip2_ldflags'] = '{0} {1} {2} {3}'.format(cc.add_lib_dir_option, options.bzip2_lib_dir, cc.add_lib_option, bzip2_name)
+        else:
+            template_vars['bzip2_ldflags'] = external_command(['pkg-config', '--libs', 'bzip2'])
     else:
-        template_vars['zlib_cxxflags'] = external_command(['pkg-config', '--cflags', 'zlib'])
+        template_vars['bzip2_ldflags'] = ''
 
+
+def set_zlib_variables(options, template_vars, cc):
     if options.build_cli or options.test:
         if options.zlib_lib_dir:
             zlib_name = 'z'
@@ -1857,10 +1863,11 @@ def process_command_line(args):
             help='botan include directory (default: use pkg-config)')
     build_group.add_option('--botan-lib-dir', metavar='DIR', dest='botan_lib_dir', default='',
             help='botan library directory (default: use pkg-config)')
-    build_group.add_option('--zlib-include-dir', metavar='DIR', dest='zlib_include_dir', default='',
-            help='zlib include directory (default: use pkg-config)')
     build_group.add_option('--zlib-lib-dir', metavar='DIR', dest='zlib_lib_dir', default='',
             help='zlib library directory (default: use pkg-config)')
+
+    build_group.add_option('--bzip2-lib-dir', metavar='DIR', dest='bzip2_lib_dir', default='',
+            help='bzip2 library directory (default: use pkg-config)')
 
     build_group.add_option('--static-linking', action='store_true', dest='static_linking', default=False,
                            help='static linking')
@@ -1968,6 +1975,7 @@ def configure_encryptmsg(system_command, options):
 
     set_botan_variables(options, template_vars, cc)
     set_zlib_variables(options, template_vars, cc)
+    set_bzip2_variables(options, template_vars, cc)
     do_io_for_build(cc, arch, osinfo, info_modules.values(), build_paths, source_paths, template_vars, options)
 
 def main(argv):
