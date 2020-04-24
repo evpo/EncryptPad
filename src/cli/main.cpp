@@ -197,6 +197,10 @@ namespace
         {
             return Compression::ZLIB;
         }
+        else if(str == "BZIP2")
+        {
+            return Compression::BZip2;
+        }
         else if(str == "NONE")
         {
             return Compression::Uncompressed;
