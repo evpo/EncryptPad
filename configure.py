@@ -1646,6 +1646,17 @@ def configure_botan(options):
             '--with-bzip2',
             '--enable-modules', 'aes,pbkdf2,auto_rng,compression'])
 
+    extra_flags = ""
+    if options.build_zlib:
+        extra_flags += ' ' if extra_flags else ''
+        extra_flags += '-I ' + get_zlib_dir()
+    if options.build_bzip2:
+        extra_flags += ' ' if extra_flags else ''
+        extra_flags += '-I ' + get_bzip2_dir()
+
+    if extra_flags:
+        cmd.extend(['--extra-cxxflags', extra_flags])
+
     logging.info('Executing: %s', ' '.join(cmd))
 
     try:
