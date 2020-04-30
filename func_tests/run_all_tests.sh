@@ -53,7 +53,7 @@ $S ./compat_test.sh $BIN
 
 # corrupt input tests
 echo "Corrupt input tests"
-$S ./corrupt_test.sh $BIN
+$S ./corrupt_input_test.sh $BIN
 
 # diffrent key file and passphrase combinations
 $S ./epd_encryption_test.sh $BIN "$PLAIN_TEXT_FILE"
