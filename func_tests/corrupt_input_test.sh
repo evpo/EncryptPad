@@ -21,6 +21,8 @@ TEST_FILE=plain_text.txt
 
 mkdir -p $TMP_DIR
 
+echo "non zero exit codes are expected:"
+
 result_1=0
 cat $PASSPHRASE_FILE | $CMD -d --pwd-file $PASSPHRASE_FILE --key-pwd-fd 0 -o $TMP_DIR/out_file_1.txt $ENC_DIR/bad_mdc_hash.gpg || result_1=$?
 

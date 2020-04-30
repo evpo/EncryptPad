@@ -299,6 +299,11 @@ namespace EncryptMsg
         assert(!packet_pair.second);
 
         state.emsg_result = packet_pair.first->Finish();
+        if(state.emsg_result != EmsgResult::Success)
+        {
+            context.SetFailed(true);
+            return;
+        }
         *state.packet_chain_it = PacketType::Unknown;
         state.packet_chain_it ++;
     }
