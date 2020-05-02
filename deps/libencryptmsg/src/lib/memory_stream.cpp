@@ -88,7 +88,7 @@ namespace EncryptMsg
     SafeVector::const_iterator InBufferStream::ReadLength(SafeVector::const_iterator it, SafeVector::const_iterator end)
     {
         size_t range_distance = static_cast<size_t>(std::distance(it, end));
-        size_t bytes2take = std::max(range_distance, static_cast<size_t>(5U));
+        size_t bytes2take = std::min(range_distance, static_cast<size_t>(5U));
 
         SafeVector buf(it, it + bytes2take);
         InBufferStream stm;
