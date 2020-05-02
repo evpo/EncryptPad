@@ -13,6 +13,7 @@ namespace EncryptMsg
     {
         using SafeVector = Botan::secure_vector<uint8_t>;
         const uint8_t kLen16 = 0xE4;
+        const uint8_t kPlainLen3 = 0x03;
 
         class InputMemoryStreamFixture : public ::testing::Test
         {
@@ -63,7 +64,34 @@ namespace EncryptMsg
             ASSERT_TRUE(std::all_of(out_buf_2.begin(), out_buf_2.end(), [](uint8_t e){ return e == 0x02; }));
         }
 
-        TEST_F(InputMemoryStreamFixture, When_reading_buffer_Then_stream_just_works)
+        TEST_F(InputMemoryStreamFixture, Bug_fix_When_reading_partial_portion_followed_by_portion_less_than_4_Then_stream_contains_correct_bytes)
+        {
+            // Arrange
+            SafeVector buf;
+            buf.push_back(kLen16); // 16 bytes
+            buf.insert(buf.end(), 16, 0x01);
+            buf.push_back(kPlainLen3);
+            buf.insert(buf.end(), 3, 0x02);
+
+            // Act
+
+            InBufferStream stm;
+            stm.SetPartialLength(true);
+            stm.Push(buf);
+            size_t count = stm.GetCount();
+            buf.clear();
+            buf.resize(stm.GetCount());
+            stm.Read(buf.data(), buf.size());
+
+            // Assert
+
+            ASSERT_FALSE(stm.GetPartialLength());
+            ASSERT_EQ(19U, count);
+            ASSERT_TRUE(std::all_of(buf.begin(), buf.begin() + 16, [](int e){ return e == 0x01; }));
+            ASSERT_TRUE(std::all_of(buf.begin() + 24, buf.end(), [](int e){ return e == 0x02; }));
+        }
+
+        TEST_F(InputMemoryStreamFixture, When_reading_with_partial_length_Then_stream_contains_correct_bytes)
         {
             // Arrange
             SafeVector buf;
@@ -93,7 +121,7 @@ namespace EncryptMsg
             ASSERT_TRUE(std::all_of(buf.begin() + 24, buf.end(), [](int e){ return e == 0x02; }));
         }
 
-        TEST_F(InputMemoryStreamFixture, When_reading_without_partial_length_Then_it_just_works)
+        TEST_F(InputMemoryStreamFixture, When_reading_without_partial_length_Then_stream_contains_correct_bytes)
         {
             // Arrange
             SafeVector buf;

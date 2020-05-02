@@ -5,6 +5,7 @@
 //LibEncryptMsg is released under the Simplified BSD License (see license.txt)
 //**********************************************************************************
 #include "packet_parsers.h"
+#include "plog/Log.h"
 
 namespace EncryptMsg
 {
@@ -12,6 +13,9 @@ namespace EncryptMsg
     {
         is_partial_length = false;
         size_t ret_val = -1;
+
+        // for logging
+        auto count_before = stm.GetCount();
 
         unsigned char c = stm.Get();
 
@@ -43,7 +47,26 @@ namespace EncryptMsg
             // This is used for packets split in multiple packets. 
             // After this packet there will be another with its own length header.
         }
+        LOG_DEBUG << "length consumed: " << (count_before - stm.GetCount());
+        LOG_DEBUG << "length: " << ret_val;
+        LOG_DEBUG << "partial length: " << (is_partial_length ? "yes" : "no");
         return ret_val;
+    }
+
+    OneOctetLengthResult TryOneOctetLength(unsigned char octet)
+    {
+        OneOctetLengthResult ret_val;
+        ret_val.is_one_octet_length = false;
+        if(octet >= 192)
+        {
+            return ret_val;
+        }
+        else
+        {
+            ret_val.is_one_octet_length = true;
+            ret_val.length = octet;
+            return ret_val;
+        }
     }
 
     PacketHeader ReadPacketHeader(InBufferStream &stm)

@@ -46,4 +46,12 @@ namespace EncryptMsg
     };
 
     const PacketSpec &GetPacketSpec(PacketType packet_type);
+
+    struct OneOctetLengthResult
+    {
+        bool is_one_octet_length = false;
+        size_t length = 0;
+    };
+
+    OneOctetLengthResult TryOneOctetLength(unsigned char octet);
 }

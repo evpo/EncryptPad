@@ -35,6 +35,14 @@ namespace
 
         return EmsgResult::Success;
     }
+
+    void LogHeader(PacketHeader &header)
+    {
+        LOG_INFO << "Found packet header: " << GetPacketSpec(header.packet_type).packet_name;
+        LOG_INFO << "partial: " << (header.is_partial_length ? "yes" : "no");
+        LOG_INFO << "new format: " << (header.is_new_format ? "yes" : "no");
+        LOG_INFO << "body length: " << header.body_length;
+    }
 }
 
 namespace EncryptMsg
@@ -112,6 +120,7 @@ namespace EncryptMsg
         if(in_stm_.GetCount() < kHeaderMaxSize && !finish_packets)
             return EmsgResult::Pending;
         packet_header_ = ReadPacketHeader(in_stm_);
+        LogHeader(packet_header_);
         if(GetPacketSpec(packet_header_.packet_type).packet_type == PacketType::Unknown)
             return EmsgResult::UnsupportedPacketType;
 
@@ -323,6 +332,7 @@ namespace EncryptMsg
         Botan::secure_vector<uint8_t> buf(bytes2update);
         in_.Read(buf.data(), buf.size());
 
+        LOG_DEBUG << "Cipher processing bytes: " << bytes2update;
         if(state_.finish_packets)
         {
             cipher_mode_->finish(buf);
@@ -331,6 +341,7 @@ namespace EncryptMsg
         {
             cipher_mode_->update(buf);
         }
+        LOG_DEBUG << "Cipher returned bytes: " << buf.size();
 
         if(buf.size() == 0)
             return EmsgResult::Pending;
@@ -359,6 +370,7 @@ namespace EncryptMsg
             {
                 // previous left bytes
                 hash_->update(mdc_.data(), kMDCLength);
+                LOG_DEBUG << "writing bytes to out: " << kMDCLength;
                 out.Write(mdc_.data(), kMDCLength);
             }
             else
@@ -367,6 +379,7 @@ namespace EncryptMsg
             }
 
             hash_->update(buf.data(), buf.size() - kMDCLength);
+            LOG_DEBUG << "writing bytes to out: " << buf.size() - kMDCLength;
             out.Write(buf.data(), buf.size() - kMDCLength);
 
             // new left bytes
@@ -377,6 +390,7 @@ namespace EncryptMsg
         {
             assert(state_.finish_packets);
             hash_->update(mdc_.data(), buf.size());
+            LOG_DEBUG << "writing bytes to out: " << buf.size();
             out.Write(mdc_.data(), buf.size());
 
             // this is a move to the left. Hopefully it handles overlapping ranges.

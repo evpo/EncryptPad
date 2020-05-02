@@ -12,6 +12,7 @@
 #include "emsg_symmetric_key.h"
 #include "state_id.h"
 #include "context.h"
+#include "plog/Log.h"
 
 using namespace std;
 using namespace LightStateMachine;
@@ -209,6 +210,7 @@ namespace EncryptMsg
 
     void MessageReaderImpl::Update(SafeVector &buf)
     {
+        LOG_DEBUG << "Update called";
         if(buf.empty())
             return;
         session_state_.buffer_stack.push(buf);
@@ -233,7 +235,9 @@ namespace EncryptMsg
 
     void MessageReaderImpl::Finish(SafeVector &buf)
     {
+        LOG_DEBUG << "Finish called";
         Update(buf);
+        LOG_DEBUG << "finish_packets set";
         session_state_.finish_packets = true;
         state_machine_.Reset();
         while(state_machine_.NextState())

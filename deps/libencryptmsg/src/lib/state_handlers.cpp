@@ -231,6 +231,7 @@ namespace EncryptMsg
         // it can be empty when finishing
         if(!buffer_stack.empty())
         {
+            LOG_DEBUG << "Push bytes to packet: " << buffer_stack.top().size();
             packet.GetInStream().Push(buffer_stack.top());
             buffer_stack.pop();
         }
@@ -242,11 +243,13 @@ namespace EncryptMsg
                 *state.packet_chain_it = PacketType::Unknown;
                 if(packet.GetInStream().GetCount() > 0)
                 {
+                    LOG_DEBUG << "Unused bytes returned: " << packet.GetInStream().GetCount();
                     buffer_stack.emplace();
                     AppendToBuffer(packet.GetInStream(), buffer_stack.top());
                 }
                 break;
             case EmsgResult::Pending:
+                LOG_DEBUG << "Return Pending";
                 break;
             default:
                 context.SetFailed(true);
@@ -298,6 +301,7 @@ namespace EncryptMsg
         assert(packet_pair.first);
         assert(!packet_pair.second);
 
+        LOG_DEBUG << "Finish packet: " << GetPacketSpec(*state.packet_chain_it).packet_name;
         state.emsg_result = packet_pair.first->Finish();
         if(state.emsg_result != EmsgResult::Success)
         {
