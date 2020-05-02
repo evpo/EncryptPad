@@ -88,7 +88,7 @@ namespace EncryptMsg
             ASSERT_FALSE(stm.GetPartialLength());
             ASSERT_EQ(19U, count);
             ASSERT_TRUE(std::all_of(buf.begin(), buf.begin() + 16, [](int e){ return e == 0x01; }));
-            ASSERT_TRUE(std::all_of(buf.begin() + 24, buf.end(), [](int e){ return e == 0x02; }));
+            ASSERT_TRUE(std::all_of(buf.begin() + 16, buf.end(), [](int e){ return e == 0x02; }));
         }
 
         TEST_F(InputMemoryStreamFixture, When_reading_with_partial_length_Then_stream_contains_correct_bytes)
