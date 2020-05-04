@@ -22,6 +22,7 @@ install:
   - set PATH=%QTTOOLS%\bin;%QTDIR%\bin;%PATH%;C:\MinGW\bin
   - set BOTAN=c:\Users\appveyor\botan
   - set ZLIB=c:\Users\appveyor\zlib-1.2.11
+  - set BZIP2=c:\Users\appveyor\bzip2-1.0.8
 
 build_script:
   - echo %PATH%
@@ -29,12 +30,17 @@ build_script:
   - 7z x zlib-1.2.11.tar.gz > NUL
   - 7z x zlib-1.2.11.tar > NUL
   - bash -c "mv zlib-1.2.11 /c/Users/appveyor/"
+  - appveyor DownloadFile https://www.sourceware.org/pub/bzip2/bzip2-latest.tar.gz -FileName bzip2-latest.tar.gz
+  - 7z x bzip2-latest.tar.gz > NUL
+  - 7z x bzip2-1.0.8.tar > NUL
+  - bash -c "mv bzip2-1.0.8 /c/Users/appveyor/"
   - mingw32-make -C c:\Users\appveyor\zlib-1.2.11 -f win32/Makefile.gcc
+  - mingw32-make -C %BZIP2% libbz2.a
   - bash .\ci\prepare.sh appveyor
   - which g++
   - g++ --version
   - uname
   - mingw32-make -j2 -C c:\Users\appveyor\botan libs
-  - python configure.py --debug-mode --test --build-cli --botan-include-dir %BOTAN%\build\include --botan-lib-dir %BOTAN% --zlib-include-dir %ZLIB% --zlib-lib-dir %ZLIB%
+  - python configure.py --debug-mode --test --build-cli --botan-include-dir %BOTAN%\build\include --botan-lib-dir %BOTAN% --zlib-lib-dir %ZLIB% --bzip2-lib-dir %BZIP2%
   - mingw32-make -j2
   - bash -c "cd bin/debug && ./encryptmsg-test"
