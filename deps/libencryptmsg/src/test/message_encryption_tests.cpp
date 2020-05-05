@@ -43,13 +43,13 @@ namespace EncryptMsg
         };
 
         Config MessageEncryptionFixture::ParameterCombination[] = {
-            {buffer: 8, cipher: CipherAlgo::Twofish, hash: HashAlgo::SHA512},
-            {buffer: 24, cipher: CipherAlgo::Twofish, hash: HashAlgo::SHA224},
-            {buffer: 128, cipher: CipherAlgo::AES256, hash: HashAlgo::SHA160},
-            {buffer: 512, cipher: CipherAlgo::AES128, hash: HashAlgo::SHA384},
-            {buffer: 1024, cipher: CipherAlgo::AES128, hash: HashAlgo::SHA224},
-            {buffer: 1024, cipher: CipherAlgo::CAST5, hash: HashAlgo::SHA160},
-            {buffer: 1024, cipher: CipherAlgo::TripleDES, hash: HashAlgo::SHA160},
+            {.buffer = 8, .cipher = CipherAlgo::Twofish, .hash = HashAlgo::SHA512},
+            {.buffer = 24, .cipher = CipherAlgo::Twofish, .hash = HashAlgo::SHA224},
+            {.buffer = 128, .cipher = CipherAlgo::AES256, .hash = HashAlgo::SHA160},
+            {.buffer = 512, .cipher = CipherAlgo::AES128, .hash = HashAlgo::SHA384},
+            {.buffer = 1024, .cipher = CipherAlgo::AES128, .hash = HashAlgo::SHA224},
+            {.buffer = 1024, .cipher = CipherAlgo::CAST5, .hash = HashAlgo::SHA160},
+            {.buffer = 1024, .cipher = CipherAlgo::TripleDES, .hash = HashAlgo::SHA160},
         };
 
         INSTANTIATE_TEST_CASE_P(Common, MessageEncryptionFixture,

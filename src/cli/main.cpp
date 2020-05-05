@@ -391,7 +391,7 @@ int main(int argc, char *argv[])
             ""
         },
 
-        END_CLI_DEFINITIONS,
+        {nullptr,stlplus::cli_switch_kind,stlplus::cli_single_mode,"",nullptr},
     };
 
     message_handler messages(std::cerr);

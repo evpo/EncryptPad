@@ -12,6 +12,8 @@ using namespace stlplus;
 using namespace EncryptMsg::Cli;
 using namespace EncryptMsg;
 
+void PrintUsage();
+
 void PrintUsage()
 {
     const char *usage =
@@ -31,71 +33,71 @@ enum class Action
 
 int main(int, char *argv[])
 {
-    cli_definitions_t cli_defs = {
+    cli_definitions cli_defs = {
         {
             "help",
             cli_kind_t::cli_switch_kind,
             cli_mode_t::cli_single_mode,
             "help",
-            ""
         },
         {
             "log",
             cli_kind_t::cli_value_kind,
             cli_mode_t::cli_single_mode,
             "log",
-            ""
         },
         {
             "e",
             cli_kind_t::cli_switch_kind,
             cli_mode_t::cli_single_mode,
-            "encrypt",
-            ""
+            "e",
         },
         {
             "d",
             cli_kind_t::cli_switch_kind,
             cli_mode_t::cli_single_mode,
-            "decrypt",
-            ""
+            "d",
         },
         {
             "pwd-file",
             cli_kind_t::cli_value_kind,
             cli_mode_t::cli_single_mode,
             "pwd-file",
-            ""
         },
         {
             "armor",
             cli_kind_t::cli_switch_kind,
             cli_mode_t::cli_single_mode,
             "armor",
-            ""
         },
         {
             "o",
             cli_kind_t::cli_value_kind,
             cli_mode_t::cli_single_mode,
-            "output",
-            ""
+            "o",
         },
         {
             "",
             cli_kind_t::cli_value_kind,
             cli_mode_t::cli_single_mode,
-            "file-name",
-            ""
+            "input-file",
         },
-        END_CLI_DEFINITIONS,
     };
 
     message_handler messages(std::cerr);
-    cli_parser parser(&cli_defs[0], messages);
+    messages.add_message("help", "--help print this help");
+    messages.add_message("log", "--log log file");
+    messages.add_message("e", "-e encrypt file");
+    messages.add_message("d", "-d decrypt file");
+    messages.add_message("pwd-file", "--pwd-file passphrase file");
+    messages.add_message("armor", "--armor enable ascii armor");
+    messages.add_message("o", "-o output file");
+    messages.add_message("input-file", "<position argument> input file");
+
+    cli_parser parser(cli_defs, messages);
     if(!parser.parse(argv))
     {
-        PrintUsage();
+        parser.usage();
         exit(1);
     }
 
@@ -110,7 +112,7 @@ int main(int, char *argv[])
     {
         if(parser.name(i) == "help")
         {
-            PrintUsage();
+            parser.usage();
             exit(0);
         }
         else if(parser.name(i) == "log")
@@ -154,7 +156,7 @@ int main(int, char *argv[])
     LOG_DEBUG << file_name << " " << output << " " << pwd_file;
     if(file_name.empty() || output.empty() || pwd_file.empty())
     {
-        PrintUsage();
+        parser.usage();
         return -1;
     }
 
