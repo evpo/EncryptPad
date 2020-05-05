@@ -66,10 +66,11 @@ EncryptPad is an application for viewing and editing symmetrically encrypted tex
 * File format compatible with **OpenPGP**
 * **Iterated and salted S2K**
 * **Passphrases are not kept in the memory** for reuse, only S2K results ([more ...](#passphrases-in-memory))
-* Cipher algorithms: **CAST5, TripleDES, AES128, AES256**
-* Hash algorithms: **SHA-1, SHA-256, SHA-512**
+* Cipher algorithms: **TripleDES, CAST5, AES, AES192, AES256, Camellia128, Camellia192, Camellia256, Twofish**
+* Hash algorithms: **SHA-1, SHA-256, SHA-384, SHA-512, SHA-224**
 * Integrity protection: **SHA-1**
-* Compression: **ZLIB, ZIP**
+* Compression: **ZLIB, ZIP, Bzip2**
+* **ASCII armor**
 * **Large multi-gigabyte files** are supported
 
 <div id="supported-platforms"></div>
