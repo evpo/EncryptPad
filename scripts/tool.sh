@@ -12,6 +12,7 @@ COMMANDS:\n\
 --appimage           build AppImage (requires AppImageKit and binaries)\n\
 --docs               build docs directory from markdown files (requres the markdown utility)\n\
 --update-htm         update htm files (README.htm and CHANGES.htm)\n\
+--import-emsg <DIR>  import latest libencryptmsg code from DIR\n\
 -h, --help           help\n\n\
 OPTIONS:\n\
 --debug              debug configuration. If not specified, the release configuration is used. The unit tests\n\
@@ -34,22 +35,16 @@ fi
 
 UNAME=`uname -o 2>/dev/null || uname`
 
-CONFIG_DIR=release
-QT_BIN_SUB=release
 
-while [[ $# > 0 ]]
-do
-    case $1 in
-        -d|--debug)
-            QT_BIN_SUB=debug
-            CONFIG_DIR=debug
-            ;;
-        *)
-            COMMAND=$1
-            ;;
-    esac
-    shift
-done
+COMMAND=$1
+shift
+
+CONFIG_DIR=release
+case $1 in
+    -d|--debug)
+        CONFIG_DIR=debug
+        ;;
+esac
 
 case $COMMAND in
 --culture-res)
@@ -106,6 +101,15 @@ case $COMMAND in
     rm /tmp/tmp_cut_readme.md
     cp $pkg_root/CHANGES.md $pkg_root/docs/en/changes.md
     markdown $pkg_root/CHANGES.md > $pkg_root/CHANGES.htm
+    ;;
+--import-emsg)
+    import_repo="$1"
+    rm -rf deps/libencryptmsg
+    mkdir deps/libencryptmsg
+    git --work-tree=deps/libencryptmsg/ --git-dir=${import_repo}/.git checkout -f
+    rm -r deps/libencryptmsg/deps
+    result=$?
+    exit $result
     ;;
 -h|--help)
     echo -e "$USAGE"
