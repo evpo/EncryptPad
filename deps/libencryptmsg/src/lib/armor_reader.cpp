@@ -400,7 +400,13 @@ namespace EncryptMsg
     {
         LineResult result;
         PushBackToBuffer(in_stm_, buffer_);
-        auto it = std::find(buffer_.begin(), buffer_.end(), '\n');
+        auto it = std::find_if(buffer_.begin(), buffer_.end(),
+               [](const uint8_t &b){return b == '\r' || b == '\n';});
+
+        auto line_range_end = it;
+        if(it != buffer_.end() && *it == '\r')
+            it++;
+
         if(it == buffer_.end())
         {
             if(buffer_.size() > kMaxLineLength)
@@ -409,7 +415,8 @@ namespace EncryptMsg
         }
 
         result.success = true;
-        result.line.assign(buffer_.begin(), it);
+
+        result.line.assign(buffer_.begin(), line_range_end);
         it ++;
         buffer_.erase(buffer_.begin(), it);
         return result;

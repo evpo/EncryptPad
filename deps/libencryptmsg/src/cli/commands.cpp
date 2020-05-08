@@ -94,7 +94,7 @@ namespace EncryptMsg
             if(!out_file)
                 return;
 
-            const size_t kBufSize = 16813023;
+            const size_t kBufSize = 16;
             SafeVector buf(kBufSize);
             while(in_file && !in_file.eof())
             {
@@ -125,7 +125,7 @@ namespace EncryptMsg
             if(!out_file)
                 return;
 
-            const size_t kBufSize = 16813023;
+            const size_t kBufSize = 16;
             SafeVector buf(kBufSize);
             while(in_file && !in_file.eof())
             {

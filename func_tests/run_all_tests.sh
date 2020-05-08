@@ -47,6 +47,11 @@ then
     dd if=/dev/urandom of=$PLAIN_TEXT_FILE bs=1048576 count=15
 fi
 
+# crlf end of line
+
+echo "CRLF EOL"
+$S ./crlf_end_of_line.sh $BIN
+
 # backward compatibility tests
 echo "Backward compatibility tests"
 $S ./compat_test.sh $BIN
