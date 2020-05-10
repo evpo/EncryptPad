@@ -12,24 +12,20 @@ using namespace stlplus;
 using namespace EncryptMsg::Cli;
 using namespace EncryptMsg;
 
-void PrintUsage();
-
-void PrintUsage()
-{
-    const char *usage =
-        VER_PRODUCTNAME_STR " " VER_PRODUCTVERSION_STR "\n"
-        "\n"
-        "Usage: encryptmsg --help | -e|-d --armor --pwd-file <pwd-file> -o <output-file> <file-name>\n";
-
-    std::cout << usage << std::endl;
-}
-
 enum class Action
 {
     None,
     Encrypt,
     Decrypt
 };
+
+void PrintUsage(const cli_parser& parser);
+
+void PrintUsage(const cli_parser& parser)
+{
+    std::cout << VER_PRODUCTNAME_STR << " " << VER_PRODUCTVERSION_STR << "\n";
+    parser.usage();
+}
 
 int main(int, char *argv[])
 {
@@ -85,19 +81,19 @@ int main(int, char *argv[])
     };
 
     message_handler messages(std::cerr);
-    messages.add_message("help", "--help print this help");
-    messages.add_message("log", "--log log file");
-    messages.add_message("e", "-e encrypt file");
-    messages.add_message("d", "-d decrypt file");
-    messages.add_message("pwd-file", "--pwd-file passphrase file");
-    messages.add_message("armor", "--armor enable ascii armor");
-    messages.add_message("o", "-o output file");
-    messages.add_message("input-file", "<position argument> input file");
+    messages.add_message("help", "\t--help\t\tprint this help");
+    messages.add_message("log", "\t--log\t\tlog file");
+    messages.add_message("e", "\t-e\t\tencrypt file");
+    messages.add_message("d", "\t-d\t\tdecrypt file");
+    messages.add_message("pwd-file", "\t--pwd-file\tpassphrase file");
+    messages.add_message("armor", "\t--armor\t\tenable ascii armor");
+    messages.add_message("o", "\t-o\t\toutput file");
+    messages.add_message("input-file", "\t<position argument>\tinput file");
 
     cli_parser parser(cli_defs, messages);
     if(!parser.parse(argv))
     {
-        parser.usage();
+        PrintUsage(parser);
         exit(1);
     }
 
@@ -112,7 +108,7 @@ int main(int, char *argv[])
     {
         if(parser.name(i) == "help")
         {
-            parser.usage();
+            PrintUsage(parser);
             exit(0);
         }
         else if(parser.name(i) == "log")
@@ -156,7 +152,7 @@ int main(int, char *argv[])
     LOG_DEBUG << file_name << " " << output << " " << pwd_file;
     if(file_name.empty() || output.empty() || pwd_file.empty())
     {
-        parser.usage();
+        PrintUsage(parser);
         return -1;
     }
 

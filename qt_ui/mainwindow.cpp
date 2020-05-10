@@ -45,6 +45,7 @@
 #include "common_definitions.h"
 #include "encryptmsg/openpgp_conversions.h"
 #include "repository.h"
+#include "encryptmsg_version.h"
 
 typedef unsigned char byte;
 
@@ -653,16 +654,39 @@ void MainWindow::createNewKey()
 
 void MainWindow::about()
 {
-   QMessageBox::about(this, tr("About EncryptPad"),
-            tr("<b>EncryptPad %1 Beta</b><br/><br/>"
-               "A minimalist secure text editor and file encryptor that implements "
-               "RFC 4880 Open PGP format: "
-               "symmetrically encrypted, compressed and integrity protected. "
-               "The editor can protect files with passphrases, key files or both.<br/><br/>"
-               "%2<br/>"
-               "GNU General Public License v2<br/><br/>"
-               ).arg(VER_PRODUCTVERSION_STR).arg(VER_LEGALCOPYRIGHT_STR) +
-               QString("<a href=\"https://www.evpo.net/encryptpad\">https://www.evpo.net/encryptpad</a>"));
+    QString encryptPadText = tr("<b>EncryptPad %1 Beta</b><br/><br/>"
+                "A minimalist secure text editor and file encryptor that implements "
+                "RFC 4880 Open PGP format: "
+                "symmetrically encrypted, compressed and integrity protected. "
+                "The editor can protect files with passphrases, key files or both.<br/><br/>"
+                "%2<br/>"
+                "GNU General Public License v2<br/><br/>"
+              ).arg(VER_PRODUCTVERSION_STR).arg(VER_LEGALCOPYRIGHT_STR) +
+            QString("<a href=\"https://www.evpo.net/encryptpad\">https://www.evpo.net/encryptpad</a>");
+
+    QString libEncryptMsgText = tr(
+                "<b>%1</b>"
+                "<br/>"
+                "<br/>"
+                "OpenPGP implementation."
+                "<br/>"
+                "<br/>"
+                "%2"
+                "<br/>"
+                "Simplified BSD License"
+                "<br/>"
+                "<br/>"
+              )
+        .arg(EncryptPad::EncryptMsgVersion().c_str())
+        .arg(EncryptPad::EncryptMsgCopyright().c_str()) +
+            QString("<a href=\"https://www.evpo.net/libencryptmsg\">https://www.evpo.net/libencryptmsg</a>");
+
+    QMessageBox::about(this, tr("About EncryptPad"),
+           encryptPadText +
+           "<br>" +
+           "<hr>" +
+           "<br>" +
+           libEncryptMsgText);
 }
 
 void MainWindow::documentWasModified()

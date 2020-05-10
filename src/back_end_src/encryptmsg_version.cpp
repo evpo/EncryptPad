@@ -9,5 +9,10 @@ namespace EncryptPad
     {
         return VER_PRODUCTNAME_STR " " VER_PRODUCTVERSION_STR;
     }
+
+    std::string EncryptMsgCopyright()
+    {
+        return VER_LEGALCOPYRIGHT_STR;
+    }
 }
 
