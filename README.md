@@ -34,6 +34,7 @@ EncryptPad is an application for viewing and editing symmetrically encrypted tex
   - [Steps](#steps)
 * [Compile EncryptPad on Mac/Linux](#compile-on-mac-linux)
     - [Fedora](#build-on-fedora)
+    - [Ubuntu](#build-on-ubuntu)
     - [Debian](#build-on-debian)
     - [openSUSE](#build-on-opensuse)
     - [FreeBSD](#build-on-freebsd)
@@ -398,6 +399,19 @@ For a dynamic build with using the system libraries:
 
     dnf install botan-devel
     ./configure.py
+    make
+
+<div id="build-on-ubuntu"></div>
+
+### Ubuntu
+
+Install dependencies and tools:
+
+    apt-get install qtbase5-dev qt5-default gcc g++ make python pkg-config zlib1g-dev libbotan-2-dev
+
+Open the EncryptPad source directory:
+
+    ./configure.py --build-bzip2
     make
 
 <div id="build-on-debian"></div>

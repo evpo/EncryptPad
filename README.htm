@@ -33,6 +33,7 @@
 <li><a href="#compile-on-mac-linux">Compile EncryptPad on Mac/Linux</a>
 <ul>
 <li><a href="#build-on-fedora">Fedora</a></li>
+<li><a href="#build-on-ubuntu">Ubuntu</a></li>
 <li><a href="#build-on-debian">Debian</a></li>
 <li><a href="#build-on-opensuse">openSUSE</a></li>
 <li><a href="#build-on-freebsd">FreeBSD</a></li>
@@ -425,6 +426,21 @@ make
 
 <pre><code>dnf install botan-devel
 ./configure.py
+make
+</code></pre>
+
+<div id="build-on-ubuntu"></div>
+
+<h3>Ubuntu</h3>
+
+<p>Install dependencies and tools:</p>
+
+<pre><code>apt-get install qtbase5-dev qt5-default gcc g++ make python pkg-config zlib1g-dev libbotan-2-dev
+</code></pre>
+
+<p>Open the EncryptPad source directory:</p>
+
+<pre><code>./configure.py --build-bzip2
 make
 </code></pre>
 
