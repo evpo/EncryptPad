@@ -25,6 +25,7 @@ EncryptPad это приложение для просмотра и редакт
   - [Steps](#steps)
 * [Compile EncryptPad on Mac/Linux](#compile-on-mac-linux)
     - [Fedora](#build-on-fedora)
+    - [Ubuntu](#build-on-ubuntu)
     - [Debian](#build-on-debian)
     - [openSUSE](#build-on-opensuse)
     - [FreeBSD](#build-on-freebsd)
@@ -57,10 +58,11 @@ EncryptPad это приложение для просмотра и редакт
 * File format compatible with **OpenPGP**
 * **Iterated and salted S2K**
 * **Passphrases are not kept in the memory** for reuse, only S2K results ([more ...](#passphrases-in-memory))
-* Cipher algorithms: **CAST5, TripleDES, AES128, AES256**
-* Hash algorithms: **SHA-1, SHA-256, SHA-512**
+* Cipher algorithms: **TripleDES, CAST5, AES, AES192, AES256, Camellia128, Camellia192, Camellia256, Twofish**
+* Hash algorithms: **SHA-1, SHA-256, SHA-384, SHA-512, SHA-224**
 * Integrity protection: **SHA-1**
-* Compression: **ZLIB, ZIP**
+* Compression: **ZLIB, ZIP, Bzip2**
+* **ASCII armor**
 * **Large multi-gigabyte files** are supported
 
 <div id="supported-platforms"></div>
@@ -388,6 +390,19 @@ For a dynamic build with using the system libraries:
 
     dnf install botan-devel
     ./configure.py
+    make
+
+<div id="build-on-ubuntu"></div>
+
+### Ubuntu
+
+Install dependencies and tools:
+
+    apt-get install qtbase5-dev qt5-default gcc g++ make python pkg-config zlib1g-dev libbotan-2-dev
+
+Open the EncryptPad source directory:
+
+    ./configure.py --build-bzip2
     make
 
 <div id="build-on-debian"></div>
