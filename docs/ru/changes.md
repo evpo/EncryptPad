@@ -6,6 +6,19 @@ h2
 </style>
 ## Release Notes ##
 
+### Version 0.5.0.0
+
+* ASCII armor
+* Added cipher algorithms: CAMELLIA128, CAMELLIA192, CAMELLIA256, TWOFISH
+* Added S2K digest algorithms: SHA384, SHA512, SHA224
+* Added compression algorithm: BZIP2
+* Botan has been updated to version 2.13
+* Translation fixes for context menu
+* New Python build system ported from Botan
+* Bug fix: MDC failure was not reported when opening files
+* Bug fix: the special case in which the last partial packet was smaller than 5 bytes was not handled correctly
+* Bug fix: --key-file-length parameter was broken in CLI
+
 ### Version 0.4.0.4
 
 * Portable software should be able to store all its files in a single removable location such as a memory stick. EncryptPad creates its setting file in `$HOME/.encryptpad`. After this change EncryptPad will check if there is `encryptpad_repository` directory in the application path and use it for settings and key files.
