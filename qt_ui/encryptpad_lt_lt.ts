@@ -251,6 +251,11 @@ Ar norite jį pakeisti?</translation>
     <name>FileExtensions</name>
     <message>
         <location filename="file_name_helper.cpp" line="36"/>
+        <source>ASCII-armored GnuPG (*.asc)</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="file_name_helper.cpp" line="37"/>
         <source>Plain Text (*.txt)</source>
         <translation>Grynasis tekstas (*.txt)</translation>
     </message>

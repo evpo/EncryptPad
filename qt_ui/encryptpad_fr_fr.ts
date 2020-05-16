@@ -251,13 +251,18 @@ Souhaitez-vous le remplacer ?</translation>
     <name>FileExtensions</name>
     <message>
         <location filename="file_name_helper.cpp" line="36"/>
+        <source>ASCII-armored GnuPG (*.asc)</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="file_name_helper.cpp" line="37"/>
         <source>Plain Text (*.txt)</source>
-        <translation>Texte brut (*.txt)</translation>
+        <translation>Texte en clair (*.txt)</translation>
     </message>
     <message>
         <location filename="file_name_helper.cpp" line="41"/>
         <source>Encrypted Files (*.epd *.gpg *.asc);; Plain Text (*.txt)</source>
-        <translation>Fichiers chiffrés (*.epd *.gpg *.asc);; Texte brut (*.txt)</translation>
+        <translation>Fichiers chiffrés (*.epd *.gpg *.asc);; Texte en clair (*.txt)</translation>
     </message>
     <message>
         <location filename="file_name_helper.cpp" line="42"/>
@@ -1338,7 +1343,7 @@ Souhaitez-vous le remplacer ?</translation>
     <message>
         <location filename="preferences_dialog.ui" line="66"/>
         <source>Parameters:</source>
-        <translation>Paramètres :</translation>
+        <translation>Paramètres :</translation>
     </message>
     <message>
         <location filename="preferences_dialog.ui" line="51"/>

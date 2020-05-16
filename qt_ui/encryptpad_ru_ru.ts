@@ -250,6 +250,11 @@ Do you want to replace it?</source>
     <name>FileExtensions</name>
     <message>
         <location filename="file_name_helper.cpp" line="36"/>
+        <source>ASCII-armored GnuPG (*.asc)</source>
+        <translation>ASCII-armored GnuPG (*.asc)</translation>
+    </message>
+    <message>
+        <location filename="file_name_helper.cpp" line="37"/>
         <source>Plain Text (*.txt)</source>
         <translation>Открытый Текст (*.txt)</translation>
     </message>

@@ -33,7 +33,7 @@ namespace
     {
         {".epd", "EncryptPad (*.epd)"},
         {".gpg", "GnuPG (*.gpg)"},
-        {".asc", "GnuPG (*.asc)"},
+        {".asc", QT_TRANSLATE_NOOP("FileExtensions", "ASCII-armored GnuPG (*.asc)")},
         {".txt", QT_TRANSLATE_NOOP("FileExtensions", "Plain Text (*.txt)")},
         {nullptr, nullptr}
     };
