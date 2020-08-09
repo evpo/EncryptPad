@@ -58,6 +58,10 @@ void PlainTextEdit::enterEvent(QEvent *event)
 
 bool PlainTextEdit::eventFilter(QObject *, QEvent *event)
 {
+    // I need to give credit to QOwnNotes project for the code below
+    // https://github.com/pbek/QOwnNotes
+
+
     // we need this strange newline character we are getting in the
     // selected text for newlines
     const QString newLine =
