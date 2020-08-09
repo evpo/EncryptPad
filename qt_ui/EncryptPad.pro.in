@@ -90,7 +90,6 @@ SOURCES += \
     plain_text_edit.cpp \
     find_dialog.cpp \
     preferences.cpp \
-    epad_text_edit.cpp
 
 HEADERS += \
     application.h \
@@ -120,7 +119,6 @@ HEADERS += \
     common_definitions.h \
     find_dialog.h \
     preferences.h \
-    epad_text_edit.h
 
 QMAKE_RESOURCE_FLAGS += -no-compress
 RESOURCES += \

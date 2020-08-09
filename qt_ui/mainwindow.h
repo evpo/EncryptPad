@@ -35,7 +35,7 @@
 #include "find_dialog.h"
 #include "find_and_replace.h"
 #include "preferences.h"
-#include "epad_text_edit.h"
+#include "plain_text_edit.h"
 
 QT_BEGIN_NAMESPACE
 class QAction;
@@ -126,7 +126,7 @@ private:
     QLabel *encryptionKeySet;
     QLabel *lineStatus;
     QLabel *charStatus;
-    EpadTextEdit *textEdit;
+    PlainTextEdit *textEdit;
 
     FindDialog *findDialog;
     FindAndReplace *replaceDialog;
