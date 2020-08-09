@@ -110,7 +110,7 @@ MainWindow::MainWindow():
     saveSuccess(false)
 {
     setWindowIcon(QIcon(":/images/application_icon.png"));
-    textEdit = new PlainTextEdit(this);
+    textEdit = new EpadTextEdit(this);
     setCentralWidget(textEdit);
     QPalette palette = textEdit->palette();
     QColor color = palette.color(QPalette::Active, QPalette::Highlight);
@@ -138,6 +138,9 @@ MainWindow::MainWindow():
 
     plain_text_functor_.EncryptedPlainSwitchChange(!enc.GetIsPlainText());
     enc.SetEncryptedPlainSwitchFunctor(&plain_text_functor_);
+
+    textEdit->installEventFilter(this);
+
     setCurrentFile("");
 
     update();
@@ -1149,7 +1152,15 @@ void MainWindow::onUpdatedPreferences()
     enc.SetLibcurlParams(preferences.libCurlParameters.toStdString());
     textEdit->setFont(preferences.font);
     QFontMetrics metrics(textEdit->font());
-    textEdit->setTabStopWidth(preferences.tabSize * metrics.width(' '));
+
+#if QT_VERSION < QT_VERSION_CHECK(5, 11, 0)
+    int width = preferences.tabSize * metrics.width(' ');
+    textEdit->setTabStopWidth(width);
+#else
+    int width = preferences.tabSize * metrics.horizontalAdvance(' ');
+    textEdit->setTabStopDistance(width);
+#endif
+
     recent_files_service_.SetMaxFiles(preferences.recentFiles);
     resetZoom();
 
@@ -1701,4 +1712,64 @@ void MainWindow::openFileEncryption()
     FileEncryptionDialog dlg(this, file_request_service_);
     dlg.SetDefaultFileParameters(preferences.defaultFileProperties);
     dlg.exec();
+}
+
+bool MainWindow::eventFilter(QObject *obj, QEvent *event)
+{
+    return false;
+    // we need this strange newline character we are getting in the
+    // selected text for newlines
+    const QString newLine =
+        QString::fromUtf8(QByteArray::fromHex(QByteArrayLiteral("e280a9")));
+    const QString indentCharacters = "\t";
+
+    if(event->type() == QEvent::KeyPress)
+        return false;
+
+    if(obj != textEdit)
+        return false;
+
+    if(!textEdit->hasFocus())
+        return false;
+
+    auto *keyEvent = static_cast<QKeyEvent *>(event);
+    QTextCursor cursor = textEdit->textCursor();
+    QString selectedText = cursor.selectedText();
+    if(selectedText.isEmpty())
+        return false;
+
+    if (keyEvent->key() == Qt::Key_Tab)
+    {
+        // replace trailing new line to prevent an indent of the line after
+        // the selection
+        // QString newText = selectedText.replace(
+        //     QRegularExpression(QRegularExpression::escape(newLine) +
+        //                        QStringLiteral("$")),
+        //     QStringLiteral("\n"));
+        QString newText = selectedText;
+        auto debugS = selectedText.toStdString();
+
+        // indent text
+        newText.replace(newLine, QStringLiteral("\n") + indentCharacters)
+            .prepend(indentCharacters);
+        debugS = newText.toStdString();
+
+        // remove trailing \t
+        newText.remove(QRegularExpression(QStringLiteral("\\t$")));
+        debugS = newText.toStdString();
+        // insert the new text
+        cursor.insertText(newText);
+        //
+        // update the selection to the new text
+        cursor.setPosition(cursor.position() - newText.size(),
+                           QTextCursor::KeepAnchor);
+        textEdit->setTextCursor(cursor);
+        return true;
+    }
+    else if(keyEvent->key() == Qt::Key_Backtab)
+    {
+
+    }
+
+    return false;
 }
