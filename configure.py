@@ -1572,6 +1572,15 @@ def generate_build_info(build_paths, modules, cc, arch, osinfo, options):
 
     return out
 
+def probe_qmake(options):
+    qmake_found = False
+    if have_program(options.qmake_bin):
+        qmake_found = True
+
+    if not qmake_found and have_program("qmake-qt5"):
+        options.qmake_bin = "qmake-qt5"
+        qmake_found = True
+
 def execute_qmake(options):
     """
     run qmake to generate its Makefile
@@ -1919,6 +1928,24 @@ def process_command_line(args):
 
     return options
 
+def probe_environment(options):
+    if options.build_botan and options.build_zlib and options.build_bzip2:
+        return
+
+    if not have_program('pkg-config'):
+        raise UserError('pkg-config is not found. Enable all --build-... options')
+
+    all_package_names = external_command(['pkg-config', '--list-package-names']).split('\n')
+    if not options.build_botan and "botan-2" not in all_package_names:
+        raise UserError('botan-2 package is not found. Use --build-botan')
+
+    if not options.build_zlib and "zlib" not in all_package_names:
+        raise UserError('bzip2 package is not found. Use --build-zlib')
+
+    if not options.build_bzip2 and "bzip2" not in all_package_names:
+        raise UserError('bzip2 package is not found. Use --build-bzip2')
+
+
 def configure_back_end(system_command, options):
     """
     Build the back_end library and cli
@@ -2005,9 +2032,11 @@ def main(argv):
     options = process_command_line(argv[1:])
     setup_logging(options)
     logging.info('%s invoked with options "%s"', argv[0], ' '.join(argv[1:]))
+    probe_environment(options)
 
     configure_back_end(argv[0], options)
     if not options.without_qt_ui:
+        probe_qmake(options)
         execute_qmake(options)
 
     if options.build_botan:
