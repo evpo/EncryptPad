@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="128" height="128" enable-background="new" version="1.0" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <defs>
+  <clipPath>
+   <rect x="160" y="-188" width="16" height="56" rx="8" ry="8" enable-background="new" fill="none" stroke="#000" style="paint-order:normal"/>
+  </clipPath>
+  <linearGradient id="linearGradient1159" x1="28" x2="116" y1="-276" y2="-276" gradientTransform="translate(-136)" gradientUnits="userSpaceOnUse">
+   <stop stop-color="#c0bfbc" offset="0"/>
+   <stop stop-color="#fff" offset=".045455"/>
+   <stop stop-color="#deddda" offset=".090909"/>
+   <stop stop-color="#deddda" offset=".90909"/>
+   <stop stop-color="#fff" offset=".95455"/>
+   <stop stop-color="#c0bfbc" offset="1"/>
+  </linearGradient>
+ </defs>
+ <g transform="translate(0,-172)">
+  <g display="none">
+   <g display="inline" enable-background="new">
+    <rect x="9.2651e-8" y="172" width="128" height="128" display="inline" enable-background="accumulate" fill="#f0f0f0"/>
+    <g fill="none">
+     <g stroke="#000" stroke-dasharray="0.99000001, 0.99000001" stroke-width=".99">
+      <circle cx="64" cy="236" r="59.504" display="inline" enable-background="new" opacity=".1" style="paint-order:normal"/>
+      <rect x="20.495" y="180.49" width="87.01" height="111.01" rx="8.701" ry="7.9293" display="inline" enable-background="new" opacity=".1" style="paint-order:normal"/>
+      <rect x="12.495" y="184.5" width="103.01" height="103.01" rx="7.9238" ry="7.9238" display="inline" enable-background="new" opacity=".1" style="paint-order:normal"/>
+      <rect x="8.495" y="200.49" width="111.01" height="87.01" rx="7.9293" ry="8.701" display="inline" enable-background="new" opacity=".1" style="paint-order:normal"/>
+     </g>
+     <path d="m2.6203e-5 289h128" display="inline" enable-background="new" stroke="#62a0ea" stroke-width="2"/>
+    </g>
+   </g>
+  </g>
+  <g>
+   <rect transform="scale(-1)" x="-108" y="-294" width="88" height="30.25" rx="8" ry="8" fill="#1a5fb4" style="paint-order:normal"/>
+   <rect transform="scale(-1)" x="-108" y="-292" width="88" height="40" rx="8" ry="8" fill="url(#linearGradient1159)" style="paint-order:normal"/>
+   <rect transform="scale(-1)" x="-108" y="-288" width="88" height="108" rx="8" ry="8" fill="#f6f5f4" stroke="#bbb6aa" stroke-width=".3" style="paint-order:normal"/>
+   <g transform="translate(-4,2)" fill="#ceccc5">
+    <path d="m32 188c-1.1046 0-2 0.89543-2 2s0.89543 2 2 2 2-0.89543 2-2-0.89543-2-2-2zm8 0c-1.1046 0-2 0.89543-2 2s0.89543 2 2 2 2-0.89543 2-2-0.89543-2-2-2zm8 0c-1.1046 0-2 0.89543-2 2s0.89543 2 2 2 2-0.89543 2-2-0.89543-2-2-2zm8 0c-1.1046 0-2 0.89543-2 2s0.89543 2 2 2 2-0.89543 2-2-0.89543-2-2-2zm8 0c-1.1046 0-2 0.89543-2 2s0.89543 2 2 2 2-0.89543 2-2-0.89543-2-2-2zm8 0c-1.1046 0-2 0.89543-2 2s0.89543 2 2 2 2-0.89543 2-2-0.89543-2-2-2zm8 0c-1.1046 0-2 0.89543-2 2s0.89543 2 2 2 2-0.89543 2-2-0.89543-2-2-2zm8 0c-1.1046 0-2 0.89543-2 2s0.89543 2 2 2 2-0.89543 2-2-0.89543-2-2-2zm8 0c-1.1046 0-2 0.89543-2 2s0.89543 2 2 2 2-0.89543 2-2-0.89543-2-2-2z" enable-background="new"/>
+    <circle transform="scale(-1,1)" cx="-104" cy="190" r="2"/>
+    <path d="m112 192a2 2 0 0 1-1.732-1 2 2 0 0 1 0-2 2 2 0 0 1 1.732-1"/>
+    <path transform="scale(-1,1)" d="m-24 192a2 2 0 0 1-1.7321-1 2 2 0 0 1 0-2 2 2 0 0 1 1.7321-1" enable-background="new"/>
+   </g>
+  </g>
+ </g>
+ <g>
+  <g transform="matrix(3.5435 0 0 3.5435 46.835 -3617.4)">
+   <path d="m5 1037.4c-1.1046 0-2 0.9-2 2v8c0 1.1 0.8954 2 2 2h14c1.105 0 2-0.9 2-2v-8c0-1.1-0.895-2-2-2h-2z" fill="#f1c40f"/>
+   <path d="m5 1040.4c-1.1046 0-2 0.9-2 2v8c0 1.1 0.8954 2 2 2h14c1.105 0 2-0.9 2-2v-8c0-1.1-0.895-2-2-2h-2z" fill="#f39c12"/>
+   <path d="m12 1029.4c-3.866 0-7 3.1-7 7h3c0-2.2 1.7909-4 4-4 2.209 0 4 1.8 4 4h3c0-3.9-3.134-7-7-7z" fill="#bdc3c7"/>
+   <path transform="translate(0,1028.4)" d="m5 14v1h14v-1zm0 2v1h14v-1zm0 2v1h14v-1zm0 2v1h14v-1z" fill="#e67e22"/>
+   <path d="m5 1037.4v1c0 0.5 0.6716 1 1.5 1s1.5-0.5 1.5-1v-1c0 0.5-0.6716 1-1.5 1s-1.5-0.5-1.5-1z" fill="#7f8c8d"/>
+   <path d="m16 1037.4v1c0 0.5 0.672 1 1.5 1s1.5-0.5 1.5-1v-1c0 0.5-0.672 1-1.5 1s-1.5-0.5-1.5-1z" fill="#7f8c8d"/>
+   <path transform="translate(0,1028.4)" d="m12 2.4375c-0.351 0-0.699 0.0338-1.031 0.0937-0.247 0.0446-0.487 0.1129-0.719 0.1876-0.217 0.0698-0.4229 0.1561-0.625 0.25-0.106 0.0492-0.2109 0.1008-0.3125 0.1562-0.1319 0.0719-0.2513 0.1682-0.375 0.25-0.1158 0.0765-0.2356 0.1342-0.3437 0.2188-0.1407 0.1097-0.2799 0.2211-0.4063 0.3437-0.0369 0.0362-0.0581 0.0878-0.0937 0.125-0.1684 0.1744-0.3313 0.3356-0.4688 0.5313-0.1402 0.1993-0.2704 0.4065-0.375 0.625-4e-3 0.0084 4e-3 0.0227 0 0.0312-0.1111 0.2359-0.2159 0.4959-0.2812 0.75-0.253 0.5844-0.9424 1-1.75 1-0.06 0-0.0832 0.0018-0.125 0-0.0105-4e-4 -0.0168 0.0014-0.0313 0l-0.0625 1v2h3v-2c0-0.2761 0.0405-0.5521 0.0938-0.8125 0.3729-1.8227 1.9732-3.1875 3.9062-3.1875 2.209 0 4 1.7909 4 4v2h3v-2l-0.062-1c-0.015 0.0014-0.021-4e-4 -0.032 0h-0.125c-0.807 0-1.497-0.4156-1.75-1-0.065-0.2541-0.17-0.5141-0.281-0.75-4e-3 -0.0085 4e-3 -0.0228 0-0.0312-0.105-0.2185-0.235-0.4257-0.375-0.625-0.138-0.1957-0.3-0.3569-0.469-0.5313-0.036-0.038-0.055-0.0881-0.094-0.125-0.126-0.1226-0.265-0.234-0.406-0.3437-0.104-0.0817-0.232-0.1448-0.344-0.2188-0.122-0.0809-0.244-0.1788-0.374-0.25-0.101-0.055-0.208-0.1074-0.313-0.1562-0.202-0.0939-0.408-0.1802-0.625-0.25-0.232-0.0747-0.472-0.143-0.719-0.1876-0.332-0.0599-0.68-0.0937-1.031-0.0937z" fill="#95a5a6"/>
+  </g>
+ </g>
+</svg>
