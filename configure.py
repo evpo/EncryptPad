@@ -1743,12 +1743,17 @@ def configure_encryptmsg(options):
 
 def external_command(cmd):
     logging.info('Executing: %s', ' '.join(cmd))
+    errors = []
     result = ''
     try:
         proc = subprocess.Popen(cmd, stdout=subprocess.PIPE)
         result, errs = proc.communicate()
+        if errs:
+            errors.append(errs.decode('utf-8'))
     except OSError as e:
-        raise UserError('Error while executing command: %s' % e)
+        errors.append(str(e))
+    if errors:
+        raise UserError('Error while executing command: %s' % cmd, ", ".join(errors))
     return result if result is str else result.decode("ascii")
 
 def set_bzip2_variables(options, template_vars, cc):
@@ -1935,7 +1940,11 @@ def probe_environment(options):
     if not have_program('pkg-config'):
         raise UserError('pkg-config is not found. Enable all --build-... options')
 
-    all_package_names = external_command(['pkg-config', '--list-package-names']).split('\n')
+    try:
+        all_package_names = external_command(['pkg-config', '--list-package-names']).split('\n')
+    except UserError as e:
+        if "Unknown option --list-package-names" in str(e):
+            all_package_names = external_command(['pkg-config', '--list-all']).split('\n')
     if not options.build_botan and "botan-2" not in all_package_names:
         raise UserError('botan-2 package is not found. Use --build-botan')
 
