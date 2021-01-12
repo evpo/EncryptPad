@@ -1920,7 +1920,7 @@ def process_command_line(args):
         options.no_optimizations = True
         options.with_debug_info = True
 
-    if is_windows(options):
+    if is_windows(options) or options.os == 'darwin':
         options.build_zlib = True
         options.build_bzip2 = True
         options.build_botan = True
