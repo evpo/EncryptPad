@@ -1920,11 +1920,10 @@ def process_command_line(args):
         options.no_optimizations = True
         options.with_debug_info = True
 
-    if options.os == 'windows':
+    if is_windows(options):
         options.build_zlib = True
         options.build_bzip2 = True
         options.build_botan = True
-
 
     options.enabled_modules = []
     options.disabled_modules = []
