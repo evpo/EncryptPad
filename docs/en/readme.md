@@ -383,6 +383,7 @@ Open the EncryptPad directory:
 
     ./configure.py
     make
+    sudo make install
 
 <div id="build-on-ubuntu"></div>
 
