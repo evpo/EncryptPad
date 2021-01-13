@@ -10,7 +10,7 @@ h2
 
 * ASCII armor
 * Added cipher algorithms: CAMELLIA128, CAMELLIA192, CAMELLIA256, TWOFISH
-* Added S2K digest algorithms: SHA384, SHA512, SHA224
+* Added S2K hash digest algorithms: SHA384, SHA512, SHA224
 * Added compression algorithm: BZIP2
 * Botan has been updated to version 2.13
 * Translation fixes for context menu

@@ -377,18 +377,10 @@ Change the Qt path and replace the minimal macOS versions as needed. The command
 
 Install dependencies and tools:
 
-    dnf install gcc make qt5-qtbase-devel gcc-c++ python libstdc++-static glibc-static
-    PATH=$PATH:/usr/lib64/qt5/bin/
-    export PATH
+    dnf install gcc make qt5-qtbase-devel gcc-c++ python libstdc++-static glibc-static botan2-devel bzip2-devel zlib-devel
 
 Open the EncryptPad directory:
 
-    ./configure.py --build-botan --build-zlib
-    make
-
-For a dynamic build with using the system libraries:
-
-    dnf install botan-devel
     ./configure.py
     make
 

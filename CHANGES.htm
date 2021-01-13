@@ -1,9 +1,4 @@
-<p><style type="text/css">
-h2
-{
-    text-align: center;
-}
-</style></p>
+
 
 <h2>Release Notes</h2>
 
@@ -12,15 +7,16 @@ h2
 <ul>
 <li>ASCII armor</li>
 <li>Added cipher algorithms: CAMELLIA128, CAMELLIA192, CAMELLIA256, TWOFISH</li>
-<li>Added S2K digest algorithms: SHA384, SHA512, SHA224</li>
+<li>Added S2K hash digest algorithms: SHA384, SHA512, SHA224</li>
 <li>Added compression algorithm: BZIP2</li>
 <li>Botan has been updated to version 2.13</li>
 <li>Translation fixes for context menu</li>
 <li>New Python build system ported from Botan</li>
 <li>Bug fix: MDC failure was not reported when opening files</li>
 <li>Bug fix: the special case in which the last partial packet was smaller than 5 bytes was not handled correctly</li>
-<li>Bug fix: --key-file-length parameter was broken in CLI</li>
+<li>Bug fix: &ndash;key-file-length parameter was broken in CLI</li>
 </ul>
+
 
 <h3>Version 0.4.0.4</h3>
 
@@ -30,6 +26,7 @@ h2
 <li>Plog has been updated to version 1.1.4.</li>
 <li>Translation to Lithuanian</li>
 </ul>
+
 
 <h3>Version 0.4.0.0</h3>
 
@@ -42,6 +39,7 @@ h2
 <li>OpenPGP functionality has moved to its own library libencryptmsg</li>
 <li>WAD format that is used for files encrypted with the persistent key file location and double protection has changed. Files of this type that are larger than 64 kilobytes are not backward compatible and cannot be opened with 0.3.2.5. This does not apply to gpg and epd files with single encryption and without persistent key file.</li>
 </ul>
+
 
 <h3>Version 0.3.2.5</h3>
 
@@ -58,11 +56,12 @@ h2
 <li>Prevented the unnecessary prompt for a key file passphrase if the key file is local and not encrypted.</li>
 <li>Bug fixed: after opening a file the mouse cursor changed to arrow shape when it was over the text edit area. It is now <code>I</code> shaped as it should.</li>
 <li>Use one EncryptPad binary for all languages. EncryptPad will recognize the OS preferred language for localization. It will simplify the release management especially for packagers.</li>
-<li><code>--lang</code> switch to force a specific language instead of taking the OS's locale. Example: <code>encryptpad --lang FR</code> to load the French localization strings. Example: <code>encryptpad --lang FR</code> to load the French localization strings.</li>
+<li><code>--lang</code> switch to force a specific language instead of taking the OS&rsquo;s locale. Example: <code>encryptpad --lang FR</code> to load the French localization strings. Example: <code>encryptpad --lang FR</code> to load the French localization strings.</li>
 <li>EncryptPad GUI was translated to Chinese.</li>
 <li>README.md translated to French.</li>
 <li>stlplus was updated from upstream. It is now 3.13.</li>
 </ul>
+
 
 <h3>Version 0.3.2.3</h3>
 
@@ -75,9 +74,10 @@ h2
 <li>Translation to French.</li>
 <li>Added the <code>SHA-512</code> hashing algorithm.</li>
 <li>CLI: encryptcli crashed with a segfault when TTY was not available. Now it exits gracefully with an error code.</li>
-<li>Bug fixed: In the file encryption dialogue, when clearing the passphrase and setting it again, the passphrase was ignored and the file was saved as "key only".</li>
-<li>Bug fixed: In the file encryption, gpg files were encrypted with 't' flag. It lead to removal of 0x0D bytes when GPG decrypted the files because it thought that the files were textual. The problem did not manifest on Windows and when EncryptPad was used for decryption. It was only in the direction from EncryptPad to Linux/Unix GPG.</li>
+<li>Bug fixed: In the file encryption dialogue, when clearing the passphrase and setting it again, the passphrase was ignored and the file was saved as &ldquo;key only&rdquo;.</li>
+<li>Bug fixed: In the file encryption, gpg files were encrypted with &rsquo;t' flag. It lead to removal of 0x0D bytes when GPG decrypted the files because it thought that the files were textual. The problem did not manifest on Windows and when EncryptPad was used for decryption. It was only in the direction from EncryptPad to Linux/Unix GPG.</li>
 </ul>
+
 
 <h3>Version 0.3.2.2</h3>
 
@@ -97,8 +97,10 @@ h2
 <li>Fixed warnings</li>
 </ul>
 
+
 <h3>Version 0.3.2.1</h3>
 
 <ul>
 <li>Initial open source release</li>
 </ul>
+
