@@ -1741,17 +1741,23 @@ def configure_encryptmsg(options):
     except OSError as e:
         raise UserError('Error while executing commands: %s' % e)
 
+class ExternalCommandResult:
+    def __init__(self, success, result):
+        self.success = success
+        self.result = result
+
 def try_external_command(cmd):
     logging.info('Executing: %s', ' '.join(cmd))
     result = ''
-    success = True
     try:
         proc = subprocess.Popen(cmd, stdout=subprocess.PIPE)
         result, errs = proc.communicate()
     except OSError as e:
-        success = False
+        raise UserError('Error while executing command: %s' % e)
+    success = proc.returncode == 0
     result = result if result is str else result.decode("ascii")
-    return (success, result)
+    r = ExternalCommandResult(success, result)
+    return r
 
 def external_command(cmd):
     logging.info('Executing: %s', ' '.join(cmd))
@@ -1952,13 +1958,13 @@ def probe_environment(options):
     if not have_program('pkg-config'):
         raise UserError('pkg-config is not found. Enable all --build-... options')
 
-    if not options.build_botan and not try_external_command(['pkg-config','--exists','botan-2']):
+    if not options.build_botan and not try_external_command(['pkg-config','--exists','botan-2']).success:
         raise UserError('botan-2 package is not found. Use --build-botan')
 
-    if not options.build_zlib and not try_external_command(['pkg-config','--exists','zlib']):
+    if not options.build_zlib and not try_external_command(['pkg-config','--exists','zlib']).success:
         raise UserError('bzip2 package is not found. Use --build-zlib')
 
-    if not options.build_bzip2 and not try_external_command(['pkg-config','--exists','bzip2']):
+    if not options.build_bzip2 and not try_external_command(['pkg-config','--exists','bzip2']).success:
         raise UserError('bzip2 package is not found. Use --build-bzip2')
 
 
