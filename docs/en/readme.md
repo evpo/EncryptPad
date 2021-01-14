@@ -404,21 +404,13 @@ Open the EncryptPad source directory:
 
 Install dependencies and tools:
 
-    apt-get install qtbase5-dev qt5-default gcc g++ make python zlib1g-dev pkg-config
+    apt-get install qtbase5-dev gcc g++ make python zlib1g-dev pkg-config libbotan-2-dev libbz2-dev
 
 Open the EncryptPad source directory:
 
-    ./configure.py --build-botan --build-zlib
-    make
-
-You can also use the system `libbotan-2-dev` instead of building it. If `libbotan-2-dev` is not available, add `stretch-backports` to the repository:
-
-    echo "deb http://deb.debian.org/debian/ stretch-backports main" >> /etc/apt/sources.list
-
-    apt-get install libbotan-2-dev
-
     ./configure.py
     make
+    sudo make install
 
 <div id="build-on-opensuse"></div>
 
@@ -426,19 +418,13 @@ You can also use the system `libbotan-2-dev` instead of building it. If `libbota
 
 Install dependencies and tools:
 
-    zypper install gcc gcc-c++ make python pkg-config zlib-devel libqt5-qtbase-devel
-    ln -s qmake-qt5 /usr/bin/qmake
-
-You can also install later compiler versions and link them to the default commands:
-
-    zypper install gcc7 gcc7-c++
-    ln -sf gcc-7 /usr/bin/gcc
-    ln -sf g++-7 /usr/bin/g++
+    zypper install gcc gcc-c++ make python pkg-config zlib-devel libqt5-qtbase-devel libbotan-devel libbz2-devel
 
 Open the EncryptPad source directory:
 
-    ./configure.py --build-botan --build-zlib
+    ./configure.py
     make
+    sudo make install
 
 <div id="build-on-freebsd"></div>
 

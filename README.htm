@@ -492,23 +492,14 @@ make
 
 <p>Install dependencies and tools:</p>
 
-<pre><code>apt-get install qtbase5-dev qt5-default gcc g++ make python zlib1g-dev pkg-config
+<pre><code>apt-get install qtbase5-dev gcc g++ make python zlib1g-dev pkg-config libbotan-2-dev libbz2-dev
 </code></pre>
 
 <p>Open the EncryptPad source directory:</p>
 
-<pre><code>./configure.py --build-botan --build-zlib
+<pre><code>./configure.py
 make
-</code></pre>
-
-<p>You can also use the system <code>libbotan-2-dev</code> instead of building it. If <code>libbotan-2-dev</code> is not available, add <code>stretch-backports</code> to the repository:</p>
-
-<pre><code>echo "deb http://deb.debian.org/debian/ stretch-backports main" &gt;&gt; /etc/apt/sources.list
-
-apt-get install libbotan-2-dev
-
-./configure.py
-make
+sudo make install
 </code></pre>
 
 <div id="build-on-opensuse"></div>
@@ -518,21 +509,14 @@ make
 
 <p>Install dependencies and tools:</p>
 
-<pre><code>zypper install gcc gcc-c++ make python pkg-config zlib-devel libqt5-qtbase-devel
-ln -s qmake-qt5 /usr/bin/qmake
-</code></pre>
-
-<p>You can also install later compiler versions and link them to the default commands:</p>
-
-<pre><code>zypper install gcc7 gcc7-c++
-ln -sf gcc-7 /usr/bin/gcc
-ln -sf g++-7 /usr/bin/g++
+<pre><code>zypper install gcc gcc-c++ make python pkg-config zlib-devel libqt5-qtbase-devel libbotan-devel libbz2-devel
 </code></pre>
 
 <p>Open the EncryptPad source directory:</p>
 
-<pre><code>./configure.py --build-botan --build-zlib
+<pre><code>./configure.py
 make
+sudo make install
 </code></pre>
 
 <div id="build-on-freebsd"></div>
