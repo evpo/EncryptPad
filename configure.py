@@ -1780,8 +1780,12 @@ def set_bzip2_variables(options, template_vars, cc):
         template_vars['bzip2_cxxflags'] =  cc.add_include_dir_option + bzip2_dir
         template_vars['bzip2_ldflags'] = os.path.join(bzip2_dir, 'libbz2.a')
     else:
-        template_vars['bzip2_cxxflags'] = external_command(['pkg-config', '--cflags', 'bzip2'])
-        template_vars['bzip2_ldflags'] = external_command(['pkg-config', '--libs', 'bzip2'])
+        if try_external_command(['pkg-config','--exists','bzip2']).success:
+            template_vars['bzip2_cxxflags'] = external_command(['pkg-config', '--cflags', 'bzip2'])
+            template_vars['bzip2_ldflags'] = external_command(['pkg-config', '--libs', 'bzip2'])
+        else:
+            template_vars['bzip2_ldflags'] = "-lbz2"
+
 
 def set_zlib_variables(options, template_vars, cc):
     template_vars['build_zlib'] = options.build_zlib
@@ -1963,10 +1967,6 @@ def probe_environment(options):
 
     if not options.build_zlib and not try_external_command(['pkg-config','--exists','zlib']).success:
         raise UserError('bzip2 package is not found. Use --build-zlib')
-
-    if not options.build_bzip2 and not try_external_command(['pkg-config','--exists','bzip2']).success:
-        raise UserError('bzip2 package is not found. Use --build-bzip2')
-
 
 def configure_back_end(system_command, options):
     """
