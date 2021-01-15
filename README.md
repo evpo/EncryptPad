@@ -400,12 +400,13 @@ Open the EncryptPad directory:
 
 Install dependencies and tools:
 
-    apt-get install qtbase5-dev qt5-default gcc g++ make python pkg-config zlib1g-dev libbotan-2-dev
+    apt-get install qtbase5-dev gcc g++ make python pkg-config zlib1g-dev libbotan-2-dev libbz2-dev
 
 Open the EncryptPad source directory:
 
-    ./configure.py --build-bzip2
+    ./configure.py
     make
+    sudo make install
 
 <div id="build-on-debian"></div>
 

@@ -476,13 +476,14 @@ sudo make install
 
 <p>Install dependencies and tools:</p>
 
-<pre><code>apt-get install qtbase5-dev qt5-default gcc g++ make python pkg-config zlib1g-dev libbotan-2-dev
+<pre><code>apt-get install qtbase5-dev gcc g++ make python pkg-config zlib1g-dev libbotan-2-dev libbz2-dev
 </code></pre>
 
 <p>Open the EncryptPad source directory:</p>
 
-<pre><code>./configure.py --build-bzip2
+<pre><code>./configure.py
 make
+sudo make install
 </code></pre>
 
 <div id="build-on-debian"></div>
