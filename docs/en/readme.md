@@ -28,6 +28,7 @@ EncryptPad is an application for viewing and editing symmetrically encrypted tex
     - [Ubuntu](#build-on-ubuntu)
     - [Debian](#build-on-debian)
     - [openSUSE](#build-on-opensuse)
+    - [Archlinux](#build-on-archlinux)
     - [FreeBSD](#build-on-freebsd)
 * [Portable mode](#portable-mode)
 * [Does EncryptPad store passphrases in the memory to reopen files?](#passphrases-in-memory)
