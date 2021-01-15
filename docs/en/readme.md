@@ -427,6 +427,21 @@ Open the EncryptPad source directory:
     make
     sudo make install
 
+<div id="build-on-archlinux"></div>
+
+### Archlinux
+
+Install dependencies and tools:
+
+    pacman -S --needed base-devel
+    pacman -S qt5-base python botan zlib bzip2
+
+Open the EncryptPad source directory:
+
+    ./configure.py
+    make
+    sudo make install
+
 <div id="build-on-freebsd"></div>
 
 ### FreeBSD
