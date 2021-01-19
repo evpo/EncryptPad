@@ -16,6 +16,7 @@ protected:
     virtual void dropEvent(QDropEvent *event) override;
     virtual void enterEvent(QEvent *event) override;
     virtual void leaveEvent(QEvent *event) override;
+    bool eventFilter(QObject *obj, QEvent *event) override;
 signals:
     void urlDropped(QUrl url);
     void leaveControl();

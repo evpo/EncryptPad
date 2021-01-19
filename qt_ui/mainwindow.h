@@ -35,6 +35,7 @@
 #include "find_dialog.h"
 #include "find_and_replace.h"
 #include "preferences.h"
+#include "plain_text_edit.h"
 
 QT_BEGIN_NAMESPACE
 class QAction;
@@ -63,6 +64,7 @@ public:
 
 protected:
     void closeEvent(QCloseEvent *event);
+    bool eventFilter(QObject *obj, QEvent *event) override;
 
 public slots:
     void AsyncOperationCompleted();
@@ -104,6 +106,9 @@ private slots:
     void replaceOne(QString text, QString replaceWith, bool matchCase, bool wholeWord);
     void clearReplaceContext();
 private:
+
+    friend class LoadHandlerAdapter;
+
     static const int maxZoomIn;
     static const int minZoomOut;
 
@@ -121,7 +126,7 @@ private:
     QLabel *encryptionKeySet;
     QLabel *lineStatus;
     QLabel *charStatus;
-    QPlainTextEdit *textEdit;
+    PlainTextEdit *textEdit;
 
     FindDialog *findDialog;
     FindAndReplace *replaceDialog;
@@ -174,6 +179,19 @@ private:
     bool encryptionModified;
     bool isBusy;
 
+    int currentZoom;
+
+    AsyncLoad load_state_machine_;
+    PlainTextSwitch plain_text_switch_;
+    PlainTextFunctor plain_text_functor_;
+    RecentFilesService recent_files_service_;
+    FileRequestService file_request_service_;
+
+    LoadHandlerAdapter loadAdapter;
+    EncryptPad::LoadHandler loadHandler;
+    bool saveSuccess;
+    QStringList passphraseGenerationSettings;
+
     void createActions();
     void createMenus();
     void createToolBars();
@@ -203,19 +221,6 @@ private:
     QString accessRepositoryPath(const QString &fileName);
     std::unique_ptr<QSettings> loadSettings();
 
-    int currentZoom;
-
-    AsyncLoad load_state_machine_;
-    PlainTextSwitch plain_text_switch_;
-    PlainTextFunctor plain_text_functor_;
-    RecentFilesService recent_files_service_;
-    FileRequestService file_request_service_;
-
-    friend class LoadHandlerAdapter;
-    LoadHandlerAdapter loadAdapter;
-    EncryptPad::LoadHandler loadHandler;
-    bool saveSuccess;
-    QStringList passphraseGenerationSettings;
 };
 
 #endif

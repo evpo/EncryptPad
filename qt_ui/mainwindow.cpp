@@ -41,7 +41,6 @@
 #include "file_encryption_dialog.h"
 #include "passphrase_generation_dialog.h"
 #include "version.h"
-#include "plain_text_edit.h"
 #include "common_definitions.h"
 #include "encryptmsg/openpgp_conversions.h"
 #include "repository.h"
@@ -138,6 +137,7 @@ MainWindow::MainWindow():
 
     plain_text_functor_.EncryptedPlainSwitchChange(!enc.GetIsPlainText());
     enc.SetEncryptedPlainSwitchFunctor(&plain_text_functor_);
+
     setCurrentFile("");
 
     update();
@@ -1149,7 +1149,15 @@ void MainWindow::onUpdatedPreferences()
     enc.SetLibcurlParams(preferences.libCurlParameters.toStdString());
     textEdit->setFont(preferences.font);
     QFontMetrics metrics(textEdit->font());
-    textEdit->setTabStopWidth(preferences.tabSize * metrics.width(' '));
+
+#if QT_VERSION < QT_VERSION_CHECK(5, 11, 0)
+    int width = preferences.tabSize * metrics.width(' ');
+    textEdit->setTabStopWidth(width);
+#else
+    int width = preferences.tabSize * metrics.horizontalAdvance(' ');
+    textEdit->setTabStopDistance(width);
+#endif
+
     recent_files_service_.SetMaxFiles(preferences.recentFiles);
     resetZoom();
 
@@ -1701,4 +1709,9 @@ void MainWindow::openFileEncryption()
     FileEncryptionDialog dlg(this, file_request_service_);
     dlg.SetDefaultFileParameters(preferences.defaultFileProperties);
     dlg.exec();
+}
+
+bool MainWindow::eventFilter(QObject *obj, QEvent *event)
+{
+    return false;
 }
