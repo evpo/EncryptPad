@@ -23,7 +23,8 @@ if which update-icon-caches >/dev/null; then
 fi
 if which update-mime-database >/dev/null; then
     echo "running update-mime-database ..."
-    update-mime-database /usr/share/mime
+    update-mime-database /usr/share/mime/application
+    update-mime-database /usr/share/mime/packages
 fi
 if which update-desktop-database >/dev/null; then
     echo "running update-desktop-database .."
