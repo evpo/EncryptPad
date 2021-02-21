@@ -1,0 +1,146 @@
+---
+name: CMake
+
+# yamllint disable-line rule:truthy
+on:
+  - push
+
+jobs:
+  build:
+    name: ${{matrix.buildname}}
+    runs-on: ${{matrix.os}}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - windows-latest
+          - macos-latest
+
+        include:
+          - os: windows-latest
+            buildname: Windows
+            triplet: x64-windows
+
+          - os: macos-latest
+            buildname: macOS
+            triplet: x64-osx
+            compiler: clang_64
+
+    env:
+      qt: '5.15.1'
+
+    steps:
+      - name: Restore Qt cache
+        uses: actions/cache@v2
+        id: cache-qt
+        with:
+          path: ${{runner.workspace}}/Qt/${{env.qt}}
+          key: ${{runner.os}}-qt-${{env.qt}}
+          restore-keys: |
+            ${{runner.os}}-qt-
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2
+        if: steps.cache-qt.outputs.cache-hit != 'true'
+        with:
+          version: ${{env.qt}}
+          dir: ${{runner.workspace}}
+          cached: ${{steps.cache-qt.outputs.cache-hit}}
+
+      - name: Checkout source code
+        uses: actions/checkout@v2
+        with:
+          submodules: false
+          fetch-depth: 0
+
+      - name: Build with CMake
+        uses: lukka/run-cmake@v3
+        with:
+          cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
+          cmakeListsTxtPath: '${{github.workspace}}/CMakeLists.txt'
+          cmakeBuildType: Release
+          cmakeGenerator: Ninja
+          buildDirectory: '${{runner.workspace}}/build'
+          cmakeAppendedArgs: >-
+            -DBUILD_TESTS=TRUE
+            -DBUILD_EXAMPLE=TRUE
+            -DCMAKE_PREFIX_PATH='${{runner.workspace}}/Qt/${{env.qt}}/${{matrix.compiler}}/'
+
+      - name: Run tests
+        working-directory: '${{runner.workspace}}/build'
+        run: ctest --output-on-failure
+
+  build_linux:
+    name: Linux
+    runs-on: ubuntu-20.04
+
+    env:
+      # Required for Linux/X11 for running GUI tests.
+      DISPLAY: ':99'
+
+    steps:
+      - name: (Linux) Install dependencies
+        if: runner.os == 'Linux'
+        run: >-
+          sudo apt-get install
+          libqt5test5
+          libqt5widgets5
+          ninja-build
+          openbox
+          pyqt5-dev
+          python3-pyqt5
+          python3-sip
+          qtbase5-dev
+          xvfb
+
+      - name: Checkout source code
+        uses: actions/checkout@v2
+        with:
+          submodules: false
+          fetch-depth: 0
+
+      - name: Build with CMake
+        uses: lukka/run-cmake@v3
+        with:
+          cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
+          cmakeListsTxtPath: '${{github.workspace}}/CMakeLists.txt'
+          cmakeBuildType: Release
+          cmakeGenerator: Ninja
+          buildDirectory: '${{runner.workspace}}/build'
+          cmakeAppendedArgs: >-
+            -DBUILD_TESTS=TRUE
+            -DBUILD_EXAMPLE=TRUE
+            -DCMAKE_INSTALL_PREFIX='${{runner.workspace}}/install'
+
+      - name: Install with CMake
+        run: cmake --install '${{runner.workspace}}/build'
+
+      - name: (Linux) Start X11 and window manager
+        if: runner.os == 'Linux'
+        working-directory: '${{runner.workspace}}/build'
+        shell: bash
+        run: |
+          Xvfb $DISPLAY -screen 0 800x600x24 & sleep 5
+          openbox & sleep 8
+
+      - name: Run tests
+        working-directory: '${{runner.workspace}}/build'
+        run: ctest --output-on-failure
+
+      - name: (Linux) Build Python library
+        if: runner.os == 'Linux'
+        working-directory: '${{github.workspace}}/python'
+        env:
+          PYTHON: python3
+          LIBRARY_PATH: '${{runner.workspace}}/install/lib'
+          INCLUDE_PATH: '${{runner.workspace}}/install/include'
+        run: ./build.sh
+
+      - name: (Linux) Test Python library
+        if: runner.os == 'Linux'
+        working-directory: '${{github.workspace}}/python'
+        env:
+          PYTHONPATH: '${{github.workspace}}/python/build'
+          LD_LIBRARY_PATH: '${{runner.workspace}}/install'
+          FAKEVIM_CMD: ':q'
+        run: python3 test.py
