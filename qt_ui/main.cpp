@@ -1,5 +1,5 @@
 //**********************************************************************************
-//EncryptPad Copyright 2016 Evgeny Pokhilko 
+//EncryptPad Copyright 2021 Evgeny Pokhilko 
 //<http://www.evpo.net/encryptpad>
 //
 //This file is part of EncryptPad
@@ -179,15 +179,10 @@ int main(int argc, char *argv[])
 
     MainWindow mainWin;
     app.setMainWindow(&mainWin);
-#if defined(Q_OS_SYMBIAN)
-    mainWin.showMaximized();
-#else
     mainWin.show();
-#endif
 
     if(!arguments.fileName.isEmpty())
         mainWin.open(arguments.fileName);
 
     return app.exec();
 }
-//! [0]

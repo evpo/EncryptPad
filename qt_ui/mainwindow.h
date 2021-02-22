@@ -36,6 +36,7 @@
 #include "find_and_replace.h"
 #include "preferences.h"
 #include "plain_text_edit.h"
+#include "fake_vim_wrapper.h"
 
 QT_BEGIN_NAMESPACE
 class QAction;
@@ -191,6 +192,8 @@ private:
     EncryptPad::LoadHandler loadHandler;
     bool saveSuccess;
     QStringList passphraseGenerationSettings;
+
+    std::unique_ptr<FakeVimWrapper> fakeVimWrapper;
 
     void createActions();
     void createMenus();

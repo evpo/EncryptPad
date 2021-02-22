@@ -45,6 +45,7 @@
 #include "encryptmsg/openpgp_conversions.h"
 #include "repository.h"
 #include "encryptmsg_version.h"
+#include "fake_vim_edit.h"
 
 typedef unsigned char byte;
 
@@ -106,10 +107,14 @@ MainWindow::MainWindow():
     plain_text_switch_(this), plain_text_functor_(plain_text_switch_), recent_files_service_(this),
     loadAdapter(this),
     loadHandler(this, loadAdapter, metadata),
-    saveSuccess(false)
+    saveSuccess(false),
+    fakeVimWrapper()
 {
     setWindowIcon(QIcon(":/images/application_icon.png"));
-    textEdit = new PlainTextEdit(this);
+    // textEdit = new PlainTextEdit(this);
+    textEdit = createEditorWidget(this);
+    fakeVimWrapper = CreateFakeVimWrapper(textEdit, this);
+
     setCentralWidget(textEdit);
     QPalette palette = textEdit->palette();
     QColor color = palette.color(QPalette::Active, QPalette::Highlight);

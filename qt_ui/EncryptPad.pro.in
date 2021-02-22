@@ -23,6 +23,9 @@ LIBS += %{zlib_ldflags}
 #bzip2
 LIBS += %{bzip2_ldflags}
 
+# fakevim
+LIBS += -lfakevim
+
 QMAKE_CXXFLAGS += $$BOTAN_CXXFLAGS
 
 LIBS += %{cxx_abi_flags}
@@ -90,6 +93,8 @@ SOURCES += \
     plain_text_edit.cpp \
     find_dialog.cpp \
     preferences.cpp \
+    fake_vim_edit.cpp \
+    fake_vim_wrapper.cpp \
 
 HEADERS += \
     application.h \
@@ -119,6 +124,8 @@ HEADERS += \
     common_definitions.h \
     find_dialog.h \
     preferences.h \
+    fake_vim_edit.h \
+    fake_vim_wrapper.h \
 
 QMAKE_RESOURCE_FLAGS += -no-compress
 RESOURCES += \
