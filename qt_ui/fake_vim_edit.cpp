@@ -1,6 +1,6 @@
 #include "fake_vim_edit.h"
-#include <fakevim/fakevimactions.h>
-#include <fakevim/fakevimhandler.h>
+#include <fakevimactions.h>
+#include <fakevimhandler.h>
 
 #include <QApplication>
 #include <QFontMetrics>

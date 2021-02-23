@@ -1,5 +1,5 @@
 #pragma once
-#include <fakevim/fakevimhandler.h>
+#include <fakevimhandler.h>
 #include <memory>
 #include <QMainWindow>
 #include "fake_vim_edit.h"

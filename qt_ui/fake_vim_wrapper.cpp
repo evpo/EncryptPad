@@ -1,6 +1,5 @@
 #include "fake_vim_wrapper.h"
 #include <QStandardPaths>
-#include <fakevim/fakevimhandler.h>
 
 std::unique_ptr<FakeVimWrapper> CreateFakeVimWrapper(PlainTextEdit *editor, QMainWindow *mainWindow)
 {
