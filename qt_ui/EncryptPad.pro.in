@@ -28,6 +28,8 @@ QMAKE_CXXFLAGS += $$BOTAN_CXXFLAGS
 LIBS += %{cxx_abi_flags}
 LIBS += %{ldflags}
 
+QMAKE_CXXFLAGS += -DFAKEVIM_STATIC_DEFINE
+
 CONFIG(debug, debug|release){
     CONFIG_NAME = debug
     SUBDIR_RELEASE =
