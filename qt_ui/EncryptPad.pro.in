@@ -23,9 +23,6 @@ LIBS += %{zlib_ldflags}
 #bzip2
 LIBS += %{bzip2_ldflags}
 
-# fakevim
-LIBS += -lfakevim
-
 QMAKE_CXXFLAGS += $$BOTAN_CXXFLAGS
 
 LIBS += %{cxx_abi_flags}
@@ -143,3 +140,5 @@ DESTDIR = $$PROJ/bin/$$CONFIG_NAME
 OBJECTS_DIR = $$CONFIG_NAME/obj
 unix|win32:TARGET = encryptpad
 macx:TARGET = EncryptPad
+
+include($$PROJ/deps/fakevim/fakevim/fakevim.pri)

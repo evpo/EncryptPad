@@ -2,5 +2,5 @@ INCLUDEPATH += $$PWD
 
 DEFINES += QTCREATOR_UTILS_STATIC_LIB
 SOURCES += \
-    $$PWD/hostinfo.cpp \
+    $$PWD/hostosinfo.cpp \
     $$PWD/qtcassert.cpp
