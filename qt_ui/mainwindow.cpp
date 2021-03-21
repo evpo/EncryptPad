@@ -113,7 +113,6 @@ MainWindow::MainWindow():
     setWindowIcon(QIcon(":/images/application_icon.png"));
     // textEdit = new PlainTextEdit(this);
     textEdit = createEditorWidget(this);
-    fakeVimWrapper = CreateFakeVimWrapper(textEdit, this);
 
     setCentralWidget(textEdit);
     QPalette palette = textEdit->palette();
@@ -129,6 +128,12 @@ MainWindow::MainWindow():
     createStatusBar();
 
     readSettings();
+
+    if(preferences.enableFakeVim)
+    {
+        fakeVimWrapper = CreateFakeVimWrapper(textEdit, this);
+    }
+
     SetDefaultMetadataValues(metadata, preferences.defaultFileProperties);
 
     connect(textEdit->document(), SIGNAL(contentsChanged()), this, SLOT(documentWasModified()));

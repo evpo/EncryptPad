@@ -9,6 +9,7 @@ namespace
     const bool kDefaultSaveLastUsedDirectory = true;
     const bool kDefaultenableBakFiles = true;
     const bool kDefaultWordWrap = true;
+    const bool kDefaultEnableFakeVim = false;
     const int kDefaultS2KResultsPoolSize = 8;
     const int kDefaultTabSize = 4;
     const EncryptMsg::Compression kDefaultKeyFileCompression
@@ -116,6 +117,7 @@ namespace
         mapper.Map("enable_bak_files", preferences.enableBakFiles);
         mapper.Map("save_last_used_directory", preferences.saveLastUsedDirectory);
         mapper.Map("word_wrap", preferences.wordWrap);
+        mapper.Map("enable_fake_vim", preferences.enableFakeVim);
         mapper.Map("libcurl_path", preferences.libCurlPath);
         mapper.Map("libcurl_parameters", preferences.libCurlParameters);
         mapper.Map("s2k_results_pool_size", preferences.s2kResultsPoolSize);
@@ -141,8 +143,9 @@ void SetDefaultPreferences(PersistentPreferences &preferences)
     preferences.saveLastUsedDirectory = kDefaultSaveLastUsedDirectory;
     preferences.enableBakFiles = kDefaultenableBakFiles;
     preferences.windowsEol = kDefaultWindowsEol;
-    preferences.s2kResultsPoolSize = kDefaultS2KResultsPoolSize;
     preferences.wordWrap = kDefaultWordWrap;
+    preferences.enableFakeVim = kDefaultEnableFakeVim;
+    preferences.s2kResultsPoolSize = kDefaultS2KResultsPoolSize;
     preferences.kfKeyLength = EncryptPad::kDefaultKeyFileKeyLength;
 
     preferences.defaultFileProperties.cipher_algo = EncryptPad::kDefaultCipherAlgo;

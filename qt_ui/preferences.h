@@ -11,6 +11,7 @@ struct PersistentPreferences
     bool enableBakFiles;
     bool windowsEol;
     bool wordWrap;
+    bool enableFakeVim;
     int recentFiles;
     int s2kResultsPoolSize;
     QFont font;
