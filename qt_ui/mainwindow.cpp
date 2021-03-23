@@ -111,7 +111,6 @@ MainWindow::MainWindow():
     fakeVimWrapper()
 {
     setWindowIcon(QIcon(":/images/application_icon.png"));
-    // textEdit = new PlainTextEdit(this);
     textEdit = createEditorWidget(this);
 
     setCentralWidget(textEdit);
@@ -169,7 +168,10 @@ void MainWindow::updateLineStatus()
 
     int lineNumber = cursor.blockNumber();
 
-    lineStatus->setText(tr("ln: %1 of %2").arg(QString::number(lineNumber + 1)).arg(QString::number(count)));
+    if(!fakeVimWrapper)
+    {
+        lineStatus->setText(tr("ln: %1 of %2").arg(QString::number(lineNumber + 1)).arg(QString::number(count)));
+    }
     charStatus->setText(tr("chars: %1").arg(QString::number(charCount - 1)));
 }
 

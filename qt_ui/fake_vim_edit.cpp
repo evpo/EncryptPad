@@ -429,7 +429,7 @@ void Proxy::updateExtraSelections()
 
 bool Proxy::wantSaveAndQuit(const ExCommand &cmd)
 {
-    return cmd.cmd == "wq";
+    return cmd.cmd == "wq" || cmd.cmd == "x";
 }
 
 bool Proxy::wantSave(const ExCommand &cmd)
