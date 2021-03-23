@@ -131,6 +131,10 @@ MainWindow::MainWindow():
     if(preferences.enableFakeVim)
     {
         fakeVimWrapper = CreateFakeVimWrapper(textEdit, this);
+        const auto *proxy = fakeVimWrapper->proxy.get();
+        connect(proxy, SIGNAL(requestSave()), this, SLOT(save()));
+        connect(proxy, SIGNAL(requestQuit()), this, SLOT(close()));
+        connect(proxy, SIGNAL(requestSaveAndQuit()), this, SLOT(close()));
     }
 
     SetDefaultMetadataValues(metadata, preferences.defaultFileProperties);
