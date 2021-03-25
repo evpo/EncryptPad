@@ -132,9 +132,16 @@ MainWindow::MainWindow():
     {
         fakeVimWrapper = CreateFakeVimWrapper(textEdit, this);
         const auto *proxy = fakeVimWrapper->proxy.get();
+
+        connect(proxy, SIGNAL(requestRead(const QString&)), this, SLOT(open(QString)));
+
         connect(proxy, SIGNAL(requestSave()), this, SLOT(save()));
-        connect(proxy, SIGNAL(requestQuit()), this, SLOT(close()));
+        connect(proxy, SIGNAL(requestSave(const QString&)), this, SLOT(saveAs(const QString&)));
+
         connect(proxy, SIGNAL(requestSaveAndQuit()), this, SLOT(close()));
+        connect(proxy, SIGNAL(requestSaveAndQuit(const QString&)), this, SLOT(saveAsAndClose(const QString&)));
+
+        connect(proxy, SIGNAL(requestQuit()), this, SLOT(close()));
     }
 
     SetDefaultMetadataValues(metadata, preferences.defaultFileProperties);
@@ -538,6 +545,27 @@ bool MainWindow::save()
     } else {
         return saveFile(curFile);
     }
+}
+
+void MainWindow::saveAs(const QString &path)
+{
+    if(curFile != path && preferences.enableBakFiles)
+    {
+        takeBakFile = true;
+    }
+
+    saveFile(path);
+}
+
+void MainWindow::saveAsAndClose(const QString &path)
+{
+    if(curFile != path && preferences.enableBakFiles)
+    {
+        takeBakFile = true;
+    }
+
+    saveFile(path);
+    close();
 }
 
 bool MainWindow::saveAs()

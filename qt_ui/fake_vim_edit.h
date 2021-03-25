@@ -34,8 +34,15 @@ public:
 
 signals:
     void handleInput(const QString &keys);
+
+    void requestRead(const QString &path);
+
     void requestSave();
     void requestSaveAndQuit();
+
+    void requestSave(const QString &path);
+    void requestSaveAndQuit(const QString &path);
+
     void requestQuit();
     void requestRun();
 
@@ -57,6 +64,7 @@ private:
     static int firstNonSpace(const QString &text);
 
     void updateExtraSelections();
+    bool wantRead(const FakeVim::Internal::ExCommand &cmd);
     bool wantSaveAndQuit(const FakeVim::Internal::ExCommand &cmd);
     bool wantSave(const FakeVim::Internal::ExCommand &cmd);
     bool wantQuit(const FakeVim::Internal::ExCommand &cmd);

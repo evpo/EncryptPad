@@ -78,6 +78,8 @@ private slots:
     void open();
     bool save();
     bool saveAs();
+    void saveAs(const QString &path);
+    void saveAsAndClose(const QString &path);
     void setFileProperties();
     void closeAndReset();
     void createNewKey();

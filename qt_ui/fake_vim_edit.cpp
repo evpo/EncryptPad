@@ -15,6 +15,7 @@
 #include <QTemporaryFile>
 #include <QStandardPaths>
 #include <QDebug>
+#include <QDir>
 
 #define EDITOR(editor, call) \
     if (QPlainTextEdit *ed = qobject_cast<QPlainTextEdit *>(editor)) { \
@@ -227,12 +228,38 @@ void Proxy::updateStatusBar()
     m_mainWindow->statusBar()->showMessage(msg);
 }
 
+QString replaceHome(QString path)
+{
+    return path.replace("~", QDir::homePath());
+}
+
 void Proxy::handleExCommand(bool *handled, const ExCommand &cmd)
 {
-    if ( wantSaveAndQuit(cmd) ) {
-        emit requestSaveAndQuit(); // :wq
+
+    if(wantRead(cmd)) {
+        if(cmd.args.size() == 0)
+            *handled = false;
+
+        emit requestRead(replaceHome(cmd.args)); // :r <file>
+    }
+    else if ( wantSaveAndQuit(cmd) ) {
+        if(cmd.args.size() > 0)
+        {
+            emit requestSaveAndQuit(replaceHome(cmd.args)); // :wq <file>
+        }
+        else
+        {
+            emit requestSaveAndQuit(); // :wq
+        }
     } else if ( wantSave(cmd) ) {
-        emit requestSave(); // :w
+        if(cmd.args.size() > 0)
+        {
+            emit requestSave(replaceHome(cmd.args)); // :w <file>
+        }
+        else
+        {
+            emit requestSave(); // :w
+        }
     } else if ( wantQuit(cmd) ) {
         emit requestQuit(); // :q
     } else if ( wantRun(cmd) ) {
@@ -425,6 +452,11 @@ void Proxy::updateExtraSelections()
     } else if (plainEditor) {
         plainEditor->setExtraSelections(m_clearSelection + m_searchSelection + m_blockSelection);
     }
+}
+
+bool Proxy::wantRead(const ExCommand &cmd)
+{
+    return cmd.cmd == "r" || cmd.matches("r", "read");
 }
 
 bool Proxy::wantSaveAndQuit(const ExCommand &cmd)
