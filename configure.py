@@ -524,9 +524,9 @@ def set_defaults_for_unset_options(options, info_arch, info_cc): # pylint: disab
             options.os = 'cygwin'
         else:
             options.os = system_from_python
-        logging.info('Guessing target OS is %s (use --os to set)' % (options.os))
-        if is_windows(options.os):
+        if is_windows(options):
             options.os = 'mingw'
+        logging.info('Guessing target OS is %s (use --os to set)' % (options.os))
 
     def deduce_compiler_type_from_cc_bin(cc_bin):
         if cc_bin.find('clang') != -1 or cc_bin in ['emcc', 'em++']:
@@ -567,7 +567,7 @@ def set_defaults_for_unset_options(options, info_arch, info_cc): # pylint: disab
         options.cpu = cpu
         if is_windows(options):
             options.cpu = "x86_32"
-        logging.info('Guessing target processor is a %s (use --cpu to set)' % (options.arch))
+        logging.info('Guessing target processor is a %s (use --cpu to set)' % (options.cpu))
 
     if is_windows(options):
         options.build_botan = True
