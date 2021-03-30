@@ -1942,11 +1942,6 @@ def process_command_line(args):
         options.no_optimizations = True
         options.with_debug_info = True
 
-    if is_windows(options) or options.os == 'darwin':
-        options.build_zlib = True
-        options.build_bzip2 = True
-        options.build_botan = True
-
     options.enabled_modules = []
     options.disabled_modules = []
     options.with_os_features = []
@@ -1968,6 +1963,7 @@ def probe_environment(options):
     if not options.build_zlib and not try_external_command(['pkg-config','--exists','zlib']).success:
         raise UserError('bzip2 package is not found. Use --build-zlib')
 
+
 def configure_back_end(system_command, options):
     """
     Build the back_end library and cli
@@ -1980,6 +1976,7 @@ def configure_back_end(system_command, options):
 
     set_defaults_for_unset_options(options, info_arch, info_cc)
     canonicalize_options(options, info_os, info_arch)
+    probe_environment(options)
 
     logging.info('Autodetected platform information: OS="%s" machine="%s" proc="%s"',
                  platform.system(), platform.machine(), platform.processor())
@@ -2054,7 +2051,6 @@ def main(argv):
     options = process_command_line(argv[1:])
     setup_logging(options)
     logging.info('%s invoked with options "%s"', argv[0], ' '.join(argv[1:]))
-    probe_environment(options)
 
     configure_back_end(argv[0], options)
     if not options.without_qt_ui:
