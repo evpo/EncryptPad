@@ -525,6 +525,8 @@ def set_defaults_for_unset_options(options, info_arch, info_cc): # pylint: disab
         else:
             options.os = system_from_python
         logging.info('Guessing target OS is %s (use --os to set)' % (options.os))
+        if is_windows(options.os):
+            options.os = 'mingw'
 
     def deduce_compiler_type_from_cc_bin(cc_bin):
         if cc_bin.find('clang') != -1 or cc_bin in ['emcc', 'em++']:
