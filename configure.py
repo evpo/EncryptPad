@@ -563,6 +563,8 @@ def set_defaults_for_unset_options(options, info_arch, info_cc): # pylint: disab
         (arch, cpu) = guess_processor(info_arch)
         options.arch = arch
         options.cpu = cpu
+        if is_windows(options):
+            options.cpu = "x86_32"
         logging.info('Guessing target processor is a %s (use --cpu to set)' % (options.arch))
 
     if is_windows(options):
