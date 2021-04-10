@@ -142,6 +142,7 @@ MainWindow::MainWindow():
         connect(proxy, SIGNAL(requestSaveAndQuit(const QString&)), this, SLOT(saveAsAndClose(const QString&)));
 
         connect(proxy, SIGNAL(requestQuit()), this, SLOT(close()));
+        file_request_service_.SetDontUseNativeDialog(true);
     }
 
     SetDefaultMetadataValues(metadata, preferences.defaultFileProperties);

@@ -32,6 +32,9 @@ FileRequestSelection FileRequestService::RequestExistingFile(QWidget *parent, co
                     !file_name.isEmpty() ? file_name : GetValidDirectory(),
                     filter);
 
+    if(GetDontUseNativeDialog())
+        dlg.setOption(QFileDialog::DontUseNativeDialog);
+
     if(selected_filter)
         dlg.setNameFilter(*selected_filter);
 
@@ -55,10 +58,12 @@ FileRequestSelection FileRequestService::RequestNewFile(QWidget *parent, const Q
     ret_val.cancelled = true;
     if(selected_filter)
         ret_val.filter = *selected_filter;
-
+    QFileDialog::Options file_dialog_options = {};
+    if(GetDontUseNativeDialog())
+        file_dialog_options &= QFileDialog::DontUseNativeDialog;
     ret_val.file_name = QFileDialog::getSaveFileName(parent, title,
                                             !file_name.isEmpty() ? file_name : GetValidDirectory(),
-                                            filter, &ret_val.filter);
+                                            filter, &ret_val.filter, file_dialog_options);
 
     ret_val.cancelled = ret_val.file_name.isNull();
     if(!ret_val.cancelled)
