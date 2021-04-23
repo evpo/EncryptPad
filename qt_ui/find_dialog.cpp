@@ -12,6 +12,7 @@ FindDialog::FindDialog(QWidget *parent) :
     ui->setupUi(this);
     setMinimumSize(sizeHint());
     adjustSize();
+    ui->uiFind->setFocus();
 }
 
 FindDialog::~FindDialog()
