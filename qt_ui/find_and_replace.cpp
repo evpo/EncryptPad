@@ -28,7 +28,6 @@ FindAndReplace::FindAndReplace(QWidget *parent) :
     ui->setupUi(this);
     setMinimumSize(sizeHint());
     adjustSize();
-    ui->uiFind->setFocus();
 }
 
 FindAndReplace::~FindAndReplace()
@@ -51,10 +50,15 @@ void FindAndReplace::SetFind(const QString &str)
     ui->uiFind->setText(str);
 }
 
+void FindAndReplace::setFindFocus()
+{
+    ui->uiFind->setFocus();
+}
+
 void FindAndReplace::on_FindAndReplace_finished(int result)
 {
     (void)result;
-    ui->uiFind->setFocus();
+    setFindFocus();
 }
 
 void FindAndReplace::on_uiFindNext_clicked()

@@ -12,7 +12,6 @@ FindDialog::FindDialog(QWidget *parent) :
     ui->setupUi(this);
     setMinimumSize(sizeHint());
     adjustSize();
-    ui->uiFind->setFocus();
 }
 
 FindDialog::~FindDialog()
@@ -23,6 +22,11 @@ FindDialog::~FindDialog()
 void FindDialog::setFindWhat(const QString &text)
 {
     ui->uiFind->setText(text);
+}
+
+void FindDialog::setFindFocus()
+{
+    ui->uiFind->setFocus();
 }
 
 void FindDialog::on_uiFindNext_clicked()
@@ -38,5 +42,5 @@ void FindDialog::on_uiFind_textChanged(const QString &text)
 void FindDialog::on_FindDialog_finished(int result)
 {
     (void)result;
-    ui->uiFind->setFocus();
+    setFindFocus();
 }

@@ -1505,7 +1505,9 @@ void MainWindow::replace()
     QString selectedText = textEdit->textCursor().selectedText();
     if(!selectedText.isEmpty())
         replaceDialog->SetFind(selectedText);
+
     replaceDialog->show();
+    replaceDialog->setFindFocus();
 }
 
 void MainWindow::readOnlyToggled(bool flag)
@@ -1542,6 +1544,7 @@ void MainWindow::search()
         findDialog->setFindWhat(selectedText);
 
     findDialog->show();
+    findDialog->setFindFocus();
 }
 
 void MainWindow::generatePassphrase()
