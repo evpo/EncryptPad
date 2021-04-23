@@ -30,6 +30,7 @@
 #include "file_encryption.h"
 #include "key_service.h"
 #include "get_passphrase.h"
+#include "plog/Severity.h"
 #include "version.h"
 #include "key_generation.h"
 #include "file_helper.h"
@@ -84,6 +85,8 @@ namespace
             "--s2k-digest-algo <s2k-digest-algo>   s2k digest algorithm (SHA1, SHA256, SHA384, SHA512, SHA224; default: SHA256)\n"
             "--s2k-count <s2k-count>               s2k iteration count\n"
             "--key-file-length <length>            key file random sequence length in bytes. Use with --generate-key. default: 64\n"
+            "--log-file                            log file to output diagnotic information\n"
+            "--log-severity                        log severity: verbose, debug, info, warning, error, fatal, none (default: warning)\n"
             "\n"
             "Feedback: evpo.net/encryptpad\n"
             ;
@@ -102,6 +105,44 @@ namespace
     void StringToUpper(std::string &str)
     {
         std::transform(str.begin(), str.end(), str.begin(), ::toupper);
+    }
+
+
+    plog::Severity ParsePlogSeverity(const std::string &str)
+    {
+        using namespace plog;
+        if(str == "none")
+        {
+            return Severity::none;
+        }
+        else if(str == "fatal")
+        {
+            return Severity::fatal;
+        }
+        else if(str == "error")
+        {
+            return Severity::error;
+        }
+        else if(str == "warning")
+        {
+            return Severity::warning;
+        }
+        else if(str == "info")
+        {
+            return Severity::info;
+        }
+        else if(str == "debug")
+        {
+            return Severity::debug;
+        }
+        else if(str == "verbose")
+        {
+            return Severity::verbose;
+        }
+        else
+        {
+            return Severity::warning;
+        }
     }
 
     EncryptMsg::CipherAlgo ParseCipherAlgo(std::string str)
@@ -217,136 +258,119 @@ namespace
 
 void GenerateKeyFile(const std::string &path, size_t key_byte_size, const std::string &passphrase, PacketMetadata *kf_metadata);
 
-#undef END_CLI_DEFINITIONS
-#define END_CLI_DEFINITIONS {nullptr,stlplus::cli_switch_kind,stlplus::cli_single_mode,"",nullptr}
-
-// end Packet read write tests
 int main(int argc, char *argv[])
 {
 
-    //TODO: switch enable / disable later
-    // plog::init(plog::debug, "epad.log");
-    // LOG_INFO << "Log instance started";
+    // cli_definition
+    // --------------
+    // std::string name
+    // cli_kind_t kind
+    // cli_mode_t mode
+    // std::string message
+    // std::string default
 
-    cli_definitions_t cli_defs = {
+    cli_definitions cli_defs = {
         {
             "encrypt",
             cli_kind_t::cli_switch_kind,
             cli_mode_t::cli_single_mode,
             "encrypt data",
-            ""
         },
         {
             "decrypt",
             cli_kind_t::cli_switch_kind,
             cli_mode_t::cli_single_mode,
             "decrypt data",
-            ""
         },
         {
             "generate-key",
             cli_kind_t::cli_switch_kind,
             cli_mode_t::cli_single_mode,
             "generate key file",
-            ""
         },
         {
             "help",
             cli_kind_t::cli_switch_kind,
             cli_mode_t::cli_single_mode,
             "help",
-            ""
         },
         {
             "output",
             cli_kind_t::cli_value_kind,
             cli_mode_t::cli_single_mode,
             "output file",
-            ""
         },
         {
             "armor",
             cli_kind_t::cli_switch_kind,
             cli_mode_t::cli_single_mode,
             "enable ascii armor",
-            ""
         },
         {
             "force",
             cli_kind_t::cli_switch_kind,
             cli_mode_t::cli_single_mode,
             "overwrite output file",
-            ""
         },
         {
             "key-file",
             cli_kind_t::cli_value_kind,
             cli_mode_t::cli_single_mode,
             "key file",
-            ""
         },
         {
             "key-only",
             cli_kind_t::cli_switch_kind,
             cli_mode_t::cli_single_mode,
             "key only, no passphrase",
-            ""
         },
         {
             "persist-key",
             cli_kind_t::cli_switch_kind,
             cli_mode_t::cli_single_mode,
             "persist key location in the encrypted file",
-            ""
         },
         {
             "key-pwd-fd",
             cli_kind_t::cli_value_kind,
             cli_mode_t::cli_single_mode,
             "key file passphrase file descriptor",
-            ""
         },
         {
             "key-pwd-file",
             cli_kind_t::cli_value_kind,
             cli_mode_t::cli_single_mode,
             "key file passphrase file",
-            ""
         },
         {
             "libcurl-path",
             cli_kind_t::cli_value_kind,
             cli_mode_t::cli_single_mode,
             "path to libcurl executable to download remote key files",
-            ""
         },
         {
             "force-key-pwd",
             cli_kind_t::cli_switch_kind,
             cli_mode_t::cli_single_mode,
             "request key passphrase entry",
-            ""
         },
         {
             "plain-text-key",
             cli_kind_t::cli_switch_kind,
             cli_mode_t::cli_single_mode,
             "plain text key",
-            ""
         },
         {
             "pwd-fd",
             cli_kind_t::cli_value_kind,
             cli_mode_t::cli_single_mode,
             "passphrase file descriptor",
-            ""
         },
         {
             "pwd-file",
             cli_kind_t::cli_value_kind,
             cli_mode_t::cli_single_mode,
             "passphrase file",
-            ""
         },
         {
             "cipher-algo",
@@ -374,29 +398,37 @@ int main(int argc, char *argv[])
             cli_kind_t::cli_value_kind,
             cli_mode_t::cli_single_mode,
             "s2k iteration count",
-            ""
         },
         {
             "key-file-length",
             cli_kind_t::cli_value_kind,
             cli_mode_t::cli_single_mode,
             "key file length",
-            ""
+        },
+        {
+            "log-file",
+            cli_kind_t::cli_value_kind,
+            cli_mode_t::cli_single_mode,
+            "log file",
+        },
+        {
+            "log-severity",
+            cli_kind_t::cli_value_kind,
+            cli_mode_t::cli_single_mode,
+            "log severity",
+            "warning"
         },
         {
             "",
             cli_kind_t::cli_value_kind,
             cli_mode_t::cli_single_mode,
             "input file",
-            ""
         },
-
-        {nullptr,stlplus::cli_switch_kind,stlplus::cli_single_mode,"",nullptr},
     };
 
     message_handler messages(std::cerr);
 
-    cli_parser parser(&cli_defs[0], messages);
+    cli_parser parser(cli_defs, messages);
 
     if(!parser.parse(argv))
     {
@@ -437,6 +469,8 @@ int main(int argc, char *argv[])
     std::string s2k_count_str;
     int key_file_length = kDefaultKeyFileKeyLength;
     std::string key_file_length_str;
+    std::string log_file;
+    plog::Severity log_severity;
 
     std::string libcurl_path;
 
@@ -526,6 +560,14 @@ int main(int argc, char *argv[])
         {
             key_file_length_str = parser.string_value(i);
         }
+        else if(parser.name(i) == "log-file")
+        {
+            log_file = parser.string_value(i);
+        }
+        else if(parser.name(i) == "log-severity")
+        {
+            log_severity = ParsePlogSeverity(parser.string_value(i));
+        }
         else if(parser.name(i) == "help")
         {
             PrintUsage(true);
@@ -535,6 +577,12 @@ int main(int argc, char *argv[])
         {
             in_file = parser.string_value(i);
         }
+    }
+
+    if(log_file.size() != 0)
+    {
+        plog::init(log_severity, log_file.c_str());
+        LOG_INFO << "Log instance started";
     }
 
     if(!in_file.empty())
