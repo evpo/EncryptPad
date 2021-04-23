@@ -14,6 +14,8 @@ class FileRequestService
 {
 private:
     QString current_directory_;
+    bool dont_use_native_dialog_ = false;
+
     const QString &GetValidDirectory();
     void SetDirectoryFromFile(const QString &path);
 public:
@@ -35,6 +37,16 @@ public:
                                              const QString &filter, QString *selected_filter = nullptr);
     FileRequestSelection RequestNewFile(QWidget *parent, const QString &title, const QString &file_name,
                                         const QString &filter, QString *selected_filter = nullptr);
+
+    bool GetDontUseNativeDialog() const
+    {
+        return dont_use_native_dialog_;
+    }
+
+    void SetDontUseNativeDialog(bool flag)
+    {
+        dont_use_native_dialog_ = flag;
+    }
 
 };
 
