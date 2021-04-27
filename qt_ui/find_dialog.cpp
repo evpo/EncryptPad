@@ -24,6 +24,11 @@ void FindDialog::setFindWhat(const QString &text)
     ui->uiFind->setText(text);
 }
 
+void FindDialog::setFindFocus()
+{
+    ui->uiFind->setFocus();
+}
+
 void FindDialog::on_uiFindNext_clicked()
 {
     findNext(ui->uiFind->text(), ui->uiDown->isChecked(), ui->uiMatchCase->isChecked(), ui->uiWholeWord->isChecked());
@@ -37,5 +42,5 @@ void FindDialog::on_uiFind_textChanged(const QString &text)
 void FindDialog::on_FindDialog_finished(int result)
 {
     (void)result;
-    ui->uiFind->setFocus();
+    setFindFocus();
 }

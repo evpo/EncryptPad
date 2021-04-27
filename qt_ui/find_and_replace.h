@@ -37,6 +37,7 @@ public:
     QString GetFind() const;
     QString GetReplace() const;
     void SetFind(const QString &str);
+    void setFindFocus();
 
 private:
     Ui::FindAndReplace *ui;

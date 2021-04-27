@@ -16,6 +16,7 @@ public:
     ~FindDialog();
 
     void setFindWhat(const QString &text);
+    void setFindFocus();
 
 private:
     Ui::FindDialog *ui;
