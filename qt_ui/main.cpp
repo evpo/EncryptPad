@@ -28,6 +28,7 @@
 #include "mainwindow.h"
 #include "application.h"
 #include "repository.h"
+#include "diagnostic_log.h"
 #include "plog/Log.h"
 
 namespace
@@ -72,6 +73,8 @@ namespace
     {
         QString fileName;
         QString language;
+        QString logFile;
+        QString logSeverity;
     };
 
     CommandArguments parseArguments(const Application &app)
@@ -96,6 +99,23 @@ namespace
                     return empty;
 
                 retVal.language = queue.front();
+            }
+            else if(arg == "--log-file")
+            {
+                queue.pop_front();
+                if(queue.isEmpty())
+                    return empty;
+
+                retVal.logFile = queue.front();
+
+            }
+            else if(arg == "--log-severity")
+            {
+                queue.pop_front();
+                if(queue.isEmpty())
+                    return empty;
+
+                retVal.logSeverity = queue.front();
             }
             else
             {
@@ -125,12 +145,18 @@ bool loadTranslatorResource(Application &app, QTranslator &translator, const QSt
 int main(int argc, char *argv[])
 {
     Q_INIT_RESOURCE(EncryptPad);
-    // plog::init(plog::debug, "epad.log");
-    // LOG_INFO << "Log instance started";
 
     Application app(argc, argv);
     CommandArguments arguments = parseArguments(app);
     assert(argc >= 1);
+
+    if(!arguments.logFile.isEmpty())
+    {
+        plog::init(EncryptPad::ParsePlogSeverity(arguments.logSeverity.toStdString()),
+                arguments.logFile.toStdString().c_str());
+        LOG_INFO << "Log instance started";
+    }
+
     EncryptPad::InitializeRepositoryPath(argv[0]);
 
     QStringList userLangs;

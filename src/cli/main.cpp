@@ -40,6 +40,7 @@
 #include "plog/Log.h"
 #include "encryptmsg_version.h"
 #include "repository.h"
+#include "diagnostic_log.h"
 
 using namespace EncryptPad;
 using namespace stlplus;
@@ -105,44 +106,6 @@ namespace
     void StringToUpper(std::string &str)
     {
         std::transform(str.begin(), str.end(), str.begin(), ::toupper);
-    }
-
-
-    plog::Severity ParsePlogSeverity(const std::string &str)
-    {
-        using namespace plog;
-        if(str == "none")
-        {
-            return Severity::none;
-        }
-        else if(str == "fatal")
-        {
-            return Severity::fatal;
-        }
-        else if(str == "error")
-        {
-            return Severity::error;
-        }
-        else if(str == "warning")
-        {
-            return Severity::warning;
-        }
-        else if(str == "info")
-        {
-            return Severity::info;
-        }
-        else if(str == "debug")
-        {
-            return Severity::debug;
-        }
-        else if(str == "verbose")
-        {
-            return Severity::verbose;
-        }
-        else
-        {
-            return Severity::warning;
-        }
     }
 
     EncryptMsg::CipherAlgo ParseCipherAlgo(std::string str)
