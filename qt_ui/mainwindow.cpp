@@ -46,6 +46,7 @@
 #include "repository.h"
 #include "encryptmsg_version.h"
 #include "fake_vim_edit.h"
+#include "plog/Log.h"
 
 typedef unsigned char byte;
 
@@ -1356,6 +1357,7 @@ void MainWindow::startSave(const QString &fileName, std::string &kf_passphrase)
 
     {
         QString str = textEdit->toPlainText();
+        LOG_INFO << "took the string from the control";
         QByteArray byteArr;
 
         if(!windowsEol)
@@ -1366,15 +1368,19 @@ void MainWindow::startSave(const QString &fileName, std::string &kf_passphrase)
         {
             ConvertToWindowsEOL(str, byteArr);
         }
+        LOG_INFO << "converted to bytes";
 
         Botan::SecureVector<byte> secureVect;
         secureVect.resize(byteArr.size());
+        LOG_INFO << "resized secure vector";
         std::copy_n(reinterpret_cast<const byte*>(byteArr.constData()), byteArr.size(), secureVect.data());
-        // Botan::SecureVector<byte> secureVect(reinterpret_cast<const byte*>(byteArr.constData()), byteArr.size());
+        LOG_INFO << "copied the bytes to the secure vector";
         if(takeBakFile)
         {
+            LOG_INFO << "taking bak file";
             if(!TakeBakFile(fileName))
             {
+                LOG_ERROR << "taking bak file failed";
                 result = EpadResult::BakFileMoveFailed;
             }
             takeBakFile = false;

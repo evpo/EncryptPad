@@ -21,6 +21,7 @@
 #include <string>
 #include "file_encryption.h"
 #include "file_helper.h"
+#include "plog/Log.h"
 
 using namespace std;
 using namespace EncryptPadEncryptor;
@@ -109,16 +110,19 @@ EpadResult Encryptor::Save(const string &fileName, const SecureVector<byte> &con
 
     if(!is_protected)
     {
+        LOG_INFO << "the file is not protected";
         OutPacketStreamFile file;
         if (OpenFile(fileName, file) != OpenFileResult::OK)
         {
             return EpadResult::IOErrorOutput;
         }
+        LOG_INFO << "unprotected file opened";
 
         if(!file.Write(content.data(), content.size()))
         {
             return EpadResult::IOErrorOutput;
         }
+        LOG_INFO << "unprotected file written";
 
         return EpadResult::Success;
     }
@@ -146,13 +150,19 @@ EpadResult Encryptor::Save(const string &fileName, const SecureVector<byte> &con
         enc_params.key_file_encrypt_params = &kf_encrypt_params;
     }
 
+    LOG_INFO << "calling EncryptPacketFile";
     EpadResult result = EncryptPacketFile(content, fileName, enc_params, *metadata);
 
     if(result != EpadResult::Success)
+    {
+        LOG_ERROR << "EncryptPacketFile failed";
         return result;
+    }
+
     if(metadata->key_only)
         this->SetIsPlainText();
 
+    LOG_INFO << "EncryptPacketFile succeeded";
     return result;
 }
 

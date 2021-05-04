@@ -32,6 +32,7 @@
 #include "get_passphrase_dialog.h"
 #include "set_encryption_key.h"
 #include "get_passphrase_or_key_dialog.h"
+#include "plog/Log.h"
 
 namespace EncryptPad
 {
@@ -228,6 +229,7 @@ namespace EncryptPad
         metadata.cannot_use_wad = isGpg;
         metadata.is_armor = (isGpg && isArmor);
 
+        LOG_INFO << "call StartSave";
         client.StartSave(fileName, kf_passphrase);
         std::fill(std::begin(kf_passphrase), std::end(kf_passphrase), '0');
         return true;

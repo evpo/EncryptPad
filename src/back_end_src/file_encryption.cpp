@@ -35,6 +35,7 @@
 #include "key_service_key_provider.h"
 #include "decryption_state_machine.h"
 #include "epad_result.h"
+#include "plog/Log.h";
 
 using namespace EncryptMsg;
 namespace
@@ -197,6 +198,9 @@ namespace
         bool is_key_file_session = (mode == FileNestingMode::SimpleGPGWithKey || mode == FileNestingMode::WadWithGPG ||
                 mode == FileNestingMode::NestedGPGWithWad);
 
+        LOG_INFO << "passphrase session: " << is_passphrase_session;
+        LOG_INFO << "key file session: " << is_key_file_session;
+
         MessageWriter passphrase_session_writer;
         MessageWriter key_file_session_writer;
         if(is_passphrase_session)
@@ -206,6 +210,7 @@ namespace
             passphrase_session = PreparePassphraseSession(encrypt_params, passphrase_config);
             if(!passphrase_session.IsValid())
                 return passphrase_session.preparation_result;
+            LOG_INFO << "passphrase_session_writer.Start";
             passphrase_session_writer.Start(std::move(passphrase_session.key), passphrase_config, passphrase_session.salt);
         }
 
@@ -215,7 +220,11 @@ namespace
             key_file_config.SetArmor(mode == FileNestingMode::SimpleGPGWithKey && metadata.is_armor);
             key_file_session = PrepareKeyFileSession(encrypt_params, metadata, key_file_config);
             if(!key_file_session.IsValid())
+            {
+                LOG_WARNING << "key file session is not valid";
                 return key_file_session.preparation_result;
+            }
+            LOG_INFO << "key_file_session_writer.Start";
             key_file_session_writer.Start(std::move(key_file_session.key), key_file_config, key_file_session.salt);
         }
 
@@ -233,6 +242,7 @@ namespace
         progress_event.complete_bytes = 0;
 
         SafeVector buf;
+        LOG_INFO << "entering the main loop in EncryptStream";
         // Use do while to process empty files
         do
         {
@@ -242,9 +252,11 @@ namespace
             buf.resize(length);
             MessageWriter *writer = nullptr;
             progress_event.complete_bytes += length;
+            LOG_INFO << "calling progress_callback";
             encrypt_params.progress_callback(progress_event);
             if(progress_event.cancel)
             {
+                LOG_WARNING << "cancel received from progress_callback";
                 result = EpadResult::Cancelled;
                 return result;
             }
@@ -259,14 +271,20 @@ namespace
 
                     result = UpdateOrFinish(*writer, buf, in.IsEOF());
                     if(result != EpadResult::Success)
+                    {
+                        LOG_WARNING << "UpdateOrFinish failed";
                         return result;
+                    }
 
                     break;
 
                 case FileNestingMode::WadWithGPG:
                     result = UpdateOrFinish(key_file_session_writer, buf, in.IsEOF());
                     if(result != EpadResult::Success)
+                    {
+                        LOG_WARNING << "UpdateOrFinish failed";
                         return result;
+                    }
 
                     if(!wad_head_written)
                     {
@@ -278,7 +296,10 @@ namespace
                         }
 
                         if(!WriteWadHead(wad_key_file, wad_payload_size, wad_version, out))
+                        {
+                            LOG_WARNING << "WriteWadHead failed";
                             return EpadResult::IOErrorOutput;
+                        }
                         wad_head_written = true;
                     }
                     break;
@@ -286,7 +307,10 @@ namespace
                 case FileNestingMode::NestedGPGWithWad:
                     result = UpdateOrFinish(key_file_session_writer, buf, in.IsEOF());
                     if(result != EpadResult::Success)
+                    {
+                        LOG_WARNING << "UpdateOrFinish failed";
                         return result;
+                    }
 
                     if(!wad_head_written)
                     {
@@ -298,8 +322,12 @@ namespace
                         }
                         SafeVector wad_head;
                         auto wad_head_out = MakeOutStream(wad_head);
+                        LOG_INFO << "writing WAD head";
                         if(!WriteWadHead(wad_key_file, wad_payload_size, wad_version, *wad_head_out))
+                        {
+                            LOG_WARNING << "WriteWadHead failed";
                             return EpadResult::IOErrorOutput;
+                        }
                         wad_head.resize(wad_head_out->GetCount());
                         buf.insert(buf.begin(), wad_head.cbegin(), wad_head.cend());
                         wad_head_written = true;
@@ -307,7 +335,10 @@ namespace
 
                     result = UpdateOrFinish(passphrase_session_writer, buf, in.IsEOF());
                     if(result != EpadResult::Success)
+                    {
+                        LOG_WARNING << "UpdateOrFinish failed";
                         return result;
+                    }
 
                     break;
 
@@ -317,8 +348,12 @@ namespace
             }
 
             // All cases above should leave buf for writing to the out stream
+            LOG_INFO << "writing the buffer to the output";
             if(!out.Write(buf.data(), buf.size()))
+            {
+                LOG_WARNING << "writing the buffer to the output failed";
                 return EpadResult::IOErrorOutput;
+            }
         }
         while(!in.IsEOF());
 
@@ -391,14 +426,17 @@ namespace EncryptPad
             InPacketStreamMemory stm_in(input_buffer.data(), input_buffer.data() + input_buffer.size());
 
             OutPacketStreamFile out;
+            LOG_INFO << "opening the output file";
             if(OpenFile(file_out, out) != OpenFileResult::OK)
                 return EpadResult::IOErrorOutput;
 
+            LOG_INFO << "call EncryptStream";
             result = EncryptStream(stm_in, encrypt_params, out, metadata); 
         }
 
         if(result != EpadResult::Success)
         {
+            LOG_ERROR << "EncryptStream failed. Deleting the output file that can be incomplete.";
             RemoveFile(file_out);
         }
         return result;
