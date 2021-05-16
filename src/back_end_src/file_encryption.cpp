@@ -35,7 +35,7 @@
 #include "key_service_key_provider.h"
 #include "decryption_state_machine.h"
 #include "epad_result.h"
-#include "plog/Log.h";
+#include "plog/Log.h"
 
 using namespace EncryptMsg;
 namespace

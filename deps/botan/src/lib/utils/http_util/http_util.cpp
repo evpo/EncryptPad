@@ -25,6 +25,7 @@ namespace {
 * closes the socket.
 */
 std::string http_transact(const std::string& hostname,
+		                  const std::string& service,
                           const std::string& message,
                           std::chrono::milliseconds timeout)
    {
@@ -34,7 +35,7 @@ std::string http_transact(const std::string& hostname,
 
    try
       {
-      socket = OS::open_socket(hostname, "http", timeout);
+      socket = OS::open_socket(hostname, service, timeout);
       if(!socket)
          throw Not_Implemented("No socket support enabled in build");
       }
@@ -117,7 +118,7 @@ Response http_sync(http_exch_fn http_transact,
 
    const auto host_loc_sep = url.find('/', protocol_host_sep + 3);
 
-   std::string hostname, loc;
+   std::string hostname, loc, service;
 
    if(host_loc_sep == std::string::npos)
       {
@@ -128,6 +129,18 @@ Response http_sync(http_exch_fn http_transact,
       {
       hostname = url.substr(protocol_host_sep + 3, host_loc_sep-protocol_host_sep-3);
       loc = url.substr(host_loc_sep, std::string::npos);
+      }
+
+   const auto port_sep = hostname.find(":");
+   if(port_sep == std::string::npos)
+      {
+      service = "http";
+      // hostname not modified
+      }
+   else
+      {
+      service = hostname.substr(port_sep + 1, std::string::npos);
+      hostname = hostname.substr(0, port_sep);
       }
 
    std::ostringstream outbuf;
@@ -148,7 +161,7 @@ Response http_sync(http_exch_fn http_transact,
    outbuf << "Connection: close\r\n\r\n";
    outbuf.write(cast_uint8_ptr_to_char(body.data()), body.size());
 
-   std::istringstream io(http_transact(hostname, outbuf.str()));
+   std::istringstream io(http_transact(hostname, service, outbuf.str()));
 
    std::string line1;
    std::getline(io, line1);
@@ -219,9 +232,9 @@ Response http_sync(const std::string& verb,
                    std::chrono::milliseconds timeout)
    {
    auto transact_with_timeout =
-      [timeout](const std::string& hostname, const std::string& service)
+      [timeout](const std::string& hostname, const std::string& service, const std::string& message)
       {
-      return http_transact(hostname, service, timeout);
+      return http_transact(hostname, service, message, timeout);
       };
 
    return http_sync(

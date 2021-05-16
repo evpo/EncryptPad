@@ -11,7 +11,6 @@
 #include <botan/psk_db.h>
 
 #if defined(BOTAN_HAS_SQLITE3)
-  #include <botan/psk_db_sql.h>
   #include <botan/sqlite3.h>
 #endif
 
@@ -252,7 +251,7 @@ class PSK_DB_Tests final : public Test
 
    };
 
-BOTAN_REGISTER_TEST("psk_db", PSK_DB_Tests);
+BOTAN_REGISTER_TEST("misc", "psk_db", PSK_DB_Tests);
 
 }
 

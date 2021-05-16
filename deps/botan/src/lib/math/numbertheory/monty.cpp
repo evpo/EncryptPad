@@ -49,7 +49,8 @@ Montgomery_Params::Montgomery_Params(const BigInt& p)
 
 BigInt Montgomery_Params::inv_mod_p(const BigInt& x) const
    {
-   return ct_inverse_mod_odd_modulus(x, p());
+   // TODO use Montgomery inverse here?
+   return inverse_mod(x, p());
    }
 
 BigInt Montgomery_Params::redc(const BigInt& x, secure_vector<word>& ws) const
@@ -272,13 +273,7 @@ void Montgomery_Int::fix_size()
    if(m_v.sig_words() > p_words)
       throw Internal_Error("Montgomery_Int::fix_size v too large");
 
-   secure_vector<word>& w = m_v.get_word_vector();
-
-   if(w.size() != p_words)
-      {
-      w.resize(p_words);
-      w.shrink_to_fit();
-      }
+   m_v.grow_to(p_words);
    }
 
 bool Montgomery_Int::operator==(const Montgomery_Int& other) const

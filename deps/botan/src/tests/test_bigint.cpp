@@ -154,22 +154,20 @@ class BigInt_Unit_Tests final : public Test
 
       Test::Result test_get_substring()
          {
-         const size_t trials = 1000;
-
          Test::Result result("BigInt get_substring");
 
-         const Botan::BigInt r(Test::rng(), 250);
+         const size_t rbits = 1024;
 
-         for(size_t s = 1; s <= 32; ++s)
+         const Botan::BigInt r(Test::rng(), rbits);
+
+         for(size_t wlen = 1; wlen <= 32; ++wlen)
             {
-            for(size_t trial = 0; trial != trials; ++trial)
+            for(size_t offset = 0; offset != rbits + 64; ++offset)
                {
-               const size_t offset = Test::rng().next_byte();
-
-               const uint32_t val = r.get_substring(offset, s);
+               const uint32_t val = r.get_substring(offset, wlen);
 
                Botan::BigInt t = r >> offset;
-               t.mask_bits(s);
+               t.mask_bits(wlen);
 
                const uint32_t cmp = t.to_u32bit();
 
@@ -219,7 +217,51 @@ class BigInt_Unit_Tests final : public Test
          }
    };
 
-BOTAN_REGISTER_TEST("bigint_unit", BigInt_Unit_Tests);
+BOTAN_REGISTER_TEST("math", "bigint_unit", BigInt_Unit_Tests);
+
+class BigInt_Cmp_Test final : public Text_Based_Test
+   {
+   public:
+      BigInt_Cmp_Test() : Text_Based_Test("bn/cmp.vec", "X,Y,R") {}
+
+      Test::Result run_one_test(const std::string& op, const VarMap& vars) override
+         {
+         Test::Result result("BigInt Comparison " + op);
+
+         const BigInt x = vars.get_req_bn("X");
+         const BigInt y = vars.get_req_bn("Y");
+         const bool expected = vars.get_req_bool("R");
+
+         if(op == "EQ")
+            {
+            result.confirm("Values equal", x == y, expected);
+            }
+         else if(op == "LT")
+            {
+            result.confirm("Values LT", x < y, expected);
+
+            if(expected)
+               result.confirm("If LT then reverse is GT", y >= x);
+            else
+               result.confirm("If not LT then GTE", x >= y);
+            }
+         else if(op == "LTE")
+            {
+            result.confirm("Values LTE", x <= y, expected);
+
+            if(expected)
+               result.confirm("If LTE then either LT or EQ", x < y || x == y);
+            else
+               result.confirm("If not LTE then GT", x > y);
+            }
+         else
+            throw Test_Error("Unknown BigInt comparison type " + op);
+
+         return result;
+         }
+   };
+
+BOTAN_REGISTER_TEST("math", "bn_cmp", BigInt_Cmp_Test);
 
 class BigInt_Add_Test final : public Text_Based_Test
    {
@@ -252,7 +294,7 @@ class BigInt_Add_Test final : public Text_Based_Test
 
    };
 
-BOTAN_REGISTER_TEST("bn_add", BigInt_Add_Test);
+BOTAN_REGISTER_TEST("math", "bn_add", BigInt_Add_Test);
 
 class BigInt_Sub_Test final : public Text_Based_Test
    {
@@ -277,7 +319,7 @@ class BigInt_Sub_Test final : public Text_Based_Test
          }
    };
 
-BOTAN_REGISTER_TEST("bn_sub", BigInt_Sub_Test);
+BOTAN_REGISTER_TEST("math", "bn_sub", BigInt_Sub_Test);
 
 class BigInt_Mul_Test final : public Text_Based_Test
    {
@@ -307,7 +349,7 @@ class BigInt_Mul_Test final : public Text_Based_Test
          }
    };
 
-BOTAN_REGISTER_TEST("bn_mul", BigInt_Mul_Test);
+BOTAN_REGISTER_TEST("math", "bn_mul", BigInt_Mul_Test);
 
 class BigInt_Sqr_Test final : public Text_Based_Test
    {
@@ -328,7 +370,7 @@ class BigInt_Sqr_Test final : public Text_Based_Test
          }
    };
 
-BOTAN_REGISTER_TEST("bn_sqr", BigInt_Sqr_Test);
+BOTAN_REGISTER_TEST("math", "bn_sqr", BigInt_Sqr_Test);
 
 class BigInt_Div_Test final : public Text_Based_Test
    {
@@ -367,7 +409,7 @@ class BigInt_Div_Test final : public Text_Based_Test
          }
    };
 
-BOTAN_REGISTER_TEST("bn_div", BigInt_Div_Test);
+BOTAN_REGISTER_TEST("math", "bn_div", BigInt_Div_Test);
 
 class BigInt_Mod_Test final : public Text_Based_Test
    {
@@ -419,7 +461,7 @@ class BigInt_Mod_Test final : public Text_Based_Test
          }
    };
 
-BOTAN_REGISTER_TEST("bn_mod", BigInt_Mod_Test);
+BOTAN_REGISTER_TEST("math", "bn_mod", BigInt_Mod_Test);
 
 class BigInt_GCD_Test final : public Text_Based_Test
    {
@@ -442,7 +484,7 @@ class BigInt_GCD_Test final : public Text_Based_Test
          }
    };
 
-BOTAN_REGISTER_TEST("bn_gcd", BigInt_GCD_Test);
+BOTAN_REGISTER_TEST("math", "bn_gcd", BigInt_GCD_Test);
 
 class BigInt_Jacobi_Test final : public Text_Based_Test
    {
@@ -470,7 +512,7 @@ class BigInt_Jacobi_Test final : public Text_Based_Test
          }
    };
 
-BOTAN_REGISTER_TEST("bn_jacobi", BigInt_Jacobi_Test);
+BOTAN_REGISTER_TEST("math", "bn_jacobi", BigInt_Jacobi_Test);
 
 class BigInt_Lshift_Test final : public Text_Based_Test
    {
@@ -495,7 +537,7 @@ class BigInt_Lshift_Test final : public Text_Based_Test
          }
    };
 
-BOTAN_REGISTER_TEST("bn_lshift", BigInt_Lshift_Test);
+BOTAN_REGISTER_TEST("math", "bn_lshift", BigInt_Lshift_Test);
 
 class BigInt_Rshift_Test final : public Text_Based_Test
    {
@@ -520,7 +562,7 @@ class BigInt_Rshift_Test final : public Text_Based_Test
          }
    };
 
-BOTAN_REGISTER_TEST("bn_rshift", BigInt_Rshift_Test);
+BOTAN_REGISTER_TEST("math", "bn_rshift", BigInt_Rshift_Test);
 
 class BigInt_Powmod_Test final : public Text_Based_Test
    {
@@ -573,7 +615,7 @@ class BigInt_Powmod_Test final : public Text_Based_Test
          }
    };
 
-BOTAN_REGISTER_TEST("bn_powmod", BigInt_Powmod_Test);
+BOTAN_REGISTER_TEST("math", "bn_powmod", BigInt_Powmod_Test);
 
 class BigInt_IsPrime_Test final : public Text_Based_Test
    {
@@ -597,7 +639,7 @@ class BigInt_IsPrime_Test final : public Text_Based_Test
          }
    };
 
-BOTAN_REGISTER_TEST("bn_isprime", BigInt_IsPrime_Test);
+BOTAN_REGISTER_TEST("math", "bn_isprime", BigInt_IsPrime_Test);
 
 class BigInt_IsSquare_Test final : public Text_Based_Test
    {
@@ -616,7 +658,7 @@ class BigInt_IsSquare_Test final : public Text_Based_Test
          }
    };
 
-BOTAN_REGISTER_TEST("bn_issquare", BigInt_IsSquare_Test);
+BOTAN_REGISTER_TEST("math", "bn_issquare", BigInt_IsSquare_Test);
 
 class BigInt_Ressol_Test final : public Text_Based_Test
    {
@@ -645,7 +687,7 @@ class BigInt_Ressol_Test final : public Text_Based_Test
          }
    };
 
-BOTAN_REGISTER_TEST("bn_ressol", BigInt_Ressol_Test);
+BOTAN_REGISTER_TEST("math", "bn_ressol", BigInt_Ressol_Test);
 
 class BigInt_InvMod_Test final : public Text_Based_Test
    {
@@ -660,7 +702,7 @@ class BigInt_InvMod_Test final : public Text_Based_Test
          const Botan::BigInt mod = vars.get_req_bn("Modulus");
          const Botan::BigInt expected = vars.get_req_bn("Output");
 
-         const Botan::BigInt a_inv = Botan::inverse_euclid(a, mod);
+         const Botan::BigInt a_inv = Botan::inverse_mod(a, mod);
 
          result.test_eq("inverse_mod", a_inv, expected);
 
@@ -668,13 +710,12 @@ class BigInt_InvMod_Test final : public Text_Based_Test
             {
             result.test_eq("inverse ok", (a * a_inv) % mod, 1);
             }
-
-         if(mod.is_odd() && a < mod)
+         /*
+         else if((a % mod) > 0)
             {
-            result.test_eq("ct_inverse_odd_modulus",
-                           ct_inverse_mod_odd_modulus(a, mod),
-                           expected);
+            result.confirm("no inverse with gcd > 1", gcd(a, mod) > 1);
             }
+         */
 
          if(mod.is_odd() && a_inv != 0)
             {
@@ -687,7 +728,7 @@ class BigInt_InvMod_Test final : public Text_Based_Test
          }
    };
 
-BOTAN_REGISTER_TEST("bn_invmod", BigInt_InvMod_Test);
+BOTAN_REGISTER_TEST("math", "bn_invmod", BigInt_InvMod_Test);
 
 class BigInt_Rand_Test final : public Text_Based_Test
    {
@@ -712,7 +753,7 @@ class BigInt_Rand_Test final : public Text_Based_Test
          }
    };
 
-BOTAN_REGISTER_TEST("bn_rand", BigInt_Rand_Test);
+BOTAN_REGISTER_TEST("math", "bn_rand", BigInt_Rand_Test);
 
 class Lucas_Primality_Test final : public Test
    {
@@ -753,7 +794,7 @@ class Lucas_Primality_Test final : public Test
          }
    };
 
-BOTAN_REGISTER_TEST("bn_lucas", Lucas_Primality_Test);
+BOTAN_REGISTER_TEST("math", "bn_lucas", Lucas_Primality_Test);
 
 class DSA_ParamGen_Test final : public Text_Based_Test
    {
@@ -801,7 +842,7 @@ class DSA_ParamGen_Test final : public Text_Based_Test
          }
    };
 
-BOTAN_REGISTER_TEST("dsa_param", DSA_ParamGen_Test);
+BOTAN_REGISTER_TEST("math", "dsa_param", DSA_ParamGen_Test);
 
 #endif
 

@@ -60,8 +60,8 @@ sha2_64_bmi2
 sha3_bmi2
 
 # modes
-clmul_cpu
-clmul_ssse3
+ghash_cpu
+ghash_vperm
 
 # hash
 sha2_32_x86
@@ -70,12 +70,10 @@ sha2_32_armv8
 # entropy sources
 dev_random
 proc_walk
-rdrand
 rdseed
 win32_stats
 
 # rng
-rdrand_rng
 system_rng
 
 # utils

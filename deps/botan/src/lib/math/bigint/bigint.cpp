@@ -89,14 +89,13 @@ BigInt::BigInt(const uint8_t input[], size_t length, Base base)
 
 BigInt::BigInt(const uint8_t buf[], size_t length, size_t max_bits)
    {
-   const size_t max_bytes = std::min(length, (max_bits + 7) / 8);
-   binary_decode(buf, max_bytes);
+   if(8 * length > max_bits)
+      length = (max_bits + 7) / 8;
 
-   const size_t b = this->bits();
-   if(b > max_bits)
-      {
-      *this >>= (b - max_bits);
-      }
+   binary_decode(buf, length);
+
+   if(8 * length > max_bits)
+      *this >>= (8 - (max_bits % 8));
    }
 
 /*
@@ -166,8 +165,8 @@ bool BigInt::is_less_than(const BigInt& other) const
 
    if(other.is_negative() && this->is_negative())
       {
-      return !bigint_ct_is_lt(other.data(), other.sig_words(),
-                              this->data(), this->sig_words(), true).is_set();
+      return bigint_ct_is_lt(other.data(), other.sig_words(),
+                             this->data(), this->sig_words()).is_set();
       }
 
    return bigint_ct_is_lt(this->data(), this->sig_words(),
@@ -216,18 +215,27 @@ uint32_t BigInt::get_substring(size_t offset, size_t length) const
    if(length == 0 || length > 32)
       throw Invalid_Argument("BigInt::get_substring invalid substring length");
 
-   const size_t byte_offset = offset / 8;
-   const size_t shift = (offset % 8);
    const uint32_t mask = 0xFFFFFFFF >> (32 - length);
 
-   const uint8_t b0 = byte_at(byte_offset);
-   const uint8_t b1 = byte_at(byte_offset + 1);
-   const uint8_t b2 = byte_at(byte_offset + 2);
-   const uint8_t b3 = byte_at(byte_offset + 3);
-   const uint8_t b4 = byte_at(byte_offset + 4);
-   const uint64_t piece = make_uint64(0, 0, 0, b4, b3, b2, b1, b0);
+   const size_t word_offset = offset / BOTAN_MP_WORD_BITS;
+   const size_t wshift = (offset % BOTAN_MP_WORD_BITS);
 
-   return static_cast<uint32_t>((piece >> shift) & mask);
+   /*
+   * The substring is contained within one or at most two words. The
+   * offset and length are not secret, so we can perform conditional
+   * operations on those values.
+   */
+   const word w0 = word_at(word_offset);
+
+   if(wshift == 0 || (offset + length) / BOTAN_MP_WORD_BITS == word_offset)
+      {
+      return static_cast<uint32_t>(w0 >> wshift) & mask;
+      }
+   else
+      {
+      const word w1 = word_at(word_offset + 1);
+      return static_cast<uint32_t>((w0 >> wshift) | (w1 << (BOTAN_MP_WORD_BITS - wshift))) & mask;
+      }
    }
 
 /*
@@ -444,6 +452,17 @@ void BigInt::binary_decode(const uint8_t buf[], size_t length)
    m_data.swap(reg);
    }
 
+void BigInt::ct_cond_add(bool predicate, const BigInt& value)
+   {
+   if(this->is_negative() || value.is_negative())
+      throw Invalid_Argument("BigInt::ct_cond_add requires both values to be positive");
+   this->grow_to(1 + value.sig_words());
+
+   bigint_cnd_add(static_cast<word>(predicate),
+                  this->mutable_data(), this->size(),
+                  value.data(), value.sig_words());
+   }
+
 void BigInt::ct_cond_swap(bool predicate, BigInt& other)
    {
    const size_t max_words = std::max(size(), other.size());
@@ -485,10 +504,8 @@ void BigInt::ct_cond_assign(bool predicate, const BigInt& other)
       this->set_word_at(i, mask.select(o_word, t_word));
       }
 
-   if(sign() != other.sign())
-      {
-      cond_flip_sign(predicate);
-      }
+   const bool different_sign = sign() != other.sign();
+   cond_flip_sign(predicate && different_sign);
    }
 
 #if defined(BOTAN_HAS_VALGRIND)

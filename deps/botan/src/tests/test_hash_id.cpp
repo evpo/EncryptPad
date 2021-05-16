@@ -9,7 +9,7 @@
 #if defined(BOTAN_HAS_HASH_ID) && defined(BOTAN_HAS_ASN1)
   #include <botan/hash_id.h>
   #include <botan/der_enc.h>
-  #include <botan/alg_id.h>
+  #include <botan/asn1_obj.h>
 #endif
 
 namespace Botan_Tests {
@@ -87,7 +87,7 @@ class PKCS_HashID_Test final : public Test
          }
    };
 
-BOTAN_REGISTER_TEST("pkcs_hash_id", PKCS_HashID_Test);
+BOTAN_REGISTER_TEST("pubkey", "pkcs_hash_id", PKCS_HashID_Test);
 #endif
 
 }

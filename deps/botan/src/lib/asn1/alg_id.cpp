@@ -5,7 +5,7 @@
 * Botan is released under the Simplified BSD License (see license.txt)
 */
 
-#include <botan/alg_id.h>
+#include <botan/asn1_obj.h>
 #include <botan/der_enc.h>
 #include <botan/ber_dec.h>
 #include <botan/oids.h>
@@ -57,35 +57,28 @@ AlgorithmIdentifier::AlgorithmIdentifier(const std::string& alg_id,
       parameters.assign(DER_NULL, DER_NULL + 2);
    }
 
-/*
-* Compare two AlgorithmIdentifiers
-*/
-namespace {
-
-bool param_null_or_empty(const std::vector<uint8_t>& p)
+bool AlgorithmIdentifier::parameters_are_null() const
    {
-   if(p.size() == 2 && (p[0] == 0x05) && (p[1] == 0x00))
-      return true;
-   return p.empty();
+   return (parameters.size() == 2 && (parameters[0] == 0x05) && (parameters[1] == 0x00));
    }
-
-}
 
 bool operator==(const AlgorithmIdentifier& a1, const AlgorithmIdentifier& a2)
    {
    if(a1.get_oid() != a2.get_oid())
       return false;
 
-   if(param_null_or_empty(a1.get_parameters()) &&
-      param_null_or_empty(a2.get_parameters()))
+   /*
+   * Treat NULL and empty as equivalent
+   */
+   if(a1.parameters_are_null_or_empty() &&
+      a2.parameters_are_null_or_empty())
+      {
       return true;
+      }
 
    return (a1.get_parameters() == a2.get_parameters());
    }
 
-/*
-* Compare two AlgorithmIdentifiers
-*/
 bool operator!=(const AlgorithmIdentifier& a1, const AlgorithmIdentifier& a2)
    {
    return !(a1 == a2);

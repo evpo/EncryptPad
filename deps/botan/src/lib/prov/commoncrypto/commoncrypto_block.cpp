@@ -5,13 +5,12 @@
 * Botan is released under the Simplified BSD License (see license.txt)
 */
 
-#include <botan/hex.h>
-
-#include <botan/block_cipher.h>
 #include <botan/internal/commoncrypto.h>
-#include <CommonCrypto/CommonCrypto.h>
+#include <botan/internal/commoncrypto_utils.h>
+#include <botan/hex.h>
+#include <botan/block_cipher.h>
 
-#include "commoncrypto_utils.h"
+#include <CommonCrypto/CommonCrypto.h>
 
 namespace Botan {
 
@@ -98,6 +97,7 @@ void CommonCrypto_BlockCipher::key_schedule(const uint8_t key[], size_t length)
    {
    secure_vector<uint8_t> full_key(key, key + length);
 
+   clear();
    commoncrypto_adjust_key_size(key, length, m_opts, full_key);
 
    CCCryptorStatus status;
@@ -131,6 +131,18 @@ BlockCipher* CommonCrypto_BlockCipher::clone() const
 void CommonCrypto_BlockCipher::clear()
    {
    m_key_set = false;
+
+   if(m_encrypt)
+      {
+      CCCryptorRelease(m_encrypt);
+      m_encrypt = nullptr;
+      }
+
+   if(m_decrypt)
+      {
+      CCCryptorRelease(m_decrypt);
+      m_decrypt = nullptr;
+      }
    }
 }
 
@@ -140,7 +152,7 @@ make_commoncrypto_block_cipher(const std::string& name)
 
    try
       {
-      CommonCryptor_Opts opts = commoncrypto_opts_from_algo(name);
+      CommonCryptor_Opts opts = commoncrypto_opts_from_algo_name(name);
       return std::unique_ptr<BlockCipher>(new CommonCrypto_BlockCipher(name, opts));
       }
    catch(CommonCrypto_Error& e)

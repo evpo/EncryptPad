@@ -6,6 +6,14 @@ h2
 </style>
 ## Release Notes ##
 
+### Version 0.5.0.1
+
+* FakeVim mode to enable editing files with Vim-like interface
+* The lock icon has been replaced with a page and lock with the higher quality of the image.
+* Botan has been updated to version 2.18.1
+* The build system has been improved to support more distributions
+* Bug fix: Opening search dialog by using 'CTRL-F' doesn't focus on the find text field
+
 ### Version 0.5.0.0
 
 * ASCII armor

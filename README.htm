@@ -48,6 +48,12 @@
 </ul>
 </li>
 <li><a href="#portable-mode">Portable mode</a></li>
+<li><a href="#fakevim-mode">FakeVim mode</a>
+
+<ul>
+<li><a href="#fakevim-input-output">FakeVim: input and output commands</a></li>
+</ul>
+</li>
 <li><a href="#passphrases-in-memory">Does EncryptPad store passphrases in the memory to reopen files?</a></li>
 <li><a href="#acknowledgements">Acknowledgements</a></li>
 <li><a href="#integrity-verification">EncryptPad integrity verification</a>
@@ -76,6 +82,7 @@
 <li><strong>Key repository</strong> in a hidden directory in the user&rsquo;s home folder</li>
 <li>Path to a key file can be stored in an encrypted file. If enabled, <strong>you do not need to specify the key file</strong> every time you open files.</li>
 <li>Encryption of <strong>binary files</strong> (images, videos, archives etc.)</li>
+<li><strong>FakeVim</strong> mode to edit files by using Vim-like user interface</li>
 <li><strong>Read only</strong> mode to prevent accidental file modification</li>
 <li><strong>UTF8</strong> text encoding</li>
 <li>Windows/Unix <strong>configurable line endings</strong></li>
@@ -562,6 +569,63 @@ make
 
 <p>EncryptPad checks the executable directory for a sub-directory called <code>encryptpad_repository</code>. If exists, it is used for key files and settings. The directory <code>.encryptpad</code> in the user&rsquo;s profile is then ignored. The EncryptPad executable and <code>encryptpad_repository</code> can both be copied to a removable media and used on multiple computers. It should be noted that keeping encrypted material with the key files on the same removable media is less secure. Separate them if possible.</p>
 
+<div id="fakevim-mode"></div>
+
+
+<h2>FakeVim mode</h2>
+
+<p>FakeVim mode lets edit files with Vim-like interface.</p>
+
+<p>To enable the mode:</p>
+
+<ol>
+<li>open Settings&hellip; / Preferences &hellip;</li>
+<li>Set &ldquo;Enable FakeVim&rdquo;</li>
+<li>Restart EncryptPad</li>
+</ol>
+
+
+<p>To configure FakeVim create and edit the file at the location below:</p>
+
+<p>Linux and macOS:</p>
+
+<pre><code>~/.encryptpad/vimrc
+</code></pre>
+
+<p>On Windows in the user profile directory:</p>
+
+<pre><code>_encryptpad/vimrc
+</code></pre>
+
+<p>You can find more information about FakeVim interface at <a href="https://github.com/hluk/FakeVim">FakeVim library web page</a></p>
+
+<div id="fakevim-input-output"></div>
+
+
+<h3>FakeVim: input and output commands</h3>
+
+<p>The ex mode supports commands to read and write files. The input and output commands are integrated with the following EncryptPad operations:</p>
+
+<pre><code>:r &lt;file&gt; - File / Open...
+
+:w - File / Save
+
+:w &lt;file&gt; - File / Save As...
+
+:q - File / Exit
+</code></pre>
+
+<p>The combinations of the above commands are also supported:</p>
+
+<pre><code>:wq
+:wq &lt;file&gt;
+</code></pre>
+
+<p>Vim + register integrates with the system clipboard. You can also add the below line to the vimrc file to integrate the unnamed register with the system clipboard:</p>
+
+<pre><code>set clipboard=unnamedplus
+</code></pre>
+
 <div id="passphrases-in-memory"></div>
 
 
@@ -585,6 +649,7 @@ make
 <li><a href="http://code.google.com/p/googletest/"><strong>gtest</strong></a></li>
 <li><a href="http://www.famfamfam.com/lab/icons/silk/"><strong>famfamfam Silk iconset 1.3</strong></a></li>
 <li><a href="https://github.com/SergiusTheBest/plog"><strong>plog</strong></a></li>
+<li><a href="https://github.com/hluk/FakeVim"><strong>FakeVim</strong></a></li>
 </ol>
 
 

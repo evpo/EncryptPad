@@ -36,7 +36,7 @@ BOTAN_PUBLIC_API(2,3) void deallocate_memory(void* p, size_t elems, size_t elem_
 /**
 * Ensure the allocator is initialized
 */
-void initialize_allocator();
+void BOTAN_UNSTABLE_API initialize_allocator();
 
 class Allocator_Initializer
    {
@@ -87,7 +87,10 @@ inline bool constant_time_compare(const uint8_t x[],
    }
 
 /**
-* Zero out some bytes
+* Zero out some bytes. Warning: use secure_scrub_memory instead if the
+* memory is about to be freed or otherwise the compiler thinks it can
+* elide the writes.
+*
 * @param ptr a pointer to memory to zero
 * @param bytes the number of bytes to zero in ptr
 */
@@ -114,10 +117,8 @@ template<typename T> inline void clear_mem(T* ptr, size_t n)
    clear_bytes(ptr, sizeof(T)*n);
    }
 
-
-
 // is_trivially_copyable is missing in g++ < 5.0
-#if !__clang__ && __GNUG__ && __GNUC__ < 5
+#if (BOTAN_GCC_VERSION > 0 && BOTAN_GCC_VERSION < 500)
 #define BOTAN_IS_TRIVIALLY_COPYABLE(T) true
 #else
 #define BOTAN_IS_TRIVIALLY_COPYABLE(T) std::is_trivially_copyable<T>::value
@@ -221,6 +222,35 @@ template<typename T> inline bool same_mem(const T* p1, const T* p2, size_t n)
       difference |= (p1[i] ^ p2[i]);
 
    return difference == 0;
+   }
+
+template<typename T, typename Alloc>
+size_t buffer_insert(std::vector<T, Alloc>& buf,
+                     size_t buf_offset,
+                     const T input[],
+                     size_t input_length)
+   {
+   BOTAN_ASSERT_NOMSG(buf_offset <= buf.size());
+   const size_t to_copy = std::min(input_length, buf.size() - buf_offset);
+   if(to_copy > 0)
+      {
+      copy_mem(&buf[buf_offset], input, to_copy);
+      }
+   return to_copy;
+   }
+
+template<typename T, typename Alloc, typename Alloc2>
+size_t buffer_insert(std::vector<T, Alloc>& buf,
+                     size_t buf_offset,
+                     const std::vector<T, Alloc2>& input)
+   {
+   BOTAN_ASSERT_NOMSG(buf_offset <= buf.size());
+   const size_t to_copy = std::min(input.size(), buf.size() - buf_offset);
+   if(to_copy > 0)
+      {
+      copy_mem(&buf[buf_offset], input.data(), to_copy);
+      }
+   return to_copy;
    }
 
 /**

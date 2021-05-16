@@ -60,7 +60,7 @@ class URI_Tests final : public Test
                {"[::1]:61234", Botan::URI::Type::IPv6, "::1", 61234},
             };
 
-         for(const auto t : tests)
+         for(const auto& t : tests)
             {
             auto test_URI = [&result](const Botan::URI& uri, const std::string& host, const unsigned port)
                {
@@ -113,7 +113,7 @@ class URI_Tests final : public Test
          }
    };
 
-BOTAN_REGISTER_TEST("uri", URI_Tests);
+BOTAN_REGISTER_TEST("utils", "uri", URI_Tests);
 
 }  // namespace Botan_Tests
 

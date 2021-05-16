@@ -18,14 +18,12 @@ namespace Botan {
 */
 GCM_Mode::GCM_Mode(BlockCipher* cipher, size_t tag_size) :
    m_tag_size(tag_size),
-   m_cipher_name(cipher->name())
+   m_cipher_name(cipher->name()),
+   m_ctr(new CTR_BE(cipher, 4)),
+   m_ghash(new GHASH)
    {
    if(cipher->block_size() != GCM_BS)
       throw Invalid_Argument("Invalid block cipher for GCM");
-
-   m_ghash.reset(new GHASH);
-
-   m_ctr.reset(new CTR_BE(cipher, 4)); // CTR_BE takes ownership of cipher
 
    /* We allow any of the values 128, 120, 112, 104, or 96 bits as a tag size */
    /* 64 bit tag is still supported but deprecated and will be removed in the future */
@@ -95,7 +93,10 @@ void GCM_Mode::start_msg(const uint8_t nonce[], size_t nonce_len)
    if(!valid_nonce_length(nonce_len))
       throw Invalid_IV_Length(name(), nonce_len);
 
-   m_y0.resize(GCM_BS);
+   if(m_y0.size() != GCM_BS)
+      m_y0.resize(GCM_BS);
+
+   clear_mem(m_y0.data(), m_y0.size());
 
    if(nonce_len == 12)
       {
@@ -109,11 +110,11 @@ void GCM_Mode::start_msg(const uint8_t nonce[], size_t nonce_len)
 
    m_ctr->set_iv(m_y0.data(), m_y0.size());
 
-   zeroise(m_y0);
+   clear_mem(m_y0.data(), m_y0.size());
    m_ctr->encipher(m_y0);
 
    m_ghash->start(m_y0.data(), m_y0.size());
-   m_y0.clear();
+   clear_mem(m_y0.data(), m_y0.size());
    }
 
 size_t GCM_Encryption::process(uint8_t buf[], size_t sz)

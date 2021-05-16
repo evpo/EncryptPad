@@ -5,13 +5,12 @@
 * Botan is released under the Simplified BSD License (see license.txt)
 */
 
+#include <botan/internal/commoncrypto.h>
+#include <botan/internal/commoncrypto_utils.h>
 #include <botan/cipher_mode.h>
 #include <botan/parsing.h>
-#include <botan/internal/commoncrypto.h>
 #include <botan/internal/rounding.h>
 #include <botan/scan_name.h>
-
-#include "commoncrypto_utils.h"
 
 namespace Botan {
 
@@ -49,14 +48,8 @@ std::string CommonCrypto_Error::ccryptorstatus_to_string(CCCryptorStatus status)
    };
 
 
-CommonCryptor_Opts commoncrypto_opts_from_algo(const std::string& algo)
+CommonCryptor_Opts commoncrypto_opts_from_algo_name(const std::string& algo_name)
    {
-   SCAN_Name spec(algo);
-
-   std::string algo_name = spec.algo_name();
-   std::string cipher_mode = spec.cipher_mode();
-   std::string cipher_mode_padding = spec.cipher_mode_pad();
-
    CommonCryptor_Opts opts;
 
    if(algo_name.compare(0, 3, "AES") == 0)
@@ -110,6 +103,20 @@ CommonCryptor_Opts commoncrypto_opts_from_algo(const std::string& algo)
       {
       throw CommonCrypto_Error("Unsupported cipher");
       }
+
+   return opts;
+   }
+
+
+CommonCryptor_Opts commoncrypto_opts_from_algo(const std::string& algo)
+   {
+   SCAN_Name spec(algo);
+
+   std::string algo_name = spec.algo_name();
+   std::string cipher_mode = spec.cipher_mode();
+   std::string cipher_mode_padding = spec.cipher_mode_pad();
+
+   CommonCryptor_Opts opts = commoncrypto_opts_from_algo_name(algo_name);
 
    //TODO add CFB and XTS support
    if(cipher_mode.empty() || cipher_mode == "ECB")

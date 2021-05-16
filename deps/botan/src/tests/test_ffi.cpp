@@ -201,6 +201,7 @@ class FFI_Unit_Tests final : public Test
          botan_rng_t system_rng;
          botan_rng_t rdrand_rng = nullptr;
          botan_rng_t null_rng;
+         botan_rng_t custom_rng;
 
          TEST_FFI_FAIL("invalid rng type", botan_rng_init, (&rng, "invalid_type"));
 
@@ -247,6 +248,50 @@ class FFI_Unit_Tests final : public Test
             TEST_FFI_OK(botan_rng_add_entropy, (rng, not_really_entropy, 32));
             }
 
+         size_t cb_counter = 0;
+
+         auto custom_get_cb = [](void* context, uint8_t* out, size_t out_len) -> int
+            {
+            Botan::set_mem(out, out_len, 0x12);
+            BOTAN_UNUSED(out, out_len);
+            (*(static_cast<size_t*>(context)))++;
+            return 0;
+            };
+
+         auto custom_add_entropy_cb = [](void* context, const uint8_t input[], size_t length) -> int
+            {
+            BOTAN_UNUSED(input, length);
+            (*(static_cast<size_t*>(context)))++;
+            return 0;
+            };
+
+         auto custom_destroy_cb = [](void* context) -> void
+            {
+            (*(static_cast<size_t*>(context)))++;
+            };
+
+         if(TEST_FFI_OK(botan_rng_init_custom, (&custom_rng, "custom rng", &cb_counter, custom_get_cb, custom_add_entropy_cb, custom_destroy_cb)))
+            {
+               Botan::clear_mem(outbuf.data(), outbuf.size());
+               TEST_FFI_OK(botan_rng_get, (custom_rng, outbuf.data(), outbuf.size()));
+               result.test_eq("custom_get_cb called", cb_counter, 1);
+               std::vector<uint8_t> pattern(outbuf.size(), 0x12);
+               result.test_eq("custom_get_cb returned bytes", pattern, outbuf);
+
+               TEST_FFI_OK(botan_rng_reseed, (custom_rng, 256));
+               result.test_eq("custom_add_entropy_cb called", cb_counter, 2);
+
+               TEST_FFI_OK(botan_rng_reseed_from_rng, (custom_rng, system_rng, 256));
+               result.test_eq("custom_add_entropy_cb called", cb_counter, 3);
+
+               uint8_t not_really_entropy[32] = { 0 };
+               TEST_FFI_OK(botan_rng_add_entropy, (custom_rng, not_really_entropy, 32));
+               result.test_eq("custom_add_entropy_cb called", cb_counter, 4);
+
+               TEST_FFI_OK(botan_rng_destroy, (custom_rng));
+               result.test_eq("custom_destroy_cb called", cb_counter, 5);
+            }
+
          TEST_FFI_OK(botan_rng_destroy, (rng));
          TEST_FFI_OK(botan_rng_destroy, (null_rng));
          TEST_FFI_OK(botan_rng_destroy, (system_rng));
@@ -287,7 +332,7 @@ class FFI_Unit_Tests final : public Test
          Test::Result result("FFI CRL");
 
 #if defined(BOTAN_HAS_X509_CERTIFICATES)
-         
+
          const char *crl_string = "-----BEGIN X509 CRL-----\n"
                                  "MIICoTCCAQkCAQEwDQYJKoZIhvcNAQELBQAwgZQxLTArBgNVBAMTJFVzYWJsZSBj\n"
                                  "ZXJ0IHZhbGlkYXRpb246IFRlbXBvcmFyeSBDQTE5MDcGA1UECxMwQ2VudHJlIGZv\n"
@@ -305,18 +350,18 @@ class FFI_Unit_Tests final : public Test
                                  "RnIoBwjnrGoJoz636KS170SZCB9ARNs17WE4IvbJdZrTXNOGaVZCQUUpiLRj4ZSO\n"
                                  "Na/nobI=\n"
                                  "-----END X509 CRL-----";
-         
+
          botan_x509_crl_t bytecrl;
-         REQUIRE_FFI_OK(botan_x509_crl_load, (&bytecrl, (const uint8_t*)crl_string, 966));
+         REQUIRE_FFI_OK(botan_x509_crl_load, (&bytecrl, reinterpret_cast<const uint8_t*>(crl_string), 966));
 
          botan_x509_crl_t crl;
          REQUIRE_FFI_OK(botan_x509_crl_load_file, (&crl, Test::data_file("x509/nist/root.crl").c_str()));
-         
+
          botan_x509_cert_t cert1;
          REQUIRE_FFI_OK(botan_x509_cert_load_file, (&cert1, Test::data_file("x509/nist/test01/end.crt").c_str()));
          TEST_FFI_RC(-1, botan_x509_is_revoked, (crl, cert1));
          TEST_FFI_OK(botan_x509_cert_destroy, (cert1));
-            
+
          botan_x509_cert_t cert2;
          REQUIRE_FFI_OK(botan_x509_cert_load_file, (&cert2, Test::data_file("x509/nist/test20/int.crt").c_str()));
          TEST_FFI_RC(0, botan_x509_is_revoked, (crl, cert2));
@@ -390,7 +435,7 @@ class FFI_Unit_Tests final : public Test
          result.confirm("Validation failed", rc == 5000);
          result.test_eq("Validation status string", botan_x509_cert_validation_status(rc),
                         "Certificate is revoked");
-         
+
          TEST_FFI_OK(botan_x509_cert_destroy, (end2));
          TEST_FFI_OK(botan_x509_cert_destroy, (sub2));
          TEST_FFI_OK(botan_x509_cert_destroy, (end7));
@@ -2081,49 +2126,53 @@ class FFI_Unit_Tests final : public Test
 
          std::vector<uint8_t> message(1280), signature;
          TEST_FFI_OK(botan_rng_get, (rng, message.data(), message.size()));
-         botan_pk_op_sign_t signer;
-         if(TEST_FFI_OK(botan_pk_op_sign_create, (&signer, loaded_privkey, "EMSA1(SHA-384)", 0)))
+
+         for(uint32_t flags = 0; flags <= 1; ++flags)
             {
-            // TODO: break input into multiple calls to update
-            TEST_FFI_OK(botan_pk_op_sign_update, (signer, message.data(), message.size()));
+            botan_pk_op_sign_t signer;
+            if(TEST_FFI_OK(botan_pk_op_sign_create, (&signer, loaded_privkey, "EMSA1(SHA-384)", flags)))
+               {
+               // TODO: break input into multiple calls to update
+               TEST_FFI_OK(botan_pk_op_sign_update, (signer, message.data(), message.size()));
 
-            size_t sig_len;
-            TEST_FFI_OK(botan_pk_op_sign_output_length, (signer, &sig_len));
+               size_t sig_len;
+               TEST_FFI_OK(botan_pk_op_sign_output_length, (signer, &sig_len));
 
-            signature.resize(sig_len);
+               signature.resize(sig_len);
 
-            size_t output_sig_len = signature.size();
-            TEST_FFI_OK(botan_pk_op_sign_finish, (signer, rng, signature.data(), &output_sig_len));
-            signature.resize(output_sig_len);
+               size_t output_sig_len = signature.size();
+               TEST_FFI_OK(botan_pk_op_sign_finish, (signer, rng, signature.data(), &output_sig_len));
+               signature.resize(output_sig_len);
 
-            TEST_FFI_OK(botan_pk_op_sign_destroy, (signer));
-            }
+               TEST_FFI_OK(botan_pk_op_sign_destroy, (signer));
+               }
 
-         botan_pk_op_verify_t verifier = nullptr;
+            botan_pk_op_verify_t verifier = nullptr;
 
-         if(signature.size() > 0 && TEST_FFI_OK(botan_pk_op_verify_create, (&verifier, pub, "EMSA1(SHA-384)", 0)))
-            {
-            TEST_FFI_OK(botan_pk_op_verify_update, (verifier, message.data(), message.size()));
-            TEST_FFI_OK(botan_pk_op_verify_finish, (verifier, signature.data(), signature.size()));
+            if(signature.size() > 0 && TEST_FFI_OK(botan_pk_op_verify_create, (&verifier, pub, "EMSA1(SHA-384)", flags)))
+               {
+               TEST_FFI_OK(botan_pk_op_verify_update, (verifier, message.data(), message.size()));
+               TEST_FFI_OK(botan_pk_op_verify_finish, (verifier, signature.data(), signature.size()));
 
-            // TODO: randomize this
-            signature[0] ^= 1;
-            TEST_FFI_OK(botan_pk_op_verify_update, (verifier, message.data(), message.size()));
-            TEST_FFI_RC(BOTAN_FFI_INVALID_VERIFIER, botan_pk_op_verify_finish, (verifier, signature.data(), signature.size()));
+               // TODO: randomize this
+               signature[0] ^= 1;
+               TEST_FFI_OK(botan_pk_op_verify_update, (verifier, message.data(), message.size()));
+               TEST_FFI_RC(BOTAN_FFI_INVALID_VERIFIER, botan_pk_op_verify_finish, (verifier, signature.data(), signature.size()));
 
-            message[0] ^= 1;
-            TEST_FFI_OK(botan_pk_op_verify_update, (verifier, message.data(), message.size()));
-            TEST_FFI_RC(BOTAN_FFI_INVALID_VERIFIER, botan_pk_op_verify_finish, (verifier, signature.data(), signature.size()));
+               message[0] ^= 1;
+               TEST_FFI_OK(botan_pk_op_verify_update, (verifier, message.data(), message.size()));
+               TEST_FFI_RC(BOTAN_FFI_INVALID_VERIFIER, botan_pk_op_verify_finish, (verifier, signature.data(), signature.size()));
 
-            signature[0] ^= 1;
-            TEST_FFI_OK(botan_pk_op_verify_update, (verifier, message.data(), message.size()));
-            TEST_FFI_RC(BOTAN_FFI_INVALID_VERIFIER, botan_pk_op_verify_finish, (verifier, signature.data(), signature.size()));
+               signature[0] ^= 1;
+               TEST_FFI_OK(botan_pk_op_verify_update, (verifier, message.data(), message.size()));
+               TEST_FFI_RC(BOTAN_FFI_INVALID_VERIFIER, botan_pk_op_verify_finish, (verifier, signature.data(), signature.size()));
 
-            message[0] ^= 1;
-            TEST_FFI_OK(botan_pk_op_verify_update, (verifier, message.data(), message.size()));
-            TEST_FFI_OK(botan_pk_op_verify_finish, (verifier, signature.data(), signature.size()));
+               message[0] ^= 1;
+               TEST_FFI_OK(botan_pk_op_verify_update, (verifier, message.data(), message.size()));
+               TEST_FFI_OK(botan_pk_op_verify_finish, (verifier, signature.data(), signature.size()));
 
-            TEST_FFI_OK(botan_pk_op_verify_destroy, (verifier));
+               TEST_FFI_OK(botan_pk_op_verify_destroy, (verifier));
+               }
             }
 
          TEST_FFI_OK(botan_mp_destroy, (private_scalar));
@@ -2792,7 +2841,7 @@ class FFI_Unit_Tests final : public Test
 
    };
 
-BOTAN_REGISTER_TEST("ffi", FFI_Unit_Tests);
+BOTAN_REGISTER_TEST("ffi", "ffi", FFI_Unit_Tests);
 
 #endif
 

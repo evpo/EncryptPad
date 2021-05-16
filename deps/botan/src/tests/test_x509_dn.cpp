@@ -7,7 +7,7 @@
 #include "tests.h"
 
 #if defined(BOTAN_HAS_X509_CERTIFICATES)
-   #include <botan/x509_dn.h>
+   #include <botan/pkix_types.h>
    #include <botan/ber_dec.h>
 #endif
 
@@ -63,7 +63,7 @@ class X509_DN_Comparisons_Tests final : public Text_Based_Test
          }
    };
 
-BOTAN_REGISTER_TEST("x509_dn_cmp", X509_DN_Comparisons_Tests);
+BOTAN_REGISTER_TEST("x509", "x509_dn_cmp", X509_DN_Comparisons_Tests);
 #endif
 
 }

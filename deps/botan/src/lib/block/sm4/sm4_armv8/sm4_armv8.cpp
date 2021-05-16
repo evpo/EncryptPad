@@ -11,10 +11,17 @@ namespace Botan {
 
 namespace {
 
+static const uint8_t qswap_tbl[16] = {
+   12, 13, 14, 15, 8, 9, 10, 11, 4, 5, 6, 7, 0, 1, 2, 3
+};
+
+static const uint8_t bswap_tbl[16] = {
+   15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0
+};
+
 inline uint32x4_t qswap_32(uint32x4_t B)
    {
-   static const uint8x16_t tbl = (uint8x16_t){12, 13, 14, 15, 8, 9, 10, 11, 4, 5, 6, 7, 0, 1, 2, 3 };
-   return vreinterpretq_u32_u8(vqtbl1q_u8(vreinterpretq_u8_u32(B), tbl));
+   return vreinterpretq_u32_u8(vqtbl1q_u8(vreinterpretq_u8_u32(B), vld1q_u8(qswap_tbl)));
    }
 
 inline uint32x4_t bswap_32(uint32x4_t B)
@@ -28,8 +35,7 @@ inline uint32x4_t bswap_32(uint32x4_t B)
 */
 inline uint32x4_t bqswap_32(uint32x4_t B)
    {
-   static const uint8x16_t tbl = (uint8x16_t){15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0 };
-   return vreinterpretq_u32_u8(vqtbl1q_u8(vreinterpretq_u8_u32(B), tbl));
+   return vreinterpretq_u32_u8(vqtbl1q_u8(vreinterpretq_u8_u32(B), vld1q_u8(bswap_tbl)));
    }
 
 #define SM4_E(B0, B1, B2, B3, K) do { \
@@ -41,8 +47,8 @@ inline uint32x4_t bqswap_32(uint32x4_t B)
 
 }
 
-BOTAN_FUNC_ISA("+sm4")
-void SM4::sm4_armv8_encrypt(const uint8_t input8[], uint8_t output8[], size_t blocks) const
+void BOTAN_FUNC_ISA("arch=armv8.2-a+sm4")
+SM4::sm4_armv8_encrypt(const uint8_t input8[], uint8_t output8[], size_t blocks) const
    {
    const uint32x4_t K0 = vld1q_u32(&m_RK[ 0]);
    const uint32x4_t K1 = vld1q_u32(&m_RK[ 4]);
@@ -102,8 +108,8 @@ void SM4::sm4_armv8_encrypt(const uint8_t input8[], uint8_t output8[], size_t bl
       }
    }
 
-BOTAN_FUNC_ISA("+sm4")
-void SM4::sm4_armv8_decrypt(const uint8_t input8[], uint8_t output8[], size_t blocks) const
+void BOTAN_FUNC_ISA("arch=armv8.2-a+sm4")
+SM4::sm4_armv8_decrypt(const uint8_t input8[], uint8_t output8[], size_t blocks) const
    {
    const uint32x4_t K0 = qswap_32(vld1q_u32(&m_RK[ 0]));
    const uint32x4_t K1 = qswap_32(vld1q_u32(&m_RK[ 4]));

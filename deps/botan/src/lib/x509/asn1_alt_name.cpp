@@ -6,14 +6,13 @@
 * Botan is released under the Simplified BSD License (see license.txt)
 */
 
-#include <botan/asn1_alt_name.h>
+#include <botan/pkix_types.h>
 #include <botan/der_enc.h>
 #include <botan/ber_dec.h>
 #include <botan/oids.h>
 #include <botan/internal/stl_util.h>
 #include <botan/parsing.h>
 #include <botan/loadstor.h>
-#include <botan/x509_dn.h>
 
 #include <sstream>
 
@@ -103,6 +102,20 @@ std::vector<std::string> AlternativeName::get_attribute(const std::string& attr)
    for(auto i = range.first; i != range.second; ++i)
       results.push_back(i->second);
    return results;
+   }
+
+X509_DN AlternativeName::dn() const
+   {
+   X509_DN dn;
+   auto range = m_alt_info.equal_range("DN");
+
+   for(auto i = range.first; i != range.second; ++i)
+      {
+      std::istringstream strm(i->second);
+      strm >> dn;
+      }
+
+   return dn;
    }
 
 /*

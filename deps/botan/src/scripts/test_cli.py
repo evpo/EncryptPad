@@ -89,6 +89,9 @@ def test_cli(cmd, cmd_options, expected_output=None, cmd_input=None, expected_st
         else:
             if stderr != expected_stderr:
                 logging.error("Got output on stderr %s which did not match expected value %s", stderr, expected_stderr)
+    else:
+        if expected_stderr is not None:
+            logging.error('Expected output on stderr but got nothing')
 
     output = stdout.decode('ascii').strip()
 
@@ -138,7 +141,7 @@ def cli_version_tests(_tmp_dir):
         logging.error("Unexpected version output %s" % (output))
 
     output = test_cli("version", ["--full"], None, None)
-    version_full_re = re.compile(r'Botan [0-9]\.[0-9]+\.[0-9] \(.* revision .*, distribution .*\)')
+    version_full_re = re.compile(r'Botan [0-9]\.[0-9]+\.[0-9] \(.* revision .*, distribution .*\)$')
     if not version_full_re.match(output):
         logging.error("Unexpected version output %s" % (output))
 
@@ -150,6 +153,19 @@ def cli_is_prime_tests(_tmp_dir):
 def cli_gen_prime_tests(_tmp_dir):
     test_cli("gen_prime", "64", "15568813029901363163")
     test_cli("gen_prime", "128", "287193909494025008847286845478788766073")
+
+def cli_cycle_counter(_tmp_dir):
+    output = test_cli("cpu_clock", None, None)
+
+    if output.startswith('No CPU cycle counter on this machine'):
+        return
+
+    have_clock_re = re.compile(r'Estimated CPU clock [0-9\.]+ (M|G)Hz')
+
+    if have_clock_re.match(output):
+        return
+
+    logging.error('Unexpected output from cpu_clock: %s', output)
 
 def cli_entropy_tests(_tmp_dir):
     output = test_cli("entropy", ["all"], None)
@@ -253,12 +269,12 @@ def cli_argon2_tests(_tmp_dir):
 def cli_gen_dl_group_tests(_tmp_dir):
 
     pem = """-----BEGIN X9.42 DH PARAMETERS-----
-MIIBJAKBgwVcMHlFVo64S86Y5KrlClZrIibOQ6iKm8Ih3Eb53XoQiSc33GtilRmP
-f7qKIVI86meoJHVU7gtaJk82yAYk6BksmZn0eXvUU7zD8yF/yH3yym0SfI0eH1OC
-2+esfGblePpHCtt5uO56pzIqCIpOq+8gTG7JbFHJvTb8nwmAWFLZvjepAoGDBHOP
-e5A/RNyeXz+16+7Jjh4QOXWo/c6kM0WrIHgFbaIkupRndG5bcy8aCjsbgiIpeWy1
-aNDURFB3UR3q1Si0gA7cvirDOH7lnN3C9zeohq+VPy5L7S3gKLGB1HXY/r2qLKhM
-6ziphMYZxtr+XhsbxbA/+MuNoP/He+kwlGLtDKiBdF4CFjgPiPatvmWssQw2AuZ9
+MIIBJAKBgwTw7LQiLkXJsrgMVQxTPlWaQlYz/raZ+5RtIZe4YluQgRQGPFADLZ/t
+TOYzuIzZJFOcdKtEtrVkxZRGSkjZwKFKLUD6fzSjoC2M2EHktK/y5HsvxBxL4tKr
+q1ffbyPQi+iBLYTZAXygvxj2vWyrvA+/w4nbt1fStCHTDhWjLWqFpV9nAoGDAKzA
+HUu/IRl7OiUtW/dz36gzEJnaYtz4ZtJl0FG8RJiOe02lD8myqW2sVzYqMvKD0LGx
+x9fdSKC1G+aZ/NWtqrQjb66Daf7b0ddDx+bfWTWJ2dOtZd8IL2rmQQJm+JogDi9i
+huVYFicDNQGzi+nEKAzrZ1L/VxtiSiw/qw0IyOuVtz8CFjgPiPatvmWssQw2AuZ9
 mFvAZ/8wal0=
 -----END X9.42 DH PARAMETERS-----"""
 
@@ -821,18 +837,20 @@ def cli_tls_socket_tests(tmp_dir):
                                    '--port=%d' % (server_port), server_cert, priv_key],
                                   stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-    time.sleep(.5)
+    wait_time = 1.0
+
+    time.sleep(wait_time)
 
     tls_client = subprocess.Popen([CLI_PATH, 'tls_client', 'localhost',
                                    '--port=%d' % (server_port), '--trusted-cas=%s' % (ca_cert)],
                                   stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-    time.sleep(.5)
+    time.sleep(wait_time)
 
     tls_client.stdin.write(client_msg)
     tls_client.stdin.flush()
 
-    time.sleep(.5)
+    time.sleep(wait_time)
 
     (stdout, stderr) = tls_client.communicate()
 
@@ -882,7 +900,8 @@ def cli_tls_http_server_tests(tmp_dir):
                                    '--port=%d' % (server_port), server_cert, priv_key],
                                   stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-    time.sleep(.5)
+    wait_time = 1.0
+    time.sleep(wait_time)
 
     context = ssl.create_default_context(cafile=ca_cert)
     conn = HTTPSConnection('localhost', port=server_port, context=context)
@@ -961,7 +980,9 @@ def cli_tls_proxy_tests(tmp_dir):
                                   server_cert, priv_key, '--output=/tmp/proxy.err', '--max-clients=2'],
                                  stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-    time.sleep(.5)
+    wait_time = 1.0
+
+    time.sleep(wait_time)
 
     server_response = binascii.hexlify(os.urandom(32))
 
@@ -980,7 +1001,7 @@ def cli_tls_proxy_tests(tmp_dir):
     http_thread.daemon = True
     http_thread.start()
 
-    time.sleep(.5)
+    time.sleep(wait_time)
 
     context = ssl.create_default_context(cafile=ca_cert)
 
@@ -1112,7 +1133,7 @@ def cli_speed_pk_tests(_tmp_dir):
 
     pk_algos = ["ECDSA", "ECDH", "SM2", "ECKCDSA", "ECGDSA", "GOST-34.10",
                 "DH", "DSA", "ElGamal", "Ed25519", "Curve25519", "NEWHOPE", "McEliece",
-                "RSA", "XMSS"]
+                "RSA", "RSA_keygen", "XMSS"]
 
     output = test_cli("speed", ["--msec=%d" % (msec)] + pk_algos, None).split('\n')
 
@@ -1132,6 +1153,62 @@ def cli_speed_pbkdf_tests(_tmp_dir):
         for line in output:
             if format_re.match(line) is None:
                 logging.error("Unexpected line %s", line)
+
+def cli_speed_table_tests(_tmp_dir):
+    msec = 1
+
+    version_re = re.compile(r'^Botan 2\.[0-9]+\.[0-9] \(.*, revision .*, distribution .*\)')
+    cpuid_re = re.compile(r'^CPUID: [a-z_0-9 ]*$')
+    format_re = re.compile(r'^AES-128 .* buffer size [0-9]+ bytes: [0-9]+\.[0-9]+ MiB\/sec .*\([0-9]+\.[0-9]+ MiB in [0-9]+\.[0-9]+ ms\)')
+    tbl_hdr_re = re.compile(r'^algo +operation +1024 bytes$')
+    tbl_val_re = re.compile(r'^AES-128 +(encrypt|decrypt) +[0-9]+(\.[0-9]{2})$')
+
+    output = test_cli("speed", ["--format=table", "--provider=base", "--msec=%d" % (msec), "AES-128"], None).split('\n')
+
+    if len(output) != 11:
+        logging.error('Unexpected number of lines from table output')
+
+    if version_re.match(output[0]) is None:
+        logging.error("Unexpected version line %s", output[0])
+
+    if output[1] != '':
+        if cpuid_re.match(output[1]) is None:
+            logging.error("Unexpected cpuid line %s", output[1])
+    elif output[2] != '':
+        logging.error("Expected newline got %s", output[2])
+
+    if format_re.match(output[3]) is None:
+        logging.error("Unexpected line %s", output[3])
+    if format_re.match(output[4]) is None:
+        logging.error("Unexpected line %s", output[4])
+    if output[5] != '':
+        logging.error("Expected newline got %s", output[5])
+
+    if tbl_hdr_re.match(output[6]) is None:
+        logging.error("Unexpected table header %s", output[6])
+    if tbl_val_re.match(output[7]) is None:
+        logging.error("Unexpected table header %s", output[7])
+    if tbl_val_re.match(output[8]) is None:
+        logging.error("Unexpected table header %s", output[8])
+    if output[9] != '':
+        logging.error("Expected newline got %s", output[9])
+    if output[10].find('results are the number of 1000s bytes processed per second') < 0:
+        logging.error("Unexpected trailing message got %s", output[10])
+
+def cli_speed_invalid_option_tests(_tmp_dir):
+    speed_usage = b"Usage: speed --msec=500 --format=default --ecc-groups= --provider= --buf-size=1024 --clear-cpuid= --cpu-clock-speed=0 --cpu-clock-ratio=1.0 *algos\n"
+
+    test_cli("speed", ["--buf-size=0", "--msec=1", "AES-128"],
+             expected_stderr=b"Usage error: Cannot have a zero-sized buffer\n%s" % (speed_usage))
+
+    test_cli("speed", ["--buf-size=F00F", "--msec=1", "AES-128"],
+             expected_stderr=b"Usage error: Invalid integer value 'F00F' for option buf-size\n%s" % (speed_usage))
+
+    test_cli("speed", ["--buf-size=90000000", "--msec=1", "AES-128"],
+             expected_stderr=b"Usage error: Specified buffer size is too large\n%s" % (speed_usage))
+
+    test_cli("speed", ["--clear-cpuid=goku", "--msec=1", "AES-128"],
+             expected_stderr=b"Warning don't know CPUID flag 'goku'\n")
 
 def cli_speed_math_tests(_tmp_dir):
     msec = 1
@@ -1270,6 +1347,8 @@ def main(args=None):
         cli_speed_pk_tests,
         cli_speed_math_tests,
         cli_speed_pbkdf_tests,
+        cli_speed_table_tests,
+        cli_speed_invalid_option_tests,
         cli_xmss_sign_tests,
 
         cli_argon2_tests,
@@ -1279,6 +1358,7 @@ def main(args=None):
         cli_base64_tests,
         cli_bcrypt_tests,
         cli_cc_enc_tests,
+        cli_cycle_counter,
         cli_cert_issuance_tests,
         cli_compress_tests,
         cli_config_tests,

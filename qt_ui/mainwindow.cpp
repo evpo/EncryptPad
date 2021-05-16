@@ -578,6 +578,7 @@ bool MainWindow::saveAs()
         selectedFilter = GetFileFilterFromFileName(curFile);
     }
 
+    LOG_INFO << "selectedFilter: " << selectedFilter.toStdString();
     FileRequestSelection selection = file_request_service_.RequestNewFile(
                 this,
                 tr("Save File As"),

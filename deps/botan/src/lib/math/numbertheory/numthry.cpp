@@ -10,9 +10,8 @@
 #include <botan/monty.h>
 #include <botan/divide.h>
 #include <botan/rng.h>
-#include <botan/internal/bit_ops.h>
-#include <botan/internal/mp_core.h>
 #include <botan/internal/ct_utils.h>
+#include <botan/internal/mp_core.h>
 #include <botan/internal/monty_exp.h>
 #include <botan/internal/primality.h>
 #include <algorithm>
@@ -41,41 +40,65 @@ size_t low_zero_bits(const BigInt& n)
    {
    size_t low_zero = 0;
 
-   if(n.is_positive() && n.is_nonzero())
-      {
-      for(size_t i = 0; i != n.size(); ++i)
-         {
-         const word x = n.word_at(i);
+   auto seen_nonempty_word = CT::Mask<word>::cleared();
 
-         if(x)
-            {
-            low_zero += ctz(x);
-            break;
-            }
-         else
-            low_zero += BOTAN_MP_WORD_BITS;
-         }
+   for(size_t i = 0; i != n.size(); ++i)
+      {
+      const word x = n.word_at(i);
+
+      // ctz(0) will return sizeof(word)
+      const size_t tz_x = ctz(x);
+
+      // if x > 0 we want to count tz_x in total but not any
+      // further words, so set the mask after the addition
+      low_zero += seen_nonempty_word.if_not_set_return(tz_x);
+
+      seen_nonempty_word |= CT::Mask<word>::expand(x);
       }
 
-   return low_zero;
+   // if we saw no words with x > 0 then n == 0 and the value we have
+   // computed is meaningless. Instead return 0 in that case.
+   return seen_nonempty_word.if_set_return(low_zero);
    }
+
+namespace {
+
+size_t safegcd_loop_bound(size_t f_bits, size_t g_bits)
+   {
+   const size_t d = std::max(f_bits, g_bits);
+
+   if(d < 46)
+      return (49*d + 80) / 17;
+   else
+      return (49*d + 57) / 17;
+   }
+
+}
 
 /*
 * Calculate the GCD
 */
 BigInt gcd(const BigInt& a, const BigInt& b)
    {
-   if(a.is_zero() || b.is_zero())
-      return 0;
+   if(a.is_zero())
+      return abs(b);
+   if(b.is_zero())
+      return abs(a);
    if(a == 1 || b == 1)
       return 1;
 
+   // See https://gcd.cr.yp.to/safegcd-20190413.pdf fig 1.2
+
    BigInt f = a;
    BigInt g = b;
+   f.const_time_poison();
+   g.const_time_poison();
+
    f.set_sign(BigInt::Positive);
    g.set_sign(BigInt::Positive);
 
    const size_t common2s = std::min(low_zero_bits(f), low_zero_bits(g));
+   CT::unpoison(common2s);
 
    f >>= common2s;
    g >>= common2s;
@@ -84,32 +107,32 @@ BigInt gcd(const BigInt& a, const BigInt& b)
 
    int32_t delta = 1;
 
-   const size_t loop_cnt = 4 + 3*std::max(f.bits(), g.bits());
+   const size_t loop_cnt = safegcd_loop_bound(f.bits(), g.bits());
 
    BigInt newg, t;
    for(size_t i = 0; i != loop_cnt; ++i)
       {
-      g.shrink_to_fit();
-      f.shrink_to_fit();
       sub_abs(newg, f, g);
 
       const bool need_swap = (g.is_odd() && delta > 0);
 
-      // if(need_swap) delta *= -1
-      delta *= CT::Mask<uint8_t>::expand(need_swap).select(0, 2) - 1;
+      // if(need_swap) { delta *= -1 } else { delta *= 1 }
+      delta *= CT::Mask<uint8_t>::expand(need_swap).if_not_set_return(2) - 1;
       f.ct_cond_swap(need_swap, g);
       g.ct_cond_swap(need_swap, newg);
 
       delta += 1;
 
-      t = g;
-      t += f;
-      g.ct_cond_assign(g.is_odd(), t);
-
+      g.ct_cond_add(g.is_odd(), f);
       g >>= 1;
       }
 
    f <<= common2s;
+
+   f.const_time_unpoison();
+   g.const_time_unpoison();
+
+   BOTAN_ASSERT_NOMSG(g.is_zero());
 
    return f;
    }
@@ -120,329 +143,6 @@ BigInt gcd(const BigInt& a, const BigInt& b)
 BigInt lcm(const BigInt& a, const BigInt& b)
    {
    return ct_divide(a * b, gcd(a, b));
-   }
-
-/*
-Sets result to a^-1 * 2^k mod a
-with n <= k <= 2n
-Returns k
-
-"The Montgomery Modular Inverse - Revisited" Çetin Koç, E. Savas
-https://citeseerx.ist.psu.edu/viewdoc/citations?doi=10.1.1.75.8377
-
-A const time implementation of this algorithm is described in
-"Constant Time Modular Inversion" Joppe W. Bos
-http://www.joppebos.com/files/CTInversion.pdf
-*/
-size_t almost_montgomery_inverse(BigInt& result,
-                                 const BigInt& a,
-                                 const BigInt& p)
-   {
-   size_t k = 0;
-
-   BigInt u = p, v = a, r = 0, s = 1;
-
-   while(v > 0)
-      {
-      if(u.is_even())
-         {
-         u >>= 1;
-         s <<= 1;
-         }
-      else if(v.is_even())
-         {
-         v >>= 1;
-         r <<= 1;
-         }
-      else if(u > v)
-         {
-         u -= v;
-         u >>= 1;
-         r += s;
-         s <<= 1;
-         }
-      else
-         {
-         v -= u;
-         v >>= 1;
-         s += r;
-         r <<= 1;
-         }
-
-      ++k;
-      }
-
-   if(r >= p)
-      {
-      r -= p;
-      }
-
-   result = p - r;
-
-   return k;
-   }
-
-BigInt normalized_montgomery_inverse(const BigInt& a, const BigInt& p)
-   {
-   BigInt r;
-   size_t k = almost_montgomery_inverse(r, a, p);
-
-   for(size_t i = 0; i != k; ++i)
-      {
-      if(r.is_odd())
-         r += p;
-      r >>= 1;
-      }
-
-   return r;
-   }
-
-BigInt ct_inverse_mod_odd_modulus(const BigInt& n, const BigInt& mod)
-   {
-   if(n.is_negative() || mod.is_negative())
-      throw Invalid_Argument("ct_inverse_mod_odd_modulus: arguments must be non-negative");
-   if(mod < 3 || mod.is_even())
-      throw Invalid_Argument("Bad modulus to ct_inverse_mod_odd_modulus");
-   if(n >= mod)
-      throw Invalid_Argument("ct_inverse_mod_odd_modulus n >= mod not supported");
-
-   /*
-   This uses a modular inversion algorithm designed by Niels Möller
-   and implemented in Nettle. The same algorithm was later also
-   adapted to GMP in mpn_sec_invert.
-
-   It can be easily implemented in a way that does not depend on
-   secret branches or memory lookups, providing resistance against
-   some forms of side channel attack.
-
-   There is also a description of the algorithm in Appendix 5 of "Fast
-   Software Polynomial Multiplication on ARM Processors using the NEON Engine"
-   by Danilo Câmara, Conrado P. L. Gouvêa, Julio López, and Ricardo
-   Dahab in LNCS 8182
-      https://conradoplg.cryptoland.net/files/2010/12/mocrysen13.pdf
-
-   Thanks to Niels for creating the algorithm, explaining some things
-   about it, and the reference to the paper.
-   */
-
-   // todo allow this to be pre-calculated and passed in as arg
-   BigInt mp1o2 = (mod + 1) >> 1;
-
-   const size_t mod_words = mod.sig_words();
-   BOTAN_ASSERT(mod_words > 0, "Not empty");
-
-   BigInt a = n;
-   BigInt b = mod;
-   BigInt u = 1, v = 0;
-
-   a.grow_to(mod_words);
-   u.grow_to(mod_words);
-   v.grow_to(mod_words);
-   mp1o2.grow_to(mod_words);
-
-   secure_vector<word>& a_w = a.get_word_vector();
-   secure_vector<word>& b_w = b.get_word_vector();
-   secure_vector<word>& u_w = u.get_word_vector();
-   secure_vector<word>& v_w = v.get_word_vector();
-
-   CT::poison(a_w.data(), a_w.size());
-   CT::poison(b_w.data(), b_w.size());
-   CT::poison(u_w.data(), u_w.size());
-   CT::poison(v_w.data(), v_w.size());
-
-   // Only n.bits() + mod.bits() iterations are required, but avoid leaking the size of n
-   size_t bits = 2 * mod.bits();
-
-   while(bits--)
-      {
-      /*
-      const word odd = a.is_odd();
-      a -= odd * b;
-      const word underflow = a.is_negative();
-      b += a * underflow;
-      a.set_sign(BigInt::Positive);
-
-      a >>= 1;
-
-      if(underflow)
-         {
-         std::swap(u, v);
-         }
-
-      u -= odd * v;
-      u += u.is_negative() * mod;
-
-      const word odd_u = u.is_odd();
-
-      u >>= 1;
-      u += mp1o2 * odd_u;
-      */
-
-      const word odd_a = a_w[0] & 1;
-
-      //if(odd_a) a -= b
-      word underflow = bigint_cnd_sub(odd_a, a_w.data(), b_w.data(), mod_words);
-
-      //if(underflow) { b -= a; a = abs(a); swap(u, v); }
-      bigint_cnd_add(underflow, b_w.data(), a_w.data(), mod_words);
-      bigint_cnd_abs(underflow, a_w.data(), mod_words);
-      bigint_cnd_swap(underflow, u_w.data(), v_w.data(), mod_words);
-
-      // a >>= 1
-      bigint_shr1(a_w.data(), mod_words, 0, 1);
-
-      //if(odd_a) u -= v;
-      word borrow = bigint_cnd_sub(odd_a, u_w.data(), v_w.data(), mod_words);
-
-      // if(borrow) u += p
-      bigint_cnd_add(borrow, u_w.data(), mod.data(), mod_words);
-
-      const word odd_u = u_w[0] & 1;
-
-      // u >>= 1
-      bigint_shr1(u_w.data(), mod_words, 0, 1);
-
-      //if(odd_u) u += mp1o2;
-      bigint_cnd_add(odd_u, u_w.data(), mp1o2.data(), mod_words);
-      }
-
-   CT::unpoison(a_w.data(), a_w.size());
-   CT::unpoison(b_w.data(), b_w.size());
-   CT::unpoison(u_w.data(), u_w.size());
-   CT::unpoison(v_w.data(), v_w.size());
-
-   BOTAN_ASSERT(a.is_zero(), "A is zero");
-
-   if(b != 1)
-      return 0;
-
-   return v;
-   }
-
-/*
-* Find the Modular Inverse
-*/
-BigInt inverse_mod(const BigInt& n, const BigInt& mod)
-   {
-   if(mod.is_zero())
-      throw BigInt::DivideByZero();
-   if(mod.is_negative() || n.is_negative())
-      throw Invalid_Argument("inverse_mod: arguments must be non-negative");
-   if(n.is_zero())
-      return 0;
-
-   if(mod.is_odd() && n < mod)
-      return ct_inverse_mod_odd_modulus(n, mod);
-
-   return inverse_euclid(n, mod);
-   }
-
-BigInt inverse_euclid(const BigInt& n, const BigInt& mod)
-   {
-   if(mod.is_zero())
-      throw BigInt::DivideByZero();
-   if(mod.is_negative() || n.is_negative())
-      throw Invalid_Argument("inverse_mod: arguments must be non-negative");
-
-   if(n.is_zero() || (n.is_even() && mod.is_even()))
-      return 0; // fast fail checks
-
-   BigInt u = mod, v = n;
-   BigInt A = 1, B = 0, C = 0, D = 1;
-   BigInt T0, T1, T2;
-
-   while(u.is_nonzero())
-      {
-      const size_t u_zero_bits = low_zero_bits(u);
-      u >>= u_zero_bits;
-
-      const size_t v_zero_bits = low_zero_bits(v);
-      v >>= v_zero_bits;
-
-      const bool u_gte_v = (u >= v);
-
-      for(size_t i = 0; i != u_zero_bits; ++i)
-         {
-         const bool needs_adjust = A.is_odd() || B.is_odd();
-
-         T0 = A + n;
-         T1 = B - mod;
-
-         A.ct_cond_assign(needs_adjust, T0);
-         B.ct_cond_assign(needs_adjust, T1);
-
-         A >>= 1;
-         B >>= 1;
-         }
-
-      for(size_t i = 0; i != v_zero_bits; ++i)
-         {
-         const bool needs_adjust = C.is_odd() || D.is_odd();
-         T0 = C + n;
-         T1 = D - mod;
-
-         C.ct_cond_assign(needs_adjust, T0);
-         D.ct_cond_assign(needs_adjust, T1);
-
-         C >>= 1;
-         D >>= 1;
-         }
-
-      T0 = u - v;
-      T1 = A - C;
-      T2 = B - D;
-
-      T0.cond_flip_sign(!u_gte_v);
-      T1.cond_flip_sign(!u_gte_v);
-      T2.cond_flip_sign(!u_gte_v);
-
-      u.ct_cond_assign(u_gte_v, T0);
-      A.ct_cond_assign(u_gte_v, T1);
-      B.ct_cond_assign(u_gte_v, T2);
-
-      v.ct_cond_assign(!u_gte_v, T0);
-      C.ct_cond_assign(!u_gte_v, T1);
-      D.ct_cond_assign(!u_gte_v, T2);
-      }
-
-   if(v != 1)
-      return 0; // no modular inverse
-
-   while(D.is_negative())
-      D += mod;
-   while(D >= mod)
-      D -= mod;
-
-   return D;
-   }
-
-word monty_inverse(word a)
-   {
-   if(a % 2 == 0)
-      throw Invalid_Argument("monty_inverse only valid for odd integers");
-
-   /*
-   * From "A New Algorithm for Inversion mod p^k" by Çetin Kaya Koç
-   * https://eprint.iacr.org/2017/411.pdf sections 5 and 7.
-   */
-
-   word b = 1;
-   word r = 0;
-
-   for(size_t i = 0; i != BOTAN_MP_WORD_BITS; ++i)
-      {
-      const word bi = b % 2;
-      r >>= 1;
-      r += bi << (BOTAN_MP_WORD_BITS - 1);
-
-      b -= a * bi;
-      b >>= 1;
-      }
-
-   // Now invert in addition space
-   r = (MP_WORD_MAX - r) + 1;
-
-   return r;
    }
 
 /*
@@ -554,7 +254,10 @@ bool is_prime(const BigInt& n,
       if(is_miller_rabin_probable_prime(n, mod_n, rng, t) == false)
          return false;
 
-      return is_lucas_probable_prime(n, mod_n);
+      if(is_random)
+         return true;
+      else
+         return is_lucas_probable_prime(n, mod_n);
       }
    else
       {

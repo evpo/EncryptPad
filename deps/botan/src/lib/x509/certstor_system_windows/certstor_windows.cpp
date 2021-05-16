@@ -7,6 +7,7 @@
 */
 
 #include <botan/certstor_windows.h>
+#include <botan/pkix_types.h>
 #include <botan/der_enc.h>
 
 #include <array>
@@ -16,6 +17,8 @@
 #define _WINSOCKAPI_ // stop windows.h including winsock.h
 #include <windows.h>
 #include <wincrypt.h>
+
+#define WINCRYPT_UNUSED_PARAM 0 // for avoiding warnings when passing NULL to unused params in win32 api that accept integer types
 
 namespace Botan {
 namespace {
@@ -105,7 +108,7 @@ class Handle_Guard
 
 HCERTSTORE open_cert_store(const char* cert_store_name)
    {
-   auto store = CertOpenSystemStore(NULL, cert_store_name);
+   auto store = CertOpenSystemStoreA(WINCRYPT_UNUSED_PARAM, cert_store_name);
    if(!store)
       {
       throw Botan::Internal_Error(
@@ -127,7 +130,7 @@ Cert_Vector search_cert_stores(const _CRYPTOAPI_BLOB& blob, const DWORD& find_ty
       Handle_Guard<PCCERT_CONTEXT> cert_context = nullptr;
       while(cert_context.assign(CertFindCertificateInStore(
                                    windows_cert_store.get(), PKCS_7_ASN_ENCODING | X509_ASN_ENCODING,
-                                   NULL, find_type,
+                                   WINCRYPT_UNUSED_PARAM, find_type,
                                    &blob, cert_context.get())))
          {
          auto cert = std::make_shared<X509_Certificate>(cert_context->pbCertEncoded, cert_context->cbCertEncoded);

@@ -61,8 +61,8 @@
    #include <botan/hmac_drbg.h>
 #endif
 
-#if defined(BOTAN_HAS_RDRAND_RNG)
-   #include <botan/rdrand_rng.h>
+#if defined(BOTAN_HAS_PROCESSOR_RNG)
+   #include <botan/processor_rng.h>
 #endif
 
 #if defined(BOTAN_HAS_CHACHA_RNG)
@@ -479,8 +479,6 @@ class Speed final : public Command
 
          const std::vector<size_t> buf_sizes = unique_buffer_sizes(get_arg("buf-size"));
 
-         Botan::CPUID::initialize();
-
          for(std::string cpuid_to_clear : Botan::split_on(get_arg("clear-cpuid"), ','))
             {
             auto bits = Botan::CPUID::bit_from_string(cpuid_to_clear);
@@ -558,6 +556,10 @@ class Speed final : public Command
             else if(algo == "RSA")
                {
                bench_rsa(provider, msec);
+               }
+            else if(algo == "RSA_keygen")
+               {
+               bench_rsa_keygen(provider, msec);
                }
 #endif
 #if defined(BOTAN_HAS_ECDSA)
@@ -767,11 +769,11 @@ class Speed final : public Command
                bench_rng(Botan::system_rng(), "System_RNG", msec, buf_sizes);
 #endif
 
-#if defined(BOTAN_HAS_RDRAND_RNG)
-               if(Botan::CPUID::has_rdrand())
+#if defined(BOTAN_HAS_PROCESSOR_RNG)
+               if(Botan::Processor_RNG::available())
                   {
-                  Botan::RDRAND_RNG rdrand;
-                  bench_rng(rdrand, "RDRAND", msec, buf_sizes);
+                  Botan::Processor_RNG hwrng;
+                  bench_rng(hwrng, "Processor_RNG", msec, buf_sizes);
                   }
 #endif
 
@@ -1124,15 +1126,15 @@ class Speed final : public Command
          {
          for(std::string group_name : groups)
             {
-            const Botan::EC_Group group(group_name);
+            const Botan::EC_Group ec_group(group_name);
 
             std::unique_ptr<Timer> add_timer = make_timer(group_name + " add");
             std::unique_ptr<Timer> addf_timer = make_timer(group_name + " addf");
             std::unique_ptr<Timer> dbl_timer = make_timer(group_name + " dbl");
 
-            const Botan::PointGFp& base_point = group.get_base_point();
-            Botan::PointGFp non_affine_pt = group.get_base_point() * 1776; // create a non-affine point
-            Botan::PointGFp pt = group.get_base_point();
+            const Botan::PointGFp& base_point = ec_group.get_base_point();
+            Botan::PointGFp non_affine_pt = ec_group.get_base_point() * 1776; // create a non-affine point
+            Botan::PointGFp pt = ec_group.get_base_point();
 
             std::vector<Botan::BigInt> ws(Botan::PointGFp::WORKSPACE_SIZE);
 
@@ -1169,13 +1171,13 @@ class Speed final : public Command
          {
          for(std::string group_name : groups)
             {
-            const Botan::EC_Group group(group_name);
+            const Botan::EC_Group ec_group(group_name);
 
             std::unique_ptr<Timer> mult_timer = make_timer(group_name + " Montgomery ladder");
             std::unique_ptr<Timer> blinded_mult_timer = make_timer(group_name + " blinded comb");
             std::unique_ptr<Timer> blinded_var_mult_timer = make_timer(group_name + " blinded window");
 
-            const Botan::PointGFp& base_point = group.get_base_point();
+            const Botan::PointGFp& base_point = ec_group.get_base_point();
 
             std::vector<Botan::BigInt> ws;
 
@@ -1183,15 +1185,15 @@ class Speed final : public Command
                   blinded_mult_timer->under(runtime) &&
                   blinded_var_mult_timer->under(runtime))
                {
-               const Botan::BigInt scalar(rng(), group.get_p_bits());
+               const Botan::BigInt scalar(rng(), ec_group.get_p_bits());
 
                const Botan::PointGFp r1 = mult_timer->run([&]() { return base_point * scalar; });
 
                const Botan::PointGFp r2 = blinded_mult_timer->run(
-                  [&]() { return group.blinded_base_point_multiply(scalar, rng(), ws); });
+                  [&]() { return ec_group.blinded_base_point_multiply(scalar, rng(), ws); });
 
                const Botan::PointGFp r3 = blinded_var_mult_timer->run(
-                  [&]() { return group.blinded_var_point_multiply(base_point, scalar, rng(), ws); });
+                  [&]() { return ec_group.blinded_var_point_multiply(base_point, scalar, rng(), ws); });
 
                BOTAN_ASSERT_EQUAL(r1, r2, "Same point computed by Montgomery and comb");
                BOTAN_ASSERT_EQUAL(r1, r3, "Same point computed by Montgomery and window");
@@ -1210,17 +1212,17 @@ class Speed final : public Command
 
          for(std::string group_name : groups)
             {
-            const Botan::EC_Group group(group_name);
+            const Botan::EC_Group ec_group(group_name);
 
             while(uncmp_timer->under(runtime) && cmp_timer->under(runtime))
                {
                const Botan::BigInt k(rng(), 256);
-               const Botan::PointGFp p = group.get_base_point() * k;
+               const Botan::PointGFp p = ec_group.get_base_point() * k;
                const std::vector<uint8_t> os_cmp = p.encode(Botan::PointGFp::COMPRESSED);
                const std::vector<uint8_t> os_uncmp = p.encode(Botan::PointGFp::UNCOMPRESSED);
 
-               uncmp_timer->run([&]() { group.OS2ECP(os_uncmp); });
-               cmp_timer->run([&]() { group.OS2ECP(os_cmp); });
+               uncmp_timer->run([&]() { ec_group.OS2ECP(os_uncmp); });
+               cmp_timer->run([&]() { ec_group.OS2ECP(os_cmp); });
                }
 
             record_result(uncmp_timer);
@@ -1354,7 +1356,7 @@ class Speed final : public Command
                y.randomize(rng(), q_bits);
 
                div_timer->start();
-               Botan::divide(x, y, q1, r1);
+               Botan::vartime_divide(x, y, q1, r1);
                div_timer->stop();
 
                ct_div_timer->start();
@@ -1393,7 +1395,7 @@ class Speed final : public Command
                x.randomize(rng(), n_bits);
 
                div_timer->start();
-               Botan::divide(x, ten, q1, r1);
+               Botan::vartime_divide(x, ten, q1, r1);
                div_timer->stop();
 
                ct_div_timer->start();
@@ -1431,8 +1433,8 @@ class Speed final : public Command
 
             while(f_timer->under(runtime))
                {
-               e_timer->run([&]() { Botan::power_mod(group.get_g(), random_e, group.get_p()); });
-               f_timer->run([&]() { Botan::power_mod(group.get_g(), random_f, group.get_p()); });
+               e_timer->run([&]() { group.power_g_p(random_e); });
+               f_timer->run([&]() { group.power_g_p(random_f); });
                }
 
             record_result(e_timer);
@@ -1528,37 +1530,33 @@ class Speed final : public Command
 
       void bench_inverse_mod(const std::chrono::milliseconds runtime)
          {
-
-         for(size_t bits : { 256, 384, 512 })
+         for(size_t bits : { 256, 384, 512, 1024, 2048 })
             {
-            const Botan::BigInt p = Botan::random_prime(rng(), bits);
-
             const std::string bit_str = std::to_string(bits);
 
-            std::unique_ptr<Timer> invmod_timer = make_timer("binext-" + bit_str);
-            std::unique_ptr<Timer> monty_timer = make_timer("monty-" + bit_str);
-            std::unique_ptr<Timer> ct_invmod_timer = make_timer("ct-" + bit_str);
+            std::unique_ptr<Timer> timer = make_timer("inverse_mod-" + bit_str);
 
-            while(invmod_timer->under(runtime))
+            while(timer->under(runtime))
                {
-               const Botan::BigInt x(rng(), p.bits() - 1);
+               const Botan::BigInt x(rng(), bits - 1);
+               Botan::BigInt mod(rng(), bits);
 
-               const Botan::BigInt x_inv1 = invmod_timer->run(
-                  [&] { return Botan::inverse_euclid(x, p); });
+               const Botan::BigInt x_inv = timer->run(
+                  [&] { return Botan::inverse_mod(x, mod); });
 
-               const Botan::BigInt x_inv2 = monty_timer->run(
-                  [&] { return Botan::normalized_montgomery_inverse(x, p); });
-
-               const Botan::BigInt x_inv3 = ct_invmod_timer->run(
-                  [&] { return Botan::ct_inverse_mod_odd_modulus(x, p); });
-
-               BOTAN_ASSERT_EQUAL(x_inv1, x_inv2, "Same result");
-               BOTAN_ASSERT_EQUAL(x_inv1, x_inv3, "Same result");
+               if(x_inv == 0)
+                  {
+                  const Botan::BigInt g = gcd(x, mod);
+                  BOTAN_ASSERT(g != 1, "Inversion only fails if gcd(x, mod) > 1");
+                  }
+               else
+                  {
+                  const Botan::BigInt check = (x_inv*x) % mod;
+                  BOTAN_ASSERT_EQUAL(check, 1, "Const time inversion correct");
+                  }
                }
 
-            record_result(invmod_timer);
-            record_result(monty_timer);
-            record_result(ct_invmod_timer);
+            record_result(timer);
             }
          }
 
@@ -1598,27 +1596,37 @@ class Speed final : public Command
          {
          const size_t coprime = 65537; // simulates RSA key gen
 
-         for(size_t bits : { 1024, 1536 })
+         for(size_t bits : { 256, 384, 512, 768, 1024, 1536 })
             {
             std::unique_ptr<Timer> genprime_timer = make_timer("random_prime " + std::to_string(bits));
+            std::unique_ptr<Timer> gensafe_timer = make_timer("random_safe_prime " + std::to_string(bits));
             std::unique_ptr<Timer> is_prime_timer = make_timer("is_prime " + std::to_string(bits));
 
-            while(genprime_timer->under(runtime) && is_prime_timer->under(runtime))
+            while(gensafe_timer->under(runtime))
                {
                const Botan::BigInt p = genprime_timer->run([&]
                   {
                   return Botan::random_prime(rng(), bits, coprime);
                   });
 
-               const bool ok = is_prime_timer->run([&]
+               if(!is_prime_timer->run([&] { return Botan::is_prime(p, rng(), 64, true); }))
                   {
-                  return Botan::is_prime(p, rng(), 64, true);
+                  error_output() << "Generated prime " << p << " which failed a primality test";
+                  }
+
+               const Botan::BigInt sg = gensafe_timer->run([&]
+                  {
+                  return Botan::random_safe_prime(rng(), bits);
                   });
 
-               if(!ok)
+               if(!is_prime_timer->run([&] { return Botan::is_prime(sg, rng(), 64, true); }))
                   {
-                  error_output() << "Generated prime " << p
-                                 << " which then failed primality test";
+                  error_output() << "Generated safe prime " << sg << " which failed a primality test";
+                  }
+
+               if(!is_prime_timer->run([&] { return Botan::is_prime(sg / 2, rng(), 64, true); }))
+                  {
+                  error_output() << "Generated prime " << sg/2 << " which failed a primality test";
                   }
 
                // Now test p+2, p+4, ... which may or may not be prime
@@ -1629,6 +1637,7 @@ class Speed final : public Command
                }
 
             record_result(genprime_timer);
+            record_result(gensafe_timer);
             record_result(is_prime_timer);
             }
          }
@@ -1661,9 +1670,9 @@ class Speed final : public Command
 
             if(dec_timer->under(msec))
                {
-               auto dec_pt = dec_timer->run([&]() { return dec.decrypt(ciphertext); });
+               const auto dec_pt = dec_timer->run([&]() { return dec.decrypt(ciphertext); });
 
-               if(dec_pt != plaintext) // sanity check
+               if(!(dec_pt == plaintext)) // sanity check
                   {
                   error_output() << "Bad roundtrip in PK encrypt/decrypt bench\n";
                   }
@@ -1846,6 +1855,27 @@ class Speed final : public Command
 #endif
 
 #if defined(BOTAN_HAS_RSA)
+      void bench_rsa_keygen(const std::string& provider,
+                            std::chrono::milliseconds msec)
+         {
+         for(size_t keylen : { 1024, 2048, 3072, 4096 })
+            {
+            const std::string nm = "RSA-" + std::to_string(keylen);
+            std::unique_ptr<Timer> keygen_timer = make_timer(nm, provider, "keygen");
+
+            while(keygen_timer->under(msec))
+               {
+               std::unique_ptr<Botan::Private_Key> key(keygen_timer->run([&] {
+                  return Botan::create_private_key("RSA", rng(), std::to_string(keylen));
+                  }));
+
+               BOTAN_ASSERT(key->check_key(rng(), true), "Key is ok");
+               }
+
+            record_result(keygen_timer);
+            }
+         }
+
       void bench_rsa(const std::string& provider,
                      std::chrono::milliseconds msec)
          {

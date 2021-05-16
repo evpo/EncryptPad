@@ -5,11 +5,9 @@
 * Botan is released under the Simplified BSD License (see license.txt)
 */
 
-#include <botan/name_constraint.h>
-#include <botan/asn1_alt_name.h>
+#include <botan/pkix_types.h>
 #include <botan/ber_dec.h>
 #include <botan/loadstor.h>
-#include <botan/x509_dn.h>
 #include <botan/x509cert.h>
 #include <botan/parsing.h>
 #include <sstream>
@@ -115,9 +113,13 @@ GeneralName::MatchResult GeneralName::matches(const X509_Certificate& cert) cons
       {
       match_fn = std::mem_fn(&GeneralName::matches_dn);
 
-      std::stringstream ss;
-      ss << dn;
-      nam.push_back(ss.str());
+      nam.push_back(dn.to_string());
+
+      const auto alt_dn = alt_name.dn();
+      if(alt_dn.empty() == false)
+         {
+         nam.push_back(alt_dn.to_string());
+         }
       }
    else if(type() == "IP")
       {
@@ -163,17 +165,19 @@ bool GeneralName::matches_dns(const std::string& nam) const
    {
    if(nam.size() == name().size())
       {
-      return nam == name();
+      return tolower_string(nam) == tolower_string(name());
       }
    else if(name().size() > nam.size())
       {
+      // The constraint is longer than the issued name: not possibly a match
       return false;
       }
    else // name.size() < nam.size()
       {
-      std::string constr = name().front() == '.' ? name() : "." + name();
       // constr is suffix of nam
-      return constr == nam.substr(nam.size() - constr.size(), constr.size());
+      const std::string constr = name().front() == '.' ? name() : "." + name();
+      const std::string substr = nam.substr(nam.size() - constr.size(), constr.size());
+      return tolower_string(constr) == tolower_string(substr);
       }
    }
 

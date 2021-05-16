@@ -9,9 +9,9 @@
 
 #include <botan/pwdhash.h>
 
-namespace Botan {
+//BOTAN_FUTURE_INTERNAL_HEADER(argon2.h)
 
-BOTAN_FUTURE_INTERNAL_HEADER(argon2.h)
+namespace Botan {
 
 class RandomNumberGenerator;
 

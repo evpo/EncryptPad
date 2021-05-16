@@ -2,7 +2,9 @@
 #define BOTAN_BUILD_CONFIG_H_
 
 /*
-* This file was automatically generated running
+* Build configuration for Botan %{version}
+*
+* Automatically generated from
 * '%{command_line}'
 *
 * Target
@@ -15,6 +17,11 @@
 #define BOTAN_VERSION_MINOR %{version_minor}
 #define BOTAN_VERSION_PATCH %{version_patch}
 #define BOTAN_VERSION_DATESTAMP %{version_datestamp}
+
+%{if version_suffix}
+#define BOTAN_VERSION_SUFFIX %{version_suffix}
+#define BOTAN_VERSION_SUFFIX_STR "%{version_suffix}"
+%{endif}
 
 #define BOTAN_VERSION_RELEASE_TYPE "%{release_type}"
 
@@ -175,13 +182,10 @@
 
 /*
 * Specifies (in order) the list of entropy sources that will be used
-* to seed an in-memory RNG. The first in the default list: "rdseed"
-* and "rdrand" do not count as contributing any entropy but are
-* included as they are fast and help protect against a seriously
-* broken system RNG.
+* to seed an in-memory RNG.
 */
 #define BOTAN_ENTROPY_DEFAULT_SOURCES \
-   { "rdseed", "rdrand", "p9_darn", "getentropy", "dev_random", \
+   { "rdseed", "hwrng", "p9_darn", "getentropy", "dev_random", \
      "system_rng", "proc_walk", "system_stats" }
 
 /* Multiplier on a block cipher's native parallelism */

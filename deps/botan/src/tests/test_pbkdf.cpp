@@ -83,7 +83,7 @@ class PBKDF_KAT_Tests final : public Text_Based_Test
 
    };
 
-BOTAN_REGISTER_TEST("pbkdf", PBKDF_KAT_Tests);
+BOTAN_REGISTER_TEST("pbkdf", "pbkdf", PBKDF_KAT_Tests);
 
 class Pwdhash_Tests : public Test
    {
@@ -160,7 +160,7 @@ class Pwdhash_Tests : public Test
          }
    };
 
-BOTAN_REGISTER_TEST("pwdhash", Pwdhash_Tests);
+BOTAN_REGISTER_TEST("pbkdf", "pwdhash", Pwdhash_Tests);
 
 #endif
 
@@ -192,7 +192,7 @@ class Bcrypt_PBKDF_KAT_Tests final : public Text_Based_Test
          }
    };
 
-BOTAN_REGISTER_TEST("bcrypt_pbkdf", Bcrypt_PBKDF_KAT_Tests);
+BOTAN_REGISTER_TEST("pbkdf", "bcrypt_pbkdf", Bcrypt_PBKDF_KAT_Tests);
 
 #endif
 
@@ -246,7 +246,7 @@ class Scrypt_KAT_Tests final : public Text_Based_Test
 
    };
 
-BOTAN_REGISTER_TEST("scrypt", Scrypt_KAT_Tests);
+BOTAN_REGISTER_TEST("pbkdf", "scrypt", Scrypt_KAT_Tests);
 
 #endif
 
@@ -291,12 +291,33 @@ class Argon2_KAT_Tests final : public Text_Based_Test
 
          result.test_eq("derived key", output, expected);
 
+         auto pwdhash_fam = Botan::PasswordHashFamily::create(mode);
+
+         if(!pwdhash_fam)
+            {
+            result.test_failure("Argon2 is missing PasswordHashFamily");
+            return result;
+            }
+
+         if(ad.size() == 0)
+            {
+            auto pwdhash = pwdhash_fam->from_params(M, T, P);
+
+            std::vector<uint8_t> pwdhash_derived(expected.size());
+            pwdhash->derive_key(pwdhash_derived.data(), pwdhash_derived.size(),
+                                reinterpret_cast<const char*>(passphrase.data()),
+                                passphrase.size(),
+                                salt.data(), salt.size());
+
+            result.test_eq("pwdhash derived key", pwdhash_derived, expected);
+            }
+
          return result;
          }
 
    };
 
-BOTAN_REGISTER_TEST("argon2", Argon2_KAT_Tests);
+BOTAN_REGISTER_TEST("pbkdf", "argon2", Argon2_KAT_Tests);
 
 #endif
 
@@ -348,7 +369,7 @@ class PGP_S2K_Iter_Test final : public Test
          }
    };
 
-BOTAN_REGISTER_TEST("pgp_s2k_iter", PGP_S2K_Iter_Test);
+BOTAN_REGISTER_TEST("pbkdf", "pgp_s2k_iter", PGP_S2K_Iter_Test);
 
 #endif
 

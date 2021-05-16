@@ -14,6 +14,7 @@
    #include <botan/x509self.h>
    #include <botan/x509path.h>
    #include <botan/x509_ca.h>
+   #include <botan/x509_ext.h>
    #include <botan/pk_algs.h>
    #include <botan/ber_dec.h>
    #include <botan/der_enc.h>
@@ -459,6 +460,20 @@ Test::Result test_crl_dn_name()
    return result;
    }
 
+Test::Result test_rdn_multielement_set_name()
+   {
+   Test::Result result("DN with multiple elements in RDN");
+
+   // GH #2611
+
+   Botan::X509_Certificate cert(Test::data_file("x509/misc/rdn_set.crt"));
+
+   result.confirm("contains expected name components",
+                  cert.issuer_dn().get_attributes().size() == 4);
+
+   return result;
+   }
+
 Test::Result test_rsa_oaep()
    {
    Test::Result result("RSA OAEP decoding");
@@ -603,7 +618,7 @@ Test::Result test_verify_gost2012_cert()
    {
    Test::Result result("X509 GOST-2012 certificates");
 
-#if defined(BOTAN_HAS_GOST_34_10_2012) && defined(BOTAN_HAS_STREEBOG)
+#if defined(BOTAN_HAS_GOST_34_10_2012) && defined(BOTAN_HAS_STREEBOG) && defined(BOTAN_HAS_EMSA1)
    try
       {
       Botan::X509_Certificate root_cert(Test::data_file("x509/gost/gost_root.pem"));
@@ -1600,6 +1615,11 @@ class X509_Cert_Unit_Tests final : public Test
                continue;
 #endif
 
+#if !defined(BOTAN_HAS_EMSA1)
+            if(algo != "RSA" && algo != "Ed25519")
+               continue;
+#endif
+
             std::unique_ptr<Botan::Private_Key> key = make_a_private_key(algo);
 
             if(key == nullptr)
@@ -1712,6 +1732,7 @@ class X509_Cert_Unit_Tests final : public Test
          results.push_back(test_x509_utf8());
          results.push_back(test_x509_bmpstring());
          results.push_back(test_crl_dn_name());
+         results.push_back(test_rdn_multielement_set_name());
          results.push_back(test_x509_decode_list());
          results.push_back(test_rsa_oaep());
          results.push_back(test_x509_authority_info_access_extension());
@@ -1727,7 +1748,7 @@ class X509_Cert_Unit_Tests final : public Test
          }
    };
 
-BOTAN_REGISTER_TEST("x509_unit", X509_Cert_Unit_Tests);
+BOTAN_REGISTER_TEST("x509", "x509_unit", X509_Cert_Unit_Tests);
 
 #endif
 

@@ -1,6 +1,7 @@
 #include "file_request_service.h"
 #include "file_name_helper.h"
 #include <QFileDialog>
+#include "plog/Log.h"
 
 
 const QString &FileRequestService::GetValidDirectory()
@@ -58,16 +59,25 @@ FileRequestSelection FileRequestService::RequestNewFile(QWidget *parent, const Q
     ret_val.cancelled = true;
     if(selected_filter)
         ret_val.filter = *selected_filter;
-    QFileDialog::Options file_dialog_options = {};
-    if(GetDontUseNativeDialog())
-        file_dialog_options &= QFileDialog::DontUseNativeDialog;
-    ret_val.file_name = QFileDialog::getSaveFileName(parent, title,
-                                            !file_name.isEmpty() ? file_name : GetValidDirectory(),
-                                            filter, &ret_val.filter, file_dialog_options);
 
-    ret_val.cancelled = ret_val.file_name.isNull();
-    if(!ret_val.cancelled)
+    QFileDialog dlg(parent,
+                    title,
+                    !file_name.isEmpty() ? file_name : GetValidDirectory(),
+                    filter);
+    dlg.setAcceptMode(QFileDialog::AcceptMode::AcceptSave);
+    dlg.setFileMode(QFileDialog::AnyFile);
+    if(!ret_val.filter.isEmpty())
+        dlg.selectNameFilter(ret_val.filter);
+
+    if(GetDontUseNativeDialog())
+        dlg.setOption(QFileDialog::DontUseNativeDialog);
+
+    if(dlg.exec() && dlg.selectedFiles().size() > 0)
     {
+        ret_val.cancelled = false;
+        ret_val.file_name = dlg.selectedFiles().first();
+        ret_val.filter = dlg.selectedNameFilter();
+
         ret_val.file_name = AppendExtensionForFileDialog(ret_val.file_name, ret_val.filter);
         SetDirectoryFromFile(ret_val.file_name);
     }

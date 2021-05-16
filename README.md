@@ -40,6 +40,8 @@ EncryptPad is an application for viewing and editing symmetrically encrypted tex
     - [Archlinux](#build-on-archlinux)
     - [FreeBSD](#build-on-freebsd)
 * [Portable mode](#portable-mode)
+* [FakeVim mode](#fakevim-mode)
+    - [FakeVim: input and output commands](#fakevim-input-output)
 * [Does EncryptPad store passphrases in the memory to reopen files?](#passphrases-in-memory)
 * [Acknowledgements](#acknowledgements)
 * [EncryptPad integrity verification](#integrity-verification)
@@ -61,6 +63,7 @@ EncryptPad is an application for viewing and editing symmetrically encrypted tex
 * **Key repository** in a hidden directory in the user's home folder
 * Path to a key file can be stored in an encrypted file. If enabled, **you do not need to specify the key file** every time you open files.
 * Encryption of **binary files** (images, videos, archives etc.)
+* **FakeVim** mode to edit files by using Vim-like user interface
 * **Read only** mode to prevent accidental file modification
 * **UTF8** text encoding
 * Windows/Unix **configurable line endings**
@@ -471,6 +474,51 @@ Open the EncryptPad source directory:
 
 EncryptPad checks the executable directory for a sub-directory called `encryptpad_repository`. If exists, it is used for key files and settings. The directory `.encryptpad` in the user's profile is then ignored. The EncryptPad executable and `encryptpad_repository` can both be copied to a removable media and used on multiple computers. It should be noted that keeping encrypted material with the key files on the same removable media is less secure. Separate them if possible.
 
+<div id="fakevim-mode"></div>
+## FakeVim mode
+
+FakeVim mode lets edit files with Vim-like interface.
+
+To enable the mode:
+
+1. open Settings... / Preferences ...
+2. Set "Enable FakeVim"
+3. Restart EncryptPad
+
+To configure FakeVim create and edit the file at the location below:
+
+Linux and macOS:
+
+    ~/.encryptpad/vimrc
+
+On Windows in the user profile directory:
+
+    _encryptpad/vimrc
+
+You can find more information about FakeVim interface at [FakeVim library web page](https://github.com/hluk/FakeVim)
+
+<div id="fakevim-input-output"></div>
+### FakeVim: input and output commands
+
+The ex mode supports commands to read and write files. The input and output commands are integrated with the following EncryptPad operations:
+
+    :r <file> - File / Open...
+
+    :w - File / Save
+
+    :w <file> - File / Save As...
+
+    :q - File / Exit
+
+The combinations of the above commands are also supported:
+
+    :wq
+    :wq <file>
+
+Vim + register integrates with the system clipboard. You can also add the below line to the vimrc file to integrate the unnamed register with the system clipboard:
+
+    set clipboard=unnamedplus
+
 <div id="passphrases-in-memory"></div>
 
 ## Does EncryptPad store passphrases in the memory to reopen files?
@@ -490,6 +538,7 @@ EncryptPad uses the following frameworks and libraries:
 6. [**gtest**](http://code.google.com/p/googletest/)
 7. [**famfamfam Silk iconset 1.3**](http://www.famfamfam.com/lab/icons/silk/)
 8. [**plog**](https://github.com/SergiusTheBest/plog)
+9. [**FakeVim**](https://github.com/hluk/FakeVim)
 
 <div id="integrity-verification"></div>
 

@@ -121,12 +121,7 @@ The basic build procedure on Unix and Unix-like systems is::
 
    $ ./configure.py [--enable-modules=<list>] [--cc=CC]
    $ make
-   $ ./botan-test
-
-If that fails with an error about not being able to find libbotan.so,
-you may need to set ``LD_LIBRARY_PATH``::
-
-   $ LD_LIBRARY_PATH=. ./botan-test
+   $ make check
 
 If the tests look OK, install::
 
@@ -172,7 +167,7 @@ shell), and run::
 
    $ python configure.py --cc=msvc --os=windows
    $ nmake
-   $ botan-test.exe
+   $ nmake check
    $ nmake install
 
 Botan supports the nmake replacement `Jom <https://wiki.qt.io/Jom>`_
@@ -306,34 +301,34 @@ The Amalgamation Build
 You can also configure Botan to be built using only a single source file; this
 is quite convenient if you plan to embed the library into another application.
 
-To generate the amalgamation, run ``configure.py`` with whatever
-options you would ordinarily use, along with the option
-``--amalgamation``. This will create two (rather large) files,
-``botan_all.h`` and ``botan_all.cpp``, plus (unless the option
-``--single-amalgamation-file`` is used) also some number of files like
-``botan_all_aesni.cpp`` and ``botan_all_sse2.cpp`` which need to be
-compiled with the appropriate compiler flags to enable that
-instruction set. The ISA specific files are only generated if there is
-code that requires them, so you can simplify your build. The
-``--minimized-build`` option (described elsewhere in this documentation)
-is also quite useful with the amalgamation.
+To generate the amalgamation, run ``configure.py`` with whatever options you
+would ordinarily use, along with the option ``--amalgamation``. This will create
+two (rather large) files, ``botan_all.h`` and ``botan_all.cpp``.
+
+.. note::
+
+   The library will as usual be configured to target some specific operating
+   system and CPU architecture. You can use the CPU target "generic" if you need
+   to target multiple CPU architectures, but this has the effect of disabling
+   *all* CPU specific features such as SIMD, AES instruction sets, or inline
+   assembly. If you need to ship amalgamations for multiple targets, it would be
+   better to create different amalgamation files for each individual target.
 
 Whenever you would have included a botan header, you can then include
-``botan_all.h``, and include ``botan_all.cpp`` along with the rest of
-the source files in your build. If you want to be able to easily
-switch between amalgamated and non-amalgamated versions (for instance
-to take advantage of prepackaged versions of botan on operating
-systems that support it), you can instead ignore ``botan_all.h`` and
-use the headers from ``build/include`` as normal.
+``botan_all.h``, and include ``botan_all.cpp`` along with the rest of the source
+files in your build. If you want to be able to easily switch between amalgamated
+and non-amalgamated versions (for instance to take advantage of prepackaged
+versions of botan on operating systems that support it), you can instead ignore
+``botan_all.h`` and use the headers from ``build/include`` as normal.
 
-You can also build the library using Botan's build system (as normal)
-but utilizing the amalgamation instead of the individual source files
-by running something like ``./configure.py --amalgamation && make``.
-This is essentially a very simple form of link time optimization;
-because the entire library source is visible to the compiler, it has
-more opportunities for interprocedural optimizations.
-Additionally, amalgamation builds usually have significantly shorter
-compile times for full rebuilds.
+You can also build the library using Botan's build system (as normal) but
+utilizing the amalgamation instead of the individual source files by running
+something like ``./configure.py --amalgamation && make``. This is essentially a
+very simple form of link time optimization; because the entire library source is
+visible to the compiler, it has more opportunities for interprocedural
+optimizations.  Additionally (assuming you are not making use of a compiler
+cache such as ``ccache`` or ``sccache``) amalgamation builds usually have
+significantly shorter compile times for full rebuilds.
 
 Modules Relying on Third Party Libraries
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -539,319 +534,349 @@ ChaCha20Poly1305 ciphersuites. To enable these, add ``chacha20poly1305``.
 Configure Script Options
 ---------------------------
 
---cpu=CPU
+``--cpu=CPU``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Set the target CPU architecture. If not used, the arch of the current
 system is detected (using Python's platform module) and used.
 
---os=OS
+``--os=OS``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Set the target operating system.
 
---cc=COMPILER
+``--cc=COMPILER``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Set the desired build compiler
 
-
---cc-min-version=MAJOR.MINOR
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+``--cc-min-version=MAJOR.MINOR``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Set the minimal version of the target
 compiler. Use --cc-min-version=0.0 to support all compiler
 versions. Default is auto detection.
 
---cc-bin=BINARY
+``--cc-bin=BINARY``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Set path to compiler binary
 
---cc-abi-flags=FLAGS
+If not provided, the value of the ``CXX`` environment variable is used if set.
+
+``--cc-abi-flags=FLAGS``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Set ABI flags, which for the purposes of this option mean options
 which should be passed to both the compiler and linker.
 
---cxxflags=FLAGS
+``--cxxflags=FLAGS``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Override all compiler flags. This is equivalent to setting ``CXXFLAGS``
 in the environment.
 
---extra-cxxflags=FLAGS
+``--extra-cxxflags=FLAGS``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Set extra compiler flags, which are appended to the default set.  This
 is useful if you want to set just one or two additional options but
 leave the normal logic for selecting flags alone.
 
---ldflags=FLAGS
+``--ldflags=FLAGS``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Set flags to pass to the linker. This is equivalent to setting ``LDFLAGS``
 
---ar-command=AR
+``--ar-command=AR``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Set the path to the tool to use to create static archives (``ar``).
 This is normally only used for cross-compilation.
 
---ar-options=AR_OPTIONS
+If not provided, the value of the ``AR`` environment variable is used if set.
+
+``--ar-options=AR_OPTIONS``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Specify the options to pass to ``ar``.
 
---msvc-runtime=RT
+If not provided, the value of the ``AR_OPTIONS`` environment variable is used if set.
+
+``--msvc-runtime=RT``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Specify the MSVC runtime to use (MT, MD, MTd, or MDd). If not specified,
 picks either MD or MDd depending on if debug mode is set.
 
---with-endian=ORDER
+``--with-endian=ORDER``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Override the guess as to which endian the target system is.
+The parameter should be either "little" or "big". If not used then if
+the target architecture has a default, that is used. Otherwise left
+unspecified, which causes less optimal codepaths to be used but will
+work on either little or big endian.
 
---with-os-features=FEAT
+``--with-os-features=FEAT``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Specify an OS feature to enable. See ``src/build-data/os`` and
 ``doc/os.rst`` for more information.
 
---without-os-features=FEAT
+``--without-os-features=FEAT``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Specify an OS feature to disable.
 
---disable-sse2
+``--disable-sse2``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Disable use of SSE2 intrinsics
 
---disable-ssse3
+``--disable-ssse3``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Disable use of SSSE3 intrinsics
 
---disable-sse4.1
+``--disable-sse4.1``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Disable use of SSE4.1 intrinsics
 
---disable-sse4.2
+``--disable-sse4.2``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Disable use of SSE4.2 intrinsics
 
---disable-avx2
+``--disable-avx2``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Disable use of AVX2 intrinsics
 
---disable-bmi2
+``--disable-bmi2``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Disable use of BMI2 intrinsics
 
---disable-rdrand
+``--disable-rdrand``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Disable use of RDRAND intrinsics
 
---disable-rdseed
+``--disable-rdseed``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Disable use of RDSEED intrinsics
 
---disable-aes-ni
+``--disable-aes-ni``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Disable use of AES-NI intrinsics
 
---disable-sha-ni
+``--disable-sha-ni``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Disable use of SHA-NI intrinsics
 
---disable-altivec
+``--disable-altivec``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Disable use of AltiVec intrinsics
 
---disable-neon
+``--disable-neon``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Disable use of NEON intrinsics
 
---disable-armv8crypto
+``--disable-armv8crypto``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Disable use of ARMv8Crypto intrinsics
+Disable use of ARMv8 Crypto intrinsics
 
---with-debug-info
+``--disable-powercrypto``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Disable use of POWER Crypto intrinsics
+
+``--with-debug-info``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Include debug symbols.
 
---with-sanitizers
+``--with-sanitizers``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Enable some default set of sanitizer checks. What exactly is enabled
 depends on the compiler.
 
---enable-sanitizers=SAN
+``--enable-sanitizers=SAN``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Enable specific sanitizers. See ``src/build-data/cc`` for more information.
 
---without-stack-protector
+``--without-stack-protector``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Disable stack smashing protections. **not recommended**
 
---with-coverage
+``--with-coverage``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Add coverage info and disable optimizations
 
---with-coverage-info
+``--with-coverage-info``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Add coverage info, but leave optimizations alone
 
---disable-shared-library
+``--disable-shared-library``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Disable building a shared library
 
---disable-static-library
+``--disable-static-library``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Disable building static library
 
---optimize-for-size
+``--optimize-for-size``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Optimize for code size.
 
---no-optimizations
+``--no-optimizations``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Disable all optimizations for debugging.
 
---debug-mode
+``--debug-mode``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Enable debug info and disable optimizations
 
---amalgamation
+``--amalgamation``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Use amalgamation to build
 
---single-amalgamation-file
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-By default the amalgamation file is split up into several files,
-because using intrinsics requires enabling the relevant instruction
-set extension. This option selects generating a single file instead.
-
-This requires either MSVC, or a fairly recent version of GCC/Clang
-which supports the ``target`` attribute.
-
---system-cert-bundle
+``--system-cert-bundle=PATH``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Set a path to a file containing one or more trusted CA certificates in
 PEM format. If not given, some default locations are checked.
 
---with-build-dir=DIR
+``--with-build-dir=DIR``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Setup the build in a specified directory instead of ``./build``
 
---with-external-includedir=DIR
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+``--with-external-includedir=DIR``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Search for includes in this directory. Provide this parameter multiple times to
 define multiple additional include directories.
 
---with-external-libdir=DIR
+``--with-external-libdir=DIR``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Add DIR to the link path. Provide this parameter multiple times to define
 multiple additional library link directories.
 
---define-build-macro
+``--define-build-macro``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Set a compile-time pre-processor definition (i.e. add a -D... to the compiler
 invocations). Provide this parameter multiple times to add multiple compile-time
 definitions. Both KEY=VALUE and KEY (without specific value) are supported.
 
---with-sysroot-dir=DIR
+``--with-sysroot-dir=DIR``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Use specified dir for system root while cross-compiling
 
---with-openmp
+``--with-openmp``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Enable use of OpenMP
 
---link-method=METHOD
+``--link-method=METHOD``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 During build setup a directory linking to each header file is created.
 Choose how the links are performed (options are "symlink", "hardlink",
 or "copy").
 
---with-local-config=FILE
+``--with-local-config=FILE``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Include the contents of FILE into the generated build.h
 
---distribution-info=STRING
+``--distribution-info=STRING``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Set distribution specific version information
 
---maintainer-mode
+``--maintainer-mode``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Enable extra warnings and turn most warnings into errors
+A build configuration used by library developers, which enables extra
+warnings and turns most warnings into errors.
 
---with-python-versions=N.M
+.. warning::
+
+   When this option is used, all relevant warnings available in the
+   most recent release of GCC/Clang are enabled, so it may fail to
+   build if your compiler is not sufficiently recent. In addition
+   there may be non-default configurations or unusual platforms which
+   cause warnings which are converted to errors. Patches addressing
+   such warnings are welcome, but otherwise no support is available
+   when using this option.
+
+``--werror-mode``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Turns most warnings into errors.
+
+``--no-install-python-module``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Skip installing Python module.
+
+``--with-python-versions=N.M``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Where to install botan2.py. By default this is chosen to be the
 version of Python that is running ``configure.py``.
 
---with-valgrind
+``--with-valgrind``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Use valgrind API to perform additional checks. Not needed by end users.
 
---unsafe-fuzzer-mode
+``--unsafe-fuzzer-mode``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Disable essential checks for testing. **UNSAFE FOR PRODUCTION**
 
---build-fuzzers=TYPE
+``--build-fuzzers=TYPE``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Select which interface the fuzzer uses. Options are "afl",
 "libfuzzer", "klee", or "test". The "test" mode builds fuzzers that
 read one input from stdin and then exit.
 
---with-fuzzer-lib=LIB
+``--with-fuzzer-lib=LIB``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Specify an additional library that fuzzer binaries must link with.
 
---boost-library-name
+``--build-targets=BUILD_TARGETS``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Build only the specific targets and tools
+(``static``, ``shared``, ``cli``, ``tests``, ``bogo_shim``).
+
+``--boost-library-name``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Provide an alternative name for a boost library. Depending on the platform and
@@ -860,32 +885,32 @@ boost's build configuration these library names differ significantly (see `Boost
 The provided library name must be suitable as identifier in a linker parameter,
 e.g on unix: ``boost_system`` or windows: ``libboost_regex-vc71-x86-1_70``.
 
---without-documentation
+``--without-documentation``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Skip building/installing documentation
 
---with-sphinx
+``--with-sphinx``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Use Sphinx to generate the handbook
 
---with-pdf
+``--with-pdf``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Use Sphinx to generate PDF doc
 
---with-rst2man
+``--with-rst2man``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Use rst2man to generate a man page for the CLI
 
---with-doxygen
+``--with-doxygen``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Use Doxygen to generate API reference
 
---module-policy=POL
+``--module-policy=POL``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The option ``--module-policy=POL`` enables modules required by and
@@ -895,100 +920,100 @@ Currently available policies include ``bsi``, ``nist`` and ``modern``::
 
  $ ./configure.py --module-policy=bsi --enable-modules=tls,xts
 
---enable-modules=MODS
+``--enable-modules=MODS``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Enable some specific modules
 
---disable-modules=MODS
+``--disable-modules=MODS``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Disable some specific modules
 
---minimized-build
+``--minimized-build``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Start with the bare minimum. This is mostly useful in conjuction with
-`--enable-modules`` to get a build that has just the features a
+``--enable-modules`` to get a build that has just the features a
 particular application requires.
 
---with-boost
+``--with-boost``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Use Boost.Asio for networking support. This primarily affects the
 command line utils.
 
---with-bzip2
+``--with-bzip2``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Enable bzip2 compression
 
---with-lzma
+``--with-lzma``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Enable lzma compression
 
---with-zlib
+``--with-zlib``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Enable using zlib compression
 
---with-openssl
+``--with-openssl``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Enable using OpenSSL for certain operations
 
---with-commoncrypto
+``--with-commoncrypto``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Enable using CommonCrypto for certain operations
 
---with-sqlite3
+``--with-sqlite3``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Enable using sqlite3 for data storage
 
---with-tpm
+``--with-tpm``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Enable support for TPM
 
---program-suffix=SUFFIX
+``--program-suffix=SUFFIX``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 A string to append to all program binaries.
 
---library-suffix=SUFFIX
+``--library-suffix=SUFFIX``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 A string to append to all library names.
 
---prefix=DIR
+``--prefix=DIR``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Set the install prefix.
 
---docdir=DIR
+``--docdir=DIR``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Set the documentation installation dir.
 
---bindir=DIR
+``--bindir=DIR``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Set the binary installation dir.
 
---libdir=DIR
+``--libdir=DIR``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Set the library installation dir.
 
---mandir=DIR
+``--mandir=DIR``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Set the man page installation dir.
 
---includedir=DIR
+``--includedir=DIR``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Set the include file installation dir.

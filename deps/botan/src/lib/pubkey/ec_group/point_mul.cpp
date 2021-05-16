@@ -9,12 +9,16 @@
 #include <botan/reducer.h>
 #include <botan/internal/rounding.h>
 #include <botan/internal/ct_utils.h>
+#include <iostream>
 
 namespace Botan {
 
 namespace {
 
-const size_t PointGFp_SCALAR_BLINDING_BITS = 80;
+size_t blinding_size(const BigInt& group_order)
+   {
+   return (group_order.bits() + 1) / 2;
+   }
 
 }
 
@@ -51,8 +55,7 @@ PointGFp_Base_Point_Precompute::PointGFp_Base_Point_Precompute(const PointGFp& b
                                                                const Modular_Reducer& mod_order) :
    m_base_point(base),
    m_mod_order(mod_order),
-   m_p_words(base.get_curve().get_p().sig_words()),
-   m_T_size(base.get_curve().get_p().bits() + PointGFp_SCALAR_BLINDING_BITS + 1)
+   m_p_words(base.get_curve().get_p().sig_words())
    {
    std::vector<BigInt> ws(PointGFp::WORKSPACE_SIZE);
 
@@ -63,7 +66,7 @@ PointGFp_Base_Point_Precompute::PointGFp_Base_Point_Precompute(const PointGFp& b
    * the size of the prime modulus. In all cases they are at most 1 bit
    * longer. The +1 compensates for this.
    */
-   const size_t T_bits = round_up(p_bits + PointGFp_SCALAR_BLINDING_BITS + 1, WINDOW_BITS) / WINDOW_BITS;
+   const size_t T_bits = round_up(p_bits + blinding_size(mod_order.get_modulus()) + 1, WINDOW_BITS) / WINDOW_BITS;
 
    std::vector<PointGFp> T(WINDOW_SIZE*T_bits);
 
@@ -117,7 +120,7 @@ PointGFp PointGFp_Base_Point_Precompute::mul(const BigInt& k,
    if(rng.is_seeded())
       {
       // Choose a small mask m and use k' = k + m*order (Coron's 1st countermeasure)
-      const BigInt mask(rng, PointGFp_SCALAR_BLINDING_BITS);
+      const BigInt mask(rng, blinding_size(group_order));
       scalar += group_order * mask;
       }
    else
@@ -272,7 +275,7 @@ PointGFp PointGFp_Var_Point_Precompute::mul(const BigInt& k,
       ws.resize(PointGFp::WORKSPACE_SIZE);
 
    // Choose a small mask m and use k' = k + m*order (Coron's 1st countermeasure)
-   const BigInt mask(rng, PointGFp_SCALAR_BLINDING_BITS, false);
+   const BigInt mask(rng, blinding_size(group_order), false);
    const BigInt scalar = k + group_order * mask;
 
    const size_t elem_size = 3*m_p_words;
@@ -373,7 +376,19 @@ PointGFp_Multi_Point_Precompute::PointGFp_Multi_Point_Precompute(const PointGFp&
    m_M.push_back(y3.plus(x2, ws));
    m_M.push_back(y3.plus(x3, ws));
 
-   PointGFp::force_all_affine(m_M, ws[0].get_word_vector());
+   bool no_infinity = true;
+   for(auto& pt : m_M)
+      {
+      if(pt.is_zero())
+         no_infinity = false;
+      }
+
+   if(no_infinity)
+      {
+      PointGFp::force_all_affine(m_M, ws[0].get_word_vector());
+      }
+
+   m_no_infinity = no_infinity;
    }
 
 PointGFp PointGFp_Multi_Point_Precompute::multi_exp(const BigInt& z1,
@@ -400,7 +415,10 @@ PointGFp PointGFp_Multi_Point_Precompute::multi_exp(const BigInt& z1,
       // This function is not intended to be const time
       if(z12)
          {
-         H.add_affine(m_M[z12-1], ws);
+         if(m_no_infinity)
+            H.add_affine(m_M[z12-1], ws);
+         else
+            H.add(m_M[z12-1], ws);
          }
       }
 

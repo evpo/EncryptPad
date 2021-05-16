@@ -1,6 +1,307 @@
 Release Notes
 ========================================
 
+Version 2.18.1, 2021-05-09
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+* Fix a build regression in 2.18.0 which caused linker flags which
+  contain ``-l`` within them (such as ``-fuse-linker-plugin``) to
+  be misinterpreted. (GH #2715)
+
+* Fix a bug which caused decoding a certificate which contained
+  more than one name in a single RDN. (GH #2611 #2630 #2724)
+
+* Fix a bug which caused OID lookup failures when run in a locale
+  which uses thousands separators (pt_BR was reported as having
+  this issue). (GH #2732 #2730 #2237)
+
+* DNS names in name constraints were compared with case sensitivity, which
+  could cause valid certificates to be rejected. (GH #2739 #2735)
+
+* X.509 name constraint extensions were rejected if non-critical. RFC 5280
+  requires conforming CAs issue such extensions as critical, but not all
+  certificates are compliant, and all other known implementations do not
+  require this. (GH #2739 #2736)
+
+* X.509 name constraints were incorrectly applied to the certificate which
+  included the constraint. (GH #2739 #2737)
+
+Version 2.18.0, 2021-04-15
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+* Add support for implementing custom RNG objects through the
+  FFI interface (GH #2627 #2600)
+
+* Improve safegcd bounds, improving runtime performance (GH #2628 #2619)
+
+* Fix a bug introduced in 2.9.0 where BigInt::operator< would return
+  an incorrect result if both operands were negative. (GH #2641 #2638)
+
+* Reject non-TLS messages as quickly as possible without waiting for
+  a full record. (GH #2676)
+
+* Add build support for RISC-V 32
+
+* Fixes for TLS::Stream::async_shutdown (GH #2673)
+
+* Fix a regression introduced in 2.17.0 where LDFLAGS which add an extra
+  library (such as ``-latomic`` needed on SPARC) were not always applied
+  effectively. (GH #2622 #2623 #2625)
+
+Version 2.17.3, 2020-12-21
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+* CVE-2021-24115 Change base64, base58, base32, and hex encoding and
+  decoding operations to run in constant time (GH #2549)
+
+* Fix a build problem on PPC64 building with Clang (GH #2547)
+
+* Fix an install problem introduced in 2.17.2 affecting MSVC 2015
+
+* Fix use of -L flag in linking when configured using ``--with-external-libdir``
+  (GH #2496)
+
+* Fix a build problem on big-endian PowerPC related to VSX instructions
+  in the AES code. (GH #2515)
+
+Version 2.17.2, 2020-11-13
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+* Fix an build problem on ppc64 introduced with certain recent
+  versions of GCC or binutils where using the DARN instruction
+  requires using an appropriate -mcpu flag to enable the instruction
+  in the assembler. (GH #2481 2463)
+
+* Resolve an issue in the modular square root algorithm where a loop
+  to find a quadratic non-residue could, for a carefully chosen
+  composite modulus, not terminate in a timely manner. (GH #2482 #2476)
+
+* Fix a regression in MinGW builds introduced in 2.17.1
+
+Version 2.17.1, 2020-11-07
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+* Fix a build problem that could occur if Python was not in the PATH.
+  This was known to occur on some installations of macOS.
+
+* Re-enable support for the x86 CLMUL instruction on Visual C++, which was
+  accidentally disabled starting in 2.12.0. (GH #2460)
+
+Version 2.17.0, 2020-11-05
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+* Fix a bug in ECDSA which could occur when the group size and hash length
+  differ. In this case, on occasion the generated signature would not be
+  accepted by other ECDSA implementations. This was particularly likely to
+  affect users of 160-bit or 239-bit curves. (GH #2433 #2415)
+
+* Fix a bug in ECDSA verification when the public key was chosen to be
+  a small multiple of the group generator. In that case, verification
+  would fail even if the signature was actually valid. (GH #2425)
+
+* SIV's functionality of supporting multiple associated data inputs has been
+  generalized onto the AEAD_Mode interface. However at the moment SIV is the
+  only AEAD implemented which supports more than one AD. (GH #2440)
+
+* The contents of ASN.1 headers ``asn1_str.h``, ``asn1_time.h``, ``asn1_oid.h``
+  and ``alg_id.h`` have been moved to ``asn1_obj.h``. The header files remain
+  but simply forward the include to ``asn1_obj.h``. These now-empty header files
+  are deprecated, and will be removed in a future major release. (GH #2441)
+
+* The contents of X.509/PKIX headers ``asn1_attribute.h`` ``asn1_alt_name.h``
+  ``name_constraint.h`` ``x509_dn.h`` ``cert_status.h`` and ``key_constraint.h``
+  have been merged into ``pkix_enums.h`` (for enumerations) and ``pkix_types.h``
+  (for all other definitions). The previous header files remain but simply
+  forward the include to the new header containing the definition. These
+  now-empty header files are deprecated, and will be removed in a future major
+  release. (GH #2441)
+
+* A number of other headers including those related to HOTP/TOTP, XMSS,
+  PKCS11, PSK_DB have also been merged. Any now deprecated/empty headers
+  simply include the new header and issue a deprecation warning.
+  (GH #2443 #2446 #2447 2448 #2449)
+
+* Small optimizations in the non-hardware assisted AES key generation
+  code path (GH #2417 #2418)
+
+* Move the GHASH code to a new module in utils, making it possible
+  to build GMAC support without requiring GCM (GH #2416)
+
+* Add more detection logic for AVX-512 features (GH #2430)
+
+* Avoid std::is_pod which is deprecated in C++20 (GH #2429)
+
+* Fix a bug parsing deeply nested cipher names (GH #2426)
+
+* Add support for ``aarch64_be`` target CPU (GH #2422)
+
+* Fix order of linker flags so they are always applied effectively (GH #2420)
+
+* Prevent requesting DER encoding of signatures when the algorithm
+  did not support it (GH #2419)
+
+Version 2.16.0, 2020-10-06
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+* Now userspace PRNG objects (such as AutoSeeded_RNG and HMAC_DRBG)
+  use an internal lock, which allows safe concurrent use. This however
+  is purely a precaution in case of accidental sharing of such RNG
+  objects; for performance reasons it is always preferable to use
+  a RNG per thread if a userspace RNG is needed. (GH #2399)
+
+* DL_Group and EC_Group objects now track if they were created from a
+  known trusted group (such as P-256 or an IPsec DH parameter).  If
+  so, then verification tests can be relaxed, as compared to
+  parameters which may have been maliciously constructed in order to
+  pass primality checks. (GH #2409)
+
+* RandomNumberGenerator::add_entropy_T assumed its input was a POD
+  type but did not verify this. (GH #2403)
+
+* Support OCSP responders that live on a non-standard port (GH #2401)
+
+* Add support for Solaris sandbox (GH #2385)
+
+* Support suffixes on release numbers for alpha/beta releases (GH #2404)
+
+* Fix a bug in EAX which allowed requesting a 0 length tag, which had
+  the effect of using a full length tag. Instead omit the length field,
+  or request the full tag length explicitly. (GH #2392 #2390)
+
+* Fix a memory leak in GCM where if passed an unsuitable block cipher
+  (eg not 128 bit) it would throw an exception and leak the cipher
+  object. (GH #2392 #2388)
+
+Version 2.15.0, 2020-07-07
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+* Fix a bug where the name constraint extension did not constrain the
+  alternative DN field which can be included in a subject alternative name. This
+  would allow a corrupted sub-CA which was otherwise constrained by a name
+  constraint to issue a certificate with a prohibited DN.
+
+* Fix a bug in the TLS server during client authentication where where
+  if a (disabled by default) static RSA ciphersuite was selected, then
+  no certificate request would be sent. This would have an equivalent
+  effect to a client which simply replied with an empty Certificate
+  message. (GH #2367)
+
+* Replace the T-Tables implementation of AES with a 32-bit bitsliced
+  version. As a result AES is now constant time on all processors.
+  (GH #2346 #2348 #2353 #2329 #2355)
+
+* In TLS, enforce that the key usage given in the server certificate
+  allows the operation being performed in the ciphersuite. (GH #2367)
+
+* In X.509 certificates, verify that the algorithm parameters are
+  the expected NULL or empty. (GH #2367)
+
+* Change the HMAC key schedule to attempt to reduce the information
+  leaked from the key schedule with regards to the length of the key,
+  as this is at times (as for example in PBKDF2) sensitive information.
+  (GH #2362)
+
+* Add Processor_RNG which wraps RDRAND or the POWER DARN RNG
+  instructions. The previous RDRAND_RNG interface is deprecated.
+  (GH #2352)
+
+* The documentation claimed that mlocked pages were created with a
+  guard page both before and after. However only a trailing guard page
+  was used. Add a leading guard page. (GH #2334)
+
+* Add support for generating and verifying DER-encoded ECDSA signatures
+  in the C and Python interfaces. (GH #2357 #2356)
+
+* Workaround a bug in GCC's UbSan which triggered on a code sequence
+  in XMSS (GH #2322)
+
+* When building documentation using Sphinx avoid parallel builds with
+  version 3.0 due to a bug in that version (GH #2326 #2324)
+
+* Fix a memory leak in the CommonCrypto block cipher calls (GH #2371)
+
+* Fix a flaky test that would occasionally fail when running the tests
+  with a large number of threads. (GH #2325 #2197)
+
+* Additional algorithms are now deprecated: XTEA, GOST, and Tiger.
+  They will be removed in a future major release.
+
+Version 2.14.0, 2020-04-06
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+* Add support for using POWER8+ VPSUMD instruction to accelerate GCM
+  (GH #2247)
+
+* Optimize the vector permute AES implementation, especially improving
+  performance on ARMv7, Aarch64, and POWER. (GH #2243)
+
+* Use a new algorithm for modular inversions which is both faster and
+  more resistant to side channel attacks. (GH #2287 #2296 #2301)
+
+* Address an issue in CBC padding which would leak the length of the
+  plaintext which was being padded. Unpadding during decryption was
+  not affected. Thanks to Maximilian Blochberger for reporting this.
+  (GH #2312)
+
+* Optimize NIST prime field reductions, improving ECDSA by 3-9% (GH #2295)
+
+* Increase the size of the ECC blinding mask and scale it based on the
+  size of the group order. (GH #880 #893 #2308)
+
+* Add server side support for the TLS asio wrapper. (GH #2229)
+
+* Add support for using Windows certificate store on MinGW (GH #2280)
+
+* Use the library thread pool instead of a new thread for RSA computations,
+  improving signature performance by up to 20%. (GH #2257)
+
+* Precompute and cache additional fields in ``X509_Certificate`` (GH #2250)
+
+* Add a CLI utility ``cpu_clock`` which estimates the speed of the
+  processor cycle counter. (GH #2251)
+
+* Fix a bug which prevented using DER-encoded ECDSA signatures with a PKCS11
+  key (GH #2293)
+
+* Enable use of raw block ciphers from CommonCrypto (GH #2278)
+
+* Support for splitting up the amalgamation file by ABI extension has
+  been removed. Instead only ``botan_all.cpp`` and ``botan_all.h`` are
+  generated. (GH #2246)
+
+* Improve support for baremetal systems with no underlying OS, with
+  target OS ``none`` (GH #2303 #2304 #2305)
+
+* The build system now avoids using ``-rpath=$ORIGIN`` or (on macOS)
+  install_name which allowed running the tests from the build
+  directory without setting ``LD_LIBRARY_PATH``/``DYLD_LIBRARY_PATH``
+  environment variables. Instead set the dynamic linker variables
+  appropriately, or use ``make check``. (GH #2294 #2302)
+
+* Add new option ``--name-amalgamation`` which allows naming the
+  amalgamation output, instead of the default ``botan_all``. (GH #2246)
+
+* Avoid using symbolic links on Windows (GH #2288 #2286 #2285)
+
+* Fix a bug that prevented compilation of the amalgamation on ARM and
+  POWER processors (GH #2245 #2241)
+
+* Fix some build problems under Intel C++ (GH #2260)
+
+* Remove use of Toolhelp Windows library, which was known to trigger
+  false positives under some antivirus systems. (GH #2261)
+
+* Fix a compilation problem when building on Windows in Unicode mode.
+  Add Unicode build to CI to prevent regressions. (GH #2254 #2256)
+
+* Work around a GCC bug affecting old libc (GH #2235)
+
+* Workaround a bug in macOS 10.15 which caused a test to crash.
+  (GH #2279 #2268)
+
+* Avoid a crash in PKCS8::load_key due to a bug in Clang 8.
+  (GH #2277)
+
 Version 2.13.0, 2020-01-06
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

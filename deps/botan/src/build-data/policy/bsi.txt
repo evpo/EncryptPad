@@ -57,8 +57,8 @@ aes_armv8
 aes_power8
 
 # modes
-clmul_cpu
-clmul_ssse3
+ghash_cpu
+ghash_vperm
 
 # hash
 sha2_32_x86
@@ -70,12 +70,11 @@ sha3_bmi2
 # entropy sources
 dev_random
 proc_walk
-rdrand
 rdseed
 win32_stats
 
 # rng
-rdrand_rng
+processor_rng
 system_rng
 
 # utils

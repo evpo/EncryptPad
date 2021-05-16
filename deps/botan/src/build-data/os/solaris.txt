@@ -8,10 +8,12 @@ clock_gettime
 dev_random
 proc_fs
 
+atomics
 threads
 thread_local
 sockets
 filesystem
+setppriv
 </target_features>
 
 <aliases>

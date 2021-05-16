@@ -1,6 +1,5 @@
 /*
-* Shanks-Tonnelli (RESSOL)
-* (C) 2007-2008 Falko Strenzke, FlexSecure GmbH
+* (C) 2007,2008 Falko Strenzke, FlexSecure GmbH
 * (C) 2008 Jack Lloyd
 *
 * Botan is released under the Simplified BSD License (see license.txt)
@@ -12,10 +11,13 @@
 namespace Botan {
 
 /*
-* Shanks-Tonnelli algorithm
+* Tonelli-Shanks algorithm
 */
 BigInt ressol(const BigInt& a, const BigInt& p)
    {
+   if(p <= 1 || p.is_even())
+      throw Invalid_Argument("ressol: invalid prime");
+
    if(a == 0)
       return 0;
    else if(a < 0)
@@ -25,16 +27,14 @@ BigInt ressol(const BigInt& a, const BigInt& p)
 
    if(p == 2)
       return a;
-   else if(p <= 1)
-      throw Invalid_Argument("ressol: prime must be > 1 a");
-   else if(p.is_even())
-      throw Invalid_Argument("ressol: invalid prime");
 
    if(jacobi(a, p) != 1) // not a quadratic residue
       return -BigInt(1);
 
-   if(p % 4 == 3)
+   if(p % 4 == 3) // The easy case
+      {
       return power_mod(a, ((p+1) >> 2), p);
+      }
 
    size_t s = low_zero_bits(p - 1);
    BigInt q = p >> s;
@@ -51,10 +51,23 @@ BigInt ressol(const BigInt& a, const BigInt& p)
    if(n == 1)
       return r;
 
-   // find random non quadratic residue z
-   BigInt z = 2;
-   while(jacobi(z, p) == 1) // while z quadratic residue
-      ++z;
+   // find random quadratic nonresidue z
+   word z = 2;
+   for(;;)
+      {
+      if(jacobi(z, p) == -1) // found one
+         break;
+
+      z += 1; // try next z
+
+      /*
+      * The expected number of tests to find a non-residue modulo a
+      * prime is 2. If we have not found one after 256 then almost
+      * certainly we have been given a non-prime p.
+      */
+      if(z >= 256)
+         return -BigInt(1);
+      }
 
    BigInt c = power_mod(z, (q << 1) + 1, p);
 

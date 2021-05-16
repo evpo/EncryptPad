@@ -8,13 +8,11 @@
 #ifndef BOTAN_INTERNAL_COMMONCRYPTO_UTILS_H_
 #define BOTAN_INTERNAL_COMMONCRYPTO_UTILS_H_
 
-#include <botan/key_spec.h>
+#include <botan/sym_algo.h>
 
 #include <CommonCrypto/CommonCrypto.h>
 
 namespace Botan {
-
-class Key_Length_Specification;
 
 struct CommonCryptor_Opts
    {
@@ -25,6 +23,7 @@ struct CommonCryptor_Opts
    Key_Length_Specification key_spec{0};
    };
 
+CommonCryptor_Opts commoncrypto_opts_from_algo_name(const std::string& algo_name);
 CommonCryptor_Opts commoncrypto_opts_from_algo(const std::string& algo);
 
 void commoncrypto_adjust_key_size(const uint8_t key[], size_t length,

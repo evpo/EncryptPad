@@ -25,6 +25,7 @@
 #include <botan/x509cert.h>
 #include <botan/pkcs8.h>
 #include <botan/hex.h>
+#include <botan/rng.h>
 
 #if defined(BOTAN_HAS_TLS_SQLITE3_SESSION_MANAGER)
    #include <botan/tls_session_manager_sqlite.h>
@@ -33,7 +34,7 @@
 #include "tls_helpers.h"
 
 #if BOOST_VERSION >= 107000
-#define GET_IO_SERVICE(s) ((boost::asio::io_context&)(s).get_executor().context())
+#define GET_IO_SERVICE(s) (static_cast<boost::asio::io_context&>((s).get_executor().context()))
 #else
 #define GET_IO_SERVICE(s) ((s).get_io_service())
 #endif

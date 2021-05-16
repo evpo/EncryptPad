@@ -60,7 +60,7 @@ confidence=
 # no Warning level messages displayed, use"--disable=all --enable=classes
 # --disable=W"
 
-disable=missing-docstring,no-else-return,logging-not-lazy,locally-disabled
+disable=missing-docstring,no-else-return,logging-not-lazy,locally-disabled,import-outside-toplevel,super-with-arguments,raise-missing-from
 
 
 [REPORTS]
@@ -255,7 +255,7 @@ callbacks=cb_,_cb
 [FORMAT]
 
 # Maximum number of characters on a single line.
-max-line-length=120
+max-line-length=180
 
 # Regexp for a line that is allowed to be longer than the limit.
 ignore-long-lines=^\s*(# )?<?https?://\S+>?$
@@ -351,7 +351,7 @@ max-locals=15
 max-returns=6
 
 # Maximum number of branch for function / method body
-max-branches=12
+max-branches=32
 
 # Maximum number of statements in function / method body
 max-statements=50

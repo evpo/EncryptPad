@@ -5,16 +5,28 @@
 */
 
 #include "sandbox.h"
-#include <botan/build.h>
+#include <botan/mem_ops.h>
 
 #if defined(BOTAN_TARGET_OS_HAS_PLEDGE)
   #include <unistd.h>
 #elif defined(BOTAN_TARGET_OS_HAS_CAP_ENTER)
   #include <sys/capsicum.h>
   #include <unistd.h>
+#elif defined(BOTAN_TARGET_OS_HAS_SETPPRIV)
+  #include <priv.h>
 #endif
 
 namespace Botan_CLI {
+
+#if defined(BOTAN_TARGET_OS_HAS_SETPPRIV)
+struct SandboxPrivDelete {
+  void operator()(priv_set_t *ps)
+    {
+  ::priv_emptyset(ps);
+  ::priv_freeset(ps);
+    }
+};
+#endif
 
 Sandbox::Sandbox()
    {
@@ -22,6 +34,8 @@ Sandbox::Sandbox()
    m_name = "pledge";
 #elif defined(BOTAN_TARGET_OS_HAS_CAP_ENTER)
    m_name = "capsicum";
+#elif defined(BOTAN_TARGET_OS_HAS_SETPPRIV)
+   m_name = "privilege";
 #else
    m_name = "<none>";
 #endif
@@ -29,6 +43,8 @@ Sandbox::Sandbox()
 
 bool Sandbox::init()
    {
+   Botan::initialize_allocator();
+
 #if defined(BOTAN_TARGET_OS_HAS_PLEDGE)
    const static char *opts = "stdio rpath inet error";
    return (::pledge(opts, nullptr) == 0);
@@ -61,6 +77,33 @@ bool Sandbox::init()
       }
 
    return (::cap_enter() == 0);
+#elif defined(BOTAN_TARGET_OS_HAS_SETPPRIV)
+   priv_set_t *tmp;
+   std::unique_ptr<priv_set_t, SandboxPrivDelete> ps;
+   const char *const priv_perms[] = {
+	   PRIV_PROC_FORK,
+	   PRIV_PROC_EXEC,
+	   PRIV_PROC_INFO,
+	   PRIV_PROC_SESSION,
+   };
+
+   if ((tmp = ::priv_allocset()) == nullptr)
+      {
+      return false;
+      }
+
+   ps = std::unique_ptr<priv_set_t, SandboxPrivDelete>(tmp);
+   ::priv_basicset(ps.get());
+
+   for (auto perm: priv_perms)
+   {
+     if (::priv_delset(ps.get(), perm) == -1)
+     {
+        return false;
+     }
+   }
+
+   return true;
 #else
    return true;
 #endif

@@ -5,7 +5,7 @@
 * Botan is released under the Simplified BSD License (see license.txt)
 */
 
-#include <botan/x509_dn.h>
+#include <botan/pkix_types.h>
 #include <botan/der_enc.h>
 #include <botan/ber_dec.h>
 #include <botan/parsing.h>
@@ -291,7 +291,7 @@ void X509_DN::decode_from(BER_Decoder& source)
          rdn.start_cons(SEQUENCE)
             .decode(oid)
             .decode(str) // TODO support Any
-            .end_cons().verify_end("Invalid X509_DN, data follows RDN");
+            .end_cons();
 
          add_attribute(oid, str);
          }
