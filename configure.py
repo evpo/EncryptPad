@@ -1624,6 +1624,9 @@ def execute_qmake(options):
 def get_project_dir():
     return os.path.abspath(os.curdir)
 
+def is_windows(options):
+    return options.os in ['windows','mingw']
+
 def get_botan_build_dir():
     return os.path.join(get_project_dir(), 'deps', 'botan')
 
@@ -1640,7 +1643,6 @@ def configure_botan(options):
     cmd = [
             sys.executable,
             './configure.py',
-            # '--with-build-dir', botan_build_dir,
             '--cc', options.compiler,
             '--cpu', options.cpu,
             '--os', options.os,
@@ -1666,6 +1668,9 @@ def configure_botan(options):
     if options.build_bzip2:
         extra_flags += ' ' if extra_flags else ''
         extra_flags += '-I ' + get_bzip2_dir()
+    if is_windows(options):
+        extra_flags += ' ' if extra_flags else ''
+        extra_flags += '-msse4.1'
 
     if extra_flags:
         cmd.extend(['--extra-cxxflags', extra_flags])
@@ -1683,9 +1688,6 @@ def get_zlib_dir():
 
 def get_bzip2_dir():
     return os.path.join(get_project_dir(), 'deps', 'bzip2')
-
-def is_windows(options):
-    return options.os in ['windows','mingw']
 
 def configure_zlib(options):
     if is_windows(options):
