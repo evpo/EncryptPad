@@ -20,7 +20,13 @@
 <li><a href="#epd-file-format">EPD file format when encrypting with a key</a></li>
 <li><a href="#use-curl">Use CURL to automatically download keys from a remote storage</a></li>
 <li><a href="#known-weaknesses">Known weaknesses</a></li>
-<li><a href="#command-line-interface">Command line interface</a></li>
+<li><a href="#command-line-interface">Command line interface</a>
+
+<ul>
+<li><a href="#command-line-encryptcli">encryptcli</a></li>
+<li><a href="#command-line-encryptpad">encryptpad</a></li>
+</ul>
+</li>
 <li><a href="#installing">Installing EncryptPad</a>
 
 <ul>
@@ -289,8 +295,12 @@ through a pipe. <code>gpg2</code> reads the sequence from the descriptor with <c
 
 <h2>Command line interface</h2>
 
-<p><strong>encryptcli</strong> is the executable to encrypt / decrypt files in command line. Run it without
-arguments to see available parameters. Below is an example of encrypting a file with a key:</p>
+<h3>encryptcli</h3>
+
+<div id="command-line-encryptcli"></div>
+
+
+<p><strong>encryptcli</strong> is the executable to encrypt / decrypt files in command line. Run it without arguments to see available parameters. Below is an example of encrypting a file with a key:</p>
 
 <pre><code># generate a new key and protect it with the passphrase "key".
 # --key-pwd-fd 0 for reading the key passphrase from descriptor 0
@@ -300,6 +310,20 @@ echo -n "key" | encryptcli --generate-key --key-pwd-fd 0 my_key.key
 # The key passphrase is sent through file descriptor 3
 cat plain_text.txt | encryptcli -e --key-file my_key.key \
 --key-only --key-pwd-fd 3 -o plain_text.txt.gpg 3&lt; &lt;(echo -n "key")
+</code></pre>
+
+<h3>encryptpad</h3>
+
+<div id="command-line-encryptpad"></div>
+
+
+<p><strong>encryptpad</strong> is the GUI executable. It has the command line parameters below:</p>
+
+<pre><code>`--lang` - to enforce the language for the GUI
+
+`--log-file` - specify the log file for diagnostics
+
+`--log-severity` - log severity can be one of the following list: none, fatal, error, warning, info, debug, verbose
 </code></pre>
 
 <div id="installing"></div>

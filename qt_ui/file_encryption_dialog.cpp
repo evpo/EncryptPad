@@ -262,12 +262,20 @@ void FileEncryptionDialog::on_uiInputBrowse_clicked()
 void FileEncryptionDialog::on_uiOutputBrowse_clicked()
 {
     QString outputFile = ui->uiOutputFile->text();
+
+    QString selectedFilter;
+    if(!outputFile.isEmpty())
+    {
+        selectedFilter = GetFileFilterFromFileName(outputFile);
+    }
+
     FileRequestSelection selection = fileRequestService.RequestNewFile(
                 this,
                 tr("Output File"),
                 outputFile,
                 ui->uiDecryptRadio->isChecked() ? GetAllFilesFilter() : GetSaveDialogFilter(),
-                nullptr);
+                &selectedFilter
+                );
 
     if(selection.cancelled)
         return;

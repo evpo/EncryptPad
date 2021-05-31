@@ -16,6 +16,8 @@ EncryptPad is an application for viewing and editing symmetrically encrypted tex
 * [Use CURL to automatically download keys from a remote storage](#use-curl)
 * [Known weaknesses](#known-weaknesses)
 * [Command line interface](#command-line-interface)
+  - [encryptcli](#command-line-encryptcli)
+  - [encryptpad](#command-line-encryptpad)
 * [Installing EncryptPad](#installing)
     - [Portable executable](#portable-exe)
     - [Arch Linux](#install-on-arch)
@@ -232,8 +234,10 @@ If this file gets into the hands of a wrongdoer, he or she will need to brute fo
 
 ## Command line interface
 
-**encryptcli** is the executable to encrypt / decrypt files in command line. Run it without
-arguments to see available parameters. Below is an example of encrypting a file with a key:
+### encryptcli
+<div id="command-line-encryptcli"></div>
+
+**encryptcli** is the executable to encrypt / decrypt files in command line. Run it without arguments to see available parameters. Below is an example of encrypting a file with a key:
 
     # generate a new key and protect it with the passphrase "key".
     # --key-pwd-fd 0 for reading the key passphrase from descriptor 0
@@ -243,6 +247,17 @@ arguments to see available parameters. Below is an example of encrypting a file 
     # The key passphrase is sent through file descriptor 3
     cat plain_text.txt | encryptcli -e --key-file my_key.key \
     --key-only --key-pwd-fd 3 -o plain_text.txt.gpg 3< <(echo -n "key")
+
+### encryptpad
+<div id="command-line-encryptpad"></div>
+
+**encryptpad** is the GUI executable. It has the command line parameters below:
+
+    `--lang` - to enforce the language for the GUI
+
+    `--log-file` - specify the log file for diagnostics
+
+    `--log-severity` - log severity can be one of the following list: none, fatal, error, warning, info, debug, verbose
 
 <div id="installing"></div>
 
