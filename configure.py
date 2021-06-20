@@ -569,7 +569,7 @@ def set_defaults_for_unset_options(options, info_arch, info_cc): # pylint: disab
             options.cpu = "x86_32"
         logging.info('Guessing target processor is a %s (use --cpu to set)' % (options.cpu))
 
-    if is_windows(options):
+    if is_windows(options) or options.os == 'darwin':
         options.build_botan = True
         options.build_zlib = True
         options.build_bzip2 = True
