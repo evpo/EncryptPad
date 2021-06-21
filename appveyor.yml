@@ -8,7 +8,7 @@ skip_tags: true
 
 environment:
   matrix:
-    - qtdir: "C:\\Qt\\5.11\\mingw53_32"
+    - qtdir: "C:\\Qt\\latest\\mingw73_32"
       gpp: win32-g++
     # - qtdir: "C:\\Qt\\latest\\mingw73_64"
     #   gpp: win32-g++
@@ -21,7 +21,7 @@ install:
       [Environment]::SetEnvironmentVariable("path", $newPath, "machine")
   - cmd: appveyor-retry choco install gpg4win
   - set QTDIR=%qtdir%
-  - set QTTOOLS=C:\Qt\Tools\mingw530_32
+  - set QTTOOLS=C:\Qt\Tools\mingw730_32
   - set GPGPATH="C:\Program Files (x86)\Gpg4win\..\GnuPG"
   - set PATH=%GPGPATH%\bin;%QTTOOLS%\bin;%QTDIR%\bin;%PATH%;C:\MinGW\bin
 
