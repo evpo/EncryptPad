@@ -82,7 +82,7 @@ namespace
     }
 }
 
-#if defined(_MSC_VER) || defined(__MINGW32__) || defined(__APPLE__)
+#if defined(_MSC_VER) || defined(__MINGW32__)
     QString AppendExtensionForFileDialog(QString fileName, QString selectedFilter)
     {
         (void)selectedFilter;
@@ -90,7 +90,7 @@ namespace
     }
 #endif
 
-#if defined(unix) || defined(__unix__) || defined(__unix)
+#if defined(unix) || defined(__unix__) || defined(__unix) || defined(__APPLE__)
     QString AppendExtensionForFileDialog(QString fileName, QString selectedFilter)
     {
         if(selectedFilter.isEmpty())

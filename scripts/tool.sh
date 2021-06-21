@@ -13,6 +13,7 @@ COMMANDS:\n\
 --docs               build docs directory from markdown files (requres the markdown utility)\n\
 --update-htm         update htm files (README.htm and CHANGES.htm)\n\
 --import-emsg <DIR>  import latest libencryptmsg code from DIR\n\
+--icns               generate icns from iconset
 -h, --help           help\n\n\
 OPTIONS:\n\
 --debug              debug configuration. If not specified, the release configuration is used. The unit tests\n\
@@ -110,6 +111,10 @@ case $COMMAND in
     rm -r deps/libencryptmsg/deps
     result=$?
     exit $result
+    ;;
+--icns)
+    iconutil -c icns -o images/crypt.icns images/icns.iconset
+    exit 0
     ;;
 -h|--help)
     echo -e "$USAGE"

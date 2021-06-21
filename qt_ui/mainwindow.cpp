@@ -589,6 +589,9 @@ bool MainWindow::saveAs()
     if(selection.cancelled)
         return false;
 
+    LOG_INFO << "selection.file_name: " << selection.file_name;
+    LOG_INFO << "selection.filter: " << selection.filter;
+
     // Set the bak file flag if the file name has changed
     if(curFile != selection.file_name && preferences.enableBakFiles)
     {
