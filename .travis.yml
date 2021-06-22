@@ -2,7 +2,6 @@ language: cpp
 os:
     - linux
     - osx
-    - freebsd
 
 osx_image: xcode12.5
 compiler: gcc
@@ -79,7 +78,3 @@ addons:
     homebrew:
         packages:
             - qt5
-    pkg:
-        - botan2
-        - qt5
-        - pkgconf
