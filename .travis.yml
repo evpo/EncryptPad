@@ -28,14 +28,10 @@ script:
     - |
         if [[ "$TRAVIS_OS_NAME" == "linux" ]]
         then
-            # QTDIR="/opt/qt53"
-            # PATH="$QTDIR/bin:$PATH"
-            # qt53-env.sh
-            # sudo qtchooser -install qt5
-            find / -name 'qmake*'
-
-            qmake-qt5 -v
-            ./configure.py --build-botan --build-zlib --build-bzip2 
+            QTDIR="/usr/lib/qt5"
+            PATH="$QTDIR/bin:$PATH"
+            qmake -v
+            ./configure.py --build-botan --build-zlib --build-bzip2
             make
             ./configure.py --without-qt-ui --debug-mode --test --build-botan --build-zlib --build-bzip2
             make
