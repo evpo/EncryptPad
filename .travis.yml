@@ -23,7 +23,7 @@ install:
         if [[ "$TRAVIS_OS_NAME" == "osx" ]]
         then
             # brew update
-            brew install qt5
+            # brew install qt5
             export QTDIR="/usr/local/opt/qt5"
         fi
 script:
@@ -59,7 +59,9 @@ addons:
     apt:
         sources:
             - ubuntu-toolchain-r-test
-            
         packages:
             - zlib1g-dev
             - g++-5
+    homebrew:
+        packages:
+            - qt5
