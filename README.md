@@ -495,6 +495,7 @@ Open the EncryptPad source directory:
 EncryptPad checks the executable directory for a sub-directory called `encryptpad_repository`. If exists, it is used for key files and settings. The directory `.encryptpad` in the user's profile is then ignored. The EncryptPad executable and `encryptpad_repository` can both be copied to a removable media and used on multiple computers. It should be noted that keeping encrypted material with the key files on the same removable media is less secure. Separate them if possible.
 
 <div id="fakevim-mode"></div>
+
 ## FakeVim mode
 
 FakeVim mode lets edit files with Vim-like interface.

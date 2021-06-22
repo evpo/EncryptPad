@@ -2,6 +2,7 @@ language: cpp
 os:
     - linux
     - osx
+    - freebsd
 
 osx_image: xcode12.5
 compiler: gcc
@@ -13,7 +14,6 @@ install:
     - |
         if [[ "$TRAVIS_OS_NAME" == "linux" ]]
         then
-            echo "linux"
             # sudo apt-add-repository -y ppa:beineri/opt-qt532-trusty
             # sudo apt-get -qq update
             # sudo apt-get install qt53tools
@@ -23,7 +23,7 @@ install:
     - |
         if [[ "$TRAVIS_OS_NAME" == "osx" ]]
         then
-            echo "osx"
+            export QTDIR="/usr/local/opt/qt5"
         fi
 script:
     - |
@@ -32,10 +32,24 @@ script:
             # QTDIR="/opt/qt53"
             # PATH="$QTDIR/bin:$PATH"
             # qt53-env.sh
-            qmake -v
-            ./configure.py --build-botan --build-zlib --build-bzip2
+            # sudo qtchooser -install qt5
+            find / -name 'qmake*'
+
+            qmake-qt5 -v
+            ./configure.py --build-botan --build-zlib --build-bzip2 
             make
             ./configure.py --without-qt-ui --debug-mode --test --build-botan --build-zlib --build-bzip2
+            make
+            ./scripts/tool.sh --run-tests
+            ./scripts/tool.sh --run-func-tests --debug
+        fi
+    - |
+        if [[ "$TRAVIS_OS_NAME" == "freebsd" ]]
+        then
+            qmake -v
+            ./configure.py
+            make
+            ./configure.py --without-qt-ui --debug-mode --test
             make
             ./scripts/tool.sh --run-tests
             ./scripts/tool.sh --run-func-tests --debug
@@ -65,3 +79,7 @@ addons:
     homebrew:
         packages:
             - qt5
+    pkg:
+        - botan2
+        - qt5
+        - pkgconf
