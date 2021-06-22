@@ -6,7 +6,7 @@ os:
 compiler: gcc
 env: CONFIG=Release
 group: stable
-dist: trusty
+dist: xenial
 
 install:
     - |
@@ -21,7 +21,7 @@ install:
     - |
         if [[ "$TRAVIS_OS_NAME" == "osx" ]]
         then
-            brew update
+            # brew update
             brew install qt5
             export QTDIR="/usr/local/opt/qt5"
         fi
