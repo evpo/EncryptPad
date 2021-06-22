@@ -7,34 +7,33 @@ osx_image: xcode12.5
 compiler: gcc
 env: CONFIG=Release
 group: stable
-dist: xenial
+dist: bionic
 
 install:
     - |
         if [[ "$TRAVIS_OS_NAME" == "linux" ]]
         then
-            sudo apt-add-repository -y ppa:beineri/opt-qt532-trusty
-            sudo apt-get -qq update
-            sudo apt-get install qt53tools
-            sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 50
-            sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-5 50
+            echo "linux"
+            # sudo apt-add-repository -y ppa:beineri/opt-qt532-trusty
+            # sudo apt-get -qq update
+            # sudo apt-get install qt53tools
+            sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 50
+            sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-7 50
         fi
     - |
         if [[ "$TRAVIS_OS_NAME" == "osx" ]]
         then
-            # brew update
-            # brew install qt5
-            export QTDIR="/usr/local/opt/qt5"
+            echo "osx"
         fi
 script:
     - |
         if [[ "$TRAVIS_OS_NAME" == "linux" ]]
         then
-            QTDIR="/opt/qt53"
-            PATH="$QTDIR/bin:$PATH"
-            qt53-env.sh
+            # QTDIR="/opt/qt53"
+            # PATH="$QTDIR/bin:$PATH"
+            # qt53-env.sh
             qmake -v
-            ./configure.py --qmake-bin $(which qmake) --build-botan --build-zlib --build-bzip2
+            ./configure.py --build-botan --build-zlib --build-bzip2
             make
             ./configure.py --without-qt-ui --debug-mode --test --build-botan --build-zlib --build-bzip2
             make
@@ -48,12 +47,12 @@ script:
             LDFLAGS=-L$QTDIR/lib
             CPPFLAGS=-I$QTDIR/include
             qmake -v
-            ./configure.py --cpu x86_64 --build-botan --build-zlib --build-bzip2
+            ./configure.py --ldflags "-mmacosx-version-min=11.0" --cxxflags "-mmacosx-version-min=11.0"
             make
-            ./configure.py --without-qt-ui --debug-mode --test --cpu x86_64 --build-botan --build-zlib --build-bzip2
+            ./configure.py --without-qt-ui --debug-mode --test --ldflags "-mmacosx-version-min=11.0" --cxxflags "-mmacosx-version-min=11.0"
             make
             ./scripts/tool.sh --run-tests
-            ./scripts/tool.sh --run-func-tests --debug 
+            ./scripts/tool.sh --run-func-tests --debug
         fi
 addons:
     apt:
@@ -61,7 +60,8 @@ addons:
             - ubuntu-toolchain-r-test
         packages:
             - zlib1g-dev
-            - g++-5
+            - g++-7
+            - qtbase5-dev
     homebrew:
         packages:
             - qt5
