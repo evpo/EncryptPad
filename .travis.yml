@@ -3,6 +3,7 @@ os:
     - linux
     - osx
 
+osx_image: xcode12.5
 compiler: gcc
 env: CONFIG=Release
 group: stable
