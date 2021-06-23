@@ -41,8 +41,8 @@ install:
       set PATH=%GPGPATH%\bin;%QTTOOLS%\bin;%QTDIR%\bin;%PATH%;C:\MinGW\bin
 
   - sh: |
-      apt-get update
-      apt-get install libbotan-2-dev mesa-common-dev libgl1-mesa-dev gnupg2
+      sudo apt-get update
+      sudo apt-get install libbotan-2-dev mesa-common-dev libgl1-mesa-dev gnupg2
 
 
 build_script:
