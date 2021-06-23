@@ -40,8 +40,12 @@ install:
       set GPGPATH="C:\Program Files (x86)\Gpg4win\..\GnuPG"
       set PATH=%GPGPATH%\bin;%QTTOOLS%\bin;%QTDIR%\bin;%PATH%;C:\MinGW\bin
 
+  - sh: |
+      apt-get update
+      apt-get install libbotan-2-dev mesa-common-dev libgl1-mesa-dev gnupg2
+
+
 build_script:
-  # enable this to take a look if there are new qt versions
   - cmd: |
       echo %PATH%
       dir C:\Qt
@@ -58,3 +62,16 @@ build_script:
       mingw32-make -j 1
       bash scripts\tool.sh --run-tests
       bash scripts\tool.sh --run-func-tests --debug
+
+  - sh: |
+      export PATH=${HOME}/Qt/5.12.10/gcc_64/bin:${PATH}
+      qmake --version
+      which g++
+      g++ --version
+      ./configure.py --debug-mode
+      make -j 1
+      ./configure.py --without-qt-ui --debug-mode --test
+      make -j 1
+      scripts\tool.sh --run-tests
+      scripts\tool.sh --run-func-tests --debug
+

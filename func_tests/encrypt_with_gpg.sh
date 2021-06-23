@@ -2,7 +2,7 @@
 set -e
 set -o pipefail
 
-CMD="$GPG -c --verbose --allow-old-cipher-algos --batch --passphrase-file passphrase.txt"
+CMD="$GPG -c --verbose --batch --passphrase-file passphrase.txt"
 
 if [ "$PLAIN_TEXT_FILE" = "" ]
 then
