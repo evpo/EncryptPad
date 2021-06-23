@@ -12,7 +12,7 @@ image:
 environment:
   APPVEYOR_YML_DISABLE_PS_LINUX: true
   APPVEYOR_SSH_KEY: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDFM0NqOhTDfGjsA/+yXFeDN+d6w3W5Y5LxQriZysUgu1ftXx+q9sLFpGE8d5vIQ6e/Tcl1vGh3avj/JyGzqsYRBoHiUaUq09Azzz6uYf/fzkbpCh2qo4Ly47hssyimqWdO6LgXX90ImqBiukrOz/Vh2xUyy5xxrb5lR8uYbj/YSPuOaIW4b0XVcozN+pkjvex0g+53NuhcwI6sxfqI85Iy0AU0b03meYH9m9kPc+/p6GzuO+qR8bDVohtc5Yb845aPVXWwKCdn7eWnz90WlI1sdd5oWy9fCt08x3tWbdaR3BZKcGcu0qRhJSllGSmfmp63awLfqHLjDRHI4ImOloC5Ze+OIO0BA65BYTauUr6Szhk5UhhoE3cyVxzw9tfLBzfFP/1/ZkByyhNRtSdmw4OqTShNlfyeqWhyBQqlw3zvo1SOHi6YZi+S4ZddFG+C+OMgXqAZKwKubJpyBmm3C4asexz5PLwYcrzYozTTwjmLvS5KhQk9ogfvtV2cPyaHH0c= evpo@tw
-  APPVEYOR_SSH_BLOCK: true
+    #  APPVEYOR_SSH_BLOCK: true
 
 for:
 -
