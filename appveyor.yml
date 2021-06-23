@@ -72,6 +72,6 @@ build_script:
       make -j 1
       ./configure.py --without-qt-ui --debug-mode --test
       make -j 1
-      scripts\tool.sh --run-tests
-      scripts\tool.sh --run-func-tests --debug
+      scripts/tool.sh --run-tests
+      scripts/tool.sh --run-func-tests --debug
 
