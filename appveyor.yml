@@ -34,27 +34,27 @@ install:
       $newPath = ($path.Split(';') | Where-Object { $_ -eq 'C:\ProgramData\chocolatey\bin' }) -join ';'
       [Environment]::SetEnvironmentVariable("path", $newPath, "machine")
   - cmd: |
-    appveyor-retry choco install gpg4win
-    set QTDIR=%qtdir%
-    set QTTOOLS=C:\Qt\Tools\mingw730_32
-    set GPGPATH="C:\Program Files (x86)\Gpg4win\..\GnuPG"
-    set PATH=%GPGPATH%\bin;%QTTOOLS%\bin;%QTDIR%\bin;%PATH%;C:\MinGW\bin
+      appveyor-retry choco install gpg4win
+      set QTDIR=%qtdir%
+      set QTTOOLS=C:\Qt\Tools\mingw730_32
+      set GPGPATH="C:\Program Files (x86)\Gpg4win\..\GnuPG"
+      set PATH=%GPGPATH%\bin;%QTTOOLS%\bin;%QTDIR%\bin;%PATH%;C:\MinGW\bin
 
 build_script:
   # enable this to take a look if there are new qt versions
   - cmd: |
-    echo %PATH%
-    dir C:\Qt
-    dir C:\Qt\Tools
-    dir C:\Qt\latest
-    dir %GPGPATH%
-    which g++
-    g++ --version
-    uname
-    gpg --version
-    python configure.py --debug-mode
-    mingw32-make -j 1
-    python configure.py --without-qt-ui --debug-mode --test
-    mingw32-make -j 1
-    bash scripts\tool.sh --run-tests
-    bash scripts\tool.sh --run-func-tests --debug
+      echo %PATH%
+      dir C:\Qt
+      dir C:\Qt\Tools
+      dir C:\Qt\latest
+      dir %GPGPATH%
+      which g++
+      g++ --version
+      uname
+      gpg --version
+      python configure.py --debug-mode
+      mingw32-make -j 1
+      python configure.py --without-qt-ui --debug-mode --test
+      mingw32-make -j 1
+      bash scripts\tool.sh --run-tests
+      bash scripts\tool.sh --run-func-tests --debug
