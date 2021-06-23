@@ -24,8 +24,8 @@ for:
     qtdir: "C:\\Qt\\latest\\mingw73_32"
     gpp: win32-g++
 
-init:
-  - sh: curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -
+# init:
+#   - sh: curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -
 
 install:
   # Qt-versions: https://www.appveyor.com/docs/build-environment/#qt
