@@ -42,7 +42,7 @@ install:
 
   - sh: |
       sudo apt-get update
-      sudo apt-get install libbotan-2-dev mesa-common-dev libgl1-mesa-dev gnupg2
+      sudo apt-get install --yes libbotan-2-dev mesa-common-dev libgl1-mesa-dev gnupg2
 
 
 build_script:
