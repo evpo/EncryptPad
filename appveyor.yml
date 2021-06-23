@@ -6,8 +6,8 @@
 
 skip_tags: true
 image:
-  - Visual Studio 2015
   - Ubuntu
+  - Visual Studio 2015
 
 environment:
   APPVEYOR_YML_DISABLE_PS_LINUX: true
