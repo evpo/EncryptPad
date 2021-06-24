@@ -6,6 +6,7 @@
 
 skip_tags: true
 image:
+  - macos
   - Ubuntu
   - Visual Studio 2015
 
@@ -75,6 +76,27 @@ for:
         make -j 1
         ./configure.py --without-qt-ui --debug-mode --test
         make -j 1
+        scripts/tool.sh --run-tests
+        scripts/tool.sh --run-func-tests --debug
+
+-
+  matrix:
+    only:
+      - image: macos
+
+  install:
+    - sh: |
+        echo "install in macos"
+
+  build_script:
+    - sh: |
+        export QTDIR=${HOME}/Qt/5.12.10/clang_64
+        export PATH=${QTDIR}/bin:${PATH}
+        qmake --version
+        ./configure.py --ldflags "-mmacosx-version-min=11.0" --cxxflags "-mmacosx-version-min=11.0"
+        make
+        ./configure.py --without-qt-ui --debug-mode --test --ldflags "-mmacosx-version-min=11.0" --cxxflags "-mmacosx-version-min=11.0"
+        make
         scripts/tool.sh --run-tests
         scripts/tool.sh --run-func-tests --debug
 
