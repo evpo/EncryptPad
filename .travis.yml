@@ -1,76 +1,22 @@
 language: cpp
 os:
-    - linux
-    - osx
+    - freebsd
 
-osx_image: xcode12.5
 compiler: gcc
 env: CONFIG=Release
 group: stable
-dist: bionic
 
-install:
-    - |
-        if [[ "$TRAVIS_OS_NAME" == "linux" ]]
-        then
-            # sudo apt-add-repository -y ppa:beineri/opt-qt532-trusty
-            # sudo apt-get -qq update
-            # sudo apt-get install qt53tools
-            sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 50
-            sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-7 50
-        fi
-    - |
-        if [[ "$TRAVIS_OS_NAME" == "osx" ]]
-        then
-            export QTDIR="/usr/local/opt/qt5"
-        fi
 script:
     - |
-        if [[ "$TRAVIS_OS_NAME" == "linux" ]]
-        then
-            QTDIR="/usr/lib/qt5"
-            PATH="$QTDIR/bin:$PATH"
-            qmake -v
-            ./configure.py --build-botan --build-zlib --build-bzip2
-            make
-            ./configure.py --without-qt-ui --debug-mode --test --build-botan --build-zlib --build-bzip2
-            make
-            ./scripts/tool.sh --run-tests
-            ./scripts/tool.sh --run-func-tests --debug
-        fi
-    - |
-        if [[ "$TRAVIS_OS_NAME" == "freebsd" ]]
-        then
-            qmake -v
-            ./configure.py
-            make
-            ./configure.py --without-qt-ui --debug-mode --test
-            make
-            ./scripts/tool.sh --run-tests
-            ./scripts/tool.sh --run-func-tests --debug
-        fi
-    - |
-        if [[ "$TRAVIS_OS_NAME" == "osx" ]]
-        then
-            PATH="$QTDIR/bin:$PATH"
-            LDFLAGS=-L$QTDIR/lib
-            CPPFLAGS=-I$QTDIR/include
-            qmake -v
-            ./configure.py --ldflags "-mmacosx-version-min=11.0" --cxxflags "-mmacosx-version-min=11.0"
-            make
-            ./configure.py --without-qt-ui --debug-mode --test --ldflags "-mmacosx-version-min=11.0" --cxxflags "-mmacosx-version-min=11.0"
-            make
-            ./scripts/tool.sh --run-tests
-            ./scripts/tool.sh --run-func-tests --debug
-        fi
+      qmake -v
+      ./configure.py
+      make
+      ./configure.py --without-qt-ui --debug-mode --test
+      make
+      ./scripts/tool.sh --run-tests
+      ./scripts/tool.sh --run-func-tests --debug
 addons:
-    apt:
-        sources:
-            - ubuntu-toolchain-r-test
-        packages:
-            - zlib1g-dev
-            - g++-7
-            - qtbase5-dev
-    homebrew:
-        packages:
-            - qt5
+  pkg:
+    - botan2
+    - qt5
+    - pkgconf
