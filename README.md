@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/evpo/EncryptPad.svg?branch=master)](https://travis-ci.org/evpo/EncryptPad) [![Build status](https://ci.appveyor.com/api/projects/status/6esb4w56f25go5oc?svg=true)](https://ci.appveyor.com/project/evpo/encryptpad)
+[![Build status](https://ci.appveyor.com/api/projects/status/6esb4w56f25go5oc?svg=true)](https://ci.appveyor.com/project/evpo/encryptpad) [![Build Status](https://travis-ci.com/evpo/EncryptPad.svg?branch=master)](https://travis-ci.org/evpo/EncryptPad)
 
 Screenshots and tutorials are at [evpo.net/encryptpad/](http://evpo.net/encryptpad/)
 
