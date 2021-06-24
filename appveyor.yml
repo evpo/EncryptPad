@@ -24,17 +24,7 @@ for:
     qtdir: "C:\\Qt\\latest\\mingw73_32"
     gpp: win32-g++
 
-# init:
-#   - sh: curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -
-
-for:
--
-  matrix:
-    only:
-      - image: Visual Studio 2015
-
   install:
-    # Qt-versions: https://www.appveyor.com/docs/build-environment/#qt
     - ps: |
         $path = [Environment]::GetEnvironmentVariable("path", "machine")
         $newPath = ($path.Split(';') | Where-Object { $_ -eq 'C:\ProgramData\chocolatey\bin' }) -join ';'
@@ -47,23 +37,6 @@ for:
         set GPGPATH="C:\Program Files (x86)\Gpg4win\..\GnuPG"
         set PATH=%GPGPATH%\bin;%QTTOOLS%\bin;%QTDIR%\bin;%PATH%;C:\MinGW\bin
 
-for:
--
-  matrix:
-    only:
-      - image: Ubuntu
-
-  install:
-    - sh: |
-        sudo apt-get update
-        sudo apt-get install --yes libbotan-2-dev mesa-common-dev libgl1-mesa-dev gnupg2
-
-
-for:
--
-  matrix:
-    only:
-      - image: Visual Studio 2015
   build_script:
     - cmd: |
         echo %PATH%
@@ -87,6 +60,12 @@ for:
   matrix:
     only:
       - image: Ubuntu
+
+  install:
+    - sh: |
+        sudo apt-get update
+        sudo apt-get install --yes libbotan-2-dev mesa-common-dev libgl1-mesa-dev gnupg2
+
   build_script:
     - sh: |
         export PATH=${HOME}/Qt/5.12.10/gcc_64/bin:${PATH}
@@ -99,4 +78,7 @@ for:
         make -j 1
         scripts/tool.sh --run-tests
         scripts/tool.sh --run-func-tests --debug
+
+# init:
+#   - sh: curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -
 
