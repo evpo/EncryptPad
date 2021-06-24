@@ -55,7 +55,6 @@ for:
         bash scripts\tool.sh --run-tests
         bash scripts\tool.sh --run-func-tests --debug
 
-for:
 -
   matrix:
     only:
