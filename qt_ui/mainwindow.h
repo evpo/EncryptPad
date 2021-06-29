@@ -64,7 +64,7 @@ public:
     const QString &getEncryptionKeyFile() const;
 
 protected:
-    void closeEvent(QCloseEvent *event);
+    void closeEvent(QCloseEvent *event) override;
     bool eventFilter(QObject *obj, QEvent *event) override;
 
 public slots:
