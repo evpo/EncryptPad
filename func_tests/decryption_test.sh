@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -e
 set -o pipefail
 USAGE1="decryption_test.sh <path_to_decryptor> <directory_with_encrypted_files>"
