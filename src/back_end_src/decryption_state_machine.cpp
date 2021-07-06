@@ -1,4 +1,5 @@
 #include "decryption_state_machine.h"
+#include <limits>
 #include "state_graph.h"
 #include "state_machine.h"
 #include "encryptmsg/emsg_exception.h"

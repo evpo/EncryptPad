@@ -20,6 +20,7 @@
 #include "file_helper.h"
 #include <cstdio>
 #include <cerrno>
+#include <limits>
 #include "win_file_reader.h"
 #include "epad_utilities.h"
 
