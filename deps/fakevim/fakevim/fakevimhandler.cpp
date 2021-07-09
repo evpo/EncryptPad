@@ -87,6 +87,7 @@
 #include <climits>
 #include <ctype.h>
 #include <functional>
+#include <iostream>
 
 //#define DEBUG_KEY  1
 #if DEBUG_KEY
@@ -3206,15 +3207,37 @@ void FakeVimHandler::Private::commitCursor()
             // FIXME: After '$' command (i.e. m_visualTargetColumn == -1), end of selected lines
             //        should be selected.
         } else if (isVisualLineMode()) {
-            const int posLine = lineForPosition(pos);
-            const int ancLine = lineForPosition(anc);
+            // EP: my fix is below for the problem: the visual line mode selection selects the entire line
+            // but the actions apply to the visible line
+
+            // const int posLine = lineForPosition(pos);
+            // const int ancLine = lineForPosition(anc);
+            // if (anc < pos) {
+            //     pos = lastPositionInLine(posLine);
+            //     anc = firstPositionInLine(ancLine);
+            // } else {
+            //     pos = firstPositionInLine(posLine);
+            //     anc = lastPositionInLine(ancLine) + 1;
+            // }
+
+            QTextCursor tmpCur = tc;
             if (anc < pos) {
-                pos = lastPositionInLine(posLine);
-                anc = firstPositionInLine(ancLine);
-            } else {
-                pos = firstPositionInLine(posLine);
-                anc = lastPositionInLine(ancLine) + 1;
+                tmpCur.setPosition(pos);
+                tmpCur.movePosition(EndOfLine);
+                pos = tmpCur.position();
+                tmpCur.setPosition(anc);
+                tmpCur.movePosition(StartOfLine);
+                anc = tmpCur.position();
             }
+            else {
+                tmpCur.setPosition(pos);
+                tmpCur.movePosition(StartOfLine);
+                pos = tmpCur.position();
+                tmpCur.setPosition(anc);
+                tmpCur.movePosition(EndOfLine);
+                anc = tmpCur.position() + 1;
+            }
+
             // putting cursor on folded line will unfold the line, so move the cursor a bit
             if (!blockAt(pos).isVisible())
                 ++pos;
