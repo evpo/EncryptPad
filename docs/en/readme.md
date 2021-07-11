@@ -25,7 +25,8 @@ EncryptPad is an application for viewing and editing symmetrically encrypted tex
 * [Compile EncryptPad on Windows](#compile-on-windows)
   - [Prerequisites](#prerequisites)
   - [Steps](#steps)
-* [Compile EncryptPad on Mac/Linux](#compile-on-mac-linux)
+* [Compile EncryptPad on macOS](#compile-on-macos)
+* [Compile EncryptPad on Linux](#compile-on-linux)
     - [Fedora](#build-on-fedora)
     - [Ubuntu](#build-on-ubuntu)
     - [Debian](#build-on-debian)
@@ -378,17 +379,21 @@ If the build is successful, you should see the executable **./bin/release/encryp
 
 Note that if you want EncryptPad to work as a single executable without dlls, you need to build Qt framework yourself statically. It takes a few hours. There are plenty of instructions on how to do this in the Internet. The most popular article recommends using a PowerShell script. While it is convenient and I did it once, sometimes you don't want to upgrade your PowerShell and install heavy dependencies coming with it. So the next time I had to do that, I read the script and did everything manually. Luckily there are not too many steps in it.
 
-<div id="compile-on-mac-linux"></div>
+<div id="compile-on-macos"></div>
 
-## Compile EncryptPad on Mac/Linux
+## Compile EncryptPad on macOS
 
-All you need is to install Qt, Python and run:
+You need to install Qt 5, Python and run:
 
-    export PATH=$HOME/Qt/5.10.1/clang_64/bin/:$PATH
-    ./configure.py --build-botan --ldflags "-mmacosx-version-min=10.10" --cxxflags "-mmacosx-version-min=10.10"
+    export PATH=$HOME/Qt/5.12.11/clang_64/bin/:$PATH
+    ./configure.py --ldflags "-mmacosx-version-min=11.0" --cxxflags "-mmacosx-version-min=11.0"
     make
 
 Change the Qt path and replace the minimal macOS versions as needed. The command will work without them but the result will be limited to the current version.
+
+<div id="compile-on-linux"></div>
+
+## Compile EncryptPad on Linux
 
 <div id="build-on-fedora"></div>
 
@@ -481,6 +486,7 @@ Open the EncryptPad source directory:
 EncryptPad checks the executable directory for a sub-directory called `encryptpad_repository`. If exists, it is used for key files and settings. The directory `.encryptpad` in the user's profile is then ignored. The EncryptPad executable and `encryptpad_repository` can both be copied to a removable media and used on multiple computers. It should be noted that keeping encrypted material with the key files on the same removable media is less secure. Separate them if possible.
 
 <div id="fakevim-mode"></div>
+
 ## FakeVim mode
 
 FakeVim mode lets edit files with Vim-like interface.
