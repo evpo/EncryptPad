@@ -60,7 +60,15 @@ public:
                 QFontMetrics fm(TextEdit::font());
                 const int position = TextEdit::textCursor().position();
                 const QChar c = TextEdit::document()->characterAt(position);
-                rect.setWidth(fm.horizontalAdvance(c));
+
+#if QT_VERSION < QT_VERSION_CHECK(5, 11, 0)
+                int width = fm.width(c);
+#else
+                int width = fm.horizontalAdvance(c);
+#endif
+
+                rect.setWidth(width);
+
                 painter.setPen(Qt::NoPen);
                 painter.setBrush(TextEdit::palette().color(QPalette::Base));
                 painter.setCompositionMode(QPainter::CompositionMode_Difference);
