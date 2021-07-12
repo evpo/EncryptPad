@@ -48,3 +48,4 @@ file_filter = docs/<lang>/tutorials/encrypt_binary_file/binary_file.md
 source_file = docs/en/tutorials/encrypt_binary_file/binary_file.md
 source_lang = en
 type = TXT
+
