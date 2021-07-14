@@ -3235,7 +3235,12 @@ void FakeVimHandler::Private::commitCursor()
                 pos = tmpCur.position();
                 tmpCur.setPosition(anc);
                 tmpCur.movePosition(EndOfLine);
-                anc = tmpCur.position() + 1;
+                if(!tmpCur.atEnd()) {
+                    anc = tmpCur.position() + 1;
+                }
+                else {
+                    anc = tmpCur.position();
+                }
             }
 
             // putting cursor on folded line will unfold the line, so move the cursor a bit
@@ -7118,7 +7123,20 @@ QString FakeVimHandler::Private::selectText(const Range &range) const
 
 void FakeVimHandler::Private::yankText(const Range &range, int reg)
 {
-    const QString text = selectText(range);
+    QString text = selectText(range);
+    //EP: bug fix: when standing at the end of the document and yanking the line,
+    //the register contains leading \n
+    bool lineMode = (range.rangemode == RangeLineMode || range.rangemode == RangeLineModeExclusive);
+    if(lineMode && text.startsWith('\n'))
+    {
+        QTextCursor tc = m_cursor;
+        tc.setPosition(range.endPos, KeepAnchor);
+        tc.movePosition(EndOfLine, KeepAnchor);
+        if(tc.atEnd())
+        {
+            text = text.mid(1);
+        }
+    }
     setRegister(reg, text, range.rangemode);
 
     // If register is not specified or " ...
