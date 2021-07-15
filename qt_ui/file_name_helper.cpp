@@ -82,47 +82,37 @@ namespace
     }
 }
 
-#if defined(_MSC_VER) || defined(__MINGW32__)
-    QString AppendExtensionForFileDialog(QString fileName, QString selectedFilter)
-    {
-        (void)selectedFilter;
+QString AppendExtensionForFileDialog(QString fileName, QString selectedFilter)
+{
+    if(selectedFilter.isEmpty())
         return fileName;
-    }
-#endif
 
-#if defined(unix) || defined(__unix__) || defined(__unix) || defined(__APPLE__)
-    QString AppendExtensionForFileDialog(QString fileName, QString selectedFilter)
+    struct Filter2Ext
     {
-        if(selectedFilter.isEmpty())
-            return fileName;
+        const char *filter;
+        const char *ext;
+    };
 
-        struct Filter2Ext
-        {
-            const char *filter;
-            const char *ext;
-        };
+    static Filter2Ext tbl[] =
+    {
+        {"(*.epd)", ".epd"},
+        {"(*.gpg)", ".gpg"},
+        {"(*.asc)", ".asc"},
+        {"(*.txt)", ".txt"},
+        {"(*.key)", ".key"},
+        {nullptr, nullptr},
+    };
 
-        static Filter2Ext tbl[] =
-        {
-            {"(*.epd)", ".epd"},
-            {"(*.gpg)", ".gpg"},
-            {"(*.asc)", ".asc"},
-            {"(*.txt)", ".txt"},
-            {"(*.key)", ".key"},
-            {nullptr, nullptr},
-        };
+    Filter2Ext *p = tbl;
 
-        Filter2Ext *p = tbl;
-
-        for(;p->ext != nullptr; p++)
-        {
-            if(selectedFilter.endsWith(QString(p->filter)) && !fileName.toLower().endsWith(p->ext))
-                fileName += p->ext;
-        }
-
-        return fileName;
+    for(;p->ext != nullptr; p++)
+    {
+        if(selectedFilter.endsWith(QString(p->filter)) && !fileName.toLower().endsWith(p->ext))
+            fileName += p->ext;
     }
-#endif
+
+    return fileName;
+}
 
 
 QString GetSaveDialogFilter()
