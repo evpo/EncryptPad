@@ -16,3 +16,6 @@ the EncryptPad key is.
 Dmitri Goutnik (enodata)
 Fixes for Arch Linux and Freebsd and other unix like systems.
 Arch Linux AUR package.
+
+José Micó (jmico)
+Application icon
