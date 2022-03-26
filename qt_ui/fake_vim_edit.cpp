@@ -16,7 +16,6 @@
 #include <QStandardPaths>
 #include <QDebug>
 #include <QDir>
-#include <QObject>
 
 #include "plog/Log.h"
 
@@ -27,7 +26,6 @@
         (ed->call); \
     }
 
-using namespace std::chrono;
 using namespace FakeVim::Internal;
 
 typedef QLatin1String _;
