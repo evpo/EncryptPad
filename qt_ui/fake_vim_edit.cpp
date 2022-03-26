@@ -16,6 +16,9 @@
 #include <QStandardPaths>
 #include <QDebug>
 #include <QDir>
+#include <QObject>
+
+#include "plog/Log.h"
 
 #define EDITOR(editor, call) \
     if (QPlainTextEdit *ed = qobject_cast<QPlainTextEdit *>(editor)) { \
@@ -24,6 +27,7 @@
         (ed->call); \
     }
 
+using namespace std::chrono;
 using namespace FakeVim::Internal;
 
 typedef QLatin1String _;
@@ -35,55 +39,73 @@ typedef QLatin1String _;
 template <typename TextEdit>
 class Editor : public TextEdit
 {
+private:
+    int getCursorWidth()
+    {
+        QFontMetrics fm(TextEdit::font());
+        // LOG_DEBUG << "font: " << TextEdit::font().toString();
+        const int position = TextEdit::textCursor().position();
+        const QChar c = TextEdit::document()->characterAt(position);
+
+#if QT_VERSION < QT_VERSION_CHECK(5, 11, 0)
+        int width = fm.width(c);
+#else
+        int width = fm.horizontalAdvance(c);
+#endif
+        return width;
+    }
+
+    void resizeCursorWidth()
+    {
+        TextEdit::setCursorWidth(getCursorWidth());
+    }
+
+    void onTextChanged()
+    {
+        if(this->document()->isEmpty())
+        {
+            resizeCursorWidth();
+        }
+        else
+        {
+            TextEdit::setCursorWidth(1);
+        }
+    }
 public:
     explicit Editor(QWidget *parent = nullptr) : TextEdit(parent)
     {
-        TextEdit::setCursorWidth(0);
+        this->connect(this, &QPlainTextEdit::textChanged, [this]() { onTextChanged(); });
     }
 
     void paintEvent(QPaintEvent *e)
     {
         TextEdit::paintEvent(e);
-
-        if ( !m_cursorRect.isNull() && e->rect().intersects(m_cursorRect) ) {
-            QRect rect = m_cursorRect;
-            m_cursorRect = QRect();
-            TextEdit::viewport()->update(rect);
+        if(m_skipNextPaint)
+        {
+            m_skipNextPaint = false;
+            return;
+        }
+        m_skipNextPaint = true;
+        if(!m_initialCursorSet)
+        {
+            onTextChanged();
+            m_initialCursorSet = true;
         }
 
-        // Draw text cursor.
         QRect rect = TextEdit::cursorRect();
-        if ( e->rect().intersects(rect) ) {
-            QPainter painter(TextEdit::viewport());
-
-            if ( TextEdit::overwriteMode() ) {
-                QFontMetrics fm(TextEdit::font());
-                const int position = TextEdit::textCursor().position();
-                const QChar c = TextEdit::document()->characterAt(position);
-
-#if QT_VERSION < QT_VERSION_CHECK(5, 11, 0)
-                int width = fm.width(c);
-#else
-                int width = fm.horizontalAdvance(c);
-#endif
-
-                rect.setWidth(width);
-
-                painter.setPen(Qt::NoPen);
-                painter.setBrush(TextEdit::palette().color(QPalette::Base));
-                painter.setCompositionMode(QPainter::CompositionMode_Difference);
-            } else {
-                rect.setWidth(TextEdit::cursorWidth());
-                painter.setPen(TextEdit::palette().color(QPalette::Text));
-            }
-
-            painter.drawRect(rect);
-            m_cursorRect = rect;
+        if(!e->rect().intersects(rect))
+        {
+            return;
         }
+
+        auto width = getCursorWidth();
+        rect.setWidth(width + 2);
+        TextEdit::viewport()->update(rect);
     }
 
 private:
-    QRect m_cursorRect;
+    bool m_initialCursorSet = false;
+    bool m_skipNextPaint = false;
 };
 
 PlainTextEdit *createEditorWidget(QWidget *parent)

@@ -144,6 +144,7 @@ MainWindow::MainWindow():
 
         connect(proxy, SIGNAL(requestQuit()), this, SLOT(close()));
         file_request_service_.SetDontUseNativeDialog(true);
+        QGuiApplication::styleHints()->setCursorFlashTime(0);
     }
 
     SetDefaultMetadataValues(metadata, preferences.defaultFileProperties);
