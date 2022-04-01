@@ -99,8 +99,6 @@ MainWindow::MainWindow():
     persistEncryptionKeyPath(false),
     windowsEol(false),
     takeBakFile(false),
-    enc(),
-    metadata(),
     encryptionModified(false),
     isBusy(false),
     currentZoom(0),
@@ -108,8 +106,7 @@ MainWindow::MainWindow():
     plain_text_switch_(this), plain_text_functor_(plain_text_switch_), recent_files_service_(this),
     loadAdapter(this),
     loadHandler(this, loadAdapter, metadata),
-    saveSuccess(false),
-    fakeVimWrapper()
+    saveSuccess(false)
 {
     setWindowIcon(QIcon(":/images/application_icon.png"));
     textEdit = createEditorWidget(this);
@@ -143,7 +140,6 @@ MainWindow::MainWindow():
         connect(proxy, SIGNAL(requestSaveAndQuit(const QString&)), this, SLOT(saveAsAndClose(const QString&)));
 
         connect(proxy, SIGNAL(requestQuit()), this, SLOT(close()));
-        file_request_service_.SetDontUseNativeDialog(true);
         QGuiApplication::styleHints()->setCursorFlashTime(0);
     }
 
