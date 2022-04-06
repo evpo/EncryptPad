@@ -185,6 +185,7 @@ public:
     Signal<void()> completionRequested;
     Signal<void()> tabPreviousRequested;
     Signal<void()> tabNextRequested;
+    Signal<void(bool thinCursorMode)> thinCursorModeUpdated;
 
 public:
     class Private;

@@ -7968,6 +7968,7 @@ void FakeVimHandler::Private::updateCursorShape()
 void FakeVimHandler::Private::setThinCursor(bool enable)
 {
     EDITOR(setOverwriteMode(!enable));
+    q->thinCursorModeUpdated(enable);
 }
 
 bool FakeVimHandler::Private::hasThinCursor() const

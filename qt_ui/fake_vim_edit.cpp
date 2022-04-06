@@ -60,7 +60,8 @@ private:
 
     void onTextChanged()
     {
-        if(this->document()->isEmpty())
+        // this->document()->isEmpty() ||
+        if(!this->m_isThinCursorRequested)
         {
             resizeCursorWidth();
         }
@@ -101,9 +102,15 @@ public:
         TextEdit::viewport()->update(rect);
     }
 
+    void SetIsThinCursorRequested(bool flag)
+    {
+        this->m_isThinCursorRequested = flag;
+        this->onTextChanged();
+    }
 private:
     bool m_initialCursorSet = false;
     bool m_skipNextPaint = false;
+    bool m_isThinCursorRequested = false;
 };
 
 PlainTextEdit *createEditorWidget(QWidget *parent)
@@ -168,6 +175,9 @@ Proxy *connectSignals(FakeVimHandler *handler, QMainWindow *mainWindow, QWidget 
     handler->checkForElectricCharacter.connect([proxy](bool *result, QChar c) {
             proxy->checkForElectricCharacter(result, c);
     });
+    handler->thinCursorModeUpdated.connect([proxy](bool thinCursorMode) {
+            proxy->thinCursorModeUpdated(thinCursorMode);
+    });
 
     return proxy;
 }
@@ -186,6 +196,12 @@ void Proxy::changeStatusData(const QString &info)
 {
     m_statusData = info;
     updateStatusBar();
+}
+
+void Proxy::thinCursorModeUpdated(bool thinCursorMode)
+{
+    Editor<QPlainTextEdit> *editor = reinterpret_cast<Editor<QPlainTextEdit>*>(m_widget);
+    editor->SetIsThinCursorRequested(thinCursorMode);
 }
 
 void Proxy::highlightMatches(const QString &pattern)

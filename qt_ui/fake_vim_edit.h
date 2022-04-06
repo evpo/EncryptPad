@@ -59,6 +59,7 @@ public slots:
     void requestHasBlockSelection(bool *on);
     void indentRegion(int beginBlock, int endBlock, QChar typedChar);
     void checkForElectricCharacter(bool *result, QChar c);
+    void thinCursorModeUpdated(bool thinCursorMode);
 
 private:
     static int firstNonSpace(const QString &text);
