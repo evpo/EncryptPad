@@ -42,6 +42,7 @@ EncryptPad is an application for viewing and editing symmetrically encrypted tex
     - [openSUSE](#build-on-opensuse)
     - [Archlinux](#build-on-archlinux)
     - [FreeBSD](#build-on-freebsd)
+	- [VoidLinux](#build-on-voidlinux)
 * [Portable mode](#portable-mode)
 * [FakeVim mode](#fakevim-mode)
     - [FakeVim: input and output commands](#fakevim-input-output)
@@ -488,6 +489,19 @@ Open the EncryptPad source directory:
     ./configure.py
     make
 
+<div id="build-on-voidlinux"></div>
+
+### Void Linux
+
+Install dependencies and tools: 
+	
+	sudo xbps-install base-devel qt5-devel python3 botan-devel bzip2-devel libzip-devel
+
+Open the EncryptPad source directory:
+
+    ./configure.py
+    sudo make install
+	
 <div id="portable-mode"></div>
 
 ## Portable mode

@@ -52,6 +52,7 @@
 <li><a href="#build-on-opensuse">openSUSE</a></li>
 <li><a href="#build-on-archlinux">Archlinux</a></li>
 <li><a href="#build-on-freebsd">FreeBSD</a></li>
+<li><a href="#build-on-voidlinux">VoidLinux</a></li>
 </ul>
 </li>
 <li><a href="#portable-mode">Portable mode</a></li>
@@ -590,6 +591,21 @@ sudo make install
 
 <pre><code>./configure.py
 make
+</code></pre>
+
+<div id="build-on-voidlinux"></div>
+
+<h3>Void Linux</h3>
+
+<p>Install dependencies and tools:</p>
+	
+<pre><code>sudo xbps-install base-devel qt5-devel python3 botan-devel bzip2-devel libzip-devel
+</code></pre>
+
+<p>Open the EncryptPad source directory:</p>
+
+<pre><code>./configure.py
+sudo make install
 </code></pre>
 
 <div id="portable-mode"></div>
