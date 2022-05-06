@@ -1,6 +1,6 @@
 #include "fake_vim_edit.h"
-#include <fakevimactions.h>
-#include <fakevimhandler.h>
+#include "fakevimactions.h"
+#include "fakevimhandler.h"
 
 #include <QApplication>
 #include <QFontMetrics>
@@ -19,31 +19,19 @@
 
 #include "plog/Log.h"
 
-#define EDITOR(editor, call) \
-    if (QPlainTextEdit *ed = qobject_cast<QPlainTextEdit *>(editor)) { \
-        (ed->call); \
-    } else if (QTextEdit *ed = qobject_cast<QTextEdit *>(editor)) { \
-        (ed->call); \
-    }
-
 using namespace FakeVim::Internal;
 
 typedef QLatin1String _;
 
-/**
- * Simple editor widget.
- * @tparam TextEdit QTextEdit or QPlainTextEdit as base class
- */
-template <typename TextEdit>
-class Editor : public TextEdit
+class FakeVimEditor : public PlainTextEdit
 {
 private:
     int getCursorWidth()
     {
-        QFontMetrics fm(TextEdit::font());
-        // LOG_DEBUG << "font: " << TextEdit::font().toString();
-        const int position = TextEdit::textCursor().position();
-        const QChar c = TextEdit::document()->characterAt(position);
+        QFontMetrics fm(QPlainTextEdit::font());
+        // LOG_DEBUG << "font: " << QPlainTextEdit::font().toString();
+        const int position = QPlainTextEdit::textCursor().position();
+        const QChar c = QPlainTextEdit::document()->characterAt(position);
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 11, 0)
         int width = fm.width(c);
@@ -55,53 +43,64 @@ private:
 
     void resizeCursorWidth()
     {
-        TextEdit::setCursorWidth(getCursorWidth());
+        QPlainTextEdit::setCursorWidth(getCursorWidth());
     }
 
     void onTextChanged()
     {
-        // this->document()->isEmpty() ||
         if(!this->m_isThinCursorRequested)
         {
             resizeCursorWidth();
         }
         else
         {
-            TextEdit::setCursorWidth(1);
+            QPlainTextEdit::setCursorWidth(1);
         }
     }
 public:
-    explicit Editor(QWidget *parent = nullptr) : TextEdit(parent)
+    FakeVimEditor(QWidget *parent = 0) : PlainTextEdit(parent)
     {
         this->connect(this, &QPlainTextEdit::textChanged, [this]() { onTextChanged(); });
     }
 
-    void paintEvent(QPaintEvent *e)
+    virtual ~FakeVimEditor()
     {
-        TextEdit::paintEvent(e);
+
+    }
+
+protected:
+    void paintEvent(QPaintEvent *e) override
+    {
+        LOG_INFO << "x=" << e->rect().x() << " y=" << e->rect().y() << " width=" << e->rect().width() << " height=" << e->rect().height();
+        PlainTextEdit::paintEvent(e);
         if(m_skipNextPaint)
         {
             m_skipNextPaint = false;
             return;
         }
-        m_skipNextPaint = true;
         if(!m_initialCursorSet)
         {
             onTextChanged();
             m_initialCursorSet = true;
         }
 
-        QRect rect = TextEdit::cursorRect();
+        QRect rect = QPlainTextEdit::cursorRect();
         if(!e->rect().intersects(rect))
         {
             return;
         }
 
+        // m_skipNextPaint = true;
         auto width = getCursorWidth();
         rect.setWidth(width + 2);
-        TextEdit::viewport()->update(rect);
+        if(e->rect() != rect)
+        {
+            QPlainTextEdit::viewport()->update(rect);
+        }
+
     }
 
+public:
     void SetIsThinCursorRequested(bool flag)
     {
         this->m_isThinCursorRequested = flag;
@@ -115,10 +114,8 @@ private:
 
 PlainTextEdit *createEditorWidget(QWidget *parent)
 {
-    PlainTextEdit *editor = nullptr;
-    Editor<PlainTextEdit> *w = new Editor<PlainTextEdit>(parent);
-    w->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    editor = w;
+    FakeVimEditor *editor = new FakeVimEditor(parent);
+    editor->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     editor->setObjectName(_("Editor"));
     editor->setFocus();
     return editor;
@@ -133,15 +130,15 @@ void initHandler(FakeVimHandler *handler)
     handler->setupWidget();
 }
 
-void clearUndoRedo(QWidget *editor)
+void clearUndoRedo(QPlainTextEdit *editor)
 {
-    EDITOR(editor, setUndoRedoEnabled(false));
-    EDITOR(editor, setUndoRedoEnabled(true));
+    editor->setUndoRedoEnabled(false);
+    editor->setUndoRedoEnabled(true);
 }
 
-Proxy *connectSignals(FakeVimHandler *handler, QMainWindow *mainWindow, QWidget *editor)
+Proxy *connectSignals(FakeVimHandler *handler, QMainWindow *mainWindow, PlainTextEdit *editor)
 {
-    Proxy *proxy = new Proxy(editor, mainWindow, handler);
+    Proxy *proxy = new Proxy(dynamic_cast<FakeVimEditor*>(editor), mainWindow, handler);
 
     handler->commandBufferChanged
         .connect([proxy](const QString &contents, int cursorPos, int /*anchorPos*/, int /*messageLevel*/) {
@@ -182,7 +179,7 @@ Proxy *connectSignals(FakeVimHandler *handler, QMainWindow *mainWindow, QWidget 
     return proxy;
 }
 
-Proxy::Proxy(QWidget *widget, QMainWindow *mw, QObject *parent)
+Proxy::Proxy(FakeVimEditor *widget, QMainWindow *mw, QObject *parent)
     : QObject(parent), m_widget(widget), m_mainWindow(mw)
 {
 }
@@ -200,27 +197,13 @@ void Proxy::changeStatusData(const QString &info)
 
 void Proxy::thinCursorModeUpdated(bool thinCursorMode)
 {
-    Editor<QPlainTextEdit> *editor = reinterpret_cast<Editor<QPlainTextEdit>*>(m_widget);
-    editor->SetIsThinCursorRequested(thinCursorMode);
+    m_widget->SetIsThinCursorRequested(thinCursorMode);
 }
 
 void Proxy::highlightMatches(const QString &pattern)
 {
-    QTextDocument *doc = nullptr;
-
-    { // in a block so we don't inadvertently use one of them later
-        QPlainTextEdit *plainEditor = qobject_cast<QPlainTextEdit *>(m_widget);
-        QTextEdit *editor = qobject_cast<QTextEdit *>(m_widget);
-        if (editor) {
-            doc = editor->document();
-        } else if (plainEditor) {
-            doc = plainEditor->document();
-        } else {
-            return;
-        }
-    }
+    QTextDocument *doc = m_widget->document();
     Q_ASSERT(doc);
-
     QTextEdit::ExtraSelection selection;
     selection.format.setBackground(Qt::yellow);
     selection.format.setForeground(Qt::black);
@@ -318,11 +301,7 @@ void Proxy::handleExCommand(bool *handled, const ExCommand &cmd)
 
 void Proxy::requestSetBlockSelection(const QTextCursor &tc)
 {
-    QTextEdit *editor = qobject_cast<QTextEdit*>(m_widget);
-    QPlainTextEdit *plainEditor = qobject_cast<QPlainTextEdit*>(m_widget);
-    if (!editor && !plainEditor) {
-        return;
-    }
+    QPlainTextEdit *plainEditor = m_widget;
 
     QPalette pal = m_widget->parentWidget() != nullptr ? m_widget->parentWidget()->palette()
                                                        : QApplication::palette();
@@ -353,19 +332,11 @@ void Proxy::requestSetBlockSelection(const QTextCursor &tc)
         m_blockSelection.append(selection);
     }
 
-    if (editor) {
-        disconnect(editor, &QTextEdit::selectionChanged,
-                   this, &Proxy::updateBlockSelection);
-        editor->setTextCursor(tc);
-        connect(editor, &QTextEdit::selectionChanged,
-                this, &Proxy::updateBlockSelection);
-    } else {
-        disconnect(plainEditor, &QPlainTextEdit::selectionChanged,
-                   this, &Proxy::updateBlockSelection);
-        plainEditor->setTextCursor(tc);
-        connect(plainEditor, &QPlainTextEdit::selectionChanged,
-                this, &Proxy::updateBlockSelection);
-    }
+    disconnect(plainEditor, &QPlainTextEdit::selectionChanged,
+               this, &Proxy::updateBlockSelection);
+    plainEditor->setTextCursor(tc);
+    connect(plainEditor, &QPlainTextEdit::selectionChanged,
+            this, &Proxy::updateBlockSelection);
 
 
     QPalette pal2 = m_widget->palette();
@@ -378,11 +349,7 @@ void Proxy::requestSetBlockSelection(const QTextCursor &tc)
 
 void Proxy::requestDisableBlockSelection()
 {
-    QTextEdit *editor = qobject_cast<QTextEdit*>(m_widget);
-    QPlainTextEdit *plainEditor = qobject_cast<QPlainTextEdit*>(m_widget);
-    if (!editor && !plainEditor) {
-        return;
-    }
+    QPlainTextEdit *plainEditor = m_widget;
 
     QPalette pal = m_widget->parentWidget() != nullptr ? m_widget->parentWidget()->palette()
                                                        : QApplication::palette();
@@ -392,26 +359,15 @@ void Proxy::requestDisableBlockSelection()
 
     m_widget->setPalette(pal);
 
-    if (editor) {
-        disconnect(editor, &QTextEdit::selectionChanged,
-                   this, &Proxy::updateBlockSelection);
-    } else {
-        disconnect(plainEditor, &QPlainTextEdit::selectionChanged,
-                   this, &Proxy::updateBlockSelection);
-    }
+    disconnect(plainEditor, &QPlainTextEdit::selectionChanged,
+               this, &Proxy::updateBlockSelection);
 
     updateExtraSelections();
 }
 
 void Proxy::updateBlockSelection()
 {
-    QTextEdit *editor = qobject_cast<QTextEdit*>(m_widget);
-    QPlainTextEdit *plainEditor = qobject_cast<QPlainTextEdit*>(m_widget);
-    if (!editor && !plainEditor) {
-        return;
-    }
-
-    requestSetBlockSelection(editor ? editor->textCursor() : plainEditor->textCursor());
+    requestSetBlockSelection(m_widget->textCursor());
 }
 
 void Proxy::requestHasBlockSelection(bool *on)
@@ -421,18 +377,7 @@ void Proxy::requestHasBlockSelection(bool *on)
 
 void Proxy::indentRegion(int beginBlock, int endBlock, QChar typedChar)
 {
-    QTextDocument *doc = nullptr;
-    { // in a block so we don't inadvertently use one of them later
-        QPlainTextEdit *plainEditor = qobject_cast<QPlainTextEdit *>(m_widget);
-        QTextEdit *editor = qobject_cast<QTextEdit *>(m_widget);
-        if (editor) {
-            doc = editor->document();
-        } else if (plainEditor) {
-            doc = plainEditor->document();
-        } else {
-            return;
-        }
-    }
+    QTextDocument *doc = m_widget->document();
     Q_ASSERT(doc);
 
     const int indentSize = theFakeVimSetting(ConfigShiftWidth)->value().toInt();
@@ -489,13 +434,7 @@ int Proxy::firstNonSpace(const QString &text)
 
 void Proxy::updateExtraSelections()
 {
-    QTextEdit *editor = qobject_cast<QTextEdit*>(m_widget);
-    QPlainTextEdit *plainEditor = qobject_cast<QPlainTextEdit*>(m_widget);
-    if (editor) {
-        editor->setExtraSelections(m_clearSelection + m_searchSelection + m_blockSelection);
-    } else if (plainEditor) {
-        plainEditor->setExtraSelections(m_clearSelection + m_searchSelection + m_blockSelection);
-    }
+    m_widget->setExtraSelections(m_clearSelection + m_searchSelection + m_blockSelection);
 }
 
 bool Proxy::wantRead(const ExCommand &cmd)
@@ -538,12 +477,7 @@ bool Proxy::hasChanges(const QString &fileName)
 
 QTextDocument *Proxy::document() const
 {
-    QTextDocument *doc = NULL;
-    if (QPlainTextEdit *ed = qobject_cast<QPlainTextEdit *>(m_widget))
-        doc = ed->document();
-    else if (QTextEdit *ed = qobject_cast<QTextEdit *>(m_widget))
-        doc = ed->document();
-    return doc;
+    return m_widget->document();
 }
 
 QString Proxy::content() const

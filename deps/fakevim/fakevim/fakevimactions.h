@@ -26,11 +26,12 @@
 #pragma once
 
 #define FAKEVIM_STANDALONE // Only diff with upstream, I hope
+#include "fakevimsavedaction.h"
 
 #ifdef FAKEVIM_STANDALONE
 #   include "private/fakevim_export.h"
 #else
-#   include <utils/savedaction.h>
+#   include "utils/savedaction.h"
 #endif
 
 #include <QCoreApplication>
@@ -64,11 +65,11 @@ public:
     QString m_settingsKey;
 };
 
-#ifdef FAKEVIM_STANDALONE
-using FakeVimAction = DummyAction;
-#else
+// #ifdef FAKEVIM_STANDALONE
+// using FakeVimAction = DummyAction;
+// #else
 using FakeVimAction = Utils::SavedAction;
-#endif
+// #endif
 
 enum FakeVimSettingsCode
 {

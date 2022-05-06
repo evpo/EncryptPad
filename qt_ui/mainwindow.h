@@ -195,7 +195,7 @@ private:
     bool saveSuccess;
     QStringList passphraseGenerationSettings;
 
-    std::unique_ptr<FakeVimWrapper> fakeVimWrapper;
+    FakeVimWrapper fakeVimWrapper;
 
     void createActions();
     void createMenus();

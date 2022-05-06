@@ -1,0 +1,3 @@
+#!/bin/bash
+
+truncate egg.log -s 0 ; DISPLAY=:10 cgdb --args bin/debug/encryptpad --log-file egg.log --log-severity debug

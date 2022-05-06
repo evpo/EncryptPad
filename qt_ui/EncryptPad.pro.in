@@ -94,6 +94,7 @@ SOURCES += \
     preferences.cpp \
     fake_vim_edit.cpp \
     fake_vim_wrapper.cpp \
+    line_number_area.cpp \
 
 HEADERS += \
     application.h \
@@ -125,6 +126,7 @@ HEADERS += \
     preferences.h \
     fake_vim_edit.h \
     fake_vim_wrapper.h \
+    line_number_area.h \
 
 QMAKE_RESOURCE_FLAGS += -no-compress
 RESOURCES += \

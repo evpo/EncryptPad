@@ -31,9 +31,7 @@
 // Qt Creator. The idea is to keep this file here in a "clean" state that
 // allows easy reuse with any QTextEdit or QPlainTextEdit derived class.
 
-
 #include <utils/qtcassert.h>
-
 #include <QDebug>
 
 using namespace Utils;

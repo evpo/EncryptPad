@@ -9,8 +9,10 @@ class QTextDocument;
 class QString;
 class QWidget;
 class QTextCursor;
+class QPlainTextEdit;
 
 class Proxy;
+class FakeVimEditor;
 
 namespace FakeVim {
 namespace Internal {
@@ -21,15 +23,15 @@ struct ExCommand;
 
 PlainTextEdit *createEditorWidget(QWidget *parent = 0);
 void initHandler(FakeVim::Internal::FakeVimHandler *handler);
-void clearUndoRedo(QWidget *editor);
-Proxy *connectSignals( FakeVim::Internal::FakeVimHandler *handler, QMainWindow *mainWindow, QWidget *editor);
+void clearUndoRedo(QPlainTextEdit *editor);
+Proxy *connectSignals( FakeVim::Internal::FakeVimHandler *handler, QMainWindow *mainWindow, PlainTextEdit *editor);
 
 class Proxy : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit Proxy(QWidget *widget, QMainWindow *mw, QObject *parent = nullptr);
+    explicit Proxy(FakeVimEditor *widget, QMainWindow *mw, QObject *parent = nullptr);
     void openFile(const QString &fileName);
 
 signals:
@@ -77,7 +79,7 @@ private:
     QTextDocument *document() const;
     QString content() const;
 
-    QWidget *m_widget;
+    FakeVimEditor *m_widget;
     QMainWindow *m_mainWindow;
     QString m_statusMessage;
     QString m_statusData;

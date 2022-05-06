@@ -109,7 +109,14 @@ MainWindow::MainWindow():
     saveSuccess(false)
 {
     setWindowIcon(QIcon(":/images/application_icon.png"));
-    textEdit = createEditorWidget(this);
+    if(preferences.enableFakeVim)
+    {
+        textEdit = createEditorWidget(this);
+    }
+    else
+    {
+        textEdit = new PlainTextEdit(this);
+    }
 
     setCentralWidget(textEdit);
     QPalette palette = textEdit->palette();
@@ -129,16 +136,12 @@ MainWindow::MainWindow():
     if(preferences.enableFakeVim)
     {
         fakeVimWrapper = CreateFakeVimWrapper(textEdit, this);
-        const auto *proxy = fakeVimWrapper->proxy.get();
-
+        const auto *proxy = fakeVimWrapper.proxy.get();
         connect(proxy, SIGNAL(requestRead(const QString&)), this, SLOT(open(QString)));
-
         connect(proxy, SIGNAL(requestSave()), this, SLOT(save()));
         connect(proxy, SIGNAL(requestSave(const QString&)), this, SLOT(saveAs(const QString&)));
-
         connect(proxy, SIGNAL(requestSaveAndQuit()), this, SLOT(close()));
         connect(proxy, SIGNAL(requestSaveAndQuit(const QString&)), this, SLOT(saveAsAndClose(const QString&)));
-
         connect(proxy, SIGNAL(requestQuit()), this, SLOT(close()));
         QGuiApplication::styleHints()->setCursorFlashTime(0);
     }
@@ -178,7 +181,7 @@ void MainWindow::updateLineStatus()
 
     int lineNumber = cursor.blockNumber();
 
-    if(!fakeVimWrapper)
+    if(!fakeVimWrapper.handler)
     {
         lineStatus->setText(tr("ln: %1 of %2").arg(QString::number(lineNumber + 1)).arg(QString::number(count)));
     }

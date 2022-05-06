@@ -1,8 +1,9 @@
 #pragma once
-#include <fakevimhandler.h>
 #include <memory>
 #include <QMainWindow>
 #include "fake_vim_edit.h"
+#include <fakevimhandler.h>
+#include "plain_text_edit.h"
 
 struct FakeVimWrapper
 {
@@ -10,4 +11,4 @@ struct FakeVimWrapper
     std::unique_ptr<Proxy> proxy;
 };
 
-std::unique_ptr<FakeVimWrapper> CreateFakeVimWrapper(PlainTextEdit *editor, QMainWindow *mainWindow);
+FakeVimWrapper CreateFakeVimWrapper(PlainTextEdit *editor, QMainWindow *mainWindow);
