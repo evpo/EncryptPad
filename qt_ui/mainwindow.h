@@ -201,7 +201,8 @@ private:
     void createMenus();
     void createToolBars();
     void createStatusBar();
-    void readSettings();
+    std::unique_ptr<QSettings> readSettings();
+    void initSettings(const QSettings &settings);
     void writeSettings();
     bool maybeSave();
     void makeDirty();

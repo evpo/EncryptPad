@@ -109,6 +109,7 @@ MainWindow::MainWindow():
     saveSuccess(false)
 {
     setWindowIcon(QIcon(":/images/application_icon.png"));
+    auto settings = readSettings();
     if(preferences.enableFakeVim)
     {
         textEdit = createEditorWidget(this);
@@ -131,7 +132,10 @@ MainWindow::MainWindow():
     createToolBars();
     createStatusBar();
 
-    readSettings();
+    if(settings)
+    {
+        initSettings(*settings);
+    }
 
     if(preferences.enableFakeVim)
     {
@@ -983,7 +987,7 @@ void MainWindow::createActions()
 
 void MainWindow::replaceAll(QString text, QString replaceWith, bool matchCase, bool wholeWord)
 {
-    QTextDocument::FindFlags flags = 0;
+    QTextDocument::FindFlags flags{};
     if(matchCase)
         flags |= QTextDocument::FindCaseSensitively;
 
@@ -1032,7 +1036,7 @@ void MainWindow::clearReplaceContext()
 
 void MainWindow::findNext(QString text, bool down, bool matchCase, bool wholeWord)
 {
-    QTextDocument::FindFlags flags = 0;
+    QTextDocument::FindFlags flags{};
     if(!down)
         flags |= QTextDocument::FindBackward;
 
@@ -1215,17 +1219,22 @@ void MainWindow::onUpdatedPreferences()
         enc.GetKeyService().set_key_count(preferences.s2kResultsPoolSize);
 }
 
-void MainWindow::readSettings()
+std::unique_ptr<QSettings> MainWindow::readSettings()
 {
     SetDefaultPreferences(preferences);
 
+    std::unique_ptr<QSettings> retVal;
     QString configFile = accessRepositoryPath(kConfigFileName);
     if(configFile.isEmpty())
-        return;
+        return retVal;
 
-    QSettings settings(configFile, QSettings::IniFormat);
+    retVal.reset(new QSettings(configFile, QSettings::IniFormat));
+    ReadPreferences(*retVal, preferences);
+    return retVal;
+}
 
-    ReadPreferences(settings, preferences);
+void MainWindow::initSettings(const QSettings &settings)
+{
     onUpdatedPreferences();
 
     QPoint pos = settings.value("pos", QPoint(200, 200)).toPoint();
@@ -1244,6 +1253,7 @@ void MainWindow::readSettings()
 
     resize(size);
     move(pos);
+
 }
 
 std::unique_ptr<QSettings> MainWindow::loadSettings()
