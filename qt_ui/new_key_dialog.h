@@ -40,7 +40,7 @@ public:
 
 public slots:
     void browseForKeyPath();
-
+    void accept() override;
 
 private:
     Ui::NewKeyDialog *ui;

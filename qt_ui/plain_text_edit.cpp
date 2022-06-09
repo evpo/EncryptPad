@@ -154,15 +154,12 @@ bool PlainTextEdit::eventFilter(QObject *, QEvent *event)
 
 void PlainTextEdit::updateLineNumberAreaWidth(int)
 {
-    LOG_INFO << "here";
     setViewportMargins(lineNumberArea->sizeHint().width(), 0, 0, 0);
 }
 
 void PlainTextEdit::paintEvent(QPaintEvent *event)
 {
-    LOG_INFO << "x=" << event->rect().x() << " y=" << event->rect().y() << " width=" << event->rect().width() << " height=" << event->rect().height();
     QPlainTextEdit::paintEvent(event);
-    // lineNumberArea->update(0, event->rect().y(), lineNumberArea->sizeHint().width(), event->rect().height());
     QRect cr = contentsRect();
     lineNumberArea->setGeometry(QRect(cr.left(), cr.top(), lineNumberArea->sizeHint().width(), cr.height()));
     if (event->rect().contains(viewport()->rect()))

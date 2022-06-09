@@ -42,7 +42,6 @@ QSize LineNumberArea::sizeHint() const
     space = 15 + m_codeEditParent->fontMetrics().width(QLatin1Char('9')) * digits;
 #endif
 
-    LOG_INFO << "space=" << space;
     return {space, 0};
 }
 
@@ -53,7 +52,6 @@ bool LineNumberArea::getShowRelativeNumbers() const
 
 void LineNumberArea::paintEvent(QPaintEvent *event)
 {
-    LOG_INFO << "x=" << event->rect().x() << " y=" << event->rect().y() << " width=" << event->rect().width() << " height=" << event->rect().height();
     QPainter painter(this);
 
     // Clearing rect to update

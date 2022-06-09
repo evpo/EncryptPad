@@ -18,6 +18,7 @@
 //along with EncryptPad.  If not, see <http://www.gnu.org/licenses/>.
 //**********************************************************************************
 #include "packet_stream.h"
+#include "plog/Log.h"
 
 namespace EncryptPad
 {

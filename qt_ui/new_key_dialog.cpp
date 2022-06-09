@@ -21,7 +21,9 @@
 #include "ui_new_key_dialog.h"
 #include <QDebug>
 #include <QFileDialog>
+#include <QMessageBox>
 #include "file_name_helper.h"
+#include "file_helper.h"
 #include "common_definitions.h"
 
 NewKeyDialog::NewKeyDialog(QWidget *parent, FileRequestService &fileRequestService_p)
@@ -68,4 +70,20 @@ void NewKeyDialog::browseForKeyPath()
         return;
 
     ui->uiKeyPath->setText(selection.file_name);
+}
+
+void NewKeyDialog::accept()
+{
+    std::string keyName = isKeyInRepository() ? ui->uiRepositoryKeyName->text().toStdString() :
+        EncryptPad::GetFileNamePart(ui->uiKeyPath->text().toStdString());
+
+    if(!EncryptPad::ValidateFileName(keyName))
+    {
+        QMessageBox::warning(
+                this,
+                this->windowTitle(),
+                tr("Invalid characters in the key name"));
+        return;
+    }
+    QDialog::accept();
 }

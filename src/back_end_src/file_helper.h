@@ -44,4 +44,7 @@ namespace EncryptPad
     int GetStdoutNo();
 
     bool ValidateFileDescriptor(int fd, std::string &message);
+
+    bool ValidateFileName(const std::string &name);
+    std::string GetFileNamePart(const std::string &path);
 }

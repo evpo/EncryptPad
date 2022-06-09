@@ -21,8 +21,10 @@
 #include <cstdio>
 #include <cerrno>
 #include <limits>
+#include <algorithm>
 #include "win_file_reader.h"
 #include "epad_utilities.h"
+#include "file_system.hpp"
 
 using namespace EncryptPad;
 
@@ -186,5 +188,26 @@ namespace EncryptPad
         }
 #endif
         return true;
+    }
+
+    bool ValidateFileName(const std::string &name)
+    {
+#if defined(__MINGW__) || defined(__MINGW32__)
+        static const std::string kInvalidCharacters = R"(<>:"/\|?*)";
+
+        for(auto c : name)
+        {
+            if(std::find(kInvalidCharacters.begin(), kInvalidCharacters.end(), c) != kInvalidCharacters.end())
+                return false;
+        }
+        return true;
+#else
+        return true;
+#endif
+    }
+
+    std::string GetFileNamePart(const std::string &path)
+    {
+        return stlplus::filename_part(path);
     }
 }
