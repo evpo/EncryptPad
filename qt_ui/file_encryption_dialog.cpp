@@ -355,6 +355,10 @@ void FileEncryptionDialog::on_uiStart_clicked()
                 GetAlgoSpec(metadata.cipher_algo).key_size,
                 metadata.iterations);
         }
+        else
+        {
+            keyService.Clear();
+        }
 
         loadHandler.SaveFile(ui->uiOutputFile->text());
     }
