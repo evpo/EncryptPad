@@ -1,5 +1,3 @@
-[![Build status](https://ci.appveyor.com/api/projects/status/6esb4w56f25go5oc?svg=true)](https://ci.appveyor.com/project/evpo/encryptpad)
-
 Screenshots and tutorials are at [evpo.net/encryptpad/](http://evpo.net/encryptpad/)
 
 # EncryptPad
