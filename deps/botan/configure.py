@@ -2036,6 +2036,12 @@ def create_template_vars(source_paths, build_paths, options, modules, cc, arch, 
         'all_targets': ' '.join(all_targets(options)),
         'install_targets': ' '.join(install_targets(options)),
 
+        'public_headers': sorted([os.path.basename(h) for h in build_paths.public_headers]),
+        'internal_headers': sorted([os.path.basename(h) for h in build_paths.internal_headers]),
+        'external_headers':  sorted([os.path.basename(h) for h in build_paths.external_headers]),
+
+        'abs_root_dir': os.path.dirname(os.path.realpath(__file__)),
+
         'base_dir': source_paths.base_dir,
         'src_dir': source_paths.src_dir,
         'test_data_dir': source_paths.test_data_dir,
@@ -2104,6 +2110,7 @@ def create_template_vars(source_paths, build_paths, options, modules, cc, arch, 
 
         'os': options.os,
         'arch': options.arch,
+        'compiler': options.compiler,
         'cpu_family': arch.family,
         'endian': options.with_endian,
         'cpu_is_64bit': arch.wordsize == 64,
@@ -2191,6 +2198,11 @@ def create_template_vars(source_paths, build_paths, options, modules, cc, arch, 
         'mod_list': sorted([m.basename for m in modules])
     }
 
+    variables['installed_include_dir'] = os.path.join(
+        variables['prefix'],
+        variables['includedir'],
+        'botan-%d' % (Version.major()), 'botan')
+
     if cc.basename == 'msvc' and variables['cxx_abi_flags'] != '':
         # MSVC linker doesn't support/need the ABI options,
         # just transfer them over to just the compiler invocations
@@ -2231,10 +2243,11 @@ def create_template_vars(source_paths, build_paths, options, modules, cc, arch, 
 
     if options.os == 'llvm' or options.compiler == 'msvc':
         # llvm-link and msvc require just naming the file directly
+        variables['build_dir_link_path'] = ''
         variables['link_to_botan'] = os.path.join(build_dir, variables['static_lib_name'])
     else:
-        variables['link_to_botan'] = '%s%s %s' % (cc.add_lib_dir_option, build_dir,
-                                                  (cc.add_lib_option % variables['libname']))
+        variables['build_dir_link_path'] = '%s%s' % (cc.add_lib_dir_option, build_dir)
+        variables['link_to_botan'] = cc.add_lib_option % variables['libname']
 
     return variables
 

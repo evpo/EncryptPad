@@ -1,6 +1,73 @@
 Release Notes
 ========================================
 
+Version 2.19.2, Not Yet Released
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+* Add support for parallel computation in Argon2 (GH #2937 #2926)
+
+* Add SSSE3 implementation of Argon2 (GH #2937 #2927)
+
+* The OpenSSL provider was incompatible with OpenSSL 3.0.
+  It has been removed (GH #2902)
+
+* Avoid using reserve in secure_vector appending, which caused
+  a performance problem (GH #2945 #2920)
+
+* Fix TLS::Text_Policy behavior when X25519 is disabled
+  at build time (GH #2894)
+
+* Fix several warnings from Clang (#2888 #2886)
+
+Version 2.19.1, 2022-01-21
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+* Fix a compilation problem affecting macOS XCode (GH #2880)
+
+* Fix a build problem preventing amalgamation builds in 2.19.0
+  (GH #2879)
+
+Version 2.19.0, 2022-01-19
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+* Add a forward error correction code compatible with the
+  zfec library (GH #2868 #2866)
+
+* Improve Emscripten build (GH #2864)
+
+* Always use ``-L`` before build flags (GH #2858 2848)
+
+* Fix compilation issue on earlier macOS versions (GH #2851)
+
+* Add a GCC 4.8 CI target to prevent build regressions (GH #2869)
+
+* Add support for Loongarch64 (GH #2877)
+
+* Check OSXSAVE flag before using AVX2 instructions (GH #2878)
+
+Version 2.18.2, 2021-10-25
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+* Avoid using short exponents when encrypting in ElGamal, as some PGP
+  implementations generate keys with parameters that are weak when
+  short exponents are used (GH #2794)
+
+* Fix a low risk OAEP decryption side channel (GH #2797)
+
+* Work around a miscompilation of SHA-3 caused by a bug in Clang 12
+  and XCode 13. (GH #2826)
+
+* Remove support in OpenSSL provider for algorithms which are
+  disabled by default in OpenSSL 3.0 (GH #2823, #2814)
+
+* Add CI based on GitHub actions to replace Travis CI (GH #2632)
+
+* Fix the online OCSP test, as the certificate involved had expired.
+  (GH #2799)
+
+* Fix some test failures induced by the expiration of the trust root
+  "DST Root CA X3" (GH #2820)
+
 Version 2.18.1, 2021-05-09
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

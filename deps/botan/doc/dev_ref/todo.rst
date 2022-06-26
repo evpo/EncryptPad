@@ -67,8 +67,6 @@ External Providers, Hardware Support
 
 * Add support ARMv8.4-A SHA-512, SHA-3, SM3 and RNG
 * Aarch64 inline asm for BigInt
-* Extend OpenSSL provider (DH, HMAC, CMAC, GCM)
-* Support using BoringSSL instead of OpenSSL or LibreSSL
 * /dev/crypto provider (ciphers, hashes)
 * Windows CryptoNG provider (ciphers, hashes)
 * Extend Apple CommonCrypto provider (HMAC, CMAC, RSA, ECDSA, ECDH)
@@ -158,9 +156,6 @@ Python
 Build/Test
 ----------------------------------------
 
-* Start using GitHub Actions for CI, especially Windows builds
-* Create Docker image for Travis that runs 18.04 and has all
-  the tools we need pre-installed.
 * Code signing for Windows installers
 * Test runner python script that captures backtraces and other
   debug info during CI

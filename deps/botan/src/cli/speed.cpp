@@ -136,6 +136,10 @@
    #include <botan/passhash9.h>
 #endif
 
+#if defined(BOTAN_HAS_ZFEC)
+  #include <botan/zfec.h>
+#endif
+
 namespace Botan_CLI {
 
 using Botan::Timer;
@@ -672,6 +676,12 @@ class Speed final : public Command
             else if(algo == "passhash9")
                {
                bench_passhash9();
+               }
+#endif
+#if defined(BOTAN_HAS_ZFEC)
+            else if(algo == "zfec")
+               {
+               bench_zfec(msec);
                }
 #endif
 #if defined(BOTAN_HAS_POLY_DBL)
@@ -2152,6 +2162,77 @@ class Speed final : public Command
          }
 #endif
 
+#if defined(BOTAN_HAS_ZFEC)
+      void bench_zfec(std::chrono::milliseconds msec)
+         {
+         const size_t k = 4;
+         const size_t n = 16;
+
+         Botan::ZFEC zfec(k, n);
+
+         const size_t share_size = 256 * 1024;
+
+         std::vector<uint8_t> input(share_size * k);
+         rng().randomize(input.data(), input.size());
+
+         std::vector<uint8_t> output(share_size * n);
+
+         auto enc_fn = [&](size_t share, const uint8_t buf[], size_t len)
+            {
+            std::memcpy(&output[share*share_size], buf, len);
+            };
+
+         auto enc_timer = make_timer("zfec " +
+                                     std::to_string(k) + "/" +
+                                     std::to_string(n),
+                                     input.size(),
+                                     "encode", "", input.size());
+
+         enc_timer->run_until_elapsed(msec, [&]() {
+            zfec.encode(input.data(), input.size(), enc_fn);
+         });
+
+         record_result(enc_timer);
+
+         auto dec_timer = make_timer("zfec " +
+                                     std::to_string(k) + "/" +
+                                     std::to_string(n),
+                                     input.size(),
+                                     "decode", "", input.size());
+
+         std::map<size_t, const uint8_t*> shares;
+         for(size_t i = 0; i != n; ++i)
+            {
+            shares[i] = &output[share_size * i];
+            }
+
+         // remove data shares to make decoding maximally expensive:
+         while(shares.size() != k)
+            {
+            shares.erase(shares.begin());
+            }
+
+         std::vector<uint8_t> recovered(share_size * k);
+
+         auto dec_fn = [&](size_t share, const uint8_t buf[], size_t len)
+            {
+            std::memcpy(&recovered[share * share_size], buf, len);
+            };
+
+         dec_timer->run_until_elapsed(msec, [&]() {
+            zfec.decode_shares(shares, share_size, dec_fn);
+         });
+
+         record_result(dec_timer);
+
+         if(recovered != input)
+            {
+            error_output() << "ZFEC recovery failed\n";
+            }
+         }
+
+#endif
+
 #if defined(BOTAN_HAS_POLY_DBL)
       void bench_poly_dbl(std::chrono::milliseconds msec)
          {
@@ -2267,9 +2348,9 @@ class Speed final : public Command
 
          for(size_t M : { 8*1024, 64*1024, 256*1024 })
             {
-            for(size_t t : { 1, 2, 4 })
+            for(size_t t : { 1, 4 })
                {
-               for(size_t p : { 1 })
+               for(size_t p : { 1, 4 })
                   {
                   std::unique_ptr<Timer> timer = make_timer(
                      "Argon2id M=" + std::to_string(M) + " t=" + std::to_string(t) + " p=" + std::to_string(p));
