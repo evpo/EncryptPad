@@ -29,15 +29,15 @@ QSize LineNumberArea::sizeHint() const
     }
 
     unsigned maxShownNumber = 0;
-    if(!getShowRelativeNumbers())
-    {
-        maxShownNumber = m_codeEditParent->document()->blockCount();
-    }
-    else
-    {
-        const auto h = m_codeEditParent->cursorRect(m_codeEditParent->textCursor()).height();
-        maxShownNumber = h > 0 ? m_codeEditParent->viewport()->height() / h : 1;
-    }
+    // if(!getShowRelativeNumbers())
+    // {
+    maxShownNumber = m_codeEditParent->document()->blockCount();
+    // }
+    // else
+    // {
+    //     const auto h = m_codeEditParent->cursorRect(m_codeEditParent->textCursor()).height();
+    //     maxShownNumber = h > 0 ? m_codeEditParent->viewport()->height() / h : 1;
+    // }
     const int digits = QString::number(maxShownNumber).length();
     int space;
 
@@ -82,7 +82,7 @@ void LineNumberArea::paintEvent(QPaintEvent *event)
         {
             auto isCurrentLine = currentLineNumber == blockNumber;
             painter.setPen(isCurrentLine ? currentLine : otherLines);
-            auto numberToShow = getShowRelativeNumbers() ? std::abs(blockNumber - currentLineNumber) : blockNumber + 1;
+            auto numberToShow = getShowRelativeNumbers() && !isCurrentLine ? std::abs(blockNumber - currentLineNumber) : blockNumber + 1;
             QString number = QString::number(numberToShow);
             painter.drawText(-5, top, sizeHint().width(), m_codeEditParent->fontMetrics().height(), Qt::AlignRight,
                              number);
