@@ -157,6 +157,20 @@ void PlainTextEdit::updateLineNumberAreaWidth(int)
     setViewportMargins(lineNumberArea->sizeHint().width(), 0, 0, 0);
 }
 
+void PlainTextEdit::updateDisplayLineNumbers(bool flag)
+{
+    if(flag)
+    {
+        lineNumberArea->show();
+        updateLineNumberAreaWidth(0);
+    }
+    else
+    {
+        lineNumberArea->hide();
+        updateLineNumberAreaWidth(0);
+    }
+}
+
 void PlainTextEdit::paintEvent(QPaintEvent *event)
 {
     QPlainTextEdit::paintEvent(event);

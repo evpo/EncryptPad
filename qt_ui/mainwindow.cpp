@@ -1198,6 +1198,7 @@ void MainWindow::createStatusBar()
 void MainWindow::onUpdatedPreferences()
 {
     wordWrapAct->setChecked(preferences.wordWrap);
+    textEdit->updateDisplayLineNumbers(preferences.displayLineNumbers);
     wordWrapToggled(preferences.wordWrap);
     enc.SetLibcurlPath(preferences.libCurlPath.toStdString());
     enc.SetLibcurlParams(preferences.libCurlParameters.toStdString());

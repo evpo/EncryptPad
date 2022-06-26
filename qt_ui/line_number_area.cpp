@@ -18,6 +18,11 @@ LineNumberArea::LineNumberArea(PlainTextEdit *parent)
 
 QSize LineNumberArea::sizeHint() const
 {
+    if(isHidden())
+    {
+        return {0, 0};
+    }
+
     if (m_codeEditParent == nullptr)
     {
         return QWidget::sizeHint();

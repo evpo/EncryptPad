@@ -10,6 +10,7 @@ struct PersistentPreferences
     bool saveLastUsedDirectory;
     bool enableBakFiles;
     bool windowsEol;
+    bool displayLineNumbers;
     bool wordWrap;
     bool enableFakeVim;
     int recentFiles;

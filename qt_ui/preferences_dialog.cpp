@@ -95,6 +95,7 @@ namespace
     void Bind(Ui::PreferencesDialog &ui, ControlBinder &binder, PersistentPreferences &value)
     {
         binder.Bind(ui.uiRecentFiles, value.recentFiles);
+        binder.Bind(ui.uiDisplayLineNumbers, value.displayLineNumbers);
         binder.Bind(ui.uiWordWrap, value.wordWrap);
         binder.Bind(ui.uiEnableFakeVim, value.enableFakeVim);
         binder.Bind(ui.uiLastUsedDirectory, value.saveLastUsedDirectory);

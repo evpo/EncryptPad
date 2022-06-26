@@ -32,6 +32,7 @@ signals:
 public slots:
     void updateLineNumberAreaWidth(int);
     void updateLineNumberArea();
+    void updateDisplayLineNumbers(bool flag);
 private:
     LineNumberArea *lineNumberArea;
 

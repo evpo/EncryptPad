@@ -8,6 +8,7 @@ namespace
     const int kDefaultRecentFiles = 5;
     const bool kDefaultSaveLastUsedDirectory = true;
     const bool kDefaultenableBakFiles = true;
+    const bool kDefaultDisplayLineNumbers = true;
     const bool kDefaultWordWrap = true;
     const bool kDefaultEnableFakeVim = false;
     const int kDefaultS2KResultsPoolSize = 8;
@@ -116,6 +117,7 @@ namespace
         mapper.Map("recent_files", preferences.recentFiles);
         mapper.Map("enable_bak_files", preferences.enableBakFiles);
         mapper.Map("save_last_used_directory", preferences.saveLastUsedDirectory);
+        mapper.Map("display_line_numbers", preferences.displayLineNumbers);
         mapper.Map("word_wrap", preferences.wordWrap);
         mapper.Map("enable_fake_vim", preferences.enableFakeVim);
         mapper.Map("libcurl_path", preferences.libCurlPath);
@@ -143,6 +145,7 @@ void SetDefaultPreferences(PersistentPreferences &preferences)
     preferences.saveLastUsedDirectory = kDefaultSaveLastUsedDirectory;
     preferences.enableBakFiles = kDefaultenableBakFiles;
     preferences.windowsEol = kDefaultWindowsEol;
+    preferences.displayLineNumbers = kDefaultDisplayLineNumbers;
     preferences.wordWrap = kDefaultWordWrap;
     preferences.enableFakeVim = kDefaultEnableFakeVim;
     preferences.s2kResultsPoolSize = kDefaultS2KResultsPoolSize;
