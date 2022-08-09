@@ -5,19 +5,21 @@ set -o pipefail
 USAGE="USAGE:\n\
 configure.sh <command> [option]\n\n\
 COMMANDS:\n\
--r, --run            run the application\n\
--t, --run-tests      run the unit tests\n\
--f, --run-func-tests run functional tests\n\
---culture-res        build qm files from ts files to update culture resources\n\
---appimage           build AppImage (requires AppImageKit and binaries)\n\
---docs               build docs directory from markdown files (requres the markdown utility)\n\
---update-htm         update htm files (README.htm and CHANGES.htm)\n\
---import-emsg <DIR>  import latest libencryptmsg code from DIR\n\
---icns               generate icns from iconset
--h, --help           help\n\n\
+-r, --run                       run the application\n\
+-t, --run-tests                 run the unit tests\n\
+-f, --run-func-tests            run functional tests\n\
+--update-ts                     update ts files from pro, C++ and ui files (step 1)\n\
+--generage-qm                   build qm files from ts files to update culture resources (step 2)\n\
+--import-from-fakevim-ts <DIR>  import translation for FakeVim from DIR\n\
+--appimage                      build AppImage (requires AppImageKit and binaries)\n\
+--docs                          build docs directory from markdown files (requres the markdown utility)\n\
+--update-htm                    update htm files (README.htm and CHANGES.htm)\n\
+--import-emsg <DIR>             import latest libencryptmsg code from DIR\n\
+--icns                          generate icns from iconset
+-h, --help                      help\n\n\
 OPTIONS:\n\
---debug              debug configuration. If not specified, the release configuration is used. The unit tests\n\
-                     are always built with the debug configuration.\n\
+--debug                         debug configuration. If not specified, the release configuration is used. The unit tests\n\
+                                are always built with the debug configuration.\n\
 "
 
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -48,7 +50,10 @@ case $1 in
 esac
 
 case $COMMAND in
---culture-res)
+--update-ts)
+    lupdate $pkg_root/build/qt_build/EncryptPad.pro -locations none
+    ;;
+--generate-qm)
     for TSFILE in $pkg_root/qt_ui/encryptpad_*.ts $pkg_root/qt_ui/qt_excerpt_*.ts
     do
         file_name=${TSFILE##*/}
@@ -111,6 +116,9 @@ case $COMMAND in
     rm -r deps/libencryptmsg/deps
     result=$?
     exit $result
+    ;;
+--import-from-fakevim-ts)
+    python3 $pkg_root/scripts/import-from-fakevim-ts.py "$1" $pkg_root/qt_ui
     ;;
 --icns)
     iconutil -c icns -o images/crypt.icns images/icns.iconset

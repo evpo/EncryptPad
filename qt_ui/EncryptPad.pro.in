@@ -134,10 +134,10 @@ RESOURCES += \
     culture.qrc
 
 TRANSLATIONS = \
-    encryptpad_en_gb.ts \
-    encryptpad_ru_ru.ts \
-    encryptpad_fr_fr.ts \
-    encryptpad_zh_cn.ts
+    ../../qt_ui/encryptpad_en_gb.ts \
+    ../../qt_ui/encryptpad_ru_ru.ts \
+    ../../qt_ui/encryptpad_fr_fr.ts \
+    ../../qt_ui/encryptpad_zh_cn.ts
 
 RC_FILE = $$PROJ/qt_ui/encrypt_pad.rc
 DESTDIR = $$PROJ/bin/$$CONFIG_NAME
