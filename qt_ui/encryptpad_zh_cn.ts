@@ -36,11 +36,11 @@
     <name>FakeVim</name>
     <message>
         <source>Use Vim-style Editing</source>
-        <translation type="unfinished"></translation>
+        <translation>使用vim风格编辑</translation>
     </message>
     <message>
         <source>Read .vimrc</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">读取vimrc</translation>
     </message>
     <message>
         <source>Path to .vimrc</source>
@@ -48,11 +48,11 @@
     </message>
     <message>
         <source>Unknown option: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>未知选项： %1</translation>
     </message>
     <message>
         <source>Argument must be positive: %1=%2</source>
-        <translation type="unfinished"></translation>
+        <translation>参数必须是正值： %1=%2</translation>
     </message>
     <message>
         <source>Mark &quot;%1&quot; not set.</source>
@@ -64,11 +64,11 @@
     </message>
     <message>
         <source>%1%2%</source>
-        <translation type="unfinished"></translation>
+        <translation>%1%2%</translation>
     </message>
     <message>
         <source>%1All</source>
-        <translation type="unfinished"></translation>
+        <translation>%1所有</translation>
     </message>
     <message>
         <source>Not implemented in FakeVim.</source>
@@ -102,11 +102,11 @@
     </message>
     <message>
         <source>File &quot;%1&quot; exists (add ! to override)</source>
-        <translation type="unfinished"></translation>
+        <translation>文件 &apos;%1&apos; 存在 (添加 ! 覆盖)</translation>
     </message>
     <message>
         <source>Cannot open file &quot;%1&quot; for writing</source>
-        <translation type="unfinished"></translation>
+        <translation>无法打开用于写入的文件 &quot;%1&quot;</translation>
     </message>
     <message>
         <source>&quot;%1&quot; %2 %3L, %4C written.</source>
@@ -114,15 +114,15 @@
     </message>
     <message>
         <source> [New] </source>
-        <translation type="unfinished"></translation>
+        <translation>[新建]</translation>
     </message>
     <message>
         <source>Cannot open file &quot;%1&quot; for reading</source>
-        <translation type="unfinished"></translation>
+        <translation>无法打开用于读取的文件&quot;%1&quot;</translation>
     </message>
     <message>
         <source>&quot;%1&quot; %2L, %3C</source>
-        <translation type="unfinished"></translation>
+        <translation>&quot;%1&quot; %2L, %3C</translation>
     </message>
     <message numerus="yes">
         <source>%n lines filtered.</source>
@@ -132,19 +132,19 @@
     </message>
     <message>
         <source>Cannot open file %1</source>
-        <translation type="unfinished"></translation>
+        <translation>打开文件 %1 失败</translation>
     </message>
     <message>
         <source>Not an editor command: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>不是一个编辑器命令: %1</translation>
     </message>
     <message>
         <source>Invalid regular expression: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>无效的正则表达式: %1</translation>
     </message>
     <message>
         <source>Pattern not found: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>未找到模式:%1</translation>
     </message>
     <message>
         <source>Search hit BOTTOM, continuing at TOP.</source>
