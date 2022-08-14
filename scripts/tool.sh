@@ -51,14 +51,14 @@ esac
 
 case $COMMAND in
 --update-ts)
-    lupdate $pkg_root/build/qt_build/EncryptPad.pro -locations none
+    lupdate $pkg_root/qt_ui/ -no-ui-lines -locations none -ts $pkg_root/qt_ui/encryptpad_*.ts
     ;;
 --generate-qm)
-    for TSFILE in $pkg_root/qt_ui/encryptpad_*.ts $pkg_root/qt_ui/qt_excerpt_*.ts
+    for TSFILE in $pkg_root/qt_ui/encryptpad_*.ts $pkg_root/qt_ui/fakevim_*.ts $pkg_root/qt_ui/qt_excerpt_*.ts
     do
         file_name=${TSFILE##*/}
         CULTUREFILE=${file_name%.ts}
-        if [[ $CULTUREFILE == encryptpad_en_gb ]]
+        if [[ $CULTUREFILE == encryptpad_en_gb || $CULTUREFILE == fakevim_en_gb ]]
         then
             continue
         fi

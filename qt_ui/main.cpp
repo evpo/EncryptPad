@@ -169,6 +169,7 @@ int main(int argc, char *argv[])
         userLangs.append(arguments.language);
     }
     QString resourcePath;
+    QString fakeVimResourcePath;
     QString qtExcerptPath;
     for(QString userLang : userLangs)
     {
@@ -178,17 +179,28 @@ int main(int argc, char *argv[])
         if(resourcePath.isEmpty())
             continue;
 
+        fakeVimResourcePath = findLangResource("fakevim_", userLang);
+        assert(!fakeVimResourcePath.isEmpty());
+
         qtExcerptPath = findLangResource("qt_excerpt_", userLang);
         assert(!qtExcerptPath.isEmpty());
         break;
     }
 
     QTranslator translator;
+    QTranslator fakeVimTranslator;
     QTranslator excerptTranslator;
 
     if(!resourcePath.isEmpty())
     {
         bool result = loadTranslatorResource(app, translator, resourcePath);
+        assert(result);
+        (void)result;
+    }
+
+    if(!fakeVimResourcePath.isEmpty())
+    {
+        bool result = loadTranslatorResource(app, fakeVimTranslator, fakeVimResourcePath);
         assert(result);
         (void)result;
     }

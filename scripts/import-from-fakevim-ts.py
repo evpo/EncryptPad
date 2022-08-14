@@ -36,7 +36,7 @@ destTsDir = sys.argv[2]
 
 destTsItems = []
 p = Path(destTsDir)
-for f in [x for x in p.glob("encryptpad_*.ts")
+for f in [x for x in p.glob("fakevim_*.ts")
         if x.is_file()]:
     destTsItems.append(createTsItem(f.name))
 
