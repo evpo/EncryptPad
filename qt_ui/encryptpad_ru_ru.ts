@@ -796,7 +796,7 @@ Do you want to replace it?</source>
     </message>
     <message>
         <source>File Encryption...</source>
-        <translation>Шифрование Файлов...</translation>
+        <translation>Шифрование файлов...</translation>
     </message>
     <message>
         <source>File encryption</source>
