@@ -86,7 +86,7 @@
     </message>
     <message>
         <source>OpenPGP Armor</source>
-        <translation type="unfinished"/>
+        <translation>Armure OpenPGP</translation>
     </message>
     <message>
         <source>ASC</source>
@@ -657,7 +657,7 @@ Souhaitez-vous le remplacer ?</translation>
     </message>
     <message>
         <source>Exit the application</source>
-        <translation>Sortir l’application</translation>
+        <translation>Fermer l’application</translation>
     </message>
     <message>
         <source>Undo</source>
@@ -1151,7 +1151,7 @@ Souhaitez-vous le remplacer ?</translation>
     </message>
     <message>
         <source>Enable FakeVim (restart required)</source>
-        <translation>Activer FakeVim (redémarrage requis)</translation>
+        <translation>Activer FauxVim (redémarrage requis)</translation>
     </message>
     <message>
         <source>32</source>

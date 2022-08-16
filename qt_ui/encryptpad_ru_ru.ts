@@ -3,7 +3,7 @@
     <name>ConfirmPassphraseDialog</name>
     <message>
         <source>Set Passphrase</source>
-        <translation>Установить Пароль</translation>
+        <translation>Установить пароль</translation>
     </message>
     <message>
         <source>Leave blank when passphrase is not needed</source>
@@ -34,7 +34,7 @@
     <name>FileEncryptionDialog</name>
     <message>
         <source>File Encryption</source>
-        <translation>Шифрование Файлов</translation>
+        <translation>Шифрование файлов</translation>
     </message>
     <message>
         <source>Command</source>
@@ -146,11 +146,11 @@
     </message>
     <message>
         <source>Input File</source>
-        <translation>Входной Файл</translation>
+        <translation>Входной файл</translation>
     </message>
     <message>
         <source>Output File</source>
-        <translation>Выходной Файл</translation>
+        <translation>Выходной файл</translation>
     </message>
     <message>
         <source>EncryptPad</source>
@@ -210,7 +210,7 @@ Do you want to replace it?</source>
     </message>
     <message>
         <source>Plain Text (*.txt)</source>
-        <translation>Открытый Текст (*.txt)</translation>
+        <translation>Открытый текст (*.txt)</translation>
     </message>
     <message>
         <source>Encrypted Files (*.epd *.gpg *.asc);; Plain Text (*.txt)</source>
@@ -222,18 +222,18 @@ Do you want to replace it?</source>
     </message>
     <message>
         <source>All Files (*)</source>
-        <translation>Все Файлы (*)</translation>
+        <translation>Все файлы (*)</translation>
     </message>
     <message>
         <source>All Files (*.*)</source>
-        <translation>Все Файлы (*.*)</translation>
+        <translation>Все файлы (*.*)</translation>
     </message>
 </context>
 <context>
     <name>FilePropertiesDialog</name>
     <message>
         <source>File Properties</source>
-        <translation>Свойства Файла</translation>
+        <translation>Свойства файла</translation>
     </message>
     <message>
         <source>Algorithm:</source>
@@ -340,7 +340,7 @@ Do you want to replace it?</source>
     </message>
     <message>
         <source>Replace All</source>
-        <translation>Заменить Все</translation>
+        <translation>Заменить все</translation>
     </message>
     <message>
         <source>Close</source>
@@ -405,7 +405,7 @@ Do you want to replace it?</source>
     <name>GetPassphraseOrKeyDialog</name>
     <message>
         <source>Passphrase or Key File</source>
-        <translation>Пароль или Ключ</translation>
+        <translation>Пароль или ключ</translation>
     </message>
     <message>
         <source>Passphrase:</source>
@@ -432,7 +432,7 @@ Do you want to replace it?</source>
     <name>LoadSaveHandler</name>
     <message>
         <source>Passphrase for Key File</source>
-        <translation>Пароль для Ключа</translation>
+        <translation>Пароль для ключа</translation>
     </message>
     <message>
         <source>Cannot open the file because it does not exist</source>
@@ -515,11 +515,11 @@ Do you want to replace it?</source>
     </message>
     <message>
         <source>Open File</source>
-        <translation>Открыть Файл</translation>
+        <translation>Открыть файл</translation>
     </message>
     <message>
         <source>Save File As</source>
-        <translation>Сохранить Как</translation>
+        <translation>Сохранить как</translation>
     </message>
     <message>
         <source>Cannot create the repository directory in HOME</source>
@@ -527,7 +527,7 @@ Do you want to replace it?</source>
     </message>
     <message>
         <source>Passphrase for Key File</source>
-        <translation>Пароль для Ключа</translation>
+        <translation>Пароль для ключа</translation>
     </message>
     <message>
         <source>You left the passphrase blank. The key file is going to be UNENCRYPTED. Do you want to continue?</source>
@@ -588,7 +588,7 @@ Do you want to replace it?</source>
     </message>
     <message>
         <source>Save &amp;As...</source>
-        <translation>Сохранить &amp;Как...</translation>
+        <translation>Сохранить &amp;как...</translation>
     </message>
     <message>
         <source>Save the document under a new name</source>
@@ -596,7 +596,7 @@ Do you want to replace it?</source>
     </message>
     <message>
         <source>File &amp;Properties...</source>
-        <translation>Свойства &amp;Файла...</translation>
+        <translation>Свойства &amp;файла...</translation>
     </message>
     <message>
         <source>Set file properties</source>
@@ -604,7 +604,7 @@ Do you want to replace it?</source>
     </message>
     <message>
         <source>&amp;Close and Reset</source>
-        <translation>&amp;Закрыть и Сбросить</translation>
+        <translation>&amp;Закрыть и сбросить</translation>
     </message>
     <message>
         <source>Close and reset security settings</source>
@@ -612,7 +612,7 @@ Do you want to replace it?</source>
     </message>
     <message>
         <source>Generate Key...</source>
-        <translation>Генерировать Ключ...</translation>
+        <translation>Генерировать ключ...</translation>
     </message>
     <message>
         <source>Generate a new key file</source>
@@ -620,7 +620,7 @@ Do you want to replace it?</source>
     </message>
     <message>
         <source>Set &amp;Passphrase...</source>
-        <translation>Задать &amp;Пароль...</translation>
+        <translation>Задать &amp;пароль...</translation>
     </message>
     <message>
         <source>Set passphrase for encryption and decryption</source>
@@ -628,7 +628,7 @@ Do you want to replace it?</source>
     </message>
     <message>
         <source>Set &amp;Encryption Key...</source>
-        <translation>Установить &amp;Ключ Шифрования...</translation>
+        <translation>Установить &amp;ключ шифрования...</translation>
     </message>
     <message>
         <source>Set encryption key file</source>
@@ -636,7 +636,7 @@ Do you want to replace it?</source>
     </message>
     <message>
         <source>Clear &amp;Encryption Key</source>
-        <translation>С&amp;бросить Ключ Шифрования</translation>
+        <translation>С&amp;бросить ключ шифрования</translation>
     </message>
     <message>
         <source>Clear encryption key file. Passphrase only (if set).</source>
@@ -644,7 +644,7 @@ Do you want to replace it?</source>
     </message>
     <message>
         <source>&amp;Clear Passphrase</source>
-        <translation>Сб&amp;росить Пароль</translation>
+        <translation>Сб&amp;росить пароль</translation>
     </message>
     <message>
         <source>Save without passphrase protected encryption. Encryption with file key only (if enabled).</source>
@@ -692,7 +692,7 @@ Do you want to replace it?</source>
     </message>
     <message>
         <source>&amp;Select All</source>
-        <translation>Вы&amp;брать Все</translation>
+        <translation>Вы&amp;брать все</translation>
     </message>
     <message>
         <source>Select all text</source>
@@ -716,7 +716,7 @@ Do you want to replace it?</source>
     </message>
     <message>
         <source>&amp;Generate Passphrase...</source>
-        <translation>&amp;Генерировать Пароль...</translation>
+        <translation>&amp;Генерировать пароль...</translation>
     </message>
     <message>
         <source>Generate passphrase</source>
@@ -732,19 +732,19 @@ Do you want to replace it?</source>
     </message>
     <message>
         <source>Read Only</source>
-        <translation>Только Чтение</translation>
+        <translation>Только чтение</translation>
     </message>
     <message>
         <source>Enable Read Only mode</source>
-        <translation>Переключить Режим Только Чтение</translation>
+        <translation>Переключить режим только чтение</translation>
     </message>
     <message>
         <source>Word Wrap</source>
-        <translation>Переносить Слова</translation>
+        <translation>Переносить слова</translation>
     </message>
     <message>
         <source>Enable Word Wrap</source>
-        <translation>Переключить Перенос Слов</translation>
+        <translation>Переключить перенос слов</translation>
     </message>
     <message>
         <source>&amp;Zoom In</source>
@@ -764,19 +764,19 @@ Do you want to replace it?</source>
     </message>
     <message>
         <source>&amp;Reset Zoom</source>
-        <translation>&amp;Сбросить Увеличение</translation>
+        <translation>&amp;Сбросить увеличение</translation>
     </message>
     <message>
         <source>Reset Zoom</source>
-        <translation>Сбросить Приближение</translation>
+        <translation>Сбросить приближение</translation>
     </message>
     <message>
         <source>&amp;About...</source>
-        <translation>&amp;О Программе...</translation>
+        <translation>&amp;О программе...</translation>
     </message>
     <message>
         <source>Show the application&apos;s About box</source>
-        <translation>Показать окно О Программе</translation>
+        <translation>Показать окно О программе</translation>
     </message>
     <message>
         <source>About &amp;Qt</source>
@@ -804,7 +804,7 @@ Do you want to replace it?</source>
     </message>
     <message>
         <source>Windows EOL</source>
-        <translation>Конец Строки Windows</translation>
+        <translation>Конец строки Windows</translation>
     </message>
     <message>
         <source>&quot;Windows&quot; end of line: CR+LF</source>
@@ -955,7 +955,7 @@ Do you want to replace it?</source>
     <name>NewKeyDialog</name>
     <message>
         <source>Generate Key</source>
-        <translation>Генерировать Ключ</translation>
+        <translation>Генерировать ключ</translation>
     </message>
     <message>
         <source>&amp;Key path</source>
@@ -983,7 +983,7 @@ Do you want to replace it?</source>
     </message>
     <message>
         <source>Save New Key To</source>
-        <translation>Сохранить Новый Ключ В</translation>
+        <translation>Сохранить новый ключ как</translation>
     </message>
     <message>
         <source>Invalid characters in the key name</source>
@@ -994,7 +994,7 @@ Do you want to replace it?</source>
     <name>PassphraseGenerationDialog</name>
     <message>
         <source>Generate Passphrase</source>
-        <translation>Генерировать Пароль</translation>
+        <translation>Генерировать пароль</translation>
     </message>
     <message>
         <source>Custom:</source>
@@ -1202,11 +1202,11 @@ Do you want to replace it?</source>
     </message>
     <message>
         <source>Select Font</source>
-        <translation>Выбрать Шрифт</translation>
+        <translation>Выбрать шрифт</translation>
     </message>
     <message>
         <source>Path to Libcurl</source>
-        <translation>Путь к Libcurl</translation>
+        <translation>Путь к libcurl</translation>
     </message>
 </context>
 <context>
@@ -1220,7 +1220,7 @@ Do you want to replace it?</source>
     <name>SetKeyDialog</name>
     <message>
         <source>Set Encryption Key</source>
-        <translation>Установить Ключ Шифрования</translation>
+        <translation>Установить ключ шифрования</translation>
     </message>
     <message>
         <source>Key &amp;repository:</source>
@@ -1267,7 +1267,7 @@ Do you want to replace it?</source>
     </message>
     <message>
         <source>Set Passphrase</source>
-        <translation>Установить Пароль</translation>
+        <translation>Установить пароль</translation>
     </message>
     <message>
         <source>The confirmation passphrase does not match</source>

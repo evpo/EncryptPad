@@ -16,6 +16,8 @@ EncryptPad est une application de visualisation et d’édition de texte chiffr�
 * [Utiliser CURL pour télécharger automatiquement des clés d’un stockage distant](#use-curl)
 * [Faiblesses connues](#known-weaknesses)
 * [Interface en ligne de commande](#command-line-interface)
+  – [encryptcli](#command-line-encryptcli)
+  – [encryptpad](#command-line-encryptpad)
 * [Installer EncryptPad](#installing)
     – [Exécutable portable](#portable-exe)
     – [Arch Linux](#install-on-arch)
@@ -23,13 +25,17 @@ EncryptPad est une application de visualisation et d’édition de texte chiffr�
 * [Compiler EncryptPad sous Windows](#compile-on-windows)
   – [Prérequis](#prerequisites)
   – [Étapes](#steps)
-* [Compiler EncryptPad sous Mac/Linux](#compile-on-mac-linux)
+* [Compiler EncryptPad sous macOS](#compile-on-macos)
+* [Compiler EncryptPad sous Linux](#compile-on-linux)
     – [Fedora](#build-on-fedora)
     – [Ubuntu](#build-on-ubuntu)
     – [Debian](#build-on-debian)
     – [openSUSE](#build-on-opensuse)
+    – [Archlinux](#build-on-archlinux)
     – [FreeBSD](#build-on-freebsd)
 * [Mode portable](#portable-mode)
+* [Mode FauxVim](#fakevim-mode)
+    – [FauxVim : commandes d’entrée et de sortie](#fakevim-input-output)
 * [EncryptPad stocke-t-il les phrases de passe en mémoire pour rouvrir les fichiers ?](#passphrases-in-memory)
 * [Remerciements](#acknowledgements)
 * [Vérification de l’intégrité par EncryptPad](#integrity-verification)
@@ -51,6 +57,7 @@ EncryptPad est une application de visualisation et d’édition de texte chiffr�
 * **Dépôt de clés** dans un répertoire caché du dossier personnel de l’utilisateur
 * Le chemin d’un fichier clé peut être stocké dans un fichier chiffré. Si cette option est activée, **vous n’avez pas à indiquer le fichier clé** chaque fois que vous ouvrez des fichiers.
 * Chiffrement de **fichiers binaires** (images, vidéos, fichiers compressés, etc.)
+* Mode **FauxVim** pour modifier des fichiers avec une interface qui ressemble à Vim
 * Mode **lecture seulement** pour empêcher les modifications accidentelles de fichiers
 * Encodage de texte **UTF8**
 * **Fins de ligne configurable** Windows ou Unix
@@ -228,8 +235,10 @@ Si le fichier tombe dans les mains d’un malfaiteur, il devra d’abord attaque
 
 ## Interface en ligne de commande
 
-**encryptcli** est l’exécutable pour chiffrer ou déchiffrer des fichiers à partir de la ligne de commande. Exécutez-le sans
-arguments pour obtenir une liste des paramètres proposés. Ci-dessous un exemple de chiffrement d’un fichier avec une clé :
+### encryptcli
+<div id="command-line-encryptcli"></div>
+
+**encryptcli** is the executable to encrypt / decrypt files in command line. Run it without arguments to see available parameters. Below is an example of encrypting a file with a key:
 
     # générer une nouvelle clé et la protéger avec la phrase de passe « clé ».
     # --key-pwd-fd 0 pour lire la phrase par de la clé à partir de descripteur 0
@@ -239,6 +248,17 @@ arguments pour obtenir une liste des paramètres proposés. Ci-dessous un exempl
     # La phrase de passe de la clé est envoyé par le descripteur de fichier 3
     cat texte_en_clair.txt | encryptcli -e --key-file ma_clé.key \
     --key-only --key-pwd-fd 3 -o texte_en_clair.txt.gpg 3< <(echo -n "clé")
+
+### encryptpad
+<div id="command-line-encryptpad"></div>
+
+**encryptpad** is the GUI executable. It has the command line parameters below:
+
+    `--lang` – pour forcer une langue d’IUG
+
+    `--log-file` – préciser le journal pour le diagnostic
+
+    `--log-severity` – la sévérité du journal peut être soit : none, fatal, error, warning, info, debug ou verbose
 
 <div id="installing"></div>
 
@@ -359,17 +379,21 @@ Si la compilation réussie, vous devriez voir l’exécutable **./bin/release/en
 
 Prendre note que si vous voulez qu’EncryptPad fonctionne en un seul exécutable sans dll, vous devez compiler le d’applications Qt vous-même de façon statique. Cela prend quelques heures. De nombreuses instructions décrivant comment accomplir cela se trouvent sur Internet. L’article le plus populaire recommande d’utiliser un script PowerShell. Bien qu’il soit très pratique (je l’ai utilisé une fois), on ne veut pas toujours mettre à niveau son PowerShell et installer les lourdes dépendances qui viennent avec. Et donc, la fois d’après, j’ai lu le script et j’ai tout fait manuellement. Heureusement qu’il n’y avait pas trop d’étapes.
 
-<div id="compile-on-mac-linux"></div>
+<div id="compile-on-macos"></div>
 
-## Compiler EncryptPad sous Mac ou Linux
+## Compiler EncryptPad sous macOS
 
-Tout ce que vous avez à faire est d’installer Qt, Python et d’exécuter :
+You need to install Qt 5, Python and run:
 
-    export PATH=$HOME/Qt/5.10.1/clang_64/bin/:$PATH
-    ./configure.py --build-botan --ldflags "-mmacosx-version-min=10.10" --cxxflags "-mmacosx-version-min=10.10"
+    export PATH=$HOME/Qt/5.12.11/clang_64/bin/:$PATH
+    ./configure.py --ldflags "-mmacosx-version-min=11.0" --cxxflags "-mmacosx-version-min=11.0"
     make
 
 Changez le chemin de Qt et remplacez les versions minimales de macOS suivant le besoin. La commande fonctionnera sans elles, mais le résultat sera limité à la version actuelle.
+
+<div id="compile-on-linux"></div>
+
+## Compiler EncryptPad sous Linux
 
 <div id="build-on-fedora"></div>
 
@@ -377,20 +401,13 @@ Changez le chemin de Qt et remplacez les versions minimales de macOS suivant le 
 
 Installer les dépendances et outils :
 
-    dnf install gcc make qt5-qtbase-devel gcc-c++ python libstdc++-static glibc-static
-    PATH=$PATH:/usr/lib64/qt5/bin/
-    export PATH
+    dnf install gcc make qt5-qtbase-devel gcc-c++ python libstdc++-static glibc-static botan2-devel bzip2-devel zlib-devel
 
 Ouvrir le répertoire encryptpad :
 
-    ./configure.py --build-botan --build-zlib
-    make
-
-Pour une compilation dynamique en utilisant les bibliothèques système :
-
-    dnf install botan-devel
     ./configure.py
     make
+    sudo make install
 
 <div id="build-on-ubuntu"></div>
 
@@ -398,12 +415,13 @@ Pour une compilation dynamique en utilisant les bibliothèques système :
 
 Installer les dépendances et outils :
 
-    apt-get install qtbase5-dev qt5-default gcc g++ make python pkg-config zlib1g-dev libbotan-2-dev
+    apt-get install qtbase5-dev gcc g++ make python pkg-config zlib1g-dev libbotan-2-dev libbz2-dev
 
 Ouvrir le répertoire source d’Encryptpad :
 
-    ./configure.py --build-bzip2
+    ./configure.py
     make
+    sudo make install
 
 <div id="build-on-debian"></div>
 
@@ -411,21 +429,13 @@ Ouvrir le répertoire source d’Encryptpad :
 
 Installer les dépendances et outils :
 
-    apt-get install qtbase5-dev qt5-default gcc g++ make python zlib1g-dev pkg-config
+    apt-get install qtbase5-dev gcc g++ make python zlib1g-dev pkg-config libbotan-2-dev libbz2-dev
 
 Ouvrir le répertoire source d’Encryptpad :
 
-    ./configure.py --build-botan --build-zlib
-    make
-
-Vous pouvez aussi utiliser le `libbotan-2-dev` du système au lieu de le compiler. Si `libbotan-2-dev` n’est pas proposé, ajoutez `stretch-backports` au dépôt :
-
-    echo "deb http://deb.debian.org/debian/ stretch-backports main" >> /etc/apt/sources.list
-
-    apt-get install libbotan-2-dev
-
     ./configure.py
     make
+    sudo make install
 
 <div id="build-on-opensuse"></div>
 
@@ -433,19 +443,28 @@ Vous pouvez aussi utiliser le `libbotan-2-dev` du système au lieu de le compile
 
 Installer les dépendances et outils :
 
-    zypper install gcc gcc-c++ make python pkg-config zlib-devel libqt5-qtbase-devel
-    ln -s qmake-qt5 /usr/bin/qmake
-
-Vous pouvez aussi installer des versions ultérieures du compilateur et les relier aux commandes par défaut :
-
-    zypper install gcc7 gcc7-c++
-    ln -sf gcc-7 /usr/bin/gcc
-    ln -sf g++-7 /usr/bin/g++
+    zypper install gcc gcc-c++ make python pkg-config zlib-devel libqt5-qtbase-devel libbotan-devel libbz2-devel
 
 Ouvrir le répertoire source d’Encryptpad :
 
-    ./configure.py --build-botan --build-zlib
+    ./configure.py
     make
+    sudo make install
+
+<div id="build-on-archlinux"></div>
+
+### Archlinux
+
+Installer les dépendances et outils :
+
+    pacman -S --needed base-devel
+    pacman -S qt5-base python botan zlib bzip2
+
+Ouvrir le répertoire source d’Encryptpad :
+
+    ./configure.py
+    make
+    sudo make install
 
 <div id="build-on-freebsd"></div>
 
@@ -466,6 +485,52 @@ Ouvrir le répertoire source d’Encryptpad :
 
 EncryptPad vérifie la présence d’un sous-répertoire nommé `encryptpad_repository` dans le répertoire de l’exécutable. S’il existe, il est utilisé pour les paramètres et les fichiers clés. Le répertoire `.encryptpad` situé dans le profil de l’utilisateur est alors ignoré. L’exécutable EncryptPad et `encryptpad_repository` peuvent être copiés vers un support amovible, et ainsi être utilisés sur plusieurs ordinateurs. Il convient de noter qu’il est moins sécuritaire de conserver sur le même support amovible documents chiffrés et fichiers clés. Séparez-les si possible.
 
+<div id="fakevim-mode"></div>
+
+## Mode FauxVim
+
+Le mode FauxVim vous permet de modifier les fichiers avec une interface qui ressemble à Vim.
+
+To enable the mode:
+
+1. open Settings... / Preferences ...
+2. Cochez « Activer FauxVim » 
+3. Restart EncryptPad
+
+To configure FakeVim create and edit the file at the location below:
+
+Linux and macOS:
+
+    ~/.encryptpad/vimrc
+
+On Windows in the user profile directory:
+
+    _encryptpad/vimrc
+
+You can find more information about FakeVim interface at [FakeVim library web page](https://github.com/hluk/FakeVim)
+
+<div id="fakevim-input-output"></div>
+### FakeVim: input and output commands
+
+The ex mode supports commands to read and write files. The input and output commands are integrated with the following EncryptPad operations:
+
+    :r <file> – Ficher > Ouvrir…
+
+    :w – Fichier > Ouvrir
+
+    :w <file>– Fichier > Enregistrer sous…
+
+    :q – Fichier > Fermer
+
+The combinations of the above commands are also supported:
+
+    :wq
+    :wq <file>
+
+Vim + register integrates with the system clipboard. You can also add the below line to the vimrc file to integrate the unnamed register with the system clipboard:
+
+    set clipboard=unnamedplus
+
 <div id="passphrases-in-memory"></div>
 
 ## EncryptPad stocke-t-il les phrases de passe en mémoire pour rouvrir les fichiers ?
@@ -485,6 +550,7 @@ EncryptPad utilise les cadres d’applications et les bibliothèques suivants :
 6. [**gtest**](http://code.google.com/p/googletest/)
 7. [**Jeu d’icônes famfamfam Silk 1.3**](http://www.famfamfam.com/lab/icons/silk/)
 8. [**plog**](https://github.com/SergiusTheBest/plog)
+9. [**FakeVim**](https://github.com/hluk/FakeVim)
 
 <div id="integrity-verification"></div>
 
