@@ -1784,3 +1784,15 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 {
     return false;
 }
+
+void MainWindow::showHelp()
+{
+    QString helpText = QString("encryptpad[.exe] [options] [file]") + "<br>" +
+        tr("options:") + "<br>" +
+        tr("<b>--lang</b> - to enforce the language for the GUI") + "<br>" +
+        tr("<b>--log-file</b> - specify the log file for diagnostics") + "<br>" +
+        tr("<b>--log-severity</b> - log severity can be one of the following list: none, fatal, error, warning, info, debug, verbose");
+    // QMessageBox::information(this, tr("Command Line Interface"), QString("<b>robo</b> ohoho"));
+    QMessageBox::information(this, tr("Command Line Interface"), helpText);
+
+}

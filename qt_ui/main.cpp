@@ -75,6 +75,7 @@ namespace
         QString language;
         QString logFile;
         QString logSeverity;
+        bool isHelpRequested = false;
     };
 
     CommandArguments parseArguments(const Application &app)
@@ -116,6 +117,10 @@ namespace
                     return empty;
 
                 retVal.logSeverity = queue.front();
+            }
+            else if(arg == "--help")
+            {
+                retVal.isHelpRequested = true;
             }
             else
             {
@@ -221,6 +226,9 @@ int main(int argc, char *argv[])
 
     if(!arguments.fileName.isEmpty())
         mainWin.open(arguments.fileName);
+
+    if(arguments.isHelpRequested)
+        mainWin.showHelp();
 
     return app.exec();
 }

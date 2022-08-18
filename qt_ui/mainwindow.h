@@ -62,6 +62,7 @@ public:
     bool getIsBusy() const;
     void setEncryptionKeyFile(const QString &file, bool clearKFKeyService = true);
     const QString &getEncryptionKeyFile() const;
+    void showHelp();
 
 protected:
     void closeEvent(QCloseEvent *event) override;
