@@ -6,6 +6,18 @@ h2
 </style>
 ## Release Notes ##
 
+### Version 0.5.0.2
+
+* An option has been added to display line numbers in the editor
+* Bug fix: invalid characters entered by the user are not checked and a bad key file is created on Windows
+* Bug fix: in the file encryption dialogue clearing the passphrase sometimes causes invalid behaviour
+* FakeVim mode: the cursor has become more consistent and presentable
+* FakeVim mode: the native file open dialogue can now be used
+* FakeVim mode: support relative line numbers (rnu)
+* Bug fix: in FakeVim mode the CPU consumption is 100% due to an infinite loop in the Paint event
+* Botan has been updated to version 2.19.2
+* Localization has been updated
+
 ### Version 0.5.0.1
 
 * FakeVim mode to enable editing files with Vim-like interface
