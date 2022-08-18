@@ -33,6 +33,7 @@ EncryptPad est une application de visualisation et d’édition de texte chiffr�
     – [openSUSE](#build-on-opensuse)
     – [Archlinux](#build-on-archlinux)
     – [FreeBSD](#build-on-freebsd)
+	- [VoidLinux](#build-on-voidlinux)
 * [Mode portable](#portable-mode)
 * [Mode FauxVim](#fakevim-mode)
     – [FauxVim : commandes d’entrée et de sortie](#fakevim-input-output)
@@ -415,7 +416,7 @@ Ouvrir le répertoire encryptpad :
 
 Installer les dépendances et outils :
 
-    apt-get install qtbase5-dev gcc g++ make python pkg-config zlib1g-dev libbotan-2-dev libbz2-dev
+    apt-get install qt5-default qtbase5-dev gcc g++ make python pkg-config zlib1g-dev libbotan-2-dev libbz2-dev
 
 Ouvrir le répertoire source d’Encryptpad :
 
@@ -479,6 +480,19 @@ Ouvrir le répertoire source d’Encryptpad :
     ./configure.py
     make
 
+<div id="build-on-voidlinux"></div>
+
+### Void Linux
+
+Installer les dépendances et outils : 
+	
+	sudo xbps-install base-devel qt5-devel python3 botan-devel bzip2-devel libzip-devel
+
+Ouvrir le répertoire source d’Encryptpad :
+
+    ./configure.py
+    sudo make install
+	
 <div id="portable-mode"></div>
 
 ## Mode portable

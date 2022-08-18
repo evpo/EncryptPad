@@ -953,6 +953,30 @@ Ar norite jį pakeisti?</translation>
         <source>&lt;b&gt;%1&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;OpenPGP implementation.&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;Simplified BSD License&lt;br/&gt;&lt;br/&gt;</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>options:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;--lang&lt;/b&gt; - to enforce the language for the GUI</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;--log-file&lt;/b&gt; - specify the log file for diagnostics</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;--log-severity&lt;/b&gt; - log severity can be one of the following list: none, fatal, error, warning, info, debug, verbose</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Command Line Interface</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>encryptpad[.exe] [options] [file]</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>NewKeyDialog</name>

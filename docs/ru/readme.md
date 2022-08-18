@@ -16,6 +16,8 @@ EncryptPad это приложение для просмотра и редакт
 * [Use CURL to automatically download keys from a remote storage](#use-curl)
 * [Known weaknesses](#known-weaknesses)
 * [Command line interface](#command-line-interface)
+  - [encryptcli](#command-line-encryptcli)
+  - [encryptpad](#command-line-encryptpad)
 * [Installing EncryptPad](#installing)
     - [Portable executable](#portable-exe)
     - [Arch Linux](#install-on-arch)
@@ -23,13 +25,18 @@ EncryptPad это приложение для просмотра и редакт
 * [Compile EncryptPad on Windows](#compile-on-windows)
   - [Prerequisites](#prerequisites)
   - [Steps](#steps)
-* [Compile EncryptPad on Mac/Linux](#compile-on-mac-linux)
+* [Compile EncryptPad on macOS](#compile-on-macos)
+* [Compile EncryptPad on Linux](#compile-on-linux)
     - [Fedora](#build-on-fedora)
     - [Ubuntu](#build-on-ubuntu)
     - [Debian](#build-on-debian)
     - [openSUSE](#build-on-opensuse)
+    - [Archlinux](#build-on-archlinux)
     - [FreeBSD](#build-on-freebsd)
+	- [VoidLinux](#build-on-voidlinux)
 * [Portable mode](#portable-mode)
+* [FakeVim mode](#fakevim-mode)
+    - [FakeVim: input and output commands](#fakevim-input-output)
 * [Does EncryptPad store passphrases in the memory to reopen files?](#passphrases-in-memory)
 * [Acknowledgements](#acknowledgements)
 * [EncryptPad integrity verification](#integrity-verification)
@@ -51,6 +58,7 @@ EncryptPad это приложение для просмотра и редакт
 * **Key repository** in a hidden directory in the user's home folder
 * Path to a key file can be stored in an encrypted file. If enabled, **you do not need to specify the key file** every time you open files.
 * Encryption of **binary files** (images, videos, archives etc.)
+* **FakeVim** mode to edit files by using Vim-like user interface
 * **Read only** mode to prevent accidental file modification
 * **UTF8** text encoding
 * Windows/Unix **configurable line endings**
@@ -228,8 +236,10 @@ If this file gets into the hands of a wrongdoer, he or she will need to brute fo
 
 ## Command line interface
 
-**encryptcli** is the executable to encrypt / decrypt files in command line. Run it without
-arguments to see available parameters. Below is an example of encrypting a file with a key:
+
+<div id="command-line-encryptcli"></div>
+
+**encryptcli** is the executable to encrypt / decrypt files in command line. Run it without arguments to see available parameters. Below is an example of encrypting a file with a key:
 
     # generate a new key and protect it with the passphrase "key".
     # --key-pwd-fd 0 for reading the key passphrase from descriptor 0
@@ -239,6 +249,17 @@ arguments to see available parameters. Below is an example of encrypting a file 
     # The key passphrase is sent through file descriptor 3
     cat plain_text.txt | encryptcli -e --key-file my_key.key \
     --key-only --key-pwd-fd 3 -o plain_text.txt.gpg 3< <(echo -n "key")
+
+
+<div id="command-line-encryptpad"></div>
+
+**encryptpad** is the GUI executable. It has the command line parameters below:
+
+    `--lang` - to enforce the language for the GUI
+
+    `--log-file` - specify the log file for diagnostics
+
+    `--log-severity` - log severity can be one of the following list: none, fatal, error, warning, info, debug, verbose
 
 <div id="installing"></div>
 
@@ -359,17 +380,21 @@ If the build is successful, you should see the executable **./bin/release/encryp
 
 Note that if you want EncryptPad to work as a single executable without dlls, you need to build Qt framework yourself statically. It takes a few hours. There are plenty of instructions on how to do this in the Internet. The most popular article recommends using a PowerShell script. While it is convenient and I did it once, sometimes you don't want to upgrade your PowerShell and install heavy dependencies coming with it. So the next time I had to do that, I read the script and did everything manually. Luckily there are not too many steps in it.
 
-<div id="compile-on-mac-linux"></div>
+<div id="compile-on-macos"></div>
 
-## Compile EncryptPad on Mac/Linux
+## Compile EncryptPad on macOS
 
-All you need is to install Qt, Python and run:
+You need to install Qt 5, Python and run:
 
-    export PATH=$HOME/Qt/5.10.1/clang_64/bin/:$PATH
-    ./configure.py --build-botan --ldflags "-mmacosx-version-min=10.10" --cxxflags "-mmacosx-version-min=10.10"
+    
+    
     make
 
 Change the Qt path and replace the minimal macOS versions as needed. The command will work without them but the result will be limited to the current version.
+
+<div id="compile-on-linux"></div>
+
+## Compile EncryptPad on Linux
 
 <div id="build-on-fedora"></div>
 
@@ -377,20 +402,13 @@ Change the Qt path and replace the minimal macOS versions as needed. The command
 
 Install dependencies and tools:
 
-    dnf install gcc make qt5-qtbase-devel gcc-c++ python libstdc++-static glibc-static
-    PATH=$PATH:/usr/lib64/qt5/bin/
-    export PATH
+    
 
 Open the EncryptPad directory:
 
-    ./configure.py --build-botan --build-zlib
-    make
-
-For a dynamic build with using the system libraries:
-
-    dnf install botan-devel
     ./configure.py
     make
+    
 
 <div id="build-on-ubuntu"></div>
 
@@ -398,12 +416,13 @@ For a dynamic build with using the system libraries:
 
 Install dependencies and tools:
 
-    apt-get install qtbase5-dev qt5-default gcc g++ make python pkg-config zlib1g-dev libbotan-2-dev
+    apt-get install qt5-default qtbase5-dev gcc g++ make python pkg-config zlib1g-dev libbotan-2-dev libbz2-dev
 
 Open the EncryptPad source directory:
 
-    ./configure.py --build-bzip2
+    ./configure.py
     make
+    
 
 <div id="build-on-debian"></div>
 
@@ -411,21 +430,13 @@ Open the EncryptPad source directory:
 
 Install dependencies and tools:
 
-    apt-get install qtbase5-dev qt5-default gcc g++ make python zlib1g-dev pkg-config
+    
 
 Open the EncryptPad source directory:
 
-    ./configure.py --build-botan --build-zlib
-    make
-
-You can also use the system `libbotan-2-dev` instead of building it. If `libbotan-2-dev` is not available, add `stretch-backports` to the repository:
-
-    echo "deb http://deb.debian.org/debian/ stretch-backports main" >> /etc/apt/sources.list
-
-    apt-get install libbotan-2-dev
-
     ./configure.py
     make
+    
 
 <div id="build-on-opensuse"></div>
 
@@ -433,19 +444,28 @@ You can also use the system `libbotan-2-dev` instead of building it. If `libbota
 
 Install dependencies and tools:
 
-    zypper install gcc gcc-c++ make python pkg-config zlib-devel libqt5-qtbase-devel
-    ln -s qmake-qt5 /usr/bin/qmake
-
-You can also install later compiler versions and link them to the default commands:
-
-    zypper install gcc7 gcc7-c++
-    ln -sf gcc-7 /usr/bin/gcc
-    ln -sf g++-7 /usr/bin/g++
+    
 
 Open the EncryptPad source directory:
 
-    ./configure.py --build-botan --build-zlib
+    ./configure.py
     make
+    
+
+<div id="build-on-archlinux"></div>
+
+
+
+Install dependencies and tools:
+
+    
+    
+
+Open the EncryptPad source directory:
+
+    ./configure.py
+    make
+    
 
 <div id="build-on-freebsd"></div>
 
@@ -460,11 +480,70 @@ Open the EncryptPad source directory:
     ./configure.py
     make
 
+<div id="build-on-voidlinux"></div>
+
+### Void Linux
+
+Install dependencies and tools: 
+	
+	sudo xbps-install base-devel qt5-devel python3 botan-devel bzip2-devel libzip-devel
+
+Open the EncryptPad source directory:
+
+    ./configure.py
+    
+	
 <div id="portable-mode"></div>
 
 ## Portable mode
 
 EncryptPad checks the executable directory for a sub-directory called `encryptpad_repository`. If exists, it is used for key files and settings. The directory `.encryptpad` in the user's profile is then ignored. The EncryptPad executable and `encryptpad_repository` can both be copied to a removable media and used on multiple computers. It should be noted that keeping encrypted material with the key files on the same removable media is less secure. Separate them if possible.
+
+<div id="fakevim-mode"></div>
+
+## FakeVim mode
+
+FakeVim mode lets edit files with Vim-like interface.
+
+To enable the mode:
+
+1. open Settings... / Preferences ...
+2. Set "Enable FakeVim"
+3. Restart EncryptPad
+
+To configure FakeVim create and edit the file at the location below:
+
+
+
+    
+
+On Windows in the user profile directory:
+
+    
+
+You can find more information about FakeVim interface at [FakeVim library web page](https://github.com/hluk/FakeVim)
+
+<div id="fakevim-input-output"></div>
+### FakeVim: input and output commands
+
+The ex mode supports commands to read and write files. The input and output commands are integrated with the following EncryptPad operations:
+
+    :r <file> - File / Open...
+
+    :w - File / Save
+
+    :w <file> - File / Save As...
+
+    :q - File / Exit
+
+The combinations of the above commands are also supported:
+
+    :wq
+    :wq <file>
+
+Vim + register integrates with the system clipboard. You can also add the below line to the vimrc file to integrate the unnamed register with the system clipboard:
+
+    
 
 <div id="passphrases-in-memory"></div>
 
@@ -484,7 +563,8 @@ EncryptPad uses the following frameworks and libraries:
 4. [**zlib**](http://zlib.net/)
 6. [**gtest**](http://code.google.com/p/googletest/)
 7. [**famfamfam Silk iconset 1.3**](http://www.famfamfam.com/lab/icons/silk/)
-8. [**plog**](https://github.com/SergiusTheBest/plog)
+
+
 
 <div id="integrity-verification"></div>
 

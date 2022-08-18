@@ -86,7 +86,7 @@
     </message>
     <message>
         <source>OpenPGP Armor</source>
-        <translation type="unfinished"/>
+        <translation>OpenPGP Armor</translation>
     </message>
     <message>
         <source>ASC</source>
@@ -949,6 +949,30 @@ Do you want to replace it?</source>
     <message>
         <source>persistent</source>
         <translation>сохранять путь</translation>
+    </message>
+    <message>
+        <source>options:</source>
+        <translation>параметры:</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;--lang&lt;/b&gt; - to enforce the language for the GUI</source>
+        <translation>&lt;b&gt;--lang&lt;/b&gt; - установить язык для графического интерфейса</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;--log-file&lt;/b&gt; - specify the log file for diagnostics</source>
+        <translation>&lt;b&gt;--log-file&lt;/b&gt; - указать файл для диагностической информации</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;--log-severity&lt;/b&gt; - log severity can be one of the following list: none, fatal, error, warning, info, debug, verbose</source>
+        <translation>&lt;b&gt;--log-severity&lt;/b&gt; - уровень диагностики может быть один из следующих: none, fatal, error, warning, info, debug, verbose</translation>
+    </message>
+    <message>
+        <source>Command Line Interface</source>
+        <translation>Интерфейс командной строки</translation>
+    </message>
+    <message>
+        <source>encryptpad[.exe] [options] [file]</source>
+        <translation>encryptpad[.exe] [параметры] [файл]</translation>
     </message>
 </context>
 <context>

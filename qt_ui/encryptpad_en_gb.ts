@@ -952,6 +952,30 @@ Do you want to replace it?</source>
         <source>persistent</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>options:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;--lang&lt;/b&gt; - to enforce the language for the GUI</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;--log-file&lt;/b&gt; - specify the log file for diagnostics</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;--log-severity&lt;/b&gt; - log severity can be one of the following list: none, fatal, error, warning, info, debug, verbose</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Command Line Interface</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>encryptpad[.exe] [options] [file]</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>NewKeyDialog</name>

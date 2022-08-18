@@ -951,6 +951,30 @@ Souhaitez-vous le remplacer ?</translation>
         <source>persistent</source>
         <translation>persistant</translation>
     </message>
+    <message>
+        <source>options:</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <source>&lt;b&gt;--lang&lt;/b&gt; - to enforce the language for the GUI</source>
+        <translation>&lt;b&gt;--lang&lt;/b&gt; – pour forcer une langue d’IUG</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;--log-file&lt;/b&gt; - specify the log file for diagnostics</source>
+        <translation>&lt;b&gt;--log-file&lt;/b&gt; – préciser le journal pour le diagnostic</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;--log-severity&lt;/b&gt; - log severity can be one of the following list: none, fatal, error, warning, info, debug, verbose</source>
+        <translation>&lt;b&gt;--log-severity&lt;/b&gt; – la sévérité du journal peut être soit : none, fatal, error, warning, info, debug ou verbose</translation>
+    </message>
+    <message>
+        <source>Command Line Interface</source>
+        <translation>Interface en ligne de commande</translation>
+    </message>
+    <message>
+        <source>encryptpad[.exe] [options] [file]</source>
+        <translation type="unfinished"/>
+    </message>
 </context>
 <context>
     <name>NewKeyDialog</name>
