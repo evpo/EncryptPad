@@ -64,6 +64,6 @@ namespace EncryptPad
         bool LoadFile(const QString &fileName, bool force_kf_passphrase_request = false);
 
         // returns true if StartSave was called
-        bool SaveFile(const QString &fileName);
+        bool SaveFile(const QString &fileName, bool allow_unencrypted = true);
     };
 }

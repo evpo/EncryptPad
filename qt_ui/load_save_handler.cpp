@@ -150,7 +150,7 @@ namespace EncryptPad
         return true;
     }
 
-    bool LoadHandler::SaveFile(const QString &fileName)
+    bool LoadHandler::SaveFile(const QString &fileName, bool allow_unencrypted)
     {
         bool passphraseSet = !client.IsPassphraseNotSet();
         bool isGpg = IsGpgFormat(fileName);
@@ -206,6 +206,12 @@ namespace EncryptPad
 
         if(isEncryptedFormat && !passphraseSet && client.EncryptionKeyFile().isEmpty())
         {
+            if(!allow_unencrypted)
+            {
+                QMessageBox::warning(parent, "EncryptPad", qApp->translate("LoadSaveHandler", "Neither a key file nor passphrase is set."));
+                return false;
+            }
+
             auto ret = QMessageBox::warning(
                     parent,
                     "EncryptPad",

@@ -360,7 +360,8 @@ void FileEncryptionDialog::on_uiStart_clicked()
             keyService.Clear();
         }
 
-        loadHandler.SaveFile(ui->uiOutputFile->text());
+        const bool allow_unencrypted = false;
+        loadHandler.SaveFile(ui->uiOutputFile->text(), allow_unencrypted);
     }
     else
     {
