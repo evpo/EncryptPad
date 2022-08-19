@@ -167,7 +167,8 @@
     <message>
         <source>%1 already exists.
 Do you want to replace it?</source>
-        <translation>%1 уже существует.\nХотите заменить его?</translation>
+        <translation>%1 уже существует.
+Хотите его заменить?</translation>
     </message>
     <message>
         <source>Cannot open the encryption key</source>
@@ -457,6 +458,10 @@ Do you want to replace it?</source>
     <message>
         <source>Neither a key file nor passphrase is set. The file is going to be saved UNENCRYPTED.</source>
         <translation>Защита паролем или ключом не задана. Файл будет сохранен ОТКРЫТЫМ ТЕКСТОМ.</translation>
+    </message>
+    <message>
+        <source>Neither a key file nor passphrase is set.</source>
+        <translation>Защита паролем или ключем не задана.</translation>
     </message>
 </context>
 <context>

@@ -430,11 +430,11 @@ Ouvrir le répertoire source d’Encryptpad :
 
 Installer les dépendances et outils :
 
-    apt-get install qtbase5-dev gcc g++ make python zlib1g-dev pkg-config libbotan-2-dev libbz2-dev
+    apt-get install qtbase5-dev gcc g++ make python3 zlib1g-dev pkg-config libbotan-2-dev libbz2-dev
 
 Ouvrir le répertoire source d’Encryptpad :
 
-    ./configure.py
+    python3 ./configure.py
     make
     sudo make install
 

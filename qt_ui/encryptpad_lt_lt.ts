@@ -461,6 +461,10 @@ Ar norite jį pakeisti?</translation>
         <source>Neither a key file nor passphrase is set. The file is going to be saved UNENCRYPTED.</source>
         <translation>Nėra nustatyti nei rakto failas, nei slaptafrazė. Failas bus įrašytas NEŠIFRUOTAI.</translation>
     </message>
+    <message>
+        <source>Neither a key file nor passphrase is set.</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>MainWindow</name>

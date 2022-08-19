@@ -459,6 +459,10 @@ Souhaitez-vous le remplacer ?</translation>
         <source>Neither a key file nor passphrase is set. The file is going to be saved UNENCRYPTED.</source>
         <translation>Aucun fichier clé ni phrase de passe n’est défini. Le fichier sera enregistré SANS CHIFFREMENT.</translation>
     </message>
+    <message>
+        <source>Neither a key file nor passphrase is set.</source>
+        <translation>Aucun fichier clé ni phrase de passe n’est défini.</translation>
+    </message>
 </context>
 <context>
     <name>MainWindow</name>
@@ -557,7 +561,7 @@ Souhaitez-vous le remplacer ?</translation>
     </message>
     <message>
         <source>&lt;b&gt;%1&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;OpenPGP implementation.&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;Simplified BSD License&lt;br/&gt;&lt;br/&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;b&gt;%implémentation OpenPGP.&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;Licence simplifiée BSD&lt;br/&gt;&lt;br/&gt;</translation>
     </message>
     <message>
         <source>Do you want to apply the modified default file properties to this file?</source>
@@ -953,7 +957,7 @@ Souhaitez-vous le remplacer ?</translation>
     </message>
     <message>
         <source>options:</source>
-        <translation type="unfinished"/>
+        <translation>options :</translation>
     </message>
     <message>
         <source>&lt;b&gt;--lang&lt;/b&gt; - to enforce the language for the GUI</source>
@@ -965,7 +969,7 @@ Souhaitez-vous le remplacer ?</translation>
     </message>
     <message>
         <source>&lt;b&gt;--log-severity&lt;/b&gt; - log severity can be one of the following list: none, fatal, error, warning, info, debug, verbose</source>
-        <translation>&lt;b&gt;--log-severity&lt;/b&gt; – la sévérité du journal peut être soit : none, fatal, error, warning, info, debug ou verbose</translation>
+        <translation>&lt;b&gt;--log-severity&lt;/b&gt; – la gravité du journal peut être soit : none, fatal, error, warning, info, debug ou verbose</translation>
     </message>
     <message>
         <source>Command Line Interface</source>
@@ -973,7 +977,7 @@ Souhaitez-vous le remplacer ?</translation>
     </message>
     <message>
         <source>encryptpad[.exe] [options] [file]</source>
-        <translation type="unfinished"/>
+        <translation>encryptpad[.exe] [options] [fichier]</translation>
     </message>
 </context>
 <context>

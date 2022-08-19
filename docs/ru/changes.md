@@ -1,16 +1,30 @@
-<style type="text/css">
-h2
-{
-    text-align: center;
-}
-</style>
 ## Release Notes ##
+
+### Version 0.5.0.2
+
+* An option has been added to display line numbers in the editor
+* Bug fix: invalid characters entered by the user are not checked and a bad key file is created on Windows
+* Bug fix: in the file encryption dialogue clearing the passphrase sometimes causes invalid behaviour
+* FakeVim mode: the cursor has become more consistent and presentable
+* FakeVim mode: the native file open dialogue can now be used
+* FakeVim mode: support relative line numbers (rnu)
+* Bug fix: in FakeVim mode the CPU consumption is 100% due to an infinite loop in the Paint event
+* Botan has been updated to version 2.19.2
+* Localization has been updated
+
+### Version 0.5.0.1
+
+* FakeVim mode to enable editing files with Vim-like interface
+* The lock icon has been replaced with a page and lock with the higher quality of the image.
+* Botan has been updated to version 2.18.1
+* The build system has been improved to support more distributions
+* Bug fix: Opening search dialog by using 'CTRL-F' doesn't focus on the find text field
 
 ### Version 0.5.0.0
 
 * ASCII armor
 * Added cipher algorithms: CAMELLIA128, CAMELLIA192, CAMELLIA256, TWOFISH
-* Added S2K digest algorithms: SHA384, SHA512, SHA224
+* Added S2K hash digest algorithms: SHA384, SHA512, SHA224
 * Added compression algorithm: BZIP2
 * Botan has been updated to version 2.13
 * Translation fixes for context menu
@@ -88,3 +102,4 @@ h2
 ### Version 0.3.2.1
 
 * Initial open source release
+

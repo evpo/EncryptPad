@@ -460,6 +460,10 @@ Do you want to replace it?</source>
         <source>Neither a key file nor passphrase is set. The file is going to be saved UNENCRYPTED.</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Neither a key file nor passphrase is set.</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>MainWindow</name>

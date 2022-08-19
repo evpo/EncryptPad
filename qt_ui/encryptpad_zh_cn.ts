@@ -461,6 +461,10 @@ Do you want to replace it?</source>
         <source>Neither a key file nor passphrase is set. The file is going to be saved UNENCRYPTED.</source>
         <translation>你还没有设置口令或者密钥文件。文件将会不被加密的存储。</translation>
     </message>
+    <message>
+        <source>Neither a key file nor passphrase is set.</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>MainWindow</name>
