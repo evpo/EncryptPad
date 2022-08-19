@@ -35,7 +35,7 @@ do
                     ARMOR_CLAUSE="--armor"
                 fi
 
-                $CMD -o ${OUT_DIR}/${CIPHER}_${S2K_ALGO}_${COMPRESS}.${EXT} $ARMOR_CLAUSE $COMPRESS_CLAUSE --allow-old-cipher-algos --s2k-digest-algo $S2K_ALGO --cipher-algo $CIPHER $PLAIN_TEXT_FILE
+                $CMD -o ${OUT_DIR}/${CIPHER}_${S2K_ALGO}_${COMPRESS}.${EXT} $ARMOR_CLAUSE $COMPRESS_CLAUSE $ALLOW_OLD_CIPHER --s2k-digest-algo $S2K_ALGO --cipher-algo $CIPHER $PLAIN_TEXT_FILE
             done
         done
     done

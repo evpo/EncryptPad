@@ -14,6 +14,15 @@ fi
 
 export GPG
 
+if gpg2 ${ALLOW_OLD_CIPHER} --version > /dev/null ; then
+    ALLOW_OLD_CIPHER="--allow-old-cipher-algos"
+else
+    ALLOW_OLD_CIPHER=""
+fi
+
+export ALLOW_OLD_CIPHER
+echo "ALLOW_OLD_CIPHER=${ALLOW_OLD_CIPHER}"
+
 #Assign S if a different shell is needed
 S=""
 
