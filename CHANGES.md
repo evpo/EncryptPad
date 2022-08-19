@@ -1,9 +1,3 @@
-<style type="text/css">
-h2
-{
-    text-align: center;
-}
-</style>
 ## Release Notes ##
 
 ### Version 0.5.0.2
