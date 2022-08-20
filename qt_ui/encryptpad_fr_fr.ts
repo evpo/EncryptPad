@@ -528,7 +528,7 @@ Souhaitez-vous le remplacer ?</translation>
     </message>
     <message>
         <source>Cannot create the repository directory in HOME</source>
-        <translation>Impossible de créer le répertoire dépôt dans le dossier personnel</translation>
+        <translation>Impossible de créer le dossier dépôt dans le dossier personnel</translation>
     </message>
     <message>
         <source>Passphrase for Key File</source>
@@ -1000,7 +1000,7 @@ Souhaitez-vous le remplacer ?</translation>
     </message>
     <message>
         <source>The repository is &lt;b&gt;.encryptpad&lt;/b&gt; directory in the user&apos;s profile (&lt;b&gt;encryptpad_repository&lt;/b&gt; in portable mode).</source>
-        <translation>Le dépôt est le répertoire &lt;b&gt;.encryptpad&lt;/b&gt; dans le profile de l’utilisateur (&lt;b&gt;encryptpad_repository&lt;/b&gt; en mode portable).</translation>
+        <translation>Le dépôt est le dossier &lt;b&gt;.encryptpad&lt;/b&gt; dans le profile de l’utilisateur (&lt;b&gt;encryptpad_repository&lt;/b&gt; en mode portable).</translation>
     </message>
     <message>
         <source>Browse...</source>
@@ -1142,7 +1142,7 @@ Souhaitez-vous le remplacer ?</translation>
     </message>
     <message>
         <source>Save last used directory</source>
-        <translation>Mémoriser le dernier répertoire utilisé</translation>
+        <translation>Mémoriser le dernier dossier utilisé</translation>
     </message>
     <message>
         <source>Word wrap</source>
@@ -1179,7 +1179,7 @@ Souhaitez-vous le remplacer ?</translation>
     </message>
     <message>
         <source>Enable FakeVim (restart required)</source>
-        <translation>Activer FauxVim (redémarrage requis)</translation>
+        <translation>Activer FakeVim (redémarrage requis)</translation>
     </message>
     <message>
         <source>32</source>
@@ -1211,7 +1211,7 @@ Souhaitez-vous le remplacer ?</translation>
     </message>
     <message>
         <source>Retain last used directory between EncryptPad sessions</source>
-        <translation>Mémoriser le dernier répertoire utilisé d’une session d’EncryptPad à l’autre</translation>
+        <translation>Mémoriser le dernier dossier utilisé d’une session d’EncryptPad à l’autre</translation>
     </message>
     <message>
         <source>Path to libCURL executable</source>
@@ -1269,7 +1269,7 @@ Souhaitez-vous le remplacer ?</translation>
     </message>
     <message>
         <source>The repository is &lt;b&gt;.encryptpad&lt;/b&gt; directory in the user&apos;s profile (&lt;b&gt;encryptpad_repository&lt;/b&gt; in portable mode). Select a key or specify a file name without path for the repository keys.</source>
-        <translation>Le dépôt est le répertoire &lt;b&gt;.encryptpad&lt;/b&gt; dans le profile de l’utilisateur (&lt;b&gt;encryptpad_repository&lt;/b&gt; en mode portable). Sélectionner une clé ou indiquer un nom de fichier sans chemin pour les clés du dépôt.</translation>
+        <translation>Le dépôt est le dossier &lt;b&gt;.encryptpad&lt;/b&gt; dans le profile de l’utilisateur (&lt;b&gt;encryptpad_repository&lt;/b&gt; en mode portable). Sélectionner une clé ou indiquer un nom de fichier sans chemin pour les clés du dépôt.</translation>
     </message>
     <message>
         <source>Specify encryption key location</source>

@@ -1,20 +1,20 @@
-# Ouvrir un fichier texte brut, le protéger à la fois par phrase de passe et fichier clé et l’enregistrer comme fichier EPD
+# Ouvrir un fichier texte en clair, le protéger à la fois par phrase de passe et fichier clé et l’enregistrer comme fichier EPD
 
-## Ouvrir un fichier texte brut
+## Ouvrir un fichier texte en clair
 
 1\. Cliquer sur le bouton Ouvrir un fichier
 
 ![Bouton Ouvrir un fichier](images/open_text_file.png)
 
-2\. Sélectionner le type de fichier Texte brut et cliquer sur Enregistrer
+2\. Sélectionner le type de fichier Texte en clair et cliquer sur Enregistrer
 
-![Type de fichier Texte brut](images/open_file_dialog_text_file.png)
+![Type de fichier Texte en clair](images/open_file_dialog_text_file.png)
 
-3\. Le fichier texte brut ouvert
+3\. Le fichier texte en clair ouvert
 
 ![Fichier texte ouvert](images/text_file_opened.png)
 
-EncryptPad est maintenant en mode texte brut non protégé. Elle fonctionne comme un éditeur de texte ordinaire.
+EncryptPad est maintenant en mode texte en clair non protégé. Elle fonctionne comme un éditeur de texte ordinaire.
 
 ![Mode non protégé](images/unprotected_status.png)
 
@@ -24,7 +24,7 @@ EncryptPad est maintenant en mode texte brut non protégé. Elle fonctionne comm
 
 ![Bouton Générer une clé](images/generate_key_tool_button.png)
 
-5\. Sélectionner le bouton radio Clé dans le dépôt, saisir `ma_nouvelle_clé` dans la boîte de texte correspondante et cliquer sur OK.
+5\. Sélectionner le bouton radio Clé dans le dépôt, saisir `ma_nouvelle_clé` dans la boîte de texte correspondante et cliquer sur Valider.
 
 ![Boîte de dialogue Générer une clé](images/generate_key_dialog.png)
 
@@ -38,7 +38,7 @@ Saisir `MdpClé`
 
 ![Boîte de dialogue Utiliser une nouvelle clé](images/use_new_key_dialog.png)
 
-8\. Le fichier clé se trouve dans votre répertoire personnel sous `encryptpad`.
+8\. Le fichier clé se trouve dans votre dossier personnel sous `encryptpad`.
 
 ![Clé dans l’explorateur Windows](images/key_in_explorer.png)
 
@@ -60,13 +60,13 @@ C’est une séquence aléatoire en Base64 à partir de laquelle la clé de chif
 
 Veuillez prendre note que le nom de fichier est maintenant `guerre et paix.epd` dans la boîte de dialogue Enregistrer sous.
 
-11\. Il vous sera demandé de saisir une phrase de passer deux fois. Saisir `MdpDémo` pour cet exemple et cliquer sur OK.
+11\. Il vous sera demandé de saisir une phrase de passer deux fois. Saisir `MdpDémo` pour cet exemple et cliquer sur Valider.
 
 ![Définir une phrase de passe](images/set_passphrase.png)
 
-Veuillez prendre note que si vous laissez la phrase de passe vide et cliquez sur OK, le fichier ne sera protégé que par le fichier clé et vous ne bénéficierez pas de la double protection. 
+Veuillez prendre note que si vous laissez la phrase de passe vide et cliquez sur Valider, le fichier ne sera protégé que par le fichier clé et vous ne bénéficierez pas de la double protection. 
 
-12\. Le fichier a maintenant été enregistré sur le disque, chiffré avec le fichier clé généré et la phrase de passe. Voir l’état dans l’image ci-dessous.
+12\. Le fichier a maintenant été enregistré sur le disque, chiffré avec le fichier clé généré et la phrase de passe. Vous pouvez voir l’état dans l’image ci-dessous.
 
 ![Fichier GPG enregistré](images/double_protection_status.png)
 
@@ -78,7 +78,7 @@ Maintenant, si vous annulez la protection, fermez le fichier et le rouvrez, la p
 
 ![Bouton Définir la clé](images/set_key_tool_button.png)
 
-14\. Activer `Emplacement de clé persistante dans le fichier chiffré` dans la boîte de dialogue Définir la clé et cliquer sur OK.
+14\. Activer `Emplacement de clé persistante dans le fichier chiffré` dans la boîte de dialogue Définir la clé et cliquer sur Valider.
 
 ![Activer la clé persistente](images/enable_persist_key.png)
 
@@ -90,17 +90,17 @@ Si vous effacez la protection et rouvrez ce fichier, l’emplacement du fichier 
 
 16\. Cliquer sur le bouton Enregistrer pour enregistrer le fichier.
 
-## Ouvrir un autre fichier texte brut
+## Ouvrir un autre fichier texte en clair
 
-Si vous tentez d’ouvrir un fichier texte brut maintenant, cela échouera avec le message suivant :
+Si vous tentez d’ouvrir un fichier texte en clair maintenant, cela échouera avec le message suivant :
 
-![Impossible d’ouvrir le texte brut](images/open_another_plain_text.png)
+![Impossible d’ouvrir le texte en clair](images/open_another_plain_text.png)
 
-EncryptPad pense que le fichier est chiffré avec une phrase de passe et un fichier clé, car son mode est `Protégé par une clé` et `Protégé par phrase de passe`, comme vous pouvez le voir dans la barre d’état. Elle a tenté de déchiffrer le texte brut et a échoué. Pour poursuivre l’ouverture du fichier, effacez la protection par phrase de passe et fichier clé en cliquant sur les boutons Effacer la clé de chiffrement et Effacer la phrase de passe, ou mieux encore, en cliquant sur Fermer et réinitialiser» ce qui fermera le fichier texte et réinitialisera les deux parties de la protection.
+EncryptPad pense que le fichier est chiffré avec une phrase de passe et un fichier clé, car son mode est `Protégé par une clé` et `Protégé par phrase de passe`, comme vous pouvez le voir dans la barre d’état. Elle a tenté de déchiffrer le texte en clair et a échoué. Pour poursuivre l’ouverture du fichier, effacez la protection par phrase de passe et fichier clé en cliquant sur les boutons Effacer la clé de chiffrement et Effacer la phrase de passe, ou mieux encore, en cliquant sur Fermer et réinitialiser» ce qui fermera le fichier texte et réinitialisera les deux parties de la protection.
 
 ![Effacer la clé ou Fermer et réinitialiser](images/clear_key_and_pwd_or_close_and_reset.png)
 
-Vous pouvez maintenant ouvrir votre fichier texte brut.
+Vous pouvez maintenant ouvrir votre fichier texte en clair.
 
 ## Le fonctionnement interne du fichier EPD
 
@@ -132,4 +132,4 @@ Noter que le fichier `__X2_KEY` contient le nom de notre fichier clé `ma_nouvel
 
 ![Kleopatra a déchiffré notre fichier](images/kleopatra_decrypted.png)
 
-25\. Le résultat de ce déchiffrement sera votre fichier texte brut original.
+25\. Le résultat de ce déchiffrement sera votre fichier texte en clair original.

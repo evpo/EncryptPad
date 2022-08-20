@@ -24,7 +24,7 @@ EncryptPad est maintenant en mode texte en clair non protégé. Elle fonctionne 
 
 ![Bouton Générer une clé](images/generate_key_tool_button.png)
 
-5\. Sélectionnez le bouton radio Clé dans le dépôt, saisissez `ma_nouvelle_clé` dans la boîte de texte correspondante et cliquez sur OK.
+5\. Sélectionnez le bouton radio Clé dans le dépôt, saisissez `ma_nouvelle_clé` dans la boîte de texte correspondante et cliquez sur Valider.
 
 ![Boîte de dialogue Générer une clé](images/generate_key_dialog.png)
 
@@ -38,7 +38,7 @@ Saisissez `MdpClé`
 
 ![Boîte de dialogue Utiliser une nouvelle clé](images/use_new_key_dialog.png)
 
-8\. Le fichier clé se trouve dans votre répertoire personnel sous `encryptpad`.
+8\. Le fichier clé se trouve dans votre dossier personnel sous `encryptpad`.
 
 ![Clé dans l’explorateur Windows](images/key_in_explorer.png)
 
@@ -104,7 +104,7 @@ Sortie de la commande --list-packets du paquet GPG :
 
 ![Boîte de dialogue Définir une clé](images/set_key_dialog.png)
 
-Les fichiers sans chemin sont d’abord cherchés dans le répertoire d’EncryptPad, puis dans le dépôt du dossier personnel (voir le texte de l’image ci-dessus). Si votre clé ne se trouve pas dans le dépôt, vous pouvez indiquer le chemin complet vers votre clé. 
+Les fichiers sans chemin sont d’abord cherchés dans le dossier d’EncryptPad, puis dans le dépôt du dossier personnel (voir le texte de l’image ci-dessus). Si votre clé ne se trouve pas dans le dépôt, vous pouvez indiquer le chemin complet vers votre clé. 
 
 `Emplacement de clé persistante dans le fichier chiffré` n’est pas pris en charge pour les fichiers GPG (voir README.md). Laissez vide pour l’instant. À FAIRE : ajouter le lien vers le guide sur le double chiffrement EPD.
 

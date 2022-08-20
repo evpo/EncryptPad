@@ -6,7 +6,7 @@
 
 ![Bouton Générer une clé](images/generate_key_tool_button.png)
 
-2\. Sélectionner le bouton radio Clé dans le dépôt, saisir `ma_nouvelle_clé` dans la boîte de texte correspondante et cliquer sur OK.
+2\. Sélectionner le bouton radio Clé dans le dépôt, saisir `ma_nouvelle_clé` dans la boîte de texte correspondante et cliquer sur Valider.
 
 ![Boîte de dialogue Générer une clé](images/generate_key_dialog.png)
 
@@ -28,7 +28,7 @@
 
 ![Sélectionner un fichier d’entrée](images/select_input_file.png) 
 
-7\. Sélectionner un fichier d’entrée et cliquer sur OK. Le nom et l’emplacement du fichier de sortie seront suggérés en ajoutant l’extension `epd » au chemin de votre fichier d’entrée (voir la première image ci-dessous). **IMPORTANT : pour garantir que le fichier de sortie est compatible avec OpenGPG, l’extension doit être changée de `epd` à `gpg` (voir la seconde image ci-dessous). Noter que seuls les fichiers `.epd` avec une protection par phrase de passe sont compatibles avec OpenPGP.**
+7\. Sélectionner un fichier d’entrée et cliquer sur Valider. Le nom et l’emplacement du fichier de sortie seront suggérés en ajoutant l’extension `epd » au chemin de votre fichier d’entrée (voir la première image ci-dessous). **IMPORTANT : pour garantir que le fichier de sortie est compatible avec OpenGPG, l’extension doit être changée de `epd` à `gpg` (voir la seconde image ci-dessous). Noter que seuls les fichiers `.epd` avec une protection par phrase de passe sont compatibles avec OpenPGP.**
 
 ![Nom de fichier de sortie suggéré](images/input_file_selected.png)
 
@@ -38,7 +38,7 @@
 
 ![Boîte de dialogue Définir une clé](images/set_key_dialog.png)
 
-Les fichiers sans chemin sont d’abord cherchés dans le répertoire d’EncryptPad, puis dans le dépôt du dossier personnel (voir le texte de l’image ci-dessus). Si votre clé ne se trouve pas dans le dépôt, vous pouvez indiquer le chemin complet vers votre clé. 
+Les fichiers sans chemin sont d’abord cherchés dans le dossier d’EncryptPad, puis dans le dépôt du dossier personnel (voir le texte de l’image ci-dessus). Si votre clé ne se trouve pas dans le dépôt, vous pouvez indiquer le chemin complet vers votre clé. 
 
 L’`emplacement de clé persistante dans le fichier chiffré` n’est pas pris en charge pour les fichiers GPG (voir README.md). Laisser vide pour l’instant. À FAIRE : ajouter le lien vers le guide sur le double chiffrement EPD.
 

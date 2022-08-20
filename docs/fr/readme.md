@@ -33,10 +33,10 @@ EncryptPad est une application de visualisation et d’édition de texte chiffr�
     – [openSUSE](#build-on-opensuse)
     – [Archlinux](#build-on-archlinux)
     – [FreeBSD](#build-on-freebsd)
-	- [VoidLinux](#build-on-voidlinux)
-* [Mode portable](#portable-mode)
-* [Mode FauxVim](#fakevim-mode)
-    – [FauxVim : commandes d’entrée et de sortie](#fakevim-input-output)
+	- [VoidLinux](#compiler-sous-voidlinux)
+* [Mode portable](#mode-portable)
+* [Mode FakeVim](#fakevim-mode)
+    – [FakeVim : commandes d’entrée et de sortie](#fakevim-input-output)
 * [EncryptPad stocke-t-il les phrases de passe en mémoire pour rouvrir les fichiers ?](#passphrases-in-memory)
 * [Remerciements](#acknowledgements)
 * [Vérification de l’intégrité par EncryptPad](#integrity-verification)
@@ -55,10 +55,10 @@ EncryptPad est une application de visualisation et d’édition de texte chiffr�
 * Protection par **fichier clé**
 * Combinaison d’une **phrase de passe et d’un fichier clé**
 * **Générateur de fichiers clés** aléatoires 
-* **Dépôt de clés** dans un répertoire caché du dossier personnel de l’utilisateur
+* **Dépôt de clés** dans un dossier caché du dossier personnel de l’utilisateur
 * Le chemin d’un fichier clé peut être stocké dans un fichier chiffré. Si cette option est activée, **vous n’avez pas à indiquer le fichier clé** chaque fois que vous ouvrez des fichiers.
 * Chiffrement de **fichiers binaires** (images, vidéos, fichiers compressés, etc.)
-* Mode **FauxVim** pour modifier des fichiers avec une interface qui ressemble à Vim
+* Mode **FakeVim** pour modifier des fichiers avec une interface qui ressemble à Vim
 * Mode **lecture seulement** pour empêcher les modifications accidentelles de fichiers
 * Encodage de texte **UTF8**
 * **Fins de ligne configurable** Windows ou Unix
@@ -239,7 +239,7 @@ Si le fichier tombe dans les mains d’un malfaiteur, il devra d’abord attaque
 ### encryptcli
 <div id="command-line-encryptcli"></div>
 
-**encryptcli** is the executable to encrypt / decrypt files in command line. Run it without arguments to see available parameters. Below is an example of encrypting a file with a key:
+**encryptcli** est l’exécutable pour chiffrer et déchiffrer des fichiers en ligne de commande. Lancez-le sans argument pour voir les paramètres proposés. Ci-dessous un exemple de chiffrement d’un fichier avec une clé :
 
     # générer une nouvelle clé et la protéger avec la phrase de passe « clé ».
     # --key-pwd-fd 0 pour lire la phrase par de la clé à partir de descripteur 0
@@ -253,7 +253,7 @@ Si le fichier tombe dans les mains d’un malfaiteur, il devra d’abord attaque
 ### encryptpad
 <div id="command-line-encryptpad"></div>
 
-**encryptpad** is the GUI executable. It has the command line parameters below:
+**encryptpad** est l’exécutable en mode graphique. Ci-dessous ses paramètres en ligne de commande :
 
     `--lang` – pour forcer une langue d’IUG
 
@@ -368,7 +368,7 @@ Ci-dessous se trouvent les étapes pour vérifier les hachages SHA-1 des fichie
 
 1. Modifier la variable d’environnement de session **PATH** afin d’inclure l’ensemble d’outils Qt et Python. **mingw32-make**, **g++**, **qmake**, **python.exe** devraient se trouver dans le chemin de recherche globale de votre session bash Git. Personnellement, je modifie bash.bashrc et ajoute une ligne tel que `PATH=/c/Python35-32:/c/Qt/5.10.1/mingw53_32/bin:/c/Qt/Tools/mingw530_32/bin:/c/MinGW/msys/1.0/bin:/bin` afin de ne pas polluer la variable PATH à l’échelle du système.
 
-2. Extraire les fichiers sources d’EncryptPad dans un répertoire.
+2. Extraire les fichiers sources d’EncryptPad dans un dossier.
 
 3. Exécuter le script **configure.py --help** pour voir les options proposées. Pour tout compiler :
 
@@ -384,7 +384,7 @@ Prendre note que si vous voulez qu’EncryptPad fonctionne en un seul exécutabl
 
 ## Compiler EncryptPad sous macOS
 
-You need to install Qt 5, Python and run:
+Vous devez installer Qt 5, Python et exécuter :
 
     export PATH=$HOME/Qt/5.12.11/clang_64/bin/:$PATH
     ./configure.py --ldflags "-mmacosx-version-min=11.0" --cxxflags "-mmacosx-version-min=11.0"
@@ -404,7 +404,7 @@ Installer les dépendances et outils :
 
     dnf install gcc make qt5-qtbase-devel gcc-c++ python libstdc++-static glibc-static botan2-devel bzip2-devel zlib-devel
 
-Ouvrir le répertoire encryptpad :
+Ouvrir le dossier encryptpad :
 
     ./configure.py
     make
@@ -418,7 +418,7 @@ Installer les dépendances et outils :
 
     apt-get install qt5-default qtbase5-dev gcc g++ make python pkg-config zlib1g-dev libbotan-2-dev libbz2-dev
 
-Ouvrir le répertoire source d’Encryptpad :
+Ouvrir le dossier source d’Encryptpad :
 
     ./configure.py
     make
@@ -432,7 +432,7 @@ Installer les dépendances et outils :
 
     apt-get install qtbase5-dev gcc g++ make python3 zlib1g-dev pkg-config libbotan-2-dev libbz2-dev
 
-Ouvrir le répertoire source d’Encryptpad :
+Ouvrir le dossier source d’Encryptpad :
 
     python3 ./configure.py
     make
@@ -446,7 +446,7 @@ Installer les dépendances et outils :
 
     zypper install gcc gcc-c++ make python pkg-config zlib-devel libqt5-qtbase-devel libbotan-devel libbz2-devel
 
-Ouvrir le répertoire source d’Encryptpad :
+Ouvrir le dossier source d’Encryptpad :
 
     ./configure.py
     make
@@ -461,7 +461,7 @@ Installer les dépendances et outils :
     pacman -S --needed base-devel
     pacman -S qt5-base python botan zlib bzip2
 
-Ouvrir le répertoire source d’Encryptpad :
+Ouvrir le dossier source d’Encryptpad :
 
     ./configure.py
     make
@@ -475,12 +475,12 @@ Installer les dépendances et outils :
 
     pkg install python pkgconf botan2 qt5
 
-Ouvrir le répertoire source d’Encryptpad :
+Ouvrir le dossier source d’Encryptpad :
 
     ./configure.py
     make
 
-<div id="build-on-voidlinux"></div>
+<div id="compiler-sous-voidlinux"></div>
 
 ### Void Linux
 
@@ -488,45 +488,45 @@ Installer les dépendances et outils :
 	
 	sudo xbps-install base-devel qt5-devel python3 botan-devel bzip2-devel libzip-devel
 
-Ouvrir le répertoire source d’Encryptpad :
+Ouvrir le dossier source d’Encryptpad :
 
     ./configure.py
     sudo make install
 	
-<div id="portable-mode"></div>
+<div id="mode-portable"></div>
 
 ## Mode portable
 
-EncryptPad vérifie la présence d’un sous-répertoire nommé `encryptpad_repository` dans le répertoire de l’exécutable. S’il existe, il est utilisé pour les paramètres et les fichiers clés. Le répertoire `.encryptpad` situé dans le profil de l’utilisateur est alors ignoré. L’exécutable EncryptPad et `encryptpad_repository` peuvent être copiés vers un support amovible, et ainsi être utilisés sur plusieurs ordinateurs. Il convient de noter qu’il est moins sécuritaire de conserver sur le même support amovible documents chiffrés et fichiers clés. Séparez-les si possible.
+EncryptPad vérifie la présence d’un sous-dossier nommé `encryptpad_repository` dans le dossier de l’exécutable. S’il existe, il est utilisé pour les paramètres et les fichiers clés. Le dossier `.encryptpad` situé dans le profil de l’utilisateur est alors ignoré. L’exécutable EncryptPad et `encryptpad_repository` peuvent être copiés vers un support amovible, et ainsi être utilisés sur plusieurs ordinateurs. Il convient de noter qu’il est moins sécuritaire de conserver sur le même support amovible documents chiffrés et fichiers clés. Séparez-les si possible.
 
 <div id="fakevim-mode"></div>
 
-## Mode FauxVim
+## Mode FakeVim
 
-Le mode FauxVim vous permet de modifier les fichiers avec une interface qui ressemble à Vim.
+Le mode FakeVim vous permet de modifier les fichiers avec une interface qui ressemble à Vim.
 
-To enable the mode:
+Pour activer le mode :
 
-1. open Settings... / Preferences ...
-2. Cochez « Activer FauxVim » 
-3. Restart EncryptPad
+1. Accéder aux Paramètres…/Préférences…
+2. Cocher « Activer FakeVim » 
+3. Redémarrer EncryptPad
 
-To configure FakeVim create and edit the file at the location below:
+Pour configurer FakeVim, créer et modifier le fichier à l’emplacement ci-dessous :
 
 Linux and macOS:
 
     ~/.encryptpad/vimrc
 
-On Windows in the user profile directory:
+<br>Sous windows, dans le dossier personnel de l'utilisateur
 
     _encryptpad/vimrc
 
-You can find more information about FakeVim interface at [FakeVim library web page](https://github.com/hluk/FakeVim)
+Vous trouverez plus de renseignements sur l'interface FakeVim dans la [page Web de la bibliothèque FakeVim](https://github.com/hluk/FakeVim)
 
 <div id="fakevim-input-output"></div>
-### FakeVim: input and output commands
+### FakeVim : commandes d’entrée et de sortie
 
-The ex mode supports commands to read and write files. The input and output commands are integrated with the following EncryptPad operations:
+Le mode ex prend en charge des commandes de lecture et d’écriture de fichiers. Les commandes d’entrée de sortie font partie des opérations suivantes EncryptPad suivantes :
 
     :r <file> – Ficher > Ouvrir…
 
@@ -536,12 +536,12 @@ The ex mode supports commands to read and write files. The input and output comm
 
     :q – Fichier > Fermer
 
-The combinations of the above commands are also supported:
+Les commandes ci-dessus peuvent aussi être combinées :
 
     :wq
     :wq <file>
 
-Vim + register integrates with the system clipboard. You can also add the below line to the vimrc file to integrate the unnamed register with the system clipboard:
+Vim et le registre s’intègrent au presse-papiers du système. Vous pouvez aussi ajouter la ligne ci-dessous au fichier vimrc pour intégrer le registre sans nom au presse-papiers du système.
 
     set clipboard=unnamedplus
 

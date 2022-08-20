@@ -513,7 +513,7 @@ To enable the mode:
 
 To configure FakeVim create and edit the file at the location below:
 
-
+Linux and macOS:
 
     
 

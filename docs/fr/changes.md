@@ -2,19 +2,19 @@
 
 ### Version 0.5.0.2
 
-* An option has been added to display line numbers in the editor
-* Bug fix: invalid characters entered by the user are not checked and a bad key file is created on Windows
-* Bug fix: in the file encryption dialogue clearing the passphrase sometimes causes invalid behaviour
-* FakeVim mode: the cursor has become more consistent and presentable
-* FakeVim mode: the native file open dialogue can now be used
-* FakeVim mode: support relative line numbers (rnu)
-* Bug fix: in FakeVim mode the CPU consumption is 100% due to an infinite loop in the Paint event
-* Botan has been updated to version 2.19.2
-* Localization has been updated
+* Ajout d’une nouvelle option d’affichage des numéros de ligne dans l’éditeur
+* Correctif de bogue : les caractères invalides saisis par l’utilisateur ne sont pas vérifiés et un mauvais fichier clé est créé sous Windows
+* Correctif de bogue : dans la boîte de dialogue de chiffrement d’un fichier, effacer la phrase de passe cause parfois un comportement invalide
+* Mode FakeVim : le curseur est désormais plus cohérent et présentable
+* Mode FakeVim : la boîte de dialogue native d’ouverture d’un fichier peut désormais être utilisée
+* Mode FakeVim : prise en charge des numéros relatifs de ligne (nur)
+* Correctif de bogue : en mode FakeVim, l’utilisation de l’UCT reste à 100 % en raison d’une boucle infinie dans l’événement Paint
+* Botan a été mis à jour vers la version 2.19.2
+* Mise à jour des traductions
 
 ### Version 0.5.0.1
 
-* Mode FauxVim pour permettre de modifier les fichiers avec une interface qui ressemble à Vim
+* Mode FakeVim pour permettre de modifier les fichiers avec une interface qui ressemble à Vim
 * L’icône de cadenas a été remplacée par un cadenas sur une page, avec une image de meilleure qualité.
 * Botan a été mis à jour vers la version 2.18.1
 * Le système de compilation a été amélioré pour prendre plus de versions de systèmes d’exploitation en charge.
@@ -35,7 +35,7 @@
 
 ### Version 0.4.0.4
 
-* Un logiciel portable devrait pouvoir enregistrer tous ses fichiers en un seul endroit amovible, tel qu’une clé USB. EncryptPad crée son fichier de paramètres dans `$HOME/.encryptpad`. Après ce changement, EncryptPad vérifiera la présence d’un répertoire `encryptpad_repository` dans le chemin de l’application et l’utilisera pour les paramètres et les fichiers clés.
+* Un logiciel portable devrait pouvoir enregistrer tous ses fichiers en un seul endroit amovible, tel qu’une clé USB. EncryptPad crée son fichier de paramètres dans `$HOME/.encryptpad`. Après ce changement, EncryptPad vérifiera la présence d’un dossier `encryptpad_repository` dans le chemin de l’application et l’utilisera pour les paramètres et les fichiers clés.
 * Botan a été mis à jour vers la version 2.7.
 * Plog a été mis à jour vers la version 1.1.4.
 * Traduction en lituanien
@@ -54,7 +54,7 @@
 
 * Correctif de bogue : si un fichier EPD « phrase de passe seulement » déchiffré comprenait moins de 4 caractères, le contenu était ignoré et EncryptPad produisait un fichier vide. Cela se produisait, car EncryptPad s’attendait à trouver un marqueur IWAD de 4 caractères. Ces fichiers seront maintenant ouverts correctement.
 * Correctif de bogue : si un fichier texte en clair était ouvert puis enregistré chiffré, les paramètres de chiffrement n’étaient pas réinitialisés aux valeurs par défaut, mais utilisaient les paramètres du dernier fichier chiffré.
-* Correctif de bogue : le paramètre `file` de la commande `encryptpad` ne prenait pas en charge les caractères non ASCII. C’est pourquoi il était impossible d’ouvrir un fichier directement à partir de l’explorateur Windows par un double-clic si le fichier était dans un répertoire dont le nom comprenait des caractères non ASCII.
+* Correctif de bogue : le paramètre `file` de la commande `encryptpad` ne prenait pas en charge les caractères non ASCII. C’est pourquoi il était impossible d’ouvrir un fichier directement à partir de l’explorateur Windows par un double-clic si le fichier était dans un dossier dont le nom comprenait des caractères non ASCII.
 * Plus de propriétés dans les préférences afin de contrôler les paramètres de chiffrement par défaut : longueur de la séquence aléatoire du fichier clé, propriétés de chiffrement des fichiers clés, propriétés par défaut de chiffrement des fichiers (chiffre, S2K, itérations, compression), le nombre de clés de chiffrement à enregistrer ou à charger sans redemander la phrase de passe.
 * Correctif de bogue : si plusieurs EncryptPad étaient ouverts et que les préférences étaient mises à jour, lors de la fermeture le dernier EncryptPad écrasait les préférences modifiées dans les autres EncryptPad.
 * Dans la boîte de dialogue Chiffrement du fichier, un bouton radio a été ajouté afin de choisir entre EPD et GPG. L’utilisateur devait précédemment modifier l’extension manuellement pour obtenir une sortie au format GPG.
@@ -87,7 +87,7 @@
 
 * Correctif de bogue : dans la boîte de dialogue Chiffrement du fichier, lorsque la phrase de passe du fichier clé était erronée, un message n’en informait pas l’utilisateur.
 * Prise en charge de fichiers bak. Lors d’une modification, un fichier .bak n’est crée que lors du premier enregistrement.
-* L’ordre des sections a été changé dans les nouveaux fichiers wad. Il est maintenant répertoire, clé, contenu. Cela n’affecte pas les fichiers wad existants.
+* L’ordre des sections a été changé dans les nouveaux fichiers wad. Il est maintenant dossier, clé, contenu. Cela n’affecte pas les fichiers wad existants.
 * encryptcli peut lire les phrases de passe des descripteurs de fichier
 * encryptcli peut lire de stdin et écrire vers stdout
 * Les arguments d’encryptcli ont été revus et améliorés
