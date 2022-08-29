@@ -30,6 +30,7 @@ GetPassphraseOrKeyDialog::GetPassphraseOrKeyDialog(QWidget *parent, FileRequestS
     fileRequestService(fileRequestService_p)
 {
     ui->setupUi(this);
+    ui->uiPassphrase->setFocus();
 }
 
 GetPassphraseOrKeyDialog::~GetPassphraseOrKeyDialog()
