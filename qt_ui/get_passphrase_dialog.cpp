@@ -26,6 +26,7 @@ GetPassphraseDialog::GetPassphraseDialog(QWidget *parent) :
     ui(new Ui::GetPassphraseDialog)
 {
     ui->setupUi(this);
+    ui->uiPassphrase->setFocus();
 }
 
 GetPassphraseDialog::~GetPassphraseDialog()
