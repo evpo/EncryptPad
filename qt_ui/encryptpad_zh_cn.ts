@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="zh">
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="zh">
 <context>
     <name>ConfirmPassphraseDialog</name>
     <message>
@@ -88,11 +86,11 @@
     </message>
     <message>
         <source>OpenPGP Armor</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>ASC</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Key path</source>
@@ -209,7 +207,7 @@ Do you want to replace it?</source>
     <name>FileExtensions</name>
     <message>
         <source>ASCII-armored GnuPG (*.asc)</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Plain Text (*.txt)</source>
@@ -217,7 +215,7 @@ Do you want to replace it?</source>
     </message>
     <message>
         <source>Encrypted Files (*.epd *.gpg *.asc);; Plain Text (*.txt)</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Key (*.key)</source>
@@ -463,7 +461,7 @@ Do you want to replace it?</source>
     </message>
     <message>
         <source>Neither a key file nor passphrase is set.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
 </context>
 <context>
@@ -563,7 +561,7 @@ Do you want to replace it?</source>
     </message>
     <message>
         <source>&lt;b&gt;%1&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;OpenPGP implementation.&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;Simplified BSD License&lt;br/&gt;&lt;br/&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Do you want to apply the modified default file properties to this file?</source>
@@ -959,27 +957,27 @@ Do you want to replace it?</source>
     </message>
     <message>
         <source>options:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>&lt;b&gt;--lang&lt;/b&gt; - to enforce the language for the GUI</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>&lt;b&gt;--log-file&lt;/b&gt; - specify the log file for diagnostics</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>&lt;b&gt;--log-severity&lt;/b&gt; - log severity can be one of the following list: none, fatal, error, warning, info, debug, verbose</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Command Line Interface</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>encryptpad[.exe] [options] [file]</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
 </context>
 <context>
@@ -1018,7 +1016,7 @@ Do you want to replace it?</source>
     </message>
     <message>
         <source>Invalid characters in the key name</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
 </context>
 <context>
@@ -1181,7 +1179,7 @@ Do you want to replace it?</source>
     </message>
     <message>
         <source>Enable FakeVim (restart required)</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>32</source>
@@ -1201,7 +1199,7 @@ Do you want to replace it?</source>
     </message>
     <message>
         <source>Display line numbers</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>&quot;Windows&quot; end of line: CR+LF</source>
@@ -1244,7 +1242,7 @@ Do you want to replace it?</source>
     <name>Proxy</name>
     <message>
         <source>Information</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
 </context>
 <context>

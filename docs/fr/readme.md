@@ -292,63 +292,17 @@ Installer les paquets AUR ci-dessous :
 
 ### Ubuntu ou Linux Mint par PPA
 
-Alin Andrei de [**webupd8.org**](http://webupd8.org) à gentiment créé des paquets EncryptPad pour
-plusieurs versions de Linux. Voir les instructions d’installation ci-dessous :
+Il existe plusieurs PPA sur Launchpad compilés sur les serveurs de Canonical à partir des fichiers source d’EncryptPad. Utilisez les commandes ci-dessous pour installer les paquets :
 
-#### Installation
+    sudo add-apt-repository ppa:evpo/main
+    sudo apt update
+    sudo apt install encryptpad encryptcli
 
-Utiliser les commandes ci-dessous pour installer les paquets :
+Pour les versions d’Ubuntu antérieures à Impish, utilisez le PPA d’Alin Andrei ci-dessous :
 
     sudo add-apt-repository ppa:nilarimogard/webupd8
     sudo apt update
     sudo apt install encryptpad encryptcli
-
-#### Procédure de vérification de l’intégrité
-
-Ci-dessous se trouvent les étapes pour vérifier les hachages SHA-1 des fichiers sources dans [Launchpad webupd8 PPA](https://launchpad.net/~nilarimogard/+archive/ubuntu/webupd8/+packages), utilisés pour construire les paquets. Vous devez idéalement être familier avec les PPA.
-
-1\. Télécharger un des fichiers `changes` ci-dessous selon votre version d’Ubuntu. La version du paquet était 0.3.2.5 au moment d’écrire ceci. Veuillez la remplacer avec la version la plus récente que vous installez.
-
-- Yakkety
-
-        wget https://launchpadlibrarian.net/282249531/encryptpad_0.3.2.5-1~webupd8~yakkety1_source.changes
-
-- Xenial
-
-        wget https://launchpadlibrarian.net/282249418/encryptpad_0.3.2.5-1~webupd8~xenial1_source.changes
-
-- Vivid
-
-        wget https://launchpadlibrarian.net/282249098/encryptpad_0.3.2.5-1~webupd8~vivid1_source.changes
-
-- Trusty
-
-        wget https://launchpadlibrarian.net/282247738/encryptpad_0.3.2.5-1~webupd8~trusty1_source.changes
-
-2\. Télécharger le fichier tarball avec le fichier « changes » et sa signature :
-
-    wget https://github.com/evpo/EncryptPad/releases/download/v0.3.2.5\
-    /encryptpad0_3_2_5_webupd8_ppa_changes.tar.gz
-
-    wget https://github.com/evpo/EncryptPad/releases/download/v0.3.2.5\
-    /encryptpad0_3_2_5_webupd8_ppa_changes.tar.gz.asc
-
-3\. Obtenir et vérifier la clé de version `EncryptPad Release` :
-
-    gpg --recv-key 634BFC0CCC426C74389D89310F1CFF71A2813E85
-
-4\. Vérifier la signature du fichier tarball :
-
-    gpg --verify encryptpad0_3_2_5_webupd8_ppa_changes.tar.gz.asc
-
-5\. Extraire le contenu :
-
-    tar -xf encryptpad0_3_2_5_webupd8_ppa_changes.tar.gz
-
-6\. Comparer le fichier « changes » pour votre version d’Ubuntu avec le fichier de l’étape 1. Les hachages SHA devraient correspondre.
-
-    diff encryptpad_0.3.2.5-1~webupd8~yakkety1_source.changes \
-    encryptpad0_3_2_5_webupd8_ppa_changes/encryptpad_0.3.2.5-1~webupd8~yakkety1_source.changes
 
 <div id="compile-on-windows"></div>
 
@@ -541,7 +495,7 @@ Les commandes ci-dessus peuvent aussi être combinées :
     :wq
     :wq <file>
 
-Vim et le registre s’intègrent au presse-papiers du système. Vous pouvez aussi ajouter la ligne ci-dessous au fichier vimrc pour intégrer le registre sans nom au presse-papiers du système.
+Le registre + de Vim s’intègre au presse-papiers du système. Vous pouvez aussi ajouter la ligne ci-dessous au fichier vimrc pour intégrer le registre sans nom au presse-papiers du système.
 
     set clipboard=unnamedplus
 

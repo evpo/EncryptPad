@@ -8,10 +8,11 @@ source_lang = en
 type        = TXT
 
 [o:open-source-4:p:encryptpad:r:encryptpad_en_gbts]
-file_filter = qt_ui/encryptpad_<lang>_<lang>.ts
+file_filter = qt_ui/encryptpad_<lang>.ts
 source_file = qt_ui/encryptpad_en_gb.ts
 source_lang = en
 type        = QT
+lang_map = en: en_gb, fr: fr_fr, lt: lt_lt, ru: ru_ru, zh: zh_cn
 
 [o:open-source-4:p:encryptpad:r:readme_md]
 file_filter = docs/<lang>/readme.md

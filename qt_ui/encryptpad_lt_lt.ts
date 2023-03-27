@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="lt">
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="lt">
 <context>
     <name>ConfirmPassphraseDialog</name>
     <message>
@@ -85,6 +83,14 @@
     <message>
         <source>GPG</source>
         <translation>GPG</translation>
+    </message>
+    <message>
+        <source>OpenPGP Armor</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <source>ASC</source>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Key path</source>
@@ -196,20 +202,12 @@ Ar norite jį pakeisti?</translation>
         <source>File has been decrypted successfully.</source>
         <translation>Failas sėkmingai iššifruotas.</translation>
     </message>
-    <message>
-        <source>OpenPGP Armor</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>ASC</source>
-        <translation type="unfinished"></translation>
-    </message>
 </context>
 <context>
     <name>FileExtensions</name>
     <message>
         <source>ASCII-armored GnuPG (*.asc)</source>
-        <translation type="unfinished"></translation>
+        <translation>ASCII-šarvuotasis GnuPG (*.asc)</translation>
     </message>
     <message>
         <source>Plain Text (*.txt)</source>
@@ -463,7 +461,7 @@ Ar norite jį pakeisti?</translation>
     </message>
     <message>
         <source>Neither a key file nor passphrase is set.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
 </context>
 <context>
@@ -560,6 +558,10 @@ Ar norite jį pakeisti?</translation>
         <source>&lt;b&gt;EncryptPad %1 Beta&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;A minimalist secure text editor and file encryptor that implements RFC 4880 Open PGP format: symmetrically encrypted, compressed and integrity protected. The editor can protect files with passphrases, key files or both.&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;GNU General Public License v2&lt;br/&gt;&lt;br/&gt;</source>
         <oldsource>&lt;b&gt;EncryptPad %1 Beta&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;Minimalist secure text editor and binary encryptor that implements RFC 4880 Open PGP format: symmetrically encrypted, compressed and integrity protected. The editor can protect files with passphrases, key files or both.&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;GNU General Public License v2&lt;br/&gt;&lt;br/&gt;</oldsource>
         <translation>&lt;b&gt;EncryptPad %1 Beta&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;Minimalistinis saugus tekstų redaktorius ir failų šifravimo įrankis, įgyvendinantis RFC 4880 Open PGP formatą: simetriškai šifruotą, glaudintą ir apsaugotą vientisumu. Redaktorius gali apsaugoti failus slaptafrazėmis, rakto failais arba abiem.&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;GNU Bendroji viešoji licencija v2&lt;br/&gt;&lt;br/&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;%1&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;OpenPGP implementation.&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;Simplified BSD License&lt;br/&gt;&lt;br/&gt;</source>
+        <translation>&lt;b&gt;%1&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;OpenPGP įgyvendinimas.&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;Supaprastinta BSD licencija&lt;br/&gt;&lt;br/&gt;</translation>
     </message>
     <message>
         <source>Do you want to apply the modified default file properties to this file?</source>
@@ -954,32 +956,28 @@ Ar norite jį pakeisti?</translation>
         <translation>pastovus</translation>
     </message>
     <message>
-        <source>&lt;b&gt;%1&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;OpenPGP implementation.&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;Simplified BSD License&lt;br/&gt;&lt;br/&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>options:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>&lt;b&gt;--lang&lt;/b&gt; - to enforce the language for the GUI</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>&lt;b&gt;--log-file&lt;/b&gt; - specify the log file for diagnostics</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>&lt;b&gt;--log-severity&lt;/b&gt; - log severity can be one of the following list: none, fatal, error, warning, info, debug, verbose</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Command Line Interface</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>encryptpad[.exe] [options] [file]</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
 </context>
 <context>
@@ -1018,7 +1016,7 @@ Ar norite jį pakeisti?</translation>
     </message>
     <message>
         <source>Invalid characters in the key name</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
 </context>
 <context>
@@ -1180,6 +1178,10 @@ Ar norite jį pakeisti?</translation>
         <translation>Rakto failo atsitiktinės sekos ilgis (baitais):</translation>
     </message>
     <message>
+        <source>Enable FakeVim (restart required)</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
         <source>32</source>
         <translation>32</translation>
     </message>
@@ -1194,6 +1196,10 @@ Ar norite jį pakeisti?</translation>
     <message>
         <source>256</source>
         <translation>256</translation>
+    </message>
+    <message>
+        <source>Display line numbers</source>
+        <translation>Rodyti eilučių numerius</translation>
     </message>
     <message>
         <source>&quot;Windows&quot; end of line: CR+LF</source>
@@ -1231,20 +1237,12 @@ Ar norite jį pakeisti?</translation>
         <source>Path to Libcurl</source>
         <translation>Kelias į Libcurl</translation>
     </message>
-    <message>
-        <source>Enable FakeVim (restart required)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Display line numbers</source>
-        <translation type="unfinished"></translation>
-    </message>
 </context>
 <context>
     <name>Proxy</name>
     <message>
         <source>Information</source>
-        <translation type="unfinished"></translation>
+        <translation>Informacija</translation>
     </message>
 </context>
 <context>
