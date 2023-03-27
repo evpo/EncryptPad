@@ -74,15 +74,15 @@
     </message>
     <message>
         <source>EPD</source>
-        <translation>EPD</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>OpenPGP</source>
-        <translation>OpenPGP</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>GPG</source>
-        <translation>GPG</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>OpenPGP Armor</source>
@@ -138,11 +138,11 @@
     </message>
     <message>
         <source>SwitchDirection</source>
-        <translation>SwitchDirection</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>IOChange</source>
-        <translation>IOChange</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Input File</source>
@@ -154,7 +154,7 @@
     </message>
     <message>
         <source>EncryptPad</source>
-        <translation>EncryptPad</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Confirmation passphrase does not match.</source>
@@ -298,11 +298,11 @@ Desea reemplazarlo?</translation>
     </message>
     <message>
         <source>FFFFFFFFFFFFFFFF</source>
-        <translation>FFFFFFFFFFFFFFFF</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>PropertyChanged</source>
-        <translation>PropertyChanged</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>AES-256 (recommended)</source>
@@ -913,7 +913,7 @@ Desea reemplazarlo?</translation>
     </message>
     <message>
         <source>Cannot save file</source>
-        <translation>>No se puede guardar el archivo</translation>
+        <translation>&gt;No se puede guardar el archivo</translation>
     </message>
     <message>
         <source>File saved</source>
@@ -1043,7 +1043,7 @@ Desea reemplazarlo?</translation>
     </message>
     <message>
         <source>` ~ ! @ # $ % ^ &amp; * ( ) _ - + = { } [ ]  | : ; &quot; &apos; &lt; &gt; , . ? /</source>
-        <translation>` ~ ! @ # $ % ^ &amp; * ( ) _ - + = { } [ ]  | : ; &quot; &apos; &lt; &gt; , . ? /</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>8</source>
@@ -1138,7 +1138,7 @@ Desea reemplazarlo?</translation>
     </message>
     <message>
         <source>[example: Monospace (Size: 12)]</source>
-        <translation>[example: Monospace (Size: 12)]</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Save last used directory</source>
@@ -1183,19 +1183,19 @@ Desea reemplazarlo?</translation>
     </message>
     <message>
         <source>32</source>
-        <translation>32</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>64</source>
-        <translation>64</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>128</source>
-        <translation>128</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>256</source>
-        <translation>256</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Display line numbers</source>
