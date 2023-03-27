@@ -292,7 +292,7 @@ Install the AUR packages below:
 
 ### Ubuntu or Linux Mint via PPA
 
-There are several PPAs on Launchpad built on Canonical servers from encryptpad source files. Use the commands below to install the packages:
+There are several PPAs on Launchpad built on Canonical servers from EncryptPad source files. Use the commands below to install the packages:
 
     sudo add-apt-repository ppa:evpo/main
     sudo apt update
