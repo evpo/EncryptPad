@@ -6,6 +6,7 @@
 //**********************************************************************************
 #include "packet_writer.h"
 #include <memory>
+#include <stdexcept>
 #include "assert.h"
 #include "botan/compression.h"
 #include "botan/hash.h"
