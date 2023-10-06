@@ -7,6 +7,7 @@
 #pragma once
 #include <cstddef>
 #include <limits>
+#include <cstdint>
 #include "algo_spec.h"
 
 namespace EncryptMsg
