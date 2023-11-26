@@ -1028,7 +1028,7 @@ public:
         }
 
         // Set text only if input is ascii key without control modifier.
-        if (m_text.isEmpty() && k >= 0 && k <= 0x7f && (m & ControlModifier) == 0) {
+        if (m_text.isEmpty() && k > 0 && k <= 0x7f && (m & ControlModifier) == 0) {
             QChar c = QChar(k);
             if (c.isLetter())
                 m_text = isShift() ? c.toUpper() : c;
