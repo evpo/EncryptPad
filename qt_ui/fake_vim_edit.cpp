@@ -71,7 +71,6 @@ public:
 protected:
     void paintEvent(QPaintEvent *e) override
     {
-        LOG_INFO << "x=" << e->rect().x() << " y=" << e->rect().y() << " width=" << e->rect().width() << " height=" << e->rect().height();
         PlainTextEdit::paintEvent(e);
         if(m_skipNextPaint)
         {

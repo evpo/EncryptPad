@@ -34,6 +34,7 @@ namespace EncryptPad
     OpenFileResult OpenFile(const std::string &file_name, InPacketStreamFile &stm);
     OpenFileResult OpenFile(const std::string &file_name, OutPacketStreamFile &stm);
     bool RemoveFile(const std::string &file_name);
+    std::string GetLastError();
 
     // The vector is not secure. Only use this method for reading encrypted data
     // or in CLI. We don't know the size of the buffer and SecureVector resize is time consuming.

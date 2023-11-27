@@ -28,6 +28,7 @@
 #include "userenv.h"
 #include "io.h"
 #include "fcntl.h"
+#include "string.h" //for _wcserror
 
 namespace
 {
@@ -120,14 +121,24 @@ namespace EncryptPad
         return _wremove(wide.data()) == 0;
     }
 
+    std::string GetLastErrorWin()
+    {
+        if(!errno || errno == EINVAL)
+            return "";
+        std::wstring wide(_wcserror(errno));
+        std::string multi;
+        Wide2Multi(wide, multi);
+        return multi;
+    }
+
     stream_length_type WinFTell(FileHndl &file)
     {
-		return _ftelli64(file.get());
+        return _ftelli64(file.get());
     }
 
     int WinFSeek(FileHndl &file, stream_length_type offset, int origin)
     {
-		return _fseeki64(file.get(), offset, origin);
+        return _fseeki64(file.get(), offset, origin);
     }
 }
 #endif

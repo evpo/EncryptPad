@@ -25,6 +25,7 @@
 #include "win_file_reader.h"
 #include "epad_utilities.h"
 #include "file_system.hpp"
+#include "plog/Log.h"
 
 using namespace EncryptPad;
 
@@ -78,6 +79,8 @@ namespace EncryptPad
 {
     OpenFileResult OpenFile(const std::string &file_name, InPacketStreamFile &stm)
     {
+        LOG_INFO << "Opening file " << file_name;
+        errno = 0;
 #if defined(__MINGW__) || defined(__MINGW32__)
         FileHndl file = OpenInputWin(file_name);
 #else
@@ -85,7 +88,10 @@ namespace EncryptPad
 #endif
 
         if(!file)
+        {
+            LOG_WARNING << "Error: " <<  GetLastError();
             return OpenFileResult::Error;
+        }
 
         if(file_name == "-")
         {
@@ -93,17 +99,24 @@ namespace EncryptPad
             return OpenFileResult::OK;
         }
 
+        errno = 0;
         if(PlatformFSeek(file, 0, SEEK_END))
         {
             if(errno == ESPIPE || errno == EBADF || errno == EINVAL)
+            {
+                LOG_WARNING << "Seek failed as NotSeekable. Error: " <<  GetLastError();
                 return OpenFileResult::NotSeekable;
+            }
 
+            LOG_WARNING << "Seek failed. Error: " <<  GetLastError();
             return OpenFileResult::Error;
         }
 
+        errno = 0;
         stream_length_type length = PlatformFTell(file);
         if(PlatformFSeek(file, 0, SEEK_SET))
         {
+            LOG_WARNING << "Seek failed. Error: " <<  GetLastError();
             return OpenFileResult::Error;
         }
 
@@ -113,13 +126,18 @@ namespace EncryptPad
 
     OpenFileResult OpenFile(const std::string &file_name, OutPacketStreamFile &stm)
     {
+        LOG_INFO << "Opening file " << file_name;
+        errno = 0;
 #if defined(__MINGW__) || defined(__MINGW32__)
         FileHndl file = OpenOutputWin(file_name);
 #else
         FileHndl file = OpenOutputLinux(file_name);
 #endif
         if(!file)
+        {
+            LOG_WARNING << "Error: " <<  GetLastError();
             return OpenFileResult::Error;
+        }
 
         stm.Set(file);
         return OpenFileResult::OK;
@@ -127,6 +145,7 @@ namespace EncryptPad
 
     bool RemoveFile(const std::string &file_name)
     {
+        LOG_INFO << "Removing file " << file_name;
 #if defined(__MINGW__) || defined(__MINGW32__)
         return RemoveFileWin(file_name);
 #else
@@ -134,11 +153,27 @@ namespace EncryptPad
 #endif
     }
 
+    std::string GetLastError()
+    {
+        if(errno && errno != EINVAL)
+        {
+#if defined(__MINGW__) || defined(__MINGW32__)
+            return GetLastErrorWin();
+#else
+            return std::string(strerror(errno));
+#endif
+        }
+        return "";
+    }
+
     bool SaveToIOStream(int file_descriptor, const Botan::SecureVector<byte> &buffer)
     {
         FileHndl file = fdopen(file_descriptor, "wb");
         if(!file.Valid())
+        {
+            LOG_WARNING << "Failed to open descriptor " << file_descriptor << " Error: " <<  GetLastError();
             return false;
+        }
 
         size_t count = fwrite(buffer.data(), 1, buffer.size(), file.get());
         return !ferror(file.get()) && count == buffer.size();
@@ -149,7 +184,10 @@ namespace EncryptPad
         const size_t kReadLength = 3;
         FileHndl file = fdopen(file_descriptor, "rb");
         if(!file.Valid())
+        {
+            LOG_WARNING << "Failed to open descriptor " << file_descriptor << " Error: " <<  GetLastError();
             return false;
+        }
 
         while(!feof(file.get()) && !ferror(file.get()))
         {
