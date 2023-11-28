@@ -64,6 +64,7 @@ namespace
     // returns true if ok and false if we need to cancel the whole operation
     bool TakeBakFile(const QString &fileName)
     {
+        LOG_INFO << "taking bak file for " << fileName;
         QFileInfo fileInfo(fileName);
         QFile file(fileName);
 
@@ -78,14 +79,26 @@ namespace
             return true;
         }
 
-        if(QFile::exists(bakFileName))
         {
-            if(!QFile::remove(bakFileName))
-                return false;
+            QFile bakFile(bakFileName);
+            if(bakFile.exists())
+            {
+                LOG_INFO << "bak file exists";
+                bakFile.unsetError();
+                if(!bakFile.remove())
+                {
+                    LOG_WARNING << "cannot remove. Error: " << bakFile.errorString().toStdString();
+                    return false;
+                }
+            }
         }
 
+        file.unsetError();
         if(!file.rename(bakFileName))
+        {
+            LOG_WARNING << "renaming failed. Error: " << file.errorString().toStdString();
             return false;
+        }
 
         return true;
     }
