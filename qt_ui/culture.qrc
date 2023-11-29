@@ -4,13 +4,16 @@
         <file>encryptpad_ru_ru.qm</file>
         <file>encryptpad_zh_cn.qm</file>
         <file>encryptpad_lt_lt.qm</file>
+        <file>encryptpad_es_mx.qm</file>
         <file>fakevim_fr_fr.qm</file>
         <file>fakevim_ru_ru.qm</file>
         <file>fakevim_zh_cn.qm</file>
         <file>fakevim_lt_lt.qm</file>
+        <file>fakevim_es_mx.qm</file>
         <file>qt_excerpt_fr_fr.qm</file>
         <file>qt_excerpt_ru_ru.qm</file>
         <file>qt_excerpt_zh_cn.qm</file>
         <file>qt_excerpt_lt_lt.qm</file>
+        <file>qt_excerpt_es_mx.qm</file>
     </qresource>
 </RCC>

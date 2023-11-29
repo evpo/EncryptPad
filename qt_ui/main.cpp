@@ -171,6 +171,7 @@ int main(int argc, char *argv[])
     }
     else
     {
+        LOG_INFO << "language: " << arguments.language.toStdString();
         userLangs.append(arguments.language);
     }
     QString resourcePath;
@@ -181,13 +182,18 @@ int main(int argc, char *argv[])
         if(userLang == "en" || userLang.startsWith("en-"))
             break;
         resourcePath = findLangResource("encryptpad_", userLang);
+        LOG_INFO << "resourcePath is [" << resourcePath.toStdString() << "]";
         if(resourcePath.isEmpty())
+        {
             continue;
+        }
 
         fakeVimResourcePath = findLangResource("fakevim_", userLang);
+        LOG_INFO << "fakeVimResourcePath is [" << fakeVimResourcePath.toStdString() << "]";
         assert(!fakeVimResourcePath.isEmpty());
 
         qtExcerptPath = findLangResource("qt_excerpt_", userLang);
+        LOG_INFO << "qtExcerptPath is [" << qtExcerptPath.toStdString() << "]";
         assert(!qtExcerptPath.isEmpty());
         break;
     }
