@@ -1297,6 +1297,11 @@ def create_template_vars(source_paths, build_paths, options, modules, cc, arch, 
         logging.info('Defaulting to assuming %s endian', arch_info.endian)
         return arch_info.endian
 
+    def absolute_install_dir(p):
+        if os.path.isabs(p):
+            return p
+        return os.path.join(options.prefix or osinfo.install_root, p)
+
     build_dir = options.with_build_dir or os.path.curdir
     program_suffix = options.program_suffix or osinfo.program_suffix
 
@@ -1309,7 +1314,8 @@ def create_template_vars(source_paths, build_paths, options, modules, cc, arch, 
     variables = {
         'base_dir': source_paths.base_dir,
         'src_dir': source_paths.src_dir,
-        'prefix': osinfo.lib_prefix,
+        'prefix': options.prefix or osinfo.install_root,
+        'bindir': absolute_install_dir(options.bindir or osinfo.bin_dir),
         'libname': 'back_end',
         'command_line': configure_command_line(),
         'local_config': read_textfile(options.local_config),
@@ -1883,6 +1889,10 @@ def process_command_line(args):
                            help='setup the build in DIR')
     build_group.add_option('--program-suffix', metavar='SUFFIX',
                              help='append string to program names')
+    build_group.add_option('--prefix', metavar='DIR',
+                             help='set the install prefix')
+    build_group.add_option('--bindir', metavar='DIR',
+                             help='set the binary install dir')
     build_group.add_option('--with-local-config',
                            dest='local_config', metavar='FILE',
                            help='include the contents of FILE into build.h')

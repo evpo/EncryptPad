@@ -25,7 +25,8 @@ BUILD_FLAGS    = $(ABI_FLAGS) $(LANG_FLAGS) $(CXXFLAGS) $(WARN_FLAGS)
 TEST_BUILD_FLAGS = $(ABI_FLAGS) $(LANG_FLAGS) $(CXXFLAGS)
 DEPS_BUILD_FLAGS = $(ABI_FLAGS) $(LANG_FLAGS) $(CXXFLAGS)
 
-INSTALLED_LIB_DIR = %{prefix}/libdir
+PREFIX = %{prefix}
+BINDIR = %{bindir}
 SCRIPTS_DIR = scripts
 
 INCLUDE_PATHS = %{include_paths}
@@ -224,7 +225,7 @@ macos_deployment: qt_ui
 # Install in Desktop Environment
 
 install: cli qt_ui
-	scripts/install.sh
+	scripts/install.sh $(PREFIX) $(BINDIR)
 
 # Object Files
 LIBOBJS = %{join lib_objs}
