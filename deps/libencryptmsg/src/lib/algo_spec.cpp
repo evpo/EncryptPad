@@ -130,7 +130,7 @@ namespace EncryptMsg
                 static HashSpec sha160 =
                 {
                     HashAlgo::SHA160,
-                    "OpenPGP-S2K(SHA-160)"
+                    "OpenPGP-S2K(SHA-1)"
                 };
                 return sha160;
             case HashAlgo::SHA256:

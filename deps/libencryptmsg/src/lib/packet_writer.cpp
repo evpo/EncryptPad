@@ -316,11 +316,11 @@ namespace EncryptMsg
 
     SymmetricIntegProtectedWriter::SymmetricIntegProtectedWriter(const MessageConfig &config, Salt salt, const EncryptionKey &encryption_key)
         :PacketWriter(config, salt, encryption_key),
-        hash_(Botan::HashFunction::create_or_throw("SHA-160")),
+        hash_(Botan::HashFunction::create_or_throw("SHA-1")),
         write_version_(true)
     {
         auto &algo_spec = GetAlgoSpec(config_.GetCipherAlgo());
-        cipher_mode_ = Botan::Cipher_Mode::create_or_throw(algo_spec.botan_name, Botan::ENCRYPTION);
+        cipher_mode_.reset(Botan::get_cipher_mode(algo_spec.botan_name, Botan::Cipher_Dir::Encryption));
         cipher_mode_->set_key(encryption_key_.begin(), encryption_key_.size());
         SafeVector iv(algo_spec.block_size, 0);
         cipher_mode_->start(iv.data(), iv.size());

@@ -204,7 +204,7 @@ namespace EncryptMsg
         }
 
         auto algo_spec = GetAlgoSpec(state_.message_config.GetCipherAlgo());
-        cipher_mode_ = Botan::Cipher_Mode::create_or_throw(algo_spec.botan_name, Botan::DECRYPTION);
+        cipher_mode_.reset(Botan::get_cipher_mode(algo_spec.botan_name, Botan::Cipher_Dir::Decryption));
         auto &key = state_.encryption_key;
         vector<uint8_t> iv(algo_spec.block_size, 0);
         cipher_mode_->set_key(key->begin(), key->size());
@@ -216,7 +216,7 @@ namespace EncryptMsg
 
     SymmetricIntegProtectedRW::SymmetricIntegProtectedRW(SessionState &state)
         : SymmetricRWBase(state),
-        hash_(Botan::HashFunction::create_or_throw("SHA-160")),
+        hash_(Botan::HashFunction::create_or_throw("SHA-1")),
         version_read_(false)
     {}
 
