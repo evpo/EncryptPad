@@ -1679,7 +1679,7 @@ def configure_botan(options):
         extra_flags += '-I ' + get_bzip2_dir()
     if is_windows(options):
         extra_flags += ' ' if extra_flags else ''
-        extra_flags += '-msse4.1'
+#        extra_flags += '-msse4.1'
 
     if extra_flags:
         cmd.extend(['--extra-cxxflags', extra_flags])
