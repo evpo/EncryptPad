@@ -14,7 +14,7 @@ fi
 
 export GPG
 
-if gpg2 --allow-old-cipher-algos --version > /dev/null ; then
+if $GPG --allow-old-cipher-algos --version > /dev/null ; then
     ALLOW_OLD_CIPHER="--allow-old-cipher-algos"
 else
     ALLOW_OLD_CIPHER=""
