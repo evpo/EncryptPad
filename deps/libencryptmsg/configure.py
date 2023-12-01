@@ -1766,14 +1766,14 @@ def set_botan_variables(options, template_vars, cc):
     if options.botan_include_dir:
         botan_cxxflags = '{0} {1}'.format(cc.add_include_dir_option, options.botan_include_dir)
     else:
-        botan_cxxflags = external_command(['pkg-config', '--cflags', 'botan-2'])
+        botan_cxxflags = external_command(['pkg-config', '--cflags', 'botan-3'])
 
     if options.build_cli or options.test:
         if options.botan_lib_dir:
-            botan_lib_name = 'botan-2'
+            botan_lib_name = 'botan-3'
             botan_ldflags = '{0} {1} {2} {3}'.format(cc.add_lib_dir_option, options.botan_lib_dir, cc.add_lib_option, botan_lib_name)
         else:
-            botan_ldflags = external_command(['pkg-config', '--libs', 'botan-2'])
+            botan_ldflags = external_command(['pkg-config', '--libs', 'botan-3'])
     else:
         botan_ldflags = ''
 
