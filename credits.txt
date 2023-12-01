@@ -22,3 +22,6 @@ Application icon
 
 Cristiano Nunes (cfgnunes)
 Bug fix: opening search dialogue by using 'CTRL-F' doesn't focus on the find text field
+
+KoiZeroWafflz
+Spanish translation

@@ -1,114 +1,171 @@
-<h2>Release Notes</h2>
-
-<h3>Version 0.5.0.2</h3>
-
+<h2 id="release-notes">Release Notes</h2>
+<h3 id="version-0.5.0.3">Version 0.5.0.3</h3>
+<ul>
+<li>Fix passphrase focus on the text field in get passphrase/key
+dialogue</li>
+<li>Add Spanish translation</li>
+<li>Bug fix: in FakeVim Alt+Shift normally used to switch languages
+inserts a 0x00 character.</li>
+<li>Update Botan to 2.19.3</li>
+<li>Add more logging for working with files. Provide error messages in
+the logs when file operations fail.</li>
+<li>Parameterise the installation path and make /usr/local the default
+install location</li>
+<li>Disable the dependency on SSE4.1 and SSE4.2 to support older
+hardware</li>
+</ul>
+<h3 id="version-0.5.0.2">Version 0.5.0.2</h3>
 <ul>
 <li>An option has been added to display line numbers in the editor</li>
-<li>Bug fix: invalid characters entered by the user are not checked and a bad key file is created on Windows</li>
-<li>Bug fix: in the file encryption dialogue clearing the passphrase sometimes causes invalid behaviour</li>
-<li>FakeVim mode: the cursor has become more consistent and presentable</li>
+<li>Bug fix: invalid characters entered by the user are not checked and
+a bad key file is created on Windows</li>
+<li>Bug fix: in the file encryption dialogue clearing the passphrase
+sometimes causes invalid behaviour</li>
+<li>FakeVim mode: the cursor has become more consistent and
+presentable</li>
 <li>FakeVim mode: the native file open dialogue can now be used</li>
 <li>FakeVim mode: support relative line numbers (rnu)</li>
-<li>Bug fix: in FakeVim mode the CPU consumption is 100% due to an infinite loop in the Paint event</li>
+<li>Bug fix: in FakeVim mode the CPU consumption is 100% due to an
+infinite loop in the Paint event</li>
 <li>Botan has been updated to version 2.19.2</li>
 <li>Localization has been updated</li>
 </ul>
-
-
-<h3>Version 0.5.0.1</h3>
-
+<h3 id="version-0.5.0.1">Version 0.5.0.1</h3>
 <ul>
 <li>FakeVim mode to enable editing files with Vim-like interface</li>
-<li>The lock icon has been replaced with a page and lock with the higher quality of the image.</li>
+<li>The lock icon has been replaced with a page and lock with the higher
+quality of the image.</li>
 <li>Botan has been updated to version 2.18.1</li>
-<li>The build system has been improved to support more distributions</li>
-<li>Bug fix: Opening search dialog by using &lsquo;CTRL-F&rsquo; doesn&rsquo;t focus on the find text field</li>
+<li>The build system has been improved to support more
+distributions</li>
+<li>Bug fix: Opening search dialog by using ‘CTRL-F’ doesn’t focus on
+the find text field</li>
 </ul>
-
-
-<h3>Version 0.5.0.0</h3>
-
+<h3 id="version-0.5.0.0">Version 0.5.0.0</h3>
 <ul>
 <li>ASCII armor</li>
-<li>Added cipher algorithms: CAMELLIA128, CAMELLIA192, CAMELLIA256, TWOFISH</li>
+<li>Added cipher algorithms: CAMELLIA128, CAMELLIA192, CAMELLIA256,
+TWOFISH</li>
 <li>Added S2K hash digest algorithms: SHA384, SHA512, SHA224</li>
 <li>Added compression algorithm: BZIP2</li>
 <li>Botan has been updated to version 2.13</li>
 <li>Translation fixes for context menu</li>
 <li>New Python build system ported from Botan</li>
 <li>Bug fix: MDC failure was not reported when opening files</li>
-<li>Bug fix: the special case in which the last partial packet was smaller than 5 bytes was not handled correctly</li>
-<li>Bug fix: &ndash;key-file-length parameter was broken in CLI</li>
+<li>Bug fix: the special case in which the last partial packet was
+smaller than 5 bytes was not handled correctly</li>
+<li>Bug fix: –key-file-length parameter was broken in CLI</li>
 </ul>
-
-
-<h3>Version 0.4.0.4</h3>
-
+<h3 id="version-0.4.0.4">Version 0.4.0.4</h3>
 <ul>
-<li>Portable software should be able to store all its files in a single removable location such as a memory stick. EncryptPad creates its setting file in <code>$HOME/.encryptpad</code>. After this change EncryptPad will check if there is <code>encryptpad_repository</code> directory in the application path and use it for settings and key files.</li>
+<li>Portable software should be able to store all its files in a single
+removable location such as a memory stick. EncryptPad creates its
+setting file in <code>$HOME/.encryptpad</code>. After this change
+EncryptPad will check if there is <code>encryptpad_repository</code>
+directory in the application path and use it for settings and key
+files.</li>
 <li>Botan has been updated to version 2.7.</li>
 <li>Plog has been updated to version 1.1.4.</li>
 <li>Translation to Lithuanian</li>
 </ul>
-
-
-<h3>Version 0.4.0.0</h3>
-
+<h3 id="version-0.4.0.0">Version 0.4.0.0</h3>
 <ul>
-<li>Support for large files. EncryptPad can now process disk images, backups and other types of multi-gigabyte files.</li>
-<li>A progress bar and cancellation button in the file encryption dialogue.</li>
+<li>Support for large files. EncryptPad can now process disk images,
+backups and other types of multi-gigabyte files.</li>
+<li>A progress bar and cancellation button in the file encryption
+dialogue.</li>
 <li>Tab size adjustment in the text editor.</li>
 <li>Botan has been updated to version 2.3.</li>
 <li>STLplus was updated to version 3.15.</li>
-<li>OpenPGP functionality has moved to its own library libencryptmsg</li>
-<li>WAD format that is used for files encrypted with the persistent key file location and double protection has changed. Files of this type that are larger than 64 kilobytes are not backward compatible and cannot be opened with 0.3.2.5. This does not apply to gpg and epd files with single encryption and without persistent key file.</li>
+<li>OpenPGP functionality has moved to its own library
+libencryptmsg</li>
+<li>WAD format that is used for files encrypted with the persistent key
+file location and double protection has changed. Files of this type that
+are larger than 64 kilobytes are not backward compatible and cannot be
+opened with 0.3.2.5. This does not apply to gpg and epd files with
+single encryption and without persistent key file.</li>
 </ul>
-
-
-<h3>Version 0.3.2.5</h3>
-
+<h3 id="version-0.3.2.5">Version 0.3.2.5</h3>
 <ul>
-<li>Bug fixed: if a decrypted passphrase-only EPD file contained less than 4 characters, the content was ignored and EncryptPad produced an empty file. It happened because EncryptPad expected to find IWAD marker, which was 4 character long. Such files will now open correctly.</li>
-<li>Bug fixed: when opening a plain-text file and saving it as encrypted, the encryption parameters did not reset to the default values but used the parameters of the last encrypted file.</li>
-<li>Bug fixed: the <code>encryptpad</code> <code>file</code> command line parameter did not support non ASCII characters. As result it was not possible to open a file directly from Windows Explorer by double clicking on it if the file was in a directory which name contained non ASCII characters.</li>
-<li>More properties in the preferences to control default encryption parameters: key file random sequence length, key file encryption properties, default file encryption properties (cipher, s2k, iterations, compression), the number of encryption keys to save or load without prompting the passphrase again.</li>
-<li>Bug fixed: when multiple EncryptPad instances were opened and preferences updated, the last instance overwrote the preferences changed in other instances on closing.</li>
-<li>In File Encryption dialogue, a radio button was added to select between EPD and GPG. Previously the user had to edit the extension manually to output to the GPG format.</li>
-<li>Bug fixed: salt was displayed in File Encryption dialogue after encrypting or decrypting a file, which did not make sense as it was not related to the next encryption.</li>
-<li>There are only 256 possible S2K iterations sets. The file properties dialogue now has a combo box to list all of them. It is easier to select the maximum or minimum possible number of iterations.</li>
+<li>Bug fixed: if a decrypted passphrase-only EPD file contained less
+than 4 characters, the content was ignored and EncryptPad produced an
+empty file. It happened because EncryptPad expected to find IWAD marker,
+which was 4 character long. Such files will now open correctly.</li>
+<li>Bug fixed: when opening a plain-text file and saving it as
+encrypted, the encryption parameters did not reset to the default values
+but used the parameters of the last encrypted file.</li>
+<li>Bug fixed: the <code>encryptpad</code> <code>file</code> command
+line parameter did not support non ASCII characters. As result it was
+not possible to open a file directly from Windows Explorer by double
+clicking on it if the file was in a directory which name contained non
+ASCII characters.</li>
+<li>More properties in the preferences to control default encryption
+parameters: key file random sequence length, key file encryption
+properties, default file encryption properties (cipher, s2k, iterations,
+compression), the number of encryption keys to save or load without
+prompting the passphrase again.</li>
+<li>Bug fixed: when multiple EncryptPad instances were opened and
+preferences updated, the last instance overwrote the preferences changed
+in other instances on closing.</li>
+<li>In File Encryption dialogue, a radio button was added to select
+between EPD and GPG. Previously the user had to edit the extension
+manually to output to the GPG format.</li>
+<li>Bug fixed: salt was displayed in File Encryption dialogue after
+encrypting or decrypting a file, which did not make sense as it was not
+related to the next encryption.</li>
+<li>There are only 256 possible S2K iterations sets. The file properties
+dialogue now has a combo box to list all of them. It is easier to select
+the maximum or minimum possible number of iterations.</li>
 <li>The default number of iterations has been changed to 1015808.</li>
-<li>Prevented the unnecessary prompt for a key file passphrase if the key file is local and not encrypted.</li>
-<li>Bug fixed: after opening a file the mouse cursor changed to arrow shape when it was over the text edit area. It is now <code>I</code> shaped as it should.</li>
-<li>Use one EncryptPad binary for all languages. EncryptPad will recognize the OS preferred language for localization. It will simplify the release management especially for packagers.</li>
-<li><code>--lang</code> switch to force a specific language instead of taking the OS&rsquo;s locale. Example: <code>encryptpad --lang FR</code> to load the French localization strings. Example: <code>encryptpad --lang FR</code> to load the French localization strings.</li>
+<li>Prevented the unnecessary prompt for a key file passphrase if the
+key file is local and not encrypted.</li>
+<li>Bug fixed: after opening a file the mouse cursor changed to arrow
+shape when it was over the text edit area. It is now <code>I</code>
+shaped as it should.</li>
+<li>Use one EncryptPad binary for all languages. EncryptPad will
+recognize the OS preferred language for localization. It will simplify
+the release management especially for packagers.</li>
+<li><code>--lang</code> switch to force a specific language instead of
+taking the OS’s locale. Example: <code>encryptpad --lang FR</code> to
+load the French localization strings. Example:
+<code>encryptpad --lang FR</code> to load the French localization
+strings.</li>
 <li>EncryptPad GUI was translated to Chinese.</li>
 <li>README.md translated to French.</li>
 <li>stlplus was updated from upstream. It is now 3.13.</li>
 </ul>
-
-
-<h3>Version 0.3.2.3</h3>
-
+<h3 id="version-0.3.2.3">Version 0.3.2.3</h3>
 <ul>
-<li>Configurable s2k iteration count. It can be set per file and the default value for new files. That value is also used for protecting file keys.</li>
+<li>Configurable s2k iteration count. It can be set per file and the
+default value for new files. That value is also used for protecting file
+keys.</li>
 <li>Support for the timestamp bytes in GPG files.</li>
-<li>Renamed the executable to low case <code>encryptpad</code> except on macOS.</li>
-<li>Improved English interface consistency in GUI. All <code>password</code>s became <code>passphrase</code>s.</li>
+<li>Renamed the executable to low case <code>encryptpad</code> except on
+macOS.</li>
+<li>Improved English interface consistency in GUI. All
+<code>password</code>s became <code>passphrase</code>s.</li>
 <li>Translation to Russian.</li>
 <li>Translation to French.</li>
 <li>Added the <code>SHA-512</code> hashing algorithm.</li>
-<li>CLI: encryptcli crashed with a segfault when TTY was not available. Now it exits gracefully with an error code.</li>
-<li>Bug fixed: In the file encryption dialogue, when clearing the passphrase and setting it again, the passphrase was ignored and the file was saved as &ldquo;key only&rdquo;.</li>
-<li>Bug fixed: In the file encryption, gpg files were encrypted with &rsquo;t' flag. It lead to removal of 0x0D bytes when GPG decrypted the files because it thought that the files were textual. The problem did not manifest on Windows and when EncryptPad was used for decryption. It was only in the direction from EncryptPad to Linux/Unix GPG.</li>
+<li>CLI: encryptcli crashed with a segfault when TTY was not available.
+Now it exits gracefully with an error code.</li>
+<li>Bug fixed: In the file encryption dialogue, when clearing the
+passphrase and setting it again, the passphrase was ignored and the file
+was saved as “key only”.</li>
+<li>Bug fixed: In the file encryption, gpg files were encrypted with ‘t’
+flag. It lead to removal of 0x0D bytes when GPG decrypted the files
+because it thought that the files were textual. The problem did not
+manifest on Windows and when EncryptPad was used for decryption. It was
+only in the direction from EncryptPad to Linux/Unix GPG.</li>
 </ul>
-
-
-<h3>Version 0.3.2.2</h3>
-
+<h3 id="version-0.3.2.2">Version 0.3.2.2</h3>
 <ul>
-<li>Bug fixed: In file encryption dialogue, when the key file passphrase was wrong, a message box did not inform the user.</li>
-<li>BAK files support. When editing, a bak file is only created when saving for the first time.</li>
-<li>Changed the order of sections in new wad files. It is now the directory, key, payload. It does not affect existing wad files.</li>
+<li>Bug fixed: In file encryption dialogue, when the key file passphrase
+was wrong, a message box did not inform the user.</li>
+<li>BAK files support. When editing, a bak file is only created when
+saving for the first time.</li>
+<li>Changed the order of sections in new wad files. It is now the
+directory, key, payload. It does not affect existing wad files.</li>
 <li>encryptcli can read passphrases from file descriptors</li>
 <li>encryptcli can read from stdin and write to stdout</li>
 <li>encryptcli arguments cleaned up and improved</li>
@@ -116,15 +173,12 @@
 <li>64 bit build</li>
 <li>Fixed build permissions</li>
 <li>Changed build to work with g++ on Linux</li>
-<li>Build can now use system libraries on Linux including Zlib and Botan</li>
+<li>Build can now use system libraries on Linux including Zlib and
+Botan</li>
 <li>Fixed build on Fedora 23</li>
 <li>Fixed warnings</li>
 </ul>
-
-
-<h3>Version 0.3.2.1</h3>
-
+<h3 id="version-0.3.2.1">Version 0.3.2.1</h3>
 <ul>
 <li>Initial open source release</li>
 </ul>
-

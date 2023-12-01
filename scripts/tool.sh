@@ -102,11 +102,11 @@ case $COMMAND in
     ;;
 --update-htm)
     sed 1,/cutline/d $pkg_root/README.md > /tmp/tmp_cut_readme.md
-    markdown /tmp/tmp_cut_readme.md > $pkg_root/README.htm
+    pandoc -o $pkg_root/README.htm /tmp/tmp_cut_readme.md
     cp /tmp/tmp_cut_readme.md $pkg_root/docs/en/readme.md
     rm /tmp/tmp_cut_readme.md
     cp $pkg_root/CHANGES.md $pkg_root/docs/en/changes.md
-    markdown $pkg_root/CHANGES.md > $pkg_root/CHANGES.htm
+    pandoc -o $pkg_root/CHANGES.htm $pkg_root/CHANGES.md
     ;;
 --import-emsg)
     import_repo="$1"
