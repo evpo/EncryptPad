@@ -36,8 +36,8 @@ class EncryptorFixtureBase
 {
 protected:
 	Encryptor encryptor_; // encryptor should go first because it has Botan library initializer
-	SecureVector<byte> initial_string_;
-	SecureVector<byte> buffer_;
+	SecureVector<Botan::byte> initial_string_;
+	SecureVector<Botan::byte> buffer_;
     PacketMetadata metadata_;
 	static const string text_to_encrypt_;
 	static const string temp_file_;
@@ -45,7 +45,7 @@ protected:
 
 	void SetUpBase()
 	{
-        initial_string_ = SecureVector<byte>(text_to_encrypt_.begin(),
+        initial_string_ = SecureVector<Botan::byte>(text_to_encrypt_.begin(),
                 text_to_encrypt_.end());
         metadata_= PacketMetadata();
         metadata_.cipher_algo = kDefaultCipherAlgo;
@@ -86,7 +86,7 @@ protected:
 };
 
 namespace {
-	string FromSecureVectorToString(const SecureVector<byte> &sec_vec)
+	string FromSecureVectorToString(const SecureVector<Botan::byte> &sec_vec)
 	{
 		const char *sec_vec_buf = reinterpret_cast<const char *>(sec_vec.data());
 		return string(sec_vec_buf, sec_vec_buf + sec_vec.size());
