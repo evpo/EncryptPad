@@ -100,7 +100,7 @@ void Encryptor::SetPassphrase(const char *pwd, EncryptPad::PacketMetadata *metad
 		mEncryptedPlainSwitchFunctor->EncryptedPlainSwitchChange(true);
 }
 
-EpadResult Encryptor::Save(const string &fileName, const SecureVector<byte> &content, 
+EpadResult Encryptor::Save(const string &fileName, const SecureVector<uint8_t> &content, 
         const string &x2KeyLocation, bool persistX2KeyLocation,
         PacketMetadata *metadata, const std::string *kf_passphrase)
 {
@@ -167,7 +167,7 @@ EpadResult Encryptor::Save(const string &fileName, const SecureVector<byte> &con
 }
 
 // Loads file, decrypts into content
-EpadResult Encryptor::Load(const std::string &fileName, SecureVector<byte> &content, 
+EpadResult Encryptor::Load(const std::string &fileName, SecureVector<Botan::byte> &content, 
         const string &x2KeyLocation, const string *passphrase, 
         EncryptPad::PacketMetadata *metadata, const string *kf_passphrase)
 {

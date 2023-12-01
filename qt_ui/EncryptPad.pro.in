@@ -44,7 +44,7 @@ CONFIG(release, debug|release){
 sources.files = $$SOURCES $$HEADERS $$RESOURCES $$FORMS EncryptPad.pro images
 # INSTALLS += target sources
 
-CONFIG += c++11
+CONFIG+=c++2a
 
 FORMS += \
     set_key_dialog.ui \

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import collections
 import copy
@@ -1831,8 +1831,8 @@ def get_botan_include_dir():
 def set_botan_variables(options, template_vars, cc):
     template_vars['build_botan'] = options.build_botan
     if not options.build_botan:
-        botan_cxxflags = external_command(['pkg-config', '--cflags', 'botan-2'])
-        botan_ldflags = external_command(['pkg-config', '--libs', 'botan-2'])
+        botan_cxxflags = external_command(['pkg-config', '--cflags', 'botan-3'])
+        botan_ldflags = external_command(['pkg-config', '--libs', 'botan-3'])
 
         # remove all existing flags to avoid repetition
         all_flags = []
@@ -1845,7 +1845,7 @@ def set_botan_variables(options, template_vars, cc):
 
     else:
         botan_build_dir = get_botan_build_dir()
-        botan_target = os.path.join(botan_build_dir, 'libbotan-2.a')
+        botan_target = os.path.join(botan_build_dir, 'libbotan-3.a')
         template_vars['botan_target'] = botan_target
         template_vars['botan_build_dir'] = botan_build_dir
         botan_cxxflags = cc.add_include_dir_option + get_botan_include_dir()
@@ -1976,8 +1976,8 @@ def probe_environment(options):
     if not have_program('pkg-config'):
         raise UserError('pkg-config is not found. Enable all --build-... options')
 
-    if not options.build_botan and not try_external_command(['pkg-config','--exists','botan-2']).success:
-        raise UserError('botan-2 package is not found. Use --build-botan')
+    if not options.build_botan and not try_external_command(['pkg-config','--exists','botan-3']).success:
+        raise UserError('botan-3 package is not found. Use --build-botan')
 
     if not options.build_zlib and not try_external_command(['pkg-config','--exists','zlib']).success:
         raise UserError('bzip2 package is not found. Use --build-zlib')
