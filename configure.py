@@ -1665,7 +1665,9 @@ def configure_botan(options):
             '--disable-shared',
             '--with-zlib',
             '--with-bzip2',
-            '--enable-modules', 'aes,pbkdf2,auto_rng,compression'])
+            '--enable-modules', 'aes,pbkdf2,auto_rng,compression',
+            '--disable-sse4.1',
+            '--disable-sse4.2'])
 
     extra_flags = ""
     if options.build_zlib:
