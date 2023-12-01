@@ -15,47 +15,13 @@ namespace Botan {
 class RandomNumberGenerator;
 
 /**
-* Fused multiply-add
-* @param a an integer
-* @param b an integer
-* @param c an integer
-* @return (a*b)+c
-*/
-BigInt BOTAN_PUBLIC_API(2,0) BOTAN_DEPRECATED("Just use (a*b)+c")
-   mul_add(const BigInt& a,
-           const BigInt& b,
-           const BigInt& c);
-
-/**
-* Fused subtract-multiply
-* @param a an integer
-* @param b an integer
-* @param c an integer
-* @return (a-b)*c
-*/
-BigInt BOTAN_PUBLIC_API(2,0) BOTAN_DEPRECATED("Just use (a-b)*c")
-   sub_mul(const BigInt& a,
-           const BigInt& b,
-           const BigInt& c);
-
-/**
-* Fused multiply-subtract
-* @param a an integer
-* @param b an integer
-* @param c an integer
-* @return (a*b)-c
-*/
-BigInt BOTAN_PUBLIC_API(2,0) BOTAN_DEPRECATED("Just use (a*b)-c")
-   mul_sub(const BigInt& a,
-           const BigInt& b,
-           const BigInt& c);
-
-/**
 * Return the absolute value
 * @param n an integer
 * @return absolute value of n
 */
-inline BigInt abs(const BigInt& n) { return n.abs(); }
+inline BigInt abs(const BigInt& n) {
+   return n.abs();
+}
 
 /**
 * Compute the greatest common divisor
@@ -63,7 +29,7 @@ inline BigInt abs(const BigInt& n) { return n.abs(); }
 * @param y a positive integer
 * @return gcd(x,y)
 */
-BigInt BOTAN_PUBLIC_API(2,0) gcd(const BigInt& x, const BigInt& y);
+BigInt BOTAN_PUBLIC_API(2, 0) gcd(const BigInt& x, const BigInt& y);
 
 /**
 * Least common multiple
@@ -71,13 +37,13 @@ BigInt BOTAN_PUBLIC_API(2,0) gcd(const BigInt& x, const BigInt& y);
 * @param y a positive integer
 * @return z, smallest integer such that z % x == 0 and z % y == 0
 */
-BigInt BOTAN_PUBLIC_API(2,0) lcm(const BigInt& x, const BigInt& y);
+BigInt BOTAN_PUBLIC_API(2, 0) lcm(const BigInt& x, const BigInt& y);
 
 /**
 * @param x an integer
 * @return (x*x)
 */
-BigInt BOTAN_PUBLIC_API(2,0) square(const BigInt& x);
+BigInt BOTAN_PUBLIC_API(2, 0) square(const BigInt& x);
 
 /**
 * Modular inversion. This algorithm is const time with respect to x,
@@ -91,38 +57,7 @@ BigInt BOTAN_PUBLIC_API(2,0) square(const BigInt& x);
 * @param modulus a positive integer
 * @return y st (x*y) % modulus == 1 or 0 if no such value
 */
-BigInt BOTAN_PUBLIC_API(2,0) inverse_mod(const BigInt& x,
-                                         const BigInt& modulus);
-
-/**
-* Deprecated modular inversion function. Use inverse_mod instead.
-* @param x a positive integer
-* @param modulus a positive integer
-* @return y st (x*y) % modulus == 1 or 0 if no such value
-*/
-BigInt BOTAN_DEPRECATED_API("Use inverse_mod") inverse_euclid(const BigInt& x, const BigInt& modulus);
-
-/**
-* Deprecated modular inversion function. Use inverse_mod instead.
-*/
-BigInt BOTAN_DEPRECATED_API("Use inverse_mod") ct_inverse_mod_odd_modulus(const BigInt& x, const BigInt& modulus);
-
-/**
-* Return a^-1 * 2^k mod b
-* Returns k, between n and 2n
-* Not const time
-*/
-size_t BOTAN_PUBLIC_API(2,0) BOTAN_DEPRECATED("Use inverse_mod")
-   almost_montgomery_inverse(BigInt& result,
-                             const BigInt& a,
-                             const BigInt& b);
-
-/**
-* Call almost_montgomery_inverse and correct the result to a^-1 mod b
-*/
-BigInt BOTAN_PUBLIC_API(2,0) BOTAN_DEPRECATED("Use inverse_mod")
-   normalized_montgomery_inverse(const BigInt& a, const BigInt& b);
-
+BigInt BOTAN_PUBLIC_API(2, 0) inverse_mod(const BigInt& x, const BigInt& modulus);
 
 /**
 * Compute the Jacobi symbol. If n is prime, this is equivalent
@@ -133,7 +68,7 @@ BigInt BOTAN_PUBLIC_API(2,0) BOTAN_DEPRECATED("Use inverse_mod")
 * @param n is an odd integer > 1
 * @return (n / m)
 */
-int32_t BOTAN_PUBLIC_API(2,0) jacobi(const BigInt& a, const BigInt& n);
+int32_t BOTAN_PUBLIC_API(2, 0) jacobi(const BigInt& a, const BigInt& n);
 
 /**
 * Modular exponentation
@@ -142,27 +77,20 @@ int32_t BOTAN_PUBLIC_API(2,0) jacobi(const BigInt& a, const BigInt& n);
 * @param m a positive modulus
 * @return (b^x) % m
 */
-BigInt BOTAN_PUBLIC_API(2,0) power_mod(const BigInt& b,
-                                       const BigInt& x,
-                                       const BigInt& m);
+BigInt BOTAN_PUBLIC_API(2, 0) power_mod(const BigInt& b, const BigInt& x, const BigInt& m);
 
 /**
-* Compute the square root of x modulo a prime using the
-* Tonelli-Shanks algorithm
+* Compute the square root of x modulo a prime using the Tonelli-Shanks
+* algorithm. This algorithm is primarily used for EC point
+* decompression which takes only public inputs, as a consequence it is
+* not written to be constant-time and may leak side-channel information
+* about its arguments.
 *
 * @param x the input
-* @param p the prime
+* @param p the prime modulus
 * @return y such that (y*y)%p == x, or -1 if no such integer
 */
-BigInt BOTAN_PUBLIC_API(2,0) ressol(const BigInt& x, const BigInt& p);
-
-/*
-* Compute -input^-1 mod 2^MP_WORD_BITS. Throws an exception if input
-* is even. If input is odd, then input and 2^n are relatively prime
-* and an inverse exists.
-*/
-word BOTAN_PUBLIC_API(2,0) BOTAN_DEPRECATED("Use inverse_mod")
-   monty_inverse(word input);
+BigInt BOTAN_PUBLIC_API(3, 0) sqrt_modulo_prime(const BigInt& x, const BigInt& p);
 
 /**
 * @param x an integer
@@ -170,7 +98,7 @@ word BOTAN_PUBLIC_API(2,0) BOTAN_DEPRECATED("Use inverse_mod")
 *         largest value of n such that 2^n divides x evenly. Returns
 *         zero if x is equal to zero.
 */
-size_t BOTAN_PUBLIC_API(2,0) low_zero_bits(const BigInt& x);
+size_t BOTAN_PUBLIC_API(2, 0) low_zero_bits(const BigInt& x);
 
 /**
 * Check for primality
@@ -180,10 +108,8 @@ size_t BOTAN_PUBLIC_API(2,0) low_zero_bits(const BigInt& x);
 * @param is_random true if n was randomly chosen by us
 * @return true if all primality tests passed, otherwise false
 */
-bool BOTAN_PUBLIC_API(2,0) is_prime(const BigInt& n,
-                                    RandomNumberGenerator& rng,
-                                    size_t prob = 64,
-                                    bool is_random = false);
+bool BOTAN_PUBLIC_API(2, 0)
+   is_prime(const BigInt& n, RandomNumberGenerator& rng, size_t prob = 64, bool is_random = false);
 
 /**
 * Test if the positive integer x is a perfect square ie if there
@@ -192,19 +118,7 @@ bool BOTAN_PUBLIC_API(2,0) is_prime(const BigInt& n,
 * @return 0 if the integer is not a perfect square, otherwise
 *         returns the positive y st y*y == x
 */
-BigInt BOTAN_PUBLIC_API(2,8) is_perfect_square(const BigInt& x);
-
-inline bool BOTAN_DEPRECATED("Use is_prime")
-   quick_check_prime(const BigInt& n, RandomNumberGenerator& rng)
-   { return is_prime(n, rng, 32); }
-
-inline bool BOTAN_DEPRECATED("Use is_prime")
-   check_prime(const BigInt& n, RandomNumberGenerator& rng)
-   { return is_prime(n, rng, 56); }
-
-inline bool BOTAN_DEPRECATED("Use is_prime")
-   verify_prime(const BigInt& n, RandomNumberGenerator& rng)
-   { return is_prime(n, rng, 80); }
+BigInt BOTAN_PUBLIC_API(2, 8) is_perfect_square(const BigInt& x);
 
 /**
 * Randomly generate a prime suitable for discrete logarithm parameters
@@ -217,12 +131,12 @@ inline bool BOTAN_DEPRECATED("Use is_prime")
 * @param prob use test so false positive is bounded by 1/2**prob
 * @return random prime with the specified criteria
 */
-BigInt BOTAN_PUBLIC_API(2,0) random_prime(RandomNumberGenerator& rng,
-                                          size_t bits,
-                                          const BigInt& coprime = 0,
-                                          size_t equiv = 1,
-                                          size_t equiv_mod = 2,
-                                          size_t prob = 128);
+BigInt BOTAN_PUBLIC_API(2, 0) random_prime(RandomNumberGenerator& rng,
+                                           size_t bits,
+                                           const BigInt& coprime = BigInt::from_u64(0),
+                                           size_t equiv = 1,
+                                           size_t equiv_mod = 2,
+                                           size_t prob = 128);
 
 /**
 * Generate a prime suitable for RSA p/q
@@ -233,11 +147,11 @@ BigInt BOTAN_PUBLIC_API(2,0) random_prime(RandomNumberGenerator& rng,
 * @param prob use test so false positive is bounded by 1/2**prob
 * @return random prime with the specified criteria
 */
-BigInt BOTAN_PUBLIC_API(2,7) generate_rsa_prime(RandomNumberGenerator& keygen_rng,
-                                                RandomNumberGenerator& prime_test_rng,
-                                                size_t bits,
-                                                const BigInt& coprime,
-                                                size_t prob = 128);
+BigInt BOTAN_PUBLIC_API(2, 7) generate_rsa_prime(RandomNumberGenerator& keygen_rng,
+                                                 RandomNumberGenerator& prime_test_rng,
+                                                 size_t bits,
+                                                 const BigInt& coprime,
+                                                 size_t prob = 128);
 
 /**
 * Return a 'safe' prime, of the form p=2*q+1 with q prime
@@ -245,41 +159,7 @@ BigInt BOTAN_PUBLIC_API(2,7) generate_rsa_prime(RandomNumberGenerator& keygen_rn
 * @param bits is how long the resulting prime should be
 * @return prime randomly chosen from safe primes of length bits
 */
-BigInt BOTAN_PUBLIC_API(2,0) random_safe_prime(RandomNumberGenerator& rng,
-                                               size_t bits);
-
-/**
-* Generate DSA parameters using the FIPS 186 kosherizer
-* @param rng a random number generator
-* @param p_out where the prime p will be stored
-* @param q_out where the prime q will be stored
-* @param pbits how long p will be in bits
-* @param qbits how long q will be in bits
-* @return random seed used to generate this parameter set
-*/
-std::vector<uint8_t> BOTAN_PUBLIC_API(2,0) BOTAN_DEPRECATED("Use DL_Group")
-generate_dsa_primes(RandomNumberGenerator& rng,
-                    BigInt& p_out, BigInt& q_out,
-                    size_t pbits, size_t qbits);
-
-/**
-* Generate DSA parameters using the FIPS 186 kosherizer
-* @param rng a random number generator
-* @param p_out where the prime p will be stored
-* @param q_out where the prime q will be stored
-* @param pbits how long p will be in bits
-* @param qbits how long q will be in bits
-* @param seed the seed used to generate the parameters
-* @param offset optional offset from seed to start searching at
-* @return true if seed generated a valid DSA parameter set, otherwise
-          false. p_out and q_out are only valid if true was returned.
-*/
-bool BOTAN_PUBLIC_API(2,0) BOTAN_DEPRECATED("Use DL_Group")
-generate_dsa_primes(RandomNumberGenerator& rng,
-                    BigInt& p_out, BigInt& q_out,
-                    size_t pbits, size_t qbits,
-                    const std::vector<uint8_t>& seed,
-                    size_t offset = 0);
+BigInt BOTAN_PUBLIC_API(2, 0) random_safe_prime(RandomNumberGenerator& rng, size_t bits);
 
 /**
 * The size of the PRIMES[] array
@@ -289,8 +169,8 @@ const size_t PRIME_TABLE_SIZE = 6541;
 /**
 * A const array of all odd primes less than 65535
 */
-extern const uint16_t BOTAN_PUBLIC_API(2,0) PRIMES[];
+extern const uint16_t BOTAN_PUBLIC_API(2, 0) PRIMES[];
 
-}
+}  // namespace Botan
 
 #endif

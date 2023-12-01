@@ -4,55 +4,41 @@
 * Botan is released under the Simplified BSD License (see license.txt)
 */
 
-#include <botan/sha2_64.h>
-#include <botan/loadstor.h>
-#include <botan/rotate.h>
+#include <botan/internal/sha2_64.h>
+
+#include <botan/internal/bit_ops.h>
+#include <botan/internal/loadstor.h>
+#include <botan/internal/rotate.h>
+#include <botan/internal/sha2_64_f.h>
+#include <botan/internal/stl_util.h>
 
 namespace Botan {
 
-/*
-* SHA-512 F1 Function
-*
-* Use a macro as many compilers won't inline a function this big,
-* even though it is much faster if inlined.
-*/
-#define SHA2_64_F(A, B, C, D, E, F, G, H, M1, M2, M3, M4, magic)         \
-   do {                                                                  \
-      const uint64_t E_rho = rotr<14>(E) ^ rotr<18>(E) ^ rotr<41>(E);    \
-      const uint64_t A_rho = rotr<28>(A) ^ rotr<34>(A) ^ rotr<39>(A);    \
-      const uint64_t M2_sigma = rotr<19>(M2) ^ rotr<61>(M2) ^ (M2 >> 6); \
-      const uint64_t M4_sigma = rotr<1>(M4) ^ rotr<8>(M4) ^ (M4 >> 7);   \
-      H += magic + E_rho + ((E & F) ^ (~E & G)) + M1;                    \
-      D += H;                                                            \
-      H += A_rho + ((A & B) | ((A | B) & C));                            \
-      M1 += M2_sigma + M3 + M4_sigma;                                    \
-   } while(0);
+void SHA_512::compress_digest_bmi2(digest_type& digest, std::span<const uint8_t> input, size_t blocks) {
+   uint64_t A = digest[0], B = digest[1], C = digest[2], D = digest[3], E = digest[4], F = digest[5], G = digest[6],
+            H = digest[7];
 
-void SHA_512::compress_digest_bmi2(secure_vector<uint64_t>& digest,
-                                   const uint8_t input[], size_t blocks)
-   {
-   uint64_t A = digest[0], B = digest[1], C = digest[2],
-          D = digest[3], E = digest[4], F = digest[5],
-          G = digest[6], H = digest[7];
+   BufferSlicer in(input);
 
-   for(size_t i = 0; i != blocks; ++i)
-      {
-      uint64_t W00 = load_be<uint64_t>(input,  0);
-      uint64_t W01 = load_be<uint64_t>(input,  1);
-      uint64_t W02 = load_be<uint64_t>(input,  2);
-      uint64_t W03 = load_be<uint64_t>(input,  3);
-      uint64_t W04 = load_be<uint64_t>(input,  4);
-      uint64_t W05 = load_be<uint64_t>(input,  5);
-      uint64_t W06 = load_be<uint64_t>(input,  6);
-      uint64_t W07 = load_be<uint64_t>(input,  7);
-      uint64_t W08 = load_be<uint64_t>(input,  8);
-      uint64_t W09 = load_be<uint64_t>(input,  9);
-      uint64_t W10 = load_be<uint64_t>(input, 10);
-      uint64_t W11 = load_be<uint64_t>(input, 11);
-      uint64_t W12 = load_be<uint64_t>(input, 12);
-      uint64_t W13 = load_be<uint64_t>(input, 13);
-      uint64_t W14 = load_be<uint64_t>(input, 14);
-      uint64_t W15 = load_be<uint64_t>(input, 15);
+   for(size_t i = 0; i != blocks; ++i) {
+      const auto block = in.take(block_bytes);
+
+      uint64_t W00 = load_be<uint64_t>(block.data(), 0);
+      uint64_t W01 = load_be<uint64_t>(block.data(), 1);
+      uint64_t W02 = load_be<uint64_t>(block.data(), 2);
+      uint64_t W03 = load_be<uint64_t>(block.data(), 3);
+      uint64_t W04 = load_be<uint64_t>(block.data(), 4);
+      uint64_t W05 = load_be<uint64_t>(block.data(), 5);
+      uint64_t W06 = load_be<uint64_t>(block.data(), 6);
+      uint64_t W07 = load_be<uint64_t>(block.data(), 7);
+      uint64_t W08 = load_be<uint64_t>(block.data(), 8);
+      uint64_t W09 = load_be<uint64_t>(block.data(), 9);
+      uint64_t W10 = load_be<uint64_t>(block.data(), 10);
+      uint64_t W11 = load_be<uint64_t>(block.data(), 11);
+      uint64_t W12 = load_be<uint64_t>(block.data(), 12);
+      uint64_t W13 = load_be<uint64_t>(block.data(), 13);
+      uint64_t W14 = load_be<uint64_t>(block.data(), 14);
+      uint64_t W15 = load_be<uint64_t>(block.data(), 15);
 
       SHA2_64_F(A, B, C, D, E, F, G, H, W00, W14, W09, W01, 0x428A2F98D728AE22);
       SHA2_64_F(H, A, B, C, D, E, F, G, W01, W15, W10, W02, 0x7137449123EF65CD);
@@ -143,11 +129,7 @@ void SHA_512::compress_digest_bmi2(secure_vector<uint64_t>& digest,
       F = (digest[5] += F);
       G = (digest[6] += G);
       H = (digest[7] += H);
-
-      input += 128;
-      }
    }
-
-#undef SHA2_64_F
-
 }
+
+}  // namespace Botan

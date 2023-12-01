@@ -26,8 +26,7 @@ class Output_Buffers;
 * collected for retrieval.  If you're familiar with the Unix shell
 * environment, this design will sound quite familiar.
 */
-class BOTAN_PUBLIC_API(2,0) Pipe final : public DataSource
-   {
+class BOTAN_PUBLIC_API(2, 0) Pipe final : public DataSource {
    public:
       /**
       * An opaque type that identifies a message in this Pipe
@@ -38,18 +37,14 @@ class BOTAN_PUBLIC_API(2,0) Pipe final : public DataSource
       * Exception if you use an invalid message as an argument to
       * read, remaining, etc
       */
-      class BOTAN_PUBLIC_API(2,0) Invalid_Message_Number final : public Invalid_Argument
-         {
+      class BOTAN_PUBLIC_API(2, 0) Invalid_Message_Number final : public Invalid_Argument {
          public:
             /**
             * @param where the error occurred
             * @param msg the invalid message id that was used
             */
-            Invalid_Message_Number(const std::string& where, message_id msg) :
-               Invalid_Argument("Pipe::" + where + ": Invalid message number " +
-                                std::to_string(msg))
-               {}
-         };
+            Invalid_Message_Number(std::string_view where, message_id msg);
+      };
 
       /**
       * A meta-id for whatever the last message is
@@ -72,21 +67,19 @@ class BOTAN_PUBLIC_API(2,0) Pipe final : public DataSource
       * Write input to the pipe, i.e. to its first filter.
       * @param in the secure_vector containing the data to write
       */
-      void write(const secure_vector<uint8_t>& in)
-         { write(in.data(), in.size()); }
+      void write(const secure_vector<uint8_t>& in) { write(in.data(), in.size()); }
 
       /**
       * Write input to the pipe, i.e. to its first filter.
       * @param in the std::vector containing the data to write
       */
-      void write(const std::vector<uint8_t>& in)
-         { write(in.data(), in.size()); }
+      void write(const std::vector<uint8_t>& in) { write(in.data(), in.size()); }
 
       /**
       * Write input to the pipe, i.e. to its first filter.
       * @param in the string containing the data to write
       */
-      void write(const std::string& in);
+      void write(std::string_view in);
 
       /**
       * Write input to the pipe, i.e. to its first filter.
@@ -123,7 +116,7 @@ class BOTAN_PUBLIC_API(2,0) Pipe final : public DataSource
       * Perform start_msg(), write() and end_msg() sequentially.
       * @param in the string containing the data to write
       */
-      void process_msg(const std::string& in);
+      void process_msg(std::string_view in);
 
       /**
       * Perform start_msg(), write() and end_msg() sequentially.
@@ -137,7 +130,7 @@ class BOTAN_PUBLIC_API(2,0) Pipe final : public DataSource
       * for which the information is desired
       * @return number of bytes that can still be read
       */
-      size_t remaining(message_id msg = DEFAULT_MESSAGE) const BOTAN_WARN_UNUSED_RESULT;
+      [[nodiscard]] size_t remaining(message_id msg = DEFAULT_MESSAGE) const;
 
       /**
       * Read the default message from the pipe. Moves the internal
@@ -148,7 +141,7 @@ class BOTAN_PUBLIC_API(2,0) Pipe final : public DataSource
       * @param length the length of the byte array output
       * @return number of bytes actually read into output
       */
-      size_t read(uint8_t output[], size_t length) override BOTAN_WARN_UNUSED_RESULT;
+      [[nodiscard]] size_t read(uint8_t output[], size_t length) override;
 
       /**
       * Read a specified message from the pipe. Moves the internal
@@ -159,7 +152,7 @@ class BOTAN_PUBLIC_API(2,0) Pipe final : public DataSource
       * @param msg the number identifying the message to read from
       * @return number of bytes actually read into output
       */
-      size_t read(uint8_t output[], size_t length, message_id msg) BOTAN_WARN_UNUSED_RESULT;
+      [[nodiscard]] size_t read(uint8_t output[], size_t length, message_id msg);
 
       /**
       * Read a single byte from the pipe. Moves the internal offset so
@@ -170,21 +163,21 @@ class BOTAN_PUBLIC_API(2,0) Pipe final : public DataSource
       * @param msg the message to read from
       * @return number of bytes actually read into output
       */
-      size_t read(uint8_t& output, message_id msg = DEFAULT_MESSAGE) BOTAN_WARN_UNUSED_RESULT;
+      [[nodiscard]] size_t read(uint8_t& output, message_id msg = DEFAULT_MESSAGE);
 
       /**
       * Read the full contents of the pipe.
       * @param msg the number identifying the message to read from
       * @return secure_vector holding the contents of the pipe
       */
-      secure_vector<uint8_t> read_all(message_id msg = DEFAULT_MESSAGE) BOTAN_WARN_UNUSED_RESULT;
+      [[nodiscard]] secure_vector<uint8_t> read_all(message_id msg = DEFAULT_MESSAGE);
 
       /**
       * Read the full contents of the pipe.
       * @param msg the number identifying the message to read from
       * @return string holding the contents of the pipe
       */
-      std::string read_all_as_string(message_id msg = DEFAULT_MESSAGE) BOTAN_WARN_UNUSED_RESULT;
+      [[nodiscard]] std::string read_all_as_string(message_id msg = DEFAULT_MESSAGE);
 
       /**
       * Read from the default message but do not modify the internal
@@ -195,7 +188,7 @@ class BOTAN_PUBLIC_API(2,0) Pipe final : public DataSource
       * @param offset the offset from the current position in message
       * @return number of bytes actually peeked and written into output
       */
-      size_t peek(uint8_t output[], size_t length, size_t offset) const override BOTAN_WARN_UNUSED_RESULT;
+      [[nodiscard]] size_t peek(uint8_t output[], size_t length, size_t offset) const override;
 
       /** Read from the specified message but do not modify the
       * internal offset. Consecutive calls to peek() will return
@@ -206,8 +199,7 @@ class BOTAN_PUBLIC_API(2,0) Pipe final : public DataSource
       * @param msg the number identifying the message to peek from
       * @return number of bytes actually peeked and written into output
       */
-      size_t peek(uint8_t output[], size_t length,
-                  size_t offset, message_id msg) const BOTAN_WARN_UNUSED_RESULT;
+      [[nodiscard]] size_t peek(uint8_t output[], size_t length, size_t offset, message_id msg) const;
 
       /** Read a single byte from the specified message but do not
       * modify the internal offset. Consecutive calls to peek() will
@@ -217,8 +209,7 @@ class BOTAN_PUBLIC_API(2,0) Pipe final : public DataSource
       * @param msg the number identifying the message to peek from
       * @return number of bytes actually peeked and written into output
       */
-      size_t peek(uint8_t& output, size_t offset,
-                  message_id msg = DEFAULT_MESSAGE) const BOTAN_WARN_UNUSED_RESULT;
+      [[nodiscard]] size_t peek(uint8_t& output, size_t offset, message_id msg = DEFAULT_MESSAGE) const;
 
       /**
       * @return the number of bytes read from the default message.
@@ -231,7 +222,7 @@ class BOTAN_PUBLIC_API(2,0) Pipe final : public DataSource
       size_t get_bytes_read(message_id msg) const;
 
       bool check_available(size_t n) override;
-      bool check_available_msg(size_t n, message_id msg);
+      bool check_available_msg(size_t n, message_id msg) const;
 
       /**
       * @return currently set default message
@@ -326,8 +317,7 @@ class BOTAN_PUBLIC_API(2,0) Pipe final : public DataSource
       * Construct a Pipe of up to four filters. The filters are set up
       * in the same order as the arguments.
       */
-      Pipe(Filter* = nullptr, Filter* = nullptr,
-           Filter* = nullptr, Filter* = nullptr);
+      Pipe(Filter* = nullptr, Filter* = nullptr, Filter* = nullptr, Filter* = nullptr);
 
       /**
       * Construct a Pipe from a list of filters
@@ -338,7 +328,8 @@ class BOTAN_PUBLIC_API(2,0) Pipe final : public DataSource
       Pipe(const Pipe&) = delete;
       Pipe& operator=(const Pipe&) = delete;
 
-      ~Pipe();
+      ~Pipe() override;
+
    private:
       void destruct(Filter*);
       void do_append(Filter* filt);
@@ -346,13 +337,13 @@ class BOTAN_PUBLIC_API(2,0) Pipe final : public DataSource
       void find_endpoints(Filter*);
       void clear_endpoints(Filter*);
 
-      message_id get_message_no(const std::string&, message_id) const;
+      message_id get_message_no(std::string_view, message_id) const;
 
       Filter* m_pipe;
       std::unique_ptr<Output_Buffers> m_outputs;
       message_id m_default_read;
       bool m_inside_msg;
-   };
+};
 
 /**
 * Stream output operator; dumps the results from pipe's default
@@ -360,7 +351,7 @@ class BOTAN_PUBLIC_API(2,0) Pipe final : public DataSource
 * @param out an output stream
 * @param pipe the pipe
 */
-BOTAN_PUBLIC_API(2,0) std::ostream& operator<<(std::ostream& out, Pipe& pipe);
+BOTAN_PUBLIC_API(2, 0) std::ostream& operator<<(std::ostream& out, Pipe& pipe);
 
 /**
 * Stream input operator; dumps the remaining bytes of input
@@ -368,12 +359,12 @@ BOTAN_PUBLIC_API(2,0) std::ostream& operator<<(std::ostream& out, Pipe& pipe);
 * @param in the input stream
 * @param pipe the pipe
 */
-BOTAN_PUBLIC_API(2,0) std::istream& operator>>(std::istream& in, Pipe& pipe);
+BOTAN_PUBLIC_API(2, 0) std::istream& operator>>(std::istream& in, Pipe& pipe);
 
-}
+}  // namespace Botan
 
 #if defined(BOTAN_HAS_PIPE_UNIXFD_IO)
-  #include <botan/fd_unix.h>
+   #include <botan/fd_unix.h>
 #endif
 
 #endif

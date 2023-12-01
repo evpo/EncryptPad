@@ -8,8 +8,8 @@
 #ifndef BOTAN_FPE_FE1_H_
 #define BOTAN_FPE_FE1_H_
 
-#include <botan/sym_algo.h>
 #include <botan/bigint.h>
+#include <botan/sym_algo.h>
 
 namespace Botan {
 
@@ -21,10 +21,8 @@ class MessageAuthenticationCode;
 * "Format-Preserving Encryption" by Bellare, Rogaway, et al
 * (https://eprint.iacr.org/2009/251)
 */
-class BOTAN_PUBLIC_API(2,5) FPE_FE1 final : public SymmetricAlgorithm
-   {
+class BOTAN_PUBLIC_API(2, 5) FPE_FE1 final : public SymmetricAlgorithm {
    public:
-
       /**
       * @param n the modulus. All plaintext and ciphertext values must be
       *        less than this.
@@ -36,11 +34,13 @@ class BOTAN_PUBLIC_API(2,5) FPE_FE1 final : public SymmetricAlgorithm
       FPE_FE1(const BigInt& n,
               size_t rounds = 5,
               bool compat_mode = false,
-              const std::string& mac_algo = "HMAC(SHA-256)");
+              std::string_view mac_algo = "HMAC(SHA-256)");
 
-      ~FPE_FE1();
+      ~FPE_FE1() override;
 
       Key_Length_Specification key_spec() const override;
+
+      bool has_keying_material() const override;
 
       std::string name() const override;
 
@@ -65,12 +65,11 @@ class BOTAN_PUBLIC_API(2,5) FPE_FE1 final : public SymmetricAlgorithm
       BigInt encrypt(const BigInt& x, uint64_t tweak) const;
 
       BigInt decrypt(const BigInt& x, uint64_t tweak) const;
-   private:
-      void key_schedule(const uint8_t key[], size_t length) override;
 
-      BigInt F(const BigInt& R, size_t round,
-               const secure_vector<uint8_t>& tweak,
-               secure_vector<uint8_t>& tmp) const;
+   private:
+      void key_schedule(std::span<const uint8_t> key) override;
+
+      BigInt F(const BigInt& R, size_t round, const secure_vector<uint8_t>& tweak, secure_vector<uint8_t>& tmp) const;
 
       secure_vector<uint8_t> compute_tweak_mac(const uint8_t tweak[], size_t tweak_len) const;
 
@@ -80,7 +79,7 @@ class BOTAN_PUBLIC_API(2,5) FPE_FE1 final : public SymmetricAlgorithm
       BigInt m_a;
       BigInt m_b;
       size_t m_rounds;
-   };
+};
 
 namespace FPE {
 
@@ -98,9 +97,8 @@ namespace FPE {
 * @warning This function is hardcoded to use only 3 rounds which
 * may be insecure for some values of n. Prefer FPE_FE1 class
 */
-BigInt BOTAN_PUBLIC_API(2,0) fe1_encrypt(const BigInt& n, const BigInt& X,
-                                         const SymmetricKey& key,
-                                         const std::vector<uint8_t>& tweak);
+BigInt BOTAN_PUBLIC_API(2, 0)
+   fe1_encrypt(const BigInt& n, const BigInt& X, const SymmetricKey& key, const std::vector<uint8_t>& tweak);
 
 /**
 * Decrypt X from and onto the group Z_n using key and tweak
@@ -112,12 +110,11 @@ BigInt BOTAN_PUBLIC_API(2,0) fe1_encrypt(const BigInt& n, const BigInt& X,
 * @warning This function is hardcoded to use only 3 rounds which
 * may be insecure for some values of n. Prefer FPE_FE1 class
 */
-BigInt BOTAN_PUBLIC_API(2,0) fe1_decrypt(const BigInt& n, const BigInt& X,
-                                         const SymmetricKey& key,
-                                         const std::vector<uint8_t>& tweak);
+BigInt BOTAN_PUBLIC_API(2, 0)
+   fe1_decrypt(const BigInt& n, const BigInt& X, const SymmetricKey& key, const std::vector<uint8_t>& tweak);
 
-}
+}  // namespace FPE
 
-}
+}  // namespace Botan
 
 #endif

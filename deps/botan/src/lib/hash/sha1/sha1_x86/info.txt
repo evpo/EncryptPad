@@ -2,15 +2,14 @@
 SHA1_X86_SHA_NI -> 20170518
 </defines>
 
+<module_info>
+name -> "SHA-1 SIMD"
+brief -> "SHA-1 using SIMD instructions on x86"
+</module_info>
+
 <isa>
 sha
 sse2
 ssse3
 sse41
 </isa>
-
-<cc>
-clang:3.9
-gcc:5.0
-msvc:19.0 # MSVS 2015
-</cc>

@@ -2,9 +2,17 @@
 PKCS5_PBES2 -> 20141119
 </defines>
 
+<module_info>
+name -> "PBES2"
+</module_info>
+
 <requires>
 asn1
 cbc
 hmac
 pbkdf2
 </requires>
+
+<header:internal>
+pbes2.h
+</header:internal>

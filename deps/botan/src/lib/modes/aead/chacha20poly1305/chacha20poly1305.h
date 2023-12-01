@@ -10,10 +10,8 @@
 #define BOTAN_AEAD_CHACHA20_POLY1305_H_
 
 #include <botan/aead.h>
-#include <botan/stream_cipher.h>
 #include <botan/mac.h>
-
-BOTAN_FUTURE_INTERNAL_HEADER(chacha20poly1305.h)
+#include <botan/stream_cipher.h>
 
 namespace Botan {
 
@@ -24,19 +22,19 @@ namespace Botan {
 * draft-agl-tls-chacha20poly1305-04 is used instead.
 * If a nonce of 192 bits is used, XChaCha20Poly1305 is selected.
 */
-class BOTAN_PUBLIC_API(2,0) ChaCha20Poly1305_Mode : public AEAD_Mode
-   {
+class ChaCha20Poly1305_Mode : public AEAD_Mode {
    public:
-      void set_associated_data(const uint8_t ad[], size_t ad_len) override;
+      void set_associated_data_n(size_t idx, std::span<const uint8_t> ad) final;
 
       bool associated_data_requires_key() const override { return false; }
 
       std::string name() const override { return "ChaCha20Poly1305"; }
 
-      size_t update_granularity() const override { return 64; }
+      size_t update_granularity() const override;
 
-      Key_Length_Specification key_spec() const override
-         { return Key_Length_Specification(32); }
+      size_t ideal_granularity() const override;
+
+      Key_Length_Specification key_spec() const override { return Key_Length_Specification(32); }
 
       bool valid_nonce_length(size_t n) const override;
 
@@ -45,6 +43,8 @@ class BOTAN_PUBLIC_API(2,0) ChaCha20Poly1305_Mode : public AEAD_Mode
       void clear() override;
 
       void reset() override;
+
+      bool has_keying_material() const final;
 
    protected:
       std::unique_ptr<StreamCipher> m_chacha;
@@ -57,48 +57,46 @@ class BOTAN_PUBLIC_API(2,0) ChaCha20Poly1305_Mode : public AEAD_Mode
       size_t m_ctext_len = 0;
 
       bool cfrg_version() const { return m_nonce_len == 12 || m_nonce_len == 24; }
+
       void update_len(size_t len);
+
    private:
       void start_msg(const uint8_t nonce[], size_t nonce_len) override;
 
-      void key_schedule(const uint8_t key[], size_t length) override;
-   };
+      void key_schedule(std::span<const uint8_t> key) override;
+};
 
 /**
 * ChaCha20Poly1305 Encryption
 */
-class BOTAN_PUBLIC_API(2,0) ChaCha20Poly1305_Encryption final : public ChaCha20Poly1305_Mode
-   {
+class ChaCha20Poly1305_Encryption final : public ChaCha20Poly1305_Mode {
    public:
-      size_t output_length(size_t input_length) const override
-         { return input_length + tag_size(); }
+      size_t output_length(size_t input_length) const override { return input_length + tag_size(); }
 
       size_t minimum_final_size() const override { return 0; }
 
-      size_t process(uint8_t buf[], size_t size) override;
-
-      void finish(secure_vector<uint8_t>& final_block, size_t offset = 0) override;
-   };
+   private:
+      size_t process_msg(uint8_t buf[], size_t size) override;
+      void finish_msg(secure_vector<uint8_t>& final_block, size_t offset = 0) override;
+};
 
 /**
 * ChaCha20Poly1305 Decryption
 */
-class BOTAN_PUBLIC_API(2,0) ChaCha20Poly1305_Decryption final : public ChaCha20Poly1305_Mode
-   {
+class ChaCha20Poly1305_Decryption final : public ChaCha20Poly1305_Mode {
    public:
-      size_t output_length(size_t input_length) const override
-         {
-         BOTAN_ASSERT(input_length >= tag_size(), "Sufficient input");
+      size_t output_length(size_t input_length) const override {
+         BOTAN_ARG_CHECK(input_length >= tag_size(), "Sufficient input");
          return input_length - tag_size();
-         }
+      }
 
       size_t minimum_final_size() const override { return tag_size(); }
 
-      size_t process(uint8_t buf[], size_t size) override;
+   private:
+      size_t process_msg(uint8_t buf[], size_t size) override;
+      void finish_msg(secure_vector<uint8_t>& final_block, size_t offset = 0) override;
+};
 
-      void finish(secure_vector<uint8_t>& final_block, size_t offset = 0) override;
-   };
-
-}
+}  // namespace Botan
 
 #endif

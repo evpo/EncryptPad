@@ -1,0 +1,19 @@
+{
+    "[cpp]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "xaver.clang-format"
+    },
+    "C_Cpp.codeAnalysis.clangTidy.enabled": true,
+    "C_Cpp.default.cppStandard": "c++20",
+    "C_Cpp.default.cStandard": "c17",
+    "C_Cpp.formatting": "disabled",
+    "clangd.arguments": [
+        "--header-insertion=never"
+    ],
+    "python.linting.pylintEnabled": true,
+    "python.linting.enabled": true,
+    "python.linting.pylintArgs": [
+        "--rcfile=src/configs/pylint.rc"
+    ],
+    "python.linting.lintOnSave": true,
+}

@@ -9,6 +9,7 @@
 #define BOTAN_DL_PARAM_H_
 
 #include <botan/bigint.h>
+#include <string_view>
 
 namespace Botan {
 
@@ -22,31 +23,32 @@ enum class DL_Group_Source {
 };
 
 /**
+* The DL group encoding format variants.
+*/
+enum class DL_Group_Format {
+   ANSI_X9_42,
+   ANSI_X9_57,
+   PKCS_3,
+
+   DSA_PARAMETERS = ANSI_X9_57,
+   DH_PARAMETERS = ANSI_X9_42,
+   ANSI_X9_42_DH_PARAMETERS = ANSI_X9_42,
+   PKCS3_DH_PARAMETERS = PKCS_3
+};
+
+/**
 * This class represents discrete logarithm groups. It holds a prime
 * modulus p, a generator g, and (optionally) a prime q which is a
 * factor of (p-1). In most cases g generates the order-q subgroup.
 */
-class BOTAN_PUBLIC_API(2,0) DL_Group final
-   {
+class BOTAN_PUBLIC_API(2, 0) DL_Group final {
    public:
       /**
       * Determine the prime creation for DL groups.
       */
       enum PrimeType { Strong, Prime_Subgroup, DSA_Kosherizer };
 
-      /**
-      * The DL group encoding format variants.
-      */
-      enum Format {
-         ANSI_X9_42,
-         ANSI_X9_57,
-         PKCS_3,
-
-         DSA_PARAMETERS = ANSI_X9_57,
-         DH_PARAMETERS = ANSI_X9_42,
-         ANSI_X9_42_DH_PARAMETERS = ANSI_X9_42,
-         PKCS3_DH_PARAMETERS = PKCS_3
-      };
+      using Format = DL_Group_Format;
 
       /**
       * Construct a DL group with uninitialized internal value.
@@ -63,12 +65,12 @@ class BOTAN_PUBLIC_API(2,0) DL_Group final
       * deprecated and will be removed in a future major release. Instead
       * use DL_Group_from_PEM function
       */
-      explicit DL_Group(const std::string& name);
+      explicit DL_Group(std::string_view name);
 
       /*
       * Read a PEM representation
       */
-      static DL_Group DL_Group_from_PEM(const std::string& pem);
+      static DL_Group DL_Group_from_PEM(std::string_view pem);
 
       /**
       * Create a new group randomly.
@@ -83,8 +85,7 @@ class BOTAN_PUBLIC_API(2,0) DL_Group final
       * @param qbits the number of bits of q. Leave it as 0 to have
       * the value determined according to pbits.
       */
-      DL_Group(RandomNumberGenerator& rng, PrimeType type,
-               size_t pbits, size_t qbits = 0);
+      DL_Group(RandomNumberGenerator& rng, PrimeType type, size_t pbits, size_t qbits = 0);
 
       /**
       * Create a DSA group with a given seed.
@@ -93,9 +94,7 @@ class BOTAN_PUBLIC_API(2,0) DL_Group final
       * @param pbits the desired bit size of the prime p
       * @param qbits the desired bit size of the prime q.
       */
-      DL_Group(RandomNumberGenerator& rng,
-               const std::vector<uint8_t>& seed,
-               size_t pbits = 1024, size_t qbits = 0);
+      DL_Group(RandomNumberGenerator& rng, const std::vector<uint8_t>& seed, size_t pbits = 1024, size_t qbits = 0);
 
       /**
       * Create a DL group.
@@ -115,14 +114,14 @@ class BOTAN_PUBLIC_API(2,0) DL_Group final
       /**
       * Decode a BER-encoded DL group param
       */
-      DL_Group(const uint8_t ber[], size_t ber_len, Format format);
+      DL_Group(const uint8_t ber[], size_t ber_len, DL_Group_Format format);
 
       /**
       * Decode a BER-encoded DL group param
       */
-      template<typename Alloc>
-         DL_Group(const std::vector<uint8_t, Alloc>& ber, Format format) :
-         DL_Group(ber.data(), ber.size(), format) {}
+      template <typename Alloc>
+      DL_Group(const std::vector<uint8_t, Alloc>& ber, DL_Group_Format format) :
+            DL_Group(ber.data(), ber.size(), format) {}
 
       /**
       * Get the prime p.
@@ -159,6 +158,14 @@ class BOTAN_PUBLIC_API(2,0) DL_Group final
       bool verify_public_element(const BigInt& y) const;
 
       /**
+      * Verify a private element
+      *
+      * Specifically this checks that x is > 1 and < p, and additionally if
+      * q is set then x must be < q
+      */
+      bool verify_private_element(const BigInt& x) const;
+
+      /**
       * Verify a pair of elements y = g^x
       *
       * This verifies that 1 < x,y < p and that y=g^x mod p
@@ -170,14 +177,14 @@ class BOTAN_PUBLIC_API(2,0) DL_Group final
       * @param format the encoding format
       * @return string holding the PEM encoded group
       */
-      std::string PEM_encode(Format format) const;
+      std::string PEM_encode(DL_Group_Format format) const;
 
       /**
       * Encode this group into a string using DER encoding.
       * @param format the encoding format
       * @return string holding the DER encoded group
       */
-      std::vector<uint8_t> DER_encode(Format format) const;
+      std::vector<uint8_t> DER_encode(DL_Group_Format format) const;
 
       /**
       * Reduce an integer modulo p
@@ -251,6 +258,25 @@ class BOTAN_PUBLIC_API(2,0) DL_Group final
       BigInt power_g_p(const BigInt& x, size_t max_x_bits) const;
 
       /**
+      * Modular exponentiation
+      * @param b the base
+      * @param x the exponent
+      * @param max_x_bits x is assumed to be at most this many bits long.
+      *
+      * @return (b^x) % p
+      */
+      BigInt power_b_p(const BigInt& b, const BigInt& x, size_t max_x_bits) const;
+
+      /**
+      * Modular exponentiation
+      * @param b the base
+      * @param x the exponent
+      *
+      * @return (b^x) % p
+      */
+      BigInt power_b_p(const BigInt& b, const BigInt& x) const;
+
+      /**
       * Multi-exponentiate
       * Return (g^x * y^z) % p
       */
@@ -288,6 +314,11 @@ class BOTAN_PUBLIC_API(2,0) DL_Group final
       size_t q_bytes() const;
 
       /**
+      * Return if the q value is set
+      */
+      bool has_q() const;
+
+      /**
       * Return size in bits of a secret exponent
       *
       * This attempts to balance between the attack costs of NFS
@@ -314,44 +345,29 @@ class BOTAN_PUBLIC_API(2,0) DL_Group final
       *
       * @warning avoid this. Instead use the DL_Group constructor
       */
-      void BER_decode(const std::vector<uint8_t>& ber, Format format);
-
-      /**
-      * Decode a PEM encoded group into this instance.
-      * @param pem the PEM encoding of the group
-      */
-      void BOTAN_DEPRECATED("Use DL_Group_from_PEM") PEM_decode(const std::string& pem);
+      void BER_decode(const std::vector<uint8_t>& ber, DL_Group_Format format);
 
       DL_Group_Source source() const;
-
-      /**
-      * Return PEM representation of named DL group
-      */
-      static std::string BOTAN_DEPRECATED("Use DL_Group(name).PEM_encode()")
-         PEM_for_named_group(const std::string& name);
 
       /*
       * For internal use only
       */
-      static std::shared_ptr<DL_Group_Data> DL_group_info(const std::string& name);
+      static std::shared_ptr<DL_Group_Data> DL_group_info(std::string_view name);
 
    private:
-      static std::shared_ptr<DL_Group_Data> load_DL_group_info(const char* p_str,
-                                                               const char* q_str,
-                                                               const char* g_str);
+      static std::shared_ptr<DL_Group_Data> load_DL_group_info(const char* p_str, const char* q_str, const char* g_str);
 
-      static std::shared_ptr<DL_Group_Data> load_DL_group_info(const char* p_str,
-                                                               const char* g_str);
+      static std::shared_ptr<DL_Group_Data> load_DL_group_info(const char* p_str, const char* g_str);
 
-      static std::shared_ptr<DL_Group_Data>
-         BER_decode_DL_group(const uint8_t data[], size_t data_len,
-                             DL_Group::Format format,
-                             DL_Group_Source source);
+      static std::shared_ptr<DL_Group_Data> BER_decode_DL_group(const uint8_t data[],
+                                                                size_t data_len,
+                                                                DL_Group_Format format,
+                                                                DL_Group_Source source);
 
       const DL_Group_Data& data() const;
       std::shared_ptr<DL_Group_Data> m_data;
-   };
+};
 
-}
+}  // namespace Botan
 
 #endif

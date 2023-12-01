@@ -8,10 +8,8 @@
 #ifndef BOTAN_EMSA_X931_H_
 #define BOTAN_EMSA_X931_H_
 
-#include <botan/emsa.h>
 #include <botan/hash.h>
-
-BOTAN_FUTURE_INTERNAL_HEADER(emsa_x931.h)
+#include <botan/internal/emsa.h>
 
 namespace Botan {
 
@@ -20,33 +18,30 @@ namespace Botan {
 * Useful for Rabin-Williams, also sometimes used with RSA in
 * odd protocols.
 */
-class BOTAN_PUBLIC_API(2,0) EMSA_X931 final : public EMSA
-   {
+class EMSA_X931 final : public EMSA {
    public:
       /**
       * @param hash the hash function to use
       */
-      explicit EMSA_X931(HashFunction* hash);
-
-      EMSA* clone() override { return new EMSA_X931(m_hash->clone()); }
+      explicit EMSA_X931(std::unique_ptr<HashFunction> hash);
 
       std::string name() const override;
 
+      std::string hash_function() const override { return m_hash->name(); }
+
    private:
       void update(const uint8_t[], size_t) override;
-      secure_vector<uint8_t> raw_data() override;
+      std::vector<uint8_t> raw_data() override;
 
-      secure_vector<uint8_t> encoding_of(const secure_vector<uint8_t>&, size_t,
-                                     RandomNumberGenerator& rng) override;
+      std::vector<uint8_t> encoding_of(const std::vector<uint8_t>&, size_t, RandomNumberGenerator& rng) override;
 
-      bool verify(const secure_vector<uint8_t>&, const secure_vector<uint8_t>&,
-                  size_t) override;
+      bool verify(const std::vector<uint8_t>&, const std::vector<uint8_t>&, size_t) override;
 
-      secure_vector<uint8_t> m_empty_hash;
+      std::vector<uint8_t> m_empty_hash;
       std::unique_ptr<HashFunction> m_hash;
       uint8_t m_hash_id;
-   };
+};
 
-}
+}  // namespace Botan
 
 #endif

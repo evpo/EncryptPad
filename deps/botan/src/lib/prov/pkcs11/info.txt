@@ -2,6 +2,11 @@
 PKCS11 -> 20160219
 </defines>
 
+<module_info>
+name -> "PKCS #11"
+brief -> "Wrapper classes to interact with PKCS #11 modules"
+</module_info>
+
 <requires>
 dyn_load
 rng
@@ -29,8 +34,4 @@ p11_randomgenerator.h
 p11_rsa.h
 p11_types.h
 p11_x509.h
-
-p11_module.h
-p11_slot.h
-p11_session.h
 </header:public>

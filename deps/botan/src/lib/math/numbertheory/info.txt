@@ -1,18 +1,22 @@
 <defines>
-NUMBERTHEORY -> 20131128
+NUMBERTHEORY -> 20201108
 </defines>
 
+<module_info>
+name -> "Number Theory"
+brief -> "Number theoretical higher level algorithms for big integer math"
+</module_info>
+
 <header:public>
-curve_nistp.h
 numthry.h
-pow_mod.h
 reducer.h
-monty.h
 </header:public>
 
 <header:internal>
-primality.h
+curve_nistp.h
+monty.h
 monty_exp.h
+primality.h
 </header:internal>
 
 <requires>

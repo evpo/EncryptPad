@@ -1,0 +1,16 @@
+<defines>
+EC_HASH_TO_CURVE -> 20210420
+</defines>
+
+<module_info>
+name -> "EC Hash to Curve"
+</module_info>
+
+<requires>
+ec_group
+hash
+</requires>
+
+<header:internal>
+ec_h2c.h
+</header:internal>

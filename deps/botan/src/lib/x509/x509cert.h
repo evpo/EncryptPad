@@ -19,34 +19,32 @@ class Extensions;
 class AlternativeName;
 class NameConstraints;
 
-enum class Usage_Type
-   {
-   UNSPECIFIED, // no restrictions
+enum class Usage_Type {
+   UNSPECIFIED,  // no restrictions
    TLS_SERVER_AUTH,
    TLS_CLIENT_AUTH,
    CERTIFICATE_AUTHORITY,
    OCSP_RESPONDER,
    ENCRYPTION
-   };
+};
 
 struct X509_Certificate_Data;
 
 /**
 * This class represents an X.509 Certificate
 */
-class BOTAN_PUBLIC_API(2,0) X509_Certificate : public X509_Object
-   {
+class BOTAN_PUBLIC_API(2, 0) X509_Certificate : public X509_Object {
    public:
       /**
-      * Return a newly allocated copy of the public key associated
-      * with the subject of this certificate. This object is owned
-      * by the caller.
+      * Create a public key object associated with the public key bits in this
+      * certificate. If the public key bits was valid for X.509 encoding
+      * purposes but invalid algorithmically (for example, RSA with an even
+      * modulus) that will be detected at this point, and an exception will be
+      * thrown.
       *
-      * Prefer load_subject_public_key in new code
-      *
-      * @return public key
+      * @return subject public key of this certificate
       */
-      Public_Key* subject_public_key() const;
+      std::unique_ptr<Public_Key> subject_public_key() const;
 
       /**
       * Create a public key object associated with the public key bits in this
@@ -57,6 +55,7 @@ class BOTAN_PUBLIC_API(2,0) X509_Certificate : public X509_Object
       *
       * @return subject public key of this certificate
       */
+      BOTAN_DEPRECATED("Use subject_public_key")
       std::unique_ptr<Public_Key> load_subject_public_key() const;
 
       /**
@@ -117,7 +116,7 @@ class BOTAN_PUBLIC_API(2,0) X509_Certificate : public X509_Object
       * "RFC822" (Email in SAN) or "PKCS9.EmailAddress" (Email in DN).
       * @return value(s) of the specified parameter
       */
-      std::vector<std::string> subject_info(const std::string& name) const;
+      std::vector<std::string> subject_info(std::string_view name) const;
 
       /**
       * Get a value for a specific subject_info parameter name.
@@ -125,7 +124,7 @@ class BOTAN_PUBLIC_API(2,0) X509_Certificate : public X509_Object
       * "X509.Certificate.v2.key_id" or "X509v3.AuthorityKeyIdentifier".
       * @return value(s) of the specified parameter
       */
-      std::vector<std::string> issuer_info(const std::string& name) const;
+      std::vector<std::string> issuer_info(std::string_view name) const;
 
       /**
       * Raw issuer DN bits
@@ -146,24 +145,6 @@ class BOTAN_PUBLIC_API(2,0) X509_Certificate : public X509_Object
       * SHA-256 of Raw subject DN
       */
       std::vector<uint8_t> raw_subject_dn_sha256() const;
-
-      /**
-      * Get the notBefore of the certificate as a string
-      * @return notBefore of the certificate
-      */
-      std::string BOTAN_DEPRECATED("Use not_before().to_string()") start_time() const
-         {
-         return not_before().to_string();
-         }
-
-      /**
-      * Get the notAfter of the certificate as a string
-      * @return notAfter of the certificate
-      */
-      std::string BOTAN_DEPRECATED("Use not_after().to_string()") end_time() const
-         {
-         return not_after().to_string();
-         }
 
       /**
       * Get the notBefore of the certificate as X509_Time
@@ -234,7 +215,7 @@ class BOTAN_PUBLIC_API(2,0) X509_Certificate : public X509_Object
       * To check if a certain extended key constraint is set in the certificate
       * use @see X509_Certificate#has_ex_constraint.
       */
-      bool allowed_extended_usage(const std::string& usage) const;
+      bool allowed_extended_usage(std::string_view usage) const;
 
       /**
       * Returns true if the specified usage is set in the extended key usage extension,
@@ -252,18 +233,18 @@ class BOTAN_PUBLIC_API(2,0) X509_Certificate : public X509_Object
       bool allowed_usage(Usage_Type usage) const;
 
       /**
-      * Returns true if the specified @param constraints are included in the key
-      * usage extension.
+      * Returns true if and only if the specified @param constraints are
+      * included in the key usage extension.
+      *
+      * Typically for applications you want allowed_usage instead.
       */
       bool has_constraints(Key_Constraints constraints) const;
 
       /**
-      * Returns true if and only if @param ex_constraint (referring to an
-      * extended key constraint, eg "PKIX.ServerAuth") is included in the
-      * extended key extension.
+      * Returns true if and only if OID @param ex_constraint is
+      * included in the extended key extension.
       */
-      bool BOTAN_DEPRECATED("Use version taking an OID")
-         has_ex_constraint(const std::string& ex_constraint) const;
+      bool has_ex_constraint(std::string_view ex_constraint) const;
 
       /**
       * Returns true if and only if OID @param ex_constraint is
@@ -282,7 +263,7 @@ class BOTAN_PUBLIC_API(2,0) X509_Certificate : public X509_Object
       * Check whenever a given X509 Extension is marked critical in this
       * certificate.
       */
-      bool is_critical(const std::string& ex_name) const;
+      bool is_critical(std::string_view ex_name) const;
 
       /**
       * Get the key constraints as defined in the KeyUsage extension of this
@@ -290,14 +271,6 @@ class BOTAN_PUBLIC_API(2,0) X509_Certificate : public X509_Object
       * @return key constraints
       */
       Key_Constraints constraints() const;
-
-      /**
-      * Get the key constraints as defined in the ExtendedKeyUsage
-      * extension of this certificate.
-      * @return key constraints
-      */
-      std::vector<std::string>
-         BOTAN_DEPRECATED("Use extended_key_usage") ex_constraints() const;
 
       /**
       * Get the key usage as defined in the ExtendedKeyUsage extension
@@ -318,8 +291,6 @@ class BOTAN_PUBLIC_API(2,0) X509_Certificate : public X509_Object
       * of this certificate.
       * @return certificate policies
       */
-      std::vector<std::string> BOTAN_DEPRECATED("Use certificate_policy_oids") policies() const;
-
       const std::vector<OID>& certificate_policy_oids() const;
 
       /**
@@ -374,14 +345,14 @@ class BOTAN_PUBLIC_API(2,0) X509_Certificate : public X509_Object
       * @return a fingerprint of the certificate
       * @param hash_name hash function used to calculate the fingerprint
       */
-      std::string fingerprint(const std::string& hash_name = "SHA-1") const;
+      std::string fingerprint(std::string_view hash_name = "SHA-1") const;
 
       /**
       * Check if a certain DNS name matches up with the information in
       * the cert
       * @param name DNS name to match
       */
-      bool matches_dns_name(const std::string& name) const;
+      bool matches_dns_name(std::string_view name) const;
 
       /**
       * Check to certificates for equality.
@@ -409,7 +380,7 @@ class BOTAN_PUBLIC_API(2,0) X509_Certificate : public X509_Object
       * encoded certificate.
       * @param filename the name of the certificate file
       */
-      explicit X509_Certificate(const std::string& filename);
+      explicit X509_Certificate(std::string_view filename);
 #endif
 
       /**
@@ -445,7 +416,7 @@ class BOTAN_PUBLIC_API(2,0) X509_Certificate : public X509_Object
       const X509_Certificate_Data& data() const;
 
       std::shared_ptr<X509_Certificate_Data> m_data;
-   };
+};
 
 /**
 * Check two certificates for inequality
@@ -454,8 +425,8 @@ class BOTAN_PUBLIC_API(2,0) X509_Certificate : public X509_Object
 * @return true if the arguments represent different certificates,
 * false if they are binary identical
 */
-BOTAN_PUBLIC_API(2,0) bool operator!=(const X509_Certificate& cert1, const X509_Certificate& cert2);
+BOTAN_PUBLIC_API(2, 0) bool operator!=(const X509_Certificate& cert1, const X509_Certificate& cert2);
 
-}
+}  // namespace Botan
 
 #endif

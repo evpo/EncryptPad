@@ -10,8 +10,6 @@
 
 #include <botan/block_cipher.h>
 
-BOTAN_FUTURE_INTERNAL_HEADER(gost_28147.h)
-
 namespace Botan {
 
 /**
@@ -20,8 +18,7 @@ namespace Botan {
 * considered a local configuration issue. Several different sets are
 * used.
 */
-class BOTAN_PUBLIC_API(2,0) GOST_28147_89_Params final
-   {
+class GOST_28147_89_Params final {
    public:
       /**
       * @param row the row
@@ -48,17 +45,17 @@ class BOTAN_PUBLIC_API(2,0) GOST_28147_89_Params final
       * Federation
       * @param name of the parameter set
       */
-      explicit GOST_28147_89_Params(const std::string& name = "R3411_94_TestParam");
+      explicit GOST_28147_89_Params(std::string_view name = "R3411_94_TestParam");
+
    private:
       const uint8_t* m_sboxes;
       std::string m_name;
-   };
+};
 
 /**
 * GOST 28147-89
 */
-class BOTAN_PUBLIC_API(2,0) GOST_28147_89 final : public Block_Cipher_Fixed_Params<8, 32>
-   {
+class GOST_28147_89 final : public Block_Cipher_Fixed_Params<8, 32> {
    public:
       void encrypt_n(const uint8_t in[], uint8_t out[], size_t blocks) const override;
       void decrypt_n(const uint8_t in[], uint8_t out[], size_t blocks) const override;
@@ -66,30 +63,35 @@ class BOTAN_PUBLIC_API(2,0) GOST_28147_89 final : public Block_Cipher_Fixed_Para
       void clear() override;
 
       std::string name() const override;
-      BlockCipher* clone() const override { return new GOST_28147_89(m_SBOX); }
+
+      std::unique_ptr<BlockCipher> new_object() const override {
+         return std::make_unique<GOST_28147_89>(m_SBOX, m_name);
+      }
+
+      bool has_keying_material() const override;
 
       /**
       * @param params the sbox parameters to use
       */
       explicit GOST_28147_89(const GOST_28147_89_Params& params);
 
-      explicit GOST_28147_89(const std::string& param_name) :
-         GOST_28147_89(GOST_28147_89_Params(param_name)) {}
-   private:
-      explicit GOST_28147_89(const std::vector<uint32_t>& other_SBOX) :
-         m_SBOX(other_SBOX), m_EK(8) {}
+      explicit GOST_28147_89(std::string_view param_name) : GOST_28147_89(GOST_28147_89_Params(param_name)) {}
 
-      void key_schedule(const uint8_t[], size_t) override;
+      explicit GOST_28147_89(const std::vector<uint32_t>& other_SBOX, std::string_view name) :
+            m_SBOX(other_SBOX), m_EK(8), m_name(name) {}
+
+   private:
+      void key_schedule(std::span<const uint8_t> key) override;
 
       /*
       * The sbox is not secret, this is just a larger expansion of it
       * which we generate at runtime for faster execution
       */
       std::vector<uint32_t> m_SBOX;
-
       secure_vector<uint32_t> m_EK;
-   };
+      std::string m_name;
+};
 
-}
+}  // namespace Botan
 
 #endif

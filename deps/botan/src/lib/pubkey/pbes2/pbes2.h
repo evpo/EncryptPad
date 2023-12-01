@@ -5,13 +5,12 @@
 * Botan is released under the Simplified BSD License (see license.txt)
 */
 
-#ifndef BOTAN_PBE_PKCS_v20_H_
-#define BOTAN_PBE_PKCS_v20_H_
+#ifndef BOTAN_PBE_PKCS_V20_H_
+#define BOTAN_PBE_PKCS_V20_H_
 
 #include <botan/asn1_obj.h>
 #include <chrono>
-
-BOTAN_FUTURE_INTERNAL_HEADER(pbes2.h)
+#include <span>
 
 namespace Botan {
 
@@ -26,13 +25,12 @@ class RandomNumberGenerator;
 * @param digest specifies the PRF to use with PBKDF2 (eg "HMAC(SHA-1)")
 * @param rng a random number generator
 */
-std::pair<AlgorithmIdentifier, std::vector<uint8_t>>
-BOTAN_PUBLIC_API(2,0) pbes2_encrypt(const secure_vector<uint8_t>& key_bits,
-                        const std::string& passphrase,
-                        std::chrono::milliseconds msec,
-                        const std::string& cipher,
-                        const std::string& digest,
-                        RandomNumberGenerator& rng);
+std::pair<AlgorithmIdentifier, std::vector<uint8_t>> pbes2_encrypt(std::span<const uint8_t> key_bits,
+                                                                   std::string_view passphrase,
+                                                                   std::chrono::milliseconds msec,
+                                                                   std::string_view cipher,
+                                                                   std::string_view digest,
+                                                                   RandomNumberGenerator& rng);
 
 /**
 * Encrypt with PBES2 from PKCS #5 v2.0
@@ -45,14 +43,13 @@ BOTAN_PUBLIC_API(2,0) pbes2_encrypt(const secure_vector<uint8_t>& key_bits,
 * @param digest specifies the PRF to use with PBKDF2 (eg "HMAC(SHA-1)")
 * @param rng a random number generator
 */
-std::pair<AlgorithmIdentifier, std::vector<uint8_t>>
-BOTAN_PUBLIC_API(2,1) pbes2_encrypt_msec(const secure_vector<uint8_t>& key_bits,
-                             const std::string& passphrase,
-                             std::chrono::milliseconds msec,
-                             size_t* out_iterations_if_nonnull,
-                             const std::string& cipher,
-                             const std::string& digest,
-                             RandomNumberGenerator& rng);
+std::pair<AlgorithmIdentifier, std::vector<uint8_t>> pbes2_encrypt_msec(std::span<const uint8_t> key_bits,
+                                                                        std::string_view passphrase,
+                                                                        std::chrono::milliseconds msec,
+                                                                        size_t* out_iterations_if_nonnull,
+                                                                        std::string_view cipher,
+                                                                        std::string_view digest,
+                                                                        RandomNumberGenerator& rng);
 
 /**
 * Encrypt with PBES2 from PKCS #5 v2.0
@@ -63,13 +60,12 @@ BOTAN_PUBLIC_API(2,1) pbes2_encrypt_msec(const secure_vector<uint8_t>& key_bits,
 * @param digest specifies the PRF to use with PBKDF2 (eg "HMAC(SHA-1)")
 * @param rng a random number generator
 */
-std::pair<AlgorithmIdentifier, std::vector<uint8_t>>
-BOTAN_PUBLIC_API(2,1) pbes2_encrypt_iter(const secure_vector<uint8_t>& key_bits,
-                             const std::string& passphrase,
-                             size_t iterations,
-                             const std::string& cipher,
-                             const std::string& digest,
-                             RandomNumberGenerator& rng);
+std::pair<AlgorithmIdentifier, std::vector<uint8_t>> pbes2_encrypt_iter(std::span<const uint8_t> key_bits,
+                                                                        std::string_view passphrase,
+                                                                        size_t iterations,
+                                                                        std::string_view cipher,
+                                                                        std::string_view digest,
+                                                                        RandomNumberGenerator& rng);
 
 /**
 * Decrypt a PKCS #5 v2.0 encrypted stream
@@ -77,11 +73,10 @@ BOTAN_PUBLIC_API(2,1) pbes2_encrypt_iter(const secure_vector<uint8_t>& key_bits,
 * @param passphrase the passphrase to use for decryption
 * @param params the PBES2 parameters
 */
-secure_vector<uint8_t>
-BOTAN_PUBLIC_API(2,0) pbes2_decrypt(const secure_vector<uint8_t>& key_bits,
-                        const std::string& passphrase,
-                        const std::vector<uint8_t>& params);
+secure_vector<uint8_t> pbes2_decrypt(std::span<const uint8_t> key_bits,
+                                     std::string_view passphrase,
+                                     const std::vector<uint8_t>& params);
 
-}
+}  // namespace Botan
 
 #endif

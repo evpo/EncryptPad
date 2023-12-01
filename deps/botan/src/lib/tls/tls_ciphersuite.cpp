@@ -6,172 +6,147 @@
 */
 
 #include <botan/tls_ciphersuite.h>
-#include <botan/exceptn.h>
-#include <botan/parsing.h>
+
 #include <botan/block_cipher.h>
-#include <botan/stream_cipher.h>
+#include <botan/exceptn.h>
 #include <botan/hash.h>
+#include <botan/stream_cipher.h>
+#include <botan/internal/parsing.h>
 #include <algorithm>
 
-namespace Botan {
+namespace Botan::TLS {
 
-namespace TLS {
-
-size_t Ciphersuite::nonce_bytes_from_handshake() const
-   {
-   switch(m_nonce_format)
-      {
-      case Nonce_Format::CBC_MODE:
-         {
-         if(cipher_algo() == "3DES")
+size_t Ciphersuite::nonce_bytes_from_handshake() const {
+   switch(m_nonce_format) {
+      case Nonce_Format::CBC_MODE: {
+         if(cipher_algo() == "3DES") {
             return 8;
-         else
+         } else {
             return 16;
          }
+      }
       case Nonce_Format::AEAD_IMPLICIT_4:
          return 4;
       case Nonce_Format::AEAD_XOR_12:
          return 12;
-      }
-
-   throw Invalid_State("In Ciphersuite::nonce_bytes_from_handshake invalid enum value");
    }
 
-size_t Ciphersuite::nonce_bytes_from_record(Protocol_Version version) const
-   {
-   switch(m_nonce_format)
-      {
+   throw Invalid_State("In Ciphersuite::nonce_bytes_from_handshake invalid enum value");
+}
+
+size_t Ciphersuite::nonce_bytes_from_record(Protocol_Version version) const {
+   BOTAN_UNUSED(version);
+   switch(m_nonce_format) {
       case Nonce_Format::CBC_MODE:
-         {
-         if(version.supports_explicit_cbc_ivs())
-            {
-            return cipher_algo() == "3DES" ? 8 : 16;
-            }
-         else
-            {
-            return 0;
-            }
-         }
+         return cipher_algo() == "3DES" ? 8 : 16;
       case Nonce_Format::AEAD_IMPLICIT_4:
          return 8;
       case Nonce_Format::AEAD_XOR_12:
          return 0;
-      }
+   }
 
    throw Invalid_State("In Ciphersuite::nonce_bytes_from_handshake invalid enum value");
-   }
+}
 
-bool Ciphersuite::is_scsv(uint16_t suite)
-   {
+bool Ciphersuite::is_scsv(uint16_t suite) {
    // TODO: derive from IANA file in script
    return (suite == 0x00FF || suite == 0x5600);
-   }
+}
 
-bool Ciphersuite::psk_ciphersuite() const
-   {
-   return kex_method() == Kex_Algo::PSK ||
-          kex_method() == Kex_Algo::DHE_PSK ||
-          kex_method() == Kex_Algo::ECDHE_PSK;
-   }
+bool Ciphersuite::psk_ciphersuite() const {
+   return kex_method() == Kex_Algo::PSK || kex_method() == Kex_Algo::ECDHE_PSK;
+}
 
-bool Ciphersuite::ecc_ciphersuite() const
-   {
-   return kex_method() == Kex_Algo::ECDH ||
-          kex_method() == Kex_Algo::ECDHE_PSK ||
-          auth_method() == Auth_Method::ECDSA;
-   }
+bool Ciphersuite::ecc_ciphersuite() const {
+   return kex_method() == Kex_Algo::ECDH || kex_method() == Kex_Algo::ECDHE_PSK || auth_method() == Auth_Method::ECDSA;
+}
 
-bool Ciphersuite::usable_in_version(Protocol_Version version) const
-   {
-   if(!version.supports_aead_modes())
-      {
-      // Old versions do not support AEAD, or any MAC but SHA-1
-      if(mac_algo() != "SHA-1")
-         return false;
-      }
+bool Ciphersuite::usable_in_version(Protocol_Version version) const {
+   // RFC 8446 B.4.:
+   //   Although TLS 1.3 uses the same cipher suite space as previous
+   //   versions of TLS, TLS 1.3 cipher suites are defined differently, only
+   //   specifying the symmetric ciphers, and cannot be used for TLS 1.2.
+   //   Similarly, cipher suites for TLS 1.2 and lower cannot be used with
+   //   TLS 1.3.
+   //
+   // Currently cipher suite codes {0x13,0x01} through {0x13,0x05} are
+   // allowed for TLS 1.3. This may change in the future.
+   const auto is_legacy_suite = (ciphersuite_code() & 0xFF00) != 0x1300;
+   return version.is_pre_tls_13() == is_legacy_suite;
+}
 
-   return true;
-   }
-
-bool Ciphersuite::cbc_ciphersuite() const
-   {
+bool Ciphersuite::cbc_ciphersuite() const {
    return (mac_algo() != "AEAD");
-   }
+}
 
-bool Ciphersuite::signature_used() const
-   {
-   return auth_method() != Auth_Method::ANONYMOUS &&
-          auth_method() != Auth_Method::IMPLICIT;
-   }
+bool Ciphersuite::aead_ciphersuite() const {
+   return (mac_algo() == "AEAD");
+}
 
-Ciphersuite Ciphersuite::by_id(uint16_t suite)
-   {
+bool Ciphersuite::signature_used() const {
+   return auth_method() != Auth_Method::IMPLICIT;
+}
+
+std::optional<Ciphersuite> Ciphersuite::by_id(uint16_t suite) {
    const std::vector<Ciphersuite>& all_suites = all_known_ciphersuites();
    auto s = std::lower_bound(all_suites.begin(), all_suites.end(), suite);
 
-   if(s != all_suites.end() && s->ciphersuite_code() == suite)
-      {
+   if(s != all_suites.end() && s->ciphersuite_code() == suite) {
       return *s;
-      }
-
-   return Ciphersuite(); // some unknown ciphersuite
    }
 
-Ciphersuite Ciphersuite::from_name(const std::string& name)
-   {
+   return std::nullopt;  // some unknown ciphersuite
+}
+
+std::optional<Ciphersuite> Ciphersuite::from_name(std::string_view name) {
    const std::vector<Ciphersuite>& all_suites = all_known_ciphersuites();
 
-   for(auto suite : all_suites)
-      {
-      if(suite.to_string() == name)
+   for(auto suite : all_suites) {
+      if(suite.to_string() == name) {
          return suite;
       }
-
-   return Ciphersuite(); // some unknown ciphersuite
    }
+
+   return std::nullopt;  // some unknown ciphersuite
+}
 
 namespace {
 
-bool have_hash(const std::string& prf)
-   {
-   return (HashFunction::providers(prf).size() > 0);
-   }
-
-bool have_cipher(const std::string& cipher)
-   {
-   return (BlockCipher::providers(cipher).size() > 0) ||
-      (StreamCipher::providers(cipher).size() > 0);
-   }
-
+bool have_hash(std::string_view prf) {
+   return (!HashFunction::providers(prf).empty());
 }
 
-bool Ciphersuite::is_usable() const
-   {
-   if(!m_cipher_keylen) // uninitialized object
-      return false;
+bool have_cipher(std::string_view cipher) {
+   return (!BlockCipher::providers(cipher).empty()) || (!StreamCipher::providers(cipher).empty());
+}
 
-   if(!have_hash(prf_algo()))
+}  // namespace
+
+bool Ciphersuite::is_usable() const {
+   if(!m_cipher_keylen) {  // uninitialized object
       return false;
+   }
+
+   if(!have_hash(prf_algo())) {
+      return false;
+   }
 
 #if !defined(BOTAN_HAS_TLS_CBC)
    if(cbc_ciphersuite())
       return false;
 #endif
 
-   if(mac_algo() == "AEAD")
-      {
-      if(cipher_algo() == "ChaCha20Poly1305")
-         {
+   if(mac_algo() == "AEAD") {
+      if(cipher_algo() == "ChaCha20Poly1305") {
 #if !defined(BOTAN_HAS_AEAD_CHACHA20_POLY1305)
          return false;
 #endif
-         }
-      else
-         {
+      } else {
          auto cipher_and_mode = split_on(cipher_algo(), '/');
          BOTAN_ASSERT(cipher_and_mode.size() == 2, "Expected format for AEAD algo");
-         if(!have_cipher(cipher_and_mode[0]))
+         if(!have_cipher(cipher_and_mode[0])) {
             return false;
+         }
 
          const auto mode = cipher_and_mode[1];
 
@@ -189,65 +164,38 @@ bool Ciphersuite::is_usable() const
          if(mode == "OCB(12)" || mode == "OCB")
             return false;
 #endif
-         }
       }
-   else
-      {
+   } else {
       // Old non-AEAD schemes
-      if(!have_cipher(cipher_algo()))
-         return false;
-      if(!have_hash(mac_algo())) // HMAC
+      if(!have_cipher(cipher_algo())) {
          return false;
       }
+      if(!have_hash(mac_algo())) {  // HMAC
+         return false;
+      }
+   }
 
-   if(kex_method() == Kex_Algo::SRP_SHA)
-      {
-#if !defined(BOTAN_HAS_SRP6)
-      return false;
-#endif
-      }
-   else if(kex_method() == Kex_Algo::ECDH || kex_method() == Kex_Algo::ECDHE_PSK)
-      {
+   if(kex_method() == Kex_Algo::ECDH || kex_method() == Kex_Algo::ECDHE_PSK) {
 #if !defined(BOTAN_HAS_ECDH)
       return false;
 #endif
-      }
-   else if(kex_method() == Kex_Algo::DH || kex_method() == Kex_Algo::DHE_PSK)
-      {
+   } else if(kex_method() == Kex_Algo::DH) {
 #if !defined(BOTAN_HAS_DIFFIE_HELLMAN)
       return false;
 #endif
-      }
-   else if(kex_method() == Kex_Algo::CECPQ1)
-      {
-#if !defined(BOTAN_HAS_CECPQ1)
-      return false;
-#endif
-      }
+   }
 
-   if(auth_method() == Auth_Method::DSA)
-      {
-#if !defined(BOTAN_HAS_DSA)
-      return false;
-#endif
-      }
-   else if(auth_method() == Auth_Method::ECDSA)
-      {
+   if(auth_method() == Auth_Method::ECDSA) {
 #if !defined(BOTAN_HAS_ECDSA)
       return false;
 #endif
-      }
-   else if(auth_method() == Auth_Method::RSA)
-      {
+   } else if(auth_method() == Auth_Method::RSA) {
 #if !defined(BOTAN_HAS_RSA)
       return false;
 #endif
-      }
-
-   return true;
    }
 
+   return true;
 }
 
-}
-
+}  // namespace Botan::TLS

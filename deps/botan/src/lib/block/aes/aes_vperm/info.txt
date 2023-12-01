@@ -2,6 +2,11 @@
 AES_VPERM -> 20190901
 </defines>
 
+<module_info>
+name -> "AES Vector Permutation"
+brief -> "AES using Vector Permutation Instructions"
+</module_info>
+
 endian little
 
 <isa>
@@ -27,10 +32,3 @@ ppc64
 <requires>
 simd
 </requires>
-
-<cc>
-gcc
-clang
-msvc:19.10 # VC 2017
-sunstudio
-</cc>

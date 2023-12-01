@@ -2,6 +2,6 @@
 CAMELLIA -> 20150922
 </defines>
 
-<header:public>
-camellia.h
-</header:public>
+<module_info>
+name -> "Camellia"
+</module_info>

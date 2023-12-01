@@ -1,6 +1,8 @@
-<defines>
-KEYPAIR_TESTING -> 20131128
-</defines>
+<header:internal>
+keypair.h
+</header:internal>
 
-<requires>
-</requires>
+<module_info>
+name -> "Keypair"
+brief -> "Helper functions for key pair and signature consistency checks"
+</module_info>

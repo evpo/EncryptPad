@@ -70,13 +70,24 @@ stores credentials. The main user is the :doc:`tls` implementation.
       we have one of type *cert_key_type* and we would like to use a
       certificate in this *type*/*context*.
 
-   .. cpp:function:: Private_Key* private_key_for(const X509_Certificate& cert, \
+      For servers *type* will be "tls-server" and the *context* will
+      be the server name that the client requested via SNI (or empty,
+      if the client did not send SNI).
+
+      .. warning::
+
+         To avoid cross-protocol attacks it is recommended that if a server
+         receives an SNI request for a name it does not expect, it should close
+         the connection with an alert. This can be done by throwing an exception
+         from the implementation of this function.
+
+   .. cpp:function:: std::shared_ptr<Private_Key> private_key_for(const X509_Certificate& cert, \
                                                   const std::string& type, \
                                                   const std::string& context)
 
-      Return the private key for this certificate. The *cert* will be
-      the leaf cert of a chain returned previously by ``cert_chain``
-      or ``cert_chain_single_type``.
+      Return a shared pointer to the private key for this certificate. The
+      *cert* will be the leaf cert of a chain returned previously by
+      ``cert_chain`` or ``cert_chain_single_type``.
 
 In versions before 1.11.34, there was an additional function on `Credentials_Manager`
 

@@ -36,9 +36,10 @@ The Botan MAC computation is split into five stages.
 
      Clear the key.
 
-  .. cpp:function:: MessageAuthenticationCode* clone() const
+  .. cpp:function:: std::unique_ptr<MessageAuthenticationCode> new_object() const
 
      Return a newly allocated object of the same type as this one.
+     The new object is unkeyed.
 
   .. cpp:function:: void set_key(const uint8_t* key, size_t length)
 
@@ -98,113 +99,27 @@ Code Examples
 
 The following example computes an HMAC with a random key then verifies the tag.
 
-    #include <botan/mac.h>
-    #include <botan/hex.h>
-    #include <botan/system_rng.h>
-    #include <assert.h>
-
-    std::string compute_mac(const std::string& msg, const Botan::secure_vector<uint8_t>& key)
-       {
-       auto hmac = Botan::MessageAuthenticationCode::create_or_throw("HMAC(SHA-256)");
-
-       hmac->set_key(key);
-       hmac->update(msg);
-
-       return Botan::hex_encode(hmac->final());
-       }
-
-    int main()
-       {
-       Botan::System_RNG rng;
-
-       const auto key = rng.random_vec(32); // 256 bit random key
-
-       // "Message" != "Mussage" so tags will also not match
-       std::string tag1 = compute_mac("Message", key);
-       std::string tag2 = compute_mac("Mussage", key);
-       assert(tag1 != tag2);
-
-       // Recomputing with original input message results in identical tag
-       std::string tag3 = compute_mac("Message", key);
-       assert(tag1 == tag3);
-       }
-
+.. literalinclude:: /../src/examples/hmac.cpp
+   :language: cpp
 
 The following example code computes a AES-256 GMAC and subsequently verifies the
 tag.  Unlike most other MACs, GMAC requires a nonce *which must not repeat or
 all security is lost*.
 
-.. code-block:: cpp
-
-    #include <botan/mac.h>
-    #include <botan/hex.h>
-    #include <iostream>
-
-    int main()
-       {
-       const std::vector<uint8_t> key = Botan::hex_decode("1337133713371337133713371337133713371337133713371337133713371337");
-       const std::vector<uint8_t> nonce = Botan::hex_decode("FFFFFFFFFFFFFFFFFFFFFFFF");
-       const std::vector<uint8_t> data = Botan::hex_decode("6BC1BEE22E409F96E93D7E117393172A");
-       std::unique_ptr<Botan::MessageAuthenticationCode> mac(Botan::MessageAuthenticationCode::create("GMAC(AES-256)"));
-       if(!mac)
-          return 1;
-       mac->set_key(key);
-       mac->start(nonce);
-       mac->update(data);
-       Botan::secure_vector<uint8_t> tag = mac->final();
-       std::cout << mac->name() << ": " << Botan::hex_encode(tag) << std::endl;
-
-       //Verify created MAC
-       mac->start(nonce);
-       mac->update(data);
-       std::cout << "Verification: " << (mac->verify_mac(tag) ? "success" : "failure");
-       return 0;
-       }
+.. literalinclude:: /../src/examples/gmac.cpp
+   :language: cpp
 
 The following example code computes a valid AES-128 CMAC tag and modifies the
 data to demonstrate a MAC verification failure.
 
-.. code-block:: cpp
-
-  #include <botan/mac.h>
-  #include <botan/hex.h>
-  #include <iostream>
-
-    int main()
-       {
-       const std::vector<uint8_t> key = Botan::hex_decode("2B7E151628AED2A6ABF7158809CF4F3C");
-       std::vector<uint8_t> data = Botan::hex_decode("6BC1BEE22E409F96E93D7E117393172A");
-       std::unique_ptr<Botan::MessageAuthenticationCode> mac(Botan::MessageAuthenticationCode::create("CMAC(AES-128)"));
-       if(!mac)
-          return 1;
-       mac->set_key(key);
-       mac->update(data);
-       Botan::secure_vector<uint8_t> tag = mac->final();
-       //Corrupting data
-       data.back()++;
-       //Verify with corrupted data
-       mac->update(data);
-       std::cout << "Verification with malformed data: " << (mac->verify_mac(tag) ? "success" : "failure");
-       return 0;
-       }
+.. literalinclude:: /../src/examples/cmac.cpp
+   :language: cpp
 
 Available MACs
 ------------------------------------------
 
 Currently the following MAC algorithms are available in Botan. In new code,
 default to HMAC with a strong hash like SHA-256 or SHA-384.
-
-CBC-MAC
-~~~~~~~~~~~~
-
-An older authentication code based on a block cipher. Serious security problems,
-in particular **insecure** if messages of several different lengths are
-authenticated. Avoid unless required for compatibility.
-
-Available if ``BOTAN_HAS_CBC_MAC`` is defined.
-
-.. warning::
-   CBC-MAC support is deprecated and will be removed in a future major release.
 
 CMAC
 ~~~~~~~~~~~~
@@ -234,6 +149,18 @@ HMAC
 A message authentication code based on a hash function. Very commonly used.
 
 Available if ``BOTAN_HAS_HMAC`` is defined.
+
+KMAC
+~~~~~~~~~~~~
+
+.. versionadded:: 3.2
+
+A SHA-3 derived message authentication code defined by NIST in SP 800-185.
+
+There are two variants, ``KMAC-128`` and ``KMAC-256``. Both take a parameter
+which specifies the output length in bits, for example ``KMAC-128(256)``.
+
+Available if ``BOTAN_HAS_KMAC`` is defined.
 
 Poly1305
 ~~~~~~~~~~~~

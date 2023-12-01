@@ -2,9 +2,17 @@
 CHACHA_RNG -> 20170728
 </defines>
 
+<module_info>
+name -> "ChaCha RNG"
+</module_info>
+
 <requires>
 hmac
 sha2_32
 chacha
 stateful_rng
 </requires>
+
+<header:public>
+chacha_rng.h
+</header:public>

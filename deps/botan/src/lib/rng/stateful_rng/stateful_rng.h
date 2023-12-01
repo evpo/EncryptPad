@@ -7,8 +7,8 @@
 #ifndef BOTAN_STATEFUL_RNG_H_
 #define BOTAN_STATEFUL_RNG_H_
 
-#include <botan/rng.h>
 #include <botan/mutex.h>
+#include <botan/rng.h>
 
 namespace Botan {
 
@@ -23,8 +23,7 @@ namespace Botan {
 * Not implemented by RNGs which access an external RNG, such as the
 * system PRNG or a hardware RNG.
 */
-class BOTAN_PUBLIC_API(2,0) Stateful_RNG : public RandomNumberGenerator
-   {
+class BOTAN_PUBLIC_API(2, 0) Stateful_RNG : public RandomNumberGenerator {
    public:
       /**
       * @param rng is a reference to some RNG which will be used
@@ -33,13 +32,8 @@ class BOTAN_PUBLIC_API(2,0) Stateful_RNG : public RandomNumberGenerator
       * @param reseed_interval specifies a limit of how many times
       * the RNG will be called before automatic reseeding is performed
       */
-      Stateful_RNG(RandomNumberGenerator& rng,
-                   Entropy_Sources& entropy_sources,
-                   size_t reseed_interval) :
-         m_underlying_rng(&rng),
-         m_entropy_sources(&entropy_sources),
-         m_reseed_interval(reseed_interval)
-         {}
+      Stateful_RNG(RandomNumberGenerator& rng, Entropy_Sources& entropy_sources, size_t reseed_interval) :
+            m_underlying_rng(&rng), m_entropy_sources(&entropy_sources), m_reseed_interval(reseed_interval) {}
 
       /**
       * @param rng is a reference to some RNG which will be used
@@ -48,9 +42,7 @@ class BOTAN_PUBLIC_API(2,0) Stateful_RNG : public RandomNumberGenerator
       * the RNG will be called before automatic reseeding is performed
       */
       Stateful_RNG(RandomNumberGenerator& rng, size_t reseed_interval) :
-         m_underlying_rng(&rng),
-         m_reseed_interval(reseed_interval)
-         {}
+            m_underlying_rng(&rng), m_reseed_interval(reseed_interval) {}
 
       /**
       * @param entropy_sources will be polled to perform reseeding periodically
@@ -58,9 +50,7 @@ class BOTAN_PUBLIC_API(2,0) Stateful_RNG : public RandomNumberGenerator
       * the RNG will be called before automatic reseeding is performed
       */
       Stateful_RNG(Entropy_Sources& entropy_sources, size_t reseed_interval) :
-         m_entropy_sources(&entropy_sources),
-         m_reseed_interval(reseed_interval)
-         {}
+            m_entropy_sources(&entropy_sources), m_reseed_interval(reseed_interval) {}
 
       /**
       * In this case, automatic reseeding is impossible
@@ -72,32 +62,20 @@ class BOTAN_PUBLIC_API(2,0) Stateful_RNG : public RandomNumberGenerator
       * of the length of the input or the current seeded state of
       * the RNG.
       */
-      void initialize_with(const uint8_t input[], size_t length);
+      void initialize_with(std::span<const uint8_t> input);
 
-      bool is_seeded() const override final;
+      void initialize_with(const uint8_t input[], size_t length) { this->initialize_with(std::span(input, length)); }
 
-      bool accepts_input() const override final { return true; }
+      bool is_seeded() const final;
+
+      bool accepts_input() const final { return true; }
 
       /**
       * Mark state as requiring a reseed on next use
       */
       void force_reseed();
 
-      void reseed_from_rng(RandomNumberGenerator& rng,
-                           size_t poll_bits = BOTAN_RNG_RESEED_POLL_BITS) override final;
-
-      void add_entropy(const uint8_t input[], size_t input_len) override final;
-
-      void randomize(uint8_t output[], size_t output_len) override final;
-
-      void randomize_with_input(uint8_t output[], size_t output_len,
-                                const uint8_t input[], size_t input_len) override final;
-
-      /**
-      * Overrides default implementation and also includes the current
-      * process ID and the reseed counter.
-      */
-      void randomize_with_ts_input(uint8_t output[], size_t output_len) override final;
+      void reseed_from_rng(RandomNumberGenerator& rng, size_t poll_bits = BOTAN_RNG_RESEED_POLL_BITS) final;
 
       /**
       * Poll provided sources for up to poll_bits bits of entropy
@@ -127,19 +105,22 @@ class BOTAN_PUBLIC_API(2,0) Stateful_RNG : public RandomNumberGenerator
 
       size_t reseed_interval() const { return m_reseed_interval; }
 
-      void clear() override final;
+      void clear() final;
 
    protected:
       void reseed_check();
 
-      virtual void generate_output(uint8_t output[], size_t output_len,
-                                   const uint8_t input[], size_t input_len) = 0;
+      virtual void generate_output(std::span<uint8_t> output, std::span<const uint8_t> input) = 0;
 
-      virtual void update(const uint8_t input[], size_t input_len) = 0;
+      virtual void update(std::span<const uint8_t> input) = 0;
 
       virtual void clear_state() = 0;
 
    private:
+      void generate_batched_output(std::span<uint8_t> output, std::span<const uint8_t> input);
+
+      void fill_bytes_with_input(std::span<uint8_t> output, std::span<const uint8_t> input) final;
+
       void reset_reseed_counter();
 
       mutable recursive_mutex_type m_mutex;
@@ -159,8 +140,8 @@ class BOTAN_PUBLIC_API(2,0) Stateful_RNG : public RandomNumberGenerator
       * automatic reseeding is disabled (via m_reseed_interval = 0)
       */
       size_t m_reseed_counter = 0;
-   };
+};
 
-}
+}  // namespace Botan
 
 #endif

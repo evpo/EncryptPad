@@ -6,119 +6,89 @@
 * Botan is released under the Simplified BSD License (see license.txt)
 */
 
-#include <botan/sha2_32.h>
-#include <botan/loadstor.h>
-#include <botan/rotate.h>
-#include <botan/cpuid.h>
+#include <botan/internal/sha2_32.h>
+
+#include <botan/internal/bit_ops.h>
+#include <botan/internal/cpuid.h>
+#include <botan/internal/loadstor.h>
+#include <botan/internal/rotate.h>
+#include <botan/internal/sha2_32_f.h>
+#include <botan/internal/stl_util.h>
 
 namespace Botan {
 
 namespace {
 
-std::string sha256_provider()
-   {
+std::string sha256_provider() {
 #if defined(BOTAN_HAS_SHA2_32_X86)
-   if(CPUID::has_intel_sha())
-      {
+   if(CPUID::has_intel_sha()) {
       return "shani";
-      }
+   }
 #endif
 
 #if defined(BOTAN_HAS_SHA2_32_X86_BMI2)
-   if(CPUID::has_bmi2())
-      {
+   if(CPUID::has_bmi2()) {
       return "bmi2";
-      }
+   }
 #endif
 
 #if defined(BOTAN_HAS_SHA2_32_ARMV8)
-   if(CPUID::has_arm_sha2())
-      {
+   if(CPUID::has_arm_sha2()) {
       return "armv8";
-      }
+   }
 #endif
 
    return "base";
-   }
-
 }
 
-std::unique_ptr<HashFunction> SHA_224::copy_state() const
-   {
-   return std::unique_ptr<HashFunction>(new SHA_224(*this));
-   }
-
-std::unique_ptr<HashFunction> SHA_256::copy_state() const
-   {
-   return std::unique_ptr<HashFunction>(new SHA_256(*this));
-   }
-
-/*
-* SHA-256 F1 Function
-*
-* Use a macro as many compilers won't inline a function this big,
-* even though it is much faster if inlined.
-*/
-#define SHA2_32_F(A, B, C, D, E, F, G, H, M1, M2, M3, M4, magic) do {               \
-   uint32_t A_rho = rotr<2>(A) ^ rotr<13>(A) ^ rotr<22>(A); \
-   uint32_t E_rho = rotr<6>(E) ^ rotr<11>(E) ^ rotr<25>(E); \
-   uint32_t M2_sigma = rotr<17>(M2) ^ rotr<19>(M2) ^ (M2 >> 10);    \
-   uint32_t M4_sigma = rotr<7>(M4) ^ rotr<18>(M4) ^ (M4 >> 3);      \
-   H += magic + E_rho + ((E & F) ^ (~E & G)) + M1;                                  \
-   D += H;                                                                          \
-   H += A_rho + ((A & B) | ((A | B) & C));                                          \
-   M1 += M2_sigma + M3 + M4_sigma;                                                  \
-   } while(0);
+}  // namespace
 
 /*
 * SHA-224 / SHA-256 compression function
 */
-void SHA_256::compress_digest(secure_vector<uint32_t>& digest,
-                              const uint8_t input[], size_t blocks)
-   {
+void SHA_256::compress_digest(digest_type& digest, std::span<const uint8_t> input, size_t blocks) {
 #if defined(BOTAN_HAS_SHA2_32_X86)
-   if(CPUID::has_intel_sha())
-      {
+   if(CPUID::has_intel_sha()) {
       return SHA_256::compress_digest_x86(digest, input, blocks);
-      }
+   }
 #endif
 
 #if defined(BOTAN_HAS_SHA2_32_X86_BMI2)
-   if(CPUID::has_bmi2())
-      {
+   if(CPUID::has_bmi2()) {
       return SHA_256::compress_digest_x86_bmi2(digest, input, blocks);
-      }
+   }
 #endif
 
 #if defined(BOTAN_HAS_SHA2_32_ARMV8)
-   if(CPUID::has_arm_sha2())
-      {
+   if(CPUID::has_arm_sha2()) {
       return SHA_256::compress_digest_armv8(digest, input, blocks);
-      }
+   }
 #endif
 
-   uint32_t A = digest[0], B = digest[1], C = digest[2],
-            D = digest[3], E = digest[4], F = digest[5],
-            G = digest[6], H = digest[7];
+   uint32_t A = digest[0], B = digest[1], C = digest[2], D = digest[3], E = digest[4], F = digest[5], G = digest[6],
+            H = digest[7];
 
-   for(size_t i = 0; i != blocks; ++i)
-      {
-      uint32_t W00 = load_be<uint32_t>(input,  0);
-      uint32_t W01 = load_be<uint32_t>(input,  1);
-      uint32_t W02 = load_be<uint32_t>(input,  2);
-      uint32_t W03 = load_be<uint32_t>(input,  3);
-      uint32_t W04 = load_be<uint32_t>(input,  4);
-      uint32_t W05 = load_be<uint32_t>(input,  5);
-      uint32_t W06 = load_be<uint32_t>(input,  6);
-      uint32_t W07 = load_be<uint32_t>(input,  7);
-      uint32_t W08 = load_be<uint32_t>(input,  8);
-      uint32_t W09 = load_be<uint32_t>(input,  9);
-      uint32_t W10 = load_be<uint32_t>(input, 10);
-      uint32_t W11 = load_be<uint32_t>(input, 11);
-      uint32_t W12 = load_be<uint32_t>(input, 12);
-      uint32_t W13 = load_be<uint32_t>(input, 13);
-      uint32_t W14 = load_be<uint32_t>(input, 14);
-      uint32_t W15 = load_be<uint32_t>(input, 15);
+   BufferSlicer in(input);
+
+   for(size_t i = 0; i != blocks; ++i) {
+      const auto block = in.take(block_bytes);
+
+      uint32_t W00 = load_be<uint32_t>(block.data(), 0);
+      uint32_t W01 = load_be<uint32_t>(block.data(), 1);
+      uint32_t W02 = load_be<uint32_t>(block.data(), 2);
+      uint32_t W03 = load_be<uint32_t>(block.data(), 3);
+      uint32_t W04 = load_be<uint32_t>(block.data(), 4);
+      uint32_t W05 = load_be<uint32_t>(block.data(), 5);
+      uint32_t W06 = load_be<uint32_t>(block.data(), 6);
+      uint32_t W07 = load_be<uint32_t>(block.data(), 7);
+      uint32_t W08 = load_be<uint32_t>(block.data(), 8);
+      uint32_t W09 = load_be<uint32_t>(block.data(), 9);
+      uint32_t W10 = load_be<uint32_t>(block.data(), 10);
+      uint32_t W11 = load_be<uint32_t>(block.data(), 11);
+      uint32_t W12 = load_be<uint32_t>(block.data(), 12);
+      uint32_t W13 = load_be<uint32_t>(block.data(), 13);
+      uint32_t W14 = load_be<uint32_t>(block.data(), 14);
+      uint32_t W15 = load_be<uint32_t>(block.data(), 15);
 
       SHA2_32_F(A, B, C, D, E, F, G, H, W00, W14, W09, W01, 0x428A2F98);
       SHA2_32_F(H, A, B, C, D, E, F, G, W01, W15, W10, W02, 0x71374491);
@@ -196,83 +166,63 @@ void SHA_256::compress_digest(secure_vector<uint32_t>& digest,
       F = (digest[5] += F);
       G = (digest[6] += G);
       H = (digest[7] += H);
-
-      input += 64;
-      }
    }
-
-std::string SHA_224::provider() const
-   {
-   return sha256_provider();
-   }
-
-std::string SHA_256::provider() const
-   {
-   return sha256_provider();
-   }
-
-/*
-* SHA-224 compression function
-*/
-void SHA_224::compress_n(const uint8_t input[], size_t blocks)
-   {
-   SHA_256::compress_digest(m_digest, input, blocks);
-   }
-
-/*
-* Copy out the digest
-*/
-void SHA_224::copy_out(uint8_t output[])
-   {
-   copy_out_vec_be(output, output_length(), m_digest);
-   }
-
-/*
-* Clear memory of sensitive data
-*/
-void SHA_224::clear()
-   {
-   MDx_HashFunction::clear();
-   m_digest[0] = 0xC1059ED8;
-   m_digest[1] = 0x367CD507;
-   m_digest[2] = 0x3070DD17;
-   m_digest[3] = 0xF70E5939;
-   m_digest[4] = 0xFFC00B31;
-   m_digest[5] = 0x68581511;
-   m_digest[6] = 0x64F98FA7;
-   m_digest[7] = 0xBEFA4FA4;
-   }
-
-/*
-* SHA-256 compression function
-*/
-void SHA_256::compress_n(const uint8_t input[], size_t blocks)
-   {
-   SHA_256::compress_digest(m_digest, input, blocks);
-   }
-
-/*
-* Copy out the digest
-*/
-void SHA_256::copy_out(uint8_t output[])
-   {
-   copy_out_vec_be(output, output_length(), m_digest);
-   }
-
-/*
-* Clear memory of sensitive data
-*/
-void SHA_256::clear()
-   {
-   MDx_HashFunction::clear();
-   m_digest[0] = 0x6A09E667;
-   m_digest[1] = 0xBB67AE85;
-   m_digest[2] = 0x3C6EF372;
-   m_digest[3] = 0xA54FF53A;
-   m_digest[4] = 0x510E527F;
-   m_digest[5] = 0x9B05688C;
-   m_digest[6] = 0x1F83D9AB;
-   m_digest[7] = 0x5BE0CD19;
-   }
-
 }
+
+std::string SHA_224::provider() const {
+   return sha256_provider();
+}
+
+void SHA_224::compress_n(digest_type& digest, std::span<const uint8_t> input, size_t blocks) {
+   SHA_256::compress_digest(digest, input, blocks);
+}
+
+void SHA_224::init(digest_type& digest) {
+   digest.assign({0xC1059ED8, 0x367CD507, 0x3070DD17, 0xF70E5939, 0xFFC00B31, 0x68581511, 0x64F98FA7, 0xBEFA4FA4});
+}
+
+std::unique_ptr<HashFunction> SHA_224::new_object() const {
+   return std::make_unique<SHA_224>();
+}
+
+std::unique_ptr<HashFunction> SHA_224::copy_state() const {
+   return std::make_unique<SHA_224>(*this);
+}
+
+void SHA_224::add_data(std::span<const uint8_t> input) {
+   m_md.update(input);
+}
+
+void SHA_224::final_result(std::span<uint8_t> output) {
+   m_md.final(output);
+}
+
+std::string SHA_256::provider() const {
+   return sha256_provider();
+}
+
+void SHA_256::compress_n(digest_type& digest, std::span<const uint8_t> input, size_t blocks) {
+   SHA_256::compress_digest(digest, input, blocks);
+}
+
+void SHA_256::init(digest_type& digest) {
+   digest.assign({0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A, 0x510E527F, 0x9B05688C, 0x1F83D9AB, 0x5BE0CD19});
+}
+
+std::unique_ptr<HashFunction> SHA_256::new_object() const {
+   return std::make_unique<SHA_256>();
+}
+
+std::unique_ptr<HashFunction> SHA_256::copy_state() const {
+   return std::make_unique<SHA_256>(*this);
+}
+
+void SHA_256::add_data(std::span<const uint8_t> input) {
+   m_md.update(input);
+}
+
+void SHA_256::final_result(std::span<uint8_t> output) {
+   m_md.final(output);
+}
+
+}  // namespace Botan

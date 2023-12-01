@@ -6,13 +6,15 @@ optimization_flags "-xO2"
 
 shared_flags "-KPIC"
 warning_flags "+w -erroff=truncwarn,wnoretvalue,wlessrestrictedthrow"
-lang_flags "-std=c++11 +p -features=extensions"
+lang_flags "-std=c++20 +p -features=extensions"
 
 ar_command CC
 ar_options "-xar -o"
 
+supports_gcc_inline_asm yes
+
 <so_link_commands>
-default -> "$(CXX) -G -h{soname_abi}"
+default -> "{cxx} -G -h{soname_abi}"
 </so_link_commands>
 
 <mach_abi_linking>

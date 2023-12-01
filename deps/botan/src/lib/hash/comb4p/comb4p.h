@@ -10,52 +10,41 @@
 
 #include <botan/hash.h>
 
-BOTAN_FUTURE_INTERNAL_HEADER(comb4p.h)
-
 namespace Botan {
 
 /**
 * Combines two hash functions using a Feistel scheme. Described in
 * "On the Security of Hash Function Combiners", Anja Lehmann
 */
-class BOTAN_PUBLIC_API(2,0) Comb4P final : public HashFunction
-   {
+class Comb4P final : public HashFunction {
    public:
       /**
       * @param h1 the first hash
       * @param h2 the second hash
       */
-      Comb4P(HashFunction* h1, HashFunction* h2);
+      Comb4P(std::unique_ptr<HashFunction> h1, std::unique_ptr<HashFunction> h2);
 
       size_t hash_block_size() const override;
 
-      size_t output_length() const override
-         {
-         return m_hash1->output_length() + m_hash2->output_length();
-         }
+      size_t output_length() const override { return m_hash1->output_length() + m_hash2->output_length(); }
 
-      HashFunction* clone() const override
-         {
-         return new Comb4P(m_hash1->clone(), m_hash2->clone());
-         }
+      std::unique_ptr<HashFunction> new_object() const override;
 
       std::unique_ptr<HashFunction> copy_state() const override;
 
-      std::string name() const override
-         {
-         return "Comb4P(" + m_hash1->name() + "," + m_hash2->name() + ")";
-         }
+      std::string name() const override;
 
       void clear() override;
+
    private:
       Comb4P() = default;
 
-      void add_data(const uint8_t input[], size_t length) override;
-      void final_result(uint8_t out[]) override;
+      void add_data(std::span<const uint8_t> input) override;
+      void final_result(std::span<uint8_t> out) override;
 
       std::unique_ptr<HashFunction> m_hash1, m_hash2;
-   };
+};
 
-}
+}  // namespace Botan
 
 #endif

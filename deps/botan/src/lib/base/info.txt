@@ -1,14 +1,14 @@
 <header:public>
-botan.h
 buf_comp.h
-init.h
-key_spec.h
-lookup.h
 secmem.h
-scan_name.h
 sym_algo.h
 symkey.h
 </header:public>
+
+<module_info>
+name -> "Base Types"
+brief -> "Defines some high level types"
+</module_info>
 
 <requires>
 hex

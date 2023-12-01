@@ -10,42 +10,55 @@
 
 #include <botan/hash.h>
 #include <botan/secmem.h>
+#include <botan/internal/keccak_perm.h>
 #include <string>
 
 namespace Botan {
 
-BOTAN_FUTURE_INTERNAL_HEADER(keccak.h)
-
 /**
-* Keccak[1600], a SHA-3 candidate
+* Keccak[1600], the SHA-3 submission without any final bit padding. Not an official NIST SHA-3-derived hash function.
+*
+* In the terminology of the official SHA-3 specification [1],
+* the instantiations of this hash function
+* (with the output bit size in brackets) are given as
+*
+* Keccak1600[224](M) = KECCAK[448] (M, 224)
+* Keccak1600[256](M) = KECCAK[512] (M, 256)
+* Keccak1600[384](M) = KECCAK[768] (M, 384)
+* Keccak1600[512](M) = KECCAK[1024] (M, 512)
+*
+* i.e., as raw Keccak[c] without any additional final bit padding.
+*
+* [1] https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.202.pdf#page=28
+*
 */
-class BOTAN_PUBLIC_API(2,0) Keccak_1600 final : public HashFunction
-   {
+class Keccak_1600 final : public HashFunction {
    public:
-
       /**
       * @param output_bits the size of the hash output; must be one of
       *                    224, 256, 384, or 512
       */
       explicit Keccak_1600(size_t output_bits = 512);
 
-      size_t hash_block_size() const override { return m_bitrate / 8; }
-      size_t output_length() const override { return m_output_bits / 8; }
+      size_t hash_block_size() const override { return m_keccak.byte_rate(); }
 
-      HashFunction* clone() const override;
+      size_t output_length() const override { return m_output_length; }
+
+      std::unique_ptr<HashFunction> new_object() const override;
       std::unique_ptr<HashFunction> copy_state() const override;
       std::string name() const override;
       void clear() override;
+      std::string provider() const override;
 
    private:
-      void add_data(const uint8_t input[], size_t length) override;
-      void final_result(uint8_t out[]) override;
+      void add_data(std::span<const uint8_t> input) override;
+      void final_result(std::span<uint8_t> out) override;
 
-      size_t m_output_bits, m_bitrate;
-      secure_vector<uint64_t> m_S;
-      size_t m_S_pos;
-   };
+   private:
+      Keccak_Permutation m_keccak;
+      size_t m_output_length;
+};
 
-}
+}  // namespace Botan
 
 #endif

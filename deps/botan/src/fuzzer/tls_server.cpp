@@ -5,10 +5,18 @@
 */
 
 #include "fuzzers.h"
-#include <botan/tls_server.h>
-#include <botan/data_src.h>
 
-const char* fixed_rsa_key =
+#include <botan/data_src.h>
+#include <botan/hex.h>
+#include <botan/pkcs8.h>
+#include <botan/tls_server.h>
+#include <botan/tls_session_manager_noop.h>
+
+#include <memory>
+
+namespace {
+
+const char* const fixed_rsa_key =
    "-----BEGIN PRIVATE KEY-----\n"
    "MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCe6qqpMQVJ7zCJ\n"
    "oSnpxia0yO6M7Ie3FGqPcd0DzueC+kWPvuHQ+PpP5vfO6qqRaDVII37PFX5NUZQm\n"
@@ -38,7 +46,7 @@ const char* fixed_rsa_key =
    "kbf4VLg8Vk9u/R3RU1HsYWhe\n"
    "-----END PRIVATE KEY-----\n";
 
-const char* fixed_rsa_cert =
+const char* const fixed_rsa_cert =
    "-----BEGIN CERTIFICATE-----\n"
    "MIIDUDCCAjgCCQD7pIb1ZsoafjANBgkqhkiG9w0BAQsFADBqMQswCQYDVQQGEwJW\n"
    "VDEQMA4GA1UECAwHVmVybW9udDEWMBQGA1UEBwwNVGhlIEludGVybmV0czEUMBIG\n"
@@ -60,168 +68,148 @@ const char* fixed_rsa_cert =
    "Dk02a/1AOJZdZReDbgXhlqaUx5pk/rzo4mDzvu5HSCeXmClz\n"
    "-----END CERTIFICATE-----\n";
 
-class Fuzzer_TLS_Server_Creds : public Botan::Credentials_Manager
-   {
+class Fuzzer_TLS_Server_Creds : public Botan::Credentials_Manager {
    public:
-      Fuzzer_TLS_Server_Creds()
-         {
+      Fuzzer_TLS_Server_Creds() {
          Botan::DataSource_Memory cert_in(fixed_rsa_cert);
-         Botan::DataSource_Memory key_in(fixed_rsa_key);
+         m_rsa_cert = std::make_unique<Botan::X509_Certificate>(cert_in);
 
-         m_rsa_cert.reset(new Botan::X509_Certificate(cert_in));
-         //m_rsa_key.reset(Botan::PKCS8::load_key(key_in, fuzzer_rng());
-         }
+         Botan::DataSource_Memory key_in(fixed_rsa_key);
+         m_rsa_key.reset(Botan::PKCS8::load_key(key_in).release());
+      }
 
       std::vector<Botan::X509_Certificate> cert_chain(
          const std::vector<std::string>& algos,
+         const std::vector<Botan::AlgorithmIdentifier>& /*signature_schemes*/,
          const std::string& /*type*/,
-         const std::string& /*hostname*/) override
-         {
+         const std::string& /*hostname*/) override {
          std::vector<Botan::X509_Certificate> v;
 
-         for(auto algo : algos)
-            {
-            if(algo == "RSA")
-               {
+         for(const auto& algo : algos) {
+            if(algo == "RSA") {
                v.push_back(*m_rsa_cert);
                break;
-               }
             }
+         }
 
          return v;
-         }
+      }
 
-      Botan::Private_Key* private_key_for(const Botan::X509_Certificate& /*cert*/,
-                                          const std::string& /*type*/,
-                                          const std::string& /*context*/) override
-         {
-         return m_rsa_key.get();
+      std::shared_ptr<Botan::Private_Key> private_key_for(const Botan::X509_Certificate& /*cert*/,
+                                                          const std::string& type,
+                                                          const std::string& /*context*/) override {
+         if(type == "RSA") {
+            return m_rsa_key;
          }
+         return nullptr;
+      }
+
+      Botan::secure_vector<uint8_t> session_ticket_key() override {
+         return Botan::hex_decode_locked("AABBCCDDEEFF00112233445566778899");
+      }
+
+      Botan::secure_vector<uint8_t> dtls_cookie_secret() override {
+         return Botan::hex_decode_locked("AABBCCDDEEFF00112233445566778899");
+      }
 
       std::string psk_identity_hint(const std::string&, const std::string&) override { return "psk_hint"; }
+
       std::string psk_identity(const std::string&, const std::string&, const std::string&) override { return "psk_id"; }
-      Botan::SymmetricKey psk(const std::string&, const std::string&, const std::string&) override
-         {
-         return Botan::SymmetricKey("AABBCCDDEEFF00112233445566778899");
+
+      std::vector<Botan::TLS::ExternalPSK> find_preshared_keys(
+         std::string_view host,
+         Botan::TLS::Connection_Side whoami,
+         const std::vector<std::string>& identities = {},
+         const std::optional<std::string>& prf = std::nullopt) override {
+         if(!identities.empty() && std::find(identities.begin(), identities.end(), "psk_id") == identities.end()) {
+            return Botan::Credentials_Manager::find_preshared_keys(host, whoami, identities, prf);
          }
+
+         std::vector<Botan::TLS::ExternalPSK> psks;
+         psks.emplace_back("psk_id", "SHA-256", Botan::hex_decode_locked("AABBCCDDEEFF00112233445566778899"));
+         return psks;
+      }
+
    private:
       std::unique_ptr<Botan::X509_Certificate> m_rsa_cert;
-      std::unique_ptr<Botan::Private_Key> m_rsa_key;
-   };
+      std::shared_ptr<Botan::Private_Key> m_rsa_key;
+};
 
-class Fuzzer_TLS_Policy : public Botan::TLS::Policy
-   {
+class Fuzzer_TLS_Policy : public Botan::TLS::Policy {
    public:
-      std::vector<uint16_t> ciphersuite_list(Botan::TLS::Protocol_Version version,
-                                             bool have_srp) const
-         {
+      // TODO: Enable this once the TLS 1.3 server implementation is ready.
+      //       Maybe even build individual fuzz targets for different versions.
+      bool allow_tls13() const override { return false; }
+
+      std::vector<uint16_t> ciphersuite_list(Botan::TLS::Protocol_Version) const override {
          std::vector<uint16_t> ciphersuites;
 
-         for(auto&& suite : Botan::TLS::Ciphersuite::all_known_ciphersuites())
-            {
-            if(suite.valid() == false)
-               continue;
-
-            // Are we doing SRP?
-            if(!have_srp && suite.kex_method() == Botan::TLS::Kex_Algo::SRP_SHA)
-               continue;
-
-            if(!version.supports_aead_modes())
-               {
-               // Are we doing AEAD in a non-AEAD version?
-               if(suite.mac_algo() == "AEAD")
-                  continue;
-
-               // Older (v1.0/v1.1) versions also do not support any hash but SHA-1
-               if(suite.mac_algo() != "SHA-1")
-                  continue;
-               }
-
-            ciphersuites.push_back(suite.ciphersuite_code());
+         for(auto&& suite : Botan::TLS::Ciphersuite::all_known_ciphersuites()) {
+            if(suite.valid()) {
+               ciphersuites.push_back(suite.ciphersuite_code());
             }
+         }
 
          return ciphersuites;
-         }
-   };
+      }
+};
 
-class Fuzzer_TLS_Server_Callbacks : public Botan::TLS::Callbacks
-   {
+class Fuzzer_TLS_Server_Callbacks : public Botan::TLS::Callbacks {
    public:
-       void tls_emit_data(const uint8_t[], size_t) override
-         {
+      void tls_emit_data(std::span<const uint8_t>) override {
          // discard
-         }
+      }
 
-      void tls_record_received(uint64_t, const uint8_t[], size_t) override
-         {
+      void tls_record_received(uint64_t, std::span<const uint8_t>) override {
          // ignore peer data
-         }
+      }
 
-      void tls_alert(Botan::TLS::Alert) override
-         {
+      void tls_alert(Botan::TLS::Alert) override {
          // ignore alert
-         }
+      }
 
-      bool tls_session_established(const Botan::TLS::Session&) override
-         {
-         return true; // cache it
-         }
-
-      std::string tls_server_choose_app_protocol(const std::vector<std::string>& client_protos) override
-         {
-         if(client_protos.size() > 1)
+      std::string tls_server_choose_app_protocol(const std::vector<std::string>& client_protos) override {
+         if(client_protos.size() > 1) {
             return client_protos[0];
-         else
+         } else {
             return "fuzzy";
          }
+      }
 
-      void tls_verify_cert_chain(
-         const std::vector<Botan::X509_Certificate>& cert_chain,
-         const std::vector<std::shared_ptr<const Botan::OCSP::Response>>& ocsp_responses,
-         const std::vector<Botan::Certificate_Store*>& trusted_roots,
-         Botan::Usage_Type usage,
-         const std::string& hostname,
-         const Botan::TLS::Policy& policy) override
-         {
-         try
-            {
+      void tls_verify_cert_chain(const std::vector<Botan::X509_Certificate>& cert_chain,
+                                 const std::vector<std::optional<Botan::OCSP::Response>>& ocsp_responses,
+                                 const std::vector<Botan::Certificate_Store*>& trusted_roots,
+                                 Botan::Usage_Type usage,
+                                 std::string_view hostname,
+                                 const Botan::TLS::Policy& policy) override {
+         try {
             // try to validate to exercise those code paths
-            Botan::TLS::Callbacks::tls_verify_cert_chain(cert_chain, ocsp_responses,
-                                                         trusted_roots, usage, hostname, policy);
-            }
-         catch(...)
-            {
+            Botan::TLS::Callbacks::tls_verify_cert_chain(
+               cert_chain, ocsp_responses, trusted_roots, usage, hostname, policy);
+         } catch(...) {
             // ignore validation result
-            }
          }
+      }
+};
 
-   };
+}  // namespace
 
-void fuzz(const uint8_t in[], size_t len)
-   {
-   if(len <= 1)
+void fuzz(const uint8_t in[], size_t len) {
+   if(len <= 1) {
       return;
+   }
 
-   Botan::TLS::Session_Manager_Noop session_manager;
-   Fuzzer_TLS_Policy policy;
+   auto session_manager = std::make_shared<Botan::TLS::Session_Manager_Noop>();
+   auto policy = std::make_shared<Fuzzer_TLS_Policy>();
    Botan::TLS::Server_Information info("server.name", 443);
-   Fuzzer_TLS_Server_Creds creds;
-   Fuzzer_TLS_Server_Callbacks callbacks;
+   auto creds = std::make_shared<Fuzzer_TLS_Server_Creds>();
+   auto callbacks = std::make_shared<Fuzzer_TLS_Server_Callbacks>();
 
    const bool is_datagram = in[0] & 1;
 
-   Botan::TLS::Server server(callbacks,
-                             session_manager,
-                             creds,
-                             policy,
-                             fuzzer_rng(),
-                             is_datagram);
+   Botan::TLS::Server server(callbacks, session_manager, creds, policy, fuzzer_rng_as_shared(), is_datagram);
 
-   try
-      {
+   try {
       server.received_data(in + 1, len - 1);
-      }
-   catch(std::exception& e)
-      {
-      }
-   }
+   } catch(std::exception& e) {}
+}

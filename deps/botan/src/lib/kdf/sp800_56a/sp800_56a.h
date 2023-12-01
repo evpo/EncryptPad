@@ -9,11 +9,9 @@
 #ifndef BOTAN_SP800_56A_H_
 #define BOTAN_SP800_56A_H_
 
-#include <botan/kdf.h>
 #include <botan/hash.h>
+#include <botan/kdf.h>
 #include <botan/mac.h>
-
-BOTAN_FUTURE_INTERNAL_HEADER(sp800_56a.h)
 
 namespace Botan {
 
@@ -21,12 +19,11 @@ namespace Botan {
  * NIST SP 800-56A KDF using hash function
  * @warning This KDF ignores the provided salt value
  */
-class BOTAN_PUBLIC_API(2,2) SP800_56A_Hash final : public KDF
-   {
+class SP800_56A_Hash final : public KDF {
    public:
-      std::string name() const override { return "SP800-56A(" + m_hash->name() + ")"; }
+      std::string name() const override;
 
-      KDF* clone() const override { return new SP800_56A_Hash(m_hash->clone()); }
+      std::unique_ptr<KDF> new_object() const override;
 
       /**
       * Derive a key using the SP800-56A KDF.
@@ -45,28 +42,32 @@ class BOTAN_PUBLIC_API(2,2) SP800_56A_Hash final : public KDF
       *
       * @throws Invalid_Argument key_len > 2^32
       */
-      size_t kdf(uint8_t key[], size_t key_len,
-                 const uint8_t secret[], size_t secret_len,
-                 const uint8_t salt[], size_t salt_len,
-                 const uint8_t label[], size_t label_len) const override;
+      void kdf(uint8_t key[],
+               size_t key_len,
+               const uint8_t secret[],
+               size_t secret_len,
+               const uint8_t salt[],
+               size_t salt_len,
+               const uint8_t label[],
+               size_t label_len) const override;
 
       /**
       * @param hash the hash function to use as the auxiliary function
       */
-      explicit SP800_56A_Hash(HashFunction* hash) : m_hash(hash) {}
+      explicit SP800_56A_Hash(std::unique_ptr<HashFunction> hash) : m_hash(std::move(hash)) {}
+
    private:
       std::unique_ptr<HashFunction> m_hash;
-   };
+};
 
 /**
  * NIST SP 800-56A KDF using HMAC
  */
-class BOTAN_PUBLIC_API(2,2) SP800_56A_HMAC final : public KDF
-   {
+class SP800_56A_HMAC final : public KDF {
    public:
-      std::string name() const override { return "SP800-56A(" + m_mac->name() + ")"; }
+      std::string name() const override;
 
-      KDF* clone() const override { return new SP800_56A_HMAC(m_mac->clone()); }
+      std::unique_ptr<KDF> new_object() const override;
 
       /**
       * Derive a key using the SP800-56A KDF.
@@ -85,19 +86,24 @@ class BOTAN_PUBLIC_API(2,2) SP800_56A_HMAC final : public KDF
       *
       * @throws Invalid_Argument key_len > 2^32 or MAC is not a HMAC
       */
-      size_t kdf(uint8_t key[], size_t key_len,
-                 const uint8_t secret[], size_t secret_len,
-                 const uint8_t salt[], size_t salt_len,
-                 const uint8_t label[], size_t label_len) const override;
+      void kdf(uint8_t key[],
+               size_t key_len,
+               const uint8_t secret[],
+               size_t secret_len,
+               const uint8_t salt[],
+               size_t salt_len,
+               const uint8_t label[],
+               size_t label_len) const override;
 
       /**
       * @param mac the HMAC to use as the auxiliary function
       */
-      explicit SP800_56A_HMAC(MessageAuthenticationCode* mac);
+      explicit SP800_56A_HMAC(std::unique_ptr<MessageAuthenticationCode> mac);
+
    private:
       std::unique_ptr<MessageAuthenticationCode> m_mac;
-   };
+};
 
-}
+}  // namespace Botan
 
 #endif

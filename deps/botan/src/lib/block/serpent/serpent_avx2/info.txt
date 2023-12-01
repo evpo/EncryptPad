@@ -2,6 +2,11 @@
 SERPENT_AVX2 -> 20180824
 </defines>
 
+<module_info>
+name -> "Serpent AVX2"
+brief -> "Serpent using AVX2 instructions"
+</module_info>
+
 <isa>
 avx2
 </isa>
@@ -10,8 +15,7 @@ avx2
 simd_avx2
 </requires>
 
-# We must exclude MSVC due to #2120
+# MSVC 2019 miscompiles this code (see #2120)
 <cc>
-gcc
-clang
+!msvc
 </cc>

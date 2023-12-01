@@ -1,0 +1,29 @@
+<defines>
+TLS_13 -> 20210721
+</defines>
+
+<module_info>
+name -> "TLS 1.3"
+brief -> "TLS 1.3 protocol implementation"
+</module_info>
+
+<header:public>
+tls_psk_identity_13.h
+</header:public>
+
+<header:internal>
+tls_channel_impl_13.h
+tls_cipher_state.h
+tls_client_impl_13.h
+tls_handshake_layer_13.h
+tls_handshake_state_13.h
+tls_record_layer_13.h
+tls_server_impl_13.h
+tls_transcript_hash_13.h
+</header:internal>
+
+<requires>
+hkdf
+tls
+tls12
+</requires>

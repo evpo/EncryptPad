@@ -6,14 +6,10 @@
 */
 
 #include <botan/internal/getentropy.h>
+#include <unistd.h>
 
-#if defined(BOTAN_TARGET_OS_IS_OPENBSD) || defined(BOTAN_TARGET_OS_IS_FREEBSD)
-   #include <unistd.h>
-#else
-   #if defined(BOTAN_TARGET_OS_HAS_POSIX1)
-      // Allows successful compilation on macOS older than 10.12: Provides a missing typedef for `u_int`.
-      #include <sys/types.h>
-   #endif
+// macOS and Android include it in sys/random.h instead
+#if __has_include(<sys/random.h>)
    #include <sys/random.h>
 #endif
 
@@ -24,16 +20,15 @@ namespace Botan {
 * buffer size is limited to 256 bytes.  On OpenBSD this does neither
 * block nor fail.
 */
-size_t Getentropy::poll(RandomNumberGenerator& rng)
-   {
+size_t Getentropy::poll(RandomNumberGenerator& rng) {
    secure_vector<uint8_t> buf(256);
 
-   if(::getentropy(buf.data(), buf.size()) == 0)
-      {
+   if(::getentropy(buf.data(), buf.size()) == 0) {
       rng.add_entropy(buf.data(), buf.size());
       return buf.size() * 8;
-      }
+   }
 
    return 0;
-   }
 }
+
+}  // namespace Botan

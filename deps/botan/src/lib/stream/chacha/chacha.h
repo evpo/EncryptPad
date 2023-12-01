@@ -10,15 +10,12 @@
 
 #include <botan/stream_cipher.h>
 
-BOTAN_FUTURE_INTERNAL_HEADER(chacha.h)
-
 namespace Botan {
 
 /**
 * DJB's ChaCha (https://cr.yp.to/chacha.html)
 */
-class BOTAN_PUBLIC_API(2,0) ChaCha final : public StreamCipher
-   {
+class ChaCha final : public StreamCipher {
    public:
       /**
       * @param rounds number of rounds
@@ -28,12 +25,6 @@ class BOTAN_PUBLIC_API(2,0) ChaCha final : public StreamCipher
       explicit ChaCha(size_t rounds = 20);
 
       std::string provider() const override;
-
-      void cipher(const uint8_t in[], uint8_t out[], size_t length) override;
-
-      void write_keystream(uint8_t out[], size_t len) override;
-
-      void set_iv(const uint8_t iv[], size_t iv_len) override;
 
       /*
       * ChaCha accepts 0, 8, 12 or 24 byte IVs.
@@ -49,25 +40,41 @@ class BOTAN_PUBLIC_API(2,0) ChaCha final : public StreamCipher
 
       void clear() override;
 
-      StreamCipher* clone() const override;
+      std::unique_ptr<StreamCipher> new_object() const override;
 
       std::string name() const override;
 
       void seek(uint64_t offset) override;
 
+      bool has_keying_material() const override;
+
+      size_t buffer_size() const override;
+
    private:
-      void key_schedule(const uint8_t key[], size_t key_len) override;
+      void key_schedule(std::span<const uint8_t> key) override;
+
+      void cipher_bytes(const uint8_t in[], uint8_t out[], size_t length) override;
+
+      void generate_keystream(uint8_t out[], size_t len) override;
+
+      void set_iv_bytes(const uint8_t iv[], size_t iv_len) override;
 
       void initialize_state();
 
-      void chacha_x8(uint8_t output[64*8], uint32_t state[16], size_t rounds);
+      static size_t parallelism();
+
+      static void chacha(uint8_t output[], size_t output_blocks, uint32_t state[16], size_t rounds);
 
 #if defined(BOTAN_HAS_CHACHA_SIMD32)
-      void chacha_simd32_x4(uint8_t output[64*4], uint32_t state[16], size_t rounds);
+      static void chacha_simd32_x4(uint8_t output[64 * 4], uint32_t state[16], size_t rounds);
 #endif
 
 #if defined(BOTAN_HAS_CHACHA_AVX2)
-      void chacha_avx2_x8(uint8_t output[64*8], uint32_t state[16], size_t rounds);
+      static void chacha_avx2_x8(uint8_t output[64 * 8], uint32_t state[16], size_t rounds);
+#endif
+
+#if defined(BOTAN_HAS_CHACHA_AVX512)
+      static void chacha_avx512_x16(uint8_t output[64 * 16], uint32_t state[16], size_t rounds);
 #endif
 
       size_t m_rounds;
@@ -75,8 +82,8 @@ class BOTAN_PUBLIC_API(2,0) ChaCha final : public StreamCipher
       secure_vector<uint32_t> m_state;
       secure_vector<uint8_t> m_buffer;
       size_t m_position = 0;
-   };
+};
 
-}
+}  // namespace Botan
 
 #endif

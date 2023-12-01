@@ -6,24 +6,15 @@
 */
 
 #include <botan/tls_session_manager_sqlite.h>
+
 #include <botan/sqlite3.h>
 
-namespace Botan {
+namespace Botan::TLS {
 
-namespace TLS {
+Session_Manager_SQLite::Session_Manager_SQLite(std::string_view passphrase,
+                                               const std::shared_ptr<RandomNumberGenerator>& rng,
+                                               std::string_view db_filename,
+                                               size_t max_sessions) :
+      Session_Manager_SQL(std::make_shared<Sqlite3_Database>(db_filename), passphrase, rng, max_sessions) {}
 
-Session_Manager_SQLite::Session_Manager_SQLite(const std::string& passphrase,
-                                               RandomNumberGenerator& rng,
-                                               const std::string& db_filename,
-                                               size_t max_sessions,
-                                               std::chrono::seconds session_lifetime) :
-   Session_Manager_SQL(std::make_shared<Sqlite3_Database>(db_filename),
-                       passphrase,
-                       rng,
-                       max_sessions,
-                       session_lifetime)
-   {}
-
-}
-
-}
+}  // namespace Botan::TLS

@@ -2,11 +2,18 @@
 DSA -> 20131128
 </defines>
 
+<module_info>
+name -> "DSA"
+</module_info>
+
 <requires>
 dl_algo
 dl_group
 keypair
 numbertheory
-emsa1
 sha2_32
 </requires>
+
+<header:public>
+dsa.h
+</header:public>

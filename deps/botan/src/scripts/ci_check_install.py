@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # coding=utf8
 
 """
@@ -26,7 +26,7 @@ def verify_library(build_config):
     major_version = int(build_config["version_major"])
 
     if build_config['compiler'] == 'msvc':
-        expected_lib_format = r'^botan\.(dll|lib)$'
+        expected_lib_format = r'^botan-%d\.(dll|lib)$' % (major_version)
     elif build_config['os'] == 'macos':
         expected_lib_format = r'^libbotan-%d\.(a|dylib)$' % (major_version)
     else:
@@ -83,7 +83,7 @@ def main(args=None):
         print("Usage: %s <build_config.json>" % args[0])
         return 1
 
-    with open(os.path.join(args[1])) as f:
+    with open(os.path.join(args[1]), encoding='utf8') as f:
         build_config = json.load(f)
 
     install_prefix = build_config['prefix']

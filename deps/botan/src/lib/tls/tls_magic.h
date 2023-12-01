@@ -8,65 +8,78 @@
 #ifndef BOTAN_TLS_PROTOCOL_MAGIC_H_
 #define BOTAN_TLS_PROTOCOL_MAGIC_H_
 
+#include <vector>
+
 #include <botan/types.h>
 
 //BOTAN_FUTURE_INTERNAL_HEADER(tls_magic.h)
 
-namespace Botan {
-
-namespace TLS {
+namespace Botan::TLS {
 
 /**
 * Protocol Constants for SSL/TLS
+*
+* TODO: this should not be an enum
 */
-enum Size_Limits {
-   TLS_HEADER_SIZE    = 5,
-   DTLS_HEADER_SIZE   = TLS_HEADER_SIZE + 8,
+enum Size_Limits : size_t {
+   TLS_HEADER_SIZE = 5,
+   DTLS_HEADER_SIZE = TLS_HEADER_SIZE + 8,
 
-   MAX_PLAINTEXT_SIZE = 16*1024,
+   // The "TLSInnerPlaintext" length, i.e. the maximum amount of plaintext
+   // application data that can be transmitted in a single TLS record.
+   MAX_PLAINTEXT_SIZE = 16 * 1024,
+
    MAX_COMPRESSED_SIZE = MAX_PLAINTEXT_SIZE + 1024,
    MAX_CIPHERTEXT_SIZE = MAX_COMPRESSED_SIZE + 1024,
+
+   // RFC 8446 5.2:
+   //   This limit is derived from the maximum TLSInnerPlaintext length of 2^14
+   //   octets + 1 octet for ContentType + the maximum AEAD expansion of 255
+   //   octets.
+   MAX_AEAD_EXPANSION_SIZE_TLS13 = 255,
+   MAX_CIPHERTEXT_SIZE_TLS13 = MAX_PLAINTEXT_SIZE + MAX_AEAD_EXPANSION_SIZE_TLS13 + 1
 };
 
-// This will become an enum class in a future major release
-enum Connection_Side { CLIENT = 1, SERVER = 2 };
+enum class Connection_Side {
+   Client = 1,
+   Server = 2,
 
-// This will become an enum class in a future major release
-enum Record_Type {
-   CHANGE_CIPHER_SPEC = 20,
-   ALERT              = 21,
-   HANDSHAKE          = 22,
-   APPLICATION_DATA   = 23,
-
-   NO_RECORD          = 256
+   CLIENT BOTAN_DEPRECATED("Use Connection_Side::Client") = Client,
+   SERVER BOTAN_DEPRECATED("Use Connection_Side::Server") = Server,
 };
 
-// This will become an enum class in a future major release
-enum Handshake_Type {
-   HELLO_REQUEST        = 0,
-   CLIENT_HELLO         = 1,
-   SERVER_HELLO         = 2,
-   HELLO_VERIFY_REQUEST = 3,
-   NEW_SESSION_TICKET   = 4, // RFC 5077
-   CERTIFICATE          = 11,
-   SERVER_KEX           = 12,
-   CERTIFICATE_REQUEST  = 13,
-   SERVER_HELLO_DONE    = 14,
-   CERTIFICATE_VERIFY   = 15,
-   CLIENT_KEX           = 16,
-   FINISHED             = 20,
+enum class Handshake_Type {
+   HelloRequest = 0,
+   ClientHello = 1,
+   ServerHello = 2,
+   HelloVerifyRequest = 3,
+   NewSessionTicket = 4,  // RFC 5077
 
-   CERTIFICATE_URL      = 21,
-   CERTIFICATE_STATUS   = 22,
+   EndOfEarlyData = 5,       // RFC 8446 (TLS 1.3)
+   EncryptedExtensions = 8,  // RFC 8446 (TLS 1.3)
 
-   HANDSHAKE_CCS        = 254, // Not a wire value
-   HANDSHAKE_NONE       = 255  // Null value
+   Certificate = 11,
+   ServerKeyExchange = 12,
+   CertificateRequest = 13,
+   ServerHelloDone = 14,
+   CertificateVerify = 15,
+   ClientKeyExchange = 16,
+   Finished = 20,
+
+   CertificateUrl = 21,
+   CertificateStatus = 22,
+
+   KeyUpdate = 24,  // RFC 8446 (TLS 1.3)
+
+   HelloRetryRequest = 253,  // Not a wire value (HRR appears as an ordinary Server Hello)
+   HandshakeCCS = 254,       // Not a wire value (TLS 1.3 uses this value for 'message_hash' -- RFC 8446 4.4.1)
+   None = 255                // Null value
 };
 
-const char* handshake_type_to_string(Handshake_Type t);
+BOTAN_TEST_API const char* handshake_type_to_string(Handshake_Type t);
 
-}
+using Transcript_Hash = std::vector<uint8_t>;
 
-}
+}  // namespace Botan::TLS
 
 #endif

@@ -4,70 +4,49 @@ Continuous Integration and Automated Testing
 CI Build Script
 ----------------
 
-The Github Actions and AppVeyor builds are orchestrated using a script
+The Github Actions builds are orchestrated using a script
 ``src/scripts/ci_build.py``. This allows one to easily reproduce the CI process
 on a local machine.
 
 Github Actions
-----------------
+---------------
 
-This is the primary CI, and tests the Linux, macOS, and iOS builds. Among other
-things it runs tests using valgrind, compilation on various architectures
-(currently including Aarch64 and POWER), MinGW build, and a build that
-produces the coverage report.
+https://github.com/randombit/botan/actions/workflows/ci.yml
 
-The GH Actions configurations is in ``.github/workflows/ci.yml``, which executes a
-setup script ``src/scripts/ci/setup_gh_actions.sh`` to install needed packages.
-Then ``src/scripts/ci_build.py`` is invoked.
+Github Actions is the primary CI, and tests the Linux, Windows, macOS, and iOS
+builds. Among other things it runs tests using valgrind, cross-compilation
+for various architectures (currently including ARM and PPC64), MinGW build,
+and a build that produces the coverage report.
 
-AppVeyor
-----------
+The Github Actions configuration is in ``.github/workflows/ci.yml`` which
+executes platform dependent setup scripts ``src/scripts/ci/setup_gh_actions.sh``
+or ``src/scripts/ci/setup_gh_actions.ps1`` and ``.../setup_gh_actions_after_vcvars.ps1``
+to install needed packages and detect certain platform specifics like compiler
+cache locations.
 
-https://ci.appveyor.com/project/randombit/botan
+Then ``src/scripts/ci_build.py`` is invoked to steer the actual build and test
+runs.
 
-Runs a build/test cycle using MSVC on Windows. Like Travis it uses
-``src/scripts/ci_build.py``. The AppVeyor setup script is in
-``src/scripts/ci/setup_appveyor.bat``
+Github Actions (nightly)
+-------------------------
 
-The AppVeyor build uses `sccache <https://github.com/mozilla/sccache>`_ as a
-compiler cache. Since that is not available in the AppVeyor images, the setup
-script downloads a release binary from the upstream repository.
+https://github.com/randombit/botan/actions/workflows/nightly.yml
 
-LGTM
----------
+Some checks are just too slow to include in the main CI builds. These
+are instead delegated to a scheduled job that runs every night against
+master.
 
-https://lgtm.com/projects/g/randombit/botan/
-
-An automated linter that is integrated with Github. It automatically checks each
-incoming PR. It also supports custom queries/alerts, which likely would be worth
-investigating but is not something currently in use.
-
-Coverity
----------
-
-https://scan.coverity.com/projects/624
-
-An automated source code scanner. Use of Coverity scanner is rate-limited,
-sometimes it is very slow to produce a new report, and occasionally the service
-goes offline for days or weeks at a time. New reports are kicked off manually by
-rebasing branch ``coverity_scan`` against the most recent master and force
-pushing it.
-
-Sonar
--------
-
-https://sonarcloud.io/dashboard?id=botan
-
-Sonar scanner is another software quality scanner. Unfortunately a recent update
-of their scanner caused it to take over an hour to produce a report which caused
-CI timeouts, so it has been disabled. It should be re-enabled to run
-on demand in the same way Coverity is.
+Currently these checks include a full run of ``valgrind`` (the valgrind build in
+CI only runs a subset of the tests), and a run of ``clang-tidy`` with all
+warnings (that we are currently clean for) enabled. Each of these jobs takes
+about an hour to run. In the main CI, we aim to have no job take more than
+half an hour.
 
 OSS-Fuzz
 ----------
 
 https://github.com/google/oss-fuzz/
 
-OSS-Fuzz is a distributed fuzzer run by Google. Every night, each library fuzzers
+OSS-Fuzz is a distributed fuzzer run by Google. Every night, the fuzzer harnesses
 in ``src/fuzzer`` are built and run on many machines, with any findings reported
 to the developers via email.

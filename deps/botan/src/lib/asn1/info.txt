@@ -1,7 +1,25 @@
 <defines>
-ASN1 -> 20171109
+ASN1 -> 20201106
 </defines>
+
+<module_info>
+name -> "ASN.1 Handling"
+brief -> "Process/encode/decode ASN.1 data structures and map OIDs"
+</module_info>
 
 <requires>
 bigint
 </requires>
+
+<header:public>
+asn1_print.h
+asn1_obj.h
+der_enc.h
+oids.h
+ber_dec.h
+</header:public>
+
+<header:internal>
+oid_map.h
+pss_params.h
+</header:internal>

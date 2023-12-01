@@ -2,9 +2,17 @@
 SCRYPT -> 20180902
 </defines>
 
+<module_info>
+name -> "Scrypt"
+</module_info>
+
 <requires>
 salsa20
 pbkdf2
 hmac
 sha2_32
 </requires>
+
+<header:public>
+scrypt.h
+</header:public>

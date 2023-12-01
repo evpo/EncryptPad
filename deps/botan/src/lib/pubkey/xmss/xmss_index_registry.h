@@ -10,11 +10,9 @@
 
 #include <string>
 
+#include <botan/mutex.h>
 #include <botan/secmem.h>
 #include <botan/internal/atomic.h>
-#include <botan/mutex.h>
-
-//BOTAN_FUTURE_INTERNAL_HEADER(xmss_index_registry.h)
 
 namespace Botan {
 
@@ -22,8 +20,7 @@ namespace Botan {
  * A registry for XMSS private keys, keeps track of the leaf index for
  * independend copies of the same key.
  **/
-class XMSS_Index_Registry final
-   {
+class XMSS_Index_Registry final {
    public:
       XMSS_Index_Registry(const XMSS_Index_Registry&) = delete;
       XMSS_Index_Registry& operator=(const XMSS_Index_Registry&) = delete;
@@ -33,11 +30,10 @@ class XMSS_Index_Registry final
        *
        * @return Reference to unique XMSS index registry.
        **/
-      static XMSS_Index_Registry& get_instance()
-         {
+      static XMSS_Index_Registry& get_instance() {
          static XMSS_Index_Registry self;
          return self;
-         }
+      }
 
       /**
        * Retrieves the last unused leaf index for the private key identified
@@ -50,9 +46,8 @@ class XMSS_Index_Registry final
        *
        * @return last unused leaf index for private_key.
        **/
-      std::shared_ptr<Atomic<size_t>>
-                                   get(const secure_vector<uint8_t>& private_seed,
-                                       const secure_vector<uint8_t>& prf);
+      std::shared_ptr<Atomic<size_t>> get(const secure_vector<uint8_t>& private_seed,
+                                          const secure_vector<uint8_t>& prf);
 
    private:
       XMSS_Index_Registry() = default;
@@ -66,8 +61,7 @@ class XMSS_Index_Registry final
        *
        * @return unique integral identifier for an XMSS private key.
        **/
-      uint64_t make_key_id(const secure_vector<uint8_t>& private_seed,
-                           const secure_vector<uint8_t>& prf) const;
+      static uint64_t make_key_id(const secure_vector<uint8_t>& private_seed, const secure_vector<uint8_t>& prf);
 
       /**
        * Retrieves the index position of a key within the registry or
@@ -98,8 +92,8 @@ class XMSS_Index_Registry final
       std::vector<uint64_t> m_key_ids;
       std::vector<std::shared_ptr<Atomic<size_t>>> m_leaf_indices;
       mutex_type m_mutex;
-   };
+};
 
-}
+}  // namespace Botan
 
 #endif

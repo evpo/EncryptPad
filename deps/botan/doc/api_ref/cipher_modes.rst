@@ -87,7 +87,18 @@ All cipher mode implementations are are derived from the base class
   .. cpp:function:: virtual size_t update_granularity() const
 
     The :cpp:class:`Cipher_Mode` interface requires message processing in multiples of the block size.
-    Returns size of required blocks to update and 1, if the mode can process messages of any length.
+    Returns size of required blocks to update. Will return 1 if the mode implementation
+    does not require buffering.
+
+  .. cpp:function:: virtual size_t ideal_granularity() const
+
+    Returns a multiple of update_granularity sized for ideal performance.
+
+    In fact this is not truly the "ideal" buffer size but just reflects the
+    smallest possible buffer that can reasonably take advantage of available
+    parallelism (due to SIMD execution, etc). If you are concerned about
+    performance, it may be advisable to take this return value and scale it to
+    approximately 4 KB, and use buffers of that size.
 
   .. cpp:function:: virtual size_t process(uint8_t* msg, size_t msg_len)
 
@@ -102,7 +113,11 @@ All cipher mode implementations are are derived from the base class
 
   .. cpp:function:: size_t minimum_final_size() const
 
-    Returns the minimum size needed for :cpp:func:`finish`.
+    Returns the minimum size needed for :cpp:func:`finish`. This is used for
+    example when processing an AEAD message, to ensure the tag is available. In
+    that case, the encryption side will return 0 (since the tag is generated,
+    rather than being provided) while the decryption mode will return the size
+    of the tag.
 
   .. cpp:function:: void finish(secure_vector<uint8_t>& final_block, size_t offset = 0)
 
@@ -122,36 +137,8 @@ with PKCS#7 padding.
    Simply replacing the string "AES-128/CBC/PKCS7" string in the example below
    with "AES-128/GCM" suffices to use authenticated encryption.
 
-.. code-block:: cpp
-
-    #include <botan/rng.h>
-    #include <botan/auto_rng.h>
-    #include <botan/cipher_mode.h>
-    #include <botan/hex.h>
-    #include <iostream>
-
-    int main()
-       {
-       Botan::AutoSeeded_RNG rng;
-
-       const std::string plaintext("Your great-grandfather gave this watch to your granddad for good luck. Unfortunately, Dane's luck wasn't as good as his old man's.");
-       const std::vector<uint8_t> key = Botan::hex_decode("2B7E151628AED2A6ABF7158809CF4F3C");
-
-       std::unique_ptr<Botan::Cipher_Mode> enc = Botan::Cipher_Mode::create("AES-128/CBC/PKCS7", Botan::ENCRYPTION);
-       enc->set_key(key);
-
-       //generate fresh nonce (IV)
-       Botan::secure_vector<uint8_t> iv = rng.random_vec(enc->default_nonce_length());
-
-       // Copy input data to a buffer that will be encrypted
-       Botan::secure_vector<uint8_t> pt(plaintext.data(), plaintext.data()+plaintext.length());
-
-       enc->start(iv);
-       enc->finish(pt);
-
-       std::cout << enc->name() << " with iv " << Botan::hex_encode(iv) << " " << Botan::hex_encode(pt) << "\n";
-       return 0;
-       }
+.. literalinclude:: /../src/examples/aes_cbc.cpp
+   :language: cpp
 
 
 Available Unauthenticated Cipher Modes
@@ -180,6 +167,12 @@ Ciphertext stealing (CTS) is also implemented. This scheme allows the
 ciphertext to have the same length as the plaintext, however using CTS
 requires the input be at least one full block plus one byte. It is
 also less commonly implemented.
+
+.. warning::
+   Using CBC with padding without an authentication mode exposes your
+   application to CBC padding oracle attacks, which allow recovering
+   the plaintext of arbitrary messages. Always pair CBC with a MAC such
+   as HMAC (or, preferably, use an AEAD such as GCM).
 
 CFB
 ~~~~~~~~~~~~
@@ -353,8 +346,8 @@ Available if ``BOTAN_HAS_AEAD_OCB`` is defined.
 
 A block cipher based AEAD. Supports 128-bit, 256-bit and 512-bit block ciphers.
 This mode is very fast and easily secured against side channels. Adoption has
-been poor because it is patented in the United States, though a license is
-available allowing it to be freely used by open source software.
+been poor because until 2021 it was patented in the United States. The patent
+was allowed to lapse in early 2021.
 
 EAX
 ~~~~~

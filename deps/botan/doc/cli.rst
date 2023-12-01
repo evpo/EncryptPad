@@ -23,6 +23,13 @@ system, echo will be disabled while reading the passphrase.
 Most arguments that take a path to a file will also accept the literal ``-``
 to mean the file content should be read from STDIN instead.
 
+All options for the command line are displayed in the summary line,
+and in the help output. All options are, as the name suggests,
+optional, and the default values are shown. For example ``hash file``
+prints the SHA-256 of the file encoded as hex, while
+``hash --format=base64 --algo=SHA-384 file`` prints the base64 encoded
+SHA-384 hash of the same file.
+
 Hash Function
 ----------------
 ``hash --algo=SHA-256 --buf-size=4096 --no-fsname --format=hex *files``
@@ -63,61 +70,69 @@ HMAC
 
 Encryption
 ----------------
-``encryption --buf-size=4096 --decrypt --mode= --key= --iv= --ad=``
-  Encrypt a given file with the specified *mode*.  If ``--decrypt`` is provided
-  the file is decrypted instead.
+``cipher --buf-size=4096 --decrypt --cipher= --key= --nonce= --ad=``
+
+  Encrypt a given file with the specified *cipher*, eg "AES-256/GCM".
+  If ``--decrypt`` is provided the file is decrypted instead.
 
 Public Key Cryptography
 -------------------------------------
-``keygen --algo=RSA --params= --passphrase= --pbe= --pbe-millis=300 --provider= --der-out``
+``keygen --algo=RSA --params= --passphrase= --cipher= --pbkdf= --pbkdf-ms=300 --provider= --der-out``
   Generate a PKCS #8 *algo* private key. If *der-out* is passed, the pair is BER
   encoded.  Otherwise, PEM encoding is used. To protect the PKCS #8 formatted
-  key, it is recommended to encrypt it with a provided *passphrase*. *pbe* is
-  the name of the desired encryption algorithm, which uses *pbe-millis*
-  milliseconds to derive the encryption key from the passed
-  *passphrase*. Algorithm specific parameters, as the desired bit length of an
-  RSA key, can be passed with *params*.
+  key, it is recommended to encrypt it with a provided *passphrase*.
+
+  If a passphrase is used, *cipher* specifies the name of the desired encryption
+  algorithm (such as "AES-256/CBC", or leave empty to use a default), and
+  *pbkdf* can be used to specify the password hashing mechanism (either a hash
+  such as "SHA-256" to select PBKDF2, or "Scrypt").
+
+  The cipher mode must have an object identifier defined, this allows use of
+  ciphers such as AES, Twofish, Serpent, and SM4. Ciphers in CBC, GCM, and SIV
+  modes are supported. However most other implementations support only AES or
+  3DES in CBC mode.
+
+  If encryption is used, the parameter *pbkdf-ms* controls how long the password
+  hashing function will run to derive the encryption key from the passed
+  *passphrase*.
+
+  Algorithm specific parameters, as the desired bit length of an RSA key, can be
+  passed with *params*.
 
     - For RSA *params* specifies the bit length of the RSA modulus. It defaults to 3072.
     - For DH *params* specifies the DH parameters. It defaults to modp/ietf/2048.
     - For DSA *params* specifies the DSA parameters. It defaults to dsa/botan/2048.
     - For EC algorithms *params* specifies the elliptic curve. It defaults to secp256r1.
 
-  The default *pbe* algorithm is "PBES2(AES-256/CBC,SHA-256)".
+``pkcs8 --pass-in= --pub-out --der-out --pass-out= --cipher= --pbkdf= --pbkdf-ms=300 key``
 
-  With PBES2 scheme, you can select any CBC or GCM mode cipher which has an OID
-  defined (such as 3DES, Camellia, SM4, Twofish or Serpent). However most other
-  implementations support only AES or 3DES in CBC mode. You can also choose
-  Scrypt instead of PBKDF2, by using "Scrypt" instead of the name of a hash
-  function, for example "PBES2(AES-256/CBC,Scrypt)". Scrypt is also supported by
-  some other implementations including OpenSSL.
-
-``pkcs8 --pass-in= --pub-out --der-out --pass-out= --pbe= --pbe-millis=300 key``
   Open a PKCS #8 formatted key at *key*. If *key* is encrypted, the passphrase
   must be passed as *pass-in*. It is possible to (re)encrypt the read key with
-  the passphrase passed as *pass-out*. The parameters *pbe-millis* and *pbe*
-  work similarly to ``keygen``.
+  the passphrase passed as *pass-out*. The parameters *cipher*, *pbkdf*, and
+  *pbkdf-ms* work similarly to ``keygen``.
 
-``sign --der-format --passphrase= --hash=SHA-256 --emsa= --provider= key file``
-  Sign the data in *file* using the PKCS #8 private key *key*. If *key* is
-  encrypted, the used passphrase must be passed as *pass-in*. *emsa* specifies
-  the signature scheme and *hash* the cryptographic hash function used in the
-  scheme.
+``sign --der-format --passphrase= --hash=SHA-256 --padding= --provider= key file``
 
-    - For RSA signatures EMSA4 (RSA-PSS) is the default scheme.
-    - For ECDSA and DSA *emsa* defaults to EMSA1 (signing the hash directly)
+  Sign the data in *file* using the PKCS #8 private key *key* and cryptographic
+  hash *hash*. If *key* is encrypted, the used passphrase must be passed as
+  *pass-in*.
+
+  The *padding* option can be used to control padding for algorithms that have
+  divergent methods; this mostly applies to RSA. For RSA, if the option is not
+  specified PSS signatures are used. You can select generating a PKCS #1 v1.5
+  formatted signature instead by providing ``--padding=PKCS1v15``.
 
   For ECDSA and DSA, the option ``--der-format`` outputs the signature as an
   ASN.1 encoded blob. Some other tools (including ``openssl``) default to this
-  format.
+  format. This option does not make sense for other algorithms such as RSA.
 
   The signature is formatted for your screen using base64.
 
-``verify --der-format --hash=SHA-256 --emsa= pubkey file signature``
+``verify --der-format --hash=SHA-256 --padding= pubkey file signature``
   Verify the authenticity of the data in *file* with the provided signature
   *signature* and the public key *pubkey*. Similarly to the signing process,
-  *emsa* specifies the signature scheme and *hash* the cryptographic hash
-  function used in the scheme.
+  *padding* specifies the padding scheme and *hash* the cryptographic hash
+  function to use.
 
 ``gen_dl_group --pbits=1024 --qbits=0 --seed= --type=subgroup``
   Generate ANSI X9.42 encoded Diffie-Hellman group parameters.
@@ -206,7 +221,7 @@ TLS Server/Client
 -----------------------
 
 The ``--policy=`` argument of the TLS commands specifies the TLS policy to use.
-The policy can be any of the the strings "default", "suiteb_128", "suiteb_192",
+The policy can be any of the strings "default", "suiteb_128", "suiteb_192",
 "bsi", "strict", or "all" to denote built-in policies, or it can name a file
 from which a policy description will be read.
 
@@ -214,7 +229,7 @@ from which a policy description will be read.
   Prints the list of ciphersuites that will be offered under a particular
   policy/version.
 
-``tls_client host --port=443 --print-certs --policy=default --tls1.0 --tls1.1 --tls1.2 --skip-system-cert-store --trusted-cas= --session-db= --session-db-pass= --next-protocols= --type=tcp``
+``tls_client host --port=443 --print-certs --policy=default --tls1.0 --tls1.1 --tls1.2 --skip-system-cert-store --trusted-cas= --session-db= --session-db-pass= --next-protocols= --type=tcp --client-cert= --client-cert-key=``
   Implements a testing TLS client, which connects to *host* via TCP or UDP on
   port *port*. The TLS version can be set with the flags *tls1.0*, *tls1.1* and
   *tls1.2* of which the lowest specified version is automatically chosen.  If
@@ -223,6 +238,8 @@ from which a policy description will be read.
   prints all certificates in the chain, if *print-certs* is passed.
   *next-protocols* is a comma separated list and specifies the protocols to
   advertise with Application-Layer Protocol Negotiation (ALPN).
+  Pass a path to a client certificate PEM and unencrypted PKCS8 encoded private
+  key if client authentication is required.
 
 ``tls_server cert key --port=443 --type=tcp --policy=default --dump-traces= --max-clients=0 --socket-id=0``
   Implements a testing TLS server, which allows TLS clients to connect and which
@@ -304,10 +321,10 @@ Data Encoding/Decoding
 ------------------------
 
 ``base32_dec file``
-  Encode *file* to Base32.
+  Decode *file* to Base32.
 
 ``base32_enc file``
-  Decode Base32 encoded *file*.
+  Encode Base32 encoded *file*.
 
 ``base58_enc --check file``
   Encode *file* to Base58. If ``--check`` is provided Base58Check is used.
@@ -316,16 +333,34 @@ Data Encoding/Decoding
   Decode Base58 encoded *file*. If ``--check`` is provided Base58Check is used.
 
 ``base64_dec file``
-  Encode *file* to Base64.
+  Decode *file* to Base64.
 
 ``base64_enc file``
-  Decode Base64 encoded *file*.
+  Encode Base64 encoded *file*.
 
 ``hex_dec file``
-  Encode *file* to Hex.
+  Decode *file* to Hex.
 
 ``hex_enc file``
-  Decode Hex encoded *file*.
+  Encode Hex encoded *file*.
+
+Forward Error Correction
+------------------------
+
+``fec_encode --suffix=fec --prefix= --output-dir= k n input``
+  Split a given ``input`` file into ``n`` shares where ``k`` shares are required
+  to recreate the original file. The output shares a written to files with the
+  file extension specified in ``--suffix`` and either the original file name or
+  the one specified in ``--prefix``. The output directory is either equal to the
+  input file's directory or the one specified in ``--output-dir``.
+
+``fec_decode *shares``
+  If given enough shares, this will output the original input file's content to
+  stdout. Otherwise an error is printed on stderr.
+
+``fec_info share``
+  Given a single share this will print information about the share.
+  For instance: ``FEC share 4/4 with 3 needed for recovery``
 
 Miscellaneous Commands
 -------------------------------------

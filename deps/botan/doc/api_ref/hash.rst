@@ -72,38 +72,22 @@ internal state is reset to begin hashing a new message.
 
      Equivalent to calling ``update`` followed by ``final``.
 
+  .. cpp:function:: std::unique_ptr<HashFunction> new_object()
+
+     Return a newly allocated HashFunction object of the same type as this one.
+
+  .. cpp:function:: std::unique_ptr<HashFunction> copy_state()
+
+     Return a newly allocated HashFunction object of the same type as this one,
+     whose internal state matches the current state of this.
+
 Code Example
 ------------
 
 Assume we want to calculate the SHA-256, SHA-384, and SHA-3 hash digests of the STDIN stream using the Botan library.
 
-.. code-block:: cpp
-
-    #include <botan/hash.h>
-    #include <botan/hex.h>
-    #include <iostream>
-    int main ()
-       {
-       std::unique_ptr<Botan::HashFunction> hash1(Botan::HashFunction::create("SHA-256"));
-       std::unique_ptr<Botan::HashFunction> hash2(Botan::HashFunction::create("SHA-384"));
-       std::unique_ptr<Botan::HashFunction> hash3(Botan::HashFunction::create("SHA-3"));
-       std::vector<uint8_t> buf(2048);
-
-       while(std::cin.good())
-          {
-          //read STDIN to buffer
-          std::cin.read(reinterpret_cast<char*>(buf.data()), buf.size());
-          size_t readcount = std::cin.gcount();
-          //update hash computations with read data
-          hash1->update(buf.data(),readcount);
-          hash2->update(buf.data(),readcount);
-          hash3->update(buf.data(),readcount);
-          }
-       std::cout << "SHA-256: " << Botan::hex_encode(hash1->final()) << std::endl;
-       std::cout << "SHA-384: " << Botan::hex_encode(hash2->final()) << std::endl;
-       std::cout << "SHA-3: " << Botan::hex_encode(hash3->final()) << std::endl;
-       return 0;
-       }
+.. literalinclude:: /../src/examples/hash.cpp
+   :language: cpp
 
 Available Hash Functions
 ------------------------------
@@ -149,10 +133,11 @@ new code.
 MD4
 ^^^^^^^^^
 
-Available if ``BOTAN_HAS_MD4`` is defined.
+An old and now broken hash function. Available if ``BOTAN_HAS_MD4`` is defined.
 
-An old hash function that is now known to be trivially breakable. It is very
-fast, and may still be suitable as a (non-cryptographic) checksum.
+.. warning::
+   MD4 collisions can be easily created. There is no safe cryptographic use
+   for this function.
 
 .. warning::
    Support for MD4 is deprecated and will be removed in a future major release.
@@ -160,9 +145,10 @@ fast, and may still be suitable as a (non-cryptographic) checksum.
 MD5
 ^^^^^^^^^
 
-Available if ``BOTAN_HAS_MD5`` is defined.
+An old and now broken hash function. Available if ``BOTAN_HAS_MD5`` is defined.
 
-Widely used, now known to be broken.
+.. warning::
+   MD5 collisions can be easily created. MD5 should never be used for signatures.
 
 RIPEMD-160
 ^^^^^^^^^^^^^^^
@@ -171,15 +157,20 @@ Available if ``BOTAN_HAS_RIPEMD160`` is defined.
 
 A 160 bit hash function, quite old but still thought to be secure (up to the
 limit of 2**80 computation required for a collision which is possible with any
-160 bit hash function). Somewhat deprecated these days.
+160 bit hash function). Somewhat deprecated these days. Prefer SHA-2 or SHA-3
+in new code.
 
 SHA-1
 ^^^^^^^^^^^^^^^
 
 Available if ``BOTAN_HAS_SHA1`` is defined.
 
-Widely adopted NSA designed hash function. Starting to show significant signs of
-weakness, and collisions can now be generated. Avoid in new designs.
+Widely adopted NSA designed hash function. Use SHA-2 or SHA-3 in new code.
+
+.. warning::
+
+   SHA-1 collisions can now be created by moderately resourced attackers. It
+   must never be used for signatures.
 
 SHA-256
 ^^^^^^^^^^^^^^^
@@ -217,17 +208,7 @@ Available if ``BOTAN_HAS_SHAKE`` is defined.
 
 These are actually XOFs (extensible output functions) based on SHA-3, which can
 output a value of any byte length. For example "SHAKE-128(1024)" will produce
-1024 bits of output. The specified length must be a multiple of 8. Not
-specifying an output length, "SHAKE-128" defaults to a 128-bit output and
-"SHAKE-256" defaults to a 256-bit output.
-
-.. warning::
-    In the case of SHAKE-128, the default output length in insufficient
-    to ensure security. The choice of default lengths was a bug which is
-    currently retained for compatability; they should have been 256 and
-    512 bits resp to match SHAKE's security level. Using the default
-    lengths with SHAKE is deprecated and will be removed in a future major
-    release. Instead, always specify the desired output length.
+1024 bits of output. The specified length must be a multiple of 8.
 
 SM3
 ^^^^^^^^^^^^^^^
@@ -265,26 +246,6 @@ unless compatibility is needed.
    The Streebog Sbox has recently been revealed to have a hidden structure which
    interacts with its linear layer in a way which may provide a backdoor when
    used in certain ways. Avoid Streebog if at all possible.
-
-Tiger
-^^^^^^^^^^^^^^^
-
-.. deprecated:: 2.15
-
-Available if ``BOTAN_HAS_TIGER`` is defined.
-
-An older 192-bit hash function, optimized for 64-bit systems. Possibly
-vulnerable to side channels due to its use of table lookups.
-
-Tiger supports variable length output (16, 20 or 24 bytes) and
-variable rounds (which must be at least 3). Default is 24 byte output
-and 3 rounds. Specify with names like "Tiger" or "Tiger(20,5)".
-
-.. warning::
-  There are documented (albeit impractical) attacks on the full Tiger
-  hash leading to preimage attacks. This indicates possibility of a
-  serious weakness in the hash and for this reason it is deprecated
-  and will be removed in a future major release of the library.
 
 Whirlpool
 ^^^^^^^^^^^^^^^

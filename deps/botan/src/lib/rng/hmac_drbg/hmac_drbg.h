@@ -8,8 +8,8 @@
 #ifndef BOTAN_HMAC_DRBG_H_
 #define BOTAN_HMAC_DRBG_H_
 
-#include <botan/stateful_rng.h>
 #include <botan/mac.h>
+#include <botan/stateful_rng.h>
 
 namespace Botan {
 
@@ -18,8 +18,7 @@ class Entropy_Sources;
 /**
 * HMAC_DRBG from NIST SP800-90A
 */
-class BOTAN_PUBLIC_API(2,0) HMAC_DRBG final : public Stateful_RNG
-   {
+class BOTAN_PUBLIC_API(2, 0) HMAC_DRBG final : public Stateful_RNG {
    public:
       /**
       * Initialize an HMAC_DRBG instance with the given MAC as PRF (normally HMAC)
@@ -36,7 +35,7 @@ class BOTAN_PUBLIC_API(2,0) HMAC_DRBG final : public Stateful_RNG
       /**
       * Constructor taking a string for the hash
       */
-      explicit HMAC_DRBG(const std::string& hmac_hash);
+      explicit HMAC_DRBG(std::string_view hmac_hash);
 
       /**
       * Initialize an HMAC_DRBG instance with the given MAC as PRF (normally HMAC)
@@ -128,14 +127,12 @@ class BOTAN_PUBLIC_API(2,0) HMAC_DRBG final : public Stateful_RNG
 
       size_t security_level() const override;
 
-      size_t max_number_of_bytes_per_request() const override
-         { return m_max_number_of_bytes_per_request; }
+      size_t max_number_of_bytes_per_request() const override { return m_max_number_of_bytes_per_request; }
 
    private:
-      void update(const uint8_t input[], size_t input_len) override;
+      void update(std::span<const uint8_t> input) override;
 
-      void generate_output(uint8_t output[], size_t output_len,
-                           const uint8_t input[], size_t input_len) override;
+      void generate_output(std::span<uint8_t> output, std::span<const uint8_t> input) override;
 
       void clear_state() override;
 
@@ -143,8 +140,8 @@ class BOTAN_PUBLIC_API(2,0) HMAC_DRBG final : public Stateful_RNG
       secure_vector<uint8_t> m_V;
       const size_t m_max_number_of_bytes_per_request;
       const size_t m_security_level;
-   };
+};
 
-}
+}  // namespace Botan
 
 #endif

@@ -11,19 +11,16 @@
 #include <botan/hash.h>
 #include <vector>
 
-BOTAN_FUTURE_INTERNAL_HEADER(par_hash.h)
-
 namespace Botan {
 
 /**
 * Parallel Hashes
 */
-class BOTAN_PUBLIC_API(2,0) Parallel final : public HashFunction
-   {
+class Parallel final : public HashFunction {
    public:
       void clear() override;
       std::string name() const override;
-      HashFunction* clone() const override;
+      std::unique_ptr<HashFunction> new_object() const override;
       std::unique_ptr<HashFunction> copy_state() const override;
 
       size_t output_length() const override;
@@ -36,15 +33,14 @@ class BOTAN_PUBLIC_API(2,0) Parallel final : public HashFunction
 
       Parallel(const Parallel&) = delete;
       Parallel& operator=(const Parallel&) = delete;
-   private:
-      Parallel() = delete;
 
-      void add_data(const uint8_t[], size_t) override;
-      void final_result(uint8_t[]) override;
+   private:
+      void add_data(std::span<const uint8_t>) override;
+      void final_result(std::span<uint8_t>) override;
 
       std::vector<std::unique_ptr<HashFunction>> m_hashes;
-   };
+};
 
-}
+}  // namespace Botan
 
 #endif

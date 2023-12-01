@@ -1,3 +1,5 @@
+.. _configure_script:
+
 Understanding configure.py
 ============================
 
@@ -58,11 +60,6 @@ Makefile, ``build.h`` and other artifacts.
 When Modifying ``configure.py``
 --------------------------------
 
-For now, any changes to ``configure.py`` must work under both CPython 2.7 and
-CPython 3.x. In a future major release, support for CPython2 will be dropped,
-but until then if making modifications verify the code works as expected on
-both versions.
-
 Run ``./src/scripts/ci_build.py lint`` to run Pylint checks after any change.
 
 Template Language
@@ -91,10 +88,23 @@ to the output unmodified. The template elements are:
    any variables expanded. As with the for loop syntax, both the start and end
    of the conditional must be on their own lines with no additional text.
 
+Build.h
+-------
+
+The ``build.h`` header file is generated and overwritten each time the
+``configure.py`` script is executed. This header can be included in any header
+or source file and provides plenty of compile-time information in the form of
+preprocessor ``#define``\ s.
+
+It is helpful to check which modules are included in the current build of the
+library via macro defines of the form "BOTAN_HAS" followed by the module name.
+Also, it contains :ref:`version information macros <versioning>` and compile-time
+library configurations.
+
 Adding a new module
 --------------------
 
-Create a directory in the appropriate place and create a info.txt file.
+Create a directory in the appropriate place and create a ``info.txt`` file.
 
 Syntax of ``info.txt``
 ------------------------
@@ -146,7 +156,7 @@ Module Syntax
 ---------------------
 
 The ``info.txt`` files have the following elements. Not all are required; a minimal
-file for a module with no dependencies might just contain a macro define.
+file for a module with no dependencies might just contain a macro define and module_info.
 
 Lists:
  * ``comment`` and ``warning`` provides block-comments which
@@ -159,7 +169,7 @@ Lists:
  * ``header:public`` is a the list of headers (from the
    current module) which should be exported for public use. If neither
    ``header:internal`` nor ``header:public`` are used then all headers
-   in the current directory are assumed public.
+   in the current directory are assumed internal.
 
    .. note:: If you omit a header from both internal and public lists, it will
       be ignored.
@@ -173,7 +183,9 @@ Lists:
    on a specific architecture, e.g. ``x86_64:ssse3``.
  * ``cc`` is a list of compilers which can be used with this module. If the
    compiler name is suffixed with a version (like "gcc:5.0") then only compilers
-   with that minimum version can use the module.
+   with that minimum version can use the module. If you need to exclude just
+   one specific compiler (for example because that compiler miscompiles the code
+   in the module), you can prefix a compiler name with ``!`` - like ``!msvc``.
  * ``os_features`` is a list of OS features which are required in order to use this
    module. Each line can specify one or more features combined with ','. Alternatives
    can be specified on additional lines.
@@ -181,6 +193,21 @@ Lists:
 Maps:
  * ``defines`` is a map from macros to datestamps. These macros will be defined in
    the generated ``build.h``.
+ * ``module_info`` contains documentation-friendly information about the module.
+   Available mappings:
+
+   * ``name`` must contain a human-understandable name for the module
+   * ``brief`` may provide a short description about the module's contents
+   * ``type`` specifies the type of the module (defaults to ``Public``)
+
+     * ``Public`` Library users can directly interact with this module. E.g.
+       they may enable or disable the module at will during build.
+     * ``Internal`` Library users must not directly interact with this module.
+       It is enabled and used as required by other modules.
+     * ``Virtual`` This module does not contain any implementation but acts as
+       a container for other sub-modules. It cannot be interacted with by the
+       library user and cannot be depended upon directly.
+
  * ``libs`` specifies additional libraries which should be linked if this module is
    included. It maps from the OS name to a list of libraries (comma seperated).
  * ``frameworks`` is a macOS/iOS specific feature which maps from an OS name to
@@ -204,6 +231,11 @@ An example::
    DEFINE1 -> 20180104
    DEFINE2 -> 20190301
    </defines>
+
+   <module_info>
+   name -> "This Is Just To Say"
+   brief -> "Contains a poem by William Carlos Williams"
+   </module_info>
 
    <comment>
    I have eaten
@@ -342,6 +374,7 @@ Variables:
   * ``stack_protector_flags`` gives compiler flags to enable stack overflow checking.
   * ``shared_flags`` gives compiler flags to use when generation shared libraries.
   * ``lang_flags`` gives compiler flags used to enable the required version of C++.
+  * ``lang_binary_linker_flags`` gives flags to be passed to the linker when creating a binary
   * ``warning_flags`` gives warning flags to enable.
   * ``maintainer_warning_flags`` gives extra warning flags to enable during maintainer
     mode builds.

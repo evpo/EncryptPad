@@ -2,9 +2,17 @@
 ECDH -> 20131128
 </defines>
 
+<module_info>
+name -> "ECDH"
+</module_info>
+
 <requires>
 asn1
 ec_group
 ecc_key
 numbertheory
 </requires>
+
+<header:public>
+ecdh.h
+</header:public>

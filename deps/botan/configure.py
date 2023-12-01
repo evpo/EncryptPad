@@ -1,20 +1,16 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """
 Configuration program for botan
 
 (C) 2009-2020 Jack Lloyd
 (C) 2015,2016,2017 Simon Warta (Kullo GmbH)
+(C) 2019-2022 René Meusel (neXenio GmbH, Rohde & Schwarz Cybersecurity GmbH)
 
 Botan is released under the Simplified BSD License (see license.txt)
 
-This script is regularly tested with CPython 2.7 and 3.5, and
-occasionally tested with CPython 2.6 and PyPy 4.
-
-Support for CPython 2.6 will be dropped eventually, but is kept up for as
-long as reasonably convenient.
-
-CPython 2.5 and earlier are not supported.
+This script is regularly tested with CPython 3.x, and
+occasionally tested PyPy 4.
 
 On Jython target detection does not work (use --os and --cpu).
 """
@@ -52,12 +48,15 @@ def flatten(l):
 
 def normalize_source_path(source):
     """
-    cmake needs this, and nothing else minds
+    cmake and some versions of make need this, and nothing else minds
     """
     return os.path.normpath(source).replace('\\', '/')
 
+def normalize_source_paths(sources):
+    return [normalize_source_path(p) for p in sources]
+
 def parse_version_file(version_path):
-    version_file = open(version_path)
+    version_file = open(version_path, encoding='utf8')
     key_and_val = re.compile(r"([a-z_]+) = ([a-zA-Z0-9:\-\']+)")
 
     results = {}
@@ -79,7 +78,7 @@ def parse_version_file(version_path):
             results[key] = val
     return results
 
-class Version(object):
+class Version:
     """
     Version information are all static members
     """
@@ -165,13 +164,13 @@ class Version(object):
             logging.debug('%s reported revision %s', cmdname, rev)
 
             return '%s:%s' % (cmdname, rev)
-        except OSError as e:
-            logging.debug('Error getting rev from %s - %s' % (cmdname, e.strerror))
+        except OSError as ex:
+            logging.debug('Error getting rev from %s - %s', cmdname, ex.strerror)
             return 'unknown'
 
 
 
-class SourcePaths(object):
+class SourcePaths:
     """
     A collection of paths defined by the project structure and
     independent of user configurations.
@@ -195,7 +194,7 @@ class SourcePaths(object):
         self.sphinx_config_dir = os.path.join(self.configs_dir, 'sphinx')
 
 
-class BuildPaths(object): # pylint: disable=too-many-instance-attributes
+class BuildPaths:
     """
     Constructor
     """
@@ -209,6 +208,7 @@ class BuildPaths(object): # pylint: disable=too-many-instance-attributes
         self.doc_output_dir = os.path.join(self.build_dir, 'docs')
         self.handbook_output_dir = os.path.join(self.doc_output_dir, 'handbook')
         self.doc_output_dir_doxygen = os.path.join(self.doc_output_dir, 'doxygen') if options.with_doxygen else None
+        self.doc_module_info = os.path.join(self.build_dir, 'module_info') if options.with_doxygen else None
 
         self.include_dir = os.path.join(self.build_dir, 'include')
         self.botan_include_dir = os.path.join(self.include_dir, 'botan')
@@ -219,7 +219,7 @@ class BuildPaths(object): # pylint: disable=too-many-instance-attributes
         self.external_headers = sorted(flatten([m.external_headers() for m in modules]))
 
         # this is overwritten if amalgamation is used
-        self.lib_sources = [normalize_source_path(s) for s in sorted(flatten([mod.sources() for mod in modules]))]
+        self.lib_sources = normalize_source_paths(sorted(flatten([mod.sources() for mod in modules])))
 
         self.public_headers = sorted(flatten([m.public_headers() for m in modules]))
 
@@ -235,9 +235,18 @@ class BuildPaths(object): # pylint: disable=too-many-instance-attributes
                     if filename.endswith('.h') and not filename.startswith('.'):
                         yield os.path.join(dirpath, filename)
 
-        self.cli_sources = [normalize_source_path(s) for s in find_sources_in(source_paths.src_dir, 'cli')]
-        self.cli_headers = [normalize_source_path(s) for s in find_headers_in(source_paths.src_dir, 'cli')]
-        self.test_sources = [normalize_source_path(s) for s in find_sources_in(source_paths.src_dir, 'tests')]
+        self.cli_sources = normalize_source_paths(find_sources_in(source_paths.src_dir, 'cli'))
+        self.cli_headers = normalize_source_paths(find_headers_in(source_paths.src_dir, 'cli'))
+        self.test_sources = normalize_source_paths(find_sources_in(source_paths.src_dir, 'tests'))
+
+        if 'examples' in options.build_targets:
+            self.example_sources = normalize_source_paths(find_sources_in(source_paths.src_dir, 'examples'))
+            self.example_output_dir = os.path.join(self.build_dir, 'examples')
+            self.example_obj_dir = os.path.join(self.build_dir, 'obj', 'examples')
+        else:
+            self.example_sources = None
+            self.example_output_dir = None
+            self.example_obj_dir = None
 
         if options.build_fuzzers:
             self.fuzzer_sources = list(find_sources_in(source_paths.src_dir, 'fuzzer'))
@@ -259,36 +268,39 @@ class BuildPaths(object): # pylint: disable=too-many-instance-attributes
             self.handbook_output_dir,
         ]
         if self.doc_output_dir_doxygen:
-            out += [self.doc_output_dir_doxygen]
+            out += [self.doc_output_dir_doxygen, self.doc_module_info]
         if self.fuzzer_output_dir:
-            out += [self.fuzzobj_dir]
-            out += [self.fuzzer_output_dir]
+            out += [self.fuzzobj_dir, self.fuzzer_output_dir]
+        if self.example_output_dir:
+            out += [self.example_obj_dir, self.example_output_dir]
         return out
 
     def format_include_paths(self, cc, external_includes):
         dash_i = cc.add_include_dir_option
-        output = dash_i + self.include_dir
+        dash_isystem = cc.add_system_include_dir_option
+        output = dash_i + ' ' + normalize_source_path(self.include_dir)
         if self.external_headers:
-            output += ' ' + dash_i + self.external_include_dir
+            output += ' ' + dash_isystem + ' ' + normalize_source_path(self.external_include_dir)
         for external_include in external_includes:
-            output += ' ' + dash_i + external_include
+            output += ' ' + dash_isystem + ' ' + normalize_source_path(external_include)
         return output
 
     def src_info(self, typ):
         if typ == 'lib':
             return (self.lib_sources, self.libobj_dir)
-        elif typ == 'cli':
+        if typ == 'cli':
             return (self.cli_sources, self.cliobj_dir)
-        elif typ == 'test':
+        if typ == 'test':
             return (self.test_sources, self.testobj_dir)
-        elif typ == 'fuzzer':
+        if typ == 'fuzzer':
             return (self.fuzzer_sources, self.fuzzobj_dir)
-        else:
-            raise InternalError("Unknown src info type '%s'" % (typ))
+        if typ == 'examples':
+            return (self.example_sources, self.example_obj_dir)
+        raise InternalError("Unknown src info type '%s'" % (typ))
 
-ACCEPTABLE_BUILD_TARGETS = ["static", "shared", "cli", "tests", "bogo_shim"]
+ACCEPTABLE_BUILD_TARGETS = ["static", "shared", "cli", "tests", "bogo_shim", "examples"]
 
-def process_command_line(args): # pylint: disable=too-many-locals,too-many-statements
+def process_command_line(args):
     """
     Handle command line options
     Do not use logging in this method as command line options need to be
@@ -347,6 +359,12 @@ def process_command_line(args): # pylint: disable=too-many-locals,too-many-state
 
     target_group.add_option('--compiler-cache',
                             help='specify a compiler cache to use')
+
+    target_group.add_option('--with-compilation-database', dest='with_compilation_database',
+                            action='store_true', default=True, help=optparse.SUPPRESS_HELP)
+
+    target_group.add_option('--without-compilation-database', dest='with_compilation_database',
+                            action='store_false', help='disable generation of compile_commands.json')
 
     target_group.add_option('--with-endian', metavar='ORDER', default=None,
                             help='override byte order guess')
@@ -443,9 +461,6 @@ def process_command_line(args): # pylint: disable=too-many-locals,too-many-state
     build_group.add_option('--with-sysroot-dir', metavar='DIR', default='',
                            help='use DIR for system root while cross-compiling')
 
-    build_group.add_option('--with-openmp', default=False, action='store_true',
-                           help='enable use of OpenMP')
-
     link_methods = ['symlink', 'hardlink', 'copy']
     build_group.add_option('--link-method', default=None, metavar='METHOD',
                            choices=link_methods,
@@ -485,13 +500,6 @@ def process_command_line(args): # pylint: disable=too-many-locals,too-many-state
     build_group.add_option('--with-valgrind', help='use valgrind API',
                            dest='with_valgrind', action='store_true', default=False)
 
-    # Cmake and bakefile options are hidden as they should not be used by end users
-    build_group.add_option('--with-cmake', action='store_true',
-                           default=False, help=optparse.SUPPRESS_HELP)
-
-    build_group.add_option('--with-bakefile', action='store_true',
-                           default=False, help=optparse.SUPPRESS_HELP)
-
     build_group.add_option('--unsafe-fuzzer-mode', action='store_true', default=False,
                            help='Disable essential checks for testing')
 
@@ -502,21 +510,22 @@ def process_command_line(args): # pylint: disable=too-many-locals,too-many-state
     build_group.add_option('--with-fuzzer-lib', metavar='LIB', default=None, dest='fuzzer_lib',
                            help='additionally link in LIB')
 
-    build_group.add_option('--test-mode', action='store_true', default=False,
+    build_group.add_option('--with-debug-asserts', action='store_true', default=False,
                            help=optparse.SUPPRESS_HELP)
 
-    build_group.add_option('--with-debug-asserts', action='store_true', default=False,
+    build_group.add_option('--terminate-on-asserts', action='store_true', default=False,
                            help=optparse.SUPPRESS_HELP)
 
     build_group.add_option('--build-targets', default=None, dest="build_targets", action='append',
                            help="build specific targets and tools (%s)" % ', '.join(ACCEPTABLE_BUILD_TARGETS))
 
+    build_group.add_option('--build-tool', default='make',
+                           help="specify the build tool (make, ninja)")
+
     build_group.add_option('--with-pkg-config', action='store_true', default=None,
                            help=optparse.SUPPRESS_HELP)
     build_group.add_option('--without-pkg-config', dest='with_pkg_config', action='store_false',
                            help=optparse.SUPPRESS_HELP)
-    build_group.add_option('--boost-library-name', dest='boost_libnames', default=[],
-                           help="file name of some boost library to link", action='append')
 
     docs_group = optparse.OptionGroup(parser, 'Documentation Options')
 
@@ -569,7 +578,7 @@ def process_command_line(args): # pylint: disable=too-many-locals,too-many-state
                           help='minimize build')
 
     # Should be derived from info.txt but this runs too early
-    third_party = ['boost', 'bzip2', 'lzma', 'openssl', 'commoncrypto', 'sqlite3', 'zlib', 'tpm']
+    third_party = ['boost', 'bzip2', 'lzma', 'commoncrypto', 'sqlite3', 'zlib', 'tpm']
 
     for mod in third_party:
         mods_group.add_option('--with-%s' % (mod),
@@ -583,9 +592,6 @@ def process_command_line(args): # pylint: disable=too-many-locals,too-many-state
                               action='append_const',
                               const=mod,
                               dest='disabled_modules')
-
-    mods_group.add_option('--with-everything', help=optparse.SUPPRESS_HELP,
-                          action='store_true', default=False)
 
     install_group = optparse.OptionGroup(parser, 'Installation options')
 
@@ -698,13 +704,13 @@ def take_options_from_env(options):
     options.cxxflags = update_from_env(options.cxxflags, 'CXXFLAGS', 'cxxflags')
     options.ldflags = update_from_env(options.ldflags, 'LDFLAGS', 'ldflags')
 
-class LexResult(object):
+class LexResult:
     pass
 
 
 class LexerError(InternalError):
     def __init__(self, msg, lexfile, line):
-        super(LexerError, self).__init__(msg)
+        super().__init__(msg)
         self.msg = msg
         self.lexfile = lexfile
         self.line = line
@@ -735,7 +741,7 @@ def lex_me_harder(infofile, allowed_groups, allowed_maps, name_val_pairs):
     def py_var(group):
         return group.replace(':', '_')
 
-    lexer = shlex.shlex(open(infofile), infofile, posix=True)
+    lexer = shlex.shlex(open(infofile, encoding='utf8'), infofile, posix=True)
     lexer.wordchars += '=:.<>/,-!?+*' # handle various funky chars in info.txt
 
     groups = allowed_groups + allowed_maps
@@ -787,7 +793,7 @@ def lex_me_harder(infofile, allowed_groups, allowed_maps, name_val_pairs):
 
     return out
 
-class InfoObject(object):
+class InfoObject:
     def __init__(self, infofile):
         """
         Constructor sets members `infofile`, `lives_in`, `parent_module` and `basename`
@@ -797,11 +803,16 @@ class InfoObject(object):
         (dirname, basename) = os.path.split(infofile)
         self.lives_in = dirname
         if basename == 'info.txt':
-            (obj_dir, self.basename) = os.path.split(dirname)
-            if os.access(os.path.join(obj_dir, 'info.txt'), os.R_OK):
-                self.parent_module = os.path.basename(obj_dir)
-            else:
-                self.parent_module = None
+            (next_dir, self.basename) = os.path.split(dirname)
+            self.parent_module = None
+
+            obj_dir = ''
+            while next_dir != obj_dir:
+                obj_dir = next_dir
+                if os.access(os.path.join(obj_dir, 'info.txt'), os.R_OK):
+                    self.parent_module = os.path.basename(obj_dir)
+                    break
+                (next_dir, _) = os.path.split(obj_dir)
         else:
             self.basename = basename.replace('.txt', '')
 
@@ -812,13 +823,12 @@ class ModuleInfo(InfoObject):
     """
 
     def __init__(self, infofile):
-        # pylint: disable=too-many-statements
-        super(ModuleInfo, self).__init__(infofile)
+        super().__init__(infofile)
         lex = lex_me_harder(
             infofile,
             ['header:internal', 'header:public', 'header:external', 'requires',
              'os_features', 'arch', 'isa', 'cc', 'comment', 'warning'],
-            ['defines', 'libs', 'frameworks'],
+            ['defines', 'libs', 'frameworks', 'module_info'],
             {
                 'load_on': 'auto',
                 'endian': 'any',
@@ -828,7 +838,8 @@ class ModuleInfo(InfoObject):
             pub_header = set(header_list_public)
             int_header = set(header_list_internal)
             if not pub_header.isdisjoint(int_header):
-                logging.error("Module %s header contains same header in public and internal sections" % self.infofile)
+                logging.error("Module %s has same header in public and internal sections",
+                              self.infofile)
 
         check_header_duplicates(lex.header_public, lex.header_internal)
 
@@ -843,10 +854,10 @@ class ModuleInfo(InfoObject):
 
         self.source = all_source_files
 
-        # If not entry for the headers, all are assumed public
+        # If not entry for the headers, all are assumed internal
         if lex.header_internal == [] and lex.header_public == []:
-            self.header_public = list(all_header_files)
-            self.header_internal = []
+            self.header_public = []
+            self.header_internal = list(all_header_files)
         else:
             self.header_public = lex.header_public
             self.header_internal = lex.header_internal
@@ -875,6 +886,7 @@ class ModuleInfo(InfoObject):
         self.requires = lex.requires
         self.warning = combine_lines(lex.warning)
         self.endian = lex.endian
+        self._parse_module_info(lex)
 
         # Modify members
         self.source = [normalize_source_path(os.path.join(self.lives_in, s)) for s in self.source]
@@ -885,17 +897,35 @@ class ModuleInfo(InfoObject):
         # Filesystem read access check
         for src in self.source + self.header_internal + self.header_public + self.header_external:
             if not os.access(src, os.R_OK):
-                logging.error("Missing file %s in %s" % (src, infofile))
+                logging.error("Missing file %s in %s", src, infofile)
 
         # Check for duplicates
         def intersect_check(type_a, list_a, type_b, list_b):
             intersection = set.intersection(set(list_a), set(list_b))
             if intersection:
-                logging.error('Headers %s marked both %s and %s' % (' '.join(intersection), type_a, type_b))
+                logging.error('Headers %s marked both %s and %s', ' '.join(intersection), type_a, type_b)
 
         intersect_check('public', self.header_public, 'internal', self.header_internal)
         intersect_check('public', self.header_public, 'external', self.header_external)
         intersect_check('external', self.header_external, 'internal', self.header_internal)
+
+        # Check module type constraints
+        source_file_count = len(all_source_files) + len(all_header_files)
+        if self.is_virtual() and source_file_count > 0:
+            logging.error("Module '%s' is virtual but contains %d source code files", self.basename, source_file_count)
+
+    def _parse_module_info(self, lex):
+        info = lex.module_info
+
+        if "name" not in info:
+            raise InternalError("Module '%s' does not contain a <module_info> section with at least a documentation-friendly 'name' definition" % self.basename)
+
+        self.name = info["name"]
+        self.brief = info.get("brief") # possibly None
+        self.type = info.get("type") or "Public"
+
+        if self.type not in ["Public", "Internal", "Virtual"]:
+            raise InternalError("Module '%s' has an unknown type: %s" % (self.basename, self.type))
 
     @staticmethod
     def _validate_defines_content(defines):
@@ -903,7 +933,14 @@ class ModuleInfo(InfoObject):
             if not re.match('^[0-9A-Za-z_]{3,30}$', key):
                 raise InternalError('Module defines key has invalid format: "%s"' % key)
             if not re.match('^20[0-9]{6}$', value):
-                raise InternalError('Module defines value has invalid format: "%s"' % value)
+                raise InternalError('Module defines value has invalid format: "%s" (should be YYYYMMDD)' % value)
+
+            year = int(value[0:4])
+            month = int(value[4:6])
+            day = int(value[6:])
+
+            if year < 2013 or month == 0 or month > 12 or day == 0 or day > 31:
+                raise InternalError('Module defines value has invalid format: "%s" (should be YYYYMMDD)' % value)
 
     def cross_check(self, arch_info, cc_info, all_os_features, all_isa_extn):
 
@@ -913,6 +950,9 @@ class ModuleInfo(InfoObject):
 
         for supp_cc in self.cc:
             if supp_cc not in cc_info:
+                if supp_cc.startswith('!') and supp_cc[1:] in cc_info:
+                    continue
+
                 colon_idx = supp_cc.find(':')
                 # a versioned compiler dependency
                 if colon_idx > 0 and supp_cc[0:colon_idx] in cc_info:
@@ -965,7 +1005,7 @@ class ModuleInfo(InfoObject):
 
     def compatible_cpu(self, archinfo, options):
         arch_name = archinfo.basename
-        cpu_name = options.cpu
+        cpu_name = options.arch
 
         if self.endian != 'any':
             if self.endian != options.with_endian:
@@ -1026,6 +1066,14 @@ class ModuleInfo(InfoObject):
                 # compiler is supported, independent of version
                 return True
 
+            if '!%s' % (ccinfo.basename) in self.cc:
+                # an explicit exclusion of this compiler
+                return False
+
+            # If just exclusions are given, treat as accept if we do not match
+            if all(cc.startswith('!') for cc in self.cc):
+                return True
+
             # Maybe a versioned compiler dep
             for cc in self.cc:
                 try:
@@ -1065,16 +1113,38 @@ class ModuleInfo(InfoObject):
         about any that do not
         """
 
-        missing = [s for s in self.dependencies(None) if s not in modules]
+        def is_dependency_on_virtual(this_module, dependency):
+            if not dependency.is_virtual():
+                return False
 
-        if missing:
-            logging.error("Module '%s', dep of '%s', does not exist" % (
-                missing, self.basename))
+            if this_module.parent_module == dependency.basename:
+                return False
 
+            return True
+
+        missing = [s for s in self.dependencies(None) if s not in modules or is_dependency_on_virtual(self, modules[s])]
+
+        for modname in missing:
+            if modname not in modules:
+                logging.error("Module '%s', dep of '%s', does not exist",
+                              missing, self.basename)
+            else:
+                assert modules[modname].is_virtual()
+                logging.error("Module '%s' is virtual and cannot be depended on by '%s'",
+                              modname, self.basename)
+
+    def is_public(self):
+        return self.type == "Public"
+
+    def is_internal(self):
+        return self.type == "Internal"
+
+    def is_virtual(self):
+        return self.type == "Virtual"
 
 class ModulePolicyInfo(InfoObject):
     def __init__(self, infofile):
-        super(ModulePolicyInfo, self).__init__(infofile)
+        super().__init__(infofile)
         lex = lex_me_harder(
             infofile,
             ['required', 'if_available', 'prohibited'],
@@ -1089,8 +1159,8 @@ class ModulePolicyInfo(InfoObject):
         def check(tp, lst):
             for mod in lst:
                 if mod not in modules:
-                    logging.error("Module policy %s includes non-existent module %s in <%s>" % (
-                        self.infofile, mod, tp))
+                    logging.error("Module policy %s includes non-existent module %s in <%s>",
+                                  self.infofile, mod, tp)
 
         check('required', self.required)
         check('if_available', self.if_available)
@@ -1099,7 +1169,7 @@ class ModulePolicyInfo(InfoObject):
 
 class ArchInfo(InfoObject):
     def __init__(self, infofile):
-        super(ArchInfo, self).__init__(infofile)
+        super().__init__(infofile)
         lex = lex_me_harder(
             infofile,
             ['aliases', 'isa_extensions'],
@@ -1135,9 +1205,9 @@ class ArchInfo(InfoObject):
         return sorted(isas)
 
 
-class CompilerInfo(InfoObject): # pylint: disable=too-many-instance-attributes
+class CompilerInfo(InfoObject):
     def __init__(self, infofile):
-        super(CompilerInfo, self).__init__(infofile)
+        super().__init__(infofile)
         lex = lex_me_harder(
             infofile,
             [],
@@ -1147,9 +1217,11 @@ class CompilerInfo(InfoObject): # pylint: disable=too-many-instance-attributes
                 'binary_name': None,
                 'linker_name': None,
                 'macro_name': None,
+                'minimum_supported_version': None,
                 'output_to_object': '-o ',
                 'output_to_exe': '-o ',
                 'add_include_dir_option': '-I',
+                'add_system_include_dir_option': '-I',
                 'add_lib_dir_option': '-L',
                 'add_compile_definition_option': '-D',
                 'add_sysroot_option': '',
@@ -1165,6 +1237,7 @@ class CompilerInfo(InfoObject): # pylint: disable=too-many-instance-attributes
                 'stack_protector_flags': '',
                 'shared_flags': '',
                 'lang_flags': '',
+                'lang_binary_linker_flags': '',
                 'warning_flags': '',
                 'maintainer_warning_flags': '',
                 'visibility_build_flags': '',
@@ -1173,10 +1246,12 @@ class CompilerInfo(InfoObject): # pylint: disable=too-many-instance-attributes
                 'ar_options': '',
                 'ar_output_to': '',
                 'werror_flags': '',
+                'supports_gcc_inline_asm': 'no',
             })
 
         self.add_framework_option = lex.add_framework_option
         self.add_include_dir_option = lex.add_include_dir_option
+        self.add_system_include_dir_option = lex.add_system_include_dir_option
         self.add_lib_dir_option = lex.add_lib_dir_option
         self.add_lib_option = lex.add_lib_option
         self.add_compile_definition_option = lex.add_compile_definition_option
@@ -1193,6 +1268,7 @@ class CompilerInfo(InfoObject): # pylint: disable=too-many-instance-attributes
         self.debug_info_flags = lex.debug_info_flags
         self.isa_flags = lex.isa_flags
         self.lang_flags = lex.lang_flags
+        self.lang_binary_linker_flags = lex.lang_binary_linker_flags
         self.lib_flags = lex.lib_flags
         self.linker_name = lex.linker_name
         self.mach_abi_linking = lex.mach_abi_linking
@@ -1209,10 +1285,12 @@ class CompilerInfo(InfoObject): # pylint: disable=too-many-instance-attributes
         self.size_optimization_flags = lex.size_optimization_flags
         self.so_link_commands = lex.so_link_commands
         self.stack_protector_flags = lex.stack_protector_flags
+        self.supports_gcc_inline_asm = lex.supports_gcc_inline_asm == 'yes'
         self.visibility_attribute = lex.visibility_attribute
         self.visibility_build_flags = lex.visibility_build_flags
         self.warning_flags = lex.warning_flags
         self.werror_flags = lex.werror_flags
+        self.minimum_supported_version = lex.minimum_supported_version
 
     def cross_check(self, os_info, arch_info, all_isas):
 
@@ -1301,7 +1379,6 @@ class CompilerInfo(InfoObject): # pylint: disable=too-many-instance-attributes
         return ''
 
     def mach_abi_link_flags(self, options, debug_mode=None):
-        #pylint: disable=too-many-branches
 
         """
         Return the machine specific ABI flags
@@ -1326,7 +1403,7 @@ class CompilerInfo(InfoObject): # pylint: disable=too-many-instance-attributes
                     yield all_except
 
             yield options.os
-            yield options.cpu
+            yield options.arch
 
         abi_link = set()
         for what in mach_abi_groups():
@@ -1368,11 +1445,6 @@ class CompilerInfo(InfoObject): # pylint: disable=too-many-instance-attributes
 
             self.sanitizer_types = san
 
-        if options.with_openmp:
-            if 'openmp' not in self.mach_abi_linking:
-                raise UserError('No support for OpenMP for %s' % (self.basename))
-            abi_link.add(self.mach_abi_linking['openmp'])
-
         abi_flags = ' '.join(sorted(abi_link))
 
         if options.cc_abi_flags != '':
@@ -1393,9 +1465,10 @@ class CompilerInfo(InfoObject): # pylint: disable=too-many-instance-attributes
     def cc_lang_flags(self):
         return self.lang_flags
 
-    def cc_compile_flags(self, options, with_debug_info=None, enable_optimizations=None):
-        #pylint: disable=too-many-branches
+    def cc_lang_binary_linker_flags(self):
+        return self.lang_binary_linker_flags
 
+    def cc_compile_flags(self, options, with_debug_info=None, enable_optimizations=None):
         def gen_flags(with_debug_info, enable_optimizations):
 
             sanitizers_enabled = options.with_sanitizers or (len(options.enable_sanitizers) > 0)
@@ -1467,11 +1540,11 @@ class CompilerInfo(InfoObject): # pylint: disable=too-many-instance-attributes
             if s in self.binary_link_commands:
                 return self.binary_link_commands[s]
 
-        return '$(LINKER)'
+        return '{linker}'
 
-class OsInfo(InfoObject): # pylint: disable=too-many-instance-attributes
+class OsInfo(InfoObject):
     def __init__(self, infofile):
-        super(OsInfo, self).__init__(infofile)
+        super().__init__(infofile)
         lex = lex_me_harder(
             infofile,
             ['aliases', 'target_features', 'feature_macros'],
@@ -1496,7 +1569,7 @@ class OsInfo(InfoObject): # pylint: disable=too-many-instance-attributes
                 'use_stack_protector': 'true',
                 'cli_exe_name': 'botan',
                 'lib_prefix': 'lib',
-                'library_name': 'botan{suffix}-{major}',
+                'library_name': 'botan-{major}{suffix}',
                 'shared_lib_symlinks': 'yes',
                 'default_compiler': 'gcc',
                 'uses_pkg_config': 'yes',
@@ -1518,7 +1591,7 @@ class OsInfo(InfoObject): # pylint: disable=too-many-instance-attributes
                 raise InternalError("Invalid soname_patterns in %s" % (self.infofile))
         else:
             if lex.soname_suffix:
-                self.soname_pattern_base = "libbotan{lib_suffix}-{version_major}.%s" % (lex.soname_suffix)
+                self.soname_pattern_base = "{lib_prefix}{libname}.%s" % (lex.soname_suffix)
                 self.soname_pattern_abi = self.soname_pattern_base + ".{abi_rev}"
                 self.soname_pattern_patch = self.soname_pattern_abi + ".{version_minor}.{version_patch}"
             else:
@@ -1544,11 +1617,20 @@ class OsInfo(InfoObject): # pylint: disable=too-many-instance-attributes
         self.program_suffix = lex.program_suffix
         self.static_suffix = lex.static_suffix
         self.target_features = lex.target_features
-        self.use_stack_protector = (lex.use_stack_protector == "true")
-        self.shared_lib_uses_symlinks = (lex.shared_lib_symlinks == 'yes')
+        self.use_stack_protector = lex.use_stack_protector == "true"
+        self.shared_lib_uses_symlinks = lex.shared_lib_symlinks == 'yes'
         self.default_compiler = lex.default_compiler
-        self.uses_pkg_config = (lex.uses_pkg_config == 'yes')
+        self.uses_pkg_config = lex.uses_pkg_config == 'yes'
         self.feature_macros = lex.feature_macros
+
+        self._validate_os_features(self.target_features, infofile)
+
+    @staticmethod
+    def _validate_os_features(features, infofile):
+        feature_re = re.compile('^[a-z][a-z0-9_]*[a-z0-9]$')
+        for feature in features:
+            if not feature_re.match(feature):
+                logging.error("Invalid OS feature %s in %s", feature, infofile)
 
     def matches_name(self, nm):
         if nm in self._aliases:
@@ -1615,10 +1697,10 @@ def guess_processor(archinfo):
         if info_part:
             match = canon_processor(archinfo, info_part)
             if match is not None:
-                logging.debug("Matched '%s' to processor '%s'" % (info_part, match))
+                logging.debug("Matched '%s' to processor '%s'", info_part, match)
                 return match, info_part
             else:
-                logging.debug("Failed to deduce CPU from '%s'" % info_part)
+                logging.debug("Failed to deduce CPU from '%s'", info_part)
 
     raise UserError('Could not determine target CPU; set with --cpu')
 
@@ -1630,29 +1712,27 @@ def read_textfile(filepath):
     if filepath is None:
         return ''
 
-    with open(filepath) as f:
+    with open(filepath, encoding='utf8') as f:
         return ''.join(f.readlines())
 
 
 def process_template_string(template_text, variables, template_source):
-    # pylint: disable=too-many-branches,too-many-statements
-
     """
     Perform template substitution
 
     The template language supports (un-nested) conditionals.
     """
-    class SimpleTemplate(object):
+    class SimpleTemplate:
 
         def __init__(self, vals):
             self.vals = vals
             self.value_pattern = re.compile(r'%{([a-z][a-z_0-9\|]+)}')
             self.cond_pattern = re.compile('%{(if|unless) ([a-z][a-z_0-9]+)}')
             self.for_pattern = re.compile('(.*)%{for ([a-z][a-z_0-9]+)}')
-            self.join_pattern = re.compile('(.*)%{join ([a-z][a-z_0-9]+)}')
+            self.omitlast_pattern = re.compile('(.*)%{omitlast ([^}]*)}(.*)', re.DOTALL)
+            self.join_pattern = re.compile('%{join ([a-z][a-z_0-9]+)}')
 
         def substitute(self, template):
-            # pylint: disable=too-many-locals
             def insert_value(match):
                 v = match.group(1)
                 if v in self.vals:
@@ -1664,6 +1744,12 @@ def process_template_string(template_text, variables, template_source):
 
                 raise KeyError(v)
 
+            def insert_join(match):
+                var = match.group(1)
+                if var in self.vals:
+                    return ' '.join(self.vals.get(var))
+                raise KeyError(var)
+
             lines = template.splitlines()
 
             output = ""
@@ -1671,7 +1757,6 @@ def process_template_string(template_text, variables, template_source):
 
             while idx < len(lines):
                 cond_match = self.cond_pattern.match(lines[idx])
-                join_match = self.join_pattern.match(lines[idx])
                 for_match = self.for_pattern.match(lines[idx])
 
                 if cond_match:
@@ -1692,11 +1777,6 @@ def process_template_string(template_text, variables, template_source):
                         if include_cond:
                             output += lines[idx] + "\n"
                         idx += 1
-                elif join_match:
-                    join_var = join_match.group(2)
-                    join_str = ' '
-                    join_line = '%%{join %s}' % (join_var)
-                    output += lines[idx].replace(join_line, join_str.join(self.vals[join_var])) + "\n"
                 elif for_match:
                     for_prefix = for_match.group(1)
                     output += for_prefix
@@ -1717,7 +1797,7 @@ def process_template_string(template_text, variables, template_source):
                         for_body += lines[idx] + "\n"
                         idx += 1
 
-                    for v in var:
+                    for i, v in enumerate(var):
                         if isinstance(v, dict):
                             for_val = for_body
                             for ik, iv in v.items():
@@ -1725,19 +1805,33 @@ def process_template_string(template_text, variables, template_source):
                             output += for_val + "\n"
                         else:
                             output += for_body.replace('%{i}', v).replace('%{i|upper}', v.upper())
+
+                        omitlast_match = self.omitlast_pattern.match(output)
+                        if omitlast_match:
+                            output = omitlast_match.group(1)
+                            if i + 1 < len(var):
+                                output += omitlast_match.group(2)
+                            output += omitlast_match.group(3)
+
                     output += "\n"
                 else:
                     output += lines[idx] + "\n"
                 idx += 1
 
-            return self.value_pattern.sub(insert_value, output) + '\n'
+            output = self.join_pattern.sub(insert_join, self.value_pattern.sub(insert_value, output))
+
+            # Prevent newlines being added if the template was not a multiline string
+            if len(lines) == 1 and not template.endswith('\n'):
+                return output.rstrip('\n')
+
+            return output
 
     try:
         return SimpleTemplate(variables).substitute(template_text)
-    except KeyError as e:
-        logging.error('Unbound var %s in template %s' % (e, template_source))
-    except Exception as e: # pylint: disable=broad-except
-        logging.error('Exception %s during template processing file %s' % (e, template_source))
+    except KeyError as ex:
+        logging.error('Unbound var %s in template %s', ex, template_source)
+    except Exception as ex:
+        logging.error('Exception %s during template processing file %s', ex, template_source)
 
 def process_template(template_file, variables):
     return process_template_string(read_textfile(template_file), variables, template_file)
@@ -1747,13 +1841,12 @@ def yield_objectfile_list(sources, obj_dir, obj_suffix, options):
 
     for src in sources:
         (directory, filename) = os.path.split(os.path.normpath(src))
-        parts = directory.split(os.sep)
+        parts_in_src = directory.split('src' + os.sep)
+        parts = []
 
-        if 'src' in parts:
-            parts = parts[parts.index('src')+2:]
-        elif options.amalgamation and filename.find(options.name_amalgamation) != -1:
-            parts = []
-        else:
+        if len(parts_in_src) > 1:
+            parts = (parts_in_src[-1].split(os.sep))[1:]
+        elif not options.amalgamation or filename.find(options.name_amalgamation) == -1:
             raise InternalError("Unexpected file '%s/%s'" % (directory, filename))
 
         if parts != []:
@@ -1778,11 +1871,9 @@ def yield_objectfile_list(sources, obj_dir, obj_suffix, options):
             name = filename
 
         name = name.replace('.cpp', obj_suffix)
-        yield os.path.join(obj_dir, name)
+        yield normalize_source_path(os.path.join(obj_dir, name))
 
 def generate_build_info(build_paths, modules, cc, arch, osinfo, options):
-    # pylint: disable=too-many-locals
-
     # first create a map of src_file->owning module
 
     module_that_owns = {}
@@ -1814,9 +1905,13 @@ def generate_build_info(build_paths, modules, cc, arch, osinfo, options):
                 'isa_flags': _isa_specific_flags(src)
                 }
 
-            if target_type == 'fuzzer':
-                fuzz_basename = os.path.basename(obj_file).replace('.' + osinfo.obj_suffix, '')
-                info['exe'] = os.path.join(build_paths.fuzzer_output_dir, fuzz_basename)
+            if target_type in ['fuzzer', 'examples']:
+                exe_basename = os.path.basename(obj_file).replace('.' + osinfo.obj_suffix, '')
+
+                if target_type == 'fuzzer':
+                    info['exe'] = os.path.join(build_paths.fuzzer_output_dir, exe_basename)
+                else:
+                    info['exe'] = os.path.join(build_paths.example_output_dir, exe_basename)
 
             output.append(info)
 
@@ -1824,11 +1919,13 @@ def generate_build_info(build_paths, modules, cc, arch, osinfo, options):
 
     out = {}
 
-    targets = ['lib', 'cli', 'test', 'fuzzer']
+    targets = ['lib', 'cli', 'test', 'fuzzer', 'examples']
 
     out['isa_build_info'] = []
 
     fuzzer_bin = []
+    example_bin = []
+
     for t in targets:
         src_list, src_dir = build_paths.src_info(t)
 
@@ -1850,50 +1947,26 @@ def generate_build_info(build_paths, modules, cc, arch, osinfo, options):
 
             if t == 'fuzzer':
                 fuzzer_bin = [b['exe'] for b in build_info]
+            elif t == 'examples':
+                example_bin = [b['exe'] for b in build_info]
 
         out[src_key] = src_list if src_list else []
         out[obj_key] = objects
         out[build_key] = build_info
 
     out['fuzzer_bin'] = ' '.join(fuzzer_bin)
+    out['example_bin'] = ' '.join(example_bin)
     out['cli_headers'] = build_paths.cli_headers
 
     return out
 
 def create_template_vars(source_paths, build_paths, options, modules, cc, arch, osinfo):
-    #pylint: disable=too-many-locals,too-many-branches,too-many-statements
-
     """
     Create the template variables needed to process the makefile, build.h, etc
     """
 
     def external_link_cmd():
         return ' '.join([cc.add_lib_dir_option + libdir for libdir in options.with_external_libdir])
-
-    def adjust_library_name(info_txt_libname):
-        """
-        Apply custom library name mappings where necessary
-        """
-
-        # potentially map boost library names to the associated name provided
-        # via ./configure.py --boost-library-name <build/platform specific name>
-        #
-        # We assume that info.txt contains the library name's "stem", i.e.
-        # 'boost_system'. While the user-provided (actual) library will contain
-        # the same stem plus a set of prefixes and/or suffixes, e.g.
-        # libboost_system-vc140-mt-x64-1_69.lib. We use the stem for selecting
-        # the correct user-provided library name override.
-        if options.boost_libnames and 'boost_' in info_txt_libname:
-            adjusted_libnames = [chosen_libname for chosen_libname in options.boost_libnames \
-                                 if info_txt_libname in chosen_libname]
-
-            if len(adjusted_libnames) > 1:
-                logging.warning('Ambiguous boost library names: %s' % ', '.join(adjusted_libnames))
-            if len(adjusted_libnames) == 1:
-                logging.debug('Replacing boost library name %s -> %s' % (info_txt_libname, adjusted_libnames[0]))
-                return adjusted_libnames[0]
-
-        return info_txt_libname
 
     def link_to(module_member_name):
         """
@@ -1914,32 +1987,19 @@ def create_template_vars(source_paths, build_paths, options, modules, cc, arch, 
                         if osinfo.basename not in exceptions:
                             libs |= set(module_link_to)
 
-        return sorted([adjust_library_name(lib) for lib in libs])
+        return sorted(libs)
 
     def choose_mp_bits():
         mp_bits = arch.wordsize # allow command line override?
-        logging.debug('Using MP bits %d' % (mp_bits))
+        logging.debug('Using MP bits %d', mp_bits)
         return mp_bits
-
-    def innosetup_arch(os_name, arch):
-        if os_name == 'windows':
-            inno_arch = {'x86_32': '',
-                         'x86_64': 'x64',
-                         'ia64': 'ia64'}
-            if arch in inno_arch:
-                return inno_arch[arch]
-            else:
-                logging.warning('Unknown arch %s in innosetup_arch' % (arch))
-        return None
 
     def configure_command_line():
         # Cut absolute path from main executable (e.g. configure.py or python interpreter)
         # to get the same result when configuring the same thing on different machines
         main_executable = os.path.basename(sys.argv[0])
-        return ' '.join([main_executable] + sys.argv[1:])
-
-    def cmake_escape(s):
-        return s.replace('(', '\\(').replace(')', '\\)')
+        quoted_args = [arg if ' ' not in arg else '\'' + arg + '\'' for arg in sys.argv[1:]]
+        return ' '.join([main_executable] + quoted_args)
 
     def sysroot_option():
         if options.with_sysroot_dir == '':
@@ -1964,13 +2024,21 @@ def create_template_vars(source_paths, build_paths, options, modules, cc, arch, 
     program_suffix = options.program_suffix or osinfo.program_suffix
 
     def join_with_build_dir(path):
-        # For some unknown reason MinGW doesn't like ./foo
-        if build_dir == os.path.curdir and options.os == 'mingw':
-            return path
-        return os.path.join(build_dir, path)
+        # jom (and mingw32-make) seem to string-compare Makefile targets and
+        # requirements. For them, `./botan.lib` is NOT equal to `botan.lib` or
+        # `C:\botan\botan-test.exe` is NOT equal to `C:\botan/botan-test.exe`
+        #
+        # `normalize_source_path` will "fix" the path slashes but remove
+        # a redundant `./` for the "trivial" relative path.
+        normalized = normalize_source_path(os.path.join(build_dir, path))
+        if build_dir == '.':
+            normalized = './%s' % normalized
+        return normalized
 
     def all_targets(options):
         yield 'libs'
+        if options.with_documentation:
+            yield 'docs'
         if 'cli' in options.build_targets:
             yield 'cli'
         if 'tests' in options.build_targets:
@@ -1979,8 +2047,8 @@ def create_template_vars(source_paths, build_paths, options, modules, cc, arch, 
             yield 'fuzzers'
         if 'bogo_shim' in options.build_targets:
             yield 'bogo_shim'
-        if options.with_documentation:
-            yield 'docs'
+        if 'examples' in options.build_targets:
+            yield 'examples'
 
     def install_targets(options):
         yield 'libs'
@@ -1995,12 +2063,7 @@ def create_template_vars(source_paths, build_paths, options, modules, cc, arch, 
         return os.path.join(options.prefix or osinfo.install_root, p)
 
     def choose_python_exe():
-        exe = sys.executable
-
-        if options.os == 'mingw':  # mingw doesn't handle the backslashes in the absolute path well
-            return exe.replace('\\', '/')
-
-        return exe
+        return normalize_source_path(sys.executable)
 
     def choose_cxx_exe():
         cxx = options.compiler_binary or cc.binary_name
@@ -2008,13 +2071,19 @@ def create_template_vars(source_paths, build_paths, options, modules, cc, arch, 
         if options.compiler_cache is None:
             return cxx
         else:
-            return '%s %s' % (options.compiler_cache, cxx)
+            return '%s %s' % (normalize_source_path(options.compiler_cache), cxx)
 
     def extra_libs(libs, cc):
         if libs is None:
             return ''
 
         return ' '.join([(cc.add_lib_option % lib) for lib in libs.split(',') if lib != ''])
+
+    def test_exe_extra_ldflags():
+        if osinfo.matches_name("emscripten"):
+            return '--preload-file=%s@src/tests/data' % source_paths.test_data_dir
+
+        return ''
 
     variables = {
         'version_major':  Version.major(),
@@ -2040,7 +2109,7 @@ def create_template_vars(source_paths, build_paths, options, modules, cc, arch, 
         'internal_headers': sorted([os.path.basename(h) for h in build_paths.internal_headers]),
         'external_headers':  sorted([os.path.basename(h) for h in build_paths.external_headers]),
 
-        'abs_root_dir': os.path.dirname(os.path.realpath(__file__)),
+        'abs_root_dir': normalize_source_path(os.path.dirname(os.path.realpath(__file__))),
 
         'base_dir': source_paths.base_dir,
         'src_dir': source_paths.src_dir,
@@ -2081,16 +2150,19 @@ def create_template_vars(source_paths, build_paths, options, modules, cc, arch, 
         'with_doxygen': options.with_doxygen,
         'maintainer_mode': options.maintainer_mode,
 
-        'out_dir': build_dir,
-        'build_dir': build_paths.build_dir,
+        'out_dir': normalize_source_path(build_dir),
+        'build_dir': normalize_source_path(build_paths.build_dir),
+        'module_info_dir': build_paths.doc_module_info,
 
-        'doc_stamp_file': os.path.join(build_paths.build_dir, 'doc.stamp'),
+        'doc_stamp_file': normalize_source_path(os.path.join(build_paths.build_dir, 'doc.stamp')),
         'makefile_path': os.path.join(build_paths.build_dir, '..', 'Makefile'),
+        'ninja_build_path': os.path.join(build_paths.build_dir, '..', 'build.ninja'),
 
         'build_static_lib': options.build_static_lib,
         'build_shared_lib': options.build_shared_lib,
 
         'build_fuzzers': options.build_fuzzers,
+        'build_examples': 'examples' in options.build_targets,
 
         'build_coverage' : options.with_coverage_info or options.with_coverage,
 
@@ -2106,7 +2178,7 @@ def create_template_vars(source_paths, build_paths, options, modules, cc, arch, 
         'handbook_output_dir': build_paths.handbook_output_dir,
         'doc_output_dir_doxygen': build_paths.doc_output_dir_doxygen,
 
-        'compiler_include_dirs': '%s %s' % (build_paths.include_dir, build_paths.external_include_dir),
+        'compiler_include_dirs': '%s %s' % (normalize_source_path(build_paths.include_dir), normalize_source_path(build_paths.external_include_dir)),
 
         'os': options.os,
         'arch': options.arch,
@@ -2114,10 +2186,6 @@ def create_template_vars(source_paths, build_paths, options, modules, cc, arch, 
         'cpu_family': arch.family,
         'endian': options.with_endian,
         'cpu_is_64bit': arch.wordsize == 64,
-
-        'bakefile_arch': 'x86' if options.arch == 'x86_32' else 'x86_64',
-
-        'innosetup_arch': innosetup_arch(options.os, options.arch),
 
         'mp_bits': choose_mp_bits(),
 
@@ -2127,26 +2195,26 @@ def create_template_vars(source_paths, build_paths, options, modules, cc, arch, 
 
         'cxx': choose_cxx_exe(),
         'cxx_abi_flags': cc.mach_abi_link_flags(options),
-        'linker': cc.linker_name or '$(CXX)',
+        'linker': cc.linker_name or choose_cxx_exe(),
         'make_supports_phony': osinfo.basename != 'windows',
+
+        'cxx_supports_gcc_inline_asm': cc.supports_gcc_inline_asm,
 
         'sanitizer_types' : sorted(cc.sanitizer_types),
 
         'cc_compile_opt_flags': cc.cc_compile_flags(options, False, True),
         'cc_compile_debug_flags': cc.cc_compile_flags(options, True, False),
 
-        # These are for CMake
-        'cxx_abi_opt_flags': cc.mach_abi_link_flags(options, False),
-        'cxx_abi_debug_flags': cc.mach_abi_link_flags(options, True),
-
         'dash_o': cc.output_to_object,
         'dash_c': cc.compile_flags,
 
         'cc_lang_flags': cc.cc_lang_flags(),
+        'cc_lang_binary_linker_flags': cc.cc_lang_binary_linker_flags(),
         'os_feature_macros': osinfo.macros(cc),
         'cc_sysroot': sysroot_option(),
         'cc_compile_flags': options.cxxflags or cc.cc_compile_flags(options),
         'ldflags': options.ldflags or '',
+        'test_exe_extra_ldflags': test_exe_extra_ldflags(),
         'extra_libs': extra_libs(options.extra_libs, cc),
         'cc_warning_flags': cc.cc_warning_flags(options),
         'output_to_exe': cc.output_to_exe,
@@ -2167,11 +2235,6 @@ def create_template_vars(source_paths, build_paths, options, modules, cc, arch, 
             [cc.add_framework_option + fw for fw in link_to('frameworks')]
         ),
 
-        'cmake_link_to': ' '.join(
-            link_to('libs') +
-            [('"' + cc.add_framework_option + fw + '"') for fw in link_to('frameworks')]
-        ),
-
         'fuzzer_lib': (cc.add_lib_option % options.fuzzer_lib) if options.fuzzer_lib else '',
         'libs_used': [lib.replace('.lib', '') for lib in link_to('libs')],
 
@@ -2187,15 +2250,15 @@ def create_template_vars(source_paths, build_paths, options, modules, cc, arch, 
         'system_cert_bundle': options.system_cert_bundle,
 
         'fuzzer_mode': options.unsafe_fuzzer_mode,
+        'building_fuzzers': options.build_fuzzers,
         'fuzzer_type': options.build_fuzzers.upper() if options.build_fuzzers else '',
 
         'with_valgrind': options.with_valgrind,
-        'with_openmp': options.with_openmp,
         'with_debug_asserts': options.with_debug_asserts,
-        'test_mode': options.test_mode,
+        'terminate_on_asserts': options.terminate_on_asserts,
         'optimize_for_size': options.optimize_for_size,
 
-        'mod_list': sorted([m.basename for m in modules])
+        'mod_list': sorted([m.basename for m in modules]),
     }
 
     variables['installed_include_dir'] = os.path.join(
@@ -2210,7 +2273,6 @@ def create_template_vars(source_paths, build_paths, options, modules, cc, arch, 
         variables['cxx_abi_flags'] = ''
 
     variables['lib_flags'] = cc.gen_lib_flags(options, variables)
-    variables['cmake_lib_flags'] = cmake_escape(variables['lib_flags'])
 
     if options.with_pkg_config:
         variables['botan_pkgconfig'] = os.path.join(build_paths.build_dir, 'botan-%d.pc' % (Version.major()))
@@ -2233,6 +2295,9 @@ def create_template_vars(source_paths, build_paths, options, modules, cc, arch, 
 
         variables['lib_link_cmd'] = variables['lib_link_cmd'].format(**variables)
 
+    for var in ['exe_link_cmd']:
+        variables[var] = variables[var].format(**variables)
+
     lib_targets = []
     if options.build_static_lib:
         lib_targets.append('static_lib_name')
@@ -2244,14 +2309,14 @@ def create_template_vars(source_paths, build_paths, options, modules, cc, arch, 
     if options.os == 'llvm' or options.compiler == 'msvc':
         # llvm-link and msvc require just naming the file directly
         variables['build_dir_link_path'] = ''
-        variables['link_to_botan'] = os.path.join(build_dir, variables['static_lib_name'])
+        variables['link_to_botan'] = normalize_source_path(os.path.join(build_dir, variables['static_lib_name']))
     else:
         variables['build_dir_link_path'] = '%s%s' % (cc.add_lib_dir_option, build_dir)
         variables['link_to_botan'] = cc.add_lib_option % variables['libname']
 
     return variables
 
-class ModulesChooser(object):
+class ModulesChooser:
     """
     Determine which modules to load based on options, target, etc
     """
@@ -2287,23 +2352,27 @@ class ModulesChooser(object):
         return True
 
     @staticmethod
-    def _display_module_information_unused(skipped_modules):
-        for reason in sorted(skipped_modules.keys()):
-            disabled_mods = sorted(skipped_modules[reason])
-            if disabled_mods:
-                logging.info('Skipping (%s): %s' % (reason, ' '.join(disabled_mods)))
+    def _remove_virtual_modules(all_modules, modnames):
+        return [mod for mod in modnames if not all_modules[mod].is_virtual()]
 
-    @staticmethod
-    def _display_module_information_to_load(all_modules, modules_to_load):
-        sorted_modules_to_load = sorted(modules_to_load)
+    @classmethod
+    def _display_module_information_unused(cls, all_modules, skipped_modules):
+        for reason in sorted(skipped_modules.keys()):
+            disabled_mods = cls._remove_virtual_modules(all_modules, sorted(skipped_modules[reason]))
+            if disabled_mods:
+                logging.info('Skipping (%s): %s', reason, ' '.join(disabled_mods))
+
+    @classmethod
+    def _display_module_information_to_load(cls, all_modules, modules_to_load):
+        sorted_modules_to_load = cls._remove_virtual_modules(all_modules, sorted(modules_to_load))
 
         for modname in sorted_modules_to_load:
             if all_modules[modname].comment:
-                logging.info('%s: %s' % (modname, all_modules[modname].comment))
+                logging.info('%s: %s', modname, all_modules[modname].comment)
             if all_modules[modname].warning:
-                logging.warning('%s: %s' % (modname, all_modules[modname].warning))
+                logging.warning('%s: %s', modname, all_modules[modname].warning)
             if all_modules[modname].load_on == 'vendor':
-                logging.info('Enabling use of external dependency %s' % modname)
+                logging.info('Enabling use of external dependency %s', modname)
 
         if sorted_modules_to_load:
             logging.info('Loading modules: %s', ' '.join(sorted_modules_to_load))
@@ -2328,31 +2397,37 @@ class ModulesChooser(object):
     def _validate_user_selection(modules, enabled_modules, disabled_modules):
         for modname in enabled_modules:
             if modname not in modules:
-                logging.error("Module not found: %s" % modname)
+                logging.error("Module not found: %s", modname)
+            if not modules[modname].is_public():
+                logging.error("Module '%s' is meant for internal use only", modname)
 
         for modname in disabled_modules:
             if modname not in modules:
-                logging.warning("Disabled module not found: %s" % modname)
+                logging.warning("Disabled module not found: %s", modname)
 
-    def _handle_by_module_policy(self, modname, usable):
+    def _handle_by_module_policy(self, modname, module, usable):
         if self._module_policy is not None:
             if modname in self._module_policy.required:
                 if not usable:
-                    logging.error('Module policy requires module %s not usable on this platform' % (modname))
+                    logging.error('Module policy requires module %s not usable on this platform', modname)
                 elif modname in self._options.disabled_modules:
-                    logging.error('Module %s was disabled but is required by policy' % (modname))
+                    logging.error('Module %s was disabled but is required by policy', modname)
+                elif module.is_virtual():
+                    logging.error("Module %s is meant for internal use only", modname)
                 self._to_load.add(modname)
                 return True
             elif modname in self._module_policy.if_available:
                 if modname in self._options.disabled_modules:
                     self._not_using_because['disabled by user'].add(modname)
+                elif module.is_virtual():
+                    logging.error("Module %s is meant for internal use only", modname)
                 elif usable:
-                    logging.debug('Enabling optional module %s' % (modname))
+                    logging.debug('Enabling optional module %s', modname)
                     self._to_load.add(modname)
                 return True
             elif modname in self._module_policy.prohibited:
                 if modname in self._options.enabled_modules:
-                    logging.error('Module %s was requested but is prohibited by policy' % (modname))
+                    logging.error('Module %s was requested but is prohibited by policy', modname)
                 self._not_using_because['prohibited by module policy'].add(modname)
                 return True
 
@@ -2426,20 +2501,14 @@ class ModulesChooser(object):
         self._to_load = successfully_loaded
         self._maybe_dep -= successfully_loaded
 
-    def _handle_by_load_on(self, module): # pylint: disable=too-many-branches
+    def _handle_by_load_on(self, module):
         modname = module.basename
         if module.load_on == 'never':
             self._not_using_because['disabled as buggy'].add(modname)
         elif module.load_on == 'request':
-            if self._options.with_everything:
-                self._to_load.add(modname)
-            else:
-                self._not_using_because['by request only'].add(modname)
+            self._not_using_because['by request only'].add(modname)
         elif module.load_on == 'vendor':
-            if self._options.with_everything:
-                self._to_load.add(modname)
-            else:
-                self._not_using_because['requires external dependency'].add(modname)
+            self._not_using_because['requires external dependency'].add(modname)
         elif module.load_on == 'dep':
             self._maybe_dep.add(modname)
 
@@ -2452,14 +2521,14 @@ class ModulesChooser(object):
             else:
                 self._to_load.add(modname)
         else:
-            logging.error('Unknown load_on %s in %s' % (
-                module.load_on, modname))
+            logging.error('Unknown load_on %s in %s',
+                          module.load_on, modname)
 
     def choose(self):
         for (modname, module) in self._modules.items():
             usable = self._check_usable(module, modname)
 
-            module_handled = self._handle_by_module_policy(modname, usable)
+            module_handled = self._handle_by_module_policy(modname, module, usable)
             if module_handled:
                 continue
 
@@ -2479,13 +2548,19 @@ class ModulesChooser(object):
                 self._to_load.remove('compression')
                 self._not_using_because['no enabled compression schemes'].add('compression')
 
+        # The AVX2 implementation of Argon2 fails when compiled by GCC in
+        # amalgamation mode.
+        if 'argon2_avx2' in self._to_load and self._options.amalgamation and self._options.compiler == 'gcc':
+            self._to_load.remove('argon2_avx2')
+            self._not_using_because['disabled due to compiler bug'].add('argon2_avx2')
+
         self._resolve_dependencies_for_all_modules()
 
         for not_a_dep in self._maybe_dep:
             self._not_using_because['not requested'].add(not_a_dep)
 
         ModulesChooser._validate_state(self._to_load, self._not_using_because)
-        ModulesChooser._display_module_information_unused(self._not_using_because)
+        ModulesChooser._display_module_information_unused(self._modules, self._not_using_because)
         ModulesChooser._display_module_information_to_load(self._modules, self._to_load)
 
         return self._to_load
@@ -2504,6 +2579,9 @@ def choose_link_method(options):
         # required in order to successfully create symlinks. So only try to use
         # symlinks on Windows if explicitly requested.
 
+        # Hardlinks only work if the source and build dirs are on the same filesystem,
+        # so there we only use it if requested.
+
         # MinGW declares itself as 'Windows'
         host_is_windows = python_platform_identifier() in ['windows', 'cygwin']
 
@@ -2514,7 +2592,7 @@ def choose_link_method(options):
             else:
                 yield 'symlink'
 
-        if 'link' in os.__dict__:
+        if 'link' in os.__dict__ and req == 'hardlink':
             yield 'hardlink'
 
         yield 'copy'
@@ -2522,10 +2600,10 @@ def choose_link_method(options):
     for method in useable_methods():
         if req is None or req == method:
             logging.info('Using %s to link files into build dir ' \
-                         '(use --link-method to change)' % (method))
+                         '(use --link-method to change)', method)
             return method
 
-    logging.warning('Could not use link method "%s", will copy instead' % (req))
+    logging.warning('Could not use link method "%s", will copy instead', req)
     return 'copy'
 
 def portable_symlink(file_path, target_dir, method):
@@ -2534,7 +2612,7 @@ def portable_symlink(file_path, target_dir, method):
     """
 
     if not os.access(file_path, os.R_OK):
-        logging.warning('Missing file %s' % (file_path))
+        logging.warning('Missing file %s', file_path)
         return
 
     if method == 'symlink':
@@ -2548,7 +2626,7 @@ def portable_symlink(file_path, target_dir, method):
         raise UserError('Unknown link method %s' % (method))
 
 
-class AmalgamationHelper(object):
+class AmalgamationHelper:
     # All include types may have trailing comment like e.g. '#include <vector> // IWYU pragma: export'
     _any_include = re.compile(r'#include <(.*)>')
     _botan_include = re.compile(r'#include <botan/(.*)>')
@@ -2570,39 +2648,30 @@ class AmalgamationHelper(object):
     @staticmethod
     def is_botan_include(cpp_source_line):
         match = AmalgamationHelper._botan_include.search(cpp_source_line)
-        if match:
-            return match.group(1)
-        else:
-            return None
+        return match.group(1) if match else None
 
     @staticmethod
     def is_unconditional_any_include(cpp_source_line):
         match = AmalgamationHelper._unconditional_any_include.search(cpp_source_line)
-        if match:
-            return match.group(1)
-        else:
-            return None
+        return match.group(1) if match else None
 
     @staticmethod
     def is_unconditional_std_include(cpp_source_line):
         match = AmalgamationHelper._unconditional_std_include.search(cpp_source_line)
-        if match:
-            return match.group(1)
-        else:
-            return None
+        return match.group(1) if match else None
 
     @staticmethod
     def write_banner(fd):
         fd.write("""/*
 * Botan %s Amalgamation
-* (C) 1999-2020 The Botan Authors
+* (C) 1999-2023 The Botan Authors
 *
 * Botan is released under the Simplified BSD License (see license.txt)
 */
 """ % (Version.as_string()))
 
 
-class AmalgamationHeader(object):
+class AmalgamationHeader:
     def __init__(self, input_filepaths):
 
         self.included_already = set()
@@ -2613,8 +2682,8 @@ class AmalgamationHeader(object):
             try:
                 contents = AmalgamationGenerator.read_header(filepath)
                 self.file_contents[os.path.basename(filepath)] = contents
-            except IOError as e:
-                logging.error('Error processing file %s for amalgamation: %s' % (filepath, e))
+            except IOError as ex:
+                logging.error('Error processing file %s for amalgamation: %s', filepath, ex)
 
         self.contents = ''
         for name in sorted(self.file_contents):
@@ -2655,7 +2724,7 @@ class AmalgamationHeader(object):
                     yield line
 
     def write_to_file(self, filepath, include_guard):
-        with open(filepath, 'w') as f:
+        with open(filepath, 'w', encoding='utf8') as f:
             AmalgamationHelper.write_banner(f)
             f.write("\n#ifndef %s\n#define %s\n\n" % (include_guard, include_guard))
             f.write(self.header_includes)
@@ -2663,16 +2732,13 @@ class AmalgamationHeader(object):
             f.write("\n#endif // %s\n" % (include_guard))
 
 
-class AmalgamationGenerator(object):
+class AmalgamationGenerator:
     _header_guard_pattern = re.compile(r'^#define BOTAN_.*_H_\s*$')
     _header_endif_pattern = re.compile(r'^#endif.*$')
 
     @staticmethod
     def read_header(filepath):
-        encoding_kwords = {}
-        if sys.version_info[0] == 3:
-            encoding_kwords['encoding'] = 'utf8'
-        with open(filepath, **encoding_kwords) as f:
+        with open(filepath, encoding='utf8') as f:
             raw_content = f.readlines()
             return AmalgamationGenerator.strip_header_goop(filepath, raw_content)
 
@@ -2712,13 +2778,9 @@ class AmalgamationGenerator(object):
         self._options = options
 
     def generate(self):
-        encoding_kwords = {}
-        if sys.version_info[0] == 3:
-            encoding_kwords['encoding'] = 'utf8'
-
         pub_header_amalag = AmalgamationHeader(self._build_paths.public_headers)
         amalgamation_header_fsname = '%s.h' % (self._filename_prefix)
-        logging.info('Writing amalgamation header to %s' % (amalgamation_header_fsname))
+        logging.info('Writing amalgamation header to %s', amalgamation_header_fsname)
         pub_header_amalag.write_to_file(amalgamation_header_fsname, "BOTAN_AMALGAMATION_H_")
 
         internal_headers_list = []
@@ -2728,9 +2790,9 @@ class AmalgamationGenerator(object):
 
         # file descriptors for all `amalgamation_sources`
         amalgamation_fsname = '%s.cpp' % (self._filename_prefix)
-        logging.info('Writing amalgamation source to %s' % (amalgamation_fsname))
+        logging.info('Writing amalgamation source to %s', amalgamation_fsname)
 
-        amalgamation_file = open(amalgamation_fsname, 'w', **encoding_kwords)
+        amalgamation_file = open(amalgamation_fsname, 'w', encoding='utf8')
 
         AmalgamationHelper.write_banner(amalgamation_file)
         amalgamation_file.write('\n#include "%s"\n\n' % (amalgamation_header_fsname))
@@ -2743,7 +2805,7 @@ class AmalgamationGenerator(object):
 
         for mod in sorted(self._modules, key=lambda module: module.basename):
             for src in sorted(mod.source):
-                with open(src, 'r', **encoding_kwords) as f:
+                with open(src, 'r', encoding='utf8') as f:
                     for line in f:
                         if AmalgamationHelper.is_botan_include(line):
                             # Botan headers are inlined in amalgamation headers
@@ -2772,7 +2834,7 @@ def have_program(program):
         exe_file = os.path.join(path, program)
 
         if os.path.exists(exe_file) and os.access(exe_file, os.X_OK):
-            logging.debug('Found program %s in %s' % (program, path))
+            logging.debug('Found program %s in %s', program, path)
             return True
         else:
             return False
@@ -2784,14 +2846,14 @@ def have_program(program):
             if exe_test(path, program + suffix):
                 return True
 
-    logging.debug('Program %s not found' % (program))
+    logging.debug('Program %s not found', program)
     return False
 
 
-class BotanConfigureLogHandler(logging.StreamHandler, object):
+class BotanConfigureLogHandler(logging.StreamHandler):
     def emit(self, record):
         # Do the default stuff first
-        super(BotanConfigureLogHandler, self).emit(record)
+        super().emit(record)
         # Exit script if and ERROR or worse occurred
         if record.levelno >= logging.ERROR:
             sys.exit(1)
@@ -2829,9 +2891,9 @@ def load_info_files(search_dir, descr, filename_matcher, class_t):
 
     if info:
         infotxt_basenames = ' '.join(sorted(info.keys()))
-        logging.debug('Loaded %d %s files: %s' % (len(info), descr, infotxt_basenames))
+        logging.debug('Loaded %d %s files: %s', len(info), descr, infotxt_basenames)
     else:
-        logging.warning('Failed to load any %s files' % (descr))
+        logging.warning('Failed to load any %s files', descr)
 
     return info
 
@@ -2860,8 +2922,8 @@ def robust_makedirs(directory, max_retries=5):
         try:
             os.makedirs(directory)
             return
-        except OSError as e:
-            if e.errno == errno.EEXIST:
+        except OSError as ex:
+            if ex.errno == errno.EEXIST:
                 raise
 
         time.sleep(0.1)
@@ -2873,16 +2935,15 @@ def python_platform_identifier():
     system_from_python = platform.system().lower()
     if re.match('^cygwin_.*', system_from_python):
         return 'cygwin'
-    else:
-        return system_from_python
+    return system_from_python
 
 # This is for otions that have --with-XYZ and --without-XYZ. If user does not
 # set any of those, we choose a default here.
 # Mutates `options`
-def set_defaults_for_unset_options(options, info_arch, info_cc, info_os): # pylint: disable=too-many-branches
+def set_defaults_for_unset_options(options, info_arch, info_cc, info_os):
     if options.os is None:
         options.os = python_platform_identifier()
-        logging.info('Guessing target OS is %s (use --os to set)' % (options.os))
+        logging.info('Guessing target OS is %s (use --os to set)', options.os)
 
     if options.os not in info_os:
         def find_canonical_os_name(os_name_variant):
@@ -2903,23 +2964,23 @@ def set_defaults_for_unset_options(options, info_arch, info_cc, info_os): # pyli
         options.compiler = deduce_compiler_type_from_cc_bin(options.compiler_binary)
 
         if options.compiler is None:
-            logging.error("Could not figure out what compiler type '%s' is, use --cc to set" % (
-                options.compiler_binary))
+            logging.error("Could not figure out what compiler type '%s' is, use --cc to set",
+                          options.compiler_binary)
 
     if options.compiler is None and options.os in info_os:
         options.compiler = info_os[options.os].default_compiler
 
         if not have_program(info_cc[options.compiler].binary_name):
-            logging.error("Default compiler for system is %s but could not find binary '%s'; use --cc to set" % (
-                options.compiler, info_cc[options.compiler].binary_name))
+            logging.error("Default compiler is %s but could not find '%s'; use --cc to set",
+                          options.compiler, info_cc[options.compiler].binary_name)
 
-        logging.info('Guessing to use compiler %s (use --cc or CXX to set)' % (options.compiler))
+        logging.info('Guessing to use compiler %s (use --cc or CXX to set)', options.compiler)
 
     if options.cpu is None:
         (arch, cpu) = guess_processor(info_arch)
         options.arch = arch
         options.cpu = cpu
-        logging.info('Guessing target processor is a %s (use --cpu to set)' % (options.arch))
+        logging.info('Guessing target processor is a %s (use --cpu to set)', options.arch)
 
     # OpenBSD uses an old binutils that does not support AVX2
     if options.os == 'openbsd':
@@ -2943,6 +3004,7 @@ def set_defaults_for_unset_options(options, info_arch, info_cc, info_os): # pyli
             '/etc/ssl/ca-bundle.pem', # SuSE
             '/etc/ssl/cert.pem', # OpenBSD, FreeBSD, Alpine
             '/etc/certs/ca-certificates.crt', # Solaris
+            '/opt/local/share/curl/curl-ca-bundle.crt', # macOS with macPorts
         ]
 
         for path in default_paths:
@@ -2952,13 +3014,11 @@ def set_defaults_for_unset_options(options, info_arch, info_cc, info_os): # pyli
                 break
     else:
         if not os.access(options.system_cert_bundle, os.R_OK):
-            logging.warning('Provided system cert bundle path %s not found, ignoring', options.system_cert_bundle)
+            logging.warning('System cert bundle "%s" not found, ignoring', options.system_cert_bundle)
             options.system_cert_bundle = None
 
 # Mutates `options`
 def canonicalize_options(options, info_os, info_arch):
-    # pylint: disable=too-many-branches
-
     # canonical ARCH/CPU
     options.arch = canon_processor(info_arch, options.cpu)
     if options.arch is None:
@@ -3001,10 +3061,10 @@ def canonicalize_options(options, info_os, info_arch):
 
     if not shared_libs_supported:
         if options.build_shared_lib is True:
-            logging.warning('Shared libs not supported on %s, disabling shared lib support' % (options.os))
+            logging.warning('Shared libs not supported on %s, disabling shared lib support', options.os)
             options.build_shared_lib = False
         elif options.build_shared_lib is None:
-            logging.info('Shared libs not supported on %s, disabling shared lib support' % (options.os))
+            logging.info('Shared libs not supported on %s, disabling shared lib support', options.os)
 
     if options.os == 'windows' and options.build_shared_lib is None and options.build_static_lib is None:
         options.build_shared_lib = True
@@ -3043,8 +3103,6 @@ def canonicalize_options(options, info_os, info_arch):
 # This method DOES NOT change options on behalf of the user but explains
 # why the given configuration does not work.
 def validate_options(options, info_os, info_cc, available_module_policies):
-    # pylint: disable=too-many-branches,too-many-statements
-
     if options.name_amalgamation != 'botan_all':
         if options.name_amalgamation == '':
             raise UserError('Amalgamation basename must be non-empty')
@@ -3070,15 +3128,25 @@ def validate_options(options, info_os, info_cc, available_module_policies):
     if options.module_policy and options.module_policy not in available_module_policies:
         raise UserError("Unknown module set %s" % options.module_policy)
 
-    if options.cpu == 'llvm' or options.os in ['llvm', 'emscripten']:
+    if options.cpu == 'llvm' or options.os == 'llvm':
         if options.compiler != 'clang':
             raise UserError('LLVM target requires using Clang')
 
         if options.cpu != 'llvm':
             raise UserError('LLVM target requires CPU target set to LLVM bitcode (llvm)')
 
-        if options.os not in ['llvm', 'emscripten']:
+        if options.os != 'llvm':
             raise UserError('Target OS is not an LLVM bitcode target')
+
+    if options.cpu == 'wasm' or options.os == 'emscripten':
+        if options.compiler != 'emcc':
+            raise UserError('Emscripten target requires using emcc')
+
+        if options.cpu != 'wasm':
+            raise UserError('Emscripten target requires CPU target set to LLVM bitcode (wasm)')
+
+        if options.os != 'emscripten':
+            raise UserError('Target OS is not emscripten')
 
     if options.build_fuzzers is not None:
         if options.build_fuzzers not in ['libfuzzer', 'afl', 'klee', 'test']:
@@ -3086,6 +3154,9 @@ def validate_options(options, info_os, info_cc, available_module_policies):
 
         if options.build_fuzzers == 'klee' and options.os != 'llvm':
             raise UserError('Building for KLEE requires targeting LLVM')
+
+    if options.build_tool not in ['make', 'ninja']:
+        raise UserError("Unknown --build-tool option (possible values: make, ninja)")
 
     if options.build_static_lib is False and options.build_shared_lib is False:
         raise UserError('With both --disable-static-library and --disable-shared-library, nothing to do')
@@ -3104,13 +3175,6 @@ def validate_options(options, info_os, info_cc, available_module_policies):
     if options.with_pdf and not options.with_sphinx:
         raise UserError('Option --with-pdf requires --with-sphinx')
 
-    if options.with_bakefile:
-        if options.os != 'windows' or options.compiler != 'msvc' or options.build_shared_lib is False:
-            raise UserError("Building via bakefile is only supported for MSVC DLL build")
-
-        if options.arch not in ['x86_64', 'x86_32']:
-            raise UserError("Bakefile only supports x86 targets")
-
     # Warnings
     if options.os == 'windows' and options.compiler != 'msvc':
         logging.warning('The windows target is oriented towards MSVC; maybe you want --os=cygwin or --os=mingw')
@@ -3120,7 +3184,7 @@ def validate_options(options, info_os, info_cc, available_module_policies):
             raise UserError("Makes no sense to specify MSVC runtime for %s" % (options.compiler))
 
         if options.msvc_runtime not in ['MT', 'MD', 'MTd', 'MDd']:
-            logging.warning("MSVC runtime option '%s' not known", (options.msvc_runtime))
+            logging.warning("MSVC runtime option '%s' not known", options.msvc_runtime)
 
 def run_compiler_preproc(options, ccinfo, source_file, default_return, extra_flags=None):
     if extra_flags is None:
@@ -3138,8 +3202,8 @@ def run_compiler_preproc(options, ccinfo, source_file, default_return, extra_fla
             stderr=subprocess.PIPE,
             universal_newlines=True).communicate()
         cc_output = stdout
-    except OSError as e:
-        logging.warning('Could not execute %s: %s' % (cmd, e))
+    except OSError as ex:
+        logging.warning('Could not execute %s: %s', cmd, ex)
         return default_return
 
     def cleanup_output(output):
@@ -3153,12 +3217,15 @@ def calculate_cc_min_version(options, ccinfo, source_paths):
         'gcc': r'^ *GCC ([0-9]+) ([0-9]+)$',
         'clang': r'^ *CLANG ([0-9]+) ([0-9]+)$',
         'xlc': r'^ *XLC ([0-9]+) ([0-9]+)$',
+        'emcc': r'^ *EMCC ([0-9]+) ([0-9]+)$',
     }
 
     unknown_pattern = r'UNKNOWN 0 0'
 
-    if ccinfo.basename not in version_patterns:
-        logging.info("No compiler version detection available for %s" % (ccinfo.basename))
+    cxx = ccinfo.basename
+
+    if cxx not in version_patterns:
+        logging.info("No compiler version detection available for %s", cxx)
         return "0.0"
 
     detect_version_source = os.path.join(source_paths.build_data_dir, "detect_version.cpp")
@@ -3166,19 +3233,31 @@ def calculate_cc_min_version(options, ccinfo, source_paths):
     cc_output = run_compiler_preproc(options, ccinfo, detect_version_source, "0.0")
 
     if re.search(unknown_pattern, cc_output) is not None:
-        logging.warning('Failed to get version for %s from macro check' % (ccinfo.basename))
+        logging.warning('Failed to get version for %s from macro check', cxx)
         return "0.0"
 
-    match = re.search(version_patterns[ccinfo.basename], cc_output, flags=re.MULTILINE)
+    match = re.search(version_patterns[cxx], cc_output, flags=re.MULTILINE)
     if match is None:
-        logging.warning("Tried to get %s version, but output '%s' does not match expected version format" % (
-            ccinfo.basename, cc_output))
+        logging.warning("Tried to get %s version, but output '%s' is unexpected",
+                        cxx, cc_output)
         return "0.0"
 
     major_version = int(match.group(1), 0)
     minor_version = int(match.group(2), 0)
+
     cc_version = "%d.%d" % (major_version, minor_version)
-    logging.info('Auto-detected compiler version %s' % (cc_version))
+
+    if cc_version != '0.0':
+        logging.info('Auto-detected compiler version %s %s', cxx, cc_version)
+
+    if ccinfo.minimum_supported_version:
+        # compare as floats
+        min_ver = float(ccinfo.minimum_supported_version)
+        our_ver = float(cc_version)
+
+        if our_ver < min_ver:
+            logging.error("This version of Botan requires at least %s %s",
+                          cxx, ccinfo.minimum_supported_version)
 
     return cc_version
 
@@ -3200,33 +3279,40 @@ def check_compiler_arch(options, ccinfo, archinfo, source_paths):
         logging.warning("Error detecting compiler target arch: '%s'", cc_output)
         return None
 
-    logging.info('Auto-detected compiler arch %s' % (cc_output))
+    logging.info('Auto-detected compiler arch %s', cc_output)
     return cc_output
 
-def do_io_for_build(cc, arch, osinfo, using_mods, build_paths, source_paths, template_vars, options):
-    # pylint: disable=too-many-locals,too-many-branches,too-many-statements
-
+def do_io_for_build(cc, arch, osinfo, using_mods, info_modules, build_paths, source_paths, template_vars, options):
     try:
         robust_rmtree(build_paths.build_dir)
-    except OSError as e:
-        if e.errno != errno.ENOENT:
-            logging.error('Problem while removing build dir: %s' % (e))
+    except OSError as ex:
+        if ex.errno != errno.ENOENT:
+            logging.error('Problem while removing build dir: %s', ex)
 
     for build_dir in build_paths.build_dirs():
         try:
             robust_makedirs(build_dir)
-        except OSError as e:
-            if e.errno != errno.EEXIST:
-                logging.error('Error while creating "%s": %s' % (build_dir, e))
+        except OSError as ex:
+            if ex.errno != errno.EEXIST:
+                logging.error('Error while creating "%s": %s', build_dir, ex)
 
-    def write_template(sink, template):
-        with open(sink, 'w') as f:
-            f.write(process_template(template, template_vars))
+    def write_template_with_variables(sink, template, variables, postproc_fn = None):
+        output = process_template(template, variables)
+        if postproc_fn:
+            output = postproc_fn(output)
+
+        with open(sink, 'w', encoding='utf8') as f:
+            f.write(output)
+
+    def write_template(sink, template, postproc_fn = None):
+        write_template_with_variables(sink, template, template_vars, postproc_fn)
 
     def in_build_dir(p):
         return os.path.join(build_paths.build_dir, p)
     def in_build_data(p):
         return os.path.join(source_paths.build_data_dir, p)
+    def in_build_module_info(p):
+        return os.path.join(build_paths.doc_module_info, p)
 
     write_template(in_build_dir('build.h'), in_build_data('buildh.in'))
     write_template(in_build_dir('botan.doxy'), in_build_data('botan.doxy.in'))
@@ -3234,20 +3320,17 @@ def do_io_for_build(cc, arch, osinfo, using_mods, build_paths, source_paths, tem
     if 'botan_pkgconfig' in template_vars:
         write_template(template_vars['botan_pkgconfig'], in_build_data('botan.pc.in'))
 
-    if options.os == 'windows':
-        write_template(in_build_dir('botan.iss'), in_build_data('innosetup.in'))
-
     link_method = choose_link_method(options)
 
     def link_headers(headers, visibility, directory):
-        logging.debug('Linking %d %s header files in %s' % (len(headers), visibility, directory))
+        logging.debug('Linking %d %s header files in %s', len(headers), visibility, directory)
 
         for header_file in headers:
             try:
                 portable_symlink(header_file, directory, link_method)
-            except OSError as e:
-                if e.errno != errno.EEXIST:
-                    raise UserError('Error linking %s into %s: %s' % (header_file, directory, e))
+            except OSError as ex:
+                if ex.errno != errno.EEXIST:
+                    raise UserError('Error linking %s into %s: %s' % (header_file, directory, ex)) from ex
 
     link_headers(build_paths.public_headers, 'public',
                  build_paths.botan_include_dir)
@@ -3272,26 +3355,57 @@ def do_io_for_build(cc, arch, osinfo, using_mods, build_paths, source_paths, tem
 
     template_vars.update(generate_build_info(build_paths, using_mods, cc, arch, osinfo, options))
 
-    with open(os.path.join(build_paths.build_dir, 'build_config.json'), 'w') as f:
+    with open(os.path.join(build_paths.build_dir, 'build_config.json'), 'w', encoding='utf8') as f:
         json.dump(template_vars, f, sort_keys=True, indent=2)
 
-    if options.with_cmake:
-        logging.warning("CMake build is only for development: use make for production builds")
-        cmake_template = os.path.join(source_paths.build_data_dir, 'cmake.in')
-        write_template('CMakeLists.txt', cmake_template)
-    elif options.with_bakefile:
-        logging.warning("Bakefile build is only for development: use make for production builds")
-        bakefile_template = os.path.join(source_paths.build_data_dir, 'bakefile.in')
-        write_template('botan.bkl', bakefile_template)
-    else:
-        makefile_template = os.path.join(source_paths.build_data_dir, 'makefile.in')
-        write_template(template_vars['makefile_path'], makefile_template)
+    if options.with_compilation_database:
+        write_template(in_build_dir('compile_commands.json'), in_build_data('compile_commands.json.in'))
+
+    if options.build_tool == 'make':
+        write_template(template_vars['makefile_path'], in_build_data('makefile.in'))
+    elif options.build_tool == 'ninja':
+        def escape_build_lines(contents):
+            ninja_build_line = re.compile('^build (.*): (.*)')
+
+            output = []
+            for line in contents.split('\n'):
+                match = ninja_build_line.match(line)
+                if match:
+                    escaped1 = match.group(1).replace(':', '$:')
+                    escaped2 = match.group(2).replace(':', '$:')
+                    output.append('build %s: %s' % (escaped1, escaped2))
+                else:
+                    output.append(line)
+
+            return "\n".join(output)
+
+        write_template(template_vars['ninja_build_path'], in_build_data('ninja.in'), escape_build_lines)
+
+    if options.with_doxygen:
+        for module_name, info in info_modules.items():
+            write_template_with_variables(in_build_module_info(module_name + '.dox'), in_build_data('module_info.in'),
+                                          {
+                                              'parent': info.parent_module,
+                                              'identifier': module_name,
+                                              'title': info.name,
+                                              'internal': info.is_internal(),
+                                              'virtual': info.is_virtual(),
+                                              'brief': info.brief,
+                                              'public_headers': info.header_public,
+                                              'internal_headers': info.header_internal,
+                                              'sources': info.sources(),
+                                              'dependencies': info.requires,
+                                              'os_features': info.os_features,
+                                              'cpu_features': info.isa,
+                                              'arch_requirements': info.arch,
+                                              'compiler_requirements': info.cc
+                                          })
 
     if options.with_rst2man:
         rst2man_file = os.path.join(build_paths.build_dir, 'botan.rst')
         cli_doc = os.path.join(source_paths.doc_dir, 'cli.rst')
 
-        cli_doc_contents = open(cli_doc).readlines()
+        cli_doc_contents = open(cli_doc, encoding='utf8').readlines()
 
         while cli_doc_contents[0] != "\n":
             cli_doc_contents.pop(0)
@@ -3305,17 +3419,19 @@ botan
 
         """.strip()
 
-        with open(rst2man_file, 'w') as f:
+        with open(rst2man_file, 'w', encoding='utf8') as f:
             f.write(rst2man_header)
             f.write("\n")
             for line in cli_doc_contents:
                 f.write(line)
 
-    logging.info('Botan %s (revision %s) (%s %s) build setup is complete' % (
-        Version.as_string(),
-        Version.vc_rev(),
-        Version.release_type(),
-        ('dated %d' % (Version.datestamp())) if Version.datestamp() != 0 else 'undated'))
+    date = 'dated %d' % (Version.datestamp()) if Version.datestamp() != 0 else 'undated'
+
+    logging.info('Botan %s (revision %s) (%s %s) build setup is complete',
+                 Version.as_string(),
+                 Version.vc_rev(),
+                 Version.release_type(),
+                 date)
 
     if options.unsafe_fuzzer_mode:
         logging.warning("The fuzzer mode flag is labeled unsafe for a reason, this version is for testing only")
@@ -3337,8 +3453,6 @@ def main(argv):
     Main driver
     """
 
-    # pylint: disable=too-many-locals,too-many-statements
-
     options = process_command_line(argv[1:])
 
     setup_logging(options)
@@ -3348,7 +3462,8 @@ def main(argv):
     info_modules = load_info_files(source_paths.lib_dir, 'Modules', "info.txt", ModuleInfo)
 
     if options.list_modules:
-        for mod in sorted(info_modules.keys()):
+        public_modules = [name for (name, info) in info_modules.items() if info.is_public()]
+        for mod in sorted(public_modules):
             print(mod)
         return 0
 
@@ -3373,17 +3488,17 @@ def main(argv):
         policy.cross_check(info_modules)
 
     logging.info('%s invoked with options "%s"', argv[0], ' '.join(argv[1:]))
-    logging.info('Configuring to build Botan %s (revision %s)' % (
-        Version.as_string(), Version.vc_rev()))
-    logging.info('Running under %s', sys.version.replace('\n', ''))
+    logging.info('Configuring to build Botan %s (revision %s)',
+                 Version.as_string(), Version.vc_rev())
+    logging.info('Python version: "%s"', sys.version.replace('\n', ''))
 
     take_options_from_env(options)
 
     logging.info('Autodetected platform information: OS="%s" machine="%s" proc="%s"',
                  platform.system(), platform.machine(), platform.processor())
 
-    logging.debug('Known CPU names: ' + ' '.join(
-        sorted(flatten([[ainfo.basename] + ainfo.aliases for ainfo in info_arch.values()]))))
+    cpu_names = sorted(flatten([[ainfo.basename] + ainfo.aliases for ainfo in info_arch.values()]))
+    logging.debug('Known CPU names: %s', ' '.join(cpu_names))
 
     set_defaults_for_unset_options(options, info_arch, info_cc, info_os)
     canonicalize_options(options, info_os, info_arch)
@@ -3404,8 +3519,8 @@ def main(argv):
     else:
         cc_min_version = options.cc_min_version or "0.0"
 
-    logging.info('Target is %s:%s-%s-%s' % (
-        options.compiler, cc_min_version, options.os, options.arch))
+    logging.info('Target is %s:%s-%s-%s',
+                 options.compiler, cc_min_version, options.os, options.arch)
 
     def choose_endian(arch_info, options):
         if options.with_endian is not None:
@@ -3413,7 +3528,7 @@ def main(argv):
 
         if options.cpu.endswith('eb') or options.cpu.endswith('be'):
             return 'big'
-        elif options.cpu.endswith('el') or options.cpu.endswith('le'):
+        if options.cpu.endswith('el') or options.cpu.endswith('le'):
             return 'little'
 
         if arch_info.endian:
@@ -3432,7 +3547,7 @@ def main(argv):
     template_vars = create_template_vars(source_paths, build_paths, options, using_mods, cc, arch, osinfo)
 
     # Now we start writing to disk
-    do_io_for_build(cc, arch, osinfo, using_mods, build_paths, source_paths, template_vars, options)
+    do_io_for_build(cc, arch, osinfo, using_mods, info_modules, build_paths, source_paths, template_vars, options)
 
     return 0
 
@@ -3450,6 +3565,6 @@ An internal error occurred.
 Don't panic, this is probably not your fault! Please open an issue
 with the entire output at https://github.com/randombit/botan
 
-You'll meet friendly people happy to help!""" % traceback.format_exc())
+You'll meet friendly people happy to help!""", traceback.format_exc())
 
     sys.exit(0)

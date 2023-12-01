@@ -2,15 +2,19 @@
 MCELIECE -> 20150922
 </defines>
 
+<module_info>
+name -> "McEliece"
+</module_info>
+
 <header:public>
 mceliece.h
-polyn_gf2m.h
-gf2m_small_m.h
 </header:public>
 
 <header:internal>
+gf2m_small_m.h
 code_based_util.h
 mce_internal.h
+polyn_gf2m.h
 </header:internal>
 
 <requires>
