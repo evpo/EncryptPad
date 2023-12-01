@@ -1665,7 +1665,7 @@ def configure_botan(options):
             '--disable-shared',
             '--with-zlib',
             '--with-bzip2',
-            '--enable-modules', 'aes,cfb,pbkdf2,auto_rng,compression,base64,sha1,sha2_32,pgp_s2k,modes,crc24,blowfish,cast128,cast256,des,twofish,camellia,hmac,hmac_drbg,system_rng,entropy,chacha_rng,processor_rng,rdrand_rng',
+            '--enable-modules', 'aes,cfb,pbkdf2,auto_rng,compression,base64,sha1,sha2_32,sha2_64,sha3,pgp_s2k,modes,crc24,blowfish,cast128,cast256,des,twofish,camellia,hmac,hmac_drbg,system_rng,entropy,chacha_rng,processor_rng,rdrand_rng',
             '--disable-sse4.1',
             '--disable-sse4.2',
             '--minimized-build' ])
