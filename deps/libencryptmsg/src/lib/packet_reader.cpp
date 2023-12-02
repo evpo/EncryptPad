@@ -174,7 +174,7 @@ namespace EncryptMsg
                     break;
             }
             pair<const PacketType, PacketPtr> p(packet_type, std::move(packet_ptr));
-            auto ret_pair = packet_map_.insert(move(p));
+            auto ret_pair = packet_map_.insert(std::move(p));
             it = ret_pair.first;
             new_packet = true;
         }
@@ -204,7 +204,7 @@ namespace EncryptMsg
         }
 
         auto algo_spec = GetAlgoSpec(state_.message_config.GetCipherAlgo());
-        cipher_mode_.reset(Botan::get_cipher_mode(algo_spec.botan_name, Botan::DECRYPTION));
+        cipher_mode_ = Botan::Cipher_Mode::create_or_throw(algo_spec.botan_name, Botan::DECRYPTION);
         auto &key = state_.encryption_key;
         vector<uint8_t> iv(algo_spec.block_size, 0);
         cipher_mode_->set_key(key->begin(), key->size());
