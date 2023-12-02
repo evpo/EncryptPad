@@ -25,6 +25,7 @@
 #include <QLocale>
 #include <QQueue>
 #include <string>
+#include <exception>
 #include "mainwindow.h"
 #include "application.h"
 #include "repository.h"
@@ -162,79 +163,88 @@ int main(int argc, char *argv[])
         LOG_INFO << "Log instance started";
     }
 
-    EncryptPad::InitializeRepositoryPath(argv[0]);
+    try
+    {
+        EncryptPad::InitializeRepositoryPath(argv[0]);
 
-    QStringList userLangs;
-    if(arguments.language.isEmpty())
-    {
-        userLangs.append(QLocale::system().uiLanguages());
-    }
-    else
-    {
-        LOG_INFO << "language: " << arguments.language.toStdString();
-        userLangs.append(arguments.language);
-    }
-    QString resourcePath;
-    QString fakeVimResourcePath;
-    QString qtExcerptPath;
-    for(QString userLang : userLangs)
-    {
-        if(userLang == "en" || userLang.startsWith("en-"))
-            break;
-        resourcePath = findLangResource("encryptpad_", userLang);
-        LOG_INFO << "resourcePath is [" << resourcePath.toStdString() << "]";
-        if(resourcePath.isEmpty())
+        QStringList userLangs;
+        if(arguments.language.isEmpty())
         {
-            continue;
+            userLangs.append(QLocale::system().uiLanguages());
+        }
+        else
+        {
+            LOG_INFO << "language: " << arguments.language.toStdString();
+            userLangs.append(arguments.language);
+        }
+        QString resourcePath;
+        QString fakeVimResourcePath;
+        QString qtExcerptPath;
+        for(QString userLang : userLangs)
+        {
+            if(userLang == "en" || userLang.startsWith("en-"))
+                break;
+            resourcePath = findLangResource("encryptpad_", userLang);
+            LOG_INFO << "resourcePath is [" << resourcePath.toStdString() << "]";
+            if(resourcePath.isEmpty())
+            {
+                continue;
+            }
+
+            fakeVimResourcePath = findLangResource("fakevim_", userLang);
+            LOG_INFO << "fakeVimResourcePath is [" << fakeVimResourcePath.toStdString() << "]";
+            assert(!fakeVimResourcePath.isEmpty());
+
+            qtExcerptPath = findLangResource("qt_excerpt_", userLang);
+            LOG_INFO << "qtExcerptPath is [" << qtExcerptPath.toStdString() << "]";
+            assert(!qtExcerptPath.isEmpty());
+            break;
         }
 
-        fakeVimResourcePath = findLangResource("fakevim_", userLang);
-        LOG_INFO << "fakeVimResourcePath is [" << fakeVimResourcePath.toStdString() << "]";
-        assert(!fakeVimResourcePath.isEmpty());
+        QTranslator translator;
+        QTranslator fakeVimTranslator;
+        QTranslator excerptTranslator;
 
-        qtExcerptPath = findLangResource("qt_excerpt_", userLang);
-        LOG_INFO << "qtExcerptPath is [" << qtExcerptPath.toStdString() << "]";
-        assert(!qtExcerptPath.isEmpty());
-        break;
+        if(!resourcePath.isEmpty())
+        {
+            bool result = loadTranslatorResource(app, translator, resourcePath);
+            assert(result);
+            (void)result;
+        }
+
+        if(!fakeVimResourcePath.isEmpty())
+        {
+            bool result = loadTranslatorResource(app, fakeVimTranslator, fakeVimResourcePath);
+            assert(result);
+            (void)result;
+        }
+
+        if(!qtExcerptPath.isEmpty())
+        {
+            bool result = loadTranslatorResource(app, excerptTranslator, qtExcerptPath);
+            assert(result);
+            (void)result;
+        }
+
+        app.setOrganizationName("Evpo"); //
+        app.setApplicationName("EncryptPad");
+
+        MainWindow mainWin;
+        app.setMainWindow(&mainWin);
+        mainWin.show();
+
+        if(!arguments.fileName.isEmpty())
+            mainWin.open(arguments.fileName);
+
+        if(arguments.isHelpRequested)
+            mainWin.showHelp();
+
+        return app.exec();
     }
-
-    QTranslator translator;
-    QTranslator fakeVimTranslator;
-    QTranslator excerptTranslator;
-
-    if(!resourcePath.isEmpty())
+    catch(const std::exception &ex)
     {
-        bool result = loadTranslatorResource(app, translator, resourcePath);
-        assert(result);
-        (void)result;
+        LOG_ERROR << "Critical error. Exception message: " <<  ex.what();
+        LOG_ERROR << "Exit code: 1";
+        return 1;
     }
-
-    if(!fakeVimResourcePath.isEmpty())
-    {
-        bool result = loadTranslatorResource(app, fakeVimTranslator, fakeVimResourcePath);
-        assert(result);
-        (void)result;
-    }
-
-    if(!qtExcerptPath.isEmpty())
-    {
-        bool result = loadTranslatorResource(app, excerptTranslator, qtExcerptPath);
-        assert(result);
-        (void)result;
-    }
-
-    app.setOrganizationName("Evpo"); //
-    app.setApplicationName("EncryptPad");
-
-    MainWindow mainWin;
-    app.setMainWindow(&mainWin);
-    mainWin.show();
-
-    if(!arguments.fileName.isEmpty())
-        mainWin.open(arguments.fileName);
-
-    if(arguments.isHelpRequested)
-        mainWin.showHelp();
-
-    return app.exec();
 }

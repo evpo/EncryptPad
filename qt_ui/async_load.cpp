@@ -19,6 +19,8 @@
 //**********************************************************************************
 #include "async_load.h"
 #include <algorithm>
+#include <exception>
+#include "plog/Log.h"
 
 AsyncLoad::AsyncLoad(EncryptPadEncryptor::Encryptor &encryptor)
     :thread_(new QThread(this)), metadata_(nullptr), encryptor_(encryptor)
@@ -29,17 +31,25 @@ AsyncLoad::AsyncLoad(EncryptPadEncryptor::Encryptor &encryptor)
 
 void AsyncLoad::Load()
 {
-    load_result_ = encryptor_.Load(file_name_.toUtf8().constData(), file_data_,
-                                   encryption_key_file_.toStdString(), passphrase_.empty() ? nullptr : &passphrase_, metadata_,
-                                   kf_passphrase_.empty() ? nullptr : &kf_passphrase_);
+    try
+    {
+        load_result_ = encryptor_.Load(file_name_.toUtf8().constData(), file_data_,
+                encryption_key_file_.toStdString(), passphrase_.empty() ? nullptr : &passphrase_, metadata_,
+                kf_passphrase_.empty() ? nullptr : &kf_passphrase_);
 
-    std::fill(std::begin(passphrase_), std::end(passphrase_), '0');
-    std::fill(std::begin(kf_passphrase_), std::end(kf_passphrase_), '0');
-    passphrase_.clear();
-    kf_passphrase_.clear();
+        std::fill(std::begin(passphrase_), std::end(passphrase_), '0');
+        std::fill(std::begin(kf_passphrase_), std::end(kf_passphrase_), '0');
+        passphrase_.clear();
+        kf_passphrase_.clear();
 
-    emit AsyncOperationCompleted();
-    thread_->quit();
+        emit AsyncOperationCompleted();
+        thread_->quit();
+    }
+    catch(const std::exception &ex)
+    {
+        LOG_ERROR << "Critical error. Exception message: " <<  ex.what();
+        throw ex;
+    }
 }
 
 void AsyncLoad::Set(const QString &file_name, const QString &encryption_key_file, const std::string &passphrase,

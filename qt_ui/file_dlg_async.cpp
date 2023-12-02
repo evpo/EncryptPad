@@ -18,6 +18,8 @@
 //along with EncryptPad.  If not, see <http://www.gnu.org/licenses/>.
 //**********************************************************************************
 #include "file_dlg_async.h"
+#include <exception>
+#include "plog/Log.h"
 #include "file_encryption.h"
 
 using namespace EncryptPad;
@@ -53,46 +55,54 @@ void FileDlgAsync::Cancel()
 
 void FileDlgAsync::DoWork()
 {
-    is_cancelled_ = false;
-
-    EncryptParams enc_params = {};
-    enc_params.progress_callback = [this](EncryptPad::ProgressEvent &event)
+    try
     {
-        this->ProgressCallbackHandler(event);
-    };
+        is_cancelled_ = false;
 
-    enc_params.passphrase = !passphrase_.empty() ? &passphrase_ : nullptr;
+        EncryptParams enc_params = {};
+        enc_params.progress_callback = [this](EncryptPad::ProgressEvent &event)
+        {
+            this->ProgressCallbackHandler(event);
+        };
 
-    enc_params.key_service = key_service_;
+        enc_params.passphrase = !passphrase_.empty() ? &passphrase_ : nullptr;
 
-    EncryptParams kf_encrypt_params = {};
+        enc_params.key_service = key_service_;
 
-    if(!kf_passphrase_.empty() || kf_key_service_->IsPassphraseSet())
-    {
-        kf_encrypt_params.passphrase = !kf_passphrase_.empty() ? &kf_passphrase_ : nullptr;
-        kf_encrypt_params.key_service = kf_key_service_;
-        enc_params.key_file_encrypt_params = &kf_encrypt_params;
+        EncryptParams kf_encrypt_params = {};
+
+        if(!kf_passphrase_.empty() || kf_key_service_->IsPassphraseSet())
+        {
+            kf_encrypt_params.passphrase = !kf_passphrase_.empty() ? &kf_passphrase_ : nullptr;
+            kf_encrypt_params.key_service = kf_key_service_;
+            enc_params.key_file_encrypt_params = &kf_encrypt_params;
+        }
+
+        if(is_encryption_)
+        {
+            result_ = EncryptPacketFile(input_file_.toStdString(), output_file_.toStdString(), 
+                    enc_params, metadata_);
+        }
+        else
+        {
+            result_ = DecryptPacketFile(input_file_.toStdString(), output_file_.toStdString(), 
+                    enc_params, metadata_);
+        }
+
+        std::fill(std::begin(passphrase_), std::end(passphrase_), '0');
+        passphrase_.clear();
+
+        std::fill(std::begin(kf_passphrase_), std::end(kf_passphrase_), '0');
+        kf_passphrase_.clear();
+
+        emit WorkDone();
+        thread_->quit();
     }
-
-    if(is_encryption_)
+    catch(const std::exception &ex)
     {
-        result_ = EncryptPacketFile(input_file_.toStdString(), output_file_.toStdString(), 
-                enc_params, metadata_);
+        LOG_ERROR << "Critical error. Exception message: " <<  ex.what();
+        throw ex;
     }
-    else
-    {
-        result_ = DecryptPacketFile(input_file_.toStdString(), output_file_.toStdString(), 
-                enc_params, metadata_);
-    }
-
-    std::fill(std::begin(passphrase_), std::end(passphrase_), '0');
-    passphrase_.clear();
-
-    std::fill(std::begin(kf_passphrase_), std::end(kf_passphrase_), '0');
-    kf_passphrase_.clear();
-
-    emit WorkDone();
-    thread_->quit();
 }
 
 void FileDlgAsync::Start()
