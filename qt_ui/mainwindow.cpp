@@ -1597,6 +1597,7 @@ void MainWindow::readOnlyToggled(bool flag)
 void MainWindow::wordWrapToggled(bool flag)
 {
     textEdit->setWordWrapMode(flag ? QTextOption::WordWrap : QTextOption::NoWrap);
+    textEdit->updateLineNumberArea();
 }
 
 void MainWindow::windowsEolToggled(bool flag)
