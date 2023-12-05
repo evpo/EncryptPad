@@ -370,7 +370,7 @@ Open the EncryptPad directory:
 
 Install dependencies and tools:
 
-    apt-get install qt5-default qtbase5-dev gcc g++ make python pkg-config zlib1g-dev libbotan-2-dev libbz2-dev
+    apt-get install qt5-default qtbase5-dev gcc g++ make python3 pkg-config zlib1g-dev libbotan-2-dev libbz2-dev
 
 Open the EncryptPad source directory:
 
@@ -398,7 +398,7 @@ Open the EncryptPad source directory:
 
 Install dependencies and tools:
 
-    zypper install gcc gcc-c++ make python pkg-config zlib-devel libqt5-qtbase-devel libbotan-devel libbz2-devel
+    zypper install gcc gcc-c++ make python3 pkg-config zlib-devel libqt5-qtbase-devel libbotan-devel libbz2-devel
 
 Open the EncryptPad source directory:
 
@@ -413,7 +413,7 @@ Open the EncryptPad source directory:
 Install dependencies and tools:
 
     pacman -S --needed base-devel
-    pacman -S qt5-base python botan zlib bzip2
+    pacman -S qt5-base python3 botan zlib bzip2
 
 Open the EncryptPad source directory:
 
@@ -427,7 +427,7 @@ Open the EncryptPad source directory:
 
 Install dependencies and tools:
 
-    pkg install python pkgconf botan2 qt5
+    pkg install python3 pkgconf botan2 qt5
 
 Open the EncryptPad source directory:
 

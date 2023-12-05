@@ -5,6 +5,7 @@
 * Fix passphrase focus on the text field in get passphrase/key dialogue
 * Add Spanish translation
 * Bug fix: in FakeVim Alt+Shift normally used to switch languages inserts a 0x00 character.
+* Bug fix: Switching wrap / nowrap does not update the line numbers
 * Update Botan to 2.19.3
 * Add more logging for working with files. Provide error messages in the logs when file operations fail.
 * Parameterise the installation path and make /usr/local the default install location
