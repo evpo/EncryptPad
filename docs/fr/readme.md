@@ -1,3 +1,4 @@
+
 EncryptPad est une application de visualisation et d’édition de texte chiffré symétriquement. Grâce à son interface graphique et en ligne de commande simple, EncryptPad propose un outil pour chiffrer et déchiffrer des fichiers binaires sur le disque, tout en offrant des mesures efficaces pour protéger les informations. De plus, EncryptPad utilise le format de fichier **OpenPGP** [RFC 4880](https://tools.ietf.org/html/rfc4880) qui est largement adopté pour sa qualité. Contrairement à d’autres logiciels OpenPGP dont le but principal est le chiffrement asymétrique, l’objectif premier d’EncryptPad est le chiffrement symétrique.
 
 ## Table des matières
@@ -370,7 +371,7 @@ Ouvrir le dossier encryptpad :
 
 Installer les dépendances et outils :
 
-    apt-get install qt5-default qtbase5-dev gcc g++ make python pkg-config zlib1g-dev libbotan-2-dev libbz2-dev
+    apt-get install qt5-default qtbase5-dev gcc g++ make python3 pkg-config zlib1g-dev libbotan-2-dev libbz2-dev
 
 Ouvrir le dossier source d’Encryptpad :
 
@@ -398,7 +399,7 @@ Ouvrir le dossier source d’Encryptpad :
 
 Installer les dépendances et outils :
 
-    zypper install gcc gcc-c++ make python pkg-config zlib-devel libqt5-qtbase-devel libbotan-devel libbz2-devel
+    zypper install gcc gcc-c++ make python3 pkg-config zlib-devel libqt5-qtbase-devel libbotan-devel libbz2-devel
 
 Ouvrir le dossier source d’Encryptpad :
 
@@ -413,7 +414,7 @@ Ouvrir le dossier source d’Encryptpad :
 Installer les dépendances et outils :
 
     pacman -S --needed base-devel
-    pacman -S qt5-base python botan zlib bzip2
+    pacman -S qt5-base python3 botan zlib bzip2
 
 Ouvrir le dossier source d’Encryptpad :
 
@@ -427,7 +428,7 @@ Ouvrir le dossier source d’Encryptpad :
 
 Installer les dépendances et outils :
 
-    pkg install python pkgconf botan2 qt5
+    pkg install python3 pkgconf botan2 qt5
 
 Ouvrir le dossier source d’Encryptpad :
 

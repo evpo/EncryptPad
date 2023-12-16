@@ -1,3 +1,4 @@
+
 EncryptPad это приложение для просмотра и редактирования симметрично зашифрованных файлов. Приложение, так же, включает утилиту для шифрования бинарных файлов на диске. Программа предлагает эффективные способы защиты информации с помощью простого и удобного графического интерфейса и командной строки. Редактор использует наиболее распространенный формат **OpenPGP** [RFC 4880](https://tools.ietf.org/html/rfc4880). В отличит от других OpenPGP программ, главной задачей которых является ассиметричное шифрование, основная цель EncryptPad симметричное шифрование. (Перевод не завершен)
 
 ## Table of Contents
@@ -292,7 +293,7 @@ Install the AUR packages below:
 
 ### Ubuntu or Linux Mint via PPA
 
-There are several PPAs on Launchpad built on Canonical servers from encryptpad source files. Use the commands below to install the packages:
+There are several PPAs on Launchpad built on Canonical servers from EncryptPad source files. Use the commands below to install the packages:
 
     sudo add-apt-repository ppa:evpo/main
     sudo apt update
@@ -370,7 +371,7 @@ Open the EncryptPad directory:
 
 Install dependencies and tools:
 
-    apt-get install qt5-default qtbase5-dev gcc g++ make python pkg-config zlib1g-dev libbotan-2-dev libbz2-dev
+    apt-get install qt5-default qtbase5-dev gcc g++ make python3 pkg-config zlib1g-dev libbotan-2-dev libbz2-dev
 
 Open the EncryptPad source directory:
 
@@ -398,7 +399,7 @@ Open the EncryptPad source directory:
 
 Install dependencies and tools:
 
-    
+    zypper install gcc gcc-c++ make python3 pkg-config zlib-devel libqt5-qtbase-devel libbotan-devel libbz2-devel
 
 Open the EncryptPad source directory:
 
@@ -413,7 +414,7 @@ Open the EncryptPad source directory:
 Install dependencies and tools:
 
     
-    
+    pacman -S qt5-base python3 botan zlib bzip2
 
 Open the EncryptPad source directory:
 
@@ -427,7 +428,7 @@ Open the EncryptPad source directory:
 
 Install dependencies and tools:
 
-    pkg install python pkgconf botan2 qt5
+    pkg install python3 pkgconf botan2 qt5
 
 Open the EncryptPad source directory:
 

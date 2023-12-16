@@ -657,7 +657,7 @@ Souhaitez-vous le remplacer ?</translation>
     </message>
     <message>
         <source>E&amp;xit</source>
-        <translation>&amp;Sortir</translation>
+        <translation>&amp;Fermer</translation>
     </message>
     <message>
         <source>Exit the application</source>

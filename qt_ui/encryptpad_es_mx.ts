@@ -561,7 +561,7 @@ Desea reemplazarlo?</translation>
     </message>
     <message>
         <source>&lt;b&gt;%1&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;OpenPGP implementation.&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;Simplified BSD License&lt;br/&gt;&lt;br/&gt;</source>
-        <translation>&lt;b&gt;%1&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;Implementación de OpenPGP.&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;Licencia BSD simplificada&lt;br/&gt;&lt;br/&gt;</translation>
+        <translation>&lt;b&gt;%Implementación de OpenPGP.&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;Licencia BSD simplificada&lt;br/&gt;&lt;br/&gt;</translation>
     </message>
     <message>
         <source>Do you want to apply the modified default file properties to this file?</source>

@@ -1,5 +1,16 @@
 ## Notes de version ##
 
+### Version 0.5.0.3
+
+* Fix passphrase focus on the text field in get passphrase/key dialogue
+* Add Spanish translation
+* Bug fix: in FakeVim Alt+Shift normally used to switch languages inserts a 0x00 character.
+* Bug fix: Switching wrap / nowrap does not update the line numbers
+* Update Botan to 2.19.3
+* Add more logging for working with files. Provide error messages in the logs when file operations fail.
+* Parameterise the installation path and make /usr/local the default install location
+* Disable the dependency on SSE4.1 and SSE4.2 to support older hardware
+
 ### Version 0.5.0.2
 
 * Ajout d’une nouvelle option d’affichage des numéros de ligne dans l’éditeur
