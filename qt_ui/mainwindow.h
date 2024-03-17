@@ -37,6 +37,7 @@
 #include "preferences.h"
 #include "plain_text_edit.h"
 #include "fake_vim_wrapper.h"
+#include "dialog_enum.h"
 
 QT_BEGIN_NAMESPACE
 class QAction;
@@ -63,6 +64,8 @@ public:
     void setEncryptionKeyFile(const QString &file, bool clearKFKeyService = true);
     const QString &getEncryptionKeyFile() const;
     void showHelp();
+    ThemeAppearance getThemeAppearance() const;
+    void setThemeAppearance(ThemeAppearance value);
 
 protected:
     void closeEvent(QCloseEvent *event) override;
@@ -197,6 +200,8 @@ private:
     QStringList passphraseGenerationSettings;
 
     FakeVimWrapper fakeVimWrapper;
+
+    ThemeAppearance themeAppearance;
 
     void createActions();
     void createMenus();

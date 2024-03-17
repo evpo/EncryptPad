@@ -27,6 +27,7 @@
 #include "load_save_handler.h"
 #include "file_dlg_async.h"
 #include "file_request_service.h"
+#include "dialog_enum.h"
 
 namespace Ui {
 class FileEncryptionDialog;
@@ -73,6 +74,8 @@ public:
 
     void SetDefaultFileParameters(const EncryptPad::PacketMetadata &default_metadata);
     void closeEvent(QCloseEvent *event) override;
+
+    void SetThemeAppearance(ThemeAppearance value);
 signals:
     void ToggleWorkInProgress(bool);
 private slots:

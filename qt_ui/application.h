@@ -30,6 +30,7 @@ public:
     Application(int &argc, char **argv);
     void setMainWindow(MainWindow *);
     MainWindow *getMainWindow();
+    ThemeAppearance getThemeAppearance() const;
 protected:
     bool event(QEvent *);
     void loadFile(const QString &fileName);

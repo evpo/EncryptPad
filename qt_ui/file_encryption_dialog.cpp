@@ -515,3 +515,11 @@ void FileEncryptionDialog::on_toggleWorkInProgress(bool value)
     isWorkInProgress = value;
     ui->uiProgressBar->setValue(0);
 }
+
+void FileEncryptionDialog::SetThemeAppearance(ThemeAppearance value)
+{
+    std::string prefix = value == ThemeAppearance::Light ? ":/images/breeze/light/" : ":/images/breeze/dark/";
+    auto combine = [&prefix] (const char *name) { return QString((prefix + name).c_str()); };
+    ui->uiEncryptRadio->setIcon(QIcon(combine("document-edit-encrypt.svg")));
+    ui->uiDecryptRadio->setIcon(QIcon(combine("document-edit-decrypt.svg")));
+}

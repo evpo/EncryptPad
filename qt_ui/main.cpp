@@ -230,6 +230,7 @@ int main(int argc, char *argv[])
         app.setApplicationName("EncryptPad");
 
         MainWindow mainWin;
+        mainWin.setThemeAppearance(app.getThemeAppearance());
         app.setMainWindow(&mainWin);
         mainWin.show();
 

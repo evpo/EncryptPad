@@ -119,7 +119,8 @@ MainWindow::MainWindow():
     plain_text_switch_(this), plain_text_functor_(plain_text_switch_), recent_files_service_(this),
     loadAdapter(this),
     loadHandler(this, loadAdapter, metadata),
-    saveSuccess(false)
+    saveSuccess(false),
+    themeAppearance(ThemeAppearance::Light)
 {
     setWindowIcon(QIcon(":/images/application_icon.png"));
     auto settings = readSettings();
@@ -1790,6 +1791,7 @@ void MainWindow::setWindowsEol(bool flag)
 void MainWindow::openFileEncryption()
 {
     FileEncryptionDialog dlg(this, file_request_service_);
+    dlg.SetThemeAppearance(themeAppearance);
     dlg.SetDefaultFileParameters(preferences.defaultFileProperties);
     dlg.exec();
 }
@@ -1808,4 +1810,41 @@ void MainWindow::showHelp()
         tr("<b>--log-severity</b> - log severity can be one of the following list: none, fatal, error, warning, info, debug, verbose");
     QMessageBox::information(this, tr("Command Line Interface"), helpText);
 
+}
+
+ThemeAppearance MainWindow::getThemeAppearance() const
+{
+    return themeAppearance;
+}
+
+void MainWindow::setThemeAppearance(ThemeAppearance value)
+{
+    themeAppearance = value;
+    std::string prefix = value == ThemeAppearance::Light ? ":/images/breeze/light/" : ":/images/breeze/dark/";
+    auto combine = [&prefix] (const char *name) { return QString((prefix + name).c_str()); };
+    newAct->setIcon(QIcon(combine("snap-page.svg")));
+    openAct->setIcon(QIcon(combine("document-open.svg")));
+    saveAct->setIcon(QIcon(combine("document-save.svg")));
+    saveAsAct->setIcon(QIcon(combine("document-save-as.svg")));
+    setFilePropertiesAct->setIcon(QIcon(combine("document-properties.svg")));
+    closeAndResetAct->setIcon(QIcon(combine("dialog-cancel.svg")));
+    createNewKeyAct->setIcon(QIcon(combine("key-add.svg")));
+    setPassphraseAct->setIcon(QIcon(combine("document-encrypted.svg")));
+    setEncryptionKeyAct->setIcon(QIcon(combine("key.svg")));
+    clearEncryptionKeyAct->setIcon(QIcon(combine("key-remove.svg")));
+    clearPassphraseAct->setIcon(QIcon(combine("document-decrypt.svg")));
+    undoAct->setIcon(QIcon(combine("edit-undo.svg")));
+    redoAct->setIcon(QIcon(combine("edit-redo.svg")));
+    cutAct->setIcon(QIcon(combine("edit-cut.svg")));
+    copyAct->setIcon(QIcon(combine("edit-copy.svg")));
+    pasteAct->setIcon(QIcon(combine("edit-paste.svg")));
+    searchAct->setIcon(QIcon(combine("edit-find.svg")));
+    generatePassphraseAct->setIcon(QIcon(combine("meeting-organizer.svg")));
+    readOnlyAct->setIcon(QIcon(combine("view-readermode.svg")));
+    wordWrapAct->setIcon(QIcon(combine("text-wrap.svg")));
+    zoomInAct->setIcon(QIcon(combine("format-font-size-more.svg")));
+    zoomOutAct->setIcon(QIcon(combine("format-font-size-less.svg")));
+    resetZoomAct->setIcon(QIcon(combine("format-font-size-reset.svg")));
+    openFileEncryptionAct->setIcon(QIcon(combine("file-encryption.svg")));
+    openPreferencesAct->setIcon(QIcon(combine("configure.svg")));
 }
