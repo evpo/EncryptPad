@@ -64,8 +64,8 @@ public:
     void setEncryptionKeyFile(const QString &file, bool clearKFKeyService = true);
     const QString &getEncryptionKeyFile() const;
     void showHelp();
-    ThemeAppearance getThemeAppearance() const;
-    void setThemeAppearance(ThemeAppearance value);
+    ThemeAppearance getAutoThemeAppearance() const;
+    void setAutoThemeAppearance(ThemeAppearance value);
 
 protected:
     void closeEvent(QCloseEvent *event) override;

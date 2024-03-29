@@ -378,10 +378,6 @@
           <property name="text">
            <string>Encrypt</string>
           </property>
-          <property name="icon">
-           <iconset resource="EncryptPad.qrc">
-            <normaloff>:/images/famfamfam/page_white_key.png</normaloff>:/images/famfamfam/page_white_key.png</iconset>
-          </property>
           <property name="checked">
            <bool>true</bool>
           </property>
@@ -391,10 +387,6 @@
          <widget class="QRadioButton" name="uiDecryptRadio">
           <property name="text">
            <string>Decrypt</string>
-          </property>
-          <property name="icon">
-           <iconset resource="EncryptPad.qrc">
-            <normaloff>:/images/famfamfam/page_white_text.png</normaloff>:/images/famfamfam/page_white_text.png</iconset>
           </property>
          </widget>
         </item>

@@ -67,7 +67,7 @@ void Application::setMainWindow(MainWindow *window)
     mainWindow = window;
 }
 
-ThemeAppearance Application::getThemeAppearance() const
+ThemeAppearance Application::getAutoThemeAppearance() const
 {
     auto palette = this->palette();
     const QColor textColor = palette.color(QPalette::WindowText);

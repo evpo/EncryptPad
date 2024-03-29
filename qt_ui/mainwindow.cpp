@@ -813,52 +813,52 @@ void MainWindow::openPreferences()
 
 void MainWindow::createActions()
 {
-    newAct = new QAction(QIcon(":/images/famfamfam/page_white.png"), tr("&New"), this);
+    newAct = new QAction(tr("&New"), this);
     newAct->setShortcuts(QKeySequence::New);
     newAct->setStatusTip(tr("Create a new file"));
     connect(newAct, SIGNAL(triggered()), this, SLOT(newFile()));
 
-    openAct = new QAction(QIcon(":/images/famfamfam/folder_page_white.png"), tr("&Open..."), this);
+    openAct = new QAction(tr("&Open..."), this);
     openAct->setShortcuts(QKeySequence::Open);
     openAct->setStatusTip(tr("Open an existing file"));
     connect(openAct, SIGNAL(triggered()), this, SLOT(open()));
 
-    saveAct = new QAction(QIcon(":/images/famfamfam/disk.png"), tr("&Save"), this);
+    saveAct = new QAction(tr("&Save"), this);
     saveAct->setShortcuts(QKeySequence::Save);
     saveAct->setStatusTip(tr("Save the document to disk"));
     connect(saveAct, SIGNAL(triggered()), this, SLOT(save()));
 
-    saveAsAct = new QAction(QIcon(":/images/famfamfam/disk_multiple.png"), tr("Save &As..."), this);
+    saveAsAct = new QAction(tr("Save &As..."), this);
     saveAsAct->setShortcuts(QKeySequence::SaveAs);
     saveAsAct->setStatusTip(tr("Save the document under a new name"));
     connect(saveAsAct, SIGNAL(triggered()), this, SLOT(saveAs()));
 
-    setFilePropertiesAct = new QAction(QIcon(":/images/famfamfam/page_white_gear.png"), tr("File &Properties..."), this);
+    setFilePropertiesAct = new QAction(tr("File &Properties..."), this);
     setFilePropertiesAct->setStatusTip(tr("Set file properties"));
     connect(setFilePropertiesAct, SIGNAL(triggered()), this, SLOT(setFileProperties()));
 
-    closeAndResetAct = new QAction(QIcon(":/images/famfamfam/cross.png"), tr("&Close and Reset"), this);
+    closeAndResetAct = new QAction(tr("&Close and Reset"), this);
     closeAndResetAct->setShortcuts(QKeySequence::Close);
     closeAndResetAct->setStatusTip(tr("Close and reset security settings"));
     connect(closeAndResetAct, SIGNAL(triggered()), this, SLOT(closeAndReset()));
 
-    createNewKeyAct = new QAction(QIcon(":/images/famfamfam/key_add.png"), tr("Generate Key..."), this);
+    createNewKeyAct = new QAction(tr("Generate Key..."), this);
     createNewKeyAct->setStatusTip(tr("Generate a new key file"));
     connect(createNewKeyAct, SIGNAL(triggered()), this, SLOT(createNewKey()));
 
-    setPassphraseAct = new QAction(QIcon(":/images/famfamfam/lock.png"), tr("Set &Passphrase..."), this);
+    setPassphraseAct = new QAction(tr("Set &Passphrase..."), this);
     setPassphraseAct->setStatusTip(tr("Set passphrase for encryption and decryption"));
     connect(setPassphraseAct, SIGNAL(triggered()), this, SLOT(setPassphrase()));
 
-    setEncryptionKeyAct = new QAction(QIcon(":/images/famfamfam/key.png"), tr("Set &Encryption Key..."), this);
+    setEncryptionKeyAct = new QAction(tr("Set &Encryption Key..."), this);
     setEncryptionKeyAct->setStatusTip(tr("Set encryption key file"));
     connect(setEncryptionKeyAct, SIGNAL(triggered()), this, SLOT(setEncryptionKey()));
 
-    clearEncryptionKeyAct = new QAction(QIcon(":/images/famfamfam/key_delete.png"), tr("Clear &Encryption Key"), this);
+    clearEncryptionKeyAct = new QAction(tr("Clear &Encryption Key"), this);
     clearEncryptionKeyAct->setStatusTip(tr("Clear encryption key file. Passphrase only (if set)."));
     connect(clearEncryptionKeyAct, SIGNAL(triggered()), this, SLOT(clearEncryptionKey()));
 
-    clearPassphraseAct = new QAction(QIcon(":/images/famfamfam/lock_delete.png"), tr("&Clear Passphrase"), this);
+    clearPassphraseAct = new QAction(tr("&Clear Passphrase"), this);
     clearPassphraseAct->setStatusTip(tr("Save without passphrase protected encryption. Encryption with file key only (if enabled)."));
     connect(clearPassphraseAct, SIGNAL(triggered()), this, SLOT(clearPassphrase()));
 
@@ -868,29 +868,29 @@ void MainWindow::createActions()
     exitAct->setStatusTip(tr("Exit the application"));
     connect(exitAct, SIGNAL(triggered()), this, SLOT(close()));
 
-    undoAct = new QAction(QIcon(":/images/famfamfam/arrow_undo.png"), tr("Undo"), this);
+    undoAct = new QAction(tr("Undo"), this);
     undoAct->setShortcuts(QKeySequence::Undo);
     undoAct->setStatusTip(tr("Undo"));
     connect(undoAct, SIGNAL(triggered()), textEdit, SLOT(undo()));
 
-    redoAct = new QAction(QIcon(":/images/famfamfam/arrow_redo.png"), tr("Redo"), this);
+    redoAct = new QAction(tr("Redo"), this);
     redoAct->setShortcuts(QKeySequence::Redo);
     redoAct->setStatusTip(tr("Redo"));
     connect(redoAct, SIGNAL(triggered()), textEdit, SLOT(redo()));
 
-    cutAct = new QAction(QIcon(":/images/famfamfam/cut.png"), tr("Cu&t"), this);
+    cutAct = new QAction(tr("Cu&t"), this);
     cutAct->setShortcuts(QKeySequence::Cut);
     cutAct->setStatusTip(tr("Cut the current selection's contents to the "
                             "clipboard"));
     connect(cutAct, SIGNAL(triggered()), textEdit, SLOT(cut()));
 
-    copyAct = new QAction(QIcon(":/images/famfamfam/page_copy.png"), tr("&Copy"), this);
+    copyAct = new QAction(tr("&Copy"), this);
     copyAct->setShortcuts(QKeySequence::Copy);
     copyAct->setStatusTip(tr("Copy the current selection's contents to the "
                              "clipboard"));
     connect(copyAct, SIGNAL(triggered()), textEdit, SLOT(copy()));
 
-    pasteAct = new QAction(QIcon(":/images/famfamfam/page_paste.png"), tr("&Paste"), this);
+    pasteAct = new QAction(tr("&Paste"), this);
     pasteAct->setShortcuts(QKeySequence::Paste);
     pasteAct->setStatusTip(tr("Paste the clipboard's contents into the current "
                               "selection"));
@@ -901,7 +901,7 @@ void MainWindow::createActions()
     selectAllAct->setStatusTip(tr("Select all text"));
     connect(selectAllAct, SIGNAL(triggered()), textEdit, SLOT(selectAll()));
 
-    searchAct = new QAction(QIcon(":/images/famfamfam/find.png"), tr("&Find..."), this);
+    searchAct = new QAction(tr("&Find..."), this);
     searchAct->setShortcuts(QKeySequence::Find);
     searchAct->setStatusTip(tr("Find in text"));
     connect(searchAct, SIGNAL(triggered()), this, SLOT(search()));
@@ -911,7 +911,7 @@ void MainWindow::createActions()
     gotoAct->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_G));
     connect(gotoAct, SIGNAL(triggered()), this, SLOT(gotoTriggered()));
 
-    generatePassphraseAct = new QAction(QIcon(":/images/famfamfam/user_suit.png"), tr("&Generate Passphrase..."), this);
+    generatePassphraseAct = new QAction(tr("&Generate Passphrase..."), this);
     generatePassphraseAct->setStatusTip(tr("Generate passphrase"));
     connect(generatePassphraseAct, SIGNAL(triggered()), this, SLOT(generatePassphrase()));
 
@@ -920,29 +920,29 @@ void MainWindow::createActions()
     replaceAct->setStatusTip(tr("Find and replace text"));
     connect(replaceAct, SIGNAL(triggered()), this, SLOT(replace()));
 
-    readOnlyAct = new QAction(QIcon(":/images/famfamfam/read_only.png"), tr("Read Only"), this);
+    readOnlyAct = new QAction(tr("Read Only"), this);
     readOnlyAct->setCheckable(true);
     readOnlyAct->setStatusTip(tr("Enable Read Only mode"));
     connect(readOnlyAct, SIGNAL(toggled(bool)), this, SLOT(readOnlyToggled(bool)));
     connect(readOnlyAct, SIGNAL(toggled(bool)), replaceAct, SLOT(setDisabled(bool)));
     connect(readOnlyAct, SIGNAL(toggled(bool)), generatePassphraseAct, SLOT(setDisabled(bool)));
 
-    wordWrapAct = new QAction(QIcon(":/images/famfamfam/wrap.png"), tr("Word Wrap"), this);
+    wordWrapAct = new QAction(tr("Word Wrap"), this);
     wordWrapAct->setCheckable(true);
     wordWrapAct->setStatusTip(tr("Enable Word Wrap"));
     connect(wordWrapAct, SIGNAL(toggled(bool)), this, SLOT(wordWrapToggled(bool)));
 
-    zoomInAct = new QAction(QIcon(":/images/famfamfam/magnifier_zoom_in.png"), tr("&Zoom In"), this);
+    zoomInAct = new QAction(tr("&Zoom In"), this);
     zoomInAct->setShortcuts(QKeySequence::ZoomIn);
     zoomInAct->setStatusTip(tr("Zoom In"));
     connect(zoomInAct, SIGNAL(triggered()), this, SLOT(zoomIn()));
 
-    zoomOutAct = new QAction(QIcon(":/images/famfamfam/magnifier_zoom_out.png"), tr("&Zoom Out"), this);
+    zoomOutAct = new QAction(tr("&Zoom Out"), this);
     zoomOutAct->setShortcuts(QKeySequence::ZoomOut);
     zoomOutAct->setStatusTip(tr("Zoom Out"));
     connect(zoomOutAct, SIGNAL(triggered()), this, SLOT(zoomOut()));
 
-    resetZoomAct = new QAction(QIcon(":/images/famfamfam/magnifier.png"), tr("&Reset Zoom"), this);
+    resetZoomAct = new QAction(tr("&Reset Zoom"), this);
     resetZoomAct->setShortcut(QKeySequence("Ctrl+0"));
     resetZoomAct->setStatusTip(tr("Reset Zoom"));
     connect(resetZoomAct, SIGNAL(triggered()), this, SLOT(resetZoom()));
@@ -960,7 +960,7 @@ void MainWindow::createActions()
     openPreferencesAct->setStatusTip(tr("Application preferences"));
     connect(openPreferencesAct, SIGNAL(triggered()), this, SLOT(openPreferences()));
 
-    openFileEncryptionAct = new QAction(QIcon(":/images/famfamfam/arrow_switch.png"), tr("File Encryption..."), this);
+    openFileEncryptionAct = new QAction(tr("File Encryption..."), this);
     openFileEncryptionAct->setStatusTip(tr("File encryption"));
     connect(openFileEncryptionAct, SIGNAL(triggered()), this, SLOT(openFileEncryption()));
 
@@ -1812,12 +1812,12 @@ void MainWindow::showHelp()
 
 }
 
-ThemeAppearance MainWindow::getThemeAppearance() const
+ThemeAppearance MainWindow::getAutoThemeAppearance() const
 {
     return themeAppearance;
 }
 
-void MainWindow::setThemeAppearance(ThemeAppearance value)
+void MainWindow::setAutoThemeAppearance(ThemeAppearance value)
 {
     themeAppearance = value;
     std::string prefix = value == ThemeAppearance::Light ? ":/images/breeze/light/" : ":/images/breeze/dark/";
