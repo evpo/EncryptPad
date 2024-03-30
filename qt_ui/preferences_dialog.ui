@@ -458,7 +458,7 @@
          <item>
           <widget class="QLabel" name="label_10">
            <property name="text">
-            <string>Icon theme</string>
+            <string>Icon theme (restart required):</string>
            </property>
            <property name="buddy">
             <cstring>uiIconTheme</cstring>

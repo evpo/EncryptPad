@@ -57,9 +57,9 @@ namespace
         }
 
         template<class T>
-            void Assign(T &algo, const QVariant &setting)
+            void Assign(T &value, const QVariant &setting)
             {
-                algo = static_cast<T>(setting.toInt());
+                value = static_cast<T>(setting.toInt());
             }
 
         template<class T>
@@ -83,6 +83,11 @@ namespace
         }
 
         QVariant ToVariant(EncryptMsg::CipherAlgo &value)
+        {
+            return QVariant(static_cast<int>(value));
+        }
+
+        QVariant ToVariant(PersistentPreferences::ThemeAppearanceConfig &value)
         {
             return QVariant(static_cast<int>(value));
         }
@@ -136,6 +141,7 @@ namespace
         mapper.Map("windows_eol", preferences.windowsEol);
         mapper.Map("key_file_key_length", preferences.kfKeyLength);
         mapper.Map("tab_size", preferences.tabSize);
+        mapper.Map("theme_appearance", preferences.themeAppearance);
     }
 }
 
@@ -164,6 +170,8 @@ void SetDefaultPreferences(PersistentPreferences &preferences)
 
     preferences.font = QFontDatabase::systemFont(QFontDatabase::FixedFont);
     preferences.tabSize = kDefaultTabSize;
+
+    preferences.themeAppearance = PersistentPreferences::ThemeAppearanceConfig::Auto;
 }
 
 

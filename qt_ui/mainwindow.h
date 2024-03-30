@@ -201,7 +201,8 @@ private:
 
     FakeVimWrapper fakeVimWrapper;
 
-    ThemeAppearance themeAppearance;
+    ThemeAppearance currentThemeAppearance;
+    ThemeAppearance autoThemeAppearance;
 
     void createActions();
     void createMenus();
@@ -232,6 +233,7 @@ private:
     void ConvertToWindowsEOL(QString &in, QByteArray &out);
     QString accessRepositoryPath(const QString &fileName);
     std::unique_ptr<QSettings> loadSettings();
+    void setThemeAppearance(ThemeAppearance value);
 
 };
 

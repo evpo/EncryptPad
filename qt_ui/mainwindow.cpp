@@ -102,6 +102,22 @@ namespace
 
         return true;
     }
+
+    ThemeAppearance ResolveCurrentThemeAppearance(PersistentPreferences::ThemeAppearanceConfig config, ThemeAppearance autoThemeAppearance)
+    {
+        switch(config)
+        {
+            case PersistentPreferences::ThemeAppearanceConfig::Auto:
+                return autoThemeAppearance;
+            case PersistentPreferences::ThemeAppearanceConfig::Light:
+                return ThemeAppearance::Light;
+            case PersistentPreferences::ThemeAppearanceConfig::Dark:
+                return ThemeAppearance::Dark;
+            default:
+                LOG_WARNING << "unknown ThemeAppearanceConfig";
+                return autoThemeAppearance;
+        }
+    }
 }
 
 const int MainWindow::maxZoomIn = 75;
@@ -120,7 +136,8 @@ MainWindow::MainWindow():
     loadAdapter(this),
     loadHandler(this, loadAdapter, metadata),
     saveSuccess(false),
-    themeAppearance(ThemeAppearance::Light)
+    currentThemeAppearance(ThemeAppearance::Light),
+    autoThemeAppearance(ThemeAppearance::Light)
 {
     setWindowIcon(QIcon(":/images/application_icon.png"));
     auto settings = readSettings();
@@ -145,6 +162,8 @@ MainWindow::MainWindow():
     createMenus();
     createToolBars();
     createStatusBar();
+
+    setThemeAppearance(ResolveCurrentThemeAppearance(preferences.themeAppearance, autoThemeAppearance));
 
     if(settings)
     {
@@ -1217,6 +1236,7 @@ void MainWindow::onUpdatedPreferences()
     enc.SetLibcurlPath(preferences.libCurlPath.toStdString());
     enc.SetLibcurlParams(preferences.libCurlParameters.toStdString());
     textEdit->setFont(preferences.font);
+    setThemeAppearance(ResolveCurrentThemeAppearance(preferences.themeAppearance, autoThemeAppearance));
     QFontMetrics metrics(textEdit->font());
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 11, 0)
@@ -1791,7 +1811,7 @@ void MainWindow::setWindowsEol(bool flag)
 void MainWindow::openFileEncryption()
 {
     FileEncryptionDialog dlg(this, file_request_service_);
-    dlg.SetThemeAppearance(themeAppearance);
+    dlg.SetThemeAppearance(currentThemeAppearance);
     dlg.SetDefaultFileParameters(preferences.defaultFileProperties);
     dlg.exec();
 }
@@ -1812,14 +1832,9 @@ void MainWindow::showHelp()
 
 }
 
-ThemeAppearance MainWindow::getAutoThemeAppearance() const
+void MainWindow::setThemeAppearance(ThemeAppearance value)
 {
-    return themeAppearance;
-}
-
-void MainWindow::setAutoThemeAppearance(ThemeAppearance value)
-{
-    themeAppearance = value;
+    currentThemeAppearance = value;
     std::string prefix = value == ThemeAppearance::Light ? ":/images/breeze/light/" : ":/images/breeze/dark/";
     auto combine = [&prefix] (const char *name) { return QString((prefix + name).c_str()); };
     newAct->setIcon(QIcon(combine("snap-page.svg")));
@@ -1847,4 +1862,15 @@ void MainWindow::setAutoThemeAppearance(ThemeAppearance value)
     resetZoomAct->setIcon(QIcon(combine("format-font-size-reset.svg")));
     openFileEncryptionAct->setIcon(QIcon(combine("file-encryption.svg")));
     openPreferencesAct->setIcon(QIcon(combine("configure.svg")));
+}
+
+ThemeAppearance MainWindow::getAutoThemeAppearance() const
+{
+    return autoThemeAppearance;
+}
+
+void MainWindow::setAutoThemeAppearance(ThemeAppearance value)
+{
+    autoThemeAppearance = value;
+    setThemeAppearance(ResolveCurrentThemeAppearance(preferences.themeAppearance, value));
 }

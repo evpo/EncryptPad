@@ -5,6 +5,13 @@
 
 struct PersistentPreferences
 {
+    enum class ThemeAppearanceConfig
+    {
+        Auto = 0,
+        Light = 1,
+        Dark = 2,
+    };
+
     EncryptPad::PacketMetadata defaultFileProperties;
     EncryptPad::PacketMetadata keyFileProperties;
     bool saveLastUsedDirectory;
@@ -20,6 +27,7 @@ struct PersistentPreferences
     QString libCurlPath;
     QString libCurlParameters;
     int kfKeyLength;
+    ThemeAppearanceConfig themeAppearance;
 };
 
 void SetDefaultPreferences(PersistentPreferences &preferences);

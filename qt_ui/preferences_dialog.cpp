@@ -81,6 +81,18 @@ namespace
         }
     }
 
+    void BindControl(QComboBox *cnt, PersistentPreferences::ThemeAppearanceConfig &value, BinderDirection direction)
+    {
+        if(direction == BinderDirection::Get)
+        {
+            value = static_cast<PersistentPreferences::ThemeAppearanceConfig>(cnt->currentIndex());
+        }
+        else if(direction == BinderDirection::Set)
+        {
+            cnt->setCurrentIndex(static_cast<int>(value));
+        }
+    }
+
     struct ControlBinder
     {
         BinderDirection direction;
@@ -106,6 +118,7 @@ namespace
         binder.Bind(ui.uiS2KResultsPoolSize, value.s2kResultsPoolSize);
         binder.Bind(ui.uiKeyFileLength, value.kfKeyLength);
         binder.Bind(ui.uiTabSize, value.tabSize);
+        binder.Bind(ui.uiIconTheme, value.themeAppearance);
     }
 
     void ParseComboBoxData(QComboBox *combo)
