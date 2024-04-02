@@ -1,4 +1,4 @@
-QT       += core gui widgets
+QT       += core gui widgets printsupport
 PROJ = ../..
 VPATH = $$PROJ/qt_ui
 

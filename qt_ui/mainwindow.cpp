@@ -19,6 +19,8 @@
 //**********************************************************************************
 #include <QtGui>
 #include <QtWidgets>
+#include <QPrinter>
+#include <QPrintDialog>
 
 #include <iostream>
 #include <string>
@@ -596,6 +598,18 @@ void MainWindow::saveAs(const QString &path)
     saveFile(path);
 }
 
+void MainWindow::print()
+{
+    std::unique_ptr<QPrinter> printer(new QPrinter (QPrinter::HighResolution));
+    QPrintDialog dlg(printer.get(), this);
+    dlg.setWindowModality (Qt::WindowModal);
+    dlg.setWindowTitle (tr ("Print Document"));
+    if (dlg.exec() == QDialog::Accepted)
+    {
+        textEdit->print(printer.get());
+    }
+}
+
 void MainWindow::saveAsAndClose(const QString &path)
 {
     if(curFile != path && preferences.enableBakFiles)
@@ -851,6 +865,11 @@ void MainWindow::createActions()
     saveAsAct->setShortcuts(QKeySequence::SaveAs);
     saveAsAct->setStatusTip(tr("Save the document under a new name"));
     connect(saveAsAct, SIGNAL(triggered()), this, SLOT(saveAs()));
+
+    printAct = new QAction(tr("&Print..."), this);
+    printAct->setShortcut(QKeySequence::Print);
+    printAct->setStatusTip(tr("Print the document"));
+    connect(printAct, SIGNAL(triggered()), this, SLOT(print()));
 
     setFilePropertiesAct = new QAction(tr("File &Properties..."), this);
     setFilePropertiesAct->setStatusTip(tr("Set file properties"));
@@ -1124,6 +1143,7 @@ void MainWindow::createMenus()
     fileMenu->addAction(saveAct);
 
     fileMenu->addAction(saveAsAct);
+    fileMenu->addAction(printAct);
     fileMenu->addAction(setFilePropertiesAct);
     fileMenu->addAction(closeAndResetAct);
     QAction *separator = fileMenu->addSeparator();
@@ -1184,6 +1204,7 @@ void MainWindow::createToolBars()
 
     fileToolBar->addAction(saveAct);
     fileToolBar->addAction(saveAsAct);
+    fileToolBar->addAction(printAct);
     fileToolBar->addAction(openFileEncryptionAct);
     fileToolBar->addAction(setFilePropertiesAct);
     fileToolBar->addAction(closeAndResetAct);
@@ -1840,6 +1861,7 @@ void MainWindow::setThemeAppearance(ThemeAppearance value)
     newAct->setIcon(QIcon(combine("snap-page.svg")));
     openAct->setIcon(QIcon(combine("document-open.svg")));
     saveAct->setIcon(QIcon(combine("document-save.svg")));
+    printAct->setIcon(QIcon(combine("document-print.svg")));
     saveAsAct->setIcon(QIcon(combine("document-save-as.svg")));
     setFilePropertiesAct->setIcon(QIcon(combine("document-properties.svg")));
     closeAndResetAct->setIcon(QIcon(combine("dialog-cancel.svg")));

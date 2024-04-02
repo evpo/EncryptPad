@@ -84,6 +84,7 @@ private slots:
     bool saveAs();
     void saveAs(const QString &path);
     void saveAsAndClose(const QString &path);
+    void print();
     void setFileProperties();
     void closeAndReset();
     void createNewKey();
@@ -152,6 +153,7 @@ private:
     QAction *openAct;
     QAction *saveAct;
     QAction *saveAsAct;
+    QAction *printAct;
     QAction *setFilePropertiesAct;
     QAction *closeAndResetAct;
     QAction *createNewKeyAct;
