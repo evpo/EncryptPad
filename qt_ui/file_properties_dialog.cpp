@@ -61,11 +61,18 @@ FilePropertiesDialog::FilePropertiesDialog(QWidget *parent) :
     ui(new Ui::FilePropertiesDialog), isDirty(false)
 {
     ui->setupUi(this);
+    ui->uiPath->hide();
     PopulateItems();
     connect(ui->uiCipherAlgo, SIGNAL(currentIndexChanged(int)), this, SLOT(PropertyChanged()));
     connect(ui->uiHashAlgo, SIGNAL(currentIndexChanged(int)), this, SLOT(PropertyChanged()));
     connect(ui->uiCompressionAlgo, SIGNAL(currentIndexChanged(int)), this, SLOT(PropertyChanged()));
     connect(ui->uiIterations, SIGNAL(currentIndexChanged(int)), this, SLOT(PropertyChanged()));
+}
+
+void FilePropertiesDialog::SetPath(const QString &path)
+{
+    ui->uiPath->setText(path);
+    ui->uiPath->show();
 }
 
 FilePropertiesDialog::~FilePropertiesDialog()

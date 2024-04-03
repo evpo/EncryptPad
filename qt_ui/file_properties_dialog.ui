@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>536</width>
-    <height>237</height>
+    <width>448</width>
+    <height>231</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -29,165 +29,150 @@
    <string>File Properties</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
+   <item row="2" column="0">
+    <widget class="QLabel" name="label_4">
+     <property name="text">
+      <string>Iterations:</string>
+     </property>
+     <property name="buddy">
+      <cstring>uiIterations</cstring>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QLabel" name="label_2">
+     <property name="text">
+      <string>Hash:</string>
+     </property>
+     <property name="buddy">
+      <cstring>uiHashAlgo</cstring>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="0">
+    <widget class="QLabel" name="label_5">
+     <property name="text">
+      <string>Salt:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="1">
+    <widget class="QComboBox" name="uiIterations">
+     <property name="editable">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="0">
+    <widget class="QLabel" name="label_3">
+     <property name="text">
+      <string>Compression:</string>
+     </property>
+     <property name="buddy">
+      <cstring>uiCompressionAlgo</cstring>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="1">
+    <widget class="QLabel" name="uiSalt">
+     <property name="text">
+      <string>FFFFFFFFFFFFFFFF</string>
+     </property>
+     <property name="textFormat">
+      <enum>Qt::PlainText</enum>
+     </property>
+    </widget>
+   </item>
    <item row="0" column="0">
-    <layout class="QGridLayout" name="gridLayout">
-     <property name="sizeConstraint">
-      <enum>QLayout::SetDefaultConstraint</enum>
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>Algorithm:</string>
      </property>
-     <property name="leftMargin">
-      <number>10</number>
+     <property name="buddy">
+      <cstring>uiCipherAlgo</cstring>
      </property>
-     <property name="topMargin">
-      <number>10</number>
+    </widget>
+   </item>
+   <item row="4" column="1">
+    <widget class="QComboBox" name="uiCompressionAlgo">
+     <item>
+      <property name="text">
+       <string comment="1">ZIP</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string comment="2">ZLIB</string>
+      </property>
+     </item>
+    </widget>
+   </item>
+   <item row="6" column="0" colspan="2">
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
      </property>
-     <property name="rightMargin">
-      <number>10</number>
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>35</height>
+      </size>
      </property>
-     <property name="bottomMargin">
-      <number>10</number>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
      </property>
-     <property name="spacing">
-      <number>10</number>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
      </property>
-     <item row="0" column="0">
-      <widget class="QLabel" name="label">
-       <property name="text">
-        <string>Algorithm:</string>
-       </property>
-       <property name="buddy">
-        <cstring>uiCipherAlgo</cstring>
-       </property>
-      </widget>
+    </widget>
+   </item>
+   <item row="1" column="1">
+    <widget class="QComboBox" name="uiHashAlgo">
+     <item>
+      <property name="text">
+       <string comment="2">SHA-1</string>
+      </property>
      </item>
-     <item row="2" column="0">
-      <widget class="QLabel" name="label_4">
-       <property name="text">
-        <string>Iterations:</string>
-       </property>
-       <property name="buddy">
-        <cstring>uiIterations</cstring>
-       </property>
-      </widget>
+     <item>
+      <property name="text">
+       <string comment="8">SHA-256 (recommended)</string>
+      </property>
      </item>
-     <item row="0" column="1">
-      <widget class="QComboBox" name="uiCipherAlgo">
-       <item>
-        <property name="text">
-         <string comment="2">Triple DES</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string comment="3">CAST5</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string comment="7">AES-128</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string comment="9">AES-256 (recommended)</string>
-        </property>
-       </item>
-      </widget>
+    </widget>
+   </item>
+   <item row="0" column="1">
+    <widget class="QComboBox" name="uiCipherAlgo">
+     <item>
+      <property name="text">
+       <string comment="2">Triple DES</string>
+      </property>
      </item>
-     <item row="4" column="0">
-      <widget class="QLabel" name="label_3">
-       <property name="text">
-        <string>Compression:</string>
-       </property>
-       <property name="buddy">
-        <cstring>uiCompressionAlgo</cstring>
-       </property>
-      </widget>
+     <item>
+      <property name="text">
+       <string comment="3">CAST5</string>
+      </property>
      </item>
-     <item row="4" column="1">
-      <widget class="QComboBox" name="uiCompressionAlgo">
-       <item>
-        <property name="text">
-         <string comment="1">ZIP</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string comment="2">ZLIB</string>
-        </property>
-       </item>
-      </widget>
+     <item>
+      <property name="text">
+       <string comment="7">AES-128</string>
+      </property>
      </item>
-     <item row="1" column="1">
-      <widget class="QComboBox" name="uiHashAlgo">
-       <item>
-        <property name="text">
-         <string comment="2">SHA-1</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string comment="8">SHA-256 (recommended)</string>
-        </property>
-       </item>
-      </widget>
+     <item>
+      <property name="text">
+       <string comment="9">AES-256 (recommended)</string>
+      </property>
      </item>
-     <item row="3" column="0">
-      <widget class="QLabel" name="label_5">
-       <property name="text">
-        <string>Salt:</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="0">
-      <widget class="QLabel" name="label_2">
-       <property name="text">
-        <string>Hash:</string>
-       </property>
-       <property name="buddy">
-        <cstring>uiHashAlgo</cstring>
-       </property>
-      </widget>
-     </item>
-     <item row="6" column="0" colspan="2">
-      <widget class="QDialogButtonBox" name="buttonBox">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>0</width>
-         <height>35</height>
-        </size>
-       </property>
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="standardButtons">
-        <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="1">
-      <widget class="QLabel" name="uiSalt">
-       <property name="text">
-        <string>FFFFFFFFFFFFFFFF</string>
-       </property>
-       <property name="textFormat">
-        <enum>Qt::PlainText</enum>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="1">
-      <widget class="QComboBox" name="uiIterations">
-       <property name="editable">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-    </layout>
+    </widget>
+   </item>
+   <item row="5" column="0" colspan="2">
+    <widget class="QLineEdit" name="uiPath">
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
+    </widget>
    </item>
   </layout>
   <action name="actionPropertyChanged">

@@ -1592,6 +1592,8 @@ const QString &MainWindow::getEncryptionKeyFile() const
 void MainWindow::setFileProperties()
 {
     FilePropertiesDialog dlg(this);
+    if(!curFile.isEmpty())
+        dlg.SetPath(curFile);
     dlg.SetUiFromMetadata(metadata);
     if(dlg.exec() == QDialog::Rejected || !dlg.GetIsDirty())
         return;

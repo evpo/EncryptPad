@@ -39,6 +39,7 @@ public:
     void SetUiFromMetadata(const EncryptPad::PacketMetadata &metadata);
     void UpdateMetadataFromUi(EncryptPad::PacketMetadata &metadata) const;
     bool GetIsDirty() const;
+    void SetPath(const QString &path);
 public slots:
     void PropertyChanged();
 private:
