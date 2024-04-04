@@ -527,6 +527,8 @@ EncryptPad uses the following frameworks and libraries:
 7. [**famfamfam Silk iconset 1.3**](http://www.famfamfam.com/lab/icons/silk/)
 8. [**plog**](https://github.com/SergiusTheBest/plog)
 9. [**FakeVim**](https://github.com/hluk/FakeVim)
+10. [**Breeze Icons**](https://invent.kde.org/frameworks/breeze-icons)
+11. [**tinyexpr**](https://codeplea.com/tinyexpr)
 
 <div id="integrity-verification"></div>
 

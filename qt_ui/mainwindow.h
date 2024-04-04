@@ -113,6 +113,7 @@ private slots:
     void replaceAll(QString text, QString replaceWith, bool matchCase, bool wholeWord);
     void replaceOne(QString text, QString replaceWith, bool matchCase, bool wholeWord);
     void clearReplaceContext();
+    void calculate();
 private:
 
     friend class LoadHandlerAdapter;
@@ -182,6 +183,7 @@ private:
     QAction *openFileEncryptionAct;
     QAction *gotoAct;
     QAction *generatePassphraseAct;
+    QAction *calculateAct;
 
     EncryptPadEncryptor::Encryptor enc;
     EncryptPad::PacketMetadata metadata;

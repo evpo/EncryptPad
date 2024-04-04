@@ -63,6 +63,7 @@ QMAKE_CXXFLAGS += -D_FILE_OFFSET_BITS=64
 
 INCLUDEPATH += $$PROJ/build/include
 INCLUDEPATH += $$PROJ/deps/plog/include
+INCLUDEPATH += $$PROJ/deps/tinyexpr
 
 SOURCES += \
     application.cpp \
@@ -95,6 +96,8 @@ SOURCES += \
     fake_vim_edit.cpp \
     fake_vim_wrapper.cpp \
     line_number_area.cpp \
+    calculator.cpp \
+    ../deps/tinyexpr/tinyexpr.c \
 
 HEADERS += \
     application.h \
@@ -127,6 +130,8 @@ HEADERS += \
     fake_vim_edit.h \
     fake_vim_wrapper.h \
     line_number_area.h \
+    calculator.h \
+    ../deps/tinyexpr/tinyexpr.h \
 
 QMAKE_RESOURCE_FLAGS += -no-compress
 RESOURCES += \

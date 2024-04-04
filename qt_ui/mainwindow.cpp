@@ -26,6 +26,7 @@
 #include <string>
 #include <algorithm>
 #include <ctime>
+#include <tuple>
 #include "get_passphrase_dialog.h"
 #include "confirm_passphrase_dialog.h"
 #include "mainwindow.h"
@@ -49,6 +50,7 @@
 #include "encryptmsg_version.h"
 #include "fake_vim_edit.h"
 #include "plog/Log.h"
+#include "calculator.h"
 
 typedef unsigned char byte;
 
@@ -1008,6 +1010,11 @@ void MainWindow::createActions()
     connect(windowsEolAct, SIGNAL(toggled(bool)), this, SLOT(windowsEolToggled(bool)));
     setWindowsEol(false);
 
+    calculateAct = new QAction(tr("Calculat&e"), this);
+    calculateAct->setStatusTip(tr("Calculate selected expression"));
+    calculateAct->setShortcut(QKeySequence("F2"));
+    connect(calculateAct, SIGNAL(triggered()), this, SLOT(calculate()));
+
     cutAct->setEnabled(false);
     copyAct->setEnabled(false);
     undoAct->setEnabled(false);
@@ -1035,6 +1042,36 @@ void MainWindow::createActions()
             this, SLOT(replaceOne(QString,QString,bool,bool)));
     connect(replaceDialog, SIGNAL(finished(int)),
             this, SLOT(clearReplaceContext()));
+}
+
+void MainWindow::calculate()
+{
+    QTextCursor cursor = textEdit->textCursor();
+    // textEdit->moveCursor(QTextCursor::MoveOperation::StartOfLine);
+    cursor.select(QTextCursor::SelectionType::LineUnderCursor);
+    QString text = cursor.selectedText();
+    if(text.isEmpty())
+        return;
+
+    std::string result;
+    int errorLine = 0;
+    if(text.endsWith(QChar::LineSeparator))
+    {
+        text = text.left(-1);
+    }
+    std::tie<std::string,int>(result, errorLine) = EvaluateExpression(text.toStdString());
+    if(errorLine == 0)
+    {
+        text += "\r= " + QString::fromStdString(result);
+    }
+    else
+    {
+        text += "\r" + tr("Calculator: input error at : ") + QString::fromStdString(std::to_string(errorLine));
+    }
+
+    cursor.beginEditBlock();
+    cursor.insertText(text);
+    cursor.endEditBlock();
 }
 
 void MainWindow::replaceAll(QString text, QString replaceWith, bool matchCase, bool wholeWord)
@@ -1165,6 +1202,8 @@ void MainWindow::createMenus()
     editMenu->addAction(searchAct);
     editMenu->addAction(replaceAct);
     editMenu->addAction(gotoAct);
+    editMenu->addSeparator();
+    editMenu->addAction(calculateAct);
     editMenu->addSeparator();
     editMenu->addAction(windowsEolAct);
     editMenu->addAction(generatePassphraseAct);
