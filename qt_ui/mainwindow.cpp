@@ -229,6 +229,12 @@ void MainWindow::updateLineStatus()
     charStatus->setText(tr("chars: %1").arg(QString::number(charCount - 1)));
 }
 
+void MainWindow::updateS2KStatus()
+{
+    int count = enc.GetKeyService().UnusedKeysCount();
+    s2kStatus->setText(tr("s2k: %1").arg(QString::number(count)));
+}
+
 void MainWindow::cursorPositionChanged()
 {
     updateLineStatus();
@@ -453,6 +459,8 @@ void MainWindow::AsyncOperationCompleted()
         recent_files_service_.PushFile(load_state_machine_.get_file_name());
         textEdit->setFocus();
     }
+
+    updateS2KStatus();
 }
 
 void MainWindow::UpdateStatus(const QString &text)
@@ -1047,7 +1055,6 @@ void MainWindow::createActions()
 void MainWindow::calculate()
 {
     QTextCursor cursor = textEdit->textCursor();
-    // textEdit->moveCursor(QTextCursor::MoveOperation::StartOfLine);
     cursor.select(QTextCursor::SelectionType::LineUnderCursor);
     QString text = cursor.selectedText();
     if(text.isEmpty())
@@ -1066,7 +1073,7 @@ void MainWindow::calculate()
     }
     else
     {
-        text += "\r" + tr("Calculator: input error at : ") + QString::fromStdString(std::to_string(errorLine));
+        text += "\r" + tr("Calculator: input error at : %1").arg(QString::number(errorLine));
     }
 
     cursor.beginEditBlock();
@@ -1285,6 +1292,9 @@ void MainWindow::createStatusBar()
     passphraseSet = new QLabel("", this);
     statusBar()->addPermanentWidget(passphraseSet);
 
+    s2kStatus = new QLabel("", this);
+    statusBar()->addPermanentWidget(s2kStatus);
+
     encryptionKeySet = new QLabel("", this);
     statusBar()->addPermanentWidget(encryptionKeySet);
 }
@@ -1312,7 +1322,10 @@ void MainWindow::onUpdatedPreferences()
     resetZoom();
 
     if(enc.GetKeyService().get_key_count() != preferences.s2kResultsPoolSize)
+    {
         enc.GetKeyService().set_key_count(preferences.s2kResultsPoolSize);
+        updateS2KStatus();
+    }
 }
 
 std::unique_ptr<QSettings> MainWindow::readSettings()
@@ -1406,7 +1419,10 @@ void MainWindow::makeDirty()
 
 bool MainWindow::OpenPassphraseDialog(bool confirmationEnabled, std::string *passphrase)
 {
-    return loadHandler.OpenPassphraseDialog(confirmationEnabled, passphrase);
+    bool result = loadHandler.OpenPassphraseDialog(confirmationEnabled, passphrase);
+    if(result)
+        updateS2KStatus();
+    return result;
 }
 
 void MainWindow::EnterWaitState()
@@ -1499,9 +1515,10 @@ void MainWindow::startSave(const QString &fileName, std::string &kf_passphrase)
         if(result != EpadResult::BakFileMoveFailed)
         {
             metadata.file_date = static_cast<EncryptPad::FileDate>(time(NULL));
-            result = enc.Save(fileName.toUtf8().constData(), secureVect, 
+            result = enc.Save(fileName.toUtf8().constData(), secureVect,
                     encryptionKeyFile.toStdString(), persistEncryptionKeyPath,
                     &metadata, !kf_passphrase.empty() ? &kf_passphrase : nullptr);
+            updateS2KStatus();
         }
     }
 
@@ -1591,6 +1608,7 @@ void MainWindow::loadFile(const QString &fileName, bool force_kf_passphrase_requ
 void MainWindow::clearPassphrase(bool makeFileDirty)
 {
     enc.SetIsPlainText();
+    updateS2KStatus();
     if(makeFileDirty)
         makeDirty();
 }

@@ -52,6 +52,12 @@ namespace EncryptPad
         return it != key_records_.end();
     }
 
+    int KeyService::UnusedKeysCount() const
+    {
+        return std::count_if(key_records_.begin(), key_records_.end(),
+                [](const KeyRecordPtr &p){return !p->used;});
+    }
+
     const KeyRecord &KeyService::GetKeyForSaving()
     {
         auto it = std::find_if(key_records_.begin(), key_records_.end(), 

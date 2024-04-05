@@ -135,6 +135,7 @@ private:
     QLabel *encryptionKeySet;
     QLabel *lineStatus;
     QLabel *charStatus;
+    QLabel *s2kStatus;
     PlainTextEdit *textEdit;
 
     FindDialog *findDialog;
@@ -218,6 +219,7 @@ private:
     bool maybeSave();
     void makeDirty();
     void updateLineStatus();
+    void updateS2KStatus();
     void onUpdatedPreferences();
 
     void loadFile(const QString &fileName, bool force_kf_passphrase_request = false);

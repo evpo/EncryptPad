@@ -95,6 +95,8 @@ namespace EncryptPad
         // Returns true if there are unused keys
         bool UnusedKeysExist() const;
 
+        int UnusedKeysCount() const;
+
         // Clears all keys
         void Clear()
         {
