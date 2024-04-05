@@ -1011,8 +1011,8 @@ void MainWindow::createActions()
     setWindowsEol(false);
 
     calculateAct = new QAction(tr("Calculat&e"), this);
-    calculateAct->setStatusTip(tr("Calculate selected expression"));
-    calculateAct->setShortcut(QKeySequence("F2"));
+    calculateAct->setStatusTip(tr("Calculate current line"));
+    calculateAct->setShortcut(QKeySequence("F8"));
     connect(calculateAct, SIGNAL(triggered()), this, SLOT(calculate()));
 
     cutAct->setEnabled(false);
@@ -1254,6 +1254,7 @@ void MainWindow::createToolBars()
     editToolBar->addAction(pasteAct);
     editToolBar->addAction(searchAct);
     editToolBar->addAction(generatePassphraseAct);
+    editToolBar->addAction(calculateAct);
     editToolBar->addAction(readOnlyAct);
 
     encToolBar = addToolBar(tr("Encryption"));
@@ -1925,6 +1926,7 @@ void MainWindow::setThemeAppearance(ThemeAppearance value)
     resetZoomAct->setIcon(QIcon(combine("format-font-size-reset.svg")));
     openFileEncryptionAct->setIcon(QIcon(combine("file-encryption.svg")));
     openPreferencesAct->setIcon(QIcon(combine("configure.svg")));
+    calculateAct->setIcon(QIcon(combine("folder-calculate.svg")));
 }
 
 ThemeAppearance MainWindow::getAutoThemeAppearance() const
