@@ -1,3 +1,0 @@
-Test Case: CERT_PATH_COMMON_01
-
-Purpose: Positive test checking whether the application can verify certificates. This path conforms to RFC 5280 specification and is valid.
