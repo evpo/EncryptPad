@@ -158,6 +158,7 @@ private:
     QAction *printAct;
     QAction *setFilePropertiesAct;
     QAction *closeAndResetAct;
+    QAction *closeAct;
     QAction *createNewKeyAct;
     QAction *exitAct;
     QAction *undoAct;

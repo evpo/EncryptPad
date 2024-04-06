@@ -885,6 +885,10 @@ void MainWindow::createActions()
     setFilePropertiesAct->setStatusTip(tr("Set file properties"));
     connect(setFilePropertiesAct, SIGNAL(triggered()), this, SLOT(setFileProperties()));
 
+    closeAct = new QAction(tr("Close"), this);
+    closeAct->setStatusTip(tr("Close file"));
+    connect(closeAct, SIGNAL(triggered()), this, SLOT(newFile()));
+
     closeAndResetAct = new QAction(tr("&Close and Reset"), this);
     closeAndResetAct->setShortcuts(QKeySequence::Close);
     closeAndResetAct->setStatusTip(tr("Close and reset security settings"));
@@ -1181,14 +1185,12 @@ void MainWindow::createMenus()
 {
     fileMenu = menuBar()->addMenu(tr("&File"));
     fileMenu->addAction(newAct);
-
     fileMenu->addAction(openAct);
-
     fileMenu->addAction(saveAct);
-
     fileMenu->addAction(saveAsAct);
     fileMenu->addAction(printAct);
     fileMenu->addAction(setFilePropertiesAct);
+    fileMenu->addAction(closeAct);
     fileMenu->addAction(closeAndResetAct);
     QAction *separator = fileMenu->addSeparator();
     fileMenu->addAction(openFileEncryptionAct);

@@ -24,6 +24,8 @@
 #include <QDirIterator>
 #include <QLocale>
 #include <QQueue>
+#include <QFile>
+#include <QFileInfo>
 #include <string>
 #include <exception>
 #include "mainwindow.h"
@@ -235,7 +237,18 @@ int main(int argc, char *argv[])
         mainWin.show();
 
         if(!arguments.fileName.isEmpty())
-            mainWin.open(arguments.fileName);
+        {
+            if(!QFile::exists(arguments.fileName))
+            {
+                QFile f(arguments.fileName);
+                if(!f.open(QIODevice::WriteOnly))
+                {
+                    LOG_WARNING << "The file does not exist. Cannot create the file : " << arguments.fileName;
+                }
+            }
+            QFileInfo info(arguments.fileName);
+            mainWin.open(info.absoluteFilePath());
+        }
 
         if(arguments.isHelpRequested)
             mainWin.showHelp();
