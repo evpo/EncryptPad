@@ -979,6 +979,42 @@ Do you want to replace it?</source>
         <source>encryptpad[.exe] [options] [file]</source>
         <translation>encryptpad[.exe] [параметры] [файл]</translation>
     </message>
+    <message>
+        <source>s2k: %1</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <source>Print Document</source>
+        <translation>Печатать документ</translation>
+    </message>
+    <message>
+        <source>&amp;Print...</source>
+        <translation>Печать...</translation>
+    </message>
+    <message>
+        <source>Print the document</source>
+        <translation>Печатать документ</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>Закрыть</translation>
+    </message>
+    <message>
+        <source>Close file</source>
+        <translation>Закрыть файл</translation>
+    </message>
+    <message>
+        <source>Calculat&amp;e</source>
+        <translation>Расчитать</translation>
+    </message>
+    <message>
+        <source>Calculate current line</source>
+        <translation>Расчитать текущую строку</translation>
+    </message>
+    <message>
+        <source>Calculator: input error at : %1</source>
+        <translation>Калькулятор: ошибка ввода на позиции : %1</translation>
+    </message>
 </context>
 <context>
     <name>NewKeyDialog</name>
@@ -1236,6 +1272,30 @@ Do you want to replace it?</source>
     <message>
         <source>Path to Libcurl</source>
         <translation>Путь к libcurl</translation>
+    </message>
+    <message>
+        <source>General</source>
+        <translation>Основные</translation>
+    </message>
+    <message>
+        <source>Appearance</source>
+        <translation>Внешний вид</translation>
+    </message>
+    <message>
+        <source>Icon theme (restart required):</source>
+        <translation>Тема икон (необходим перезапуск)</translation>
+    </message>
+    <message>
+        <source>Auto</source>
+        <translation>Авто</translation>
+    </message>
+    <message>
+        <source>Light</source>
+        <translation>Светлая</translation>
+    </message>
+    <message>
+        <source>Dark</source>
+        <translation>Темная</translation>
     </message>
 </context>
 <context>

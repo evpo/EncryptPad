@@ -1,15 +1,26 @@
 ## Notes de version ##
 
+### Version 0.5.0.4
+
+* Update Botan to 2.19.4
+* Use svg icons from the Breeze project to resolve the appearance in 2K/4K resolution screens
+* Add basic printing functionality
+* Show the current path in the file properties
+* Add Close menu item
+* Add calculator functionality to evaluate an expression in the current line
+* Display the remaining number of S2K derivations that can be used to save the file without entering the passphrase
+* Create a new file from the command line argument
+
 ### Version 0.5.0.3
 
-* Fix passphrase focus on the text field in get passphrase/key dialogue
-* Add Spanish translation
-* Bug fix: in FakeVim Alt+Shift normally used to switch languages inserts a 0x00 character.
-* Bug fix: Switching wrap / nowrap does not update the line numbers
-* Update Botan to 2.19.3
-* Add more logging for working with files. Provide error messages in the logs when file operations fail.
-* Parameterise the installation path and make /usr/local the default install location
-* Disable the dependency on SSE4.1 and SSE4.2 to support older hardware
+* Correctif de la focalisation de la phrase de passe sur le champ de texte dans le dialogue d’obtention de la phrase de passe et de la clé.
+* Ajout de la traduction en espagnol
+* Correctif de bogue : dans FakeVim, Alt+Maj normalement utilisé pour changer de langue insère un caractère 0x00.
+* Correction de bogue  l’activation et la désactivation du retour à la ligne ne met pas à jour les numéros de ligne
+* Botan a été mis à jour vers la version 2.19.3
+* Ajouter davantage de journalisation pour travailler avec des fichiers. Fournir des messages d’erreur dans les journaux en cas d’échec des opérations sur les fichiers.
+* Rendre paramétrable le chemin d’installation et faire de /usr/local l’emplacement d’installation par défaut
+* Désactiver la dépendance à SSE4.1 et SSE4.2 pour prendre en charge du matériel plus ancien
 
 ### Version 0.5.0.2
 

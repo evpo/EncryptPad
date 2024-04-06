@@ -980,6 +980,42 @@ Do you want to replace it?</source>
         <source>encryptpad[.exe] [options] [file]</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>s2k: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Print Document</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&amp;Print...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Print the document</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Close file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Calculat&amp;e</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Calculate current line</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Calculator: input error at : %1</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>NewKeyDialog</name>
@@ -1236,6 +1272,30 @@ Do you want to replace it?</source>
     </message>
     <message>
         <source>Path to Libcurl</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>General</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Appearance</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Icon theme (restart required):</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Auto</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Light</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Dark</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
