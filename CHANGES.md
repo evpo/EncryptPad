@@ -1,5 +1,16 @@
 ## Release Notes ##
 
+### Version 0.5.0.4
+
+* Update Botan to 2.19.4
+* Use svg icons from the Breeze project to resolve the appearance in 2K/4K resolution screens
+* Add basic printing functionality
+* Show the current path in the file properties
+* Add Close menu item
+* Add calculator functionality to evaluate an expression in the current line
+* Display the remaining number of S2K derivations that can be used to save the file without entering the passphrase
+* Create a new file from the command line argument
+
 ### Version 0.5.0.3
 
 * Fix passphrase focus on the text field in get passphrase/key dialogue
