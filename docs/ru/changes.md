@@ -37,7 +37,7 @@
 ### Version 0.5.0.1
 
 * FakeVim mode to enable editing files with Vim-like interface
-* The lock icon has been replaced with a page and lock with the higher quality of the image.
+* The lock icon has been replaced with a page and lock icon with the higher-quality image
 * Botan has been updated to version 2.18.1
 * The build system has been improved to support more distributions
 * Bug fix: Opening search dialog by using 'CTRL-F' doesn't focus on the find text field
@@ -86,7 +86,7 @@
 * Prevented the unnecessary prompt for a key file passphrase if the key file is local and not encrypted.
 * Bug fixed: after opening a file the mouse cursor changed to arrow shape when it was over the text edit area. It is now `I` shaped as it should.
 * Use one EncryptPad binary for all languages. EncryptPad will recognize the OS preferred language for localization. It will simplify the release management especially for packagers.
-* `--lang` switch to force a specific language instead of taking the OS's locale. Example: `encryptpad --lang FR` to load the French localization strings. Example: `encryptpad --lang FR` to load the French localization strings.
+* `--lang` switch to force a specific language instead of taking the OS's locale. Example: `encryptpad --lang FR` to load the French localization strings.
 * EncryptPad GUI was translated to Chinese.
 * README.md translated to French.
 * stlplus was updated from upstream. It is now 3.13.

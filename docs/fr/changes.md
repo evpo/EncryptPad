@@ -86,7 +86,7 @@
 * La phrase de passe d’un fichier clé n’est plus demandée si le fichier clé est local et non chiffré, car cela était inutile.
 * Correctif de bogue : après ouverture d’un fichier, le curseur représentait une flèche quand il survolait la zone de saisie de texte. Il représente maintenant `I` comme il se doit.
 * Utilisation d’un seul exécutable EncryptPad pour toutes les langues. EncryptPad reconnaîtra la langue préférée du SE et l’utilisera pour la localisation. La gestion des versions en sera simplifiée, particulièrement pour les empaqueteurs.
-* Argument `--lang` pour forcer une langue particulière au lieu de celle des paramètres régionaux du SE. Par exemple, `encryptpad --lang RU` pour charger les chaînes de localisation en russe.
+* Argument « --lang » pour forcer une langue précise au lieu de celle des paramètres régionaux du SE. Par exemple, « encryptpad --lang RU » pour charger les chaînes de localisation en russe.
 * L’IUG d’EncryptPad a été traduite en chinois.
 * Le fichier README.md a été traduit en français.
 * STLplus a été mise à jour vers 3.13.
