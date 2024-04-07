@@ -260,7 +260,7 @@ Si le fichier tombe dans les mains d’un malfaiteur, il devra d’abord attaque
 
     `--log-file` – préciser le journal pour le diagnostic
 
-    `--log-severity` – la sévérité du journal peut être soit : none, fatal, error, warning, info, debug ou verbose
+    `--log-severity` – la sévérité du journal peut être soit : `none`, `fatal`, `error`, `warning`, `info`, `debug` ou `verbose`
 
 <div id="installing"></div>
 
@@ -330,7 +330,7 @@ Pour les versions d’Ubuntu antérieures à Impish, utilisez le PPA d’Alin An
     ./configure.py --cpu x86 --os mingw --static
     make
 
-La commande configure fonctionnera toujours si vous exécutez votre console avec des privilèges d’administrateur. Si vous ne voulez pas l’exécuter en tant qu’administrateur, ajoutez `--link-method hardlink` aux options.
+La commande `configure.py` fonctionnera toujours si vous exécutez votre console avec des privilèges d’administrateur. Si vous ne voulez pas l’exécuter en tant qu’administrateur, ajoutez `--link-method hardlink` aux options.
 Si la compilation réussie, vous devriez voir l’exécutable **./bin/release/encryptpad.exe**
 
 Prendre note que si vous voulez qu’EncryptPad fonctionne en un seul exécutable sans dll, vous devez compiler le d’applications Qt vous-même de façon statique. Cela prend quelques heures. De nombreuses instructions décrivant comment accomplir cela se trouvent sur Internet. L’article le plus populaire recommande d’utiliser un script PowerShell. Bien qu’il soit très pratique (je l’ai utilisé une fois), on ne veut pas toujours mettre à niveau son PowerShell et installer les lourdes dépendances qui viennent avec. Et donc, la fois d’après, j’ai lu le script et j’ai tout fait manuellement. Heureusement qu’il n’y avait pas trop d’étapes.
@@ -513,7 +513,7 @@ EncryptPad utilise les cadres d’applications et les bibliothèques suivants :
 
 1. [**Cadre d’applications Qt**](http://www.qt.io/)
 2. [**Botan**](http://botan.randombit.net/)
-3. [**stlplus**](http://stlplus.sourceforge.net/)
+3. [**STLplus**](http://stlplus.sourceforge.net/)
 5. [**Makefiles**](http://stlplus.sourceforge.net/makefiles/docs/)
 4. [**zlib**](http://zlib.net/)
 6. [**gtest**](http://code.google.com/p/googletest/)
