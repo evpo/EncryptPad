@@ -2,14 +2,14 @@
 
 ### Version 0.5.0.4
 
-* Update Botan to 2.19.4
-* Use svg icons from the Breeze project to resolve the appearance in 2K/4K resolution screens
-* Add basic printing functionality
-* Show the current path in the file properties
-* Add Close menu item
-* Add calculator functionality to evaluate an expression in the current line
-* Display the remaining number of S2K derivations that can be used to save the file without entering the passphrase
-* Create a new file from the command line argument
+* Botan a été mis à jour vers la version 2.19.4
+* Utiliser les icônes svg du projet Breeze pour résoudre l’apparence des écrans dont la résolution est 2K ou 4K.
+* Ajouter une fonction d’impression de base
+* Afficher le chemin actuel dans les propriétés du fichier
+* Ajouter un élément de menu Fermer
+* Ajouter une fonction de calcul pour évaluer une expression
+* Afficher le nombre restant de dérivations S2K qui peuvent être utilisées pour enregistrer le fichier sans saisir la phrase de passe.
+* Créer un nouveau fichier par argument de la ligne de commande
 
 ### Version 0.5.0.3
 

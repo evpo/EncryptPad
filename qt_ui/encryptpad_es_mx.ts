@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="es">
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="es">
 <context>
     <name>ConfirmPassphraseDialog</name>
     <message>
@@ -59,8 +57,8 @@
         <translation>Formato:</translation>
     </message>
     <message>
-        <source>Browse...</source>
-        <translation type="vanished">Explorar...</translation>
+        <source>Browse…</source>
+        <translation>Explorar…</translation>
     </message>
     <message>
         <source>Output file:</source>
@@ -76,15 +74,15 @@
     </message>
     <message>
         <source>EPD</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>OpenPGP</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>GPG</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>OpenPGP Armor</source>
@@ -103,8 +101,8 @@
         <translation>Ruta del archivo clave:</translation>
     </message>
     <message>
-        <source>Select...</source>
-        <translation type="vanished">Seleccionar...</translation>
+        <source>Select…</source>
+        <translation>Seleccionar…</translation>
     </message>
     <message>
         <source>Passphrase</source>
@@ -123,8 +121,8 @@
         <translation>Parametros</translation>
     </message>
     <message>
-        <source>Parameters...</source>
-        <translation type="vanished">Parametros...</translation>
+        <source>Parameters…</source>
+        <translation>Parametros…</translation>
     </message>
     <message>
         <source>Encryption:</source>
@@ -140,11 +138,11 @@
     </message>
     <message>
         <source>SwitchDirection</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>IOChange</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Input File</source>
@@ -156,7 +154,7 @@
     </message>
     <message>
         <source>EncryptPad</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Confirmation passphrase does not match.</source>
@@ -203,18 +201,6 @@ Desea reemplazarlo?</translation>
     <message>
         <source>File has been decrypted successfully.</source>
         <translation>El archivo ha sido encriptado con éxito.</translation>
-    </message>
-    <message>
-        <source>Browse…</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Select…</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Parameters…</source>
-        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -312,11 +298,11 @@ Desea reemplazarlo?</translation>
     </message>
     <message>
         <source>FFFFFFFFFFFFFFFF</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>PropertyChanged</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>AES-256 (recommended)</source>
@@ -435,16 +421,12 @@ Desea reemplazarlo?</translation>
         <translation>Dejar en blanco si no se requiere contraseña</translation>
     </message>
     <message>
-        <source>Select...</source>
-        <translation type="vanished">Seleccionar...</translation>
+        <source>Select…</source>
+        <translation>Seleccionar…</translation>
     </message>
     <message>
         <source>Select key file</source>
         <translation>Seleccione un archivo de clave</translation>
-    </message>
-    <message>
-        <source>Select…</source>
-        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -502,7 +484,7 @@ Desea reemplazarlo?</translation>
     </message>
     <message>
         <source>Cannot open &apos;%1&apos;</source>
-        <translation>No se puede abrir «&#xa0;%1&#xa0;»</translation>
+        <translation>No se puede abrir « %1 »</translation>
     </message>
     <message>
         <source>Cannot open the encryption key</source>
@@ -558,7 +540,7 @@ Desea reemplazarlo?</translation>
     </message>
     <message>
         <source>Cannot generate the key &apos;%1&apos; Check the path and permissions.</source>
-        <translation>No se puede generar la clave  «&#xa0;%1&#xa0;». Compruebe la ruta y los permisos</translation>
+        <translation>No se puede generar la clave  « %1 ». Compruebe la ruta y los permisos</translation>
     </message>
     <message>
         <source>Cannot generate key</source>
@@ -594,8 +576,8 @@ Desea reemplazarlo?</translation>
         <translation>Crear un nuevo archivo</translation>
     </message>
     <message>
-        <source>&amp;Open...</source>
-        <translation type="vanished">&amp;Abrir...</translation>
+        <source>&amp;Open…</source>
+        <translation>&amp;Abrir…</translation>
     </message>
     <message>
         <source>Open an existing file</source>
@@ -610,16 +592,16 @@ Desea reemplazarlo?</translation>
         <translation>Guardar el documento en el disco</translation>
     </message>
     <message>
-        <source>Save &amp;As...</source>
-        <translation type="vanished">Guardar &amp;como...</translation>
+        <source>Save &amp;As…</source>
+        <translation>Guardar &amp;como…</translation>
     </message>
     <message>
         <source>Save the document under a new name</source>
         <translation>Guardar el documento con un nuevo nombre</translation>
     </message>
     <message>
-        <source>File &amp;Properties...</source>
-        <translation type="vanished">&amp;Propiedades del archivo...</translation>
+        <source>File &amp;Properties…</source>
+        <translation>&amp;Propiedades del archivo…</translation>
     </message>
     <message>
         <source>Set file properties</source>
@@ -634,24 +616,24 @@ Desea reemplazarlo?</translation>
         <translation>Cerrar y reiniciar la configuración de seguridad</translation>
     </message>
     <message>
-        <source>Generate Key...</source>
-        <translation type="vanished">Generar clave...</translation>
+        <source>Generate Key…</source>
+        <translation>Generar clave…</translation>
     </message>
     <message>
         <source>Generate a new key file</source>
         <translation>Generar una nueva clave de archivo</translation>
     </message>
     <message>
-        <source>Set &amp;Passphrase...</source>
-        <translation type="vanished">Establecer una &amp;contraseña...</translation>
+        <source>Set &amp;Passphrase…</source>
+        <translation>Establecer una &amp;contraseña…</translation>
     </message>
     <message>
         <source>Set passphrase for encryption and decryption</source>
         <translation>Establecer una contraseña para el encriptado y descifrado</translation>
     </message>
     <message>
-        <source>Set &amp;Encryption Key...</source>
-        <translation type="vanished">Establecer una clave de &amp;cifrado...</translation>
+        <source>Set &amp;Encryption Key…</source>
+        <translation>Establecer una clave de &amp;cifrado…</translation>
     </message>
     <message>
         <source>Set encryption key file</source>
@@ -722,32 +704,32 @@ Desea reemplazarlo?</translation>
         <translation>Seleccionar todo el texto</translation>
     </message>
     <message>
-        <source>&amp;Find...</source>
-        <translation type="vanished">&amp;Buscar...</translation>
+        <source>&amp;Find…</source>
+        <translation>&amp;Buscar…</translation>
     </message>
     <message>
         <source>Find in text</source>
         <translation>Buscar en el texto</translation>
     </message>
     <message>
-        <source>&amp;Go to...</source>
-        <translation type="vanished">&amp;Ir a...</translation>
+        <source>&amp;Go to…</source>
+        <translation>&amp;Ir a…</translation>
     </message>
     <message>
         <source>Go to</source>
         <translation>Ir a</translation>
     </message>
     <message>
-        <source>&amp;Generate Passphrase...</source>
-        <translation type="vanished">&amp;Generar una contraseña...</translation>
+        <source>&amp;Generate Passphrase…</source>
+        <translation>&amp;Generar una contraseña…</translation>
     </message>
     <message>
         <source>Generate passphrase</source>
         <translation>Generar una contraseña...</translation>
     </message>
     <message>
-        <source>&amp;Replace...</source>
-        <translation type="vanished">&amp;Reemplazar...</translation>
+        <source>&amp;Replace…</source>
+        <translation>&amp;Reemplazar…</translation>
     </message>
     <message>
         <source>Find and replace text</source>
@@ -794,8 +776,8 @@ Desea reemplazarlo?</translation>
         <translation>Reiniciar Zoom</translation>
     </message>
     <message>
-        <source>&amp;About...</source>
-        <translation type="vanished">&amp;Acerca de...</translation>
+        <source>&amp;About…</source>
+        <translation>&amp;Acerca de…</translation>
     </message>
     <message>
         <source>Show the application&apos;s About box</source>
@@ -810,16 +792,16 @@ Desea reemplazarlo?</translation>
         <translation>Mostrar el cuadro de diálogo Acerca de la biblioteca Qt</translation>
     </message>
     <message>
-        <source>&amp;Preferences...</source>
-        <translation type="vanished">&amp;Preferencias...</translation>
+        <source>&amp;Preferences…</source>
+        <translation>&amp;Preferencias…</translation>
     </message>
     <message>
         <source>Application preferences</source>
         <translation>Preferencias de la aplicación</translation>
     </message>
     <message>
-        <source>File Encryption...</source>
-        <translation type="vanished">Encriptación de archivo...</translation>
+        <source>File Encryption…</source>
+        <translation>Encriptación de archivo…</translation>
     </message>
     <message>
         <source>File encryption</source>
@@ -831,7 +813,7 @@ Desea reemplazarlo?</translation>
     </message>
     <message>
         <source>&quot;Windows&quot; end of line: CR+LF</source>
-        <translation>Fin de línea «&#xa0;Windows&#xa0;»&#xa0;: CR+LF</translation>
+        <translation>Fin de línea « Windows » : CR+LF</translation>
     </message>
     <message>
         <source>End of file reached. Started from the top.</source>
@@ -899,7 +881,7 @@ Desea reemplazarlo?</translation>
     </message>
     <message>
         <source>Cannot save &apos;%1&apos;</source>
-        <translation>No se puede guardar  «&#xa0;%1&#xa0;»</translation>
+        <translation>No se puede guardar  « %1 »</translation>
     </message>
     <message>
         <source>Cannot open the specified encryption key</source>
@@ -999,91 +981,39 @@ Desea reemplazarlo?</translation>
     </message>
     <message>
         <source>s2k: %1</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Print Document</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Print the document</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Close</source>
-        <translation type="unfinished">Cerrar</translation>
-    </message>
-    <message>
-        <source>Close file</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Calculat&amp;e</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Calculate current line</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Calculator: input error at : %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>&amp;Open…</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Save &amp;As…</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>&amp;Print…</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
-        <source>File &amp;Properties…</source>
-        <translation type="unfinished"></translation>
+        <source>Print the document</source>
+        <translation type="unfinished"/>
     </message>
     <message>
-        <source>Generate Key…</source>
-        <translation type="unfinished"></translation>
+        <source>Close</source>
+        <translation>Cerrar</translation>
     </message>
     <message>
-        <source>Set &amp;Passphrase…</source>
-        <translation type="unfinished"></translation>
+        <source>Close file</source>
+        <translation type="unfinished"/>
     </message>
     <message>
-        <source>Set &amp;Encryption Key…</source>
-        <translation type="unfinished"></translation>
+        <source>Calculat&amp;e</source>
+        <translation type="unfinished"/>
     </message>
     <message>
-        <source>&amp;Find…</source>
-        <translation type="unfinished"></translation>
+        <source>Calculate current line</source>
+        <translation type="unfinished"/>
     </message>
     <message>
-        <source>&amp;Go to…</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>&amp;Generate Passphrase…</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>&amp;Replace…</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>&amp;About…</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>&amp;Preferences…</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>File Encryption…</source>
-        <translation type="unfinished"></translation>
+        <source>Calculator: input error at : %1</source>
+        <translation type="unfinished"/>
     </message>
 </context>
 <context>
@@ -1109,8 +1039,8 @@ Desea reemplazarlo?</translation>
         <translation>El repositorio es &lt;b&gt;.encryptpad&lt;/b&gt; el directorio en el perfil del usuario (&lt;b&gt;encryptpad_repository&lt;/b&gt; en modo portable).</translation>
     </message>
     <message>
-        <source>Browse...</source>
-        <translation type="vanished">Examinar...</translation>
+        <source>Browse…</source>
+        <translation>Examinar…</translation>
     </message>
     <message>
         <source>Key name in the repository</source>
@@ -1123,10 +1053,6 @@ Desea reemplazarlo?</translation>
     <message>
         <source>Invalid characters in the key name</source>
         <translation>Caracteres inválidos en el nombre de la clave</translation>
-    </message>
-    <message>
-        <source>Browse…</source>
-        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -1153,7 +1079,7 @@ Desea reemplazarlo?</translation>
     </message>
     <message>
         <source>` ~ ! @ # $ % ^ &amp; * ( ) _ - + = { } [ ]  | : ; &quot; &apos; &lt; &gt; , . ? /</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>8</source>
@@ -1239,8 +1165,8 @@ Desea reemplazarlo?</translation>
         <translation>Fuente:</translation>
     </message>
     <message>
-        <source>Browse...</source>
-        <translation type="vanished">Examinar...</translation>
+        <source>Browse…</source>
+        <translation>Examinar…</translation>
     </message>
     <message>
         <source>Create .bak files</source>
@@ -1248,7 +1174,7 @@ Desea reemplazarlo?</translation>
     </message>
     <message>
         <source>[example: Monospace (Size: 12)]</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Save last used directory</source>
@@ -1259,8 +1185,8 @@ Desea reemplazarlo?</translation>
         <translation>Ajuste de línea</translation>
     </message>
     <message>
-        <source>Edit...</source>
-        <translation type="vanished">Editar...</translation>
+        <source>Edit…</source>
+        <translation>Editar…</translation>
     </message>
     <message>
         <source>Libcurl path:</source>
@@ -1293,19 +1219,19 @@ Desea reemplazarlo?</translation>
     </message>
     <message>
         <source>32</source>
-        <translation type="unfinished">32</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>64</source>
-        <translation type="unfinished">64</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>128</source>
-        <translation type="unfinished">128</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>256</source>
-        <translation type="unfinished">256</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Display line numbers</source>
@@ -1313,7 +1239,7 @@ Desea reemplazarlo?</translation>
     </message>
     <message>
         <source>&quot;Windows&quot; end of line: CR+LF</source>
-        <translation>Fin de línea «&#xa0;Windows&#xa0;»&#xa0;: CR+LF</translation>
+        <translation>Fin de línea « Windows » : CR+LF</translation>
     </message>
     <message>
         <source>Tab size:</source>
@@ -1328,8 +1254,8 @@ Desea reemplazarlo?</translation>
         <translation>Ruta al ejecutable libCURL</translation>
     </message>
     <message>
-        <source>Font...</source>
-        <translation type="vanished">Fuente...</translation>
+        <source>Font…</source>
+        <translation>Fuente…</translation>
     </message>
     <message>
         <source>(Size: </source>
@@ -1349,39 +1275,27 @@ Desea reemplazarlo?</translation>
     </message>
     <message>
         <source>General</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Appearance</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Icon theme (restart required):</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Auto</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Light</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Dark</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Edit…</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Browse…</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Font…</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
 </context>
 <context>
@@ -1402,8 +1316,8 @@ Desea reemplazarlo?</translation>
         <translation>&amp;repositorio:</translation>
     </message>
     <message>
-        <source>&amp;Browse...</source>
-        <translation type="vanished">&amp;Examinar...</translation>
+        <source>&amp;Browse…</source>
+        <translation>&amp;Examinar…</translation>
     </message>
     <message>
         <source>&amp;Key file path:</source>
@@ -1420,10 +1334,6 @@ Desea reemplazarlo?</translation>
     <message>
         <source>Specify encryption key location</source>
         <translation>Especificar la ubicación de la clave de cifrado</translation>
-    </message>
-    <message>
-        <source>&amp;Browse…</source>
-        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

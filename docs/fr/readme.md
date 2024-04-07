@@ -468,7 +468,7 @@ Pour activer le mode :
 
 Pour configurer FakeVim, créer et modifier le fichier à l’emplacement ci-dessous :
 
-Linux and macOS:
+Linux et macOS :
 
     ~/.encryptpad/vimrc
 
@@ -520,7 +520,7 @@ EncryptPad utilise les cadres d’applications et les bibliothèques suivants :
 7. [**Jeu d’icônes famfamfam Silk 1.3**](http://www.famfamfam.com/lab/icons/silk/)
 8. [**plog**](https://github.com/SergiusTheBest/plog)
 9. [**FakeVim**](https://github.com/hluk/FakeVim)
-10. [**Breeze Icons**](https://invent.kde.org/frameworks/breeze-icons)
+10. [**Icônes de Breeze**](https://invent.kde.org/frameworks/breeze-icons)
 11. [**tinyexpr**](https://codeplea.com/tinyexpr)
 
 <div id="integrity-verification"></div>

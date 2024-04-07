@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="ru">
+<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="ru">
 <context>
     <name>ConfirmPassphraseDialog</name>
     <message>
@@ -59,8 +57,8 @@
         <translation>Формат:</translation>
     </message>
     <message>
-        <source>Browse...</source>
-        <translation type="vanished">Просмотр...</translation>
+        <source>Browse…</source>
+        <translation>Просмотр…</translation>
     </message>
     <message>
         <source>Output file:</source>
@@ -92,7 +90,7 @@
     </message>
     <message>
         <source>ASC</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Key path</source>
@@ -103,8 +101,8 @@
         <translation>Путь к ключу:</translation>
     </message>
     <message>
-        <source>Select...</source>
-        <translation type="vanished">Выбрать...</translation>
+        <source>Select…</source>
+        <translation>Выбрать…</translation>
     </message>
     <message>
         <source>Passphrase</source>
@@ -123,8 +121,8 @@
         <translation>Параметры</translation>
     </message>
     <message>
-        <source>Parameters...</source>
-        <translation type="vanished">Параметры...</translation>
+        <source>Parameters…</source>
+        <translation>Параметры…</translation>
     </message>
     <message>
         <source>Encryption:</source>
@@ -203,18 +201,6 @@ Do you want to replace it?</source>
     <message>
         <source>File has been decrypted successfully.</source>
         <translation>Файл расшифрован успешно.</translation>
-    </message>
-    <message>
-        <source>Browse…</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Select…</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Parameters…</source>
-        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -435,16 +421,12 @@ Do you want to replace it?</source>
         <translation>Оставить пустым если пароль не требуется</translation>
     </message>
     <message>
-        <source>Select...</source>
-        <translation type="vanished">Выбрать...</translation>
+        <source>Select…</source>
+        <translation>Выбрать…</translation>
     </message>
     <message>
         <source>Select key file</source>
         <translation>Выбрать ключ</translation>
-    </message>
-    <message>
-        <source>Select…</source>
-        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -579,7 +561,7 @@ Do you want to replace it?</source>
     </message>
     <message>
         <source>&lt;b&gt;%1&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;OpenPGP implementation.&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;Simplified BSD License&lt;br/&gt;&lt;br/&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Do you want to apply the modified default file properties to this file?</source>
@@ -594,8 +576,8 @@ Do you want to replace it?</source>
         <translation>Создать новый файл</translation>
     </message>
     <message>
-        <source>&amp;Open...</source>
-        <translation type="vanished">&amp;Открыть...</translation>
+        <source>&amp;Open…</source>
+        <translation>&amp;Открыть…</translation>
     </message>
     <message>
         <source>Open an existing file</source>
@@ -610,16 +592,16 @@ Do you want to replace it?</source>
         <translation>Сохранить документ на диск</translation>
     </message>
     <message>
-        <source>Save &amp;As...</source>
-        <translation type="vanished">Сохранить &amp;как...</translation>
+        <source>Save &amp;As…</source>
+        <translation>Сохранить &amp;как…</translation>
     </message>
     <message>
         <source>Save the document under a new name</source>
         <translation>Сохранить документ под другим именем</translation>
     </message>
     <message>
-        <source>File &amp;Properties...</source>
-        <translation type="vanished">Свойства &amp;файла...</translation>
+        <source>File &amp;Properties…</source>
+        <translation>Свойства &amp;файла…</translation>
     </message>
     <message>
         <source>Set file properties</source>
@@ -634,24 +616,24 @@ Do you want to replace it?</source>
         <translation>Закрыть и сбросить установки защиты</translation>
     </message>
     <message>
-        <source>Generate Key...</source>
-        <translation type="vanished">Генерировать ключ...</translation>
+        <source>Generate Key…</source>
+        <translation>Генерировать ключ…</translation>
     </message>
     <message>
         <source>Generate a new key file</source>
         <translation>Создать новый файл ключа</translation>
     </message>
     <message>
-        <source>Set &amp;Passphrase...</source>
-        <translation type="vanished">Задать &amp;пароль...</translation>
+        <source>Set &amp;Passphrase…</source>
+        <translation>Задать &amp;пароль…</translation>
     </message>
     <message>
         <source>Set passphrase for encryption and decryption</source>
         <translation>Установить пароль для шифрования...</translation>
     </message>
     <message>
-        <source>Set &amp;Encryption Key...</source>
-        <translation type="vanished">Установить &amp;ключ шифрования...</translation>
+        <source>Set &amp;Encryption Key…</source>
+        <translation>Установить &amp;ключ шифрования…</translation>
     </message>
     <message>
         <source>Set encryption key file</source>
@@ -722,32 +704,32 @@ Do you want to replace it?</source>
         <translation>Выбрать весь текст</translation>
     </message>
     <message>
-        <source>&amp;Find...</source>
-        <translation type="vanished">&amp;Найти...</translation>
+        <source>&amp;Find…</source>
+        <translation>&amp;Найти…</translation>
     </message>
     <message>
         <source>Find in text</source>
         <translation>Найти в тексте</translation>
     </message>
     <message>
-        <source>&amp;Go to...</source>
-        <translation type="vanished">&amp;Перейти...</translation>
+        <source>&amp;Go to…</source>
+        <translation>&amp;Перейти…</translation>
     </message>
     <message>
         <source>Go to</source>
         <translation>Перейти</translation>
     </message>
     <message>
-        <source>&amp;Generate Passphrase...</source>
-        <translation type="vanished">&amp;Генерировать пароль...</translation>
+        <source>&amp;Generate Passphrase…</source>
+        <translation>&amp;Генерировать пароль…</translation>
     </message>
     <message>
         <source>Generate passphrase</source>
         <translation>Генерировать пароль</translation>
     </message>
     <message>
-        <source>&amp;Replace...</source>
-        <translation type="vanished">&amp;Заменить...</translation>
+        <source>&amp;Replace…</source>
+        <translation>&amp;Заменить…</translation>
     </message>
     <message>
         <source>Find and replace text</source>
@@ -794,8 +776,8 @@ Do you want to replace it?</source>
         <translation>Сбросить приближение</translation>
     </message>
     <message>
-        <source>&amp;About...</source>
-        <translation type="vanished">&amp;О программе...</translation>
+        <source>&amp;About…</source>
+        <translation>&amp;О программе…</translation>
     </message>
     <message>
         <source>Show the application&apos;s About box</source>
@@ -810,16 +792,16 @@ Do you want to replace it?</source>
         <translation>Показать диалог О Qt библиотеке</translation>
     </message>
     <message>
-        <source>&amp;Preferences...</source>
-        <translation type="vanished">&amp;Параметры...</translation>
+        <source>&amp;Preferences…</source>
+        <translation>&amp;Параметры…</translation>
     </message>
     <message>
         <source>Application preferences</source>
         <translation>Параметры приложения</translation>
     </message>
     <message>
-        <source>File Encryption...</source>
-        <translation type="vanished">Шифрование файлов...</translation>
+        <source>File Encryption…</source>
+        <translation>Шифрование файлов…</translation>
     </message>
     <message>
         <source>File encryption</source>
@@ -999,15 +981,15 @@ Do you want to replace it?</source>
     </message>
     <message>
         <source>s2k: %1</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <source>Print Document</source>
         <translation>Печатать документ</translation>
     </message>
     <message>
-        <source>&amp;Print...</source>
-        <translation type="vanished">Печать...</translation>
+        <source>&amp;Print…</source>
+        <translation>Печать…</translation>
     </message>
     <message>
         <source>Print the document</source>
@@ -1033,62 +1015,6 @@ Do you want to replace it?</source>
         <source>Calculator: input error at : %1</source>
         <translation>Калькулятор: ошибка ввода на позиции : %1</translation>
     </message>
-    <message>
-        <source>&amp;Open…</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Save &amp;As…</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>&amp;Print…</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>File &amp;Properties…</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Generate Key…</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Set &amp;Passphrase…</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Set &amp;Encryption Key…</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>&amp;Find…</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>&amp;Go to…</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>&amp;Generate Passphrase…</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>&amp;Replace…</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>&amp;About…</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>&amp;Preferences…</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>File Encryption…</source>
-        <translation type="unfinished"></translation>
-    </message>
 </context>
 <context>
     <name>NewKeyDialog</name>
@@ -1113,8 +1039,8 @@ Do you want to replace it?</source>
         <translation>Хранилище - это директория &lt;b&gt;.encryptpad&lt;/b&gt; в домашней директории пользователя (&lt;b&gt;encryptpad_repository&lt;/b&gt; в переносном режиме).</translation>
     </message>
     <message>
-        <source>Browse...</source>
-        <translation type="vanished">Просмотр...</translation>
+        <source>Browse…</source>
+        <translation>Просмотр…</translation>
     </message>
     <message>
         <source>Key name in the repository</source>
@@ -1127,10 +1053,6 @@ Do you want to replace it?</source>
     <message>
         <source>Invalid characters in the key name</source>
         <translation>Имя ключа содержит запрещенные символы</translation>
-    </message>
-    <message>
-        <source>Browse…</source>
-        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -1243,8 +1165,8 @@ Do you want to replace it?</source>
         <translation>Шрифт:</translation>
     </message>
     <message>
-        <source>Browse...</source>
-        <translation type="vanished">Просмотр...</translation>
+        <source>Browse…</source>
+        <translation>Просмотр…</translation>
     </message>
     <message>
         <source>Create .bak files</source>
@@ -1263,8 +1185,8 @@ Do you want to replace it?</source>
         <translation>Переносить слова</translation>
     </message>
     <message>
-        <source>Edit...</source>
-        <translation type="vanished">Редактировать...</translation>
+        <source>Edit…</source>
+        <translation>&amp;Редактировать…</translation>
     </message>
     <message>
         <source>Libcurl path:</source>
@@ -1332,8 +1254,8 @@ Do you want to replace it?</source>
         <translation>Путь к libCURL утилите</translation>
     </message>
     <message>
-        <source>Font...</source>
-        <translation type="vanished">Шрифт...</translation>
+        <source>Font…</source>
+        <translation>Шрифт…</translation>
     </message>
     <message>
         <source>(Size: </source>
@@ -1375,18 +1297,6 @@ Do you want to replace it?</source>
         <source>Dark</source>
         <translation>Темная</translation>
     </message>
-    <message>
-        <source>Edit…</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Browse…</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Font…</source>
-        <translation type="unfinished"></translation>
-    </message>
 </context>
 <context>
     <name>Proxy</name>
@@ -1406,8 +1316,8 @@ Do you want to replace it?</source>
         <translation>&amp;Хранилище:</translation>
     </message>
     <message>
-        <source>&amp;Browse...</source>
-        <translation type="vanished">&amp;Просмотр...</translation>
+        <source>&amp;Browse…</source>
+        <translation>&amp;Просмотр…</translation>
     </message>
     <message>
         <source>&amp;Key file path:</source>
@@ -1424,10 +1334,6 @@ Do you want to replace it?</source>
     <message>
         <source>Specify encryption key location</source>
         <translation>Укажите расположение ключа шифрования</translation>
-    </message>
-    <message>
-        <source>&amp;Browse…</source>
-        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
