@@ -73,7 +73,7 @@ EncryptPad is an application for viewing and editing symmetrically encrypted tex
 * Customisable **passphrase generator** helps create strong random passphrases.
 * File format compatible with **OpenPGP**
 * **Iterated and salted S2K**
-* **Passphrases are not kept in the memory** for reuse, only S2K results ([more ...](#passphrases-in-memory))
+* **Passphrases are not kept in the memory** for reuse, only S2K results ([more …](#passphrases-in-memory))
 * Cipher algorithms: **TripleDES, CAST5, AES, AES192, AES256, Camellia128, Camellia192, Camellia256, Twofish**
 * Hash algorithms: **SHA-1, SHA-256, SHA-384, SHA-512, SHA-224**
 * Integrity protection: **SHA-1**
@@ -469,7 +469,7 @@ FakeVim mode lets edit files with Vim-like interface.
 
 To enable the mode:
 
-1. open Settings... / Preferences ...
+1. open Settings… / Preferences …
 2. Set "Enable FakeVim"
 3. Restart EncryptPad
 
@@ -490,11 +490,11 @@ You can find more information about FakeVim interface at [FakeVim library web pa
 
 The ex mode supports commands to read and write files. The input and output commands are integrated with the following EncryptPad operations:
 
-    :r <file> - File / Open...
+    :r <file> - File / Open…
 
     :w - File / Save
 
-    :w <file> - File / Save As...
+    :w <file> - File / Save As…
 
     :q - File / Exit
 
