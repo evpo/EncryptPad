@@ -125,14 +125,14 @@
         <item row="1" column="2">
          <widget class="QPushButton" name="uiInputBrowse">
           <property name="text">
-           <string>Browse...</string>
+           <string>Browse…</string>
           </property>
          </widget>
         </item>
         <item row="2" column="2">
          <widget class="QPushButton" name="uiOutputBrowse">
           <property name="text">
-           <string>Browse...</string>
+           <string>Browse…</string>
           </property>
          </widget>
         </item>
@@ -251,7 +251,7 @@
         <item row="0" column="2">
          <widget class="QPushButton" name="uiSelectKeyFile">
           <property name="text">
-           <string>Select...</string>
+           <string>Select…</string>
           </property>
          </widget>
         </item>
@@ -353,7 +353,7 @@
            </size>
           </property>
           <property name="text">
-           <string>Parameters...</string>
+           <string>Parameters…</string>
           </property>
          </widget>
         </item>

@@ -1,4 +1,6 @@
-<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="zh">
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="zh">
 <context>
     <name>ConfirmPassphraseDialog</name>
     <message>
@@ -58,7 +60,7 @@
     </message>
     <message>
         <source>Browse...</source>
-        <translation>浏览……</translation>
+        <translation type="vanished">浏览……</translation>
     </message>
     <message>
         <source>Output file:</source>
@@ -86,11 +88,11 @@
     </message>
     <message>
         <source>OpenPGP Armor</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>ASC</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Key path</source>
@@ -102,7 +104,7 @@
     </message>
     <message>
         <source>Select...</source>
-        <translation>选择……</translation>
+        <translation type="vanished">选择……</translation>
     </message>
     <message>
         <source>Passphrase</source>
@@ -122,7 +124,7 @@
     </message>
     <message>
         <source>Parameters...</source>
-        <translation>参数……</translation>
+        <translation type="vanished">参数……</translation>
     </message>
     <message>
         <source>Encryption:</source>
@@ -202,12 +204,24 @@ Do you want to replace it?</source>
         <source>File has been decrypted successfully.</source>
         <translation>文件已被成功解密。</translation>
     </message>
+    <message>
+        <source>Browse…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Select…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Parameters…</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>FileExtensions</name>
     <message>
         <source>ASCII-armored GnuPG (*.asc)</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Plain Text (*.txt)</source>
@@ -215,7 +229,7 @@ Do you want to replace it?</source>
     </message>
     <message>
         <source>Encrypted Files (*.epd *.gpg *.asc);; Plain Text (*.txt)</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Key (*.key)</source>
@@ -422,11 +436,15 @@ Do you want to replace it?</source>
     </message>
     <message>
         <source>Select...</source>
-        <translation>选择……</translation>
+        <translation type="vanished">选择……</translation>
     </message>
     <message>
         <source>Select key file</source>
         <translation>请选择密钥文件</translation>
+    </message>
+    <message>
+        <source>Select…</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -461,7 +479,7 @@ Do you want to replace it?</source>
     </message>
     <message>
         <source>Neither a key file nor passphrase is set.</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -561,7 +579,7 @@ Do you want to replace it?</source>
     </message>
     <message>
         <source>&lt;b&gt;%1&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;OpenPGP implementation.&lt;br/&gt;&lt;br/&gt;%2&lt;br/&gt;Simplified BSD License&lt;br/&gt;&lt;br/&gt;</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Do you want to apply the modified default file properties to this file?</source>
@@ -577,7 +595,7 @@ Do you want to replace it?</source>
     </message>
     <message>
         <source>&amp;Open...</source>
-        <translation>打开(&amp;O)……</translation>
+        <translation type="vanished">打开(&amp;O)……</translation>
     </message>
     <message>
         <source>Open an existing file</source>
@@ -593,7 +611,7 @@ Do you want to replace it?</source>
     </message>
     <message>
         <source>Save &amp;As...</source>
-        <translation>另存为(&amp;A)</translation>
+        <translation type="vanished">另存为(&amp;A)</translation>
     </message>
     <message>
         <source>Save the document under a new name</source>
@@ -601,7 +619,7 @@ Do you want to replace it?</source>
     </message>
     <message>
         <source>File &amp;Properties...</source>
-        <translation>文件属性(&amp;P)……</translation>
+        <translation type="vanished">文件属性(&amp;P)……</translation>
     </message>
     <message>
         <source>Set file properties</source>
@@ -617,7 +635,7 @@ Do you want to replace it?</source>
     </message>
     <message>
         <source>Generate Key...</source>
-        <translation>生成密钥……</translation>
+        <translation type="vanished">生成密钥……</translation>
     </message>
     <message>
         <source>Generate a new key file</source>
@@ -625,7 +643,7 @@ Do you want to replace it?</source>
     </message>
     <message>
         <source>Set &amp;Passphrase...</source>
-        <translation>设置口令(&amp;P)……</translation>
+        <translation type="vanished">设置口令(&amp;P)……</translation>
     </message>
     <message>
         <source>Set passphrase for encryption and decryption</source>
@@ -633,7 +651,7 @@ Do you want to replace it?</source>
     </message>
     <message>
         <source>Set &amp;Encryption Key...</source>
-        <translation>设置密钥文件(&amp;E)……</translation>
+        <translation type="vanished">设置密钥文件(&amp;E)……</translation>
     </message>
     <message>
         <source>Set encryption key file</source>
@@ -705,7 +723,7 @@ Do you want to replace it?</source>
     </message>
     <message>
         <source>&amp;Find...</source>
-        <translation>查找(&amp;F)</translation>
+        <translation type="vanished">查找(&amp;F)</translation>
     </message>
     <message>
         <source>Find in text</source>
@@ -713,7 +731,7 @@ Do you want to replace it?</source>
     </message>
     <message>
         <source>&amp;Go to...</source>
-        <translation>跳转到(&amp;G)……</translation>
+        <translation type="vanished">跳转到(&amp;G)……</translation>
     </message>
     <message>
         <source>Go to</source>
@@ -721,7 +739,7 @@ Do you want to replace it?</source>
     </message>
     <message>
         <source>&amp;Generate Passphrase...</source>
-        <translation>生成口令(&amp;G)……</translation>
+        <translation type="vanished">生成口令(&amp;G)……</translation>
     </message>
     <message>
         <source>Generate passphrase</source>
@@ -729,7 +747,7 @@ Do you want to replace it?</source>
     </message>
     <message>
         <source>&amp;Replace...</source>
-        <translation>替换(&amp;R)……</translation>
+        <translation type="vanished">替换(&amp;R)……</translation>
     </message>
     <message>
         <source>Find and replace text</source>
@@ -777,7 +795,7 @@ Do you want to replace it?</source>
     </message>
     <message>
         <source>&amp;About...</source>
-        <translation>关于(&amp;A)……</translation>
+        <translation type="vanished">关于(&amp;A)……</translation>
     </message>
     <message>
         <source>Show the application&apos;s About box</source>
@@ -793,7 +811,7 @@ Do you want to replace it?</source>
     </message>
     <message>
         <source>&amp;Preferences...</source>
-        <translation>首选项(&amp;P)……</translation>
+        <translation type="vanished">首选项(&amp;P)……</translation>
     </message>
     <message>
         <source>Application preferences</source>
@@ -801,7 +819,7 @@ Do you want to replace it?</source>
     </message>
     <message>
         <source>File Encryption...</source>
-        <translation>文件加密...</translation>
+        <translation type="vanished">文件加密...</translation>
     </message>
     <message>
         <source>File encryption</source>
@@ -957,63 +975,115 @@ Do you want to replace it?</source>
     </message>
     <message>
         <source>options:</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>&lt;b&gt;--lang&lt;/b&gt; - to enforce the language for the GUI</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>&lt;b&gt;--log-file&lt;/b&gt; - specify the log file for diagnostics</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>&lt;b&gt;--log-severity&lt;/b&gt; - log severity can be one of the following list: none, fatal, error, warning, info, debug, verbose</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Command Line Interface</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>encryptpad[.exe] [options] [file]</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>s2k: %1</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Print Document</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <source>&amp;Print...</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Print the document</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Close</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished">关闭</translation>
     </message>
     <message>
         <source>Close file</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Calculat&amp;e</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Calculate current line</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Calculator: input error at : %1</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&amp;Open…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Save &amp;As…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&amp;Print…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>File &amp;Properties…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Generate Key…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set &amp;Passphrase…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set &amp;Encryption Key…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&amp;Find…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&amp;Go to…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&amp;Generate Passphrase…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&amp;Replace…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&amp;About…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&amp;Preferences…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>File Encryption…</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -1040,7 +1110,7 @@ Do you want to replace it?</source>
     </message>
     <message>
         <source>Browse...</source>
-        <translation>浏览……</translation>
+        <translation type="vanished">浏览……</translation>
     </message>
     <message>
         <source>Key name in the repository</source>
@@ -1052,7 +1122,11 @@ Do you want to replace it?</source>
     </message>
     <message>
         <source>Invalid characters in the key name</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Browse…</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -1166,7 +1240,7 @@ Do you want to replace it?</source>
     </message>
     <message>
         <source>Browse...</source>
-        <translation>浏览……</translation>
+        <translation type="vanished">浏览……</translation>
     </message>
     <message>
         <source>Create .bak files</source>
@@ -1186,7 +1260,7 @@ Do you want to replace it?</source>
     </message>
     <message>
         <source>Edit...</source>
-        <translation>编辑</translation>
+        <translation type="vanished">编辑</translation>
     </message>
     <message>
         <source>Libcurl path:</source>
@@ -1215,7 +1289,7 @@ Do you want to replace it?</source>
     </message>
     <message>
         <source>Enable FakeVim (restart required)</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>32</source>
@@ -1235,7 +1309,7 @@ Do you want to replace it?</source>
     </message>
     <message>
         <source>Display line numbers</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>&quot;Windows&quot; end of line: CR+LF</source>
@@ -1255,7 +1329,7 @@ Do you want to replace it?</source>
     </message>
     <message>
         <source>Font...</source>
-        <translation>字体……</translation>
+        <translation type="vanished">字体……</translation>
     </message>
     <message>
         <source>(Size: </source>
@@ -1275,34 +1349,46 @@ Do you want to replace it?</source>
     </message>
     <message>
         <source>General</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Appearance</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Icon theme (restart required):</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Auto</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Light</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Dark</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Edit…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Browse…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Font…</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>Proxy</name>
     <message>
         <source>Information</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -1317,7 +1403,7 @@ Do you want to replace it?</source>
     </message>
     <message>
         <source>&amp;Browse...</source>
-        <translation>浏览(&amp;B)：</translation>
+        <translation type="vanished">浏览(&amp;B)：</translation>
     </message>
     <message>
         <source>&amp;Key file path:</source>
@@ -1334,6 +1420,10 @@ Do you want to replace it?</source>
     <message>
         <source>Specify encryption key location</source>
         <translation>指定密钥路径</translation>
+    </message>
+    <message>
+        <source>&amp;Browse…</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

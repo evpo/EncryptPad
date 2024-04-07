@@ -861,7 +861,7 @@ void MainWindow::createActions()
     newAct->setStatusTip(tr("Create a new file"));
     connect(newAct, SIGNAL(triggered()), this, SLOT(newFile()));
 
-    openAct = new QAction(tr("&Open..."), this);
+    openAct = new QAction(tr("&Open…"), this);
     openAct->setShortcuts(QKeySequence::Open);
     openAct->setStatusTip(tr("Open an existing file"));
     connect(openAct, SIGNAL(triggered()), this, SLOT(open()));
@@ -871,17 +871,17 @@ void MainWindow::createActions()
     saveAct->setStatusTip(tr("Save the document to disk"));
     connect(saveAct, SIGNAL(triggered()), this, SLOT(save()));
 
-    saveAsAct = new QAction(tr("Save &As..."), this);
+    saveAsAct = new QAction(tr("Save &As…"), this);
     saveAsAct->setShortcuts(QKeySequence::SaveAs);
     saveAsAct->setStatusTip(tr("Save the document under a new name"));
     connect(saveAsAct, SIGNAL(triggered()), this, SLOT(saveAs()));
 
-    printAct = new QAction(tr("&Print..."), this);
+    printAct = new QAction(tr("&Print…"), this);
     printAct->setShortcut(QKeySequence::Print);
     printAct->setStatusTip(tr("Print the document"));
     connect(printAct, SIGNAL(triggered()), this, SLOT(print()));
 
-    setFilePropertiesAct = new QAction(tr("File &Properties..."), this);
+    setFilePropertiesAct = new QAction(tr("File &Properties…"), this);
     setFilePropertiesAct->setStatusTip(tr("Set file properties"));
     connect(setFilePropertiesAct, SIGNAL(triggered()), this, SLOT(setFileProperties()));
 
@@ -894,15 +894,15 @@ void MainWindow::createActions()
     closeAndResetAct->setStatusTip(tr("Close and reset security settings"));
     connect(closeAndResetAct, SIGNAL(triggered()), this, SLOT(closeAndReset()));
 
-    createNewKeyAct = new QAction(tr("Generate Key..."), this);
+    createNewKeyAct = new QAction(tr("Generate Key…"), this);
     createNewKeyAct->setStatusTip(tr("Generate a new key file"));
     connect(createNewKeyAct, SIGNAL(triggered()), this, SLOT(createNewKey()));
 
-    setPassphraseAct = new QAction(tr("Set &Passphrase..."), this);
+    setPassphraseAct = new QAction(tr("Set &Passphrase…"), this);
     setPassphraseAct->setStatusTip(tr("Set passphrase for encryption and decryption"));
     connect(setPassphraseAct, SIGNAL(triggered()), this, SLOT(setPassphrase()));
 
-    setEncryptionKeyAct = new QAction(tr("Set &Encryption Key..."), this);
+    setEncryptionKeyAct = new QAction(tr("Set &Encryption Key…"), this);
     setEncryptionKeyAct->setStatusTip(tr("Set encryption key file"));
     connect(setEncryptionKeyAct, SIGNAL(triggered()), this, SLOT(setEncryptionKey()));
 
@@ -953,21 +953,21 @@ void MainWindow::createActions()
     selectAllAct->setStatusTip(tr("Select all text"));
     connect(selectAllAct, SIGNAL(triggered()), textEdit, SLOT(selectAll()));
 
-    searchAct = new QAction(tr("&Find..."), this);
+    searchAct = new QAction(tr("&Find…"), this);
     searchAct->setShortcuts(QKeySequence::Find);
     searchAct->setStatusTip(tr("Find in text"));
     connect(searchAct, SIGNAL(triggered()), this, SLOT(search()));
 
-    gotoAct = new QAction(tr("&Go to..."), this);
+    gotoAct = new QAction(tr("&Go to…"), this);
     gotoAct->setStatusTip(tr("Go to"));
     gotoAct->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_G));
     connect(gotoAct, SIGNAL(triggered()), this, SLOT(gotoTriggered()));
 
-    generatePassphraseAct = new QAction(tr("&Generate Passphrase..."), this);
+    generatePassphraseAct = new QAction(tr("&Generate Passphrase…"), this);
     generatePassphraseAct->setStatusTip(tr("Generate passphrase"));
     connect(generatePassphraseAct, SIGNAL(triggered()), this, SLOT(generatePassphrase()));
 
-    replaceAct = new QAction(tr("&Replace..."), this);
+    replaceAct = new QAction(tr("&Replace…"), this);
     replaceAct->setShortcut(QKeySequence::Replace);
     replaceAct->setStatusTip(tr("Find and replace text"));
     connect(replaceAct, SIGNAL(triggered()), this, SLOT(replace()));
@@ -999,7 +999,7 @@ void MainWindow::createActions()
     resetZoomAct->setStatusTip(tr("Reset Zoom"));
     connect(resetZoomAct, SIGNAL(triggered()), this, SLOT(resetZoom()));
 
-    aboutAct = new QAction(tr("&About..."), this);
+    aboutAct = new QAction(tr("&About…"), this);
     aboutAct->setStatusTip(tr("Show the application's About box"));
     connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
 
@@ -1008,11 +1008,11 @@ void MainWindow::createActions()
     aboutQtAct->setStatusTip(tr("Show the Qt library's About box"));
     connect(aboutQtAct, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
 
-    openPreferencesAct = new QAction(tr("&Preferences..."), this);
+    openPreferencesAct = new QAction(tr("&Preferences…"), this);
     openPreferencesAct->setStatusTip(tr("Application preferences"));
     connect(openPreferencesAct, SIGNAL(triggered()), this, SLOT(openPreferences()));
 
-    openFileEncryptionAct = new QAction(tr("File Encryption..."), this);
+    openFileEncryptionAct = new QAction(tr("File Encryption…"), this);
     openFileEncryptionAct->setStatusTip(tr("File encryption"));
     connect(openFileEncryptionAct, SIGNAL(triggered()), this, SLOT(openFileEncryption()));
 

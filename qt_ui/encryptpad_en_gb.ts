@@ -59,7 +59,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Browse...</source>
+        <source>Browse…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -103,7 +103,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Select...</source>
+        <source>Select…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -123,7 +123,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Parameters...</source>
+        <source>Parameters…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -422,7 +422,7 @@ Do you want to replace it?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Select...</source>
+        <source>Select…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -577,7 +577,7 @@ Do you want to replace it?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>&amp;Open...</source>
+        <source>&amp;Open…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -593,7 +593,7 @@ Do you want to replace it?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Save &amp;As...</source>
+        <source>Save &amp;As…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -601,7 +601,7 @@ Do you want to replace it?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>File &amp;Properties...</source>
+        <source>File &amp;Properties…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -617,7 +617,7 @@ Do you want to replace it?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Generate Key...</source>
+        <source>Generate Key…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -625,7 +625,7 @@ Do you want to replace it?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Set &amp;Passphrase...</source>
+        <source>Set &amp;Passphrase…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -633,7 +633,7 @@ Do you want to replace it?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Set &amp;Encryption Key...</source>
+        <source>Set &amp;Encryption Key…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -705,7 +705,7 @@ Do you want to replace it?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>&amp;Find...</source>
+        <source>&amp;Find…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -713,7 +713,7 @@ Do you want to replace it?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>&amp;Go to...</source>
+        <source>&amp;Go to…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -721,7 +721,7 @@ Do you want to replace it?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>&amp;Generate Passphrase...</source>
+        <source>&amp;Generate Passphrase…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -729,7 +729,7 @@ Do you want to replace it?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>&amp;Replace...</source>
+        <source>&amp;Replace…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -777,7 +777,7 @@ Do you want to replace it?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>&amp;About...</source>
+        <source>&amp;About…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -793,7 +793,7 @@ Do you want to replace it?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>&amp;Preferences...</source>
+        <source>&amp;Preferences…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -801,7 +801,7 @@ Do you want to replace it?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>File Encryption...</source>
+        <source>File Encryption…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -989,7 +989,7 @@ Do you want to replace it?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>&amp;Print...</source>
+        <source>&amp;Print…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1040,7 +1040,7 @@ Do you want to replace it?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Browse...</source>
+        <source>Browse…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1166,7 +1166,7 @@ Do you want to replace it?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Browse...</source>
+        <source>Browse…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1186,7 +1186,7 @@ Do you want to replace it?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Edit...</source>
+        <source>Edit…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1255,7 +1255,7 @@ Do you want to replace it?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Font...</source>
+        <source>Font…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1317,7 +1317,7 @@ Do you want to replace it?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>&amp;Browse...</source>
+        <source>&amp;Browse…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

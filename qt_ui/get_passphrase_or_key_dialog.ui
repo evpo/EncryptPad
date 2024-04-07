@@ -77,7 +77,7 @@
         <bool>false</bool>
        </property>
        <property name="text">
-        <string>Select...</string>
+        <string>Select…</string>
        </property>
       </widget>
      </item>
@@ -102,7 +102,7 @@
   </layout>
   <action name="actionSelectKeyFile">
    <property name="text">
-    <string>Select...</string>
+    <string>Select…</string>
    </property>
    <property name="toolTip">
     <string>Select key file</string>

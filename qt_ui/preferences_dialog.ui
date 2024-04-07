@@ -61,7 +61,7 @@
        <item row="17" column="2">
         <widget class="QPushButton" name="uiEditKeyFileProperties">
          <property name="text">
-          <string>Edit...</string>
+          <string>Edit…</string>
          </property>
         </widget>
        </item>
@@ -122,7 +122,7 @@
        <item row="16" column="2">
         <widget class="QPushButton" name="uiDefaultFileProperties">
          <property name="text">
-          <string>Edit...</string>
+          <string>Edit…</string>
          </property>
         </widget>
        </item>
@@ -247,7 +247,7 @@
        <item row="13" column="2">
         <widget class="QPushButton" name="uiLibcurlBrowse">
          <property name="text">
-          <string>Browse...</string>
+          <string>Browse…</string>
          </property>
         </widget>
        </item>
@@ -376,7 +376,7 @@
           </size>
          </property>
          <property name="text">
-          <string>Font...</string>
+          <string>Font…</string>
          </property>
         </widget>
        </item>

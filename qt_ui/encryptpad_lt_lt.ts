@@ -1,4 +1,6 @@
-<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="lt">
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="lt">
 <context>
     <name>ConfirmPassphraseDialog</name>
     <message>
@@ -58,7 +60,7 @@
     </message>
     <message>
         <source>Browse...</source>
-        <translation>Naršyti...</translation>
+        <translation type="vanished">Naršyti...</translation>
     </message>
     <message>
         <source>Output file:</source>
@@ -86,11 +88,11 @@
     </message>
     <message>
         <source>OpenPGP Armor</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>ASC</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Key path</source>
@@ -102,7 +104,7 @@
     </message>
     <message>
         <source>Select...</source>
-        <translation>Pasirinkti...</translation>
+        <translation type="vanished">Pasirinkti...</translation>
     </message>
     <message>
         <source>Passphrase</source>
@@ -122,7 +124,7 @@
     </message>
     <message>
         <source>Parameters...</source>
-        <translation>Parametrai...</translation>
+        <translation type="vanished">Parametrai...</translation>
     </message>
     <message>
         <source>Encryption:</source>
@@ -201,6 +203,18 @@ Ar norite jį pakeisti?</translation>
     <message>
         <source>File has been decrypted successfully.</source>
         <translation>Failas sėkmingai iššifruotas.</translation>
+    </message>
+    <message>
+        <source>Browse…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Select…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Parameters…</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -422,11 +436,15 @@ Ar norite jį pakeisti?</translation>
     </message>
     <message>
         <source>Select...</source>
-        <translation>Pasirinkti...</translation>
+        <translation type="vanished">Pasirinkti...</translation>
     </message>
     <message>
         <source>Select key file</source>
         <translation>Pasirinkti rakto failą</translation>
+    </message>
+    <message>
+        <source>Select…</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -461,7 +479,7 @@ Ar norite jį pakeisti?</translation>
     </message>
     <message>
         <source>Neither a key file nor passphrase is set.</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -577,7 +595,7 @@ Ar norite jį pakeisti?</translation>
     </message>
     <message>
         <source>&amp;Open...</source>
-        <translation>&amp;Atverti...</translation>
+        <translation type="vanished">&amp;Atverti...</translation>
     </message>
     <message>
         <source>Open an existing file</source>
@@ -593,7 +611,7 @@ Ar norite jį pakeisti?</translation>
     </message>
     <message>
         <source>Save &amp;As...</source>
-        <translation>Įrašyti &amp;kaip...</translation>
+        <translation type="vanished">Įrašyti &amp;kaip...</translation>
     </message>
     <message>
         <source>Save the document under a new name</source>
@@ -601,7 +619,7 @@ Ar norite jį pakeisti?</translation>
     </message>
     <message>
         <source>File &amp;Properties...</source>
-        <translation>Failo &amp;savybės...</translation>
+        <translation type="vanished">Failo &amp;savybės...</translation>
     </message>
     <message>
         <source>Set file properties</source>
@@ -617,7 +635,7 @@ Ar norite jį pakeisti?</translation>
     </message>
     <message>
         <source>Generate Key...</source>
-        <translation>Generuoti raktą...</translation>
+        <translation type="vanished">Generuoti raktą...</translation>
     </message>
     <message>
         <source>Generate a new key file</source>
@@ -625,7 +643,7 @@ Ar norite jį pakeisti?</translation>
     </message>
     <message>
         <source>Set &amp;Passphrase...</source>
-        <translation>Nustatyti slapta&amp;frazę...</translation>
+        <translation type="vanished">Nustatyti slapta&amp;frazę...</translation>
     </message>
     <message>
         <source>Set passphrase for encryption and decryption</source>
@@ -633,7 +651,7 @@ Ar norite jį pakeisti?</translation>
     </message>
     <message>
         <source>Set &amp;Encryption Key...</source>
-        <translation>Nustatyti š&amp;ifravimo raktą...</translation>
+        <translation type="vanished">Nustatyti š&amp;ifravimo raktą...</translation>
     </message>
     <message>
         <source>Set encryption key file</source>
@@ -705,7 +723,7 @@ Ar norite jį pakeisti?</translation>
     </message>
     <message>
         <source>&amp;Find...</source>
-        <translation>&amp;Rasti...</translation>
+        <translation type="vanished">&amp;Rasti...</translation>
     </message>
     <message>
         <source>Find in text</source>
@@ -713,7 +731,7 @@ Ar norite jį pakeisti?</translation>
     </message>
     <message>
         <source>&amp;Go to...</source>
-        <translation>&amp;Pereiti į...</translation>
+        <translation type="vanished">&amp;Pereiti į...</translation>
     </message>
     <message>
         <source>Go to</source>
@@ -721,7 +739,7 @@ Ar norite jį pakeisti?</translation>
     </message>
     <message>
         <source>&amp;Generate Passphrase...</source>
-        <translation>&amp;Generuoti slaptafrazę...</translation>
+        <translation type="vanished">&amp;Generuoti slaptafrazę...</translation>
     </message>
     <message>
         <source>Generate passphrase</source>
@@ -729,7 +747,7 @@ Ar norite jį pakeisti?</translation>
     </message>
     <message>
         <source>&amp;Replace...</source>
-        <translation>&amp;Pakeisti...</translation>
+        <translation type="vanished">&amp;Pakeisti...</translation>
     </message>
     <message>
         <source>Find and replace text</source>
@@ -777,7 +795,7 @@ Ar norite jį pakeisti?</translation>
     </message>
     <message>
         <source>&amp;About...</source>
-        <translation>&amp;Apie...</translation>
+        <translation type="vanished">&amp;Apie...</translation>
     </message>
     <message>
         <source>Show the application&apos;s About box</source>
@@ -793,7 +811,7 @@ Ar norite jį pakeisti?</translation>
     </message>
     <message>
         <source>&amp;Preferences...</source>
-        <translation>&amp;Nuostatos...</translation>
+        <translation type="vanished">&amp;Nuostatos...</translation>
     </message>
     <message>
         <source>Application preferences</source>
@@ -801,7 +819,7 @@ Ar norite jį pakeisti?</translation>
     </message>
     <message>
         <source>File Encryption...</source>
-        <translation>Failų šifravimas...</translation>
+        <translation type="vanished">Failų šifravimas...</translation>
     </message>
     <message>
         <source>File encryption</source>
@@ -957,63 +975,115 @@ Ar norite jį pakeisti?</translation>
     </message>
     <message>
         <source>options:</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>&lt;b&gt;--lang&lt;/b&gt; - to enforce the language for the GUI</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>&lt;b&gt;--log-file&lt;/b&gt; - specify the log file for diagnostics</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>&lt;b&gt;--log-severity&lt;/b&gt; - log severity can be one of the following list: none, fatal, error, warning, info, debug, verbose</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Command Line Interface</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>encryptpad[.exe] [options] [file]</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>s2k: %1</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Print Document</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <source>&amp;Print...</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Print the document</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Close</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished">Užverti</translation>
     </message>
     <message>
         <source>Close file</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Calculat&amp;e</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Calculate current line</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Calculator: input error at : %1</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&amp;Open…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Save &amp;As…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&amp;Print…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>File &amp;Properties…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Generate Key…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set &amp;Passphrase…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set &amp;Encryption Key…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&amp;Find…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&amp;Go to…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&amp;Generate Passphrase…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&amp;Replace…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&amp;About…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&amp;Preferences…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>File Encryption…</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -1040,7 +1110,7 @@ Ar norite jį pakeisti?</translation>
     </message>
     <message>
         <source>Browse...</source>
-        <translation>Naršyti...</translation>
+        <translation type="vanished">Naršyti...</translation>
     </message>
     <message>
         <source>Key name in the repository</source>
@@ -1052,7 +1122,11 @@ Ar norite jį pakeisti?</translation>
     </message>
     <message>
         <source>Invalid characters in the key name</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Browse…</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -1166,7 +1240,7 @@ Ar norite jį pakeisti?</translation>
     </message>
     <message>
         <source>Browse...</source>
-        <translation>Naršyti...</translation>
+        <translation type="vanished">Naršyti...</translation>
     </message>
     <message>
         <source>Create .bak files</source>
@@ -1186,7 +1260,7 @@ Ar norite jį pakeisti?</translation>
     </message>
     <message>
         <source>Edit...</source>
-        <translation>Taisyti...</translation>
+        <translation type="vanished">Taisyti...</translation>
     </message>
     <message>
         <source>Libcurl path:</source>
@@ -1215,7 +1289,7 @@ Ar norite jį pakeisti?</translation>
     </message>
     <message>
         <source>Enable FakeVim (restart required)</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>32</source>
@@ -1255,7 +1329,7 @@ Ar norite jį pakeisti?</translation>
     </message>
     <message>
         <source>Font...</source>
-        <translation>Šriftas...</translation>
+        <translation type="vanished">Šriftas...</translation>
     </message>
     <message>
         <source>(Size: </source>
@@ -1275,27 +1349,39 @@ Ar norite jį pakeisti?</translation>
     </message>
     <message>
         <source>General</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Appearance</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Icon theme (restart required):</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Auto</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Light</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Dark</source>
-        <translation type="unfinished"/>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Edit…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Browse…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Font…</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -1317,7 +1403,7 @@ Ar norite jį pakeisti?</translation>
     </message>
     <message>
         <source>&amp;Browse...</source>
-        <translation>&amp;Naršyti...</translation>
+        <translation type="vanished">&amp;Naršyti...</translation>
     </message>
     <message>
         <source>&amp;Key file path:</source>
@@ -1334,6 +1420,10 @@ Ar norite jį pakeisti?</translation>
     <message>
         <source>Specify encryption key location</source>
         <translation>Nurodyti šifravimo rakto vietą</translation>
+    </message>
+    <message>
+        <source>&amp;Browse…</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
