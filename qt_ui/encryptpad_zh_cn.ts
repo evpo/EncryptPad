@@ -527,7 +527,7 @@ Do you want to replace it?</source>
         <translation>另存为</translation>
     </message>
     <message>
-        <source>Cannot create the repository directory in HOME</source>
+        <source>Cannot create the repository folder in HOME</source>
         <translation>无法在HOME中创建仓库目录</translation>
     </message>
     <message>
@@ -1035,7 +1035,7 @@ Do you want to replace it?</source>
         <translation>密钥路径</translation>
     </message>
     <message>
-        <source>The repository is &lt;b&gt;.encryptpad&lt;/b&gt; directory in the user&apos;s profile (&lt;b&gt;encryptpad_repository&lt;/b&gt; in portable mode).</source>
+        <source>The repository is &lt;b&gt;.encryptpad&lt;/b&gt; folder in the user&apos;s profile (&lt;b&gt;encryptpad_repository&lt;/b&gt; in portable mode).</source>
         <translation>EncryptPad仓库即用户文件夹内的&lt;b&gt;.encryptpad&lt;/b&gt;，（便携版EncryptPad则为EncryptPad目录内的&lt;b&gt;encryptpad_repository&lt;/b&gt;）</translation>
     </message>
     <message>
@@ -1177,7 +1177,7 @@ Do you want to replace it?</source>
         <translation>[example: Monospace (Size: 12)]</translation>
     </message>
     <message>
-        <source>Save last used directory</source>
+        <source>Save last used folder</source>
         <translation>保存最近使用的目录</translation>
     </message>
     <message>
@@ -1246,7 +1246,7 @@ Do you want to replace it?</source>
         <translation>制表符大小: </translation>
     </message>
     <message>
-        <source>Retain last used directory between EncryptPad sessions</source>
+        <source>Retain last used folder between EncryptPad sessions</source>
         <translation>在进程间保留最近使用的目录</translation>
     </message>
     <message>
@@ -1328,7 +1328,7 @@ Do you want to replace it?</source>
         <translation>记住密钥位置(&amp;P)</translation>
     </message>
     <message>
-        <source>The repository is &lt;b&gt;.encryptpad&lt;/b&gt; directory in the user&apos;s profile (&lt;b&gt;encryptpad_repository&lt;/b&gt; in portable mode). Select a key or specify a file name without path for the repository keys.</source>
+        <source>The repository is &lt;b&gt;.encryptpad&lt;/b&gt; folder in the user&apos;s profile (&lt;b&gt;encryptpad_repository&lt;/b&gt; in portable mode). Select a key or specify a file name without path for the repository keys.</source>
         <translation>如果要指定一个在EncryptPad仓库（安装版Encryptpad的话为用户文件夹内的&lt;b&gt;.encryptpad&lt;/b&gt;，便携版则为EncryptPad目录内的&lt;b&gt;encryptpad_repository&lt;/b&gt;）内的密钥，可以省略密钥文件的路径。</translation>
     </message>
     <message>

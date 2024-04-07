@@ -527,7 +527,7 @@ Souhaitez-vous le remplacer ?</translation>
         <translation>Enregistrer le fichier sous</translation>
     </message>
     <message>
-        <source>Cannot create the repository directory in HOME</source>
+        <source>Cannot create the repository folder in HOME</source>
         <translation>Impossible de créer le dossier dépôt dans le dossier personnel</translation>
     </message>
     <message>
@@ -1035,7 +1035,7 @@ Souhaitez-vous le remplacer ?</translation>
         <translation>Chemin de la clé</translation>
     </message>
     <message>
-        <source>The repository is &lt;b&gt;.encryptpad&lt;/b&gt; directory in the user&apos;s profile (&lt;b&gt;encryptpad_repository&lt;/b&gt; in portable mode).</source>
+        <source>The repository is &lt;b&gt;.encryptpad&lt;/b&gt; folder in the user&apos;s profile (&lt;b&gt;encryptpad_repository&lt;/b&gt; in portable mode).</source>
         <translation>Le dépôt est le dossier &lt;b&gt;.encryptpad&lt;/b&gt; dans le profile de l’utilisateur (&lt;b&gt;encryptpad_repository&lt;/b&gt; en mode portable).</translation>
     </message>
     <message>
@@ -1177,7 +1177,7 @@ Souhaitez-vous le remplacer ?</translation>
         <translation>[example: Monospace (Size: 12)]</translation>
     </message>
     <message>
-        <source>Save last used directory</source>
+        <source>Save last used folder</source>
         <translation>Mémoriser le dernier dossier utilisé</translation>
     </message>
     <message>
@@ -1246,7 +1246,7 @@ Souhaitez-vous le remplacer ?</translation>
         <translation>Taille des onglets :</translation>
     </message>
     <message>
-        <source>Retain last used directory between EncryptPad sessions</source>
+        <source>Retain last used folder between EncryptPad sessions</source>
         <translation>Mémoriser le dernier dossier utilisé d’une session d’EncryptPad à l’autre</translation>
     </message>
     <message>
@@ -1328,7 +1328,7 @@ Souhaitez-vous le remplacer ?</translation>
         <translation>&amp;Emplacement persistant de la clé dans le fichier chiffré</translation>
     </message>
     <message>
-        <source>The repository is &lt;b&gt;.encryptpad&lt;/b&gt; directory in the user&apos;s profile (&lt;b&gt;encryptpad_repository&lt;/b&gt; in portable mode). Select a key or specify a file name without path for the repository keys.</source>
+        <source>The repository is &lt;b&gt;.encryptpad&lt;/b&gt; folder in the user&apos;s profile (&lt;b&gt;encryptpad_repository&lt;/b&gt; in portable mode). Select a key or specify a file name without path for the repository keys.</source>
         <translation>Le dépôt est le dossier &lt;b&gt;.encryptpad&lt;/b&gt; dans le profile de l’utilisateur (&lt;b&gt;encryptpad_repository&lt;/b&gt; en mode portable). Sélectionner une clé ou indiquer un nom de fichier sans chemin pour les clés du dépôt.</translation>
     </message>
     <message>

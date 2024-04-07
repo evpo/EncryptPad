@@ -527,7 +527,7 @@ Ar norite jį pakeisti?</translation>
         <translation>Įrašyti failą kaip</translation>
     </message>
     <message>
-        <source>Cannot create the repository directory in HOME</source>
+        <source>Cannot create the repository folder in HOME</source>
         <translation>Nepavyksta sukurti saugyklos katalogo NAMŲ aplanke</translation>
     </message>
     <message>
@@ -1035,7 +1035,7 @@ Ar norite jį pakeisti?</translation>
         <translation>Rakto kelias</translation>
     </message>
     <message>
-        <source>The repository is &lt;b&gt;.encryptpad&lt;/b&gt; directory in the user&apos;s profile (&lt;b&gt;encryptpad_repository&lt;/b&gt; in portable mode).</source>
+        <source>The repository is &lt;b&gt;.encryptpad&lt;/b&gt; folder in the user&apos;s profile (&lt;b&gt;encryptpad_repository&lt;/b&gt; in portable mode).</source>
         <translation>Saugykla yra &lt;b&gt;.encryptpad&lt;/b&gt; katalogas naudotojo profilyje (&lt;b&gt;encryptpad_repository&lt;/b&gt; perkeliamoje veiksenoje).</translation>
     </message>
     <message>
@@ -1177,7 +1177,7 @@ Ar norite jį pakeisti?</translation>
         <translation>[example: Monospace (Size: 12)]</translation>
     </message>
     <message>
-        <source>Save last used directory</source>
+        <source>Save last used folder</source>
         <translation>Įrašyti paskutinį naudotą katalogą</translation>
     </message>
     <message>
@@ -1246,7 +1246,7 @@ Ar norite jį pakeisti?</translation>
         <translation>Tab dydis:</translation>
     </message>
     <message>
-        <source>Retain last used directory between EncryptPad sessions</source>
+        <source>Retain last used folder between EncryptPad sessions</source>
         <translation>Išlaikyti paskutinį naudotą katalogą tarp EncryptPad seansų</translation>
     </message>
     <message>
@@ -1328,7 +1328,7 @@ Ar norite jį pakeisti?</translation>
         <translation>&amp;Pastovaus rakto vietą šifruotame faile</translation>
     </message>
     <message>
-        <source>The repository is &lt;b&gt;.encryptpad&lt;/b&gt; directory in the user&apos;s profile (&lt;b&gt;encryptpad_repository&lt;/b&gt; in portable mode). Select a key or specify a file name without path for the repository keys.</source>
+        <source>The repository is &lt;b&gt;.encryptpad&lt;/b&gt; folder in the user&apos;s profile (&lt;b&gt;encryptpad_repository&lt;/b&gt; in portable mode). Select a key or specify a file name without path for the repository keys.</source>
         <translation>Saugykla yra &lt;b&gt;.encryptpad&lt;/b&gt; katalogas naudotojo profilyje (&lt;b&gt;encryptpad_repository&lt;/b&gt; perkeliamoje veiksenoje). Pasirinkite raktą arba saugyklos raktams nurodykite failo pavadinimą be kelio.</translation>
     </message>
     <message>

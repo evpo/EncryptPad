@@ -527,7 +527,7 @@ Do you want to replace it?</source>
         <translation>Сохранить как</translation>
     </message>
     <message>
-        <source>Cannot create the repository directory in HOME</source>
+        <source>Cannot create the repository folder in HOME</source>
         <translation>Невозможно создать хранилище в HOME</translation>
     </message>
     <message>
@@ -1035,7 +1035,7 @@ Do you want to replace it?</source>
         <translation>Путь к ключу</translation>
     </message>
     <message>
-        <source>The repository is &lt;b&gt;.encryptpad&lt;/b&gt; directory in the user&apos;s profile (&lt;b&gt;encryptpad_repository&lt;/b&gt; in portable mode).</source>
+        <source>The repository is &lt;b&gt;.encryptpad&lt;/b&gt; folder in the user&apos;s profile (&lt;b&gt;encryptpad_repository&lt;/b&gt; in portable mode).</source>
         <translation>Хранилище - это директория &lt;b&gt;.encryptpad&lt;/b&gt; в домашней директории пользователя (&lt;b&gt;encryptpad_repository&lt;/b&gt; в переносном режиме).</translation>
     </message>
     <message>
@@ -1177,7 +1177,7 @@ Do you want to replace it?</source>
         <translation>[example: Monospace (Size: 12)]</translation>
     </message>
     <message>
-        <source>Save last used directory</source>
+        <source>Save last used folder</source>
         <translation>Сохранить последнюю директорию</translation>
     </message>
     <message>
@@ -1246,7 +1246,7 @@ Do you want to replace it?</source>
         <translation>Размер таба:</translation>
     </message>
     <message>
-        <source>Retain last used directory between EncryptPad sessions</source>
+        <source>Retain last used folder between EncryptPad sessions</source>
         <translation>Сохранить последнюю использованную директорию между запусками</translation>
     </message>
     <message>
@@ -1328,7 +1328,7 @@ Do you want to replace it?</source>
         <translation>&amp;Сохранить путь ключа в зашифрованном файле</translation>
     </message>
     <message>
-        <source>The repository is &lt;b&gt;.encryptpad&lt;/b&gt; directory in the user&apos;s profile (&lt;b&gt;encryptpad_repository&lt;/b&gt; in portable mode). Select a key or specify a file name without path for the repository keys.</source>
+        <source>The repository is &lt;b&gt;.encryptpad&lt;/b&gt; folder in the user&apos;s profile (&lt;b&gt;encryptpad_repository&lt;/b&gt; in portable mode). Select a key or specify a file name without path for the repository keys.</source>
         <translation>Хранилище - это директория &lt;b&gt;.encryptpad&lt;/b&gt; в домашней директории пользователя (&lt;b&gt;encryptpad_repository&lt;/b&gt; в переносном режиме). Выберите ключ или укажите имя файла без пути для ключей в хранилище.</translation>
     </message>
     <message>
