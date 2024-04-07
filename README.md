@@ -66,7 +66,7 @@ EncryptPad is an application for viewing and editing symmetrically encrypted tex
 * **Key repository** in a hidden directory in the user's home folder
 * Path to a key file can be stored in an encrypted file. If enabled, **you do not need to specify the key file** every time you open files.
 * Encryption of **binary files** (images, videos, archives etc.)
-* **FakeVim** mode to edit files by using Vim-like user interface
+* **FakeVim** mode to edit files with a Vim-like user interface
 * **Read only** mode to prevent accidental file modification
 * **UTF8** text encoding
 * Windows/Unix **configurable line endings**
@@ -267,7 +267,7 @@ If this file gets into the hands of a wrongdoer, he or she will need to brute fo
 
     `--log-file` - specify the log file for diagnostics
 
-    `--log-severity` - log severity can be one of the following list: none, fatal, error, warning, info, debug, verbose
+    `--log-severity` - log severity can be one of the following list: `none`, `fatal`, `error`, `warning`, `info`, `debug`, `verbose`
 
 <div id="installing"></div>
 
@@ -337,7 +337,7 @@ For Ubuntu versions before Impish use Alin Andrei's PPA below:
     ./configure.py --cpu x86 --os mingw --static
     make
 
-The configure command will always work if your console is running with administrative privileges. If you don't want to run as administrator, add `--link-method hardlink` to the options.
+The `configure.py` command will always work if your console is running with administrative privileges. If you don't want to run as administrator, add `--link-method hardlink` to the options.
 If the build is successful, you should see the executable **./bin/release/encryptpad.exe**
 
 Note that if you want EncryptPad to work as a single executable without dlls, you need to build Qt framework yourself statically. It takes a few hours. There are plenty of instructions on how to do this in the Internet. The most popular article recommends using a PowerShell script. While it is convenient and I did it once, sometimes you don't want to upgrade your PowerShell and install heavy dependencies coming with it. So the next time I had to do that, I read the script and did everything manually. Luckily there are not too many steps in it.
@@ -352,7 +352,7 @@ You need to install Qt 5, Python and run:
     ./configure.py --ldflags "-mmacosx-version-min=11.0" --cxxflags "-mmacosx-version-min=11.0"
     make
 
-Change the Qt path and replace the minimal macOS versions as needed. The command will work without them but the result will be limited to the current version.
+Change the Qt path and replace the minimal macOS versions as needed. The command will work without them, but the result will be limited to the current version.
 
 <div id="compile-on-linux"></div>
 
@@ -473,7 +473,7 @@ To enable the mode:
 2. Set "Enable FakeVim"
 3. Restart EncryptPad
 
-To configure FakeVim create and edit the file at the location below:
+To configure FakeVim, create and edit the file at the location below:
 
 Linux and macOS:
 
@@ -483,27 +483,27 @@ On Windows in the user profile directory:
 
     _encryptpad/vimrc
 
-You can find more information about FakeVim interface at [FakeVim library web page](https://github.com/hluk/FakeVim)
+You can find more information about the FakeVim interface on the [FakeVim library web page](https://github.com/hluk/FakeVim)
 
 <div id="fakevim-input-output"></div>
 ### FakeVim: input and output commands
 
 The ex mode supports commands to read and write files. The input and output commands are integrated with the following EncryptPad operations:
 
-    :r <file> - File / Open…
+    :r <file> - File > Open…
 
-    :w - File / Save
+    :w - File > Save
 
-    :w <file> - File / Save As…
+    :w <file> - File > Save As…
 
-    :q - File / Exit
+    :q - File > Exit
 
 The combinations of the above commands are also supported:
 
     :wq
     :wq <file>
 
-Vim + register integrates with the system clipboard. You can also add the below line to the vimrc file to integrate the unnamed register with the system clipboard:
+Vim’s + register integrates with the system clipboard. You can also add the below line to the vimrc file to integrate the unnamed register with the system clipboard:
 
     set clipboard=unnamedplus
 
@@ -520,7 +520,7 @@ EncryptPad uses the following frameworks and libraries:
 
 1. [**Qt Framework**](http://www.qt.io/)
 2. [**Botan**](http://botan.randombit.net/)
-3. [**stlplus**](http://stlplus.sourceforge.net/)
+3. [**STLplus**](http://stlplus.sourceforge.net/)
 5. [**Makefiles**](http://stlplus.sourceforge.net/makefiles/docs/)
 4. [**zlib**](http://zlib.net/)
 6. [**gtest**](http://code.google.com/p/googletest/)

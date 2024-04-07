@@ -90,7 +90,7 @@ home folder</li>
 open files.</li>
 <li>Encryption of <strong>binary files</strong> (images, videos,
 archives etc.)</li>
-<li><strong>FakeVim</strong> mode to edit files by using Vim-like user
+<li><strong>FakeVim</strong> mode to edit files with a Vim-like user
 interface</li>
 <li><strong>Read only</strong> mode to prevent accidental file
 modification</li>
@@ -508,7 +508,7 @@ line parameters below:</p>
 
 `--log-file` - specify the log file for diagnostics
 
-`--log-severity` - log severity can be one of the following list: none, fatal, error, warning, info, debug, verbose</code></pre>
+`--log-severity` - log severity can be one of the following list: `none`, `fatal`, `error`, `warning`, `info`, `debug`, `verbose`</code></pre>
 <div id="installing">
 
 </div>
@@ -584,10 +584,10 @@ not to pollute the system wide PATH variable.</p></li>
 options. To build everything:</p>
 <p>./configure.py –cpu x86 –os mingw –static make</p></li>
 </ol>
-<p>The configure command will always work if your console is running
-with administrative privileges. If you don’t want to run as
-administrator, add <code>--link-method hardlink</code> to the options.
-If the build is successful, you should see the executable
+<p>The <code>configure.py</code> command will always work if your
+console is running with administrative privileges. If you don’t want to
+run as administrator, add <code>--link-method hardlink</code> to the
+options. If the build is successful, you should see the executable
 <strong>./bin/release/encryptpad.exe</strong></p>
 <p>Note that if you want EncryptPad to work as a single executable
 without dlls, you need to build Qt framework yourself statically. It
@@ -606,8 +606,8 @@ everything manually. Luckily there are not too many steps in it.</p>
 ./configure.py --ldflags &quot;-mmacosx-version-min=11.0&quot; --cxxflags &quot;-mmacosx-version-min=11.0&quot;
 make</code></pre>
 <p>Change the Qt path and replace the minimal macOS versions as needed.
-The command will work without them but the result will be limited to the
-current version.</p>
+The command will work without them, but the result will be limited to
+the current version.</p>
 <div id="compile-on-linux">
 
 </div>
@@ -704,13 +704,13 @@ less secure. Separate them if possible.</p>
 <li>Set “Enable FakeVim”</li>
 <li>Restart EncryptPad</li>
 </ol>
-<p>To configure FakeVim create and edit the file at the location
+<p>To configure FakeVim, create and edit the file at the location
 below:</p>
 <p>Linux and macOS:</p>
 <pre><code>~/.encryptpad/vimrc</code></pre>
 <p>On Windows in the user profile directory:</p>
 <pre><code>_encryptpad/vimrc</code></pre>
-<p>You can find more information about FakeVim interface at <a
+<p>You can find more information about the FakeVim interface on the <a
 href="https://github.com/hluk/FakeVim">FakeVim library web page</a></p>
 <div id="fakevim-input-output">
 
@@ -720,19 +720,19 @@ commands</h3>
 <p>The ex mode supports commands to read and write files. The input and
 output commands are integrated with the following EncryptPad
 operations:</p>
-<pre><code>:r &lt;file&gt; - File / Open…
+<pre><code>:r &lt;file&gt; - File &gt; Open…
 
-:w - File / Save
+:w - File &gt; Save
 
-:w &lt;file&gt; - File / Save As…
+:w &lt;file&gt; - File &gt; Save As…
 
-:q - File / Exit</code></pre>
+:q - File &gt; Exit</code></pre>
 <p>The combinations of the above commands are also supported:</p>
 <pre><code>:wq
 :wq &lt;file&gt;</code></pre>
-<p>Vim + register integrates with the system clipboard. You can also add
-the below line to the vimrc file to integrate the unnamed register with
-the system clipboard:</p>
+<p>Vim’s + register integrates with the system clipboard. You can also
+add the below line to the vimrc file to integrate the unnamed register
+with the system clipboard:</p>
 <pre><code>set clipboard=unnamedplus</code></pre>
 <div id="passphrases-in-memory">
 
@@ -761,7 +761,7 @@ because S2K algorithms with many iterations are slow by design.</p>
 <li><a
 href="http://botan.randombit.net/"><strong>Botan</strong></a></li>
 <li><a
-href="http://stlplus.sourceforge.net/"><strong>stlplus</strong></a></li>
+href="http://stlplus.sourceforge.net/"><strong>STLplus</strong></a></li>
 <li><a
 href="http://stlplus.sourceforge.net/makefiles/docs/"><strong>Makefiles</strong></a></li>
 <li><a href="http://zlib.net/"><strong>zlib</strong></a></li>
