@@ -371,7 +371,7 @@ Open the EncryptPad directory:
 
 Install dependencies and tools:
 
-    apt-get install qt5-default qtbase5-dev gcc g++ make python3 pkg-config zlib1g-dev libbotan-2-dev libbz2-dev
+    apt-get install qt5-default qtbase5-dev libqt5svg5-dev gcc g++ make python3 pkg-config zlib1g-dev libbotan-2-dev libbz2-dev
 
 Open the EncryptPad source directory:
 
