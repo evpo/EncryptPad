@@ -169,7 +169,7 @@
         </font>
        </property>
        <property name="text">
-        <string>The repository is &lt;b&gt;.encryptpad&lt;/b&gt; directory in the user's profile (&lt;b&gt;encryptpad_repository&lt;/b&gt; in portable mode). Select a key or specify a file name without path for the repository keys.</string>
+        <string>The repository is &lt;b&gt;.encryptpad&lt;/b&gt; folder in the user's profile (&lt;b&gt;encryptpad_repository&lt;/b&gt; in portable mode). Select a key or specify a file name without path for the repository keys.</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignJustify|Qt::AlignVCenter</set>

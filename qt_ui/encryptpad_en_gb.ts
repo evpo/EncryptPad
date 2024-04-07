@@ -528,7 +528,7 @@ Do you want to replace it?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Cannot create the repository directory in HOME</source>
+        <source>Cannot create the repository folder in HOME</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1036,7 +1036,7 @@ Do you want to replace it?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>The repository is &lt;b&gt;.encryptpad&lt;/b&gt; directory in the user&apos;s profile (&lt;b&gt;encryptpad_repository&lt;/b&gt; in portable mode).</source>
+        <source>The repository is &lt;b&gt;.encryptpad&lt;/b&gt; folder in the user&apos;s profile (&lt;b&gt;encryptpad_repository&lt;/b&gt; in portable mode).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1178,7 +1178,7 @@ Do you want to replace it?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Save last used directory</source>
+        <source>Save last used folder</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1247,7 +1247,7 @@ Do you want to replace it?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Retain last used directory between EncryptPad sessions</source>
+        <source>Retain last used folder between EncryptPad sessions</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1329,7 +1329,7 @@ Do you want to replace it?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>The repository is &lt;b&gt;.encryptpad&lt;/b&gt; directory in the user&apos;s profile (&lt;b&gt;encryptpad_repository&lt;/b&gt; in portable mode). Select a key or specify a file name without path for the repository keys.</source>
+        <source>The repository is &lt;b&gt;.encryptpad&lt;/b&gt; folder in the user&apos;s profile (&lt;b&gt;encryptpad_repository&lt;/b&gt; in portable mode). Select a key or specify a file name without path for the repository keys.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

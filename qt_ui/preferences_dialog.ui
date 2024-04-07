@@ -254,10 +254,10 @@
        <item row="10" column="1">
         <widget class="QCheckBox" name="uiLastUsedDirectory">
          <property name="toolTip">
-          <string>Retain last used directory between EncryptPad sessions</string>
+          <string>Retain last used folder between EncryptPad sessions</string>
          </property>
          <property name="text">
-          <string>Save last used directory</string>
+          <string>Save last used folder</string>
          </property>
         </widget>
        </item>

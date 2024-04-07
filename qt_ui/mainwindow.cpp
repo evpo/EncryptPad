@@ -671,7 +671,7 @@ QString MainWindow::accessRepositoryPath(const QString &fileName)
         QMessageBox::warning(
                     this,
                     "EncryptPad",
-                    tr("Cannot create the repository directory in HOME"));
+                    tr("Cannot create the repository folder in HOME"));
         return QString();
     }
 
