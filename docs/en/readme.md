@@ -357,7 +357,7 @@ Change the Qt path and replace the minimal macOS versions as needed. The command
 
 Install dependencies and tools:
 
-    dnf install gcc make qt5-qtbase-devel gcc-c++ python libstdc++-static glibc-static botan2-devel bzip2-devel zlib-devel
+    dnf install gcc make qt5-qtbase-devel qt5-qtsvg gcc-c++ python libstdc++-static glibc-static botan2-devel bzip2-devel zlib-devel
 
 Open the EncryptPad directory:
 
@@ -385,7 +385,7 @@ Open the EncryptPad source directory:
 
 Install dependencies and tools:
 
-    apt-get install qtbase5-dev gcc g++ make python3 zlib1g-dev pkg-config libbotan-2-dev libbz2-dev
+    apt-get install qtbase5-dev libqt5svg5-dev gcc g++ make python3 zlib1g-dev pkg-config libbotan-2-dev libbz2-dev
 
 Open the EncryptPad source directory:
 
@@ -399,7 +399,7 @@ Open the EncryptPad source directory:
 
 Install dependencies and tools:
 
-    zypper install gcc gcc-c++ make python3 pkg-config zlib-devel libqt5-qtbase-devel libbotan-devel libbz2-devel
+    zypper install gcc gcc-c++ make python3 pkg-config zlib-devel libqt5-qtbase-devel libqt5-qtsvg-devel libbotan-devel libbz2-devel
 
 Open the EncryptPad source directory:
 
@@ -414,7 +414,7 @@ Open the EncryptPad source directory:
 Install dependencies and tools:
 
     pacman -S --needed base-devel
-    pacman -S qt5-base python3 botan zlib bzip2
+    pacman -S qt5-base qt5-svg python3 botan zlib bzip2
 
 Open the EncryptPad source directory:
 
@@ -428,7 +428,7 @@ Open the EncryptPad source directory:
 
 Install dependencies and tools:
 
-    pkg install python3 pkgconf botan2 qt5
+    pkg install python3 pkgconf botan2 qt5 qt5-svg
 
 Open the EncryptPad source directory:
 
@@ -440,8 +440,8 @@ Open the EncryptPad source directory:
 ### Void Linux
 
 Install dependencies and tools: 
-	
-	sudo xbps-install base-devel qt5-devel python3 botan-devel bzip2-devel libzip-devel
+
+    sudo xbps-install base-devel qt5-devel qt5-svg-devel python3 botan-devel bzip2-devel libzip-devel
 
 Open the EncryptPad source directory:
 
