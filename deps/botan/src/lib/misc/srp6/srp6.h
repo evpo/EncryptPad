@@ -9,12 +9,12 @@
 #define BOTAN_RFC5054_SRP6_H_
 
 #include <botan/bigint.h>
+#include <botan/dl_group.h>
 #include <botan/symkey.h>
 #include <string>
 
 namespace Botan {
 
-class DL_Group;
 class RandomNumberGenerator;
 
 /**
@@ -29,15 +29,13 @@ class RandomNumberGenerator;
 *
 * @return (A,K) the client public key and the shared secret key
 */
-std::pair<BigInt,SymmetricKey>
-BOTAN_PUBLIC_API(2,0) srp6_client_agree(const std::string& username,
-                            const std::string& password,
-                            const std::string& group_id,
-                            const std::string& hash_id,
-                            const std::vector<uint8_t>& salt,
-                            const BigInt& B,
-                            RandomNumberGenerator& rng);
-
+std::pair<BigInt, SymmetricKey> BOTAN_PUBLIC_API(2, 0) srp6_client_agree(std::string_view username,
+                                                                         std::string_view password,
+                                                                         std::string_view group_id,
+                                                                         std::string_view hash_id,
+                                                                         const std::vector<uint8_t>& salt,
+                                                                         const BigInt& B,
+                                                                         RandomNumberGenerator& rng);
 
 /**
 * SRP6a Client side
@@ -52,15 +50,14 @@ BOTAN_PUBLIC_API(2,0) srp6_client_agree(const std::string& username,
 *
 * @return (A,K) the client public key and the shared secret key
 */
-std::pair<BigInt,SymmetricKey> BOTAN_PUBLIC_API(2,11)
-   srp6_client_agree(const std::string& username,
-                     const std::string& password,
-                     const DL_Group& group,
-                     const std::string& hash_id,
-                     const std::vector<uint8_t>& salt,
-                     const BigInt& B,
-                     size_t a_bits,
-                     RandomNumberGenerator& rng);
+std::pair<BigInt, SymmetricKey> BOTAN_PUBLIC_API(2, 11) srp6_client_agree(std::string_view username,
+                                                                          std::string_view password,
+                                                                          const DL_Group& group,
+                                                                          std::string_view hash_id,
+                                                                          const std::vector<uint8_t>& salt,
+                                                                          const BigInt& B,
+                                                                          size_t a_bits,
+                                                                          RandomNumberGenerator& rng);
 
 /**
 * Generate a new SRP-6 verifier
@@ -70,12 +67,11 @@ std::pair<BigInt,SymmetricKey> BOTAN_PUBLIC_API(2,11)
 * @param group_id specifies the shared SRP group
 * @param hash_id specifies a secure hash function
 */
-BigInt BOTAN_PUBLIC_API(2,0)
-   generate_srp6_verifier(const std::string& identifier,
-                          const std::string& password,
-                          const std::vector<uint8_t>& salt,
-                          const std::string& group_id,
-                          const std::string& hash_id);
+BigInt BOTAN_PUBLIC_API(2, 0) srp6_generate_verifier(std::string_view identifier,
+                                                     std::string_view password,
+                                                     const std::vector<uint8_t>& salt,
+                                                     std::string_view group_id,
+                                                     std::string_view hash_id);
 
 /**
 * Generate a new SRP-6 verifier
@@ -85,12 +81,11 @@ BigInt BOTAN_PUBLIC_API(2,0)
 * @param group specifies the shared SRP group
 * @param hash_id specifies a secure hash function
 */
-BigInt BOTAN_PUBLIC_API(2,11)
-   generate_srp6_verifier(const std::string& identifier,
-                          const std::string& password,
-                          const std::vector<uint8_t>& salt,
-                          const DL_Group& group,
-                          const std::string& hash_id);
+BigInt BOTAN_PUBLIC_API(2, 11) srp6_generate_verifier(std::string_view identifier,
+                                                      std::string_view password,
+                                                      const std::vector<uint8_t>& salt,
+                                                      const DL_Group& group,
+                                                      std::string_view hash_id);
 
 /**
 * Return the group id for this SRP param set, or else thrown an
@@ -99,13 +94,12 @@ BigInt BOTAN_PUBLIC_API(2,11)
 * @param g the group generator
 * @return group identifier
 */
-std::string BOTAN_PUBLIC_API(2,0) srp6_group_identifier(const BigInt& N, const BigInt& g);
+std::string BOTAN_PUBLIC_API(2, 0) srp6_group_identifier(const BigInt& N, const BigInt& g);
 
 /**
 * Represents a SRP-6a server session
 */
-class BOTAN_PUBLIC_API(2,0) SRP6_Server_Session final
-   {
+class BOTAN_PUBLIC_API(2, 0) SRP6_Server_Session final {
    public:
       /**
       * Server side step 1
@@ -115,10 +109,7 @@ class BOTAN_PUBLIC_API(2,0) SRP6_Server_Session final
       * @param rng a random number generator
       * @return SRP-6 B value
       */
-      BigInt step1(const BigInt& v,
-                   const std::string& group_id,
-                   const std::string& hash_id,
-                   RandomNumberGenerator& rng);
+      BigInt step1(const BigInt& v, std::string_view group_id, std::string_view hash_id, RandomNumberGenerator& rng);
 
       /**
       * Server side step 1
@@ -131,11 +122,8 @@ class BOTAN_PUBLIC_API(2,0) SRP6_Server_Session final
       * @param b_bits size of secret exponent in bits
       * @return SRP-6 B value
       */
-      BigInt step1(const BigInt& v,
-                   const DL_Group& group,
-                   const std::string& hash_id,
-                   const size_t b_bits,
-                   RandomNumberGenerator& rng);
+      BigInt step1(
+         const BigInt& v, const DL_Group& group, std::string_view hash_id, size_t b_bits, RandomNumberGenerator& rng);
 
       /**
       * Server side step 2
@@ -145,11 +133,11 @@ class BOTAN_PUBLIC_API(2,0) SRP6_Server_Session final
       SymmetricKey step2(const BigInt& A);
 
    private:
+      DL_Group m_group;
       std::string m_hash_id;
-      BigInt m_B, m_b, m_v, m_S, m_p;
-      size_t m_p_bytes = 0;
-   };
+      BigInt m_B, m_b, m_v, m_S;
+};
 
-}
+}  // namespace Botan
 
 #endif

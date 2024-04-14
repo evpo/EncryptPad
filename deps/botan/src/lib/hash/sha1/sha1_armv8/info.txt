@@ -2,11 +2,11 @@
 SHA1_ARMV8 -> 20170117
 </defines>
 
+<module_info>
+name -> "SHA-1 ARMv8"
+brief -> "SHA-1 using ARMv8 crypto instructions"
+</module_info>
+
 <isa>
 armv8crypto
 </isa>
-
-<cc>
-gcc:4.9
-clang:3.8
-</cc>

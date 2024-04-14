@@ -62,9 +62,10 @@ operations such as authenticated encryption.
 
      Zero out the key. The key must be reset before the cipher object can be used.
 
-  .. cpp:function:: BlockCipher* clone() const
+  .. cpp:function:: std::unique_ptr<BlockCipher> new_object() const
 
      Return a newly allocated BlockCipher object of the same type as this one.
+     The new object is unkeyed.
 
   .. cpp:function:: size_t block_size() const
 
@@ -124,35 +125,16 @@ operations such as authenticated encryption.
 
      Assumes ``block`` is of a multiple of the block size.
 
+.. _block_cipher_example:
+
 Code Example
 -----------------
 
 For sheer demonstrative purposes, the following code encrypts a provided single
 block of plaintext with AES-256 using two different keys.
 
-.. code-block:: cpp
-
-    #include <botan/block_cipher.h>
-    #include <botan/hex.h>
-    #include <iostream>
-    int main ()
-       {
-       std::vector<uint8_t> key = Botan::hex_decode("000102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E1F");
-       std::vector<uint8_t> block = Botan::hex_decode("00112233445566778899AABBCCDDEEFF");
-       std::unique_ptr<Botan::BlockCipher> cipher(Botan::BlockCipher::create("AES-256"));
-       cipher->set_key(key);
-       cipher->encrypt(block);
-       std::cout << std::endl <<cipher->name() << "single block encrypt: " << Botan::hex_encode(block);
-
-       //clear cipher for 2nd encryption with other key
-       cipher->clear();
-       key = Botan::hex_decode("1337133713371337133713371337133713371337133713371337133713371337");
-       cipher->set_key(key);
-       cipher->encrypt(block);
-
-       std::cout << std::endl << cipher->name() << "single block encrypt: " << Botan::hex_encode(block);
-       return 0;
-       }
+.. literalinclude:: /../src/examples/aes.cpp
+   :language: cpp
 
 Available Ciphers
 ---------------------
@@ -180,12 +162,24 @@ known side channels.
 
 Available if ``BOTAN_HAS_AES`` is defined.
 
+Algorithm specification names:
+
+- ``AES-128``
+- ``AES-192``
+- ``AES-256``
+
 ARIA
 ~~~~~~
 
 South Korean cipher used in industry there. No reason to use it otherwise.
 
 Available if ``BOTAN_HAS_ARIA`` is defined.
+
+Algorithm specification names:
+
+- ``ARIA-128``
+- ``ARIA-192``
+- ``ARIA-256``
 
 Blowfish
 ~~~~~~~~~
@@ -195,23 +189,7 @@ bcrypt) for password hashing.
 
 Available if ``BOTAN_HAS_BLOWFISH`` is defined.
 
-CAST-128
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-A 64-bit cipher, commonly used in OpenPGP.
-
-Available if ``BOTAN_HAS_CAST128`` is defined.
-
-CAST-256
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-A 128-bit cipher that was a contestant in the NIST AES competition.
-Almost never used in practice. Prefer AES or Serpent.
-
-Available if ``BOTAN_HAS_CAST256`` is defined.
-
-.. warning::
-   Support for CAST-256 is deprecated and will be removed in a future major release.
+Algorithm specification name: ``Blowfish``
 
 Camellia
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -223,6 +201,12 @@ Rarely used outside of Japan.
 
 Available if ``BOTAN_HAS_CAMELLIA`` is defined.
 
+Algorithm specification names:
+
+- ``Camellia-128``
+- ``Camellia-192``
+- ``Camellia-256``
+
 Cascade
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -232,18 +216,34 @@ good cipher (such as Serpent, SHACAL2, or AES-256) is more than sufficient.
 
 Available if ``BOTAN_HAS_CASCADE`` is defined.
 
-DES, 3DES, DESX
+Algorithm specification name:
+``Cascade(<BlockCipher 1>,<BlockCipher 2>)``, e.g. ``Cascade(Serpent,AES-256)``
+
+CAST-128
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A 64-bit cipher, commonly used in OpenPGP.
+
+Available if ``BOTAN_HAS_CAST128`` is defined.
+
+Algorithm specification name:
+
+- ``CAST-128`` (reported name) / ``CAST5``
+
+DES and 3DES
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Originally designed by IBM and NSA in the 1970s. Today, DES's 56-bit key renders
-it insecure to any well-resourced attacker. DESX and 3DES extend the key length,
-and are still thought to be secure, modulo the limitation of a 64-bit block.
+it insecure to any well-resourced attacker. 3DES extends the key length,
+and is still thought to be secure, modulo the limitation of a 64-bit block.
 All are somewhat common in some industries such as finance. Avoid in new code.
 
-.. warning::
-   Support for DESX is deprecated and it will be removed in a future major release.
-
 Available if ``BOTAN_HAS_DES`` is defined.
+
+Algorithm specification names:
+
+- ``DES``
+- ``TripleDES`` (reported name) / ``3DES`` / ``DES-EDE``
 
 GOST-28147-89
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -256,6 +256,11 @@ Available if ``BOTAN_HAS_GOST_28147_89`` is defined.
 .. warning::
    Support for this cipher is deprecated and will be removed in a future major release.
 
+Algorithm specification names:
+
+- ``GOST-28147-89`` / ``GOST-28147-89(R3411_94_TestParam)`` (reported name)
+- ``GOST-28147-89(R3411_CryptoPro)``
+
 IDEA
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -264,16 +269,25 @@ due to its use in PGP. Avoid in new designs.
 
 Available if ``BOTAN_HAS_IDEA`` is defined.
 
-Kasumi
+Algorithm specification name: ``IDEA``
+
+Kuznyechik
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-A 64-bit cipher used in 3GPP mobile phone protocols. There is no reason to use
-it outside of this context.
+.. versionadded:: 3.2
 
-Available if ``BOTAN_HAS_KASUMI`` is defined.
+Newer Russian national cipher, also known as GOST R 34.12-2015 or "Grasshopper".
 
 .. warning::
-   Support for Kasumi is deprecated and will be removed in a future major release.
+
+   The sbox of this cipher is supposedly random, but was found to have a
+   mathematical structure which is exceedingly unlikely to have occured by
+   chance. This may indicate the existence of a backdoor or other issue. Avoid
+   using this cipher unless strictly required.
+
+Available if ``BOTAN_HAS_KUZNYECHIK`` is defined.
+
+Algorithm specification name: ``Kuznyechik``
 
 Lion
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -285,27 +299,24 @@ necessary.
 
 Available if ``BOTAN_HAS_LION`` is defined.
 
-MISTY1
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Algorithm specification name:
+``Lion(<HashFunction>,<StreamCipher>,<optional block size>)``
 
-A 64-bit Japanese cipher standardized by NESSIE and ISO. Seemingly secure, but
-quite slow and saw little adoption. No reason to use it in new code.
-
-Available if ``BOTAN_HAS_MISTY1`` is defined.
-
-.. warning::
-   Support for MISTY1 is deprecated and will be removed in a future major release.
+- Block size defaults to 1024.
+- Examples: ``Lion(SHA-1,RC4,64)``
 
 Noekeon
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 A fast 128-bit cipher by the designers of AES. Easily secured against side
-channels.
+channels. Quite obscure however.
 
 Available if ``BOTAN_HAS_NOEKEON`` is defined.
 
 .. warning::
-   Support for Noekeon is deprecated and will be removed in a future major release.
+   Noekeon support is deprecated and will be removed in a future major release.
+
+Algorithm specification name: ``Noekeon``
 
 SEED
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -313,6 +324,18 @@ SEED
 A older South Korean cipher, widely used in industry there. No reason to choose it otherwise.
 
 Available if ``BOTAN_HAS_SEED`` is defined.
+
+Algorithm specification name: ``SEED``
+
+Serpent
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+An AES contender. Widely considered the most conservative design. Fairly slow
+unless SIMD instructions are available.
+
+Available if ``BOTAN_HAS_SERPENT`` is defined.
+
+Algorithm specification name: ``Serpent``
 
 SHACAL2
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -323,6 +346,8 @@ Standardized by NESSIE but otherwise obscure.
 
 Available if ``BOTAN_HAS_SHACAL2`` is defined.
 
+Algorithm specification name: ``SHACAL2``
+
 SM4
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -332,13 +357,7 @@ requirements.
 
 Available if ``BOTAN_HAS_SM4`` is defined.
 
-Serpent
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-An AES contender. Widely considered the most conservative design. Fairly slow
-unless SIMD instructions are available.
-
-Available if ``BOTAN_HAS_SERPENT`` is defined.
+Algorithm specification name: ``SM4``
 
 Threefish-512
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -348,6 +367,8 @@ Very fast on 64-bit processors.
 
 Available if ``BOTAN_HAS_THREEFISH_512`` is defined.
 
+Algorithm specification name: ``Threefish-512``
+
 Twofish
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -356,9 +377,4 @@ setup and a "kitchen sink" design.
 
 Available if ``BOTAN_HAS_TWOFISH`` is defined.
 
-XTEA
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-A 64-bit cipher popular for its simple implementation. Avoid in new code.
-
-Available if ``BOTAN_HAS_XTEA`` is defined.
+Algorithm specification name: ``Twofish``

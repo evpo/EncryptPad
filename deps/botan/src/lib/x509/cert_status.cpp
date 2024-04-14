@@ -8,10 +8,8 @@
 
 namespace Botan {
 
-const char* to_string(Certificate_Status_Code code)
-   {
-   switch(code)
-      {
+const char* to_string(Certificate_Status_Code code) {
+   switch(code) {
       case Certificate_Status_Code::VERIFIED:
          return "Verified";
       case Certificate_Status_Code::OCSP_RESPONSE_GOOD:
@@ -29,6 +27,12 @@ const char* to_string(Certificate_Status_Code code)
          return "OCSP URL not available";
       case Certificate_Status_Code::OCSP_SERVER_NOT_AVAILABLE:
          return "OCSP server not available";
+      case Certificate_Status_Code::TRUSTED_CERT_NOT_YET_VALID:
+         return "Trusted certificate is not yet valid";
+      case Certificate_Status_Code::TRUSTED_CERT_HAS_EXPIRED:
+         return "Trusted certificate has expired";
+      case Certificate_Status_Code::OCSP_ISSUER_NOT_TRUSTED:
+         return "OCSP issuer is not trustworthy";
 
       case Certificate_Status_Code::NO_REVOCATION_DATA:
          return "No revocation data";
@@ -116,10 +120,10 @@ const char* to_string(Certificate_Status_Code code)
       case Certificate_Status_Code::SIGNATURE_ALGO_BAD_PARAMS:
          return "Certificate signature has invalid parameters";
 
-      // intentionally no default so we are warned if new enum values are added
-      }
-
-   return nullptr;
+         // intentionally no default so we are warned if new enum values are added
    }
 
+   return nullptr;
 }
+
+}  // namespace Botan

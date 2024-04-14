@@ -9,10 +9,12 @@
 #define BOTAN_OCSP_H_
 
 #include <botan/asn1_obj.h>
+#include <botan/bigint.h>
 #include <botan/pkix_types.h>
 #include <botan/x509cert.h>
-#include <botan/bigint.h>
+
 #include <chrono>
+#include <optional>
 
 namespace Botan {
 
@@ -20,20 +22,17 @@ class Certificate_Store;
 
 namespace OCSP {
 
-class BOTAN_PUBLIC_API(2,0) CertID final : public ASN1_Object
-   {
+class BOTAN_PUBLIC_API(2, 0) CertID final : public ASN1_Object {
    public:
       CertID() = default;
 
-      CertID(const X509_Certificate& issuer,
-             const BigInt& subject_serial);
+      CertID(const X509_Certificate& issuer, const BigInt& subject_serial);
 
-      bool is_id_for(const X509_Certificate& issuer,
-                     const X509_Certificate& subject) const;
+      bool is_id_for(const X509_Certificate& issuer, const X509_Certificate& subject) const;
 
-      void encode_into(class DER_Encoder& to) const override;
+      void encode_into(DER_Encoder& to) const override;
 
-      void decode_from(class BER_Decoder& from) override;
+      void decode_from(BER_Decoder& from) override;
 
       const std::vector<uint8_t>& issuer_key_hash() const { return m_issuer_key_hash; }
 
@@ -42,10 +41,9 @@ class BOTAN_PUBLIC_API(2,0) CertID final : public ASN1_Object
       std::vector<uint8_t> m_issuer_dn_hash;
       std::vector<uint8_t> m_issuer_key_hash;
       BigInt m_subject_serial;
-   };
+};
 
-class BOTAN_PUBLIC_API(2,0) SingleResponse final : public ASN1_Object
-   {
+class BOTAN_PUBLIC_API(2, 0) SingleResponse final : public ASN1_Object {
    public:
       const CertID& certid() const { return m_certid; }
 
@@ -55,32 +53,30 @@ class BOTAN_PUBLIC_API(2,0) SingleResponse final : public ASN1_Object
 
       X509_Time next_update() const { return m_nextupdate; }
 
-      void encode_into(class DER_Encoder& to) const override;
+      void encode_into(DER_Encoder& to) const override;
 
-      void decode_from(class BER_Decoder& from) override;
+      void decode_from(BER_Decoder& from) override;
+
    private:
       CertID m_certid;
-      size_t m_cert_status = 2; // unknown
+      size_t m_cert_status = 2;  // unknown
       X509_Time m_thisupdate;
       X509_Time m_nextupdate;
-   };
+};
 
 /**
 * An OCSP request.
 */
-class BOTAN_PUBLIC_API(2,0) Request final
-   {
+class BOTAN_PUBLIC_API(2, 0) Request final {
    public:
       /**
       * Create an OCSP request.
       * @param issuer_cert issuer certificate
       * @param subject_cert subject certificate
       */
-      Request(const X509_Certificate& issuer_cert,
-              const X509_Certificate& subject_cert);
+      Request(const X509_Certificate& issuer_cert, const X509_Certificate& subject_cert);
 
-      Request(const X509_Certificate& issuer_cert,
-              const BigInt& subject_serial);
+      Request(const X509_Certificate& issuer_cert, const BigInt& subject_serial);
 
       /**
       * @return BER-encoded OCSP request
@@ -102,12 +98,12 @@ class BOTAN_PUBLIC_API(2,0) Request final
       */
       const X509_Certificate& subject() const { throw Not_Implemented("Method have been deprecated"); }
 
-      const std::vector<uint8_t>& issuer_key_hash() const
-         { return m_certid.issuer_key_hash(); }
+      const std::vector<uint8_t>& issuer_key_hash() const { return m_certid.issuer_key_hash(); }
+
    private:
       X509_Certificate m_issuer;
       CertID m_certid;
-   };
+};
 
 /**
 * OCSP response status.
@@ -128,14 +124,8 @@ enum class Response_Status_Code {
 *
 * Note this class is only usable as an OCSP client
 */
-class BOTAN_PUBLIC_API(2,0) Response final
-   {
+class BOTAN_PUBLIC_API(2, 0) Response final {
    public:
-      /**
-      * Creates an empty OCSP response.
-      */
-      Response() = default;
-
       /**
       * Create a fake OCSP response from a given status code.
       * @param status the status code the check functions will return
@@ -146,36 +136,40 @@ class BOTAN_PUBLIC_API(2,0) Response final
       * Parses an OCSP response.
       * @param response_bits response bits received
       */
-      Response(const std::vector<uint8_t>& response_bits) :
-         Response(response_bits.data(), response_bits.size())
-         {}
+      Response(const std::vector<uint8_t>& response_bits) : Response(response_bits.data(), response_bits.size()) {}
 
       /**
       * Parses an OCSP response.
       * @param response_bits response bits received
       * @param response_bits_len length of response in bytes
       */
-      Response(const uint8_t response_bits[],
-               size_t response_bits_len);
+      Response(const uint8_t response_bits[], size_t response_bits_len);
 
       /**
-      * Check signature and return status
-      * The optional cert_path is the (already validated!) certificate path of
-      * the end entity which is being inquired about
-      * @param trust_roots list of certstores containing trusted roots
-      * @param cert_path optionally, the (already verified!) certificate path for the certificate
-      * this is an OCSP response for. This is necessary to find the correct intermediate CA in
-      * some cases.
+      * Find the certificate that signed this OCSP response from all possible
+      * candidates and taking the attached certificates into account.
+      *
+      * @param issuer_certificate is the issuer of the certificate in question
+      * @param trusted_ocsp_responders optionally, a certificate store containing
+      *        additionally trusted responder certificates
+      *
+      * @return the certificate that signed this response or std::nullopt if not found
       */
-      Certificate_Status_Code check_signature(const std::vector<Certificate_Store*>& trust_roots,
-                                              const std::vector<std::shared_ptr<const X509_Certificate>>& cert_path = {}) const;
+      std::optional<X509_Certificate> find_signing_certificate(
+         const X509_Certificate& issuer_certificate, const Certificate_Store* trusted_ocsp_responders = nullptr) const;
 
       /**
-      * Verify that issuer's key signed this response
-      * @param issuer certificate of issuer
-      * @return if signature valid OCSP_SIGNATURE_OK else an error code
+      * Check signature of the OCSP response.
+      *
+      * Note: It is the responsibility of the caller to verify that signing
+      *       certificate is trustworthy and authorized to do so.
+      *
+      * @param signing_certificate the certificate that signed this response
+      *                            (@sa Response::find_signing_certificate).
+      *
+      * @return status code indicating the validity of the signature
       */
-      Certificate_Status_Code verify_signature(const X509_Certificate& issuer) const;
+      Certificate_Status_Code verify_signature(const X509_Certificate& signing_certificate) const;
 
       /**
       * @return the status of the response
@@ -215,18 +209,27 @@ class BOTAN_PUBLIC_API(2,0) Response final
        *         OCSP_BAD_STATUS,
        *         OCSP_CERT_NOT_LISTED
        */
-      Certificate_Status_Code status_for(const X509_Certificate& issuer,
-                                         const X509_Certificate& subject,
-                                         std::chrono::system_clock::time_point ref_time = std::chrono::system_clock::now(),
-                                         std::chrono::seconds max_age = std::chrono::seconds::zero()) const;
+      Certificate_Status_Code status_for(
+         const X509_Certificate& issuer,
+         const X509_Certificate& subject,
+         std::chrono::system_clock::time_point ref_time = std::chrono::system_clock::now(),
+         std::chrono::seconds max_age = std::chrono::seconds::zero()) const;
 
       /**
        * @return the certificate chain, if provided in response
        */
-      const std::vector<X509_Certificate> &certificates() const { return  m_certs; }
+      const std::vector<X509_Certificate>& certificates() const { return m_certs; }
+
+      /**
+      * @return the dummy response if this is a 'fake' OCSP response otherwise std::nullopt
+      */
+      std::optional<Certificate_Status_Code> dummy_status() const { return m_dummy_response_status; }
 
    private:
-      Response_Status_Code m_status;
+      bool is_issued_by(const X509_Certificate& candidate) const;
+
+   private:
+      Response_Status_Code m_status = Response_Status_Code::Internal_Error;
       std::vector<uint8_t> m_response_bits;
       X509_Time m_produced_at;
       X509_DN m_signer_name;
@@ -238,45 +241,41 @@ class BOTAN_PUBLIC_API(2,0) Response final
 
       std::vector<SingleResponse> m_responses;
 
-      Certificate_Status_Code m_dummy_response_status;
-   };
+      std::optional<Certificate_Status_Code> m_dummy_response_status;
+};
 
 #if defined(BOTAN_HAS_HTTP_UTIL)
 
 /**
-* Makes an online OCSP request via HTTP and returns the OCSP response.
+* Makes an online OCSP request via HTTP and returns the (unverified) OCSP response.
 * @param issuer issuer certificate
 * @param subject_serial the subject's serial number
 * @param ocsp_responder the OCSP responder to query
-* @param trusted_roots trusted roots for the OCSP response
 * @param timeout a timeout on the HTTP request
 * @return OCSP response
 */
-BOTAN_PUBLIC_API(2,1)
+BOTAN_PUBLIC_API(3, 0)
 Response online_check(const X509_Certificate& issuer,
                       const BigInt& subject_serial,
-                      const std::string& ocsp_responder,
-                      Certificate_Store* trusted_roots,
+                      std::string_view ocsp_responder,
                       std::chrono::milliseconds timeout = std::chrono::milliseconds(3000));
 
 /**
-* Makes an online OCSP request via HTTP and returns the OCSP response.
+* Makes an online OCSP request via HTTP and returns the (unverified) OCSP response.
 * @param issuer issuer certificate
 * @param subject subject certificate
-* @param trusted_roots trusted roots for the OCSP response
 * @param timeout a timeout on the HTTP request
 * @return OCSP response
 */
-BOTAN_PUBLIC_API(2,0)
+BOTAN_PUBLIC_API(3, 0)
 Response online_check(const X509_Certificate& issuer,
                       const X509_Certificate& subject,
-                      Certificate_Store* trusted_roots,
                       std::chrono::milliseconds timeout = std::chrono::milliseconds(3000));
 
 #endif
 
-}
+}  // namespace OCSP
 
-}
+}  // namespace Botan
 
 #endif

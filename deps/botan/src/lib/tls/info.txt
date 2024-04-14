@@ -1,37 +1,45 @@
 <defines>
-TLS -> 20191210
+TLS -> 20201128
 </defines>
+
+<module_info>
+name -> "Transport Layer Security"
+brief -> "Common functionality for TLS"
+type -> "Internal"
+</module_info>
 
 <header:public>
 credentials_manager.h
+tls.h
 tls_alert.h
 tls_algos.h
-tls_blocking.h
 tls_callbacks.h
 tls_channel.h
 tls_ciphersuite.h
 tls_client.h
 tls_exceptn.h
 tls_extensions.h
+tls_external_psk.h
 tls_handshake_msg.h
 tls_magic.h
 tls_messages.h
-tls_server_info.h
 tls_policy.h
 tls_server.h
+tls_server_info.h
 tls_session.h
 tls_session_manager.h
+tls_session_manager_noop.h
+tls_session_manager_memory.h
+tls_session_manager_stateless.h
+tls_session_manager_hybrid.h
+tls_signature_scheme.h
 tls_version.h
 </header:public>
 
 <header:internal>
-tls_handshake_hash.h
-tls_handshake_io.h
-tls_handshake_state.h
+tls_channel_impl.h
+tls_handshake_transitions.h
 tls_reader.h
-tls_record.h
-tls_seq_numbers.h
-tls_session_key.h
 </header:internal>
 
 <requires>
@@ -45,7 +53,6 @@ eme_pkcs1
 emsa_pkcs1
 gcm
 hmac
-prf_tls
 rng
 rsa
 sha2_32

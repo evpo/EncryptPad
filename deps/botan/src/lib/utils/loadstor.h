@@ -2,6 +2,7 @@
 * Load/Store Operators
 * (C) 1999-2007,2015,2017 Jack Lloyd
 *     2007 Yves Jerschow
+*     2023-2024 Fabian Albert, René Meusel - Rohde & Schwarz Cybersecurity
 *
 * Botan is released under the Simplified BSD License (see license.txt)
 */
@@ -9,26 +10,48 @@
 #ifndef BOTAN_LOAD_STORE_H_
 #define BOTAN_LOAD_STORE_H_
 
-#include <botan/types.h>
-#include <botan/bswap.h>
+#include <botan/concepts.h>
 #include <botan/mem_ops.h>
+#include <botan/types.h>
+#include <botan/internal/bswap.h>
 #include <vector>
 
-BOTAN_FUTURE_INTERNAL_HEADER(loadstor.h)
-
-#if defined(BOTAN_TARGET_CPU_IS_BIG_ENDIAN)
-   #define BOTAN_ENDIAN_N2L(x) reverse_bytes(x)
-   #define BOTAN_ENDIAN_L2N(x) reverse_bytes(x)
-   #define BOTAN_ENDIAN_N2B(x) (x)
-   #define BOTAN_ENDIAN_B2N(x) (x)
-
-#elif defined(BOTAN_TARGET_CPU_IS_LITTLE_ENDIAN)
-   #define BOTAN_ENDIAN_N2L(x) (x)
-   #define BOTAN_ENDIAN_L2N(x) (x)
-   #define BOTAN_ENDIAN_N2B(x) reverse_bytes(x)
-   #define BOTAN_ENDIAN_B2N(x) reverse_bytes(x)
-
-#endif
+/**
+ * @file loadstor.h
+ *
+ * @brief This header contains various helper functions to load and store
+ *        unsigned integers in big- or little-endian byte order.
+ *
+ * Storing integer values in various ways (same for BE and LE):
+ * @code {.cpp}
+ *
+ *   std::array<uint8_t, 8> bytes = store_le(some_uint64);
+ *   std::array<uint8_t, 12> bytes = store_le(some_uint32_1, some_uint32_2, some_uint32_3, ...);
+ *   auto bytes = store_le<std::vector<uint8_t>>(some_uint64);
+ *   auto bytes = store_le<MyContainerStrongType>(some_uint64);
+ *   auto bytes = store_le<std::vector<uint8_t>>(vector_of_ints);
+ *   auto bytes = store_le<secure_vector<uint8_t>>(some_uint32_1, some_uint32_2, some_uint32_3, ...);
+ *   store_le(bytes, some_uint64);
+ *   store_le(concatenated_bytes, some_uint64_1, some_uint64_2, some_uint64_3, ...);
+ *   store_le(concatenated_bytes, vector_of_ints);
+ *   copy_out_le(short_concated_bytes, vector_of_ints); // stores as many bytes as required in the output buffer
+ *
+ * @endcode
+ *
+ * Loading integer values in various ways (same for BE and LE):
+ * @code {.cpp}
+ *
+ *   uint64_t some_uint64 = load_le(bytes_8);
+ *   auto some_int32s = load_le<std::vector<uint32_t>>(concatenated_bytes);
+ *   auto some_int32s = load_le<std::vector<MyIntStrongType>>(concatenated_bytes);
+ *   auto some_int32s = load_le(some_strong_typed_bytes);
+ *   auto strong_int  = load_le<MyStrongTypedInteger>(concatenated_bytes);
+ *   load_le(concatenated_bytes, out_some_uint64);
+ *   load_le(concatenated_bytes, out_some_uint64_1, out_some_uint64_2, out_some_uint64_3, ...);
+ *   load_le(out_vector_of_ints, concatenated_bytes);
+ *
+ * @endcode
+ */
 
 namespace Botan {
 
@@ -38,12 +61,23 @@ namespace Botan {
 * @param input the value to extract from
 * @return byte byte_num of input
 */
-template<typename T> inline constexpr uint8_t get_byte(size_t byte_num, T input)
-   {
-   return static_cast<uint8_t>(
-      input >> (((~byte_num)&(sizeof(T)-1)) << 3)
-      );
-   }
+template <typename T>
+inline constexpr uint8_t get_byte_var(size_t byte_num, T input) {
+   return static_cast<uint8_t>(input >> (((~byte_num) & (sizeof(T) - 1)) << 3));
+}
+
+/**
+* Byte extraction
+* @param input the value to extract from
+* @return byte byte number B of input
+*/
+template <size_t B, typename T>
+inline constexpr uint8_t get_byte(T input)
+   requires(B < sizeof(T))
+{
+   const size_t shift = ((~B) & (sizeof(T) - 1)) << 3;
+   return static_cast<uint8_t>((input >> shift) & 0xFF);
+}
 
 /**
 * Make a uint16_t from two bytes
@@ -51,10 +85,9 @@ template<typename T> inline constexpr uint8_t get_byte(size_t byte_num, T input)
 * @param i1 the second byte
 * @return i0 || i1
 */
-inline constexpr uint16_t make_uint16(uint8_t i0, uint8_t i1)
-   {
+inline constexpr uint16_t make_uint16(uint8_t i0, uint8_t i1) {
    return static_cast<uint16_t>((static_cast<uint16_t>(i0) << 8) | i1);
-   }
+}
 
 /**
 * Make a uint32_t from four bytes
@@ -64,13 +97,10 @@ inline constexpr uint16_t make_uint16(uint8_t i0, uint8_t i1)
 * @param i3 the fourth byte
 * @return i0 || i1 || i2 || i3
 */
-inline constexpr uint32_t make_uint32(uint8_t i0, uint8_t i1, uint8_t i2, uint8_t i3)
-   {
-   return ((static_cast<uint32_t>(i0) << 24) |
-           (static_cast<uint32_t>(i1) << 16) |
-           (static_cast<uint32_t>(i2) <<  8) |
+inline constexpr uint32_t make_uint32(uint8_t i0, uint8_t i1, uint8_t i2, uint8_t i3) {
+   return ((static_cast<uint32_t>(i0) << 24) | (static_cast<uint32_t>(i1) << 16) | (static_cast<uint32_t>(i2) << 8) |
            (static_cast<uint32_t>(i3)));
-   }
+}
 
 /**
 * Make a uint64_t from eight bytes
@@ -84,618 +114,655 @@ inline constexpr uint32_t make_uint32(uint8_t i0, uint8_t i1, uint8_t i2, uint8_
 * @param i7 the eighth byte
 * @return i0 || i1 || i2 || i3 || i4 || i5 || i6 || i7
 */
-inline constexpr uint64_t make_uint64(uint8_t i0, uint8_t i1, uint8_t i2, uint8_t i3,
-                                      uint8_t i4, uint8_t i5, uint8_t i6, uint8_t i7)
-    {
-   return ((static_cast<uint64_t>(i0) << 56) |
-           (static_cast<uint64_t>(i1) << 48) |
-           (static_cast<uint64_t>(i2) << 40) |
-           (static_cast<uint64_t>(i3) << 32) |
-           (static_cast<uint64_t>(i4) << 24) |
-           (static_cast<uint64_t>(i5) << 16) |
-           (static_cast<uint64_t>(i6) <<  8) |
-           (static_cast<uint64_t>(i7)));
-    }
-
-/**
-* Load a big-endian word
-* @param in a pointer to some bytes
-* @param off an offset into the array
-* @return off'th T of in, as a big-endian value
-*/
-template<typename T>
-inline T load_be(const uint8_t in[], size_t off)
-   {
-   in += off * sizeof(T);
-   T out = 0;
-   for(size_t i = 0; i != sizeof(T); ++i)
-      out = static_cast<T>((out << 8) | in[i]);
-   return out;
-   }
-
-/**
-* Load a little-endian word
-* @param in a pointer to some bytes
-* @param off an offset into the array
-* @return off'th T of in, as a litte-endian value
-*/
-template<typename T>
-inline T load_le(const uint8_t in[], size_t off)
-   {
-   in += off * sizeof(T);
-   T out = 0;
-   for(size_t i = 0; i != sizeof(T); ++i)
-      out = (out << 8) | in[sizeof(T)-1-i];
-   return out;
-   }
-
-/**
-* Load a big-endian uint16_t
-* @param in a pointer to some bytes
-* @param off an offset into the array
-* @return off'th uint16_t of in, as a big-endian value
-*/
-template<>
-inline uint16_t load_be<uint16_t>(const uint8_t in[], size_t off)
-   {
-   in += off * sizeof(uint16_t);
-
-#if defined(BOTAN_ENDIAN_N2B)
-   uint16_t x;
-   typecast_copy(x, in);
-   return BOTAN_ENDIAN_N2B(x);
-#else
-   return make_uint16(in[0], in[1]);
-#endif
-   }
-
-/**
-* Load a little-endian uint16_t
-* @param in a pointer to some bytes
-* @param off an offset into the array
-* @return off'th uint16_t of in, as a little-endian value
-*/
-template<>
-inline uint16_t load_le<uint16_t>(const uint8_t in[], size_t off)
-   {
-   in += off * sizeof(uint16_t);
-
-#if defined(BOTAN_ENDIAN_N2L)
-   uint16_t x;
-   typecast_copy(x, in);
-   return BOTAN_ENDIAN_N2L(x);
-#else
-   return make_uint16(in[1], in[0]);
-#endif
-   }
-
-/**
-* Load a big-endian uint32_t
-* @param in a pointer to some bytes
-* @param off an offset into the array
-* @return off'th uint32_t of in, as a big-endian value
-*/
-template<>
-inline uint32_t load_be<uint32_t>(const uint8_t in[], size_t off)
-   {
-   in += off * sizeof(uint32_t);
-#if defined(BOTAN_ENDIAN_N2B)
-   uint32_t x;
-   typecast_copy(x, in);
-   return BOTAN_ENDIAN_N2B(x);
-#else
-   return make_uint32(in[0], in[1], in[2], in[3]);
-#endif
-   }
-
-/**
-* Load a little-endian uint32_t
-* @param in a pointer to some bytes
-* @param off an offset into the array
-* @return off'th uint32_t of in, as a little-endian value
-*/
-template<>
-inline uint32_t load_le<uint32_t>(const uint8_t in[], size_t off)
-   {
-   in += off * sizeof(uint32_t);
-#if defined(BOTAN_ENDIAN_N2L)
-   uint32_t x;
-   typecast_copy(x, in);
-   return BOTAN_ENDIAN_N2L(x);
-#else
-   return make_uint32(in[3], in[2], in[1], in[0]);
-#endif
-   }
-
-/**
-* Load a big-endian uint64_t
-* @param in a pointer to some bytes
-* @param off an offset into the array
-* @return off'th uint64_t of in, as a big-endian value
-*/
-template<>
-inline uint64_t load_be<uint64_t>(const uint8_t in[], size_t off)
-   {
-   in += off * sizeof(uint64_t);
-#if defined(BOTAN_ENDIAN_N2B)
-   uint64_t x;
-   typecast_copy(x, in);
-   return BOTAN_ENDIAN_N2B(x);
-#else
-   return make_uint64(in[0], in[1], in[2], in[3],
-                      in[4], in[5], in[6], in[7]);
-#endif
-   }
-
-/**
-* Load a little-endian uint64_t
-* @param in a pointer to some bytes
-* @param off an offset into the array
-* @return off'th uint64_t of in, as a little-endian value
-*/
-template<>
-inline uint64_t load_le<uint64_t>(const uint8_t in[], size_t off)
-   {
-   in += off * sizeof(uint64_t);
-#if defined(BOTAN_ENDIAN_N2L)
-   uint64_t x;
-   typecast_copy(x, in);
-   return BOTAN_ENDIAN_N2L(x);
-#else
-   return make_uint64(in[7], in[6], in[5], in[4],
-                      in[3], in[2], in[1], in[0]);
-#endif
-   }
-
-/**
-* Load two little-endian words
-* @param in a pointer to some bytes
-* @param x0 where the first word will be written
-* @param x1 where the second word will be written
-*/
-template<typename T>
-inline void load_le(const uint8_t in[], T& x0, T& x1)
-   {
-   x0 = load_le<T>(in, 0);
-   x1 = load_le<T>(in, 1);
-   }
-
-/**
-* Load four little-endian words
-* @param in a pointer to some bytes
-* @param x0 where the first word will be written
-* @param x1 where the second word will be written
-* @param x2 where the third word will be written
-* @param x3 where the fourth word will be written
-*/
-template<typename T>
-inline void load_le(const uint8_t in[],
-                    T& x0, T& x1, T& x2, T& x3)
-   {
-   x0 = load_le<T>(in, 0);
-   x1 = load_le<T>(in, 1);
-   x2 = load_le<T>(in, 2);
-   x3 = load_le<T>(in, 3);
-   }
-
-/**
-* Load eight little-endian words
-* @param in a pointer to some bytes
-* @param x0 where the first word will be written
-* @param x1 where the second word will be written
-* @param x2 where the third word will be written
-* @param x3 where the fourth word will be written
-* @param x4 where the fifth word will be written
-* @param x5 where the sixth word will be written
-* @param x6 where the seventh word will be written
-* @param x7 where the eighth word will be written
-*/
-template<typename T>
-inline void load_le(const uint8_t in[],
-                    T& x0, T& x1, T& x2, T& x3,
-                    T& x4, T& x5, T& x6, T& x7)
-   {
-   x0 = load_le<T>(in, 0);
-   x1 = load_le<T>(in, 1);
-   x2 = load_le<T>(in, 2);
-   x3 = load_le<T>(in, 3);
-   x4 = load_le<T>(in, 4);
-   x5 = load_le<T>(in, 5);
-   x6 = load_le<T>(in, 6);
-   x7 = load_le<T>(in, 7);
-   }
-
-/**
-* Load a variable number of little-endian words
-* @param out the output array of words
-* @param in the input array of bytes
-* @param count how many words are in in
-*/
-template<typename T>
-inline void load_le(T out[],
-                    const uint8_t in[],
-                    size_t count)
-   {
-   if(count > 0)
-      {
-#if defined(BOTAN_TARGET_CPU_IS_LITTLE_ENDIAN)
-      typecast_copy(out, in, count);
-
-#elif defined(BOTAN_TARGET_CPU_IS_BIG_ENDIAN)
-      typecast_copy(out, in, count);
-
-      const size_t blocks = count - (count % 4);
-      const size_t left = count - blocks;
-
-      for(size_t i = 0; i != blocks; i += 4)
-         bswap_4(out + i);
-
-      for(size_t i = 0; i != left; ++i)
-         out[blocks+i] = reverse_bytes(out[blocks+i]);
-#else
-      for(size_t i = 0; i != count; ++i)
-         out[i] = load_le<T>(in, i);
-#endif
-      }
-   }
-
-/**
-* Load two big-endian words
-* @param in a pointer to some bytes
-* @param x0 where the first word will be written
-* @param x1 where the second word will be written
-*/
-template<typename T>
-inline void load_be(const uint8_t in[], T& x0, T& x1)
-   {
-   x0 = load_be<T>(in, 0);
-   x1 = load_be<T>(in, 1);
-   }
-
-/**
-* Load four big-endian words
-* @param in a pointer to some bytes
-* @param x0 where the first word will be written
-* @param x1 where the second word will be written
-* @param x2 where the third word will be written
-* @param x3 where the fourth word will be written
-*/
-template<typename T>
-inline void load_be(const uint8_t in[],
-                    T& x0, T& x1, T& x2, T& x3)
-   {
-   x0 = load_be<T>(in, 0);
-   x1 = load_be<T>(in, 1);
-   x2 = load_be<T>(in, 2);
-   x3 = load_be<T>(in, 3);
-   }
-
-/**
-* Load eight big-endian words
-* @param in a pointer to some bytes
-* @param x0 where the first word will be written
-* @param x1 where the second word will be written
-* @param x2 where the third word will be written
-* @param x3 where the fourth word will be written
-* @param x4 where the fifth word will be written
-* @param x5 where the sixth word will be written
-* @param x6 where the seventh word will be written
-* @param x7 where the eighth word will be written
-*/
-template<typename T>
-inline void load_be(const uint8_t in[],
-                    T& x0, T& x1, T& x2, T& x3,
-                    T& x4, T& x5, T& x6, T& x7)
-   {
-   x0 = load_be<T>(in, 0);
-   x1 = load_be<T>(in, 1);
-   x2 = load_be<T>(in, 2);
-   x3 = load_be<T>(in, 3);
-   x4 = load_be<T>(in, 4);
-   x5 = load_be<T>(in, 5);
-   x6 = load_be<T>(in, 6);
-   x7 = load_be<T>(in, 7);
-   }
-
-/**
-* Load a variable number of big-endian words
-* @param out the output array of words
-* @param in the input array of bytes
-* @param count how many words are in in
-*/
-template<typename T>
-inline void load_be(T out[],
-                    const uint8_t in[],
-                    size_t count)
-   {
-   if(count > 0)
-      {
-#if defined(BOTAN_TARGET_CPU_IS_BIG_ENDIAN)
-      typecast_copy(out, in, count);
-
-#elif defined(BOTAN_TARGET_CPU_IS_LITTLE_ENDIAN)
-      typecast_copy(out, in, count);
-      const size_t blocks = count - (count % 4);
-      const size_t left = count - blocks;
-
-      for(size_t i = 0; i != blocks; i += 4)
-         bswap_4(out + i);
-
-      for(size_t i = 0; i != left; ++i)
-         out[blocks+i] = reverse_bytes(out[blocks+i]);
-#else
-      for(size_t i = 0; i != count; ++i)
-         out[i] = load_be<T>(in, i);
-#endif
-      }
-   }
-
-/**
-* Store a big-endian uint16_t
-* @param in the input uint16_t
-* @param out the byte array to write to
-*/
-inline void store_be(uint16_t in, uint8_t out[2])
-   {
-#if defined(BOTAN_ENDIAN_N2B)
-   uint16_t o = BOTAN_ENDIAN_N2B(in);
-   typecast_copy(out, o);
-#else
-   out[0] = get_byte(0, in);
-   out[1] = get_byte(1, in);
-#endif
-   }
-
-/**
-* Store a little-endian uint16_t
-* @param in the input uint16_t
-* @param out the byte array to write to
-*/
-inline void store_le(uint16_t in, uint8_t out[2])
-   {
-#if defined(BOTAN_ENDIAN_N2L)
-   uint16_t o = BOTAN_ENDIAN_N2L(in);
-   typecast_copy(out, o);
-#else
-   out[0] = get_byte(1, in);
-   out[1] = get_byte(0, in);
-#endif
-   }
-
-/**
-* Store a big-endian uint32_t
-* @param in the input uint32_t
-* @param out the byte array to write to
-*/
-inline void store_be(uint32_t in, uint8_t out[4])
-   {
-#if defined(BOTAN_ENDIAN_B2N)
-   uint32_t o = BOTAN_ENDIAN_B2N(in);
-   typecast_copy(out, o);
-#else
-   out[0] = get_byte(0, in);
-   out[1] = get_byte(1, in);
-   out[2] = get_byte(2, in);
-   out[3] = get_byte(3, in);
-#endif
-   }
-
-/**
-* Store a little-endian uint32_t
-* @param in the input uint32_t
-* @param out the byte array to write to
-*/
-inline void store_le(uint32_t in, uint8_t out[4])
-   {
-#if defined(BOTAN_ENDIAN_L2N)
-   uint32_t o = BOTAN_ENDIAN_L2N(in);
-   typecast_copy(out, o);
-#else
-   out[0] = get_byte(3, in);
-   out[1] = get_byte(2, in);
-   out[2] = get_byte(1, in);
-   out[3] = get_byte(0, in);
-#endif
-   }
-
-/**
-* Store a big-endian uint64_t
-* @param in the input uint64_t
-* @param out the byte array to write to
-*/
-inline void store_be(uint64_t in, uint8_t out[8])
-   {
-#if defined(BOTAN_ENDIAN_B2N)
-   uint64_t o = BOTAN_ENDIAN_B2N(in);
-   typecast_copy(out, o);
-#else
-   out[0] = get_byte(0, in);
-   out[1] = get_byte(1, in);
-   out[2] = get_byte(2, in);
-   out[3] = get_byte(3, in);
-   out[4] = get_byte(4, in);
-   out[5] = get_byte(5, in);
-   out[6] = get_byte(6, in);
-   out[7] = get_byte(7, in);
-#endif
-   }
-
-/**
-* Store a little-endian uint64_t
-* @param in the input uint64_t
-* @param out the byte array to write to
-*/
-inline void store_le(uint64_t in, uint8_t out[8])
-   {
-#if defined(BOTAN_ENDIAN_L2N)
-   uint64_t o = BOTAN_ENDIAN_L2N(in);
-   typecast_copy(out, o);
-#else
-   out[0] = get_byte(7, in);
-   out[1] = get_byte(6, in);
-   out[2] = get_byte(5, in);
-   out[3] = get_byte(4, in);
-   out[4] = get_byte(3, in);
-   out[5] = get_byte(2, in);
-   out[6] = get_byte(1, in);
-   out[7] = get_byte(0, in);
-#endif
-   }
-
-/**
-* Store two little-endian words
-* @param out the output byte array
-* @param x0 the first word
-* @param x1 the second word
-*/
-template<typename T>
-inline void store_le(uint8_t out[], T x0, T x1)
-   {
-   store_le(x0, out + (0 * sizeof(T)));
-   store_le(x1, out + (1 * sizeof(T)));
-   }
-
-/**
-* Store two big-endian words
-* @param out the output byte array
-* @param x0 the first word
-* @param x1 the second word
-*/
-template<typename T>
-inline void store_be(uint8_t out[], T x0, T x1)
-   {
-   store_be(x0, out + (0 * sizeof(T)));
-   store_be(x1, out + (1 * sizeof(T)));
-   }
-
-/**
-* Store four little-endian words
-* @param out the output byte array
-* @param x0 the first word
-* @param x1 the second word
-* @param x2 the third word
-* @param x3 the fourth word
-*/
-template<typename T>
-inline void store_le(uint8_t out[], T x0, T x1, T x2, T x3)
-   {
-   store_le(x0, out + (0 * sizeof(T)));
-   store_le(x1, out + (1 * sizeof(T)));
-   store_le(x2, out + (2 * sizeof(T)));
-   store_le(x3, out + (3 * sizeof(T)));
-   }
-
-/**
-* Store four big-endian words
-* @param out the output byte array
-* @param x0 the first word
-* @param x1 the second word
-* @param x2 the third word
-* @param x3 the fourth word
-*/
-template<typename T>
-inline void store_be(uint8_t out[], T x0, T x1, T x2, T x3)
-   {
-   store_be(x0, out + (0 * sizeof(T)));
-   store_be(x1, out + (1 * sizeof(T)));
-   store_be(x2, out + (2 * sizeof(T)));
-   store_be(x3, out + (3 * sizeof(T)));
-   }
-
-/**
-* Store eight little-endian words
-* @param out the output byte array
-* @param x0 the first word
-* @param x1 the second word
-* @param x2 the third word
-* @param x3 the fourth word
-* @param x4 the fifth word
-* @param x5 the sixth word
-* @param x6 the seventh word
-* @param x7 the eighth word
-*/
-template<typename T>
-inline void store_le(uint8_t out[], T x0, T x1, T x2, T x3,
-                                 T x4, T x5, T x6, T x7)
-   {
-   store_le(x0, out + (0 * sizeof(T)));
-   store_le(x1, out + (1 * sizeof(T)));
-   store_le(x2, out + (2 * sizeof(T)));
-   store_le(x3, out + (3 * sizeof(T)));
-   store_le(x4, out + (4 * sizeof(T)));
-   store_le(x5, out + (5 * sizeof(T)));
-   store_le(x6, out + (6 * sizeof(T)));
-   store_le(x7, out + (7 * sizeof(T)));
-   }
-
-/**
-* Store eight big-endian words
-* @param out the output byte array
-* @param x0 the first word
-* @param x1 the second word
-* @param x2 the third word
-* @param x3 the fourth word
-* @param x4 the fifth word
-* @param x5 the sixth word
-* @param x6 the seventh word
-* @param x7 the eighth word
-*/
-template<typename T>
-inline void store_be(uint8_t out[], T x0, T x1, T x2, T x3,
-                                 T x4, T x5, T x6, T x7)
-   {
-   store_be(x0, out + (0 * sizeof(T)));
-   store_be(x1, out + (1 * sizeof(T)));
-   store_be(x2, out + (2 * sizeof(T)));
-   store_be(x3, out + (3 * sizeof(T)));
-   store_be(x4, out + (4 * sizeof(T)));
-   store_be(x5, out + (5 * sizeof(T)));
-   store_be(x6, out + (6 * sizeof(T)));
-   store_be(x7, out + (7 * sizeof(T)));
-   }
-
-template<typename T>
-void copy_out_be(uint8_t out[], size_t out_bytes, const T in[])
-   {
-   while(out_bytes >= sizeof(T))
-      {
-      store_be(in[0], out);
-      out += sizeof(T);
-      out_bytes -= sizeof(T);
-      in += 1;
-   }
-
-   for(size_t i = 0; i != out_bytes; ++i)
-      out[i] = get_byte(i%8, in[0]);
-   }
-
-template<typename T, typename Alloc>
-void copy_out_vec_be(uint8_t out[], size_t out_bytes, const std::vector<T, Alloc>& in)
-   {
-   copy_out_be(out, out_bytes, in.data());
-   }
-
-template<typename T>
-void copy_out_le(uint8_t out[], size_t out_bytes, const T in[])
-   {
-   while(out_bytes >= sizeof(T))
-      {
-      store_le(in[0], out);
-      out += sizeof(T);
-      out_bytes -= sizeof(T);
-      in += 1;
-   }
-
-   for(size_t i = 0; i != out_bytes; ++i)
-      out[i] = get_byte(sizeof(T) - 1 - (i % 8), in[0]);
-   }
-
-template<typename T, typename Alloc>
-void copy_out_vec_le(uint8_t out[], size_t out_bytes, const std::vector<T, Alloc>& in)
-   {
-   copy_out_le(out, out_bytes, in.data());
-   }
-
+inline constexpr uint64_t make_uint64(
+   uint8_t i0, uint8_t i1, uint8_t i2, uint8_t i3, uint8_t i4, uint8_t i5, uint8_t i6, uint8_t i7) {
+   return ((static_cast<uint64_t>(i0) << 56) | (static_cast<uint64_t>(i1) << 48) | (static_cast<uint64_t>(i2) << 40) |
+           (static_cast<uint64_t>(i3) << 32) | (static_cast<uint64_t>(i4) << 24) | (static_cast<uint64_t>(i5) << 16) |
+           (static_cast<uint64_t>(i6) << 8) | (static_cast<uint64_t>(i7)));
 }
+
+namespace detail {
+
+enum class Endianness : bool {
+   Big,
+   Little,
+};
+
+struct AutoDetect {
+      constexpr AutoDetect() = delete;
+};
+
+/**
+ * @warning This function may return false if the native endianness is unknown
+ * @returns true iff the native endianness matches the given endianness
+ */
+constexpr bool is_native(Endianness endianness) {
+#if defined(BOTAN_TARGET_CPU_IS_BIG_ENDIAN)
+   return endianness == Endianness::Big;
+#elif defined(BOTAN_TARGET_CPU_IS_LITTLE_ENDIAN)
+   return endianness == Endianness::Little;
+#else
+   return false;
+#endif
+}
+
+/**
+ * @warning This function may return false if the native endianness is unknown
+ * @returns true iff the native endianness does not match the given endianness
+ */
+constexpr bool is_opposite(Endianness endianness) {
+#if defined(BOTAN_TARGET_CPU_IS_BIG_ENDIAN)
+   return endianness == Endianness::Little;
+#elif defined(BOTAN_TARGET_CPU_IS_LITTLE_ENDIAN)
+   return endianness == Endianness::Big;
+#else
+   return false;
+#endif
+}
+
+template <Endianness endianness>
+constexpr bool native_endianness_is_unknown() {
+#if defined(BOTAN_TARGET_CPU_IS_BIG_ENDIAN) || defined(BOTAN_TARGET_CPU_IS_LITTLE_ENDIAN)
+   return false;
+#else
+   return true;
+#endif
+}
+
+/**
+ * Models a type that can be loaded/stored from/to a byte range.
+ */
+template <typename T>
+concept unsigned_integralish = std::unsigned_integral<T> || concepts::unsigned_integral_strong_type<T> ||
+                               (std::is_enum_v<T> && std::unsigned_integral<std::underlying_type_t<T>>);
+
+/**
+ * Manually load a word from a range in either big or little endian byte order.
+ * This will be used only if the endianness of the target platform is unknown at
+ * compile time.
+ */
+template <Endianness endianness, std::unsigned_integral OutT, ranges::contiguous_range<uint8_t> InR>
+inline constexpr OutT fallback_load_any(InR&& in_range) {
+   std::span in{in_range};
+   // clang-format off
+   if constexpr(endianness == Endianness::Big) {
+      return [&]<size_t... i>(std::index_sequence<i...>) {
+         return static_cast<OutT>(((static_cast<OutT>(in[i]) << ((sizeof(OutT) - i - 1) * 8)) | ...));
+      } (std::make_index_sequence<sizeof(OutT)>());
+   } else {
+      static_assert(endianness == Endianness::Little);
+      return [&]<size_t... i>(std::index_sequence<i...>) {
+         return static_cast<OutT>(((static_cast<OutT>(in[i]) << (i * 8)) | ...));
+      } (std::make_index_sequence<sizeof(OutT)>());
+   }
+   // clang-format on
+}
+
+/**
+ * Manually store a word into a range in either big or little endian byte order.
+ * This will be used only if the endianness of the target platform is unknown at
+ * compile time.
+ */
+template <Endianness endianness, std::unsigned_integral InT, ranges::contiguous_output_range<uint8_t> OutR>
+inline constexpr void fallback_store_any(InT in, OutR&& out_range) {
+   std::span out{out_range};
+   // clang-format off
+   if constexpr(endianness == Endianness::Big) {
+      [&]<size_t... i>(std::index_sequence<i...>) {
+         ((out[i] = get_byte<i>(in)), ...);
+      } (std::make_index_sequence<sizeof(InT)>());
+   } else {
+      static_assert(endianness == Endianness::Little);
+      [&]<size_t... i>(std::index_sequence<i...>) {
+         ((out[i] = get_byte<sizeof(InT) - i - 1>(in)), ...);
+      } (std::make_index_sequence<sizeof(InT)>());
+   }
+   // clang-format on
+}
+
+/**
+ * Load a word from a range in either big or little endian byte order
+ *
+ * This is the base implementation, all other overloads are just convenience
+ * wrappers. It is assumed that the range has the correct size for the word.
+ *
+ * Template arguments of all overloads of load_any() share the same semantics:
+ *
+ *   1.  Endianness      Either `Endianness::Big` or `Endianness::Little`, that
+ *                       will eventually select the byte order translation mode
+ *                       implemented in this base function.
+ *
+ *   2.  Output type     Either `AutoDetect`, an unsigned integer or a container
+ *                       holding an unsigned integer type. `AutoDetect` means
+ *                       that the caller did not explicitly specify the type and
+ *                       expects the type to be inferred from the input.
+ *
+ *   3+. Argument types  Typically, those are input and output ranges of bytes
+ *                       or unsigned integers. Or one or more unsigned integers
+ *                       acting as output parameters.
+ *
+ * @param in_range a fixed-length byte range
+ * @return T loaded from @p in_range, as a big-endian value
+ */
+template <Endianness endianness, std::unsigned_integral OutT, ranges::contiguous_range<uint8_t> InR>
+inline constexpr OutT load_any(InR&& in_range) {
+   ranges::assert_exact_byte_length<sizeof(OutT)>(in_range);
+   std::span in{in_range};
+
+   // At compile time we cannot use `typecast_copy` as it uses `std::memcpy`
+   // internally to copy ranges on a byte-by-byte basis, which is not allowed
+   // in a `constexpr` context.
+   if(std::is_constant_evaluated()) /* TODO: C++23: if consteval {} */ {
+      return fallback_load_any<endianness, OutT>(std::forward<InR>(in_range));
+   } else {
+      if constexpr(sizeof(OutT) == 1) {
+         return static_cast<OutT>(in[0]);
+      } else if constexpr(is_native(endianness)) {
+         return typecast_copy<OutT>(in);
+      } else if constexpr(is_opposite(endianness)) {
+         return reverse_bytes(typecast_copy<OutT>(in));
+      } else {
+         static_assert(native_endianness_is_unknown<endianness>());
+         return fallback_load_any<endianness, OutT>(std::forward<InR>(in_range));
+      }
+   }
+}
+
+/**
+ * Overload for loading into a strong type holding an unsigned integer
+ */
+template <Endianness endianness, concepts::unsigned_integral_strong_type OutT, ranges::contiguous_range<uint8_t> InR>
+inline constexpr OutT load_any(InR&& in_range) {
+   using underlying_type = typename OutT::wrapped_type;
+   return OutT{load_any<endianness, underlying_type>(std::forward<InR>(in_range))};
+}
+
+/**
+ * Overload for loading into an enum type that uses an unsigned integer as its
+ * underlying type.
+ */
+template <Endianness endianness, typename OutT, ranges::contiguous_range<uint8_t> InR>
+   requires(std::is_enum_v<OutT> && std::unsigned_integral<std::underlying_type_t<OutT>>)
+inline constexpr OutT load_any(InR&& in_range) {
+   using underlying_type = std::underlying_type_t<OutT>;
+   return static_cast<OutT>(load_any<endianness, underlying_type>(std::forward<InR>(in_range)));
+}
+
+/**
+ * Load many unsigned integers
+ * @param in   a fixed-length span to some bytes
+ * @param outs a arbitrary-length parameter list of unsigned integers to be loaded
+ */
+template <Endianness endianness, typename OutT, ranges::contiguous_range<uint8_t> InR, unsigned_integralish... Ts>
+   requires(sizeof...(Ts) > 0) && ((std::same_as<AutoDetect, OutT> && all_same_v<Ts...>) ||
+                                   (unsigned_integralish<OutT> && all_same_v<OutT, Ts...>))
+inline constexpr void load_any(InR&& in, Ts&... outs) {
+   ranges::assert_exact_byte_length<(sizeof(Ts) + ...)>(in);
+   auto load_one = [off = 0]<typename T>(auto i, T& o) mutable {
+      o = load_any<endianness, T>(i.subspan(off).template first<sizeof(T)>());
+      off += sizeof(T);
+   };
+
+   (load_one(std::span{in}, outs), ...);
+}
+
+/**
+ * Load a variable number of words from @p in into @p out.
+ * The byte length of the @p out and @p in ranges must match.
+ *
+ * @param out the output range of words
+ * @param in the input range of bytes
+ */
+template <Endianness endianness,
+          typename OutT,
+          ranges::contiguous_output_range OutR,
+          ranges::contiguous_range<uint8_t> InR>
+   requires(unsigned_integralish<std::ranges::range_value_t<OutR>> &&
+            (std::same_as<AutoDetect, OutT> || std::same_as<OutT, std::ranges::range_value_t<OutR>>))
+inline constexpr void load_any(OutR&& out, InR&& in) {
+   ranges::assert_equal_byte_lengths(out, in);
+
+   auto load_elementwise = [&] {
+      using element_type = std::ranges::range_value_t<OutR>;
+      constexpr size_t bytes_per_element = sizeof(element_type);
+      std::span<const uint8_t> in_s(in);
+      for(auto& out_elem : out) {
+         out_elem = load_any<endianness, element_type>(in_s.template first<bytes_per_element>());
+         in_s = in_s.subspan(bytes_per_element);
+      }
+   };
+
+   // At compile time we cannot use `typecast_copy` as it uses `std::memcpy`
+   // internally to copy ranges on a byte-by-byte basis, which is not allowed
+   // in a `constexpr` context.
+   if(std::is_constant_evaluated()) /* TODO: C++23: if consteval {} */ {
+      load_elementwise();
+   } else {
+      if constexpr(is_native(endianness)) {
+         typecast_copy(out, in);
+      } else {
+         load_elementwise();
+      }
+   }
+}
+
+//
+// Type inference overloads
+//
+
+/**
+ * Load one or more unsigned integers, auto-detect the output type if
+ * possible. Otherwise, use the specified integer or integer container type.
+ *
+ * @param in_range a statically-sized range with some bytes
+ * @return T loaded from in
+ */
+template <Endianness endianness, typename OutT, ranges::contiguous_range<uint8_t> InR>
+   requires(std::same_as<AutoDetect, OutT> ||
+            ((ranges::statically_spanable_range<OutT> ||
+              concepts::resizable_container<OutT>)&&unsigned_integralish<typename OutT::value_type>))
+inline constexpr auto load_any(InR&& in_range) {
+   auto out = []([[maybe_unused]] const auto& in) {
+      if constexpr(std::same_as<AutoDetect, OutT>) {
+         if constexpr(ranges::statically_spanable_range<InR>) {
+            constexpr size_t extent = decltype(std::span{in})::extent;
+
+            // clang-format off
+            using type =
+               std::conditional_t<extent == 1, uint8_t,
+               std::conditional_t<extent == 2, uint16_t,
+               std::conditional_t<extent == 4, uint32_t,
+               std::conditional_t<extent == 8, uint64_t, void>>>>;
+            // clang-format on
+
+            static_assert(
+               !std::is_void_v<type>,
+               "Cannot determine the output type based on a statically sized bytearray with length other than those: 1, 2, 4, 8");
+
+            return type{};
+         } else {
+            static_assert(
+               !std::same_as<AutoDetect, OutT>,
+               "cannot infer return type from a dynamic range at compile time, please specify it explicitly");
+         }
+      } else if constexpr(concepts::resizable_container<OutT>) {
+         const size_t in_bytes = std::span{in}.size_bytes();
+         constexpr size_t out_elem_bytes = sizeof(typename OutT::value_type);
+         BOTAN_ARG_CHECK(in_bytes % out_elem_bytes == 0,
+                         "Input range is not word-aligned with the requested output range");
+         return OutT(in_bytes / out_elem_bytes);
+      } else {
+         return OutT{};
+      }
+   }(in_range);
+
+   using out_type = decltype(out);
+   if constexpr(unsigned_integralish<out_type>) {
+      out = load_any<endianness, out_type>(std::forward<InR>(in_range));
+   } else {
+      static_assert(ranges::contiguous_range<out_type>);
+      using out_range_type = std::ranges::range_value_t<out_type>;
+      load_any<endianness, out_range_type>(out, std::forward<InR>(in_range));
+   }
+   return out;
+}
+
+//
+// Legacy load functions that work on raw pointers and arrays
+//
+
+/**
+ * Load a word from @p in at some offset @p off
+ * @param in a pointer to some bytes
+ * @param off an offset into the array
+ * @return off'th T of in, as a big-endian value
+ */
+template <Endianness endianness, unsigned_integralish OutT>
+inline constexpr OutT load_any(const uint8_t in[], size_t off) {
+   // asserts that *in points to enough bytes to read at offset off
+   constexpr size_t out_size = sizeof(OutT);
+   return load_any<endianness, OutT>(std::span<const uint8_t, out_size>(in + off * out_size, out_size));
+}
+
+/**
+ * Load many words from @p in
+ * @param in   a pointer to some bytes
+ * @param outs a arbitrary-length parameter list of unsigned integers to be loaded
+ */
+template <Endianness endianness, typename OutT, unsigned_integralish... Ts>
+   requires(sizeof...(Ts) > 0 && all_same_v<Ts...> &&
+            ((std::same_as<AutoDetect, OutT> && all_same_v<Ts...>) ||
+             (unsigned_integralish<OutT> && all_same_v<OutT, Ts...>)))
+inline constexpr void load_any(const uint8_t in[], Ts&... outs) {
+   constexpr auto bytes = (sizeof(outs) + ...);
+   // asserts that *in points to the correct amount of memory
+   load_any<endianness, OutT>(std::span<const uint8_t, bytes>(in, bytes), outs...);
+}
+
+/**
+ * Load a variable number of words from @p in into @p out.
+ * @param out the output array of words
+ * @param in the input array of bytes
+ * @param count how many words are in in
+ */
+template <Endianness endianness, typename OutT, unsigned_integralish T>
+   requires(std::same_as<AutoDetect, OutT> || std::same_as<T, OutT>)
+inline constexpr void load_any(T out[], const uint8_t in[], size_t count) {
+   // asserts that *in and *out point to the correct amount of memory
+   load_any<endianness, OutT>(std::span<T>(out, count), std::span<const uint8_t>(in, count * sizeof(T)));
+}
+
+}  // namespace detail
+
+/**
+ * Load "something" in little endian byte order
+ * See the documentation of this file for more details.
+ */
+template <typename OutT = detail::AutoDetect, typename... ParamTs>
+inline constexpr auto load_le(ParamTs&&... params) {
+   return detail::load_any<detail::Endianness::Little, OutT>(std::forward<ParamTs>(params)...);
+}
+
+/**
+ * Load "something" in big endian byte order
+ * See the documentation of this file for more details.
+ */
+template <typename OutT = detail::AutoDetect, typename... ParamTs>
+inline constexpr auto load_be(ParamTs&&... params) {
+   return detail::load_any<detail::Endianness::Big, OutT>(std::forward<ParamTs>(params)...);
+}
+
+namespace detail {
+
+/**
+ * Store a word in either big or little endian byte order into a range
+ *
+ * This is the base implementation, all other overloads are just convenience
+ * wrappers. It is assumed that the range has the correct size for the word.
+ *
+ * Template arguments of all overloads of store_any() share the same semantics
+ * as those of load_any(). See the documentation of this function for more
+ * details.
+ *
+ * @param in an unsigned integral to be stored
+ * @param out_range a byte range to store the word into
+ */
+template <Endianness endianness, std::unsigned_integral InT, ranges::contiguous_output_range<uint8_t> OutR>
+inline constexpr void store_any(InT in, OutR&& out_range) {
+   ranges::assert_exact_byte_length<sizeof(InT)>(out_range);
+   std::span out{out_range};
+
+   // At compile time we cannot use `typecast_copy` as it uses `std::memcpy`
+   // internally to copy ranges on a byte-by-byte basis, which is not allowed
+   // in a `constexpr` context.
+   if(std::is_constant_evaluated()) /* TODO: C++23: if consteval {} */ {
+      return fallback_store_any<endianness, InT>(in, std::forward<OutR>(out_range));
+   } else {
+      if constexpr(sizeof(InT) == 1) {
+         out[0] = static_cast<uint8_t>(in);
+      } else if constexpr(is_native(endianness)) {
+         typecast_copy(out, in);
+      } else if constexpr(is_opposite(endianness)) {
+         typecast_copy(out, reverse_bytes(in));
+      } else {
+         static_assert(native_endianness_is_unknown<endianness>());
+         return fallback_store_any<endianness, InT>(in, std::forward<OutR>(out_range));
+      }
+   }
+}
+
+/**
+ * Overload for loading into a strong type holding an unsigned integer
+ */
+template <Endianness endianness,
+          concepts::unsigned_integral_strong_type InT,
+          ranges::contiguous_output_range<uint8_t> OutR>
+inline constexpr void store_any(InT in, OutR&& out_range) {
+   using underlying_type = typename InT::wrapped_type;
+   store_any<endianness, underlying_type>(in.get(), std::forward<OutR>(out_range));
+}
+
+/**
+ * Overload for storing an enum type that uses an unsigned integer as its
+ * underlying type.
+ */
+template <Endianness endianness, typename InT, ranges::contiguous_output_range<uint8_t> OutR>
+   requires(std::is_enum_v<InT> && std::unsigned_integral<std::underlying_type_t<InT>>)
+inline constexpr void store_any(InT in, OutR&& out_range) {
+   using underlying_type = std::underlying_type_t<InT>;
+   // TODO: C++23: use std::to_underlying(in) instead
+   store_any<endianness, underlying_type>(static_cast<underlying_type>(in), std::forward<OutR>(out_range));
+}
+
+/**
+ * Store many unsigned integers words into a byte range
+ * @param out a sized range of some bytes
+ * @param ins a arbitrary-length parameter list of unsigned integers to be stored
+ */
+template <Endianness endianness,
+          typename InT,
+          ranges::contiguous_output_range<uint8_t> OutR,
+          unsigned_integralish... Ts>
+   requires(sizeof...(Ts) > 0) && ((std::same_as<AutoDetect, InT> && all_same_v<Ts...>) ||
+                                   (unsigned_integralish<InT> && all_same_v<InT, Ts...>))
+inline constexpr void store_any(OutR&& out, Ts... ins) {
+   ranges::assert_exact_byte_length<(sizeof(Ts) + ...)>(out);
+   auto store_one = [off = 0]<typename T>(auto o, T i) mutable {
+      store_any<endianness, T>(i, o.subspan(off).template first<sizeof(T)>());
+      off += sizeof(T);
+   };
+
+   (store_one(std::span{out}, ins), ...);
+}
+
+/**
+ * Store a variable number of words given in @p in into @p out.
+ * The byte lengths of @p in and @p out must be consistent.
+ * @param out the output range of bytes
+ * @param in the input range of words
+ */
+template <Endianness endianness,
+          typename InT,
+          ranges::contiguous_output_range<uint8_t> OutR,
+          ranges::spanable_range InR>
+   requires(std::same_as<AutoDetect, InT> || std::same_as<InT, std::ranges::range_value_t<InR>>)
+inline constexpr void store_any(OutR&& out, InR&& in) {
+   ranges::assert_equal_byte_lengths(out, in);
+
+   auto store_elementwise = [&] {
+      using element_type = std::ranges::range_value_t<InR>;
+      constexpr size_t bytes_per_element = sizeof(element_type);
+      std::span<uint8_t> out_s(out);
+      for(auto in_elem : in) {
+         store_any<endianness, element_type>(out_s.template first<bytes_per_element>(), in_elem);
+         out_s = out_s.subspan(bytes_per_element);
+      }
+   };
+
+   // At compile time we cannot use `typecast_copy` as it uses `std::memcpy`
+   // internally to copy ranges on a byte-by-byte basis, which is not allowed
+   // in a `constexpr` context.
+   if(std::is_constant_evaluated()) /* TODO: C++23: if consteval {} */ {
+      store_elementwise();
+   } else {
+      if constexpr(is_native(endianness)) {
+         typecast_copy(out, in);
+      } else {
+         store_elementwise();
+      }
+   }
+}
+
+//
+// Type inference overloads
+//
+
+/**
+ * Infer InT from a single unsigned integer input parameter.
+ *
+ * TODO: we might consider dropping this overload (i.e. out-range as second
+ *       parameter) and make this a "special case" of the overload below, that
+ *       takes a variadic number of input parameters.
+ *
+ * @param in an unsigned integer to be stored
+ * @param out_range a range of bytes to store the word into
+ */
+template <Endianness endianness, typename InT, unsigned_integralish T, ranges::contiguous_output_range<uint8_t> OutR>
+   requires std::same_as<AutoDetect, InT>
+inline constexpr void store_any(T in, OutR&& out_range) {
+   store_any<endianness, T>(in, std::forward<OutR>(out_range));
+}
+
+/**
+ * The caller provided some integer values in a collection but did not provide
+ * the output container. Let's create one for them, fill it with one of the
+ * overloads above and return it. This will default to a std::array if the
+ * caller did not specify the desired output container type.
+ *
+ * @param in_range a range of words that should be stored
+ * @return a container of bytes that contains the stored words
+ */
+template <Endianness endianness, typename OutR, ranges::spanable_range InR>
+   requires(std::same_as<AutoDetect, OutR> ||
+            (ranges::statically_spanable_range<OutR> && std::default_initializable<OutR>) ||
+            concepts::resizable_byte_buffer<OutR>)
+inline constexpr auto store_any(InR&& in_range) {
+   auto out = []([[maybe_unused]] const auto& in) {
+      if constexpr(std::same_as<AutoDetect, OutR>) {
+         if constexpr(ranges::statically_spanable_range<InR>) {
+            constexpr size_t bytes = decltype(std::span{in})::extent * sizeof(std::ranges::range_value_t<InR>);
+            return std::array<uint8_t, bytes>();
+         } else {
+            static_assert(
+               !std::same_as<AutoDetect, OutR>,
+               "cannot infer a suitable result container type from the given parameters at compile time, please specify it explicitly");
+         }
+      } else if constexpr(concepts::resizable_byte_buffer<OutR>) {
+         return OutR(std::span{in}.size_bytes());
+      } else {
+         return OutR{};
+      }
+   }(in_range);
+
+   store_any<endianness, std::ranges::range_value_t<InR>>(out, std::forward<InR>(in_range));
+   return out;
+}
+
+/**
+ * The caller provided some integer values but did not provide the output
+ * container. Let's create one for them, fill it with one of the overloads above
+ * and return it. This will default to a std::array if the caller did not
+ * specify the desired output container type.
+ *
+ * @param ins some words that should be stored
+ * @return a container of bytes that contains the stored words
+ */
+template <Endianness endianness, typename OutR, unsigned_integralish... Ts>
+   requires all_same_v<Ts...>
+inline constexpr auto store_any(Ts... ins) {
+   return store_any<endianness, OutR>(std::array{ins...});
+}
+
+//
+// Legacy store functions that work on raw pointers and arrays
+//
+
+/**
+ * Store a single unsigned integer into a raw pointer
+ * @param in the input unsigned integer
+ * @param out the byte array to write to
+ */
+template <Endianness endianness, typename InT, unsigned_integralish T>
+   requires(std::same_as<AutoDetect, InT> || std::same_as<T, InT>)
+inline constexpr void store_any(T in, uint8_t out[]) {
+   // asserts that *out points to enough bytes to write into
+   store_any<endianness, InT>(in, std::span<uint8_t, sizeof(T)>(out, sizeof(T)));
+}
+
+/**
+ * Store many unsigned integers words into a raw pointer
+ * @param ins a arbitrary-length parameter list of unsigned integers to be stored
+ * @param out the byte array to write to
+ */
+template <Endianness endianness, typename InT, unsigned_integralish T0, unsigned_integralish... Ts>
+   requires(std::same_as<AutoDetect, InT> || std::same_as<T0, InT>) && all_same_v<T0, Ts...>
+inline constexpr void store_any(uint8_t out[], T0 in0, Ts... ins) {
+   constexpr auto bytes = sizeof(in0) + (sizeof(ins) + ... + 0);
+   // asserts that *out points to the correct amount of memory
+   store_any<endianness, T0>(std::span<uint8_t, bytes>(out, bytes), in0, ins...);
+}
+
+}  // namespace detail
+
+/**
+ * Store "something" in little endian byte order
+ * See the documentation of this file for more details.
+ */
+template <typename ModifierT = detail::AutoDetect, typename... ParamTs>
+inline constexpr auto store_le(ParamTs&&... params) {
+   return detail::store_any<detail::Endianness::Little, ModifierT>(std::forward<ParamTs>(params)...);
+}
+
+/**
+ * Store "something" in big endian byte order
+ * See the documentation of this file for more details.
+ */
+template <typename ModifierT = detail::AutoDetect, typename... ParamTs>
+inline constexpr auto store_be(ParamTs&&... params) {
+   return detail::store_any<detail::Endianness::Big, ModifierT>(std::forward<ParamTs>(params)...);
+}
+
+namespace detail {
+
+template <Endianness endianness, unsigned_integralish T>
+size_t copy_out_any_word_aligned_portion(std::span<uint8_t>& out, std::span<const T>& in) {
+   const size_t full_words = out.size() / sizeof(T);
+   const size_t full_word_bytes = full_words * sizeof(T);
+   const size_t remaining_bytes = out.size() - full_word_bytes;
+   BOTAN_ASSERT_NOMSG(in.size_bytes() >= full_word_bytes + remaining_bytes);
+
+   // copy full words
+   store_any<endianness, T>(out.first(full_word_bytes), in.first(full_words));
+   out = out.subspan(full_word_bytes);
+   in = in.subspan(full_words);
+
+   return remaining_bytes;
+}
+
+}  // namespace detail
+
+/**
+ * Partially copy a subset of @p in into @p out using big-endian
+ * byte order.
+ */
+template <ranges::spanable_range InR>
+void copy_out_be(std::span<uint8_t> out, InR&& in) {
+   using T = std::ranges::range_value_t<InR>;
+   std::span<const T> in_s{in};
+   const auto remaining_bytes = detail::copy_out_any_word_aligned_portion<detail::Endianness::Big>(out, in_s);
+
+   // copy remaining bytes as a partial word
+   for(size_t i = 0; i < remaining_bytes; ++i) {
+      out[i] = get_byte_var(i, in_s.front());
+   }
+}
+
+/**
+ * Partially copy a subset of @p in into @p out using little-endian
+ * byte order.
+ */
+template <ranges::spanable_range InR>
+void copy_out_le(std::span<uint8_t> out, InR&& in) {
+   using T = std::ranges::range_value_t<InR>;
+   std::span<const T> in_s{in};
+   const auto remaining_bytes = detail::copy_out_any_word_aligned_portion<detail::Endianness::Little>(out, in_s);
+
+   // copy remaining bytes as a partial word
+   for(size_t i = 0; i < remaining_bytes; ++i) {
+      out[i] = get_byte_var(sizeof(T) - 1 - i, in_s.front());
+   }
+}
+
+}  // namespace Botan
 
 #endif

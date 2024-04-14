@@ -2,6 +2,7 @@
 CPUID -> 20170917
 </defines>
 
-<header:public>
-cpuid.h
-</header:public>
+<module_info>
+name -> "CPUID"
+brief -> "Handle runtime feature detection of the current CPU"
+</module_info>

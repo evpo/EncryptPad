@@ -10,28 +10,31 @@
 #ifndef BOTAN_ECC_DOMAIN_PARAMETERS_H_
 #define BOTAN_ECC_DOMAIN_PARAMETERS_H_
 
-#include <botan/point_gfp.h>
 #include <botan/asn1_obj.h>
+#include <botan/ec_point.h>
 #include <memory>
 #include <set>
+#include <span>
 
 namespace Botan {
 
 /**
 * This class represents elliptic curce domain parameters
 */
-enum EC_Group_Encoding {
-   EC_DOMPAR_ENC_EXPLICIT = 0,
-   EC_DOMPAR_ENC_IMPLICITCA = 1,
-   EC_DOMPAR_ENC_OID = 2
+enum class EC_Group_Encoding {
+   Explicit,
+   ImplicitCA,
+   NamedCurve,
+
+   EC_DOMPAR_ENC_EXPLICIT = Explicit,
+   EC_DOMPAR_ENC_IMPLICITCA = ImplicitCA,
+   EC_DOMPAR_ENC_OID = NamedCurve
 };
 
 enum class EC_Group_Source {
    Builtin,
    ExternalSource,
 };
-
-class CurveGFp;
 
 class EC_Group_Data;
 class EC_Group_Data_Map;
@@ -42,30 +45,8 @@ class EC_Group_Data_Map;
 * The internal representation is stored in a shared_ptr, so copying an
 * EC_Group is inexpensive.
 */
-class BOTAN_PUBLIC_API(2,0) EC_Group final
-   {
+class BOTAN_PUBLIC_API(2, 0) EC_Group final {
    public:
-
-      /**
-      * Construct Domain paramers from specified parameters
-      * @param curve elliptic curve
-      * @param base_point a base point
-      * @param order the order of the base point
-      * @param cofactor the cofactor
-      */
-      BOTAN_DEPRECATED("Use version taking all BigInts")
-      EC_Group(const CurveGFp& curve,
-               const PointGFp& base_point,
-               const BigInt& order,
-               const BigInt& cofactor) :
-         EC_Group(curve.get_p(),
-                  curve.get_a(),
-                  curve.get_b(),
-                  base_point.get_affine_x(),
-                  base_point.get_affine_y(),
-                  order,
-                  cofactor) {}
-
       /**
       * Construct Domain paramers from specified parameters
       * @param p the elliptic curve p
@@ -93,9 +74,8 @@ class BOTAN_PUBLIC_API(2,0) EC_Group final
       */
       explicit EC_Group(const uint8_t ber[], size_t ber_len);
 
-      template<typename Alloc>
-         EC_Group(const std::vector<uint8_t, Alloc>& ber) :
-         EC_Group(ber.data(), ber.size()) {}
+      template <typename Alloc>
+      EC_Group(const std::vector<uint8_t, Alloc>& ber) : EC_Group(ber.data(), ber.size()) {}
 
       /**
       * Create an EC domain by OID (or throw if unknown)
@@ -111,9 +91,9 @@ class BOTAN_PUBLIC_API(2,0) EC_Group final
       * @warning Support for PEM in this function is deprecated. Use
       * EC_Group_from_PEM
       */
-      explicit EC_Group(const std::string& pem_or_oid);
+      explicit EC_Group(std::string_view pem_or_oid);
 
-      static EC_Group EC_Group_from_PEM(const std::string& pem);
+      static EC_Group EC_Group_from_PEM(std::string_view pem);
 
       /**
       * Create an uninitialized EC_Group
@@ -140,12 +120,6 @@ class BOTAN_PUBLIC_API(2,0) EC_Group final
       * @return string containing PEM data
       */
       std::string PEM_encode() const;
-
-      /**
-      * Return domain parameter curve
-      * @result domain parameter curve
-      */
-      BOTAN_DEPRECATED("Avoid CurveGFp") const CurveGFp& get_curve() const;
 
       /**
       * Return if a == -3 mod p
@@ -196,7 +170,7 @@ class BOTAN_PUBLIC_API(2,0) EC_Group final
       * Return group base point
       * @result base point
       */
-      const PointGFp& get_base_point() const;
+      const EC_Point& get_base_point() const;
 
       /**
       * Return the x coordinate of the base point
@@ -213,6 +187,12 @@ class BOTAN_PUBLIC_API(2,0) EC_Group final
       * @result order of the base point
       */
       const BigInt& get_order() const;
+
+      /**
+      * Return the cofactor
+      * @result the cofactor
+      */
+      const BigInt& get_cofactor() const;
 
       /*
       * Reduce x modulo the order
@@ -239,11 +219,10 @@ class BOTAN_PUBLIC_API(2,0) EC_Group final
       */
       BigInt multiply_mod_order(const BigInt& x, const BigInt& y, const BigInt& z) const;
 
-      /**
-      * Return the cofactor
-      * @result the cofactor
+      /*
+      * Return x^3 modulo the order
       */
-      const BigInt& get_cofactor() const;
+      inline BigInt cube_mod_order(const BigInt& x) const { return multiply_mod_order(x, square_mod_order(x)); }
 
       /**
       * Check if y is a plausible point on the curve
@@ -251,13 +230,7 @@ class BOTAN_PUBLIC_API(2,0) EC_Group final
       * In particular, checks that it is a point on the curve, not infinity,
       * and that it has order matching the group.
       */
-      bool verify_public_element(const PointGFp& y) const;
-
-      /**
-      * Return the OID of these domain parameters
-      * @result the OID as a string
-      */
-      std::string BOTAN_DEPRECATED("Use get_curve_oid") get_oid() const { return get_curve_oid().to_string(); }
+      bool verify_public_element(const EC_Point& y) const;
 
       /**
       * Return the OID of these domain parameters
@@ -268,13 +241,13 @@ class BOTAN_PUBLIC_API(2,0) EC_Group final
       /**
       * Return a point on this curve with the affine values x, y
       */
-      PointGFp point(const BigInt& x, const BigInt& y) const;
+      EC_Point point(const BigInt& x, const BigInt& y) const;
 
       /**
       * Multi exponentiate. Not constant time.
       * @return base_point*x + pt*y
       */
-      PointGFp point_multiply(const BigInt& x, const PointGFp& pt, const BigInt& y) const;
+      EC_Point point_multiply(const BigInt& x, const EC_Point& pt, const BigInt& y) const;
 
       /**
       * Blinded point multiplication, attempts resistance to side channels
@@ -283,9 +256,7 @@ class BOTAN_PUBLIC_API(2,0) EC_Group final
       * @param ws a temp workspace
       * @return base_point*k
       */
-      PointGFp blinded_base_point_multiply(const BigInt& k,
-                                           RandomNumberGenerator& rng,
-                                           std::vector<BigInt>& ws) const;
+      EC_Point blinded_base_point_multiply(const BigInt& k, RandomNumberGenerator& rng, std::vector<BigInt>& ws) const;
 
       /**
       * Blinded point multiplication, attempts resistance to side channels
@@ -296,9 +267,7 @@ class BOTAN_PUBLIC_API(2,0) EC_Group final
       * @param ws a temp workspace
       * @return x coordinate of base_point*k
       */
-      BigInt blinded_base_point_multiply_x(const BigInt& k,
-                                           RandomNumberGenerator& rng,
-                                           std::vector<BigInt>& ws) const;
+      BigInt blinded_base_point_multiply_x(const BigInt& k, RandomNumberGenerator& rng, std::vector<BigInt>& ws) const;
 
       /**
       * Blinded point multiplication, attempts resistance to side channels
@@ -308,7 +277,7 @@ class BOTAN_PUBLIC_API(2,0) EC_Group final
       * @param ws a temp workspace
       * @return point*k
       */
-      PointGFp blinded_var_point_multiply(const PointGFp& point,
+      EC_Point blinded_var_point_multiply(const EC_Point& point,
                                           const BigInt& k,
                                           RandomNumberGenerator& rng,
                                           std::vector<BigInt>& ws) const;
@@ -319,19 +288,55 @@ class BOTAN_PUBLIC_API(2,0) EC_Group final
       BigInt random_scalar(RandomNumberGenerator& rng) const;
 
       /**
+      * Hash onto the curve.
+      * For some curve types no mapping is currently available, in this
+      * case this function will throw an exception.
+      *
+      * @param hash_fn the hash function to use (typically "SHA-256" or "SHA-512")
+      * @param input the input to hash
+      * @param input_len length of input in bytes
+      * @param domain_sep a domain seperator
+      * @param domain_sep_len length of domain_sep in bytes
+      * @param random_oracle if the mapped point must be uniform (use
+               "true" here unless you know what you are doing)
+      */
+      EC_Point hash_to_curve(std::string_view hash_fn,
+                             const uint8_t input[],
+                             size_t input_len,
+                             const uint8_t domain_sep[],
+                             size_t domain_sep_len,
+                             bool random_oracle = true) const;
+
+      /**
+      * Hash onto the curve.
+      * For some curve types no mapping is currently available, in this
+      * case this function will throw an exception.
+      *
+      * @param hash_fn the hash function to use (typically "SHA-256" or "SHA-512")
+      * @param input the input to hash
+      * @param input_len length of input in bytes
+      * @param domain_sep a domain seperator
+      * @param random_oracle if the mapped point must be uniform (use
+               "true" here unless you know what you are doing)
+      */
+      EC_Point hash_to_curve(std::string_view hash_fn,
+                             const uint8_t input[],
+                             size_t input_len,
+                             std::string_view domain_sep,
+                             bool random_oracle = true) const;
+
+      /**
       * Return the zero (or infinite) point on this curve
       */
-      PointGFp zero_point() const;
+      EC_Point zero_point() const;
 
-      size_t point_size(PointGFp::Compression_Type format) const;
+      size_t point_size(EC_Point_Format format) const;
 
-      PointGFp OS2ECP(const uint8_t bits[], size_t len) const;
+      EC_Point OS2ECP(const uint8_t bits[], size_t len) const;
 
-      template<typename Alloc>
-      PointGFp OS2ECP(const std::vector<uint8_t, Alloc>& vec) const
-         {
-         return this->OS2ECP(vec.data(), vec.size());
-         }
+      EC_Point OS2ECP(std::span<const uint8_t> encoded_point) const {
+         return this->OS2ECP(encoded_point.data(), encoded_point.size());
+      }
 
       bool initialized() const { return (m_data != nullptr); }
 
@@ -339,18 +344,19 @@ class BOTAN_PUBLIC_API(2,0) EC_Group final
        * Verify EC_Group domain
        * @returns true if group is valid. false otherwise
        */
-      bool verify_group(RandomNumberGenerator& rng,
-                        bool strong = false) const;
+      bool verify_group(RandomNumberGenerator& rng, bool strong = false) const;
 
       bool operator==(const EC_Group& other) const;
 
       EC_Group_Source source() const;
 
       /**
-      * Return PEM representation of named EC group
-      * Deprecated: Use EC_Group(name).PEM_encode() if this is needed
+      * Return true if this EC_Group was derived from an explicit encoding
+      *
+      * Explicit encoding of groups is deprecated; when support for explicit curves
+      * is removed in a future major release, this function will also be removed.
       */
-      static std::string BOTAN_DEPRECATED("See header comment") PEM_for_named_group(const std::string& name);
+      bool used_explicit_encoding() const { return m_explicit_encoding; }
 
       /**
       * Return a set of known named EC groups
@@ -362,37 +368,41 @@ class BOTAN_PUBLIC_API(2,0) EC_Group final
       */
       static std::shared_ptr<EC_Group_Data> EC_group_info(const OID& oid);
 
+      /*
+      * For internal use only
+      */
       static size_t clear_registered_curve_data();
+
+      /*
+      * For internal use only
+      */
+      static OID EC_group_identity_from_order(const BigInt& order);
 
    private:
       static EC_Group_Data_Map& ec_group_data();
 
-      static std::shared_ptr<EC_Group_Data> BER_decode_EC_group(const uint8_t bits[], size_t len,
-                                                                EC_Group_Source source);
+      static std::pair<std::shared_ptr<EC_Group_Data>, bool> BER_decode_EC_group(const uint8_t bits[],
+                                                                                 size_t len,
+                                                                                 EC_Group_Source source);
 
-      static std::shared_ptr<EC_Group_Data>
-         load_EC_group_info(const char* p,
-                            const char* a,
-                            const char* b,
-                            const char* g_x,
-                            const char* g_y,
-                            const char* order,
-                            const OID& oid);
+      static std::shared_ptr<EC_Group_Data> load_EC_group_info(const char* p,
+                                                               const char* a,
+                                                               const char* b,
+                                                               const char* g_x,
+                                                               const char* g_y,
+                                                               const char* order,
+                                                               const OID& oid);
 
       // Member data
       const EC_Group_Data& data() const;
       std::shared_ptr<EC_Group_Data> m_data;
-   };
+      bool m_explicit_encoding = false;
+};
 
-inline bool operator!=(const EC_Group& lhs,
-                       const EC_Group& rhs)
-   {
+inline bool operator!=(const EC_Group& lhs, const EC_Group& rhs) {
    return !(lhs == rhs);
-   }
-
-// For compatibility with 1.8
-typedef EC_Group EC_Domain_Params;
-
 }
+
+}  // namespace Botan
 
 #endif

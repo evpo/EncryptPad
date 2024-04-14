@@ -2,6 +2,11 @@
 SHACAL2_X86 -> 20170814
 </defines>
 
+<module_info>
+name -> "SHACAL-2 X86"
+brief -> "SHACAL-2 using SSE instructions on x86"
+</module_info>
+
 <requires>
 shacal2
 </requires>
@@ -11,10 +16,3 @@ sha
 sse2
 ssse3
 </isa>
-
-<cc>
-gcc:5.0
-clang:3.9
-msvc:19.0 # MSVS 2015
-</cc>
-

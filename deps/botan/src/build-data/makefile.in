@@ -1,8 +1,8 @@
 
-# This makefile was generated using '%{command_line}'
+# Makefile for Botan %{version} generated using
+# '%{command_line}'
 
 # Paths to relevant programs
-
 CXX            = %{cxx}
 LINKER         = %{linker}
 AR             = %{ar_command}
@@ -10,10 +10,10 @@ AR_OPTIONS     = %{ar_options}
 PYTHON_EXE     = %{python_exe}
 
 # Compiler Flags
-
 ABI_FLAGS      = %{cc_sysroot} %{cxx_abi_flags}
 LANG_FLAGS     = %{cc_lang_flags} %{os_feature_macros}
-CXXFLAGS       = %{cc_compile_flags} -DBOTAN_IS_BEING_BUILT
+LANG_EXE_FLAGS = %{cc_lang_binary_linker_flags}
+CXXFLAGS       = %{cc_compile_flags}
 WARN_FLAGS     = %{cc_warning_flags}
 LIB_FLAGS      = %{lib_flags}
 LDFLAGS        = %{ldflags}
@@ -24,6 +24,9 @@ LIB_LINKS_TO        = %{external_link_cmd} %{link_to}
 BUILD_DIR_LINK_PATH = %{build_dir_link_path}
 EXE_LINKS_TO        = %{link_to_botan} $(LIB_LINKS_TO) %{extra_libs}
 
+# Note: Remember to adapt the generation of compile_commands.json as well as ninja.in,
+#       when changing any of those variables or their associations to compilation units.
+#       See compile_commands.json.in, ninja.in and configure.py (generate_build_info)
 BUILD_FLAGS    = $(ABI_FLAGS) $(LANG_FLAGS) $(CXXFLAGS) $(WARN_FLAGS)
 
 SCRIPTS_DIR    = %{scripts_dir}
@@ -45,7 +48,7 @@ docs: %{doc_stamp_file}
 # Misc targets
 
 %{if make_supports_phony}
-.PHONY: all cli libs tests check docs clean distclean install
+.PHONY: all cli libs tests check docs clean distclean install fmt tidy
 %{endif}
 
 %{doc_stamp_file}: %{doc_dir}/*.rst %{doc_dir}/api_ref/*.rst %{doc_dir}/dev_ref/*.rst
@@ -58,10 +61,16 @@ distclean:
 	"$(PYTHON_EXE)" "$(SCRIPTS_DIR)/cleanup.py" --build-dir="%{build_dir}" --distclean
 
 install: %{install_targets}
-	"$(PYTHON_EXE)" "$(SCRIPTS_DIR)/install.py" --prefix="%{prefix}" --build-dir="%{build_dir}" --bindir="%{bindir}" --libdir="%{libdir}" --docdir="%{docdir}" --includedir="%{includedir}"
+	"$(PYTHON_EXE)" "$(SCRIPTS_DIR)/install.py" --build-dir="%{build_dir}"
 
 check: tests
 	"$(PYTHON_EXE)" "$(SCRIPTS_DIR)/check.py" --build-dir="%{build_dir}"
+
+fmt:
+	"$(PYTHON_EXE)" "$(SCRIPTS_DIR)/dev_tools/run_clang_format.py"
+
+tidy:
+	"$(PYTHON_EXE)" "$(SCRIPTS_DIR)/dev_tools/run_clang_tidy.py" --only-changed-files
 
 # Object Files
 LIBOBJS = %{join lib_objs}
@@ -73,10 +82,10 @@ TESTOBJS = %{join test_objs}
 # Executable targets
 
 $(CLI): $(LIBRARIES) $(CLIOBJS)
-	$(EXE_LINK_CMD) $(ABI_FLAGS) $(CLIOBJS) $(BUILD_DIR_LINK_PATH) $(LDFLAGS) $(EXE_LINKS_TO) %{output_to_exe}$@
+	$(EXE_LINK_CMD) $(ABI_FLAGS) $(CLIOBJS) $(BUILD_DIR_LINK_PATH) $(LANG_EXE_FLAGS) $(LDFLAGS) $(EXE_LINKS_TO) %{output_to_exe}$@
 
 $(TEST): $(LIBRARIES) $(TESTOBJS)
-	$(EXE_LINK_CMD) $(ABI_FLAGS) $(TESTOBJS) $(BUILD_DIR_LINK_PATH) $(LDFLAGS) $(EXE_LINKS_TO) %{output_to_exe}$@
+	$(EXE_LINK_CMD) $(ABI_FLAGS) $(TESTOBJS) $(BUILD_DIR_LINK_PATH) $(LANG_EXE_FLAGS) $(LDFLAGS) %{test_exe_extra_ldflags} $(EXE_LINKS_TO) %{output_to_exe}$@
 
 %{if build_fuzzers}
 
@@ -88,7 +97,15 @@ fuzzer_corpus:
 	git clone --depth=1 https://github.com/randombit/crypto-corpus.git fuzzer_corpus
 
 fuzzer_corpus_zip: fuzzer_corpus
-	./src/scripts/create_corpus_zip.py fuzzer_corpus %{fuzzobj_dir}
+	%{base_dir}/src/scripts/create_corpus_zip.py fuzzer_corpus %{fuzzobj_dir}
+
+%{endif}
+
+%{if build_examples}
+
+EXAMPLES = %{example_bin}
+
+examples: $(LIBRARIES) $(EXAMPLES)
 
 %{endif}
 
@@ -98,7 +115,7 @@ bogo_shim: %{out_dir}/botan_bogo_shim
 
 # BoGo shim
 %{out_dir}/botan_bogo_shim: %{bogo_shim_src} $(LIBRARIES)
-	$(CXX) $(BUILD_FLAGS) %{include_paths} %{bogo_shim_src} $(BUILD_DIR_LINK_PATH) $(LDFLAGS) $(EXE_LINKS_TO) %{output_to_exe}$@
+	$(CXX) $(BUILD_FLAGS) -DBOTAN_IS_BEING_BUILT %{public_include_flags} %{internal_include_flags} %{external_include_flags} %{bogo_shim_src} $(BUILD_DIR_LINK_PATH) $(LDFLAGS) $(EXE_LINKS_TO) %{output_to_exe}$@
 
 %{endif}
 
@@ -125,23 +142,31 @@ bogo_shim: %{out_dir}/botan_bogo_shim
 
 %{for lib_build_info}
 %{obj}: %{src}
-	$(CXX) $(LIB_FLAGS) $(BUILD_FLAGS) %{isa_flags} %{include_paths} %{dash_c} %{src} %{dash_o}$@
+	$(CXX) $(LIB_FLAGS) $(BUILD_FLAGS) -DBOTAN_IS_BEING_BUILT %{isa_flags} %{public_include_flags} %{internal_include_flags} %{external_include_flags} %{dash_c} %{src} %{dash_o}$@
 %{endfor}
 
 %{for cli_build_info}
 %{obj}: %{src}
-	$(CXX) $(BUILD_FLAGS) %{isa_flags} %{include_paths} %{dash_c} %{src} %{dash_o}$@
+	$(CXX) $(BUILD_FLAGS) -DBOTAN_IS_BEING_BUILT %{isa_flags} %{public_include_flags} %{internal_include_flags} %{external_include_flags} %{dash_c} %{src} %{dash_o}$@
 %{endfor}
 
 %{for test_build_info}
 %{obj}: %{src}
-	$(CXX) $(BUILD_FLAGS) %{isa_flags} %{include_paths} %{dash_c} %{src} %{dash_o}$@
+	$(CXX) $(BUILD_FLAGS) -DBOTAN_IS_BEING_BUILT %{isa_flags} %{public_include_flags} %{internal_include_flags} %{external_include_flags} %{dash_c} %{src} %{dash_o}$@
 %{endfor}
 
 %{for fuzzer_build_info}
 %{obj}: %{src}
-	$(CXX) $(BUILD_FLAGS) %{isa_flags} %{include_paths} %{dash_c} %{src} %{dash_o}$@
+	$(CXX) $(BUILD_FLAGS) -DBOTAN_IS_BEING_BUILT %{isa_flags} %{public_include_flags} %{internal_include_flags} %{external_include_flags} %{dash_c} %{src} %{dash_o}$@
 
 %{exe}: %{obj} $(LIBRARIES)
-	$(EXE_LINK_CMD) $(ABI_FLAGS) %{obj} $(BUILD_DIR_LINK_PATH) $(LDFLAGS) $(EXE_LINKS_TO) %{fuzzer_lib} %{output_to_exe}$@
+	$(EXE_LINK_CMD) $(ABI_FLAGS) %{obj} $(BUILD_DIR_LINK_PATH) $(LANG_EXE_FLAGS) $(LDFLAGS) $(EXE_LINKS_TO) %{fuzzer_lib} %{output_to_exe}$@
+%{endfor}
+
+%{for examples_build_info}
+%{obj}: %{src}
+	$(CXX) $(BUILD_FLAGS) %{isa_flags} %{public_include_flags} %{external_include_flags} %{dash_c} %{src} %{dash_o}$@
+
+%{exe}: %{obj} $(LIBRARIES)
+	$(EXE_LINK_CMD) $(ABI_FLAGS) %{obj} $(BUILD_DIR_LINK_PATH) $(LANG_EXE_FLAGS) $(LDFLAGS) $(EXE_LINKS_TO) %{fuzzer_lib} %{output_to_exe}$@
 %{endfor}

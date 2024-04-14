@@ -2,38 +2,48 @@
 UTIL_FUNCTIONS -> 20180903
 </defines>
 
+<module_info>
+name -> "Utilities"
+brief -> "Various utility functions and types"
+</module_info>
+
 load_on always
 
 <header:public>
 assert.h
-bswap.h
-calendar.h
-charset.h
+allocator.h
 compiler.h
+concepts.h
 data_src.h
 database.h
 exceptn.h
-loadstor.h
 mem_ops.h
-mul128.h
 mutex.h
-parsing.h
-rotate.h
 types.h
+strong_type.h
 version.h
-stl_compatibility.h
 </header:public>
 
 <header:internal>
+alignment_buffer.h
 bit_ops.h
+bswap.h
+calendar.h
+charset.h
 codec_base.h
 ct_utils.h
 donna128.h
 filesystem.h
+fmt.h
+loadstor.h
+mul128.h
 os_utils.h
+parsing.h
 prefetch.h
+rotate.h
 rounding.h
 safeint.h
+scan_name.h
 stl_util.h
 timer.h
 </header:internal>

@@ -9,38 +9,41 @@
 */
 
 #include "tests.h"
-#include <vector>
 #include <memory>
+#include <vector>
 
 #if defined(BOTAN_HAS_TLS)
 
    #include <botan/tls_client.h>
-   #include <botan/tls_server.h>
-   #include <botan/tls_policy.h>
-   #include <botan/tls_extensions.h>
    #include <botan/tls_exceptn.h>
+   #include <botan/tls_extensions.h>
+   #include <botan/tls_policy.h>
+   #include <botan/tls_server.h>
+   #include <botan/tls_session_manager_memory.h>
+   #include <botan/tls_session_manager_noop.h>
    #include <botan/internal/tls_reader.h>
 
    #include <botan/ec_group.h>
+   #include <botan/ecdh.h>
+   #include <botan/ecdsa.h>
    #include <botan/hex.h>
-   #include <botan/oids.h>
    #include <botan/pkcs10.h>
    #include <botan/rsa.h>
-   #include <botan/ecdsa.h>
    #include <botan/x509_ca.h>
    #include <botan/x509self.h>
-
-   #if defined(BOTAN_HAS_DSA)
-      #include <botan/dsa.h>
-   #endif
-
-   #if defined(BOTAN_HAS_SRP6)
-      #include <botan/srp6.h>
-   #endif
 
    #if defined(BOTAN_HAS_TLS_SQLITE3_SESSION_MANAGER)
       #include <botan/tls_session_manager_sqlite.h>
    #endif
+
+namespace Botan::TLS {
+
+// TODO: remove this, once TLS 1.3 is fully implemented
+class Strict_Policy_Without_TLS13 : public Strict_Policy {
+      bool allow_tls13() const override { return false; }
+};
+
+}  // namespace Botan::TLS
 
 #endif
 
@@ -49,8 +52,7 @@ namespace Botan_Tests {
 namespace {
 
 #if defined(BOTAN_HAS_TLS)
-class Credentials_Manager_Test final : public Botan::Credentials_Manager
-   {
+class Credentials_Manager_Test final : public Botan::Credentials_Manager {
    public:
       Credentials_Manager_Test(bool with_client_certs,
                                const Botan::X509_Certificate& rsa_cert,
@@ -60,176 +62,135 @@ class Credentials_Manager_Test final : public Botan::Credentials_Manager
                                const Botan::X509_Certificate& ecdsa_cert,
                                Botan::Private_Key* ecdsa_key,
                                const Botan::X509_Certificate& ecdsa_ca,
-                               const Botan::X509_CRL& ecdsa_crl,
-                               const Botan::X509_Certificate* dsa_cert,
-                               Botan::Private_Key* dsa_key,
-                               const Botan::X509_Certificate* dsa_ca,
-                               Botan::X509_CRL* dsa_crl) :
-         m_rsa_cert(rsa_cert),
-         m_rsa_ca(rsa_ca),
-         m_rsa_key(rsa_key),
-         m_ecdsa_cert(ecdsa_cert),
-         m_ecdsa_ca(ecdsa_ca),
-         m_ecdsa_key(ecdsa_key),
-         m_dsa_cert(dsa_cert),
-         m_dsa_ca(dsa_ca),
-         m_dsa_key(dsa_key),
-         m_dsa_crl(dsa_crl)
-         {
-         std::unique_ptr<Botan::Certificate_Store_In_Memory> store(new Botan::Certificate_Store_In_Memory);
+                               const Botan::X509_CRL& ecdsa_crl) :
+            m_rsa_cert(rsa_cert),
+            m_rsa_ca(rsa_ca),
+            m_rsa_key(rsa_key),
+            m_ecdsa_cert(ecdsa_cert),
+            m_ecdsa_ca(ecdsa_ca),
+            m_ecdsa_key(ecdsa_key) {
+         auto store = std::make_unique<Botan::Certificate_Store_In_Memory>();
          store->add_certificate(m_rsa_ca);
          store->add_certificate(m_ecdsa_ca);
          store->add_crl(rsa_crl);
          store->add_crl(ecdsa_crl);
 
-         if(m_dsa_ca != nullptr)
-            {
-            store->add_certificate(*m_dsa_ca);
-            }
-         if(m_dsa_crl != nullptr)
-            {
-            store->add_crl(*m_dsa_crl);
-            }
-
          m_stores.push_back(std::move(store));
          m_provides_client_certs = with_client_certs;
-         }
+      }
 
-      std::vector<Botan::Certificate_Store*>
-      trusted_certificate_authorities(const std::string&,
-                                      const std::string&) override
-         {
+      std::vector<Botan::Certificate_Store*> trusted_certificate_authorities(const std::string& /*type*/,
+                                                                             const std::string& /*context*/) override {
          std::vector<Botan::Certificate_Store*> v;
-         for(auto const& store : m_stores)
-            {
+         v.reserve(m_stores.size());
+         for(const auto& store : m_stores) {
             v.push_back(store.get());
-            }
-         return v;
          }
+         return v;
+      }
 
-      std::vector<Botan::X509_Certificate> find_cert_chain(
-         const std::vector<std::string>& cert_key_types,
-         const std::vector<Botan::X509_DN>& acceptable_CAs,
-         const std::string& type,
-         const std::string& context) override
-         {
+      std::vector<Botan::X509_Certificate> find_cert_chain(const std::vector<std::string>& cert_key_types,
+                                                           const std::vector<Botan::AlgorithmIdentifier>& /*unused*/,
+                                                           const std::vector<Botan::X509_DN>& acceptable_CAs,
+                                                           const std::string& type,
+                                                           const std::string& context) override {
+         BOTAN_UNUSED(context);
          std::vector<Botan::X509_Certificate> chain;
 
-         if(m_acceptable_cas.empty())
+         if(m_acceptable_cas.empty()) {
             m_acceptable_cas = acceptable_CAs;
+         }
 
-         if(type == "tls-server" || (type == "tls-client" && m_provides_client_certs))
-            {
-            for(auto const& key_type : cert_key_types)
-               {
-               if(key_type == "RSA")
-                  {
+         if(type == "tls-server" || (type == "tls-client" && m_provides_client_certs)) {
+            for(const auto& key_type : cert_key_types) {
+               if(key_type == "RSA") {
                   chain.push_back(m_rsa_cert);
                   chain.push_back(m_rsa_ca);
                   break;
-                  }
-               else if(key_type == "ECDSA")
-                  {
+               } else if(key_type == "ECDSA") {
                   chain.push_back(m_ecdsa_cert);
                   chain.push_back(m_ecdsa_ca);
                   break;
-                  }
-#if defined(BOTAN_HAS_DSA)
-               else if(key_type == "DSA")
-                  {
-                  if(m_dsa_cert == nullptr || m_dsa_ca == nullptr)
-                     {
-                     throw Test_Error("No DSA certificates set for " + type + "/" + context);
-                     }
-                  chain.push_back(*m_dsa_cert);
-                  chain.push_back(*m_dsa_ca);
-                  break;
-                  }
-#else
-               BOTAN_UNUSED(context);
-#endif
                }
             }
+         }
 
          return chain;
-         }
+      }
 
-      Botan::Private_Key* private_key_for(const Botan::X509_Certificate& crt,
-                                          const std::string&,
-                                          const std::string&) override
-         {
-         if(crt == m_rsa_cert)
-            {
-            return m_rsa_key.get();
-            }
-         if(crt == m_ecdsa_cert)
-            {
-            return m_ecdsa_key.get();
-            }
-         if(crt == *m_dsa_cert)
-            {
-            return m_dsa_key.get();
-            }
+      std::shared_ptr<Botan::Private_Key> private_key_for(const Botan::X509_Certificate& crt,
+                                                          const std::string& /*type*/,
+                                                          const std::string& /*context*/) override {
+         if(crt == m_rsa_cert) {
+            return m_rsa_key;
+         }
+         if(crt == m_ecdsa_cert) {
+            return m_ecdsa_key;
+         }
          return nullptr;
+      }
+
+      Botan::secure_vector<uint8_t> session_ticket_key() override {
+         return Botan::hex_decode_locked("AABBCCDDEEFF012345678012345678");
+      }
+
+      Botan::secure_vector<uint8_t> dtls_cookie_secret() override {
+         return Botan::hex_decode_locked("4AEA5EAD279CADEB537A594DA0E9DE3A");
+      }
+
+      std::vector<Botan::TLS::ExternalPSK> find_preshared_keys(
+         std::string_view host,
+         Botan::TLS::Connection_Side whoami,
+         const std::vector<std::string>& identities = {},
+         const std::optional<std::string>& prf = std::nullopt) override {
+         if(identities.empty()) {
+            return find_preshared_keys(host, whoami, identities, prf);
          }
 
-      Botan::SymmetricKey psk(const std::string& type,
-                              const std::string& context,
-                              const std::string&) override
-         {
-         if(type == "tls-server" && context == "session-ticket")
-            {
-            return Botan::SymmetricKey("AABBCCDDEEFF012345678012345678");
+         std::vector<Botan::TLS::ExternalPSK> psks;
+
+         if(host == "server.example.com") {
+            // PSKs for server and client are equal. For the sake of clarity,
+            // we're not simplifying this code further
+            if(whoami == Botan::TLS::Connection_Side::Client) {
+               psks.emplace_back(
+                  std::string{}, "SHA-256", Botan::hex_decode_locked("20B602D1475F2DF888FCB60D2AE03AFD"));
             }
 
-         if(type == "tls-server" && context == "dtls-cookie-secret")
-            {
-            return Botan::SymmetricKey("4AEA5EAD279CADEB537A594DA0E9DE3A");
+            if(whoami == Botan::TLS::Connection_Side::Server) {
+               psks.emplace_back(
+                  std::string{}, "SHA-256", Botan::hex_decode_locked("20B602D1475F2DF888FCB60D2AE03AFD"));
             }
-
-         if(context == "server.example.com" && type == "tls-client")
-            {
-            return Botan::SymmetricKey("20B602D1475F2DF888FCB60D2AE03AFD");
-            }
-
-         if(context == "server.example.com" && type == "tls-server")
-            {
-            return Botan::SymmetricKey("20B602D1475F2DF888FCB60D2AE03AFD");
-            }
-
-         throw Test_Error("No PSK set for " + type + "/" + context);
          }
+
+         return psks;
+      }
 
       const std::vector<Botan::X509_DN>& get_acceptable_cas() const { return m_acceptable_cas; }
 
    private:
       Botan::X509_Certificate m_rsa_cert, m_rsa_ca;
-      std::unique_ptr<Botan::Private_Key> m_rsa_key;
+      std::shared_ptr<Botan::Private_Key> m_rsa_key;
 
       Botan::X509_Certificate m_ecdsa_cert, m_ecdsa_ca;
-      std::unique_ptr<Botan::Private_Key> m_ecdsa_key;
+      std::shared_ptr<Botan::Private_Key> m_ecdsa_key;
 
-      std::unique_ptr<const Botan::X509_Certificate> m_dsa_cert, m_dsa_ca;
-      std::unique_ptr<Botan::Private_Key> m_dsa_key;
-      std::unique_ptr<Botan::X509_CRL> m_dsa_crl;
       std::vector<std::unique_ptr<Botan::Certificate_Store>> m_stores;
       bool m_provides_client_certs;
       std::vector<Botan::X509_DN> m_acceptable_cas;
-   };
+};
 
-Botan::Credentials_Manager*
-create_creds(Botan::RandomNumberGenerator& rng,
-             bool with_client_certs = false)
-   {
+std::shared_ptr<Credentials_Manager_Test> create_creds(Botan::RandomNumberGenerator& rng,
+                                                       bool with_client_certs = false) {
    // rsa and ecdsa are required for the tls module
    const Botan::EC_Group ecdsa_params("secp256r1");
    const size_t rsa_params = 1024;
 
-   std::unique_ptr<Botan::Private_Key> rsa_ca_key(new Botan::RSA_PrivateKey(rng, rsa_params));
-   std::unique_ptr<Botan::Private_Key> rsa_srv_key(new Botan::RSA_PrivateKey(rng, rsa_params));
+   auto rsa_ca_key = std::make_unique<Botan::RSA_PrivateKey>(rng, rsa_params);
+   auto rsa_srv_key = std::make_unique<Botan::RSA_PrivateKey>(rng, rsa_params);
 
-   std::unique_ptr<Botan::Private_Key> ecdsa_ca_key(new Botan::ECDSA_PrivateKey(rng, ecdsa_params));
-   std::unique_ptr<Botan::Private_Key> ecdsa_srv_key(new Botan::ECDSA_PrivateKey(rng, ecdsa_params));
+   auto ecdsa_ca_key = std::make_unique<Botan::ECDSA_PrivateKey>(rng, ecdsa_params);
+   auto ecdsa_srv_key = std::make_unique<Botan::ECDSA_PrivateKey>(rng, ecdsa_params);
 
    Botan::X509_Cert_Options rsa_ca_opts("RSA Test CA/VT");
    Botan::X509_Cert_Options ecdsa_ca_opts("ECDSA Test CA/VT");
@@ -243,10 +204,8 @@ create_creds(Botan::RandomNumberGenerator& rng,
 
    const Botan::X509_Cert_Options server_opts("server.example.com");
 
-   const Botan::PKCS10_Request rsa_req =
-      Botan::X509::create_cert_req(server_opts, *rsa_srv_key, "SHA-256", rng);
-   const Botan::PKCS10_Request ecdsa_req =
-      Botan::X509::create_cert_req(server_opts, *ecdsa_srv_key, "SHA-256", rng);
+   const Botan::PKCS10_Request rsa_req = Botan::X509::create_cert_req(server_opts, *rsa_srv_key, "SHA-256", rng);
+   const Botan::PKCS10_Request ecdsa_req = Botan::X509::create_cert_req(server_opts, *ecdsa_srv_key, "SHA-256", rng);
 
    Botan::X509_CA rsa_ca(rsa_ca_cert, *rsa_ca_key, "SHA-256", rng);
    Botan::X509_CA ecdsa_ca(ecdsa_ca_cert, *ecdsa_ca_key, "SHA-256", rng);
@@ -257,10 +216,8 @@ create_creds(Botan::RandomNumberGenerator& rng,
    const Botan::X509_Time start_time(now);
    const Botan::X509_Time end_time(now + years(1));
 
-   const Botan::X509_Certificate rsa_srv_cert =
-      rsa_ca.sign_request(rsa_req, rng, start_time, end_time);
-   const Botan::X509_Certificate ecdsa_srv_cert =
-      ecdsa_ca.sign_request(ecdsa_req, rng, start_time, end_time);
+   const Botan::X509_Certificate rsa_srv_cert = rsa_ca.sign_request(rsa_req, rng, start_time, end_time);
+   const Botan::X509_Certificate ecdsa_srv_cert = ecdsa_ca.sign_request(ecdsa_req, rng, start_time, end_time);
 
    Botan::X509_CRL rsa_crl = rsa_ca.new_crl(rng);
    Botan::X509_CRL ecdsa_crl = ecdsa_ca.new_crl(rng);
@@ -272,352 +229,238 @@ create_creds(Botan::RandomNumberGenerator& rng,
    std::unique_ptr<Botan::X509_Certificate> dsa_srv_cert;
    std::unique_ptr<Botan::X509_Certificate> dsa_ca_cert;
 
-#if defined(BOTAN_HAS_DSA)
-   const Botan::DL_Group dsa_params("dsa/jce/1024");
+   return std::make_shared<Credentials_Manager_Test>(with_client_certs,
+                                                     rsa_srv_cert,
+                                                     rsa_srv_key.release(),
+                                                     rsa_ca_cert,
+                                                     rsa_crl,
+                                                     ecdsa_srv_cert,
+                                                     ecdsa_srv_key.release(),
+                                                     ecdsa_ca_cert,
+                                                     ecdsa_crl);
+}
 
-   dsa_ca_key.reset(new Botan::DSA_PrivateKey(rng, dsa_params));
-   dsa_srv_key.reset(new Botan::DSA_PrivateKey(rng, dsa_params));
-
-   Botan::X509_Cert_Options dsa_ca_opts("DSA Test CA/VT");
-   dsa_ca_opts.CA_key(1);
-
-   dsa_ca_cert.reset(new Botan::X509_Certificate(
-                        Botan::X509::create_self_signed_cert(dsa_ca_opts, *dsa_ca_key, "SHA-256", rng)));
-
-   const Botan::PKCS10_Request dsa_req =
-      Botan::X509::create_cert_req(server_opts, *dsa_srv_key, "SHA-256", rng);
-
-   Botan::X509_CA dsa_ca(*dsa_ca_cert, *dsa_ca_key, "SHA-256", rng);
-   dsa_srv_cert.reset(new Botan::X509_Certificate(
-                         dsa_ca.sign_request(dsa_req, rng, start_time, end_time)));
-
-   dsa_crl.reset(new Botan::X509_CRL(dsa_ca.new_crl(rng)));
-#endif
-
-   Credentials_Manager_Test* cmt = new Credentials_Manager_Test(
-      with_client_certs,
-      rsa_srv_cert, rsa_srv_key.release(), rsa_ca_cert, rsa_crl,
-      ecdsa_srv_cert, ecdsa_srv_key.release(), ecdsa_ca_cert, ecdsa_crl,
-      dsa_srv_cert.release(), dsa_srv_key.release(), dsa_ca_cert.release(), dsa_crl.release());
-
-   return cmt;
-   }
-
-#if defined(BOTAN_HAS_SRP6)
-Botan::Credentials_Manager*
-create_srp6_creds(Botan::RandomNumberGenerator& rng)
-   {
-   class Credentials_Manager_SRP6 : public Botan::Credentials_Manager
-      {
-      public:
-         Credentials_Manager_SRP6(Botan::RandomNumberGenerator& rng)
-            {
-            m_group_id = "modp/srp/1024";
-            m_username = "srp6_username";
-            m_password = "srp6_password";
-            m_salt.resize(16);
-            rng.randomize(m_salt.data(), m_salt.size());
-
-            m_verifier = Botan::generate_srp6_verifier(m_username,
-                                                       m_password,
-                                                       m_salt,
-                                                       m_group_id,
-                                                       "SHA-1");
-            }
-
-         bool attempt_srp(const std::string& /*type*/,
-                          const std::string& /*context*/) override
-            {
-            return true;
-            }
-
-         std::string srp_identifier(const std::string& /*type*/,
-                                    const std::string& /*context*/) override
-            {
-            return m_username;
-            }
-
-         std::string srp_password(const std::string& /*type*/,
-                                  const std::string& /*context*/,
-                                  const std::string& identifier) override
-            {
-            if(identifier == m_username)
-               return m_password;
-            return "";
-            }
-
-         bool srp_verifier(const std::string& /*type*/,
-                           const std::string& /*context*/,
-                           const std::string& identifier,
-                           std::string& group_name,
-                           Botan::BigInt& verifier,
-                           std::vector<uint8_t>& salt,
-                           bool generate_fake_on_unknown) override
-            {
-            // FIXME test generate_fake_on_unknown behavior
-            if(identifier == m_username)
-               {
-               group_name = m_group_id;
-               verifier = m_verifier;
-               salt = m_salt;
-               return true;
-               }
-            else if(generate_fake_on_unknown)
-               {
-               group_name = m_group_id;
-               verifier = m_verifier + 1;
-               salt = m_salt;
-               return true;
-               }
-            else
-               return false;
-            }
-
-         std::string m_username;
-         std::string m_password;
-         std::vector<uint8_t> m_salt;
-         std::string m_group_id;
-         Botan::BigInt m_verifier;
-      };
-
-   return new Credentials_Manager_SRP6(rng);
-   }
-#endif
-
-
-class TLS_Handshake_Test final
-   {
+class TLS_Handshake_Test final {
    public:
       TLS_Handshake_Test(const std::string& test_descr,
                          Botan::TLS::Protocol_Version offer_version,
-                         Botan::Credentials_Manager& creds,
-                         const Botan::TLS::Policy& client_policy,
-                         const Botan::TLS::Policy& server_policy,
-                         Botan::RandomNumberGenerator& rng,
-                         Botan::TLS::Session_Manager& client_sessions,
-                         Botan::TLS::Session_Manager& server_sessions,
+                         const std::shared_ptr<Credentials_Manager_Test>& creds,
+                         const std::shared_ptr<const Botan::TLS::Policy>& client_policy,
+                         const std::shared_ptr<const Botan::TLS::Policy>& server_policy,
+                         const std::shared_ptr<Botan::RandomNumberGenerator>& rng,
+                         const std::shared_ptr<Botan::TLS::Session_Manager>& client_sessions,
+                         const std::shared_ptr<Botan::TLS::Session_Manager>& server_sessions,
                          bool expect_client_auth) :
-         m_offer_version(offer_version),
-         m_results(test_descr),
-         m_creds(creds),
-         m_client_policy(client_policy),
-         m_client_sessions(client_sessions),
-         m_rng(rng),
-         m_client_auth(expect_client_auth)
-         {
-         m_server_cb.reset(new Test_Callbacks(m_results, offer_version, m_s2c, m_server_recv));
-         m_client_cb.reset(new Test_Callbacks(m_results, offer_version, m_c2s, m_client_recv));
+            m_offer_version(offer_version),
+            m_results(test_descr),
+            m_creds(creds),
+            m_client_policy(client_policy),
+            m_client_sessions(client_sessions),
+            m_rng(rng),
+            m_client_auth(expect_client_auth) {
+         m_server_cb = std::make_shared<Test_Callbacks>(m_results, offer_version, m_s2c, m_server_recv);
+         m_client_cb = std::make_shared<Test_Callbacks>(m_results, offer_version, m_c2s, m_client_recv);
 
-         m_server.reset(
-            new Botan::TLS::Server(*m_server_cb, server_sessions, m_creds, server_policy, m_rng,
-                                   offer_version.is_datagram_protocol())
-            );
+         bool is_dtls = offer_version.is_datagram_protocol();
 
-         }
+         m_server =
+            std::make_unique<Botan::TLS::Server>(m_server_cb, server_sessions, m_creds, server_policy, m_rng, is_dtls);
+      }
 
       void go();
 
       const Test::Result& results() const { return m_results; }
 
-      void set_custom_client_tls_session_established_callback(std::function<void(const Botan::TLS::Session&)> clbk)
-         {
+      void set_custom_client_tls_session_established_callback(
+         std::function<void(const Botan::TLS::Session_Summary&)> clbk) {
          BOTAN_ASSERT_NONNULL(m_client_cb);
          m_client_cb->set_custom_tls_session_established_callback(std::move(clbk));
-         }
+      }
 
-      void set_custom_server_tls_session_established_callback(std::function<void(const Botan::TLS::Session&)> clbk)
-         {
+      void set_custom_server_tls_session_established_callback(
+         std::function<void(const Botan::TLS::Session_Summary&)> clbk) {
          BOTAN_ASSERT_NONNULL(m_server_cb);
          m_server_cb->set_custom_tls_session_established_callback(std::move(clbk));
-         }
+      }
 
-      void set_client_expected_handshake_alert(Botan::TLS::Alert alert)
-         {
+      void set_client_expected_handshake_alert(Botan::TLS::Alert alert) {
          BOTAN_ASSERT_NONNULL(m_client_cb);
          m_client_cb->set_expected_handshake_alert(alert);
-         }
+      }
 
-      void set_server_expected_handshake_alert(Botan::TLS::Alert alert)
-         {
+      void set_server_expected_handshake_alert(Botan::TLS::Alert alert) {
          BOTAN_ASSERT_NONNULL(m_server_cb);
          m_server_cb->set_expected_handshake_alert(alert);
-         }
+      }
 
    private:
-
-      class Test_Extension : public Botan::TLS::Extension
-         {
+      class Test_Extension : public Botan::TLS::Extension {
          public:
-            static Botan::TLS::Handshake_Extension_Type static_type()
-               { return static_cast<Botan::TLS::Handshake_Extension_Type>(666); }
+            static Botan::TLS::Extension_Code static_type() { return static_cast<Botan::TLS::Extension_Code>(666); }
 
-            Botan::TLS::Handshake_Extension_Type type() const override { return static_type(); }
+            Botan::TLS::Extension_Code type() const override { return static_type(); }
 
-            std::vector<uint8_t> serialize(Botan::TLS::Connection_Side) const override { return m_buf; }
+            std::vector<uint8_t> serialize(Botan::TLS::Connection_Side /*whoami*/) const override { return m_buf; }
 
             const std::vector<uint8_t>& value() const { return m_buf; }
 
             bool empty() const override { return false; }
 
-            Test_Extension(Botan::TLS::Connection_Side side)
-               {
-               const uint8_t client_extn[6] = { 'c', 'l', 'i', 'e', 'n', 't' };
-               const uint8_t server_extn[6] = { 's', 'e', 'r', 'v', 'e', 'r' };
+            explicit Test_Extension(Botan::TLS::Connection_Side side) {
+               const uint8_t client_extn[6] = {'c', 'l', 'i', 'e', 'n', 't'};
+               const uint8_t server_extn[6] = {'s', 'e', 'r', 'v', 'e', 'r'};
 
-               Botan::TLS::append_tls_length_value(m_buf,
-                                                   (side == Botan::TLS::CLIENT) ? client_extn : server_extn,
-                                                   6, 1);
-               }
+               Botan::TLS::append_tls_length_value(
+                  m_buf, (side == Botan::TLS::Connection_Side::Client) ? client_extn : server_extn, 6, 1);
+            }
+
          private:
             std::vector<uint8_t> m_buf;
-         };
+      };
 
-      class Test_Callbacks : public Botan::TLS::Callbacks
-         {
+      class Test_Callbacks final : public Botan::TLS::Callbacks {
          public:
             Test_Callbacks(Test::Result& results,
                            Botan::TLS::Protocol_Version expected_version,
                            std::vector<uint8_t>& outbound,
                            std::vector<uint8_t>& recv_buf) :
-               m_results(results),
-               m_expected_version(expected_version),
-               m_outbound(outbound),
-               m_recv(recv_buf),
-               m_expected_handshake_alert(Botan::TLS::Alert::NULL_ALERT) // TODO: in Botan 3.0 this should be a std::optional
-               {}
+                  m_results(results), m_expected_version(expected_version), m_outbound(outbound), m_recv(recv_buf) {}
 
-            ~Test_Callbacks()
-               {
-               if(m_expected_handshake_alert.type() != Botan::TLS::Alert::NULL_ALERT)
-                  {
-                  m_results.test_failure("Expected: " + m_expected_handshake_alert.type_string() + " during handshake");
-                  }
+            Test_Callbacks(Test_Callbacks&&) = delete;
+            Test_Callbacks(const Test_Callbacks&) = delete;
+            Test_Callbacks& operator=(const Test_Callbacks&) = delete;
+            Test_Callbacks& operator=(Test_Callbacks&&) = delete;
+
+            ~Test_Callbacks() override {
+               if(m_expected_handshake_alert.has_value()) {
+                  m_results.test_failure("Expected: " + m_expected_handshake_alert->type_string() +
+                                         " during handshake");
                }
+            }
 
-            void tls_emit_data(const uint8_t bits[], size_t len) override
-               {
-               m_outbound.insert(m_outbound.end(), bits, bits + len);
-               }
+            void tls_emit_data(std::span<const uint8_t> bits) override {
+               m_outbound.insert(m_outbound.end(), bits.begin(), bits.end());
+            }
 
-            void tls_record_received(uint64_t /*seq*/, const uint8_t bits[], size_t len) override
-               {
-               m_recv.insert(m_recv.end(), bits, bits + len);
-               }
+            void tls_record_received(uint64_t /*seq*/, std::span<const uint8_t> bits) override {
+               m_recv.insert(m_recv.end(), bits.begin(), bits.end());
+            }
 
-            void tls_alert(Botan::TLS::Alert alert) override
-               {
+            void tls_alert(Botan::TLS::Alert alert) override {
                // TODO test that it is a no_renegotiation alert
 
-               if(m_expected_handshake_alert.type() != Botan::TLS::Alert::NULL_ALERT)
-                  {
-                  if(m_expected_handshake_alert.type() != alert.type())
-                     {
+               if(m_expected_handshake_alert.has_value()) {
+                  if(m_expected_handshake_alert->type() != alert.type()) {
                      m_results.test_failure("Got unexpected alert: " + alert.type_string() +
-                                            " expected: " + m_expected_handshake_alert.type_string());
-                     }
-                  else
-                     {
+                                            " expected: " + m_expected_handshake_alert->type_string());
+                  } else {
                      // acknowledge that the expected Alert was detected
-                     m_results.test_note("saw expected alert: " + m_expected_handshake_alert.type_string());
-                     m_expected_handshake_alert = Botan::TLS::Alert::NULL_ALERT;
-                     }
+                     m_results.test_note("saw expected alert: " + m_expected_handshake_alert->type_string());
+                     m_expected_handshake_alert.reset();
                   }
                }
+            }
 
-            void tls_modify_extensions(Botan::TLS::Extensions& extn, Botan::TLS::Connection_Side which_side) override
-               {
+            void tls_modify_extensions(Botan::TLS::Extensions& extn,
+                                       Botan::TLS::Connection_Side which_side,
+                                       Botan::TLS::Handshake_Type /* unused */) override {
                extn.add(new Test_Extension(which_side));
 
                // Insert an unsupported signature scheme as highest prio, to ensure we are tolerant of this
-               if(auto sig_algs = extn.get<Botan::TLS::Signature_Algorithms>())
-                  {
+               if(auto sig_algs = extn.take<Botan::TLS::Signature_Algorithms>()) {
                   std::vector<Botan::TLS::Signature_Scheme> schemes = sig_algs->supported_schemes();
                   // 0x0301 is RSA PKCS1/SHA-224, which is not supported anymore
-                  schemes.insert(schemes.begin(), static_cast<Botan::TLS::Signature_Scheme>(0x0301));
+                  schemes.insert(schemes.begin(), 0x0301);
                   // This replaces the previous extension value
                   extn.add(new Botan::TLS::Signature_Algorithms(schemes));
-                  }
                }
+            }
 
-            void tls_examine_extensions(const Botan::TLS::Extensions& extn, Botan::TLS::Connection_Side which_side) override
-               {
-               Botan::TLS::Extension* test_extn = extn.get(static_cast<Botan::TLS::Handshake_Extension_Type>(666));
+            void tls_examine_extensions(const Botan::TLS::Extensions& extn,
+                                        Botan::TLS::Connection_Side which_side,
+                                        Botan::TLS::Handshake_Type /*unused*/) override {
+               Botan::TLS::Extension* test_extn = extn.get(static_cast<Botan::TLS::Extension_Code>(666));
 
-               if(test_extn == nullptr)
-                  {
+               if(test_extn == nullptr) {
                   m_results.test_failure("Did not receive test extension from peer");
-                  }
-               else
-                  {
+               } else {
                   Botan::TLS::Unknown_Extension* unknown_ext = dynamic_cast<Botan::TLS::Unknown_Extension*>(test_extn);
 
-                  if(unknown_ext)
-                     {
+                  if(unknown_ext) {
                      const std::vector<uint8_t> val = unknown_ext->value();
 
-                     if(m_results.test_eq("Expected size for test extn", val.size(), 7))
-                        {
-                        if(which_side == Botan::TLS::CLIENT)
+                     if(m_results.test_eq("Expected size for test extn", val.size(), 7)) {
+                        if(which_side == Botan::TLS::Connection_Side::Client) {
                            m_results.test_eq("Expected extension value", val, "06636C69656E74");
-                        else
+                        } else {
                            m_results.test_eq("Expected extension value", val, "06736572766572");
                         }
                      }
-                  else
-                     {
+                  } else {
                      m_results.test_failure("Unknown extension type had unexpected type at runtime");
-                     }
                   }
                }
+            }
 
-            bool tls_session_established(const Botan::TLS::Session& session) override
-               {
-               const std::string session_report =
-                  "Session established " + session.version().to_string() + " " +
-                  session.ciphersuite().to_string() + " " +
-                  Botan::hex_encode(session.session_id());
+            void tls_session_established(const Botan::TLS::Session_Summary& session) override {
+               const std::string session_report = "Session established " + session.version().to_string() + " " +
+                                                  session.ciphersuite().to_string() + " " +
+                                                  Botan::hex_encode(session.session_id().get());
 
                m_results.test_note(session_report);
 
-               if(m_session_established_callback)
-                  {
+               if(m_session_established_callback) {
                   m_session_established_callback(session);
-                  }
-
-               if(session.version() != m_expected_version)
-                  {
-                  m_results.test_failure("Expected " + m_expected_version.to_string() +
-                                         " negotiated " + session.version().to_string());
-                  }
-
-               return true;
                }
 
-            std::string tls_server_choose_app_protocol(const std::vector<std::string>& protos) override
-               {
+               if(session.version() != m_expected_version) {
+                  m_results.test_failure("Expected " + m_expected_version.to_string() + " negotiated " +
+                                         session.version().to_string());
+               }
+            }
+
+            std::string tls_server_choose_app_protocol(const std::vector<std::string>& protos) override {
                m_results.test_eq("ALPN protocol count", protos.size(), 2);
                m_results.test_eq("ALPN protocol 1", protos[0], "test/1");
                m_results.test_eq("ALPN protocol 2", protos[1], "test/2");
                return "test/3";
+            }
+
+            std::unique_ptr<Botan::PK_Key_Agreement_Key> tls_generate_ephemeral_key(
+               const std::variant<Botan::TLS::Group_Params, Botan::DL_Group>& group,
+               Botan::RandomNumberGenerator& rng) override {
+               if(std::holds_alternative<Botan::TLS::Group_Params>(group) &&
+                  std::get<Botan::TLS::Group_Params>(group).wire_code() == 0xFEE1) {
+                  const Botan::EC_Group ec_group("secp112r1");
+                  return std::make_unique<Botan::ECDH_PrivateKey>(rng, ec_group);
                }
 
-            virtual std::string tls_decode_group_param(Botan::TLS::Group_Params group_param) override
-               {
-               if(static_cast<uint16_t>(group_param) == 0xFEE1)
-                  return "secp112r1";
+               return Botan::TLS::Callbacks::tls_generate_ephemeral_key(group, rng);
+            }
 
-               return Botan::TLS::Callbacks::tls_decode_group_param(group_param);
+            Botan::secure_vector<uint8_t> tls_ephemeral_key_agreement(
+               const std::variant<Botan::TLS::Group_Params, Botan::DL_Group>& group,
+               const Botan::PK_Key_Agreement_Key& private_key,
+               const std::vector<uint8_t>& public_value,
+               Botan::RandomNumberGenerator& rng,
+               const Botan::TLS::Policy& policy) override {
+               if(std::holds_alternative<Botan::TLS::Group_Params>(group) &&
+                  std::get<Botan::TLS::Group_Params>(group).wire_code() == 0xFEE1) {
+                  const Botan::EC_Group ec_group("secp112r1");
+                  Botan::ECDH_PublicKey peer_key(ec_group, ec_group.OS2ECP(public_value));
+                  Botan::PK_Key_Agreement ka(private_key, rng, "Raw");
+                  return ka.derive_key(0, peer_key.public_value()).bits_of();
                }
 
-            void set_custom_tls_session_established_callback(std::function<void(const Botan::TLS::Session&)> clbk)
-               {
+               return Botan::TLS::Callbacks::tls_ephemeral_key_agreement(group, private_key, public_value, rng, policy);
+            }
+
+            void set_custom_tls_session_established_callback(
+               std::function<void(const Botan::TLS::Session_Summary&)> clbk) {
                m_session_established_callback = std::move(clbk);
-               }
+            }
 
-            void set_expected_handshake_alert(Botan::TLS::Alert alert)
-               {
-               m_expected_handshake_alert = alert;
-               }
+            void set_expected_handshake_alert(Botan::TLS::Alert alert) { m_expected_handshake_alert = alert; }
 
          private:
             Test::Result& m_results;
@@ -625,115 +468,109 @@ class TLS_Handshake_Test final
             std::vector<uint8_t>& m_outbound;
             std::vector<uint8_t>& m_recv;
 
-            std::function<void(const Botan::TLS::Session&)> m_session_established_callback;
-            Botan::TLS::Alert m_expected_handshake_alert;
-         };
+            std::function<void(const Botan::TLS::Session_Summary&)> m_session_established_callback;
+            std::optional<Botan::TLS::Alert> m_expected_handshake_alert;
+      };
 
       const Botan::TLS::Protocol_Version m_offer_version;
       Test::Result m_results;
 
-      Botan::Credentials_Manager& m_creds;
-      const Botan::TLS::Policy& m_client_policy;
-      Botan::TLS::Session_Manager& m_client_sessions;
-      Botan::RandomNumberGenerator& m_rng;
+      std::shared_ptr<Credentials_Manager_Test> m_creds;
+      std::shared_ptr<const Botan::TLS::Policy> m_client_policy;
+      std::shared_ptr<Botan::TLS::Session_Manager> m_client_sessions;
+      std::shared_ptr<Botan::RandomNumberGenerator> m_rng;
 
-      std::unique_ptr<Test_Callbacks> m_client_cb;
+      std::shared_ptr<Test_Callbacks> m_client_cb;
 
-      std::unique_ptr<Test_Callbacks> m_server_cb;
+      std::shared_ptr<Test_Callbacks> m_server_cb;
       std::unique_ptr<Botan::TLS::Server> m_server;
 
       const bool m_client_auth;
 
       std::vector<uint8_t> m_c2s, m_s2c, m_client_recv, m_server_recv;
-   };
+};
 
-void TLS_Handshake_Test::go()
-   {
+void TLS_Handshake_Test::go() {
    m_results.start_timer();
 
-   Botan::RandomNumberGenerator& rng = Test::rng();
-
-   const std::vector<std::string> protocols_offered = { "test/1", "test/2" };
+   const std::vector<std::string> protocols_offered = {"test/1", "test/2"};
 
    // Choose random application data to send
-   const size_t c_len = 1 + ((static_cast<size_t>(rng.next_byte()) << 4) ^ rng.next_byte());
+   const size_t c_len = 1 + ((static_cast<size_t>(m_rng->next_byte()) << 4) ^ m_rng->next_byte());
    std::vector<uint8_t> client_msg(c_len);
-   Test::rng().randomize(client_msg.data(), client_msg.size());
+   m_rng->randomize(client_msg.data(), client_msg.size());
    bool client_has_written = false;
 
-   const size_t s_len = 1 + ((static_cast<size_t>(rng.next_byte()) << 4) ^ rng.next_byte());
+   const size_t s_len = 1 + ((static_cast<size_t>(m_rng->next_byte()) << 4) ^ m_rng->next_byte());
    std::vector<uint8_t> server_msg(s_len);
-   Test::rng().randomize(server_msg.data(), server_msg.size());
+   m_rng->randomize(server_msg.data(), server_msg.size());
    bool server_has_written = false;
 
    std::unique_ptr<Botan::TLS::Client> client;
-   client.reset(
-      new Botan::TLS::Client(*m_client_cb, m_client_sessions, m_creds,
-                             m_client_policy, m_rng,
-                             Botan::TLS::Server_Information("server.example.com"),
-                             m_offer_version,
-                             protocols_offered));
+   client = std::make_unique<Botan::TLS::Client>(m_client_cb,
+                                                 m_client_sessions,
+                                                 m_creds,
+                                                 m_client_policy,
+                                                 m_rng,
+                                                 Botan::TLS::Server_Information("server.example.com"),
+                                                 m_offer_version,
+                                                 protocols_offered);
 
    size_t rounds = 0;
 
    bool client_handshake_completed = false;
    bool server_handshake_completed = false;
 
-   while(true)
-      {
+   while(true) {
       ++rounds;
 
-      if(rounds > 25)
-         {
+      if(rounds > 25) {
          m_results.test_failure("Still here after many rounds, deadlock?");
          break;
-         }
+      }
 
-      if(client_handshake_completed == false && client->is_active())
+      if(client_handshake_completed == false && client->is_active()) {
          client_handshake_completed = true;
+      }
 
-      if(server_handshake_completed == false && m_server->is_active())
+      if(server_handshake_completed == false && m_server->is_active()) {
          server_handshake_completed = true;
+      }
 
-      if(client->is_active() && client_has_written == false)
-         {
+      if(client->is_active() && client_has_written == false) {
          m_results.test_eq("client ALPN protocol", client->application_protocol(), "test/3");
 
          size_t sent_so_far = 0;
-         while(sent_so_far != client_msg.size())
-            {
+         while(sent_so_far != client_msg.size()) {
             const size_t left = client_msg.size() - sent_so_far;
-            const size_t rnd12 = (rng.next_byte() << 4) ^ rng.next_byte();
+            const size_t rnd12 = (m_rng->next_byte() << 4) ^ m_rng->next_byte();
             const size_t sending = std::min(left, rnd12);
 
             client->send(&client_msg[sent_so_far], sending);
             sent_so_far += sending;
-            }
-         client->send_warning_alert(Botan::TLS::Alert::NO_RENEGOTIATION);
-         client_has_written = true;
          }
+         client->send_warning_alert(Botan::TLS::Alert::NoRenegotiation);
+         client_has_written = true;
+      }
 
-      if(m_server->is_active() && server_has_written == false)
-         {
+      if(m_server->is_active() && server_has_written == false) {
          m_results.test_eq("server ALPN protocol", m_server->application_protocol(), "test/3");
 
          size_t sent_so_far = 0;
-         while(sent_so_far != server_msg.size())
-            {
+         while(sent_so_far != server_msg.size()) {
             const size_t left = server_msg.size() - sent_so_far;
-            const size_t rnd12 = (rng.next_byte() << 4) ^ rng.next_byte();
+            const size_t rnd12 = (m_rng->next_byte() << 4) ^ m_rng->next_byte();
             const size_t sending = std::min(left, rnd12);
 
             m_server->send(&server_msg[sent_so_far], sending);
             sent_so_far += sending;
-            }
-
-         m_server->send_warning_alert(Botan::TLS::Alert::NO_RENEGOTIATION);
-         server_has_written = true;
          }
 
-      if(m_c2s.size() > 0)
-         {
+         m_server->send_warning_alert(Botan::TLS::Alert::NoRenegotiation);
+         server_has_written = true;
+      }
+
+      if(!m_c2s.empty()) {
          /*
          * Use this as a temp value to hold the queues as otherwise they
          * might end up appending more in response to messages during the
@@ -742,75 +579,58 @@ void TLS_Handshake_Test::go()
          std::vector<uint8_t> input;
          std::swap(m_c2s, input);
 
-         try
-            {
+         try {
             size_t needed = m_server->received_data(input.data(), input.size());
             m_results.test_eq("full packet received", needed, 0);
-            }
-         catch(...)
-            { /* ignore exceptions */ }
-
-         continue;
+         } catch(...) { /* ignore exceptions */
          }
 
-      if(m_s2c.size() > 0)
-         {
+         continue;
+      }
+
+      if(!m_s2c.empty()) {
          std::vector<uint8_t> input;
          std::swap(m_s2c, input);
 
-         try
-            {
+         try {
             size_t needed = client->received_data(input.data(), input.size());
             m_results.test_eq("full packet received", needed, 0);
-            }
-         catch(...)
-            { /* ignore exceptions */ }
+         } catch(...) { /* ignore exceptions */
+         }
 
          continue;
-         }
+      }
 
-      if(m_client_recv.size())
-         {
+      if(!m_client_recv.empty()) {
          m_results.test_eq("client recv", m_client_recv, server_msg);
-         }
+      }
 
-      if(m_server_recv.size())
-         {
+      if(!m_server_recv.empty()) {
          m_results.test_eq("server recv", m_server_recv, client_msg);
-         }
+      }
 
-      if(client->is_closed() && m_server->is_closed())
-         {
+      if(client->is_closed() && m_server->is_closed()) {
          break;
-         }
+      }
 
-      if(m_server->is_active())
-         {
+      if(m_server->is_active()) {
          std::vector<Botan::X509_Certificate> certs = m_server->peer_cert_chain();
-         if(m_client_auth)
-            {
+         if(m_client_auth) {
             m_results.test_eq("got client certs", certs.size(), 2);
 
-            Credentials_Manager_Test& test_creds = dynamic_cast<Credentials_Manager_Test&>(m_creds);
+            std::vector<Botan::X509_DN> acceptable_CAs = m_creds->get_acceptable_cas();
 
-            std::vector<Botan::X509_DN> acceptable_CAs = test_creds.get_acceptable_cas();
+            m_results.test_eq("client got CA list", acceptable_CAs.size(), 2);  // RSA + ECDSA
 
-            m_results.test_gte("client got CA list", acceptable_CAs.size(), 2); // DSA is optional
-
-            for(const Botan::X509_DN& dn : acceptable_CAs)
-               {
-               m_results.test_eq("Expected CA country field",
-                                 dn.get_first_attribute("C"), "VT");
-               }
+            for(const Botan::X509_DN& dn : acceptable_CAs) {
+               m_results.test_eq("Expected CA country field", dn.get_first_attribute("C"), "VT");
             }
-         else
-            {
+         } else {
             m_results.test_eq("no client certs", certs.size(), 0);
-            }
          }
+      }
 
-      if(m_server_recv.size() && m_client_recv.size())
-         {
+      if(!m_server_recv.empty() && !m_client_recv.empty()) {
          Botan::SymmetricKey client_key = client->key_material_export("label", "context", 32);
          Botan::SymmetricKey server_key = m_server->key_material_export("label", "context", 32);
 
@@ -821,433 +641,438 @@ void TLS_Handshake_Test::go()
          client->close();
          m_results.confirm("Client is no longer active", !client->is_active());
          m_results.confirm("Client is closed", client->is_closed());
-         }
       }
-
-   m_results.end_timer();
    }
 
-class Test_Policy final : public Botan::TLS::Text_Policy
-   {
+   m_results.end_timer();
+}
+
+class Test_Policy final : public Botan::TLS::Text_Policy {
    public:
       Test_Policy() : Text_Policy("") {}
-      bool acceptable_protocol_version(Botan::TLS::Protocol_Version) const override
-         {
-         return true;
-         }
-      bool send_fallback_scsv(Botan::TLS::Protocol_Version) const override
-         {
-         return false;
-         }
 
-      size_t dtls_initial_timeout() const override
-         {
-         return 1;
-         }
-      size_t dtls_maximum_timeout() const override
-         {
-         return 8;
-         }
+      bool acceptable_protocol_version(Botan::TLS::Protocol_Version version) const override {
+         // TODO: handle TLS 1.3 server once the time is ripe.
+         return version.is_pre_tls_13();
+      }
 
-      size_t minimum_rsa_bits() const override
-         {
-         return 1024;
-         }
+      size_t dtls_initial_timeout() const override { return 1; }
 
-      size_t minimum_dsa_group_size() const override
-         {
-         return 1024;
-         }
+      size_t dtls_maximum_timeout() const override { return 8; }
 
-      size_t minimum_signature_strength() const override
-         {
-         return 80;
-         }
-   };
+      size_t minimum_rsa_bits() const override { return 1024; }
 
-class TLS_Unit_Tests final : public Test
-   {
+      size_t minimum_signature_strength() const override { return 80; }
+};
+
+class TLS_Unit_Tests final : public Test {
    private:
-      void test_with_policy(const std::string& test_descr,
-                            std::vector<Test::Result>& results,
-                            Botan::TLS::Session_Manager& client_ses,
-                            Botan::TLS::Session_Manager& server_ses,
-                            Botan::Credentials_Manager& creds,
-                            const std::vector<Botan::TLS::Protocol_Version>& versions,
-                            const Botan::TLS::Policy& policy,
-                            bool client_auth = false)
-         {
-         Botan::RandomNumberGenerator& rng = Test::rng();
-
-         try
-            {
-            for(auto const& version : versions)
-               {
-               TLS_Handshake_Test test(
-                  version.to_string() + " " + test_descr,
-                  version, creds, policy, policy, rng, client_ses, server_ses, client_auth);
+      static void test_with_policy(const std::string& test_descr,
+                                   std::vector<Test::Result>& results,
+                                   const std::shared_ptr<Botan::TLS::Session_Manager>& client_ses,
+                                   const std::shared_ptr<Botan::TLS::Session_Manager>& server_ses,
+                                   const std::shared_ptr<Credentials_Manager_Test>& creds,
+                                   const std::vector<Botan::TLS::Protocol_Version>& versions,
+                                   const std::shared_ptr<const Botan::TLS::Policy>& policy,
+                                   std::shared_ptr<Botan::RandomNumberGenerator>& rng,
+                                   bool client_auth = false) {
+         try {
+            for(const auto& version : versions) {
+               TLS_Handshake_Test test(version.to_string() + " " + test_descr,
+                                       version,
+                                       creds,
+                                       policy,
+                                       policy,
+                                       rng,
+                                       client_ses,
+                                       server_ses,
+                                       client_auth);
                test.go();
                results.push_back(test.results());
 
-               TLS_Handshake_Test test_resumption(
-                  version.to_string() + " " + test_descr,
-                  version, creds, policy, policy, rng, client_ses, server_ses, client_auth);
+               TLS_Handshake_Test test_resumption(version.to_string() + " " + test_descr,
+                                                  version,
+                                                  creds,
+                                                  policy,
+                                                  policy,
+                                                  rng,
+                                                  client_ses,
+                                                  server_ses,
+                                                  client_auth);
                test_resumption.go();
                results.push_back(test_resumption.results());
-               }
             }
-         catch(std::exception& e)
-            {
+         } catch(std::exception& e) {
             results.push_back(Test::Result::Failure(test_descr, e.what()));
-            }
+         }
+      }
+
+      static void test_all_versions(const std::string& test_descr,
+                                    std::vector<Test::Result>& results,
+                                    const std::shared_ptr<Botan::TLS::Session_Manager>& client_ses,
+                                    const std::shared_ptr<Botan::TLS::Session_Manager>& server_ses,
+                                    const std::shared_ptr<Credentials_Manager_Test>& creds,
+                                    std::shared_ptr<Botan::RandomNumberGenerator>& rng,
+                                    const std::string& kex_policy,
+                                    const std::string& cipher_policy,
+                                    const std::string& mac_policy,
+                                    const std::string& etm_policy,
+                                    bool client_auth = false) {
+         auto policy = std::make_shared<Test_Policy>();
+         policy->set("ciphers", cipher_policy);
+         policy->set("macs", mac_policy);
+         policy->set("key_exchange_methods", kex_policy);
+         policy->set("negotiate_encrypt_then_mac", etm_policy);
+
+         policy->set("allow_tls12", "true");
+         policy->set("allow_dtls12", "true");
+
+         if(kex_policy.find("RSA") != std::string::npos) {
+            policy->set("signature_methods", "IMPLICIT");
          }
 
-      void test_all_versions(const std::string& test_descr,
-                             std::vector<Test::Result>& results,
-                             Botan::TLS::Session_Manager& client_ses,
-                             Botan::TLS::Session_Manager& server_ses,
-                             Botan::Credentials_Manager& creds,
-                             const std::string& kex_policy,
-                             const std::string& cipher_policy,
-                             const std::string& mac_policy,
-                             const std::string& etm_policy,
-                             bool client_auth = false)
-         {
-         Test_Policy policy;
-         policy.set("ciphers", cipher_policy);
-         policy.set("macs", mac_policy);
-         policy.set("key_exchange_methods", kex_policy);
-         policy.set("negotiate_encrypt_then_mac", etm_policy);
+         std::vector<Botan::TLS::Protocol_Version> versions = {Botan::TLS::Protocol_Version::TLS_V12,
+                                                               Botan::TLS::Protocol_Version::DTLS_V12};
 
-         policy.set("allow_tls10", "true");
-         policy.set("allow_tls11", "true");
-         policy.set("allow_tls12", "true");
-         policy.set("allow_dtls10", "true");
-         policy.set("allow_dtls12", "true");
+         return test_with_policy(
+            test_descr, results, client_ses, server_ses, creds, versions, policy, rng, client_auth);
+      }
 
-         if(kex_policy.find("RSA") != std::string::npos || kex_policy.find("SRP") != std::string::npos)
-            {
-            policy.set("signature_methods", "IMPLICIT");
-            }
-
-         std::vector<Botan::TLS::Protocol_Version> versions =
-            {
-#if defined(BOTAN_HAS_TLS_V10)
-            Botan::TLS::Protocol_Version::TLS_V10,
-            Botan::TLS::Protocol_Version::TLS_V11,
-            Botan::TLS::Protocol_Version::DTLS_V10,
-#endif
-            Botan::TLS::Protocol_Version::TLS_V12,
-            Botan::TLS::Protocol_Version::DTLS_V12
-            };
-
-         return test_with_policy(test_descr, results, client_ses, server_ses, creds, versions, policy, client_auth);
-         }
-
-      void test_modern_versions(const std::string& test_descr,
-                                std::vector<Test::Result>& results,
-                                Botan::TLS::Session_Manager& client_ses,
-                                Botan::TLS::Session_Manager& server_ses,
-                                Botan::Credentials_Manager& creds,
-                                const std::string& kex_policy,
-                                const std::string& cipher_policy,
-                                const std::string& mac_policy = "AEAD",
-                                bool client_auth = false)
-         {
+      static void test_modern_versions(const std::string& test_descr,
+                                       std::vector<Test::Result>& results,
+                                       const std::shared_ptr<Botan::TLS::Session_Manager>& client_ses,
+                                       const std::shared_ptr<Botan::TLS::Session_Manager>& server_ses,
+                                       const std::shared_ptr<Credentials_Manager_Test>& creds,
+                                       std::shared_ptr<Botan::RandomNumberGenerator>& rng,
+                                       const std::string& kex_policy,
+                                       const std::string& cipher_policy,
+                                       const std::string& mac_policy = "AEAD",
+                                       bool client_auth = false) {
          std::map<std::string, std::string> no_extra_policies;
-         return test_modern_versions(test_descr, results, client_ses, server_ses, creds,
-                                     kex_policy, cipher_policy, mac_policy, no_extra_policies, client_auth);
+         return test_modern_versions(test_descr,
+                                     results,
+                                     client_ses,
+                                     server_ses,
+                                     creds,
+                                     rng,
+                                     kex_policy,
+                                     cipher_policy,
+                                     mac_policy,
+                                     no_extra_policies,
+                                     client_auth);
+      }
+
+      static void test_modern_versions(const std::string& test_descr,
+                                       std::vector<Test::Result>& results,
+                                       const std::shared_ptr<Botan::TLS::Session_Manager>& client_ses,
+                                       const std::shared_ptr<Botan::TLS::Session_Manager>& server_ses,
+                                       const std::shared_ptr<Credentials_Manager_Test>& creds,
+                                       std::shared_ptr<Botan::RandomNumberGenerator>& rng,
+                                       const std::string& kex_policy,
+                                       const std::string& cipher_policy,
+                                       const std::string& mac_policy,
+                                       const std::map<std::string, std::string>& extra_policies,
+                                       bool client_auth = false) {
+         auto policy = std::make_shared<Test_Policy>();
+         policy->set("ciphers", cipher_policy);
+         policy->set("macs", mac_policy);
+         policy->set("key_exchange_methods", kex_policy);
+         policy->set("allow_tls12", "true");
+         policy->set("allow_dtls12", "true");
+
+         if(kex_policy.find("RSA") != std::string::npos) {
+            policy->set("signature_methods", "IMPLICIT");
          }
 
-      void test_modern_versions(const std::string& test_descr,
-                                std::vector<Test::Result>& results,
-                                Botan::TLS::Session_Manager& client_ses,
-                                Botan::TLS::Session_Manager& server_ses,
-                                Botan::Credentials_Manager& creds,
-                                const std::string& kex_policy,
-                                const std::string& cipher_policy,
-                                const std::string& mac_policy,
-                                const std::map<std::string, std::string>& extra_policies,
-                                bool client_auth = false)
-         {
-         Test_Policy policy;
-         policy.set("ciphers", cipher_policy);
-         policy.set("macs", mac_policy);
-         policy.set("key_exchange_methods", kex_policy);
-         policy.set("allow_tls10", "false");
-         policy.set("allow_tls11", "false");
-         policy.set("allow_tls12", "true");
-         policy.set("allow_dtls10", "false");
-         policy.set("allow_dtls12", "true");
-
-         if(kex_policy.find("RSA") != std::string::npos)
-            {
-            policy.set("signature_methods", "IMPLICIT");
-            }
-
-         for(auto const& kv : extra_policies)
-            {
-            policy.set(kv.first, kv.second);
-            }
-
-         std::vector<Botan::TLS::Protocol_Version> versions =
-            {
-            Botan::TLS::Protocol_Version::TLS_V12,
-            Botan::TLS::Protocol_Version::DTLS_V12
-            };
-
-         return test_with_policy(test_descr, results, client_ses, server_ses, creds, versions, policy, client_auth);
+         for(const auto& kv : extra_policies) {
+            policy->set(kv.first, kv.second);
          }
+
+         std::vector<Botan::TLS::Protocol_Version> versions = {Botan::TLS::Protocol_Version::TLS_V12,
+                                                               Botan::TLS::Protocol_Version::DTLS_V12};
+
+         return test_with_policy(
+            test_descr, results, client_ses, server_ses, creds, versions, policy, rng, client_auth);
+      }
 
       void test_session_established_abort(std::vector<Test::Result>& results,
-                                          Botan::Credentials_Manager& creds,
-                                          Botan::RandomNumberGenerator& rng)
-         {
-         std::vector<Botan::TLS::Protocol_Version> versions =
-            {
-            Botan::TLS::Protocol_Version::TLS_V12,
-            Botan::TLS::Protocol_Version::DTLS_V12
-            };
+                                          std::shared_ptr<Credentials_Manager_Test> creds,
+                                          std::shared_ptr<Botan::RandomNumberGenerator> rng) {
+         std::vector<Botan::TLS::Protocol_Version> versions = {Botan::TLS::Protocol_Version::TLS_V12,
+                                                               Botan::TLS::Protocol_Version::DTLS_V12};
 
-         Test_Policy policy;
-         Botan::TLS::Session_Manager_Noop noop_session_manager;
+         auto policy = std::make_shared<Test_Policy>();
+         auto noop_session_manager = std::make_shared<Botan::TLS::Session_Manager_Noop>();
 
-         auto client_aborts = [&](std::exception_ptr ex, Botan::TLS::Alert expected_server_alert)
-            {
-            for(const auto version : versions)
-               {
-               TLS_Handshake_Test test(
-                  "Client aborts in tls_session_established with " +
-                  expected_server_alert.type_string() + ": " + version.to_string(),
-                  version, creds, policy, policy, rng, noop_session_manager, noop_session_manager, false);
-               test.set_custom_client_tls_session_established_callback([=](const Botan::TLS::Session&)
-                  {
-                  std::rethrow_exception(ex);
-                  });
+         auto client_aborts = [&](const std::exception_ptr& ex, Botan::TLS::Alert expected_server_alert) {
+            for(const auto version : versions) {
+               TLS_Handshake_Test test("Client aborts in tls_session_established with " +
+                                          expected_server_alert.type_string() + ": " + version.to_string(),
+                                       version,
+                                       creds,
+                                       policy,
+                                       policy,
+                                       rng,
+                                       noop_session_manager,
+                                       noop_session_manager,
+                                       false);
+               test.set_custom_client_tls_session_established_callback(
+                  [=](const auto&) { std::rethrow_exception(ex); });
                test.set_server_expected_handshake_alert(expected_server_alert);
 
                test.go();
                results.push_back(test.results());
-               }
-            };
+            }
+         };
 
-         auto server_aborts = [&](std::exception_ptr ex, Botan::TLS::Alert expected_server_alert)
-            {
-            for(const auto version : versions)
-               {
-               TLS_Handshake_Test test(
-                  "Server aborts in tls_session_established with " +
-                  expected_server_alert.type_string() + ": " + version.to_string(),
-                  version, creds, policy, policy, rng, noop_session_manager, noop_session_manager, false);
-               test.set_custom_server_tls_session_established_callback([=](const Botan::TLS::Session&)
-                  {
-                  std::rethrow_exception(ex);
-                  });
+         auto server_aborts = [&](const std::exception_ptr& ex, Botan::TLS::Alert expected_server_alert) {
+            for(const auto version : versions) {
+               TLS_Handshake_Test test("Server aborts in tls_session_established with " +
+                                          expected_server_alert.type_string() + ": " + version.to_string(),
+                                       version,
+                                       creds,
+                                       policy,
+                                       policy,
+                                       rng,
+                                       noop_session_manager,
+                                       noop_session_manager,
+                                       false);
+               test.set_custom_server_tls_session_established_callback(
+                  [=](const auto&) { std::rethrow_exception(ex); });
                test.set_client_expected_handshake_alert(expected_server_alert);
 
                test.go();
                results.push_back(test.results());
-               }
-            };
+            }
+         };
 
          client_aborts(std::make_exception_ptr(
-                           Botan::TLS::TLS_Exception(Botan::TLS::Alert::ACCESS_DENIED,
-                                                     "some test TLS exception")),
-                       Botan::TLS::Alert::ACCESS_DENIED);
-         client_aborts(std::make_exception_ptr(
-                           Botan::Invalid_Authentication_Tag("some symmetric crypto failed :o)")),
-                       Botan::TLS::Alert::BAD_RECORD_MAC);
-         client_aborts(std::make_exception_ptr(
-                           std::runtime_error("something strange happened")),
-                       Botan::TLS::Alert::INTERNAL_ERROR);
+                          Botan::TLS::TLS_Exception(Botan::TLS::Alert::AccessDenied, "some test TLS exception")),
+                       Botan::TLS::Alert::AccessDenied);
+         client_aborts(std::make_exception_ptr(Botan::Invalid_Authentication_Tag("some symmetric crypto failed :o)")),
+                       Botan::TLS::Alert::BadRecordMac);
+         client_aborts(std::make_exception_ptr(std::runtime_error("something strange happened")),
+                       Botan::TLS::Alert::InternalError);
 
          server_aborts(std::make_exception_ptr(
-                           Botan::TLS::TLS_Exception(Botan::TLS::Alert::ACCESS_DENIED,
-                                                     "some server test TLS exception")),
-                       Botan::TLS::Alert::ACCESS_DENIED);
+                          Botan::TLS::TLS_Exception(Botan::TLS::Alert::AccessDenied, "some server test TLS exception")),
+                       Botan::TLS::Alert::AccessDenied);
          server_aborts(std::make_exception_ptr(
-                           Botan::Invalid_Authentication_Tag("some symmetric crypto failed in the server :o)")),
-                       Botan::TLS::Alert::BAD_RECORD_MAC);
-         server_aborts(std::make_exception_ptr(
-                           std::runtime_error("something strange happened in the server")),
-                       Botan::TLS::Alert::INTERNAL_ERROR);
-         }
+                          Botan::Invalid_Authentication_Tag("some symmetric crypto failed in the server :o)")),
+                       Botan::TLS::Alert::BadRecordMac);
+         server_aborts(std::make_exception_ptr(std::runtime_error("something strange happened in the server")),
+                       Botan::TLS::Alert::InternalError);
+      }
 
    public:
-      std::vector<Test::Result> run() override
-         {
+      std::vector<Test::Result> run() override {
          std::vector<Test::Result> results;
 
-         Botan::RandomNumberGenerator& rng = Test::rng();
+         auto rng = Test::new_shared_rng(this->test_name());
 
-         std::unique_ptr<Botan::TLS::Session_Manager> client_ses;
-         std::unique_ptr<Botan::TLS::Session_Manager> server_ses;
+         std::shared_ptr<Botan::TLS::Session_Manager> client_ses;
+         std::shared_ptr<Botan::TLS::Session_Manager> server_ses;
 
-#if defined(BOTAN_HAS_TLS_SQLITE3_SESSION_MANAGER)
-         client_ses.reset(
-            new Botan::TLS::Session_Manager_SQLite("client pass", rng, ":memory:", 5, std::chrono::seconds(2)));
-         server_ses.reset(
-            new Botan::TLS::Session_Manager_SQLite("server pass", rng, ":memory:", 10, std::chrono::seconds(4)));
+   #if defined(BOTAN_HAS_TLS_SQLITE3_SESSION_MANAGER)
+         client_ses.reset(new Botan::TLS::Session_Manager_SQLite("client pass", rng, ":memory:", 5));
+         server_ses.reset(new Botan::TLS::Session_Manager_SQLite("server pass", rng, ":memory:", 10));
 
-#else
-         client_ses.reset(new Botan::TLS::Session_Manager_In_Memory(rng));
-         server_ses.reset(new Botan::TLS::Session_Manager_In_Memory(rng));
-#endif
+   #else
+         client_ses = std::make_shared<Botan::TLS::Session_Manager_In_Memory>(rng);
+         server_ses = std::make_shared<Botan::TLS::Session_Manager_In_Memory>(rng);
+   #endif
 
-         std::unique_ptr<Botan::Credentials_Manager> creds(create_creds(rng));
+         auto creds = create_creds(*rng);
 
-#if defined(BOTAN_HAS_TLS_CBC)
-         for(std::string etm_setting : { "false", "true" })
-            {
-            test_all_versions("AES-128 RSA", results, *client_ses, *server_ses, *creds, "RSA", "AES-128", "SHA-256 SHA-1", etm_setting);
-            test_all_versions("AES-128 ECDH", results, *client_ses, *server_ses, *creds, "ECDH", "AES-128", "SHA-256 SHA-1", etm_setting);
+   #if defined(BOTAN_HAS_TLS_CBC)
+         for(std::string etm_setting : {"false", "true"}) {
+            test_all_versions("AES-128 RSA",
+                              results,
+                              client_ses,
+                              server_ses,
+                              creds,
+                              rng,
+                              "RSA",
+                              "AES-128",
+                              "SHA-256 SHA-1",
+                              etm_setting);
+            test_all_versions("AES-128 ECDH",
+                              results,
+                              client_ses,
+                              server_ses,
+                              creds,
+                              rng,
+                              "ECDH",
+                              "AES-128",
+                              "SHA-256 SHA-1",
+                              etm_setting);
 
-#if defined(BOTAN_HAS_CAMELLIA) && defined(BOTAN_HAS_TLS_CBC)
-            test_all_versions("Camellia-128 RSA", results, *client_ses, *server_ses,
-                              *creds, "RSA", "Camellia-128", "SHA-256 SHA-1", etm_setting);
-            test_all_versions("Camellia-256 RSA SHA-2", results, *client_ses, *server_ses,
-                              *creds, "RSA", "Camellia-256", "SHA-256 SHA-384 SHA-1", etm_setting);
-#endif
-
-#if defined(BOTAN_HAS_DES)
-            test_all_versions("3DES RSA", results, *client_ses, *server_ses, *creds, "RSA", "3DES", "SHA-1", etm_setting);
-            test_all_versions("3DES ECDH", results, *client_ses, *server_ses, *creds, "ECDH", "3DES", "SHA-1", etm_setting);
-#endif
-
-#if defined(BOTAN_HAS_SEED)
-            test_all_versions("SEED RSA", results, *client_ses, *server_ses, *creds, "RSA", "SEED", "SHA-1", etm_setting);
-#endif
+      #if defined(BOTAN_HAS_DES)
+            test_all_versions(
+               "3DES RSA", results, client_ses, server_ses, creds, rng, "RSA", "3DES", "SHA-1", etm_setting);
+            test_all_versions(
+               "3DES ECDH", results, client_ses, server_ses, creds, rng, "ECDH", "3DES", "SHA-1", etm_setting);
+      #endif
 
             server_ses->remove_all();
-            }
+         }
          client_ses->remove_all();
 
-         test_modern_versions("AES-128 DH", results, *client_ses, *server_ses, *creds, "DH", "AES-128", "SHA-256");
+         test_modern_versions("AES-128 DH", results, client_ses, server_ses, creds, rng, "DH", "AES-128", "SHA-256");
 
-#if defined(BOTAN_HAS_DSA)
-         if(Test::run_long_tests())
-            {
-            test_modern_versions("AES-128 DSA", results, *client_ses, *server_ses, *creds, "DH", "AES-128", "SHA-256",
-                                 { { "signature_methods", "DSA" } });
+   #endif
 
-            test_modern_versions("AES-128/GCM DSA", results, *client_ses, *server_ses, *creds, "DH", "AES-128/GCM", "AEAD",
-                                 { { "signature_methods", "DSA" } });
-            }
-#endif
+         auto strict_policy = std::make_shared<Botan::TLS::Strict_Policy_Without_TLS13>();
+         test_with_policy("Strict policy",
+                          results,
+                          client_ses,
+                          server_ses,
+                          creds,
+                          {Botan::TLS::Protocol_Version::TLS_V12},
+                          strict_policy,
+                          rng);
 
-#if defined(BOTAN_HAS_SRP6)
-         std::unique_ptr<Botan::Credentials_Manager> srp6_creds(create_srp6_creds(rng));
-         test_all_versions("SRP6 AES", results, *client_ses, *server_ses, *srp6_creds, "SRP_SHA", "AES-128", "SHA-1", "false");
-#endif
-
-#endif
-
-         Botan::TLS::Strict_Policy strict_policy;
-         test_with_policy("Strict policy", results, *client_ses, *server_ses, *creds,
-            {Botan::TLS::Protocol_Version::TLS_V12}, strict_policy);
-
-         Botan::TLS::NSA_Suite_B_128 suiteb_128;
-         test_with_policy("Suite B", results, *client_ses, *server_ses, *creds,
-            {Botan::TLS::Protocol_Version::TLS_V12}, suiteb_128);
+         auto suiteb_128 = std::make_shared<Botan::TLS::NSA_Suite_B_128>();
+         test_with_policy("Suite B",
+                          results,
+                          client_ses,
+                          server_ses,
+                          creds,
+                          {Botan::TLS::Protocol_Version::TLS_V12},
+                          suiteb_128,
+                          rng);
 
          // Remove server sessions before client, so clients retry with session server doesn't know
          server_ses->remove_all();
 
-         test_modern_versions("AES-128/GCM RSA", results, *client_ses, *server_ses, *creds, "RSA", "AES-128/GCM");
-         test_modern_versions("AES-128/GCM ECDH", results, *client_ses, *server_ses, *creds, "ECDH", "AES-128/GCM");
+         test_modern_versions("AES-128/GCM RSA", results, client_ses, server_ses, creds, rng, "RSA", "AES-128/GCM");
+         test_modern_versions("AES-128/GCM ECDH", results, client_ses, server_ses, creds, rng, "ECDH", "AES-128/GCM");
 
          test_modern_versions("AES-128/GCM ECDH RSA",
-                              results, *client_ses, *server_ses, *creds, "ECDH", "AES-128/GCM", "AEAD",
-                              { { "signature_methods", "RSA" } });
+                              results,
+                              client_ses,
+                              server_ses,
+                              creds,
+                              rng,
+                              "ECDH",
+                              "AES-128/GCM",
+                              "AEAD",
+                              {{"signature_methods", "RSA"}});
 
          test_modern_versions("AES-128/GCM ECDH no OCSP",
-                              results, *client_ses, *server_ses, *creds, "ECDH", "AES-128/GCM", "AEAD",
-                              { { "support_cert_status_message", "false" } });
+                              results,
+                              client_ses,
+                              server_ses,
+                              creds,
+                              rng,
+                              "ECDH",
+                              "AES-128/GCM",
+                              "AEAD",
+                              {{"support_cert_status_message", "false"}});
 
          client_ses->remove_all();
 
-#if defined(BOTAN_HAS_CAMELLIA) && defined(BOTAN_HAS_TLS_CBC)
-         test_modern_versions("Camellia-256 SHA-2", results, *client_ses, *server_ses, *creds, "RSA", "Camellia-256", "SHA-384 SHA-256");
-#endif
-#if defined(BOTAN_HAS_CAMELLIA) && defined(BOTAN_HAS_AEAD_GCM)
-         test_modern_versions("Camellia-128/GCM ECDH", results, *client_ses, *server_ses, *creds, "ECDH", "Camellia-128/GCM", "AEAD");
-#endif
+   #if defined(BOTAN_HAS_CAMELLIA) && defined(BOTAN_HAS_AEAD_GCM)
+         test_modern_versions(
+            "Camellia-128/GCM ECDH", results, client_ses, server_ses, creds, rng, "ECDH", "Camellia-128/GCM", "AEAD");
+   #endif
 
-#if defined(BOTAN_HAS_ARIA)
-         test_modern_versions("ARIA ECDH", results, *client_ses, *server_ses, *creds, "ECDH", "ARIA-128/GCM", "AEAD");
-#endif
+   #if defined(BOTAN_HAS_ARIA)
+         test_modern_versions(
+            "ARIA/GCM ECDH", results, client_ses, server_ses, creds, rng, "ECDH", "ARIA-128/GCM", "AEAD");
+   #endif
 
-#if defined(BOTAN_HAS_CECPQ1)
+         test_modern_versions("AES-128/GCM point compression",
+                              results,
+                              client_ses,
+                              server_ses,
+                              creds,
+                              rng,
+                              "ECDH",
+                              "AES-128/GCM",
+                              "AEAD",
+                              {{"use_ecc_point_compression", "true"}});
+         test_modern_versions("AES-256/GCM p521",
+                              results,
+                              client_ses,
+                              server_ses,
+                              creds,
+                              rng,
+                              "ECDH",
+                              "AES-256/GCM",
+                              "AEAD",
+                              {{"groups", "secp521r1"}});
+         test_modern_versions("AES-128/GCM bp256r1",
+                              results,
+                              client_ses,
+                              server_ses,
+                              creds,
+                              rng,
+                              "ECDH",
+                              "AES-128/GCM",
+                              "AEAD",
+                              {{"groups", "brainpool256r1"}});
 
-#if defined(BOTAN_HAS_AES) && defined(BOTAN_HAS_AEAD_GCM)
-         test_modern_versions("AES-256/GCM CECPQ1", results, *client_ses, *server_ses, *creds, "CECPQ1", "AES-256/GCM", "AEAD");
-#endif
-
-#if defined(BOTAN_HAS_AES) && defined(BOTAN_HAS_AEAD_OCB)
-         test_modern_versions("AES-256/OCB CECPQ1", results, *client_ses, *server_ses, *creds,
-                              "CECPQ1", "AES-256/OCB(12)", "AEAD");
-         test_modern_versions("AES-256/OCB CECPQ1 RSA", results, *client_ses, *server_ses, *creds,
-                              "CECPQ1", "AES-256/OCB(12)", "AEAD",
-                              {{ "signature_methods", "RSA" }});
-#endif
-
-#if defined(BOTAN_HAS_AEAD_CHACHA20_POLY1305)
-         test_modern_versions("ChaCha20Poly1305 CECPQ1", results, *client_ses, *server_ses, *creds,
-                              "CECPQ1", "ChaCha20Poly1305", "AEAD",
-                              { { "signature_methods", "RSA" }});
-#endif
-
-#endif
-
-         test_modern_versions("AES-128/GCM point compression", results, *client_ses, *server_ses, *creds, "ECDH", "AES-128/GCM", "AEAD",
-                              { { "use_ecc_point_compression", "true" } });
-         test_modern_versions("AES-256/GCM p521", results, *client_ses, *server_ses, *creds, "ECDH", "AES-256/GCM", "AEAD",
-                              { { "groups", "secp521r1" } });
-         test_modern_versions("AES-128/GCM bp256r1", results, *client_ses, *server_ses, *creds, "ECDH", "AES-128/GCM", "AEAD",
-                              { { "groups", "brainpool256r1" } });
-
-#if defined(BOTAN_HAS_CURVE_25519)
-         test_modern_versions("AES-128/GCM x25519", results, *client_ses, *server_ses, *creds, "ECDH", "AES-128/GCM", "AEAD",
-                              { { "groups", "x25519" } });
-#endif
+   #if defined(BOTAN_HAS_CURVE_25519)
+         test_modern_versions(
+            "AES-128/GCM x25519", results, client_ses, server_ses, creds, rng, "ECDH", "AES-128/GCM", "AEAD", {{
+               "groups",
+               "x25519"
+            }});
+   #endif
 
          test_modern_versions("AES-128/GCM FFDHE-2048",
-                              results, *client_ses, *server_ses, *creds, "DH", "AES-128/GCM", "AEAD",
-                              { { "groups", "ffdhe/ietf/2048" } });
+                              results,
+                              client_ses,
+                              server_ses,
+                              creds,
+                              rng,
+                              "DH",
+                              "AES-128/GCM",
+                              "AEAD",
+                              {{"groups", "ffdhe/ietf/2048"}});
 
-         std::unique_ptr<Botan::Credentials_Manager> creds_with_client_cert(create_creds(rng, true));
+         auto creds_with_client_cert = create_creds(*rng, true);
 
          client_ses->remove_all();
          test_modern_versions("AES-256/GCM client certs",
-                              results, *client_ses, *server_ses, *creds_with_client_cert, "ECDH", "AES-256/GCM", "AEAD", true);
+                              results,
+                              client_ses,
+                              server_ses,
+                              creds_with_client_cert,
+                              rng,
+                              "ECDH",
+                              "AES-256/GCM",
+                              "AEAD",
+                              true);
 
-#if defined(BOTAN_HAS_TLS_SQLITE3_SESSION_MANAGER)
+   #if defined(BOTAN_HAS_TLS_SQLITE3_SESSION_MANAGER)
          client_ses.reset(new Botan::TLS::Session_Manager_In_Memory(rng));
          server_ses.reset(new Botan::TLS::Session_Manager_In_Memory(rng));
-#endif
+   #endif
 
-#if defined(BOTAN_HAS_AEAD_OCB)
-         test_modern_versions("AES-128/OCB ECDH", results, *client_ses, *server_ses, *creds, "ECDH", "AES-128/OCB(12)");
-#endif
+   #if defined(BOTAN_HAS_AEAD_OCB)
+         test_modern_versions(
+            "AES-256/OCB ECDH", results, client_ses, server_ses, creds, rng, "ECDH", "AES-256/OCB(12)");
+   #endif
 
          server_ses->remove_all();
 
-#if defined(BOTAN_HAS_AEAD_CHACHA20_POLY1305)
-         test_modern_versions("ChaCha20Poly1305 ECDH", results, *client_ses, *server_ses, *creds, "ECDH", "ChaCha20Poly1305");
-#endif
+   #if defined(BOTAN_HAS_AEAD_CHACHA20_POLY1305)
+         test_modern_versions(
+            "ChaCha20Poly1305 ECDH", results, client_ses, server_ses, creds, rng, "ECDH", "ChaCha20Poly1305");
+   #endif
 
-         test_modern_versions("AES-128/GCM PSK", results, *client_ses, *server_ses, *creds, "PSK", "AES-128/GCM");
+         test_modern_versions("AES-128/GCM PSK", results, client_ses, server_ses, creds, rng, "PSK", "AES-128/GCM");
 
-#if defined(BOTAN_HAS_AEAD_CCM)
-         test_modern_versions("AES-128/CCM PSK", results, *client_ses, *server_ses, *creds, "PSK", "AES-128/CCM");
-         test_modern_versions("AES-128/CCM-8 PSK", results, *client_ses, *server_ses, *creds, "PSK", "AES-128/CCM(8)");
-#endif
+   #if defined(BOTAN_HAS_AEAD_CCM)
+         test_modern_versions("AES-128/CCM PSK", results, client_ses, server_ses, creds, rng, "PSK", "AES-128/CCM");
+         test_modern_versions(
+            "AES-128/CCM-8 PSK", results, client_ses, server_ses, creds, rng, "PSK", "AES-128/CCM(8)");
+   #endif
 
-#if defined(BOTAN_HAS_TLS_CBC)
-         // For whatever reason no (EC)DHE_PSK GCM ciphersuites are defined
-         test_modern_versions("AES-128 ECDHE_PSK", results, *client_ses, *server_ses, *creds, "ECDHE_PSK", "AES-128", "SHA-256");
-         test_modern_versions("AES-128 DHE_PSK", results, *client_ses, *server_ses, *creds, "DHE_PSK", "AES-128", "SHA-1");
-#endif
+         test_modern_versions(
+            "AES-128/GCM ECDHE_PSK", results, client_ses, server_ses, creds, rng, "ECDHE_PSK", "AES-128/GCM");
 
          // Test with a custom curve
 
@@ -1263,135 +1088,122 @@ class TLS_Unit_Tests final : public Test
          const Botan::BigInt order("0xDB7C2ABF62E35E7628DFAC6561C5");
 
          const Botan::OID oid("1.3.132.0.6");
+         Botan::OID::register_oid(oid, "secp112r1");
 
          // Creating this object implicitly registers the curve for future use ...
          Botan::EC_Group reg_secp112r1(p, a, b, g_x, g_y, order, 1, oid);
 
-         Botan::OIDS::add_oid(oid, "secp112r1");
-
-         test_modern_versions("AES-256/GCM secp112r1", results, *client_ses, *server_ses, *creds, "ECDH", "AES-256/GCM", "AEAD",
-                              { { "groups", "0xFEE1" }, { "minimum_ecdh_group_size", "112" } });
+         test_modern_versions("AES-256/GCM secp112r1",
+                              results,
+                              client_ses,
+                              server_ses,
+                              creds,
+                              rng,
+                              "ECDH",
+                              "AES-256/GCM",
+                              "AEAD",
+                              {{"groups", "0xFEE1"}, {"minimum_ecdh_group_size", "112"}});
 
          // Test connection abort by the application
          // by throwing in Callbacks::tls_session_established()
 
-         test_session_established_abort(results, *creds, rng);
+         test_session_established_abort(results, creds, rng);
 
          return results;
-         }
+      }
+};
 
-   };
+BOTAN_REGISTER_TEST("tls", "unit_tls", TLS_Unit_Tests);
 
-BOTAN_REGISTER_TEST("tls", "tls", TLS_Unit_Tests);
-
-class DTLS_Reconnection_Test : public Test
-   {
+class DTLS_Reconnection_Test : public Test {
    public:
-      std::vector<Test::Result> run() override
-         {
-         class Test_Callbacks : public Botan::TLS::Callbacks
-            {
+      std::vector<Test::Result> run() override {
+         class Test_Callbacks : public Botan::TLS::Callbacks {
             public:
-               Test_Callbacks(Test::Result& results,
-                              std::vector<uint8_t>& outbound,
-                              std::vector<uint8_t>& recv_buf) :
-                  m_results(results),
-                  m_outbound(outbound),
-                  m_recv(recv_buf)
-                  {}
+               Test_Callbacks(Test::Result& results, std::vector<uint8_t>& outbound, std::vector<uint8_t>& recv_buf) :
+                     m_results(results), m_outbound(outbound), m_recv(recv_buf) {}
 
-               void tls_emit_data(const uint8_t bits[], size_t len) override
-                  {
-                  m_outbound.insert(m_outbound.end(), bits, bits + len);
-                  }
+               void tls_emit_data(std::span<const uint8_t> bits) override {
+                  m_outbound.insert(m_outbound.end(), bits.begin(), bits.end());
+               }
 
-               void tls_record_received(uint64_t /*seq*/, const uint8_t bits[], size_t len) override
-                  {
-                  m_recv.insert(m_recv.end(), bits, bits + len);
-                  }
+               void tls_record_received(uint64_t /*seq*/, std::span<const uint8_t> bits) override {
+                  m_recv.insert(m_recv.end(), bits.begin(), bits.end());
+               }
 
-               void tls_alert(Botan::TLS::Alert /*alert*/) override
-                  {
+               void tls_alert(Botan::TLS::Alert /*alert*/) override {
                   // ignore
-                  }
+               }
 
-               bool tls_session_established(const Botan::TLS::Session& /*session*/) override
-                  {
+               void tls_session_established(const Botan::TLS::Session_Summary& /*session*/) override {
                   m_results.test_success("Established a session");
-                  return true;
-                  }
+               }
 
             private:
                Test::Result& m_results;
                std::vector<uint8_t>& m_outbound;
                std::vector<uint8_t>& m_recv;
-            };
+         };
 
-         class Credentials_PSK : public Botan::Credentials_Manager
-            {
+         class Credentials_PSK : public Botan::Credentials_Manager {
             public:
                Botan::SymmetricKey psk(const std::string& type,
                                        const std::string& context,
-                                       const std::string&) override
-                  {
-                  if(type == "tls-server" && context == "session-ticket")
-                     {
+                                       const std::string& /*identity*/) override {
+                  if(type == "tls-server" && context == "session-ticket") {
                      return Botan::SymmetricKey("AABBCCDDEEFF012345678012345678");
-                     }
+                  }
 
-                  if(type == "tls-server" && context == "dtls-cookie-secret")
-                     {
+                  if(type == "tls-server" && context == "dtls-cookie-secret") {
                      return Botan::SymmetricKey("4AEA5EAD279CADEB537A594DA0E9DE3A");
-                     }
+                  }
 
-                  if(context == "localhost" && type == "tls-client")
-                     {
+                  if(context == "localhost" && type == "tls-client") {
                      return Botan::SymmetricKey("20B602D1475F2DF888FCB60D2AE03AFD");
-                     }
+                  }
 
-                  if(context == "localhost" && type == "tls-server")
-                     {
+                  if(context == "localhost" && type == "tls-server") {
                      return Botan::SymmetricKey("20B602D1475F2DF888FCB60D2AE03AFD");
-                     }
+                  }
 
                   throw Test_Error("No PSK set for " + type + "/" + context);
-                  }
-            };
+               }
+         };
 
-         class Datagram_PSK_Policy : public Botan::TLS::Policy
-            {
+         class Datagram_PSK_Policy : public Botan::TLS::Policy {
             public:
-               std::vector<std::string> allowed_macs() const override
-                  { return std::vector<std::string>({"AEAD"}); }
+               std::vector<std::string> allowed_macs() const override { return std::vector<std::string>({"AEAD"}); }
 
-               std::vector<std::string> allowed_key_exchange_methods() const override
-                  { return {"PSK"}; }
+               std::vector<std::string> allowed_key_exchange_methods() const override { return {"PSK"}; }
 
-               bool allow_tls10()  const override { return false; }
-               bool allow_tls11()  const override { return false; }
-               bool allow_tls12()  const override { return false; }
-               bool allow_dtls10() const override { return false; }
-               bool allow_dtls12() const override { return true;  }
+               bool allow_tls12() const override { return false; }
+
+               bool allow_dtls12() const override { return true; }
 
                bool allow_dtls_epoch0_restart() const override { return true; }
-            };
+         };
 
          Test::Result result("DTLS reconnection");
 
-         Datagram_PSK_Policy server_policy;
-         Datagram_PSK_Policy client_policy;
-         Credentials_PSK creds;
-         Botan::TLS::Session_Manager_In_Memory server_sessions(rng());
-         //Botan::TLS::Session_Manager_In_Memory client_sessions(rng());
-         Botan::TLS::Session_Manager_Noop client_sessions;
+         auto rng = Test::new_shared_rng(this->test_name());
+
+         auto server_policy = std::make_shared<Datagram_PSK_Policy>();
+         auto client_policy = std::make_shared<Datagram_PSK_Policy>();
+         auto creds = std::make_shared<Credentials_PSK>();
+         auto server_sessions = std::make_shared<Botan::TLS::Session_Manager_In_Memory>(rng);
+         auto client_sessions = std::make_shared<Botan::TLS::Session_Manager_Noop>();
 
          std::vector<uint8_t> s2c, server_recv;
-         Test_Callbacks server_callbacks(result, s2c, server_recv);
-         Botan::TLS::Server server(server_callbacks, server_sessions, creds, server_policy, rng(), true);
+         auto server_callbacks = std::make_shared<Test_Callbacks>(result, s2c, server_recv);
+         Botan::TLS::Server server(server_callbacks, server_sessions, creds, server_policy, rng, true);
 
          std::vector<uint8_t> c1_c2s, client1_recv;
-         Test_Callbacks client1_callbacks(result, c1_c2s, client1_recv);
-         Botan::TLS::Client client1(client1_callbacks, client_sessions, creds, client_policy, rng(),
+         auto client1_callbacks = std::make_shared<Test_Callbacks>(result, c1_c2s, client1_recv);
+         Botan::TLS::Client client1(client1_callbacks,
+                                    client_sessions,
+                                    creds,
+                                    client_policy,
+                                    rng,
                                     Botan::TLS::Server_Information("localhost"),
                                     Botan::TLS::Protocol_Version::latest_dtls_version());
 
@@ -1402,50 +1214,43 @@ class DTLS_Reconnection_Test : public Test
          const std::vector<uint8_t> server_to_c1_magic(16, 0x42);
 
          size_t c1_rounds = 0;
-         for(;;)
-            {
+         for(;;) {
             c1_rounds++;
 
-            if(c1_rounds > 64)
-               {
+            if(c1_rounds > 64) {
                result.test_failure("Still spinning in client1 loop after 64 rounds");
                return {result};
-               }
+            }
 
-            if(c1_c2s.size() > 0)
-               {
+            if(!c1_c2s.empty()) {
                std::vector<uint8_t> input;
                std::swap(c1_c2s, input);
                server.received_data(input.data(), input.size());
                continue;
-               }
+            }
 
-            if(s2c.size() > 0)
-               {
+            if(!s2c.empty()) {
                std::vector<uint8_t> input;
                std::swap(s2c, input);
                client1.received_data(input.data(), input.size());
                continue;
-               }
+            }
 
-            if(!c1_to_server_sent && client1.is_active())
-               {
+            if(!c1_to_server_sent && client1.is_active()) {
                client1.send(c1_to_server_magic);
                c1_to_server_sent = true;
-               }
+            }
 
-            if(!server_to_c1_sent && server.is_active())
-               {
+            if(!server_to_c1_sent && server.is_active()) {
                server.send(server_to_c1_magic);
-               }
+            }
 
-            if(server_recv.size() > 0 && client1_recv.size() > 0)
-               {
+            if(!server_recv.empty() && !client1_recv.empty()) {
                result.test_eq("Expected message from client1", server_recv, c1_to_server_magic);
                result.test_eq("Expected message to client1", client1_recv, server_to_c1_magic);
                break;
-               }
             }
+         }
 
          // Now client1 "goes away" (goes silent) and new client
          // connects to same server context (ie due to reuse of client source port)
@@ -1455,8 +1260,12 @@ class DTLS_Reconnection_Test : public Test
          s2c.clear();
 
          std::vector<uint8_t> c2_c2s, client2_recv;
-         Test_Callbacks client2_callbacks(result, c2_c2s, client2_recv);
-         Botan::TLS::Client client2(client2_callbacks, client_sessions, creds, client_policy, rng(),
+         auto client2_callbacks = std::make_shared<Test_Callbacks>(result, c2_c2s, client2_recv);
+         Botan::TLS::Client client2(client2_callbacks,
+                                    client_sessions,
+                                    creds,
+                                    client_policy,
+                                    rng,
                                     Botan::TLS::Server_Information("localhost"),
                                     Botan::TLS::Protocol_Version::latest_dtls_version());
 
@@ -1468,59 +1277,52 @@ class DTLS_Reconnection_Test : public Test
 
          size_t c2_rounds = 0;
 
-         for(;;)
-            {
+         for(;;) {
             c2_rounds++;
 
-            if(c2_rounds > 64)
-               {
+            if(c2_rounds > 64) {
                result.test_failure("Still spinning in client2 loop after 64 rounds");
                return {result};
-               }
+            }
 
-            if(c2_c2s.size() > 0)
-               {
+            if(!c2_c2s.empty()) {
                std::vector<uint8_t> input;
                std::swap(c2_c2s, input);
                server.received_data(input.data(), input.size());
                continue;
-               }
+            }
 
-            if(s2c.size() > 0)
-               {
+            if(!s2c.empty()) {
                std::vector<uint8_t> input;
                std::swap(s2c, input);
                client2.received_data(input.data(), input.size());
                continue;
-               }
+            }
 
-            if(!c2_to_server_sent && client2.is_active())
-               {
+            if(!c2_to_server_sent && client2.is_active()) {
                client2.send(c2_to_server_magic);
                c2_to_server_sent = true;
-               }
+            }
 
-            if(!server_to_c2_sent && server.is_active())
-               {
+            if(!server_to_c2_sent && server.is_active()) {
                server.send(server_to_c2_magic);
-               }
+            }
 
-            if(server_recv.size() > 0 && client2_recv.size() > 0)
-               {
+            if(!server_recv.empty() && !client2_recv.empty()) {
                result.test_eq("Expected message from client2", server_recv, c2_to_server_magic);
                result.test_eq("Expected message to client2", client2_recv, server_to_c2_magic);
                break;
-               }
             }
+         }
 
          return {result};
-         }
-   };
+      }
+};
 
 BOTAN_REGISTER_TEST("tls", "tls_dtls_reconnect", DTLS_Reconnection_Test);
 
 #endif
 
-}
+}  // namespace
 
-}
+}  // namespace Botan_Tests

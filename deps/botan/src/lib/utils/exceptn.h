@@ -56,10 +56,8 @@ enum class ErrorType {
    /** An error during Roughtime validation */
    RoughtimeError,
 
-   /** An error when calling OpenSSL */
-   OpenSSLError = 200,
    /** An error when interacting with CommonCrypto API */
-   CommonCryptoError,
+   CommonCryptoError = 201,
    /** An error when interacting with a PKCS11 device */
    Pkcs11Error,
    /** An error when interacting with a TPM device */
@@ -77,13 +75,12 @@ enum class ErrorType {
 };
 
 //! \brief Convert an ErrorType to string
-std::string BOTAN_PUBLIC_API(2,11) to_string(ErrorType type);
+std::string BOTAN_PUBLIC_API(2, 11) to_string(ErrorType type);
 
 /**
 * Base class for all exceptions thrown by the library
 */
-class BOTAN_PUBLIC_API(2,0) Exception : public std::exception
-   {
+class BOTAN_PUBLIC_API(2, 0) Exception : public std::exception {
    public:
       /**
       * Return a descriptive string which is hopefully comprehensible to
@@ -98,163 +95,151 @@ class BOTAN_PUBLIC_API(2,0) Exception : public std::exception
       /**
       * Return the "type" of error which occurred.
       */
-      virtual ErrorType error_type() const noexcept { return Botan::ErrorType::Unknown; }
+      virtual ErrorType error_type() const noexcept { return ErrorType::Unknown; }
 
       /**
       * Return an error code associated with this exception, or otherwise 0.
       *
       * The domain of this error varies depending on the source, for example on
       * POSIX systems it might be errno, while on a Windows system it might be
-      * the result of GetLastError or WSAGetLastError. For error_type() is
-      * OpenSSLError, it will (if nonzero) be an OpenSSL error code from
-      * ERR_get_error.
+      * the result of GetLastError or WSAGetLastError.
       */
       virtual int error_code() const noexcept { return 0; }
 
       /**
       * Avoid throwing base Exception, use a subclass
       */
-      explicit Exception(const std::string& msg);
+      explicit Exception(std::string_view msg);
 
       /**
       * Avoid throwing base Exception, use a subclass
       */
-      Exception(const char* prefix, const std::string& msg);
+      Exception(const char* prefix, std::string_view msg);
 
       /**
       * Avoid throwing base Exception, use a subclass
       */
-      Exception(const std::string& msg, const std::exception& e);
+      Exception(std::string_view msg, const std::exception& e);
 
    private:
       std::string m_msg;
-   };
+};
 
 /**
 * An invalid argument was provided to an API call.
 */
-class BOTAN_PUBLIC_API(2,0) Invalid_Argument : public Exception
-   {
+class BOTAN_PUBLIC_API(2, 0) Invalid_Argument : public Exception {
    public:
-      explicit Invalid_Argument(const std::string& msg);
+      explicit Invalid_Argument(std::string_view msg);
 
-      explicit Invalid_Argument(const std::string& msg, const std::string& where);
+      explicit Invalid_Argument(std::string_view msg, std::string_view where);
 
-      Invalid_Argument(const std::string& msg, const std::exception& e);
+      Invalid_Argument(std::string_view msg, const std::exception& e);
 
       ErrorType error_type() const noexcept override { return ErrorType::InvalidArgument; }
-   };
+};
+
+/**
+* An invalid/unknown field name was passed to Public_Key::get_int_field
+*/
+class BOTAN_PUBLIC_API(3, 0) Unknown_PK_Field_Name final : public Invalid_Argument {
+   public:
+      Unknown_PK_Field_Name(std::string_view algo_name, std::string_view field_name);
+};
 
 /**
 * An invalid key length was used
 */
-class BOTAN_PUBLIC_API(2,0) Invalid_Key_Length final : public Invalid_Argument
-   {
+class BOTAN_PUBLIC_API(2, 0) Invalid_Key_Length final : public Invalid_Argument {
    public:
-      Invalid_Key_Length(const std::string& name, size_t length);
+      Invalid_Key_Length(std::string_view name, size_t length);
+
       ErrorType error_type() const noexcept override { return ErrorType::InvalidKeyLength; }
-   };
+};
 
 /**
 * An invalid nonce length was used
 */
-class BOTAN_PUBLIC_API(2,0) Invalid_IV_Length final : public Invalid_Argument
-   {
+class BOTAN_PUBLIC_API(2, 0) Invalid_IV_Length final : public Invalid_Argument {
    public:
-      Invalid_IV_Length(const std::string& mode, size_t bad_len);
+      Invalid_IV_Length(std::string_view mode, size_t bad_len);
+
       ErrorType error_type() const noexcept override { return ErrorType::InvalidNonceLength; }
-   };
+};
 
 /**
 * Invalid_Algorithm_Name Exception
 */
-class BOTAN_PUBLIC_API(2,0) Invalid_Algorithm_Name final : public Invalid_Argument
-   {
+class BOTAN_PUBLIC_API(2, 0) Invalid_Algorithm_Name final : public Invalid_Argument {
    public:
-      explicit Invalid_Algorithm_Name(const std::string& name);
-   };
+      explicit Invalid_Algorithm_Name(std::string_view name);
+};
 
 /**
 * Encoding_Error Exception
-*
-* This exception derives from Invalid_Argument for historical reasons, and it
-* does not make any real sense for it to do so. In a future major release this
-* exception type will derive directly from Exception instead.
 */
-class BOTAN_PUBLIC_API(2,0) Encoding_Error final : public Invalid_Argument
-   {
+class BOTAN_PUBLIC_API(2, 0) Encoding_Error final : public Exception {
    public:
-      explicit Encoding_Error(const std::string& name);
+      explicit Encoding_Error(std::string_view name);
 
       ErrorType error_type() const noexcept override { return ErrorType::EncodingFailure; }
-   };
+};
 
 /**
 * A decoding error occurred.
-*
-* This exception derives from Invalid_Argument for historical reasons, and it
-* does not make any real sense for it to do so. In a future major release this
-* exception type will derive directly from Exception instead.
 */
-class BOTAN_PUBLIC_API(2,0) Decoding_Error : public Invalid_Argument
-   {
+class BOTAN_PUBLIC_API(2, 0) Decoding_Error : public Exception {
    public:
-      explicit Decoding_Error(const std::string& name);
+      explicit Decoding_Error(std::string_view name);
 
-      Decoding_Error(const std::string& name, const char* exception_message);
+      Decoding_Error(std::string_view category, std::string_view err);
 
-      Decoding_Error(const std::string& msg, const std::exception& e);
+      Decoding_Error(std::string_view msg, const std::exception& e);
 
       ErrorType error_type() const noexcept override { return ErrorType::DecodingFailure; }
-   };
+};
 
 /**
 * Invalid state was encountered. A request was made on an object while the
 * object was in a state where the operation cannot be performed.
 */
-class BOTAN_PUBLIC_API(2,0) Invalid_State : public Exception
-   {
+class BOTAN_PUBLIC_API(2, 0) Invalid_State : public Exception {
    public:
-      explicit Invalid_State(const std::string& err) : Exception(err) {}
+      explicit Invalid_State(std::string_view err) : Exception(err) {}
 
       ErrorType error_type() const noexcept override { return ErrorType::InvalidObjectState; }
-   };
+};
 
 /**
 * A PRNG was called on to produce output while still unseeded
 */
-class BOTAN_PUBLIC_API(2,0) PRNG_Unseeded final : public Invalid_State
-   {
+class BOTAN_PUBLIC_API(2, 0) PRNG_Unseeded final : public Invalid_State {
    public:
-      explicit PRNG_Unseeded(const std::string& algo);
-   };
+      explicit PRNG_Unseeded(std::string_view algo);
+};
 
 /**
 * The key was not set on an object. This occurs with symmetric objects where
 * an operation which requires the key is called prior to set_key being called.
 */
-class BOTAN_PUBLIC_API(2,4) Key_Not_Set : public Invalid_State
-   {
+class BOTAN_PUBLIC_API(2, 4) Key_Not_Set : public Invalid_State {
    public:
-      explicit Key_Not_Set(const std::string& algo);
+      explicit Key_Not_Set(std::string_view algo);
 
       ErrorType error_type() const noexcept override { return ErrorType::KeyNotSet; }
-   };
+};
 
 /**
 * A request was made for some kind of object which could not be located
 */
-class BOTAN_PUBLIC_API(2,0) Lookup_Error : public Exception
-   {
+class BOTAN_PUBLIC_API(2, 0) Lookup_Error : public Exception {
    public:
-      explicit Lookup_Error(const std::string& err) : Exception(err) {}
+      explicit Lookup_Error(std::string_view err) : Exception(err) {}
 
-      Lookup_Error(const std::string& type,
-                   const std::string& algo,
-                   const std::string& provider);
+      Lookup_Error(std::string_view type, std::string_view algo, std::string_view provider = "");
 
       ErrorType error_type() const noexcept override { return ErrorType::LookupError; }
-   };
+};
 
 /**
 * Algorithm_Not_Found Exception
@@ -262,11 +247,10 @@ class BOTAN_PUBLIC_API(2,0) Lookup_Error : public Exception
 * @warning This exception type will be removed in the future. Instead
 * just catch Lookup_Error.
 */
-class BOTAN_PUBLIC_API(2,0) Algorithm_Not_Found final : public Lookup_Error
-   {
+class BOTAN_PUBLIC_API(2, 0) Algorithm_Not_Found final : public Lookup_Error {
    public:
-      explicit Algorithm_Not_Found(const std::string& name);
-   };
+      explicit Algorithm_Not_Found(std::string_view name);
+};
 
 /**
 * Provider_Not_Found is thrown when a specific provider was requested
@@ -275,11 +259,10 @@ class BOTAN_PUBLIC_API(2,0) Algorithm_Not_Found final : public Lookup_Error
 * @warning This exception type will be removed in the future. Instead
 * just catch Lookup_Error.
 */
-class BOTAN_PUBLIC_API(2,0) Provider_Not_Found final : public Lookup_Error
-   {
+class BOTAN_PUBLIC_API(2, 0) Provider_Not_Found final : public Lookup_Error {
    public:
-      Provider_Not_Found(const std::string& algo, const std::string& provider);
-   };
+      Provider_Not_Found(std::string_view algo, std::string_view provider);
+};
 
 /**
 * An AEAD or MAC check detected a message modification
@@ -287,13 +270,12 @@ class BOTAN_PUBLIC_API(2,0) Provider_Not_Found final : public Lookup_Error
 * In versions before 2.10, Invalid_Authentication_Tag was named
 * Integrity_Failure, it was renamed to make its usage more clear.
 */
-class BOTAN_PUBLIC_API(2,0) Invalid_Authentication_Tag final : public Exception
-   {
+class BOTAN_PUBLIC_API(2, 0) Invalid_Authentication_Tag final : public Exception {
    public:
-      explicit Invalid_Authentication_Tag(const std::string& msg);
+      explicit Invalid_Authentication_Tag(std::string_view msg);
 
       ErrorType error_type() const noexcept override { return ErrorType::InvalidTag; }
-   };
+};
 
 /**
 * For compatability with older versions
@@ -303,13 +285,12 @@ typedef Invalid_Authentication_Tag Integrity_Failure;
 /**
 * An error occurred while operating on an IO stream
 */
-class BOTAN_PUBLIC_API(2,0) Stream_IO_Error final : public Exception
-   {
+class BOTAN_PUBLIC_API(2, 0) Stream_IO_Error final : public Exception {
    public:
-      explicit Stream_IO_Error(const std::string& err);
+      explicit Stream_IO_Error(std::string_view err);
 
       ErrorType error_type() const noexcept override { return ErrorType::IoError; }
-   };
+};
 
 /**
 * System_Error
@@ -320,12 +301,11 @@ class BOTAN_PUBLIC_API(2,0) Stream_IO_Error final : public Exception
 * This exception type also (optionally) captures an integer error code eg
 * POSIX errno or Windows GetLastError.
 */
-class BOTAN_PUBLIC_API(2,9) System_Error : public Exception
-   {
+class BOTAN_PUBLIC_API(2, 9) System_Error : public Exception {
    public:
-      System_Error(const std::string& msg) : Exception(msg), m_error_code(0) {}
+      System_Error(std::string_view msg) : Exception(msg), m_error_code(0) {}
 
-      System_Error(const std::string& msg, int err_code);
+      System_Error(std::string_view msg, int err_code);
 
       ErrorType error_type() const noexcept override { return ErrorType::SystemError; }
 
@@ -333,18 +313,17 @@ class BOTAN_PUBLIC_API(2,9) System_Error : public Exception
 
    private:
       int m_error_code;
-   };
+};
 
 /**
 * An internal error occurred. If observed, please file a bug.
 */
-class BOTAN_PUBLIC_API(2,0) Internal_Error : public Exception
-   {
+class BOTAN_PUBLIC_API(2, 0) Internal_Error : public Exception {
    public:
-      explicit Internal_Error(const std::string& err);
+      explicit Internal_Error(std::string_view err);
 
       ErrorType error_type() const noexcept override { return ErrorType::InternalError; }
-   };
+};
 
 /**
 * Not Implemented Exception
@@ -352,90 +331,18 @@ class BOTAN_PUBLIC_API(2,0) Internal_Error : public Exception
 * This is thrown in the situation where a requested operation is
 * logically valid but is not implemented by this version of the library.
 */
-class BOTAN_PUBLIC_API(2,0) Not_Implemented final : public Exception
-   {
+class BOTAN_PUBLIC_API(2, 0) Not_Implemented final : public Exception {
    public:
-      explicit Not_Implemented(const std::string& err);
+      explicit Not_Implemented(std::string_view err);
 
       ErrorType error_type() const noexcept override { return ErrorType::NotImplemented; }
-   };
+};
 
-/*
-   The following exception types are still in use for compatability reasons,
-   but are deprecated and will be removed in a future major release.
-   Instead catch the base class.
-*/
-
-/**
-* An invalid OID string was used.
-*
-* This exception will be removed in a future major release.
-*/
-class BOTAN_PUBLIC_API(2,0) Invalid_OID final : public Decoding_Error
-   {
-   public:
-      explicit Invalid_OID(const std::string& oid);
-   };
-
-/*
-   The following exception types are deprecated, no longer used,
-   and will be removed in a future major release
-*/
-
-/**
-* Self Test Failure Exception
-*
-* This exception is no longer used. It will be removed in a future major release.
-*/
-class BOTAN_PUBLIC_API(2,0) Self_Test_Failure final : public Internal_Error
-   {
-   public:
-      BOTAN_DEPRECATED("no longer used") explicit Self_Test_Failure(const std::string& err);
-   };
-
-/**
-* No_Provider_Found Exception
-*
-* This exception is no longer used. It will be removed in a future major release.
-*/
-class BOTAN_PUBLIC_API(2,0) No_Provider_Found final : public Exception
-   {
-   public:
-      BOTAN_DEPRECATED("no longer used") explicit No_Provider_Found(const std::string& name);
-   };
-
-/**
-* Policy_Violation Exception
-*
-* This exception is no longer used. It will be removed in a future major release.
-*/
-class BOTAN_PUBLIC_API(2,0) Policy_Violation final : public Invalid_State
-   {
-   public:
-      BOTAN_DEPRECATED("no longer used") explicit Policy_Violation(const std::string& err);
-   };
-
-/**
-* Unsupported_Argument Exception
-*
-* An argument that is invalid because it is not supported by Botan.
-* It might or might not be valid in another context like a standard.
-*
-* This exception is no longer used, instead Not_Implemented is thrown.
-* It will be removed in a future major release.
-*/
-class BOTAN_PUBLIC_API(2,0) Unsupported_Argument final : public Invalid_Argument
-   {
-   public:
-      BOTAN_DEPRECATED("no longer used") explicit Unsupported_Argument(const std::string& msg) : Invalid_Argument(msg) {}
-   };
-
-template<typename E, typename... Args>
-inline void do_throw_error(const char* file, int line, const char* func, Args... args)
-   {
+template <typename E, typename... Args>
+inline void do_throw_error(const char* file, int line, const char* func, Args... args) {
    throw E(file, line, func, args...);
-   }
-
 }
+
+}  // namespace Botan
 
 #endif

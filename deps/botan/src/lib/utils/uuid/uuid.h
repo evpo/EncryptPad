@@ -9,17 +9,16 @@
 #define BOTAN_UUID_H_
 
 #include <botan/types.h>
-#include <vector>
 #include <string>
+#include <vector>
 
-BOTAN_FUTURE_INTERNAL_HEADER(uuid.h)
+//BOTAN_FUTURE_INTERNAL_HEADER(uuid.h)
 
 namespace Botan {
 
 class RandomNumberGenerator;
 
-class BOTAN_UNSTABLE_API UUID final
-   {
+class BOTAN_UNSTABLE_API UUID final {
    public:
       /**
       * Create an uninitialized UUID object
@@ -42,7 +41,7 @@ class BOTAN_UNSTABLE_API UUID final
       /**
       * Decode a UUID string
       */
-      UUID(const std::string& uuid_str);
+      UUID(std::string_view uuid_str);
 
       /**
       * Convert the UUID to a string
@@ -51,10 +50,7 @@ class BOTAN_UNSTABLE_API UUID final
 
       const std::vector<uint8_t>& binary_value() const { return m_uuid; }
 
-      bool operator==(const UUID& other) const
-         {
-         return m_uuid == other.m_uuid;
-         }
+      bool operator==(const UUID& other) const { return m_uuid == other.m_uuid; }
 
       bool operator!=(const UUID& other) const { return !(*this == other); }
 
@@ -62,8 +58,8 @@ class BOTAN_UNSTABLE_API UUID final
 
    private:
       std::vector<uint8_t> m_uuid;
-   };
+};
 
-}
+}  // namespace Botan
 
 #endif

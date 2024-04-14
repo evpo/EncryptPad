@@ -1,5 +1,4 @@
 /*
-* Serpent SBox Expressions
 * (C) 1999-2007,2013 Jack Lloyd
 *
 * The sbox expressions used here were discovered by Dag Arne Osvik and
@@ -8,14 +7,16 @@
 * Botan is released under the Simplified BSD License (see license.txt)
 */
 
-#ifndef BOTAN_SERPENT_SBOX_H_
-#define BOTAN_SERPENT_SBOX_H_
+#ifndef BOTAN_SERPENT_SBOX_FN_H_
+#define BOTAN_SERPENT_SBOX_FN_H_
 
-#include <botan/build.h>
+#include <botan/types.h>
+#include <botan/internal/serpent_fn.h>
 
-template<typename T>
-BOTAN_FORCE_INLINE void SBoxE0(T& a, T& b, T& c, T& d)
-   {
+namespace Botan::Serpent_F {
+
+template <typename T>
+BOTAN_FORCE_INLINE void SBoxE0(T& a, T& b, T& c, T& d) {
    d ^= a;
    T t0 = b;
    b &= d;
@@ -37,11 +38,10 @@ BOTAN_FORCE_INLINE void SBoxE0(T& a, T& b, T& c, T& d)
    d = a;
    a = b;
    b = t0;
-   }
+}
 
-template<typename T>
-BOTAN_FORCE_INLINE void SBoxE1(T& a, T& b, T& c, T& d)
-   {
+template <typename T>
+BOTAN_FORCE_INLINE void SBoxE1(T& a, T& b, T& c, T& d) {
    a = ~a;
    c = ~c;
    T t0 = a;
@@ -64,11 +64,10 @@ BOTAN_FORCE_INLINE void SBoxE1(T& a, T& b, T& c, T& d)
    c = d;
    d = b;
    b = t0;
-   }
+}
 
-template<typename T>
-BOTAN_FORCE_INLINE void SBoxE2(T& a, T& b, T& c, T& d)
-   {
+template <typename T>
+BOTAN_FORCE_INLINE void SBoxE2(T& a, T& b, T& c, T& d) {
    T t0 = a;
    a &= c;
    a ^= d;
@@ -88,11 +87,10 @@ BOTAN_FORCE_INLINE void SBoxE2(T& a, T& b, T& c, T& d)
    c = b;
    b = d;
    d = ~t0;
-   }
+}
 
-template<typename T>
-BOTAN_FORCE_INLINE void SBoxE3(T& a, T& b, T& c, T& d)
-   {
+template <typename T>
+BOTAN_FORCE_INLINE void SBoxE3(T& a, T& b, T& c, T& d) {
    T t0 = a;
    a |= d;
    d ^= b;
@@ -115,11 +113,10 @@ BOTAN_FORCE_INLINE void SBoxE3(T& a, T& b, T& c, T& d)
    b = c;
    c = d;
    d = t0;
-   }
+}
 
-template<typename T>
-BOTAN_FORCE_INLINE void SBoxE4(T& a, T& b, T& c, T& d)
-   {
+template <typename T>
+BOTAN_FORCE_INLINE void SBoxE4(T& a, T& b, T& c, T& d) {
    b ^= d;
    d = ~d;
    c ^= d;
@@ -143,11 +140,10 @@ BOTAN_FORCE_INLINE void SBoxE4(T& a, T& b, T& c, T& d)
    c = a;
    a = b;
    b = t0;
-   }
+}
 
-template<typename T>
-BOTAN_FORCE_INLINE void SBoxE5(T& a, T& b, T& c, T& d)
-   {
+template <typename T>
+BOTAN_FORCE_INLINE void SBoxE5(T& a, T& b, T& c, T& d) {
    a ^= b;
    b ^= d;
    d = ~d;
@@ -171,11 +167,10 @@ BOTAN_FORCE_INLINE void SBoxE5(T& a, T& b, T& c, T& d)
    a = b;
    b = d;
    d = t0;
-   }
+}
 
-template<typename T>
-BOTAN_FORCE_INLINE void SBoxE6(T& a, T& b, T& c, T& d)
-   {
+template <typename T>
+BOTAN_FORCE_INLINE void SBoxE6(T& a, T& b, T& c, T& d) {
    c = ~c;
    T t0 = d;
    d &= a;
@@ -195,11 +190,10 @@ BOTAN_FORCE_INLINE void SBoxE6(T& a, T& b, T& c, T& d)
    c &= t0;
    d ^= c;
    c = t0;
-   }
+}
 
-template<typename T>
-BOTAN_FORCE_INLINE void SBoxE7(T& a, T& b, T& c, T& d)
-   {
+template <typename T>
+BOTAN_FORCE_INLINE void SBoxE7(T& a, T& b, T& c, T& d) {
    T t0 = b;
    b |= c;
    b ^= d;
@@ -224,11 +218,10 @@ BOTAN_FORCE_INLINE void SBoxE7(T& a, T& b, T& c, T& d)
    b = d;
    d = a;
    a = t0;
-   }
+}
 
-template<typename T>
-BOTAN_FORCE_INLINE void SBoxD0(T& a, T& b, T& c, T& d)
-   {
+template <typename T>
+BOTAN_FORCE_INLINE void SBoxD0(T& a, T& b, T& c, T& d) {
    c = ~c;
    T t0 = b;
    b |= a;
@@ -250,11 +243,10 @@ BOTAN_FORCE_INLINE void SBoxD0(T& a, T& b, T& c, T& d)
    t0 ^= c;
    c = b;
    b = t0;
-   }
+}
 
-template<typename T>
-BOTAN_FORCE_INLINE void SBoxD1(T& a, T& b, T& c, T& d)
-   {
+template <typename T>
+BOTAN_FORCE_INLINE void SBoxD1(T& a, T& b, T& c, T& d) {
    T t0 = b;
    b ^= d;
    d &= b;
@@ -279,11 +271,10 @@ BOTAN_FORCE_INLINE void SBoxD1(T& a, T& b, T& c, T& d)
    t0 = c;
    c = d;
    d = t0;
-   }
+}
 
-template<typename T>
-BOTAN_FORCE_INLINE void SBoxD2(T& a, T& b, T& c, T& d)
-   {
+template <typename T>
+BOTAN_FORCE_INLINE void SBoxD2(T& a, T& b, T& c, T& d) {
    c ^= d;
    d ^= a;
    T t0 = d;
@@ -305,11 +296,10 @@ BOTAN_FORCE_INLINE void SBoxD2(T& a, T& b, T& c, T& d)
    d ^= a;
    a = b;
    b = t0;
-   }
+}
 
-template<typename T>
-BOTAN_FORCE_INLINE void SBoxD3(T& a, T& b, T& c, T& d)
-   {
+template <typename T>
+BOTAN_FORCE_INLINE void SBoxD3(T& a, T& b, T& c, T& d) {
    T t0 = c;
    c ^= b;
    a ^= c;
@@ -332,11 +322,10 @@ BOTAN_FORCE_INLINE void SBoxD3(T& a, T& b, T& c, T& d)
    a = c;
    c = d;
    d = t0;
-   }
+}
 
-template<typename T>
-BOTAN_FORCE_INLINE void SBoxD4(T& a, T& b, T& c, T& d)
-   {
+template <typename T>
+BOTAN_FORCE_INLINE void SBoxD4(T& a, T& b, T& c, T& d) {
    T t0 = c;
    c &= d;
    c ^= b;
@@ -359,11 +348,10 @@ BOTAN_FORCE_INLINE void SBoxD4(T& a, T& b, T& c, T& d)
    c ^= b;
    b = d;
    d = t0;
-   }
+}
 
-template<typename T>
-BOTAN_FORCE_INLINE void SBoxD5(T& a, T& b, T& c, T& d)
-   {
+template <typename T>
+BOTAN_FORCE_INLINE void SBoxD5(T& a, T& b, T& c, T& d) {
    b = ~b;
    T t0 = d;
    c ^= b;
@@ -388,11 +376,10 @@ BOTAN_FORCE_INLINE void SBoxD5(T& a, T& b, T& c, T& d)
    t0 = d;
    d = c;
    c = t0;
-   }
+}
 
-template<typename T>
-BOTAN_FORCE_INLINE void SBoxD6(T& a, T& b, T& c, T& d)
-   {
+template <typename T>
+BOTAN_FORCE_INLINE void SBoxD6(T& a, T& b, T& c, T& d) {
    a ^= c;
    T t0 = c;
    c &= a;
@@ -413,11 +400,10 @@ BOTAN_FORCE_INLINE void SBoxD6(T& a, T& b, T& c, T& d)
    a = b;
    b = c;
    c = t0;
-   }
+}
 
-template<typename T>
-BOTAN_FORCE_INLINE void SBoxD7(T& a, T& b, T& c, T& d)
-   {
+template <typename T>
+BOTAN_FORCE_INLINE void SBoxD7(T& a, T& b, T& c, T& d) {
    T t0 = c;
    c ^= a;
    a &= d;
@@ -441,6 +427,8 @@ BOTAN_FORCE_INLINE void SBoxD7(T& a, T& b, T& c, T& d)
    b = a;
    a = d;
    d = t0;
-   }
+}
+
+}  // namespace Botan::Serpent_F
 
 #endif

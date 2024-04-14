@@ -2,6 +2,10 @@
 ECGDSA -> 20160301
 </defines>
 
+<module_info>
+name -> "ECGDSA"
+</module_info>
+
 <requires>
 asn1
 bigint
@@ -10,6 +14,9 @@ ecc_key
 keypair
 numbertheory
 rng
-emsa1
 sha2_32
 </requires>
+
+<header:public>
+ecgdsa.h
+</header:public>

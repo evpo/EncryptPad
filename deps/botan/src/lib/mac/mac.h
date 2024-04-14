@@ -10,17 +10,17 @@
 
 #include <botan/buf_comp.h>
 #include <botan/sym_algo.h>
-#include <string>
 #include <memory>
+#include <span>
+#include <string>
 
 namespace Botan {
 
 /**
 * This class represents Message Authentication Code (MAC) objects.
 */
-class BOTAN_PUBLIC_API(2,0) MessageAuthenticationCode : public Buffered_Computation,
-                                            public SymmetricAlgorithm
-   {
+class BOTAN_PUBLIC_API(2, 0) MessageAuthenticationCode : public Buffered_Computation,
+                                                         public SymmetricAlgorithm {
    public:
       /**
       * Create an instance based on a name
@@ -29,9 +29,8 @@ class BOTAN_PUBLIC_API(2,0) MessageAuthenticationCode : public Buffered_Computat
       * @param provider provider implementation to use
       * @return a null pointer if the algo/provider combination cannot be found
       */
-      static std::unique_ptr<MessageAuthenticationCode>
-         create(const std::string& algo_spec,
-                const std::string& provider = "");
+      static std::unique_ptr<MessageAuthenticationCode> create(std::string_view algo_spec,
+                                                               std::string_view provider = "");
 
       /*
       * Create an instance based on a name
@@ -40,16 +39,15 @@ class BOTAN_PUBLIC_API(2,0) MessageAuthenticationCode : public Buffered_Computat
       * @param provider provider implementation to use
       * Throws a Lookup_Error if algo/provider combination cannot be found
       */
-      static std::unique_ptr<MessageAuthenticationCode>
-         create_or_throw(const std::string& algo_spec,
-                         const std::string& provider = "");
+      static std::unique_ptr<MessageAuthenticationCode> create_or_throw(std::string_view algo_spec,
+                                                                        std::string_view provider = "");
 
       /**
       * @return list of available providers for this algorithm, empty if not available
       */
-      static std::vector<std::string> providers(const std::string& algo_spec);
+      static std::vector<std::string> providers(std::string_view algo_spec);
 
-      virtual ~MessageAuthenticationCode() {}
+      ~MessageAuthenticationCode() override = default;
 
       /**
       * Prepare for processing a message under the specified nonce
@@ -59,41 +57,24 @@ class BOTAN_PUBLIC_API(2,0) MessageAuthenticationCode : public Buffered_Computat
       * an empty string is an error. One MAC which *requires* a per-message
       * nonce be specified is GMAC.
       *
-      * @param nonce the message nonce bytes
-      * @param nonce_len the size of len in bytes
       * Default implementation simply rejects all non-empty nonces
       * since most hash/MAC algorithms do not support randomization
-      */
-      virtual void start_msg(const uint8_t nonce[], size_t nonce_len);
-
-      /**
-      * Begin processing a message with a nonce
       *
-      * @param nonce the per message nonce
+      * @param nonce the message nonce bytes
       */
-      template<typename Alloc>
-      void start(const std::vector<uint8_t, Alloc>& nonce)
-         {
-         start_msg(nonce.data(), nonce.size());
-         }
+      void start(std::span<const uint8_t> nonce) { start_msg(nonce); }
 
       /**
       * Begin processing a message.
       * @param nonce the per message nonce
       * @param nonce_len length of nonce
       */
-      void start(const uint8_t nonce[], size_t nonce_len)
-         {
-         start_msg(nonce, nonce_len);
-         }
+      void start(const uint8_t nonce[], size_t nonce_len) { start_msg({nonce, nonce_len}); }
 
       /**
       * Begin processing a message.
       */
-      void start()
-         {
-         return start_msg(nullptr, 0);
-         }
+      void start() { return start_msg({}); }
 
       /**
       * Verify a MAC.
@@ -101,32 +82,24 @@ class BOTAN_PUBLIC_API(2,0) MessageAuthenticationCode : public Buffered_Computat
       * @param length the length of param in
       * @return true if the MAC is valid, false otherwise
       */
-      virtual bool verify_mac(const uint8_t in[], size_t length);
+      bool verify_mac(const uint8_t in[], size_t length) { return verify_mac_result({in, length}); }
 
       /**
       * Verify a MAC.
       * @param in the MAC to verify as a byte array
       * @return true if the MAC is valid, false otherwise
       */
-      virtual bool verify_mac(const std::vector<uint8_t>& in)
-         {
-         return verify_mac(in.data(), in.size());
-         }
+      bool verify_mac(std::span<const uint8_t> in) { return verify_mac_result(in); }
 
       /**
-      * Verify a MAC.
-      * @param in the MAC to verify as a byte array
-      * @return true if the MAC is valid, false otherwise
+      * @return new object representing the same algorithm as *this
       */
-      virtual bool verify_mac(const secure_vector<uint8_t>& in)
-         {
-         return verify_mac(in.data(), in.size());
-         }
+      virtual std::unique_ptr<MessageAuthenticationCode> new_object() const = 0;
 
       /**
       * Get a new object representing the same algorithm as *this
       */
-      virtual MessageAuthenticationCode* clone() const = 0;
+      MessageAuthenticationCode* clone() const { return this->new_object().release(); }
 
       /**
       * @return provider information about this implementation. Default is "base",
@@ -134,10 +107,31 @@ class BOTAN_PUBLIC_API(2,0) MessageAuthenticationCode : public Buffered_Computat
       */
       virtual std::string provider() const { return "base"; }
 
-   };
+      /**
+      * @return if a fresh key must be set for each message that is processed.
+      *
+      * This is required for certain polynomial-based MACs which are insecure
+      * if a key is ever reused for two different messages.
+      */
+      virtual bool fresh_key_required_per_message() const { return false; }
+
+   protected:
+      /**
+      * Prepare for processing a message under the specified nonce
+      *
+      * If the MAC does not support nonces, it should not override the default
+      * implementation.
+      */
+      virtual void start_msg(std::span<const uint8_t> nonce);
+
+      /**
+      * Verify the MACs final result
+      */
+      virtual bool verify_mac_result(std::span<const uint8_t> in);
+};
 
 typedef MessageAuthenticationCode MAC;
 
-}
+}  // namespace Botan
 
 #endif

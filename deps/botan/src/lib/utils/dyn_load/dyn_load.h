@@ -16,8 +16,7 @@ namespace Botan {
 /**
 * Represents a DLL or shared object
 */
-class BOTAN_PUBLIC_API(2,0) Dynamically_Loaded_Library final
-   {
+class BOTAN_TEST_API Dynamically_Loaded_Library final {
    public:
       /**
       * Load a DLL (or fail with an exception)
@@ -28,7 +27,7 @@ class BOTAN_PUBLIC_API(2,0) Dynamically_Loaded_Library final
       * qualified pathnames can help prevent code injection attacks (eg
       * via manipulation of LD_LIBRARY_PATH on Linux)
       */
-      Dynamically_Loaded_Library(const std::string& lib_name);
+      Dynamically_Loaded_Library(std::string_view lib_name);
 
       /**
       * Unload the DLL
@@ -49,11 +48,10 @@ class BOTAN_PUBLIC_API(2,0) Dynamically_Loaded_Library final
       * @param symbol names the symbol to load
       * @return address of the loaded symbol
       */
-      template<typename T>
-      T resolve(const std::string& symbol)
-         {
+      template <typename T>
+      T resolve(const std::string& symbol) {
          return reinterpret_cast<T>(resolve_symbol(symbol));
-         }
+      }
 
    private:
       Dynamically_Loaded_Library(const Dynamically_Loaded_Library&);
@@ -61,8 +59,8 @@ class BOTAN_PUBLIC_API(2,0) Dynamically_Loaded_Library final
 
       std::string m_lib_name;
       void* m_lib;
-   };
+};
 
-}
+}  // namespace Botan
 
 #endif

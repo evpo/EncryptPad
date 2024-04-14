@@ -2,10 +2,6 @@
 SERPENT -> 20131128
 </defines>
 
-<header:public>
-serpent.h
-</header:public>
-
-<header:internal>
-serpent_sbox.h
-</header:internal>
+<module_info>
+name -> "Serpent"
+</module_info>

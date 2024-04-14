@@ -8,28 +8,29 @@
 */
 
 #include <botan/internal/mp_core.h>
-#include <botan/internal/mp_monty.h>
-#include <botan/internal/mp_madd.h>
-#include <botan/internal/mp_asmi.h>
-#include <botan/internal/ct_utils.h>
-#include <botan/mem_ops.h>
+
+#include <botan/assert.h>
 #include <botan/exceptn.h>
+#include <botan/mem_ops.h>
+#include <botan/internal/ct_utils.h>
 
 namespace Botan {
-
-namespace {
 
 /*
 * Montgomery reduction - product scanning form
 *
-* https://www.iacr.org/archive/ches2005/006.pdf
+* Algorithm 5 from "Energy-Efficient Software Implementation of Long
+* Integer Modular Arithmetic"
+* (https://www.iacr.org/archive/ches2005/006.pdf)
+*
+* See also
+*
 * https://eprint.iacr.org/2013/882.pdf
 * https://www.microsoft.com/en-us/research/wp-content/uploads/1996/01/j37acmon.pdf
 */
-void bigint_monty_redc_generic(word z[], size_t z_size,
-                               const word p[], size_t p_size, word p_dash,
-                               word ws[])
-   {
+void bigint_monty_redc_generic(word z[], size_t z_size, const word p[], size_t p_size, word p_dash, word ws[]) {
+   BOTAN_ARG_CHECK(z_size >= 2 * p_size && p_size > 0, "Invalid sizes for bigint_monty_redc_generic");
+
    word w2 = 0, w1 = 0, w0 = 0;
 
    w0 = z[0];
@@ -42,12 +43,10 @@ void bigint_monty_redc_generic(word z[], size_t z_size,
    w1 = w2;
    w2 = 0;
 
-   for(size_t i = 1; i != p_size; ++i)
-      {
-      for(size_t j = 0; j < i; ++j)
-         {
-         word3_muladd(&w2, &w1, &w0, ws[j], p[i-j]);
-         }
+   for(size_t i = 1; i != p_size; ++i) {
+      for(size_t j = 0; j < i; ++j) {
+         word3_muladd(&w2, &w1, &w0, ws[j], p[i - j]);
+      }
 
       word3_add(&w2, &w1, &w0, z[i]);
 
@@ -58,76 +57,49 @@ void bigint_monty_redc_generic(word z[], size_t z_size,
       w0 = w1;
       w1 = w2;
       w2 = 0;
+   }
+
+   for(size_t i = 0; i != p_size - 1; ++i) {
+      for(size_t j = i + 1; j != p_size; ++j) {
+         word3_muladd(&w2, &w1, &w0, ws[j], p[p_size + i - j]);
       }
 
-   for(size_t i = 0; i != p_size; ++i)
-      {
-      for(size_t j = i + 1; j != p_size; ++j)
-         {
-         word3_muladd(&w2, &w1, &w0, ws[j], p[p_size + i-j]);
-         }
-
-      word3_add(&w2, &w1, &w0, z[p_size+i]);
+      word3_add(&w2, &w1, &w0, z[p_size + i]);
 
       ws[i] = w0;
+
       w0 = w1;
       w1 = w2;
       w2 = 0;
-      }
+   }
 
-   word3_add(&w2, &w1, &w0, z[z_size-1]);
+   word3_add(&w2, &w1, &w0, z[2 * p_size - 1]);
 
-   ws[p_size] = w0;
-   ws[p_size+1] = w1;
+   ws[p_size - 1] = w0;
+   // w1 is the final part, which is not stored in the workspace
 
    /*
    * The result might need to be reduced mod p. To avoid a timing
    * channel, always perform the subtraction. If in the compution
    * of x - p a borrow is required then x was already < p.
    *
-   * x starts at ws[0] and is p_size+1 bytes long.
-   * x - p starts at ws[p_size+1] and is also p_size+1 bytes log
+   * x starts at ws[0] and is p_size bytes long plus a possible high
+   * digit left over in w1.
    *
-   * Select which address to copy from indexing off of the final
-   * borrow.
+   * x - p starts at z[0] and is also p_size bytes long
+   *
+   * If borrow was set after the subtraction, then x was already less
+   * than p and the subtraction was not needed. In that case overwrite
+   * z[0:p_size] with the original x in ws[0:p_size].
+   *
+   * We only copy out p_size in the final step because we know
+   * the Montgomery result is < P
    */
 
-   // word borrow = bigint_sub3(ws + p_size + 1, ws, p_size + 1, p, p_size);
-   word borrow = 0;
-   for(size_t i = 0; i != p_size; ++i)
-      ws[p_size + 1 + i] = word_sub(ws[i], p[i], &borrow);
-   ws[2*p_size+1] = word_sub(ws[p_size], 0, &borrow);
+   bigint_monty_maybe_sub(p_size, z, w1, ws, p);
 
-   BOTAN_DEBUG_ASSERT(borrow == 0 || borrow == 1);
-
-   CT::conditional_copy_mem(borrow, z, ws, ws + (p_size + 1), (p_size + 1));
-   clear_mem(z + p_size, z_size - p_size - 2);
-   }
-
+   // Clear the high words that contain the original input
+   clear_mem(z + p_size, z_size - p_size);
 }
 
-void bigint_monty_redc(word z[],
-                       const word p[], size_t p_size, word p_dash,
-                       word ws[], size_t ws_size)
-   {
-   const size_t z_size = 2*(p_size+1);
-
-   BOTAN_ARG_CHECK(ws_size >= z_size, "workspace too small");
-
-   if(p_size == 4)
-      bigint_monty_redc_4(z, p, p_dash, ws);
-   else if(p_size == 6)
-      bigint_monty_redc_6(z, p, p_dash, ws);
-   else if(p_size == 8)
-      bigint_monty_redc_8(z, p, p_dash, ws);
-   else if(p_size == 16)
-      bigint_monty_redc_16(z, p, p_dash, ws);
-   else if(p_size == 24)
-      bigint_monty_redc_24(z, p, p_dash, ws);
-   else if(p_size == 32)
-      bigint_monty_redc_32(z, p, p_dash, ws);
-   else
-      bigint_monty_redc_generic(z, z_size, p, p_size, p_dash, ws);
-   }
-
-}
+}  // namespace Botan

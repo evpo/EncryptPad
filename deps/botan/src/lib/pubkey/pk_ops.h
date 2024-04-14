@@ -16,6 +16,11 @@
 * Unless you're doing something like that, you don't need anything
 * here. Instead use pubkey.h which wraps these types safely and
 * provides a stable application-oriented API.
+*
+* Note: This header was accidentally pulled from the public API between
+*       Botan 3.0.0 and 3.2.0, and then restored in 3.3.0. If you are
+*       maintaining an application which used this header in Botan 2.x,
+*       you should make sure to use Botan 3.3.0 or later when migrating.
 */
 
 #include <botan/pk_keys.h>
@@ -33,129 +38,141 @@ namespace PK_Ops {
 /**
 * Public key encryption interface
 */
-class BOTAN_PUBLIC_API(2,0) Encryption
-   {
+class BOTAN_UNSTABLE_API Encryption {
    public:
-      virtual secure_vector<uint8_t> encrypt(const uint8_t msg[],
-                                          size_t msg_len,
-                                          RandomNumberGenerator& rng) = 0;
+      virtual secure_vector<uint8_t> encrypt(const uint8_t msg[], size_t msg_len, RandomNumberGenerator& rng) = 0;
 
       virtual size_t max_input_bits() const = 0;
 
       virtual size_t ciphertext_length(size_t ptext_len) const = 0;
 
-      virtual ~Encryption() {}
-   };
+      virtual ~Encryption() = default;
+};
 
 /**
 * Public key decryption interface
 */
-class BOTAN_PUBLIC_API(2,0) Decryption
-   {
+class BOTAN_UNSTABLE_API Decryption {
    public:
       virtual secure_vector<uint8_t> decrypt(uint8_t& valid_mask,
-                                          const uint8_t ciphertext[],
-                                          size_t ciphertext_len) = 0;
+                                             const uint8_t ciphertext[],
+                                             size_t ciphertext_len) = 0;
 
       virtual size_t plaintext_length(size_t ctext_len) const = 0;
 
-      virtual ~Decryption() {}
-   };
+      virtual ~Decryption() = default;
+};
 
 /**
 * Public key signature verification interface
 */
-class BOTAN_PUBLIC_API(2,0) Verification
-   {
+class BOTAN_UNSTABLE_API Verification {
    public:
-      /*
+      /**
       * Add more data to the message currently being signed
       * @param msg the message
       * @param msg_len the length of msg in bytes
       */
       virtual void update(const uint8_t msg[], size_t msg_len) = 0;
 
-      /*
+      /**
       * Perform a verification operation
-      * @param rng a random number generator
       */
       virtual bool is_valid_signature(const uint8_t sig[], size_t sig_len) = 0;
 
-      virtual ~Verification() {}
-   };
+      /**
+      * Return the hash function being used by this signer
+      */
+      virtual std::string hash_function() const = 0;
+
+      virtual ~Verification() = default;
+};
 
 /**
 * Public key signature creation interface
 */
-class BOTAN_PUBLIC_API(2,0) Signature
-   {
+class BOTAN_UNSTABLE_API Signature {
    public:
-      /*
+      /**
       * Add more data to the message currently being signed
       * @param msg the message
       * @param msg_len the length of msg in bytes
       */
       virtual void update(const uint8_t msg[], size_t msg_len) = 0;
 
-      /*
+      /**
       * Perform a signature operation
       * @param rng a random number generator
       */
       virtual secure_vector<uint8_t> sign(RandomNumberGenerator& rng) = 0;
 
-      /*
+      /**
       * Return an upper bound on the length of the output signature
       */
       virtual size_t signature_length() const = 0;
 
-      virtual ~Signature() {}
-   };
+      /**
+      * Return an algorithm identifier associated with this signature scheme.
+      *
+      * Default implementation throws an exception
+      */
+      virtual AlgorithmIdentifier algorithm_identifier() const;
+
+      /**
+      * Return the hash function being used by this signer
+      */
+      virtual std::string hash_function() const = 0;
+
+      virtual ~Signature() = default;
+};
 
 /**
 * A generic key agreement operation (eg DH or ECDH)
 */
-class BOTAN_PUBLIC_API(2,0) Key_Agreement
-   {
+class BOTAN_UNSTABLE_API Key_Agreement {
    public:
-      virtual secure_vector<uint8_t> agree(size_t key_len,
-                                           const uint8_t other_key[], size_t other_key_len,
-                                           const uint8_t salt[], size_t salt_len) = 0;
+      virtual secure_vector<uint8_t> agree(
+         size_t key_len, const uint8_t other_key[], size_t other_key_len, const uint8_t salt[], size_t salt_len) = 0;
 
       virtual size_t agreed_value_size() const = 0;
 
-      virtual ~Key_Agreement() {}
-   };
+      virtual ~Key_Agreement() = default;
+};
 
 /**
 * KEM (key encapsulation)
 */
-class BOTAN_PUBLIC_API(2,0) KEM_Encryption
-   {
+class BOTAN_UNSTABLE_API KEM_Encryption {
    public:
-      virtual void kem_encrypt(secure_vector<uint8_t>& out_encapsulated_key,
-                               secure_vector<uint8_t>& out_shared_key,
+      virtual void kem_encrypt(std::span<uint8_t> out_encapsulated_key,
+                               std::span<uint8_t> out_shared_key,
+                               RandomNumberGenerator& rng,
                                size_t desired_shared_key_len,
-                               Botan::RandomNumberGenerator& rng,
-                               const uint8_t salt[],
-                               size_t salt_len) = 0;
+                               std::span<const uint8_t> salt) = 0;
 
-      virtual ~KEM_Encryption() {}
-   };
+      virtual size_t shared_key_length(size_t desired_shared_key_len) const = 0;
 
-class BOTAN_PUBLIC_API(2,0) KEM_Decryption
-   {
+      virtual size_t encapsulated_key_length() const = 0;
+
+      virtual ~KEM_Encryption() = default;
+};
+
+class BOTAN_UNSTABLE_API KEM_Decryption {
    public:
-      virtual secure_vector<uint8_t> kem_decrypt(const uint8_t encap_key[],
-                                              size_t len,
-                                              size_t desired_shared_key_len,
-                                              const uint8_t salt[],
-                                              size_t salt_len) = 0;
+      virtual void kem_decrypt(std::span<uint8_t> out_shared_key,
+                               std::span<const uint8_t> encapsulated_key,
+                               size_t desired_shared_key_len,
+                               std::span<const uint8_t> salt) = 0;
 
-      virtual ~KEM_Decryption() {}
-   };
+      virtual size_t shared_key_length(size_t desired_shared_key_len) const = 0;
 
-}
+      virtual size_t encapsulated_key_length() const = 0;
 
-}
+      virtual ~KEM_Decryption() = default;
+};
+
+}  // namespace PK_Ops
+
+}  // namespace Botan
 
 #endif

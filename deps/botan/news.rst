@@ -1,6 +1,497 @@
 Release Notes
 ========================================
 
+Version 3.4.0, 2024-04-08
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+* Add Ed448 signatures and X448 key exchange (GH #3933)
+
+* X.509 certificate verification now can optionally ignore the
+  expiration date of root certificates. (GH #3938)
+
+* Support for "hybrid" EC point encoding is now deprecated. (GH #3981)
+
+* Support for creating EC_Group objects with parameters larger than
+  521 bits is now deprecated (GH #3980)
+
+* Add new build options to disable deprecated features, and to enable
+  experimental features. (GH #3910)
+
+* Fix a bug affecting use of SIV and CCM ciphers in the FFI interface.
+  (GH #3971)
+
+* Add new FFI interface ``botan_cipher_requires_entire_message`` (GH #3969)
+
+* Internal refactorings of the mp layer to support a new elliptic
+  curve library. (GH #3973 #3977 #3962 #3957 #3964 #3956 #3961 #3950)
+
+* Use a new method for constant time division in Kyber to avoid a possible
+  side channel where the compiler inserts use of a variable time division.
+  (GH #3959)
+
+* Refactor test RNG usage to improve reproducibility. (GH #3920)
+
+* Add ``std::span`` interfaces to ``BigInt`` (GH #3866)
+
+* Refactorings and improvements to low level load/store utility
+  functions. (GH #3869)
+
+* Fix the amalgamation build on ARM64 (GH #3931)
+
+* Add Mac ARM based CI build (GH #3931)
+
+* Fix a thread serialization bug that caused sporadic test failures.
+  (GH #3922)
+
+* Update GH Actions to v4 (GH #3923)
+
+* Add examples of password based encryption and HTTPS+ASIO client.
+  (GH #3935 #3910)
+
+Version 3.3.0, 2024-02-20
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+* Fix a potential denial of service caused by accepting arbitrary
+  length primes as potential elliptic curve parameters in ASN.1
+  encodings. With very large inputs the primality verification
+  can become computationally expensive. Now any prime field larger
+  than 1024 bits is rejected immediately. Reported by Bing Shi.
+  (GH #3913)
+
+* Add FrodoKEM post-quantum KEM (GH #3679 #3807 #3892)
+
+* Add support for Blake2s (GH #3796)
+
+* Add support for RFC 7250 in TLS 1.3 to allow authenticating peers
+  using raw public keys (GH #3771)
+
+* Update the BSI TLS policy to match the latest TR, particularly
+  enabling support for TLS 1.3 (GH #3809)
+
+* Add AsymmetricKey::generate_another() to generate a new key of the
+  same type and parameters as an existing key (GH #3770 #3786)
+
+* Add Private_Key::remaining_operations() that indicates the number of
+  remaining signatures for stateful hash-based signatures (GH #3821)
+
+* Add implementation of EC_PrivateKey::check_key() (GH #3782 #3804)
+
+* Add hardware acceleration for SHA-512 on ARMv8 (GH #3860 #3864)
+
+* X.509 certificates that contain Authority Information Access (AIA)
+  extensions can now be encoded (GH #3784)
+
+* Various functions defined in ``mem_ops.h`` are now deprecated
+  for public use (GH #3759 #3752 #3757)
+
+* The ASIO TLS stream can now be used with C++20 coroutines (GH #3764)
+
+* New public header asio_compat.h to check compatibility of the ASIO
+  TLS stream with the available boost version (1.73.0+) (GH #3765)
+
+* Flatten input buffer sequences in the ASIO TLS stream to avoid
+  creating unnecessarily small TLS records (GH #3839)
+
+* Hard-rename the potentially harmful build configuration flag
+  --terminate-on-asserts to --unsafe-terminate-on-asserts (GH #3755)
+
+* Use modern SQLite3 APIs with integer width annotations from SQLite3 3.37
+  (GH #3788 #3793)
+
+* Generate and install a CMake package config file (botan-config.cmake)
+  (GH #3722 #3827 #3830 #3825)
+
+* Add TLS::Channel::is_handshake_complete() predicate method (GH #3762)
+
+* Add support for setting thread names on Haiku OS and DragonflyBSD
+  (GH #3758 #3785)
+
+* Use /Zc:throwingNew with MSVC (GH #3858)
+
+* Work around a warning in GCC 13 (GH #3852)
+
+* Add a CLI utility for testing RSA side channels using the MARVIN
+  toolkit (GH #3749)
+
+* CLI utility 'tls_http_server' is now based on Boost Beast
+  (GH #3763 #3791)
+
+* CLI utility 'tls_client_hello' can detect and handle TLS 1.3 messages
+  (GH #3820)
+
+* Add a detailed migration guide for users of OpenSSL 1.1 (GH #3815)
+
+* Various updates to the documentation and code examples
+  (GH #3777 #3805 #3802 #3794 #3815 #3823 #3828 #3842 #3841 #3849 #3745)
+
+* Fixes and improvements to the build experience using ``ninja``
+  (GH #3751 #3750 #3769 #3798 #3848)
+
+* Fix handling of cofactors when performing scalar blinding in EC (GH #3803)
+
+* Fix potential timing side channels in Kyber (GH #3846 #3874)
+
+* Fix a potential dangling reference resulting in a crash in the OCB
+  mode of operation (GH #3814)
+
+* Fix validity checks in the construction of the ASIO TLS stream
+  (GH #3766)
+
+* Fix error code handling in ASIO TLS stream (GH #3795 #3801 #3773)
+
+* Fix a TLS 1.3 assertion failure that would trigger if the
+  application callback returned an empty certificate chain. (GH #3754)
+
+* Fix a RFC 7919 conformance bug introduced in 3.2.0, where the TLS
+  server would fail to reject a client hello that advertised (only)
+  FFDHE groups that are not known to us. (GH #3743 #3742 #3729)
+
+* Fix that modifications made in TLS::Callbacks::tls_modify_extensions()
+  for the TLS 1.3 Certificate message were not being applied. (GH #3792)
+
+* Fix string mapping of the PKCS#11 mechanism RSA signing mechanism that
+  use SHA-384 (GH #3868)
+
+* Fix a build issue on NetBSD (GH #3767)
+
+* Fix the configure.py to avoid recursing out of our source tree (GH #3748)
+
+* Fix various clang-tidy warnings (GH #3822)
+
+* Fix CLI tests on windows and enable them in CI (GH #3845)
+
+* Use ``BufferStuffer`` and ``concat`` helpers in public key code
+  (GH #3756 #3753)
+
+* Add a nightly test to ensure hybrid TLS 1.3 PQ/T compatibility with
+  external implementations (GH #3740)
+
+* Internal memory operation helpers are now memory container agnostic
+  using C++20 ranges (GH #3715 #3707)
+
+* Public and internal headers are now clearly separated in the build
+  directory. That restricts the examples build target to public headers.
+  (GH #3880)
+
+* House keeping for better code formatting with clang-format
+  (GH #3862 #3865)
+
+* Build documentation in CI and fail on warnings or errors (GH #3838)
+
+* Work around a GitHub Actions CI issue (actions/runner-images#8659)
+  (GH #3783 #3833 #3888)
+
+Version 3.2.0, 2023-10-09
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+* Add support for (experimental!) post-quantum secure key exchange
+  in TLS 1.3 (GH #3609 #3732 #3733 #3739)
+
+* Add support for TLS PSK (GH #3618)
+
+* Add a first class interface for XOFs (GH #3671 #3672 #3701)
+
+* Add KMAC from NIST SP 800-185 (GH #3689)
+
+* Add cSHAKE XOF; currently this is not exposed to library users but
+  is only for deriving further cSHAKE derived functions. (GH #3671)
+
+* Add improved APIs for key encapsulation (GH #3611 #3652 #3653)
+
+* As Kyber's 90s mode is not included in the NIST draft specification,
+  and most implementations only support the SHAKE based mechanism,
+  the Kyber 90s mode is now deprecated. (GH #3695)
+
+* Previously ``KyberMode`` enums had elements like ``Kyber512`` to identify the
+  scheme. These have changed to have ``_R3`` suffixes (like ``Kyber512_R3``) to
+  clearly indicate these are not the final version but is instead the version
+  from round3 of the PQC competition. The old names continue on as (deprecated)
+  aliases. (GH #3695)
+
+* Fix bugs in various signature algorithms where if a signature
+  operation was used after the key object had been deleted, a use
+  after free would occur. (GH #3702)
+
+* The types defined in pubkey.h can now be moved (GH #3655)
+
+* Add the Russian block cipher Kuznyechik (GH #3680 #3724)
+
+* The ``TLS::Group_Params`` enum is now a class which emulates the
+  behavior of the enumeration. (GH #3729)
+
+* Implement serialization for the Certificate Authority TLS extension
+  (GH #3687)
+
+* Refactored the internal buffering logic of most hash functions
+  (GH #3705 #3693 #3736)
+
+* Add OS support for naming threads; now Botan thread pool threads
+  are identified by name. (GH #3628 #3738)
+
+* Updated the TLS documentation to reflect TLS 1.3 support and
+  the removal of TLS 1.0 and 1.1. (GH #3708)
+
+* Upon deserialization, the ``EC_Group`` type now tracks the encoding
+  which was used to create it. This is necessary to implement policies
+  which prohibit use of explicit curve encodings (which are in any case
+  deprecated). (GH #3665)
+
+* If compiling against an old glibc which does not support the ``getrandom``
+  call, now the raw syscall is used instead. (GH #3688 #3685)
+
+* On MinGW the global thread pool is disabled by default (GH #3726 #2582)
+
+* Various internal functions now use ``std::span`` instead of raw pointers
+  plus length field. NOTE: any implementations of ``BlockCipher``, ``HashFunction``
+  etc that live outside the library will have to be updated. This is not covered
+  by the SemVer guarantee; see ``doc/sem_ver.rst`` (GH #3684 #3681 #3713 #3714
+  #3698 #3696)
+
+* Add helper for buffer alignment, and adopt it within the hash function
+  implementations. (GH #3693)
+
+* Added support for encoding CRL Distribution Points extension in new
+  certificates (GH #3712)
+
+* Internal refactoring of SHA-3 to support further SHA-3 derived functionality
+  (GH #3673)
+
+* Add support for testing using TLS-Anvil (GH #3651) and fix a few cases
+  where the TLS implementation sent the incorrect alert type in various
+  error cases which were discovered using TLS-Anvil (GH #3676)
+
+* Add initial (currently somewhat experimental) support for using the ninja
+  build system as an alternative to make. (GH #3677)
+
+* Remove an unused variable in BLAKE2b (GH #3624)
+
+* Fix a number of clang-tidy warnings in the headers (GH #3646)
+
+* Add checks for invalid length AD in Argon2 (GH #3626)
+
+* CI now uses Android NDK 26, and earlier NDKs are not supported
+  due to limitations of the C++ library in earlier NDKs (GH #3718)
+
+* Improve support for IBM's XLC compiler (GH #3730)
+
+* Avoid compilation failures when using ``-Werror`` mode with GCC 12
+  due to spurious warnings in that version. (GH #3711 #3709)
+
+Version 3.1.1, 2023-07-13
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+* Fix two tests which were insufficiently serialized. This would
+  cause sporadic test failures, particularly on machines with
+  many cores. (GH #3625 #3623)
+
+Version 3.1.0, 2023-07-11
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+* Add SPHINCS+ post quantum hash based signature scheme (GH #3564 #3549)
+
+* Several small TLS compliance fixes, primarily around rejecting
+  invalid behavior from the peer (GH #3520 #3537)
+
+* Adapt TLS 1.3 to use a KEM interface to prepare for PQ key exchange
+  (GH #3608)
+
+* Fix custom key exchange logic integration for TLS 1.2 server (GH #3539)
+
+* Add initial wrappers for using AVX-512, and implement AVX-512 versions
+  of ChaCha and Serpent. (GH #3206 #3536)
+
+* Add support for an environmental variable which can disable CPU extensions
+  (GH #3535)
+
+* Update the BSI policy to match the latest TR (GH #3482)
+
+* Update the BoringSSL test suite shim (GH #3616)
+
+* Add FFI functions relating to Kyber key management (GH #3546)
+
+* The entire codebase has been reformatted using ``clang-format``.
+  (GH #3502 #3558 #3559)
+
+* Fix many warnings generated from ``clang-tidy``.
+
+* ``BigInt::random_integer`` could take a long time if requested to
+  generate a number within a small range between two large integers.
+  (GH #3594)
+
+* Fix bugs related to ``--library-suffix`` option. (GH #3511)
+
+* Improve cli handling of PBKDF configuration (GH #3518)
+
+* Fix the cli to properly update stateful keys (namely XMSS) when using such
+  a key to sign a X.509 certificate (GH #3579)
+
+* Add support for using PSK in the TLS CLI utilities (GH #3552)
+
+* Add an example of hybrid RSA+symmetric encryption (GH #3551)
+
+* In the Python module, the pbkdf function defaulted to 10K iterations.
+  This has been changed to 100K.
+
+* Switch to using coveralls.io for coverage report (GH #3512)
+
+* Add a script to analyze the output of ``botan timing_test``
+
+* Due to problems that arise if the build directory and source
+  directory are on different filesystems, now hardlinks are only
+  used during the build if explicitly requested. (GH #3504)
+
+* The ``ffi.h`` header no longer depends on the ``compiler.h`` header.
+  (GH #3531)
+
+* Avoid using varargs macros for ``BOTAN_UNUSED`` (GH #3530)
+
+* Small base64 encoding optimization (GH #3528)
+
+* If the build system detects that the compiler in use is not supported,
+  it will error immediately rather than allow a failing build. Currently
+  this is only supported for GCC, Clang, and MSVC. (GH #3526)
+
+* The examples are now a first class build target; include
+  ``examples`` in the set provided to ``--build-targets=`` option in
+  order to enable them. (GH #3527)
+
+* Remove the (undocumented, unsupported) support for CMake (GH #3501)
+
+Version 3.0.0, 2023-04-11
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+* Botan is now a C++20 codebase; compiler requirements have been
+  increased to GCC 11, Clang 14, or MSVC 2022. (GH #2455 #3086)
+
+Breaking Changes
+----------------------------------------
+
+* Remove many deprecated headers. In particular all algorithm specific
+  headers (such as ``aes.h``) are no longer available; instead objects
+  must be created through the base class ``create`` functions. (GH #2456)
+
+* Removed most functions previously marked as deprecated.
+
+* Remove several deprecated algorithms including CAST-256, MISTY1, Kasumi,
+  DESX, XTEA, PBKDF1, MCEIES, CBC-MAC, Tiger, NEWHOPE, and CECPQ1 (GH #2434 #3094)
+
+* Remove the entropy source which walked ``/proc`` as it is no longer
+  required on modern systems. (GH #2692)
+
+* Remove the entropy source which reads from ``/dev/random`` as it is
+  supplanted by the extant source one which reads from the system RNG.
+  (GH #2636)
+
+* Remove use of ``shared_ptr`` from certificate store API, as since
+  2.4.0 ``X509_Certificate`` is internally a ``shared_ptr``. (GH #2484)
+
+* Several enums including ``DL_Group::Format``, ``EC_Group_Formatting``,
+  ``CRL_Code``, ``ASN1_Tag``, ``Key_Constraints`` and ``Signature_Format`` are
+  now ``enum class``.  The ``ASN1_Tag`` enum has been split into ``ASN1_Type``
+  and ``ASN1_Class``.  (GH #2551 #2552 #3084 #2584 #3225)
+
+* Avoid using or returning raw pointers whenever possible. (GH #2683 #2684
+  #2685 #2687 #2688 #2690 #2691 #2693 #2694 #2695 #2696 #2697 #2700 #2703 #2708
+  #3220)
+
+* Remove support for HP and Pathscale compilers, Google NaCL (GH #2455),
+  and IncludeOS (GH #3406)
+
+* Remove deprecated ``Data_Store`` class (GH #2461)
+
+* Remove deprecated public member variables of ``OID``, ``Attribute``,
+  ``BER_Object``, and ``AlgorithmIdentifier``. (GH #2462)
+
+* "SHA-160" and "SHA1" are no longer recognized as names for "SHA-1"
+  (GH #3186)
+
+TLS Changes
+----------------------------------------
+
+* Added support for TLS v1.3
+
+* Support for TLS 1.0, TLS 1.1, and DTLS 1.0 have been removed (GH #2631)
+
+* Remove several deprecated features in TLS including DSA ciphersuites (GH #2505),
+  anonymous ciphersuites (GH #2497), SHA-1 signatures in TLS 1.2 (GH #2537),
+  SRP ciphersuites (GH #2506), SEED ciphersuites (GH #2509),
+  Camellia CBC ciphersuites (GH #2509), AES-128 OCB ciphersuites (GH #2511),
+  DHE_PSK suites (GH #2512), CECPQ1 ciphersuites (GH #3094)
+
+New Cryptographic Algorithms
+----------------------------------------
+
+* Add support for Kyber post-quantum KEM (GH #2872 #2500)
+
+* Add support for Dilithium lattice based signatures (GH #2973 #3212)
+
+* Add support for hashing onto an elliptic curve using the SSWU
+  technique of draft-irtf-cfrg-hash-to-curve (GH #2726)
+
+* Add support for keyed BLAKE2b (GH #2524)
+
+New APIs
+----------------------------------------
+
+* Add new interface ``T::new_object`` which supplants ``T::clone``. The
+  difference is that ``new_object`` returns a ``unique_ptr<T>`` instead of a raw
+  pointer ``T*``. ``T::clone`` is retained but simply releases the result of
+  ``new_object``. (GH #2689 #2704)
+
+* Add an API to ``PasswordHash`` accepting an AD and/or secret key, allowing
+  those facilities to be used without using an algorithm specific API (GH #2707)
+
+* Add new ``X509_DN::DER_encode`` function. (GH #2472)
+
+* New API ``Public_Key::get_int_field`` for getting the integer fields of a public
+  (or private) key by name (GH #3200)
+
+* New ``Cipher_Mode`` APIs ``ideal_granularity`` and ``requires_entire_message``
+  (GH #3172 #3168)
+
+* New ``Private_Key::public_key`` returns a new object containing the public
+  key associated with that private key. (GH #2520)
+
+* ``SymmetricAlgorithm::has_keying_material`` allows checking if a key has
+  already been set on an object (GH #3295)
+
+* Many new functions in the C89 interface; see the API reference for more details.
+
+Implementation Improvements
+----------------------------------------
+
+* Add AVX2 implementation of Argon2 (GH #3205)
+
+* Use smaller tables in the implementations of Camellia, ARIA, SEED, DES,
+  and Whirlpool (GH #2534 #2558)
+
+* Modify DES/3DES to use a new implementation which avoids most
+  cache-based side channels. (GH #2565 #2678)
+
+* Optimizations for SHACAL2, especially improving ARMv8 and POWER (GH #2556 #2557)
+
+* Add a fast path for inversion modulo ``2*o`` with ``o`` odd, and modify RSA
+  key generation so that ``phi(n)`` is always of this form. (GH #2634)
+
+* Use constant-time code instead of table lookups when computing parity bits
+  (GH #2560), choosing ASN.1 string type (GH #2559) and when converting to/from
+  the bcrypt variant of base64 (GH #2561)
+
+* Change how DL exponents are sized; now exponents are slightly larger and
+  are always chosen to be 8-bit aligned. (GH #2545)
+
+Other Improvements
+----------------------------------------
+
+* Changes to ``TLS::Stream`` to make it compatible with generic completion tokens.
+  (GH #2667 #2648)
+
+* When creating an ``EC_Group`` from parameters, cause the OID to be set if it
+  is a known group. (GH #2654 #2649)
+
+* Fix bugs in GMAC and SipHash where they would require a fresh key be
+  provided for each message. (GH #2908)
+
 Version 2.19.4, 2024-02-20
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

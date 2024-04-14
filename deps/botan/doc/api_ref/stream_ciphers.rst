@@ -29,9 +29,10 @@ class :cpp:class:`StreamCipher` (`botan/stream_cipher.h`).
 
      Clear the key.
 
-  .. cpp:function:: StreamCipher* clone() const
+  .. cpp:function:: std::unique_ptr<StreamCipher> new_object() const
 
      Return a newly allocated object of the same type as this one.
+     The new object is unkeyed.
 
   .. cpp:function:: void set_key(const uint8_t* key, size_t length)
 
@@ -96,65 +97,50 @@ class :cpp:class:`StreamCipher` (`botan/stream_cipher.h`).
 
      Processes plain/ciphertext *inout* in place. Acts like :cpp:func:`cipher`\ (inout.data(), inout.data(), inout.size()).
 
+.. _stream_ciphers_example:
+
 Code Example
 -----------------
 
 The following code encrypts a provided plaintext using ChaCha20.
 
-.. code-block:: cpp
-
-    #include <botan/stream_cipher.h>
-    #include <botan/auto_rng.h>
-    #include <botan/hex.h>
-    #include <iostream>
-
-    int main()
-       {
-       std::string plaintext("This is a tasty burger!");
-       std::vector<uint8_t> pt(plaintext.data(),plaintext.data()+plaintext.length());
-       const std::vector<uint8_t> key = Botan::hex_decode("000102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E1F");
-       std::unique_ptr<Botan::StreamCipher> cipher(Botan::StreamCipher::create("ChaCha(20)"));
-
-       //generate fresh nonce (IV)
-       std::unique_ptr<Botan::RandomNumberGenerator> rng(new Botan::AutoSeeded_RNG);
-       std::vector<uint8_t> iv(8);
-       rng->randomize(iv.data(),iv.size());
-
-       //set key and IV
-       cipher->set_key(key);
-       cipher->set_iv(iv.data(),iv.size());
-       cipher->encipher(pt);
-
-       std::cout << cipher->name() << " with iv " << Botan::hex_encode(iv) << ": "
-                 << Botan::hex_encode(pt) << "\n";
-       return 0;
-       }
+.. literalinclude:: /../src/examples/chacha.cpp
+   :language: cpp
 
 Available Stream Ciphers
 ----------------------------
 
-Botan provides the following stream ciphers. If in doubt use ChaCha20 or CTR(AES-256).
+Botan provides the following stream ciphers. If in doubt, pick ChaCha20 or CTR(AES-256).
 
 CTR-BE
 ~~~~~~~
 
-A cipher mode that converts a block cipher into a stream cipher. It offers
+Counter mode converts a block cipher into a stream cipher. It offers
 parallel execution and can seek within the output stream, both useful
 properties.
 
-CTR mode requires an IV which can be any length up to the block size of the
+CTR mode requires a nonce, which can be any length up to the block size of the
 underlying cipher. If it is shorter than the block size, sufficient zero bytes
 are appended.
 
 It is possible to choose the width of the counter portion, which can improve
 performance somewhat, but limits the maximum number of bytes that can safely be
 encrypted. Different protocols have different conventions for the width of the
-counter portion. This is done by specifying with width (which must be at least 4
-bytes, allowing to encrypt 2\ :sup:`32` blocks of data) for example
-"CTR(AES-256,8)" to select a 64-bit counter.
+counter portion. This is done by specifying the width (which must be at least 4
+bytes, allowing to encrypt 2\ :sup:`32` blocks of data) for example using
+"CTR(AES-256,8)" will select a 64-bit (8 byte) counter.
 
 (The ``-BE`` suffix refers to big-endian convention for the counter.
-This is the most common case.)
+Little-endian counter mode is rarely used and not currently implemented.)
+
+Algorithm specification name:
+``CTR-BE(<BlockCipher>,<optional counter size>)`` (reported name) /
+``CTR(<BlockCipher>,<optional counter size>)``
+
+- Counter size (in bytes) defaults to the block size of the underlying cipher
+- If the counter size is the same as the underlying cipher,
+  the name will be reported as ``CTR-BE(<BlockCipher>)``.
+- Examples: ``CTR-BE(AES-128)``, ``CTR-BE(AES-128,8)``
 
 OFB
 ~~~~~
@@ -163,6 +149,9 @@ Another stream cipher based on a block cipher. Unlike CTR mode, it does not
 allow parallel execution or seeking within the output stream. Prefer CTR.
 
 Available if ``BOTAN_HAS_OFB`` is defined.
+
+Algorithm specification name:
+``OFB(<BlockCipher>)``, e.g. ``OFB(AES-256)``
 
 ChaCha
 ~~~~~~~~
@@ -177,6 +166,14 @@ known as XChaCha.
 
 Available if ``BOTAN_HAS_CHACHA`` is defined.
 
+Algorithm specification names:
+
+- ``ChaCha20``, alias for ``ChaCha(20)``
+- ``ChaCha(<optional rounds>)``
+
+  - Optional rounds defaults to 20
+  - Examples: ``ChaCha(20)``, ``ChaCha(12)``
+
 Salsa20
 ~~~~~~~~~
 
@@ -188,24 +185,49 @@ Salsa supports an optional IV (which defaults to all zeros). It can be of length
 
 Available if ``BOTAN_HAS_SALSA20`` is defined.
 
+Algorithm specification name: ``Salsa20``
+
 SHAKE-128
 ~~~~~~~~~~~~
 
-This is the SHAKE-128 XOF exposed as a stream cipher. It is slower than ChaCha
-and somewhat obscure. It does not support IVs or seeking within the cipher
-stream.
+This is the SHAKE-128 XOF exposed as a stream cipher. It is slower
+than ChaCha and somewhat obscure, and was primarily implemented to
+support a particular post-quantum scheme which is no longer supported.
+
+SHAKE does not support IVs, nor seeking within the cipher stream.
 
 Available if ``BOTAN_HAS_SHAKE_CIPHER`` is defined.
+
+.. warning::
+
+  SHAKE support (as a stream cipher) is deprecated and will be removed
+  in a future major release.
+
+Algorithm specification names:
+
+- ``SHAKE-128`` (reported name) / ``SHAKE-128-XOF``
+- ``SHAKE-256`` (reported name) / ``SHAKE-256-XOF``
 
 RC4
 ~~~~
 
 An old and very widely deployed stream cipher notable for its simplicity. It
-does not support IVs or seeking within the cipher stream.
+does not support IVs or seeking within the cipher stream. Compared to modern
+algorithms like ChaCha20, it is also quite slow.
 
 .. warning::
 
-   RC4 is now badly broken. **Avoid in new code** and use only if required for
-   compatibility with existing systems.
+   RC4 is prone to numerous attacks. **Avoid in new code** and use only if
+   required for compatibility with existing systems.
 
 Available if ``BOTAN_HAS_RC4`` is defined.
+
+Algorithm specification names:
+
+- ``RC4`` (reported name) / ``ARC4``
+- ``MARK-4``
+- ``RC4(SKIP)`` (reported name) / ``ARC4(SKIP)``
+
+  - ``RC4(0)`` is an alias for ``RC4``
+  - ``RC4(256)`` is an alias for ``MARK-4``
+  - Examples: ``RC4(3)``

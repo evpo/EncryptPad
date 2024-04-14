@@ -1,0 +1,21 @@
+<defines>
+SERPENT_AVX512 -> 20230101
+</defines>
+
+<module_info>
+name -> "Serpent AVX512"
+brief -> "Serpent using AVX512 instructions"
+</module_info>
+
+<isa>
+avx512
+</isa>
+
+<requires>
+simd_avx512
+</requires>
+
+# MSVC miscompiles this code
+<cc>
+!msvc
+</cc>

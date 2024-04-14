@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """
 Botan doc generation script
@@ -17,6 +17,7 @@ import json
 import tempfile
 import os
 import stat
+import multiprocessing
 
 def get_concurrency():
     """
@@ -25,7 +26,6 @@ def get_concurrency():
     def_concurrency = 2
 
     try:
-        import multiprocessing
         return max(def_concurrency, multiprocessing.cpu_count())
     except ImportError:
         return def_concurrency
@@ -41,7 +41,7 @@ def have_prog(prog):
     return False
 
 def find_rst2man():
-    possible_names = ['rst2man', 'rst2man.py']
+    possible_names = ['rst2man', 'rst2man.py', 'rst2man-%d.%d' % sys.version_info[:2]]
 
     for name in possible_names:
         if have_prog(name):
@@ -52,7 +52,7 @@ def touch(fname):
     try:
         os.utime(fname, None)
     except OSError:
-        open(fname, 'a').close()
+        open(fname, 'a', encoding='utf8').close()
 
 def copy_files(src_path, dest_dir):
 
@@ -124,49 +124,17 @@ def parse_options(args):
 
     return options
 
-def sphinx_supports_concurrency():
-    import re
-    from distutils.version import StrictVersion
-
-    proc = subprocess.Popen(['sphinx-build', '--version'],
-                            stdout=subprocess.PIPE,
-                            stderr=subprocess.STDOUT)
-    output, _ = proc.communicate()
-    if isinstance(output, bytes):
-        output = output.decode('ascii')
-    output = output.strip()
-
-    # Sphinx v1.1.3
-    # sphinx-build 1.7.4
-    match = re.match(r'^(?:[a-zA-Z_-]+) v?(([0-9]+)\.([0-9]+))', output)
-
-    if match is None:
-        # If regex doesn't match, disable by default
-        logging.warning("Did not recognize sphinx version from '%s'", output)
-        return False
-
-    version = StrictVersion(match.group(1))
-
-    if version < StrictVersion('1.4'):
-        # not supported
-        return False
-    if version == StrictVersion('3.0'):
-        # Bug in Sphinx 3.0 https://github.com/sphinx-doc/sphinx/issues/7438
-        return False
-    return True
-
 def read_config(config):
     try:
-        f = open(config)
+        f = open(config, encoding='utf8')
         cfg = json.load(f)
         f.close()
-    except OSError:
-        raise Exception('Failed to load build config %s - is build dir correct?' % (config))
+    except OSError as ex:
+        raise Exception('Failed to load build config %s - is build dir correct?' % (config)) from ex
 
     return cfg
 
 def main(args=None):
-    # pylint: disable=too-many-branches
 
     if args is None:
         args = sys.argv
@@ -194,7 +162,7 @@ def main(args=None):
 
     if with_docs is False:
         logging.debug('Documentation build disabled')
-        return 0
+        return 1
 
     cmds = []
 
@@ -202,9 +170,7 @@ def main(args=None):
         cmds.append(['doxygen', os.path.join(cfg['build_dir'], 'botan.doxy')])
 
     if with_sphinx:
-        sphinx_build = ['sphinx-build', '-q', '-c', cfg['sphinx_config_dir']]
-        if sphinx_supports_concurrency():
-            sphinx_build += ['-j', str(get_concurrency())]
+        sphinx_build = ['sphinx-build', '-q', '-c', cfg['sphinx_config_dir'], '-j', 'auto', '-W', '--keep-going']
 
         cmds.append(sphinx_build + ['-b', 'html', handbook_src, handbook_output])
 

@@ -1,7 +1,11 @@
 <defines>
-TLS_V10_PRF -> 20131128
 TLS_V12_PRF -> 20131128
 </defines>
+
+<module_info>
+name -> "TLS 1.2 PRF"
+brief -> "Implementation of the Pseudo-Random Function as used in TLS 1.2"
+</module_info>
 
 <requires>
 hmac

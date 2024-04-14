@@ -65,6 +65,19 @@ attacker than a BellCore style attack, which is possible if any error at all
 occurs during either modular exponentiation involved in the RSA signature
 operation.
 
+RSA key generation is also prone to side channel vulnerabilities due to the need
+to calculate the CRT parameters. The GCD computation, LCM computations, modulo,
+and inversion of ``q`` modulo ``p`` are all done via constant time algorithms.
+An additional inversion, of ``e`` modulo ``phi(n)``, is also required. This one
+is somewhat more complicated because ``phi(n)`` is even and the primary constant
+time algorithm for inversions only works for odd moduli. This is worked around
+by a technique based on the CRT - ``phi(n)`` is factored to ``2**e * z`` for
+some ``e`` > 1 and some odd ``z``. Then ``e`` is inverted modulo ``2**e`` and
+also modulo ``z``. The inversion modulo ``2**e`` is done via a specialized
+constant-time algoirthm which only works for powers of 2. Then the two
+inversions are combined using the CRT. This process does leak the value of
+``e``; to avoid problems ``p`` and ``q`` are chosen so that ``e`` is always 1.
+
 See blinding.cpp and rsa.cpp.
 
 Decryption of PKCS #1 v1.5 Ciphertexts
@@ -141,17 +154,17 @@ ECC point decoding
 The API function OS2ECP, which is used to convert byte strings to ECC points,
 verifies that all points satisfy the ECC curve equation. Points that do not
 satisfy the equation are invalid, and can sometimes be used to break
-protocols ([InvalidCurve] [InvalidCurveTLS]). See point_gfp.cpp.
+protocols ([InvalidCurve] [InvalidCurveTLS]). See ec_point.cpp.
 
 ECC scalar multiply
 ----------------------
 
 There are several different implementations of ECC scalar multiplications which
-depend on the API invoked. This include ``PointGFp::operator*``,
+depend on the API invoked. This include ``EC_Point::operator*``,
 ``EC_Group::blinded_base_point_multiply`` and
 ``EC_Group::blinded_var_point_multiply``.
 
-The ``PointGFp::operator*`` implementation uses the Montgomery ladder, which is
+The ``EC_Point::operator*`` implementation uses the Montgomery ladder, which is
 fairly resistant to side channels. However it leaks the size of the scalar,
 because the loop iterations are bounded by the scalar size. It should not be
 used in cases when the scalar is a secret.
@@ -159,7 +172,7 @@ used in cases when the scalar is a secret.
 Both ``blinded_base_point_multiply`` and ``blinded_var_point_multiply`` apply
 side channel countermeasures. The scalar is masked by a multiple of the group
 order (this is commonly called Coron's first countermeasure [CoronDpa]),
-currently the mask is an 80 bit random value.
+currently the mask is scaled to be half the bit length of the order of the group.
 
 Botan stores all ECC points in Jacobian representation. This form allows faster
 computation by representing points (x,y) as (X,Y,Z) where x=X/Z^2 and
@@ -187,7 +200,7 @@ points. The table of precomputed multiples is accessed using a masked lookup
 which should not leak information about the secret scalar to an attacker who can
 mount a cache-based side channel attack.
 
-See point_gfp.cpp and point_mul.cpp
+See ec_point.cpp and point_mul.cpp in src/lib/pubkey/ec_group
 
 ECDH
 ----------------------
@@ -237,6 +250,14 @@ practice, some protocols are not good and cannot be fixed immediately. To avoid
 making a bad problem worse, the code to handle decoding CBC ciphertext padding
 bytes runs in constant time, depending only on the block size of the cipher.
 
+base64 decoding
+----------------------
+
+Base64 (and related encodings base32, base58 and hex) are sometimes used to
+encode or decode secret data. To avoid possible side channels which might leak
+key material during the encoding or decoding process, these functions avoid any
+input-dependent table lookups.
+
 AES
 ----------------------
 
@@ -282,10 +303,12 @@ The code is based on the public domain version by Andrew Moon.
 DES/3DES
 ----------------------
 
-The DES implementation uses table lookups, and is likely vulnerable to side
-channel attacks. DES or 3DES should be avoided in new systems. The proper fix
-would be a scalar bitsliced implementation, this is not seen as worth the
-engineering investment given these algorithms end of life status.
+The DES implementation relies on table lookups but they are limited to
+tables which are exactly 64 bytes in size. On systems with 64 byte (or
+larger) cache lines, these should not leak information. It may still
+be vulnerable to side channels on processors which leak cache line
+access offsets via cache bank conflicts; vulnerable hardware includes
+Sandy Bridge processors, but not later Intel or AMD CPUs.
 
 Twofish
 ------------------------

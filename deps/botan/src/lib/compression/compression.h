@@ -8,8 +8,8 @@
 #ifndef BOTAN_COMPRESSION_TRANSFORM_H_
 #define BOTAN_COMPRESSION_TRANSFORM_H_
 
-#include <botan/secmem.h>
 #include <botan/exceptn.h>
+#include <botan/secmem.h>
 #include <string>
 
 namespace Botan {
@@ -17,23 +17,20 @@ namespace Botan {
 /**
 * Interface for a compression algorithm.
 */
-class BOTAN_PUBLIC_API(2,0) Compression_Algorithm
-   {
+class BOTAN_PUBLIC_API(2, 0) Compression_Algorithm {
    public:
       /**
       * Create an instance based on a name, or return null if the
       * algo combination cannot be found.
       */
-      static std::unique_ptr<Compression_Algorithm>
-         create(const std::string& algo_spec);
+      static std::unique_ptr<Compression_Algorithm> create(std::string_view algo_spec);
 
       /**
       * Create an instance based on a name
       * @param algo_spec algorithm name
       * Throws Lookup_Error if not found.
       */
-      static std::unique_ptr<Compression_Algorithm>
-         create_or_throw(const std::string& algo_spec);
+      static std::unique_ptr<Compression_Algorithm> create_or_throw(std::string_view algo_spec);
 
       /**
       * Begin compressing. Most compression algorithms offer a tunable
@@ -72,29 +69,26 @@ class BOTAN_PUBLIC_API(2,0) Compression_Algorithm
       */
       virtual void clear() = 0;
 
-      virtual ~Compression_Algorithm() {}
-   };
+      virtual ~Compression_Algorithm() = default;
+};
 
 /*
 * Interface for a decompression algorithm.
 */
-class BOTAN_PUBLIC_API(2,0) Decompression_Algorithm
-   {
+class BOTAN_PUBLIC_API(2, 0) Decompression_Algorithm {
    public:
       /**
       * Create an instance based on a name, or return null if the
       * algo combination cannot be found.
       */
-      static std::unique_ptr<Decompression_Algorithm>
-         create(const std::string& algo_spec);
+      static std::unique_ptr<Decompression_Algorithm> create(std::string_view algo_spec);
 
       /**
       * Create an instance based on a name
       * @param algo_spec algorithm name
       * Throws Lookup_Error if not found.
       */
-      static std::unique_ptr<Decompression_Algorithm>
-         create_or_throw(const std::string& algo_spec);
+      static std::unique_ptr<Decompression_Algorithm> create_or_throw(std::string_view algo_spec);
 
       /**
       * Begin decompressing.
@@ -128,19 +122,26 @@ class BOTAN_PUBLIC_API(2,0) Decompression_Algorithm
       */
       virtual void clear() = 0;
 
-      virtual ~Decompression_Algorithm() {}
-   };
+      virtual ~Decompression_Algorithm() = default;
+};
 
-BOTAN_PUBLIC_API(2,0) Compression_Algorithm* make_compressor(const std::string& type);
-BOTAN_PUBLIC_API(2,0) Decompression_Algorithm* make_decompressor(const std::string& type);
+BOTAN_DEPRECATED("Use Compression_Algorithm::create")
+
+inline Compression_Algorithm* make_compressor(std::string_view type) {
+   return Compression_Algorithm::create(type).release();
+}
+
+BOTAN_DEPRECATED("Use Decompression_Algorithm::create")
+
+inline Decompression_Algorithm* make_decompressor(std::string_view type) {
+   return Decompression_Algorithm::create(type).release();
+}
 
 /**
 * An error that occurred during compression (or decompression)
 */
-class BOTAN_PUBLIC_API(2,9) Compression_Error : public Exception
-   {
+class BOTAN_PUBLIC_API(2, 9) Compression_Error final : public Exception {
    public:
-
       /**
       * @param func_name the name of the compression API that was called
       * (eg "BZ2_bzCompressInit" or "lzma_code")
@@ -148,12 +149,7 @@ class BOTAN_PUBLIC_API(2,9) Compression_Error : public Exception
       * @param rc the error return code from the compression API. The
       * interpretation of this value will depend on the library.
       */
-     Compression_Error(const char* func_name, ErrorType type, int rc) :
-        Exception("Compression API " + std::string(func_name) +
-                  " failed with return code " + std::to_string(rc)),
-        m_type(type),
-        m_rc(rc)
-         {}
+      Compression_Error(const char* func_name, ErrorType type, int rc);
 
       ErrorType error_type() const noexcept override { return m_type; }
 
@@ -162,15 +158,14 @@ class BOTAN_PUBLIC_API(2,9) Compression_Error : public Exception
    private:
       ErrorType m_type;
       int m_rc;
-   };
+};
 
 /**
 * Adapts a zlib style API
 */
-class Compression_Stream
-   {
+class Compression_Stream {
    public:
-      virtual ~Compression_Stream() {}
+      virtual ~Compression_Stream() = default;
 
       virtual void next_in(uint8_t* b, size_t len) = 0;
 
@@ -185,54 +180,52 @@ class Compression_Stream
       virtual uint32_t finish_flag() const = 0;
 
       virtual bool run(uint32_t flags) = 0;
-   };
+};
 
 /**
 * Used to implement compression using Compression_Stream
 */
-class Stream_Compression : public Compression_Algorithm
-   {
+class Stream_Compression : public Compression_Algorithm {
    public:
-      void update(secure_vector<uint8_t>& buf, size_t offset, bool flush) final override;
+      void update(secure_vector<uint8_t>& buf, size_t offset, bool flush) final;
 
-      void finish(secure_vector<uint8_t>& buf, size_t offset) final override;
+      void finish(secure_vector<uint8_t>& buf, size_t offset) final;
 
-      void clear() final override;
+      void clear() final;
 
    private:
-      void start(size_t level) final override;
+      void start(size_t level) final;
 
       void process(secure_vector<uint8_t>& buf, size_t offset, uint32_t flags);
 
-      virtual Compression_Stream* make_stream(size_t level) const = 0;
+      virtual std::unique_ptr<Compression_Stream> make_stream(size_t level) const = 0;
 
       secure_vector<uint8_t> m_buffer;
       std::unique_ptr<Compression_Stream> m_stream;
-   };
+};
 
 /**
 * FIXME add doc
 */
-class Stream_Decompression : public Decompression_Algorithm
-   {
+class Stream_Decompression : public Decompression_Algorithm {
    public:
-      void update(secure_vector<uint8_t>& buf, size_t offset) final override;
+      void update(secure_vector<uint8_t>& buf, size_t offset) final;
 
-      void finish(secure_vector<uint8_t>& buf, size_t offset) final override;
+      void finish(secure_vector<uint8_t>& buf, size_t offset) final;
 
-      void clear() final override;
+      void clear() final;
 
    private:
-      void start() final override;
+      void start() final;
 
       void process(secure_vector<uint8_t>& buf, size_t offset, uint32_t flags);
 
-      virtual Compression_Stream* make_stream() const = 0;
+      virtual std::unique_ptr<Compression_Stream> make_stream() const = 0;
 
       secure_vector<uint8_t> m_buffer;
       std::unique_ptr<Compression_Stream> m_stream;
-   };
+};
 
-}
+}  // namespace Botan
 
 #endif

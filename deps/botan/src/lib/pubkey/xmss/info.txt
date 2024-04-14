@@ -2,30 +2,26 @@
 XMSS_RFC8391 -> 20201101
 </defines>
 
+<module_info>
+name -> "XMSS"
+</module_info>
+
 <header:public>
 xmss.h
-xmss_hash.h
-xmss_wots.h
 xmss_parameters.h
-xmss_key_pair.h
-xmss_privatekey.h
-xmss_publickey.h
-xmss_wots_parameters.h
-xmss_wots_privatekey.h
-xmss_wots_publickey.h
 </header:public>
 
 <header:internal>
 atomic.h
 xmss_address.h
 xmss_common_ops.h
+xmss_hash.h
 xmss_index_registry.h
 xmss_signature.h
 xmss_signature_operation.h
 xmss_tools.h
 xmss_verification_operation.h
-xmss_wots_addressed_privatekey.h
-xmss_wots_addressed_publickey.h
+xmss_wots.h
 </header:internal>
 
 <requires>
@@ -33,6 +29,7 @@ asn1
 rng
 hash
 sha2_32
+trunc_hash
 </requires>
 
 <os_features>

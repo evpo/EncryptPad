@@ -9,77 +9,74 @@
 #define BOTAN_SHAKE_HASH_H_
 
 #include <botan/hash.h>
-#include <botan/secmem.h>
-#include <string>
+#include <botan/internal/keccak_perm.h>
 
-BOTAN_FUTURE_INTERNAL_HEADER(shake.h)
+#include <string>
 
 namespace Botan {
 
 /**
 * SHAKE-128
 */
-class BOTAN_PUBLIC_API(2,0) SHAKE_128 final : public HashFunction
-   {
+class SHAKE_128 final : public HashFunction {
    public:
-
       /**
       * @param output_bits the desired output size in bits
       * must be a multiple of 8
       */
       explicit SHAKE_128(size_t output_bits);
 
-      size_t hash_block_size() const override { return SHAKE_128_BITRATE / 8; }
+      size_t hash_block_size() const override { return m_keccak.byte_rate(); }
+
       size_t output_length() const override { return m_output_bits / 8; }
 
-      HashFunction* clone() const override;
+      std::unique_ptr<HashFunction> new_object() const override;
       std::unique_ptr<HashFunction> copy_state() const override;
       std::string name() const override;
-      void clear() override;
+
+      void clear() override { m_keccak.clear(); }
+
+      std::string provider() const override { return m_keccak.provider(); }
 
    private:
-      void add_data(const uint8_t input[], size_t length) override;
-      void final_result(uint8_t out[]) override;
+      void add_data(std::span<const uint8_t> input) override;
+      void final_result(std::span<uint8_t> out) override;
 
-      static const size_t SHAKE_128_BITRATE = 1600 - 256;
-
+      Keccak_Permutation m_keccak;
       size_t m_output_bits;
-      secure_vector<uint64_t> m_S;
-      size_t m_S_pos;
-   };
+};
 
 /**
 * SHAKE-256
 */
-class BOTAN_PUBLIC_API(2,0) SHAKE_256 final : public HashFunction
-   {
+class SHAKE_256 final : public HashFunction {
    public:
-
       /**
       * @param output_bits the desired output size in bits
       * must be a multiple of 8
       */
       explicit SHAKE_256(size_t output_bits);
 
-      size_t hash_block_size() const override { return SHAKE_256_BITRATE / 8; }
+      size_t hash_block_size() const override { return m_keccak.byte_rate(); }
+
       size_t output_length() const override { return m_output_bits / 8; }
 
-      HashFunction* clone() const override;
+      std::unique_ptr<HashFunction> new_object() const override;
       std::unique_ptr<HashFunction> copy_state() const override;
       std::string name() const override;
-      void clear() override;
+
+      void clear() override { m_keccak.clear(); }
+
+      std::string provider() const override { return m_keccak.provider(); }
 
    private:
-      void add_data(const uint8_t input[], size_t length) override;
-      void final_result(uint8_t out[]) override;
+      void add_data(std::span<const uint8_t> input) override;
+      void final_result(std::span<uint8_t> out) override;
 
-      static const size_t SHAKE_256_BITRATE = 1600 - 512;
-
+      Keccak_Permutation m_keccak;
       size_t m_output_bits;
-      secure_vector<uint64_t> m_S;
-      size_t m_S_pos;
-   };
+};
 
-}
+}  // namespace Botan
 
 #endif

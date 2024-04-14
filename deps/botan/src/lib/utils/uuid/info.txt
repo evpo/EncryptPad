@@ -2,7 +2,15 @@
 UUID -> 20180930
 </defines>
 
+<module_info>
+name -> "UUID"
+</module_info>
+
 <requires>
 rng
 hex
 </requires>
+
+<header:public>
+uuid.h
+</header:public>

@@ -10,16 +10,17 @@
 #define BOTAN_DATA_SRC_H_
 
 #include <botan/secmem.h>
-#include <string>
 #include <iosfwd>
+#include <span>
+#include <string>
+#include <string_view>
 
 namespace Botan {
 
 /**
 * This class represents an abstract data source object.
 */
-class BOTAN_PUBLIC_API(2,0) DataSource
-   {
+class BOTAN_PUBLIC_API(2, 0) DataSource {
    public:
       /**
       * Read from the source. Moves the internal offset so that every
@@ -30,7 +31,7 @@ class BOTAN_PUBLIC_API(2,0) DataSource
       * @return length in bytes that was actually read and put
       * into out
       */
-      virtual size_t read(uint8_t out[], size_t length) BOTAN_WARN_UNUSED_RESULT = 0;
+      [[nodiscard]] virtual size_t read(uint8_t out[], size_t length) = 0;
 
       virtual bool check_available(size_t n) = 0;
 
@@ -45,13 +46,14 @@ class BOTAN_PUBLIC_API(2,0) DataSource
       * @return length in bytes that was actually read and put
       * into out
       */
-      virtual size_t peek(uint8_t out[], size_t length, size_t peek_offset) const BOTAN_WARN_UNUSED_RESULT = 0;
+      [[nodiscard]] virtual size_t peek(uint8_t out[], size_t length, size_t peek_offset) const = 0;
 
       /**
       * Test whether the source still has data that can be read.
       * @return true if there is no more data to read, false otherwise
       */
       virtual bool end_of_data() const = 0;
+
       /**
       * return the id of this data source
       * @return std::string representing the id of this data source
@@ -87,16 +89,15 @@ class BOTAN_PUBLIC_API(2,0) DataSource
       virtual size_t get_bytes_read() const = 0;
 
       DataSource() = default;
-      virtual ~DataSource() {}
+      virtual ~DataSource() = default;
       DataSource& operator=(const DataSource&) = delete;
       DataSource(const DataSource&) = delete;
-   };
+};
 
 /**
 * This class represents a Memory-Based DataSource
 */
-class BOTAN_PUBLIC_API(2,0) DataSource_Memory final : public DataSource
-   {
+class BOTAN_PUBLIC_API(2, 0) DataSource_Memory final : public DataSource {
    public:
       size_t read(uint8_t[], size_t) override;
       size_t peek(uint8_t[], size_t, size_t) const override;
@@ -107,41 +108,44 @@ class BOTAN_PUBLIC_API(2,0) DataSource_Memory final : public DataSource
       * Construct a memory source that reads from a string
       * @param in the string to read from
       */
-      explicit DataSource_Memory(const std::string& in);
+      explicit DataSource_Memory(std::string_view in);
 
       /**
       * Construct a memory source that reads from a byte array
       * @param in the byte array to read from
       * @param length the length of the byte array
       */
-      DataSource_Memory(const uint8_t in[], size_t length) :
-         m_source(in, in + length), m_offset(0) {}
+      DataSource_Memory(const uint8_t in[], size_t length) : m_source(in, in + length), m_offset(0) {}
 
       /**
       * Construct a memory source that reads from a secure_vector
       * @param in the MemoryRegion to read from
       */
-      explicit DataSource_Memory(const secure_vector<uint8_t>& in) :
-         m_source(in), m_offset(0) {}
+      explicit DataSource_Memory(secure_vector<uint8_t> in) : m_source(std::move(in)), m_offset(0) {}
+
+      /**
+      * Construct a memory source that reads from an arbitrary byte buffer
+      * @param in the MemoryRegion to read from
+      */
+      explicit DataSource_Memory(std::span<const uint8_t> in) : m_source(in.begin(), in.end()), m_offset(0) {}
 
       /**
       * Construct a memory source that reads from a std::vector
       * @param in the MemoryRegion to read from
       */
-      explicit DataSource_Memory(const std::vector<uint8_t>& in) :
-         m_source(in.begin(), in.end()), m_offset(0) {}
+      explicit DataSource_Memory(const std::vector<uint8_t>& in) : m_source(in.begin(), in.end()), m_offset(0) {}
 
       size_t get_bytes_read() const override { return m_offset; }
+
    private:
       secure_vector<uint8_t> m_source;
       size_t m_offset;
-   };
+};
 
 /**
 * This class represents a Stream-Based DataSource.
 */
-class BOTAN_PUBLIC_API(2,0) DataSource_Stream final : public DataSource
-   {
+class BOTAN_PUBLIC_API(2, 0) DataSource_Stream final : public DataSource {
    public:
       size_t read(uint8_t[], size_t) override;
       size_t peek(uint8_t[], size_t, size_t) const override;
@@ -149,33 +153,33 @@ class BOTAN_PUBLIC_API(2,0) DataSource_Stream final : public DataSource
       bool end_of_data() const override;
       std::string id() const override;
 
-      DataSource_Stream(std::istream&,
-                        const std::string& id = "<std::istream>");
+      DataSource_Stream(std::istream&, std::string_view id = "<std::istream>");
 
 #if defined(BOTAN_TARGET_OS_HAS_FILESYSTEM)
       /**
       * Construct a Stream-Based DataSource from filesystem path
-      * @param file the path to the file
+      * @param filename the path to the file
       * @param use_binary whether to treat the file as binary or not
       */
-      DataSource_Stream(const std::string& file, bool use_binary = false);
+      DataSource_Stream(std::string_view filename, bool use_binary = false);
 #endif
 
       DataSource_Stream(const DataSource_Stream&) = delete;
 
       DataSource_Stream& operator=(const DataSource_Stream&) = delete;
 
-      ~DataSource_Stream();
+      ~DataSource_Stream() override;
 
       size_t get_bytes_read() const override { return m_total_read; }
+
    private:
       const std::string m_identifier;
 
       std::unique_ptr<std::istream> m_source_memory;
       std::istream& m_source;
       size_t m_total_read;
-   };
+};
 
-}
+}  // namespace Botan
 
 #endif

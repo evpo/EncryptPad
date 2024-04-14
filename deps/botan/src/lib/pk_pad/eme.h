@@ -11,8 +11,6 @@
 #include <botan/secmem.h>
 #include <string>
 
-BOTAN_FUTURE_INTERNAL_HEADER(eme.h)
-
 namespace Botan {
 
 class RandomNumberGenerator;
@@ -20,10 +18,16 @@ class RandomNumberGenerator;
 /**
 * Encoding Method for Encryption
 */
-class BOTAN_PUBLIC_API(2,0) EME
-   {
+class EME {
    public:
-      virtual ~EME() {}
+      virtual ~EME() = default;
+
+      /**
+      * Factory method for EME (message-encoding methods for encryption) objects
+      * @param algo_spec the name of the EME to create
+      * @return pointer to newly allocated object of that type
+      */
+      static std::unique_ptr<EME> create(std::string_view algo_spec);
 
       /**
       * Return the maximum input size in bytes we can support
@@ -41,9 +45,9 @@ class BOTAN_PUBLIC_API(2,0) EME
       * @return encoded plaintext
       */
       secure_vector<uint8_t> encode(const uint8_t in[],
-                                 size_t in_length,
-                                 size_t key_length,
-                                 RandomNumberGenerator& rng) const;
+                                    size_t in_length,
+                                    size_t key_length,
+                                    RandomNumberGenerator& rng) const;
 
       /**
       * Encode an input
@@ -53,8 +57,8 @@ class BOTAN_PUBLIC_API(2,0) EME
       * @return encoded plaintext
       */
       secure_vector<uint8_t> encode(const secure_vector<uint8_t>& in,
-                                 size_t key_length,
-                                 RandomNumberGenerator& rng) const;
+                                    size_t key_length,
+                                    RandomNumberGenerator& rng) const;
 
       /**
       * Decode an input
@@ -64,9 +68,7 @@ class BOTAN_PUBLIC_API(2,0) EME
       * @return bytes of out[] written to along with
       *         validity mask (0xFF if valid, else 0x00)
       */
-      virtual secure_vector<uint8_t> unpad(uint8_t& valid_mask,
-                                        const uint8_t in[],
-                                        size_t in_len) const = 0;
+      virtual secure_vector<uint8_t> unpad(uint8_t& valid_mask, const uint8_t in[], size_t in_len) const = 0;
 
       /**
       * Encode an input
@@ -77,18 +79,11 @@ class BOTAN_PUBLIC_API(2,0) EME
       * @return encoded plaintext
       */
       virtual secure_vector<uint8_t> pad(const uint8_t in[],
-                                      size_t in_length,
-                                      size_t key_length,
-                                      RandomNumberGenerator& rng) const = 0;
-   };
+                                         size_t in_length,
+                                         size_t key_length,
+                                         RandomNumberGenerator& rng) const = 0;
+};
 
-/**
-* Factory method for EME (message-encoding methods for encryption) objects
-* @param algo_spec the name of the EME to create
-* @return pointer to newly allocated object of that type
-*/
-BOTAN_PUBLIC_API(2,0) EME*  get_eme(const std::string& algo_spec);
-
-}
+}  // namespace Botan
 
 #endif

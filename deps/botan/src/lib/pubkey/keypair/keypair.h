@@ -10,11 +10,7 @@
 
 #include <botan/pk_keys.h>
 
-BOTAN_FUTURE_INTERNAL_HEADER(keypair.h)
-
-namespace Botan {
-
-namespace KeyPair {
+namespace Botan::KeyPair {
 
 /**
 * Tests whether the key is consistent for encryption; whether
@@ -25,11 +21,10 @@ namespace KeyPair {
 * @param padding the encryption padding method to use
 * @return true if consistent otherwise false
 */
-BOTAN_PUBLIC_API(2,0) bool
-encryption_consistency_check(RandomNumberGenerator& rng,
-                             const Private_Key& private_key,
-                             const Public_Key& public_key,
-                             const std::string& padding);
+bool encryption_consistency_check(RandomNumberGenerator& rng,
+                                  const Private_Key& private_key,
+                                  const Public_Key& public_key,
+                                  std::string_view padding);
 
 /**
 * Tests whether the key is consistent for signatures; whether a
@@ -40,11 +35,10 @@ encryption_consistency_check(RandomNumberGenerator& rng,
 * @param padding the signature padding method to use
 * @return true if consistent otherwise false
 */
-BOTAN_PUBLIC_API(2,0) bool
-signature_consistency_check(RandomNumberGenerator& rng,
-                            const Private_Key& private_key,
-                            const Public_Key& public_key,
-                            const std::string& padding);
+bool signature_consistency_check(RandomNumberGenerator& rng,
+                                 const Private_Key& private_key,
+                                 const Public_Key& public_key,
+                                 std::string_view padding);
 
 /**
 * Tests whether the key is consistent for encryption; whether
@@ -54,13 +48,9 @@ signature_consistency_check(RandomNumberGenerator& rng,
 * @param padding the encryption padding method to use
 * @return true if consistent otherwise false
 */
-inline bool
-encryption_consistency_check(RandomNumberGenerator& rng,
-                             const Private_Key& key,
-                             const std::string& padding)
-   {
+inline bool encryption_consistency_check(RandomNumberGenerator& rng, const Private_Key& key, std::string_view padding) {
    return encryption_consistency_check(rng, key, key, padding);
-   }
+}
 
 /**
 * Tests whether the key is consistent for signatures; whether a
@@ -70,16 +60,10 @@ encryption_consistency_check(RandomNumberGenerator& rng,
 * @param padding the signature padding method to use
 * @return true if consistent otherwise false
 */
-inline bool
-signature_consistency_check(RandomNumberGenerator& rng,
-                            const Private_Key& key,
-                            const std::string& padding)
-   {
+inline bool signature_consistency_check(RandomNumberGenerator& rng, const Private_Key& key, std::string_view padding) {
    return signature_consistency_check(rng, key, key, padding);
-   }
-
 }
 
-}
+}  // namespace Botan::KeyPair
 
 #endif

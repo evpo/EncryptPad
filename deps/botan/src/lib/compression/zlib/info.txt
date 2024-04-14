@@ -2,9 +2,17 @@
 ZLIB -> 20160412
 </defines>
 
+<module_info>
+name -> "ZLib"
+</module_info>
+
 load_on vendor
 
 <libs>
 all!windows -> z
 windows -> zlib
 </libs>
+
+<header:public>
+zlib.h
+</header:public>

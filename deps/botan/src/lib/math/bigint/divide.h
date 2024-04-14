@@ -10,8 +10,6 @@
 
 #include <botan/bigint.h>
 
-BOTAN_FUTURE_INTERNAL_HEADER(divide.h)
-
 namespace Botan {
 
 /**
@@ -21,10 +19,8 @@ namespace Botan {
 * @param q will be set to x / y
 * @param r will be set to x % y
 */
-void BOTAN_UNSTABLE_API vartime_divide(const BigInt& x,
-                                       const BigInt& y,
-                                       BigInt& q,
-                                       BigInt& r);
+BOTAN_TEST_API
+void vartime_divide(const BigInt& x, const BigInt& y, BigInt& q, BigInt& r);
 
 /**
 * BigInt division, const time variant
@@ -37,18 +33,8 @@ void BOTAN_UNSTABLE_API vartime_divide(const BigInt& x,
 * @param q will be set to x / y
 * @param r will be set to x % y
 */
-void BOTAN_PUBLIC_API(2,9) ct_divide(const BigInt& x,
-                                     const BigInt& y,
-                                     BigInt& q,
-                                     BigInt& r);
-
-inline void divide(const BigInt& x,
-                   const BigInt& y,
-                   BigInt& q,
-                   BigInt& r)
-   {
-   ct_divide(x, y, q, r);
-   }
+BOTAN_TEST_API
+void ct_divide(const BigInt& x, const BigInt& y, BigInt& q, BigInt& r);
 
 /**
 * BigInt division, const time variant
@@ -60,28 +46,25 @@ inline void divide(const BigInt& x,
 * @param y a non-zero integer
 * @return x/y with remainder discarded
 */
-inline BigInt ct_divide(const BigInt& x, const BigInt& y)
-   {
+inline BigInt ct_divide(const BigInt& x, const BigInt& y) {
    BigInt q, r;
    ct_divide(x, y, q, r);
    return q;
-   }
+}
 
 /**
 * BigInt division, const time variant
 *
 * This runs with control flow independent of the values of x/y.
-* Warning: the loop bounds still leak the sizes of x and y.
+* Warning: the loop bounds still leaks the size of x.
 *
 * @param x an integer
 * @param y a non-zero integer
 * @param q will be set to x / y
 * @param r will be set to x % y
 */
-void BOTAN_PUBLIC_API(2,9) ct_divide_u8(const BigInt& x,
-                                        uint8_t y,
-                                        BigInt& q,
-                                        uint8_t& r);
+BOTAN_TEST_API
+void ct_divide_word(const BigInt& x, word y, BigInt& q, word& r);
 
 /**
 * BigInt modulo, const time variant
@@ -93,9 +76,9 @@ void BOTAN_PUBLIC_API(2,9) ct_divide_u8(const BigInt& x,
 * @param modulo a positive integer
 * @return result x % modulo
 */
-BigInt BOTAN_PUBLIC_API(2,9) ct_modulo(const BigInt& x,
-                                       const BigInt& modulo);
+BOTAN_TEST_API
+BigInt ct_modulo(const BigInt& x, const BigInt& modulo);
 
-}
+}  // namespace Botan
 
 #endif

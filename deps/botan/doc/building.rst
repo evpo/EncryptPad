@@ -4,15 +4,21 @@ Building The Library
 =================================
 
 This document describes how to build Botan on Unix/POSIX and Windows
-systems. The POSIX oriented descriptions should apply to most
-common Unix systems (including OS X), along with POSIX-ish systems
-like BeOS, QNX, and Plan 9. Currently, systems other than Windows and
-POSIX (such as VMS, MacOS 9, OS/390, OS/400, ...) are not supported by
-the build system, primarily due to lack of access. Please contact the
+systems. The POSIX oriented descriptions should apply to most common Unix
+systems (including Apple macOS/Darwin), along with POSIX-ish systems like QNX.
+
+.. note::
+   Botan is available already in nearly all
+   `packaging systems <https://repology.org/project/botan/versions>`_ so you
+   probably only need to build from source if you need unusual options
+   or are building for an old system which has out of date packages.
+
+Currently systems such as VMS, OS/390, and OS/400 are not supported by the build
+system, primarily due to lack of access and interest.  Please contact the
 maintainer if you would like to build Botan on such a system.
 
 Botan's build is controlled by configure.py, which is a `Python
-<https://www.python.org>`_ script. Python 2.6 or later is required.
+<https://www.python.org>`_ script. Python 3.x or later is required.
 
 .. highlight:: none
 
@@ -25,10 +31,10 @@ For the impatient, this works for most systems::
 Or using ``nmake``, if you're compiling on Windows with Visual C++. On
 platforms that do not understand the '#!' convention for beginning
 script files, or that have Python installed in an unusual spot, you
-might need to prefix the ``configure.py`` command with ``python`` or
-``/path/to/python``::
+might need to prefix the ``configure.py`` command with ``python3`` or
+``/path/to/python3``::
 
-  $ python ./configure.py [arguments]
+  $ python3 ./configure.py [arguments]
 
 Configuring the Build
 ---------------------------------
@@ -36,7 +42,7 @@ Configuring the Build
 The first step is to run ``configure.py``, which is a Python script
 that creates various directories, config files, and a Makefile for
 building everything. This script should run under a vanilla install of
-Python 2.6, 2.7, or 3.x.
+Python 3.x.
 
 The script will attempt to guess what kind of system you are trying to
 compile for (and will print messages telling you what it guessed).
@@ -52,7 +58,7 @@ kernel on a 64-bit CPU will generally not like 64-bit code.
 
 By default the script tries to figure out what will work on your
 system, and use that. It will print a display at the end showing which
-algorithms have and have not been enabled. For instance on one system
+modules have and have not been enabled. For instance on one system
 we might see lines like::
 
    INFO: Skipping (dependency failure): certstor_sqlite3 sessions_sqlite3
@@ -60,7 +66,7 @@ we might see lines like::
    INFO: Skipping (incompatible OS): darwin_secrandom getentropy win32_stats
    INFO: Skipping (incompatible compiler): aes_armv8 pmull sha1_armv8 sha2_32_armv8
    INFO: Skipping (no enabled compression schemes): compression
-   INFO: Skipping (requires external dependency): boost bzip2 lzma openssl sqlite3 tpm zlib
+   INFO: Skipping (requires external dependency): boost bzip2 lzma sqlite3 tpm zlib
 
 The ones that are skipped because they are require an external
 dependency have to be explicitly asked for, because they rely on third
@@ -68,6 +74,15 @@ party libraries which your system might not have or that you might not
 want the resulting binary to depend on. For instance to enable zlib
 support, add ``--with-zlib`` to your invocation of ``configure.py``.
 All available modules can be listed with ``--list-modules``.
+
+Some modules may be marked as 'deprecated' or 'experimental'. Deprecated
+modules are available and built by default, but they will be removed in a
+future release of the library. Use ``--disable-deprecated-features`` to
+disable all of these modules or ``--disable-modules=MODS`` for finer grained
+control. Experimental modules are under active development and not built
+by default. Their API may change in future minor releases. Applications may
+still enable and use such modules using ``--enable-modules=MODS`` or using
+``--enable-experimental-features`` to enable all experimental features.
 
 You can control which algorithms and modules are built using the
 options ``--enable-modules=MODS`` and ``--disable-modules=MODS``, for
@@ -89,6 +104,33 @@ required dependencies. Note that a minimized build does not by default
 include any random number generator, which is needed for example to
 generate keys, nonces and IVs. See :doc:`api_ref/rng` on which random number
 generators are available.
+
+Common Build Targets
+--------------------
+
+Build everthing that is configured::
+
+ $ make all
+
+Build the unit test binary (``./botan-test`` to run)::
+
+ $ make tests
+
+Build and run the tests::
+
+ $ make check
+
+Build the documentation (Doxygen API reference and Sphinx handbook)::
+
+ $ make docs
+
+Install the library::
+
+ $ make install
+
+Remove all generated artefacts::
+
+ $ make clean
 
 Cross Compiling
 ---------------------
@@ -119,7 +161,7 @@ On Unix
 
 The basic build procedure on Unix and Unix-like systems is::
 
-   $ ./configure.py [--enable-modules=<list>] [--cc=CC]
+   $ ./configure.py [various options]
    $ make
    $ make check
 
@@ -128,8 +170,7 @@ If the tests look OK, install::
    $ make install
 
 On Unix systems the script will default to using GCC; use ``--cc`` if
-you want something else. For instance use ``--cc=icc`` for Intel C++
-and ``--cc=clang`` for Clang.
+you want something else. For instance use ``--cc=clang`` for Clang.
 
 The ``make install`` target has a default directory in which it will
 install Botan (typically ``/usr/local``). You can override this by
@@ -149,10 +190,17 @@ On macOS
 
 A build on macOS works much like that on any other Unix-like system.
 
-To build a universal binary for macOS, you need to set some additional
-build flags. Do this with the `configure.py` flag `--cc-abi-flags`::
+To build a universal binary for macOS, for older macOs releases,
+you need to set some additional build flags.
+Do this with the `configure.py` flag `--cc-abi-flags`::
 
   --cc-abi-flags="-force_cpusubtype_ALL -mmacosx-version-min=10.4 -arch i386 -arch ppc"
+
+
+for mac M1 on arm64, you can build the x86_64 arch version via Rosetta separately.
+Do this with with `arch -x86_64 configure.py --library-suffix=-x86_64`
+Then using lipo to create a fat binary.
+`lipo -create libbotan-arm64.dylib libbotan-x86_64.dylib -o libbotan.dylib`
 
 On Windows
 --------------
@@ -165,17 +213,26 @@ You need to have a copy of Python installed, and have both Python and
 your chosen compiler in your path. Open a command shell (or the SDK
 shell), and run::
 
-   $ python configure.py --cc=msvc --os=windows
+   $ python3 configure.py --cc=msvc --os=windows
    $ nmake
    $ nmake check
    $ nmake install
 
-Botan supports the nmake replacement `Jom <https://wiki.qt.io/Jom>`_
-which enables you to run multiple build jobs in parallel.
+Micosoft's ``nmake`` does not support building multiple jobs in parallel, which
+is unfortunate when building on modern multicore machines. It is possible to use
+the (somewhat unmaintained) `Jom <https://wiki.qt.io/Jom>`_ build tool, which is
+a ``nmake`` compatible build system that supports parallel builds. Alternately,
+starting in Botan 3.2, there is additionally support for using the ``ninja``
+build tool as an alternative to ``nmake``::
+
+   $ python3 configure.py --cc=msvc --os=windows --build-tool=ninja
+   $ ninja
+   $ ninja check
+   $ ninja install
 
 For MinGW, use::
 
-   $ python configure.py --cc=gcc --os=mingw
+   $ python3 configure.py --cc=gcc --os=mingw
    $ make
 
 By default the install target will be ``C:\botan``; you can modify
@@ -187,6 +244,17 @@ compiler to look for both include files and library files in
 place where they will be in the default compiler search paths (consult
 your documentation and/or local expert for details).
 
+Ninja Support
+---------------
+
+Starting in Botan 3.2, there is additionally support for the
+`ninja <https://ninja-build.org>`_ build system.
+
+This is particularly useful on Windows as there the default build tool ``nmake``
+does not support parallel jobs. The ``ninja`` based build also works on Unix and
+macOs systems.
+
+Support for ``ninja`` is still new and there are probably some rough edges.
 
 For iOS using XCode
 -------------------------
@@ -231,11 +299,18 @@ The resulting static library can be linked to your app in Xcode.
 For Android
 ---------------------
 
-Modern versions of Android NDK use Clang and support C++11. Simply
-configure using the appropriate NDK compiler::
+Modern versions of Android NDK use Clang and support C++20. Simply
+configure using the appropriate NDK compiler and ``ar`` (``ar`` only
+needed if building the static library). Here we build for Aarch64
+targeting Android API 28::
 
+  $ export AR=/opt/android-ndk/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar
   $ export CXX=/opt/android-ndk/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android28-clang++
   $ ./configure.py --os=android --cc=clang --cpu=arm64
+  $ make
+
+If you are building for mobile development consider restricting the build
+to only what you need (see :ref:`minimized_builds`)
 
 Docker
 ^^^^^^^^^^^
@@ -243,7 +318,7 @@ Docker
 To build android version, there is the possibility to use
 the docker way::
 
-  sudo ANDROID_SDK_VER=21 ANDROID_ARCH=arm64 src/scripts/docker-android.sh
+  sudo ANDROID_SDK_VER=29 ANDROID_ARCH=aarch64 src/scripts/docker-android.sh
 
 This will produce the docker-builds/android folder containing
 each architecture compiled.
@@ -253,16 +328,12 @@ Emscripten (WebAssembly)
 
 To build for WebAssembly using Emscripten, try::
 
-  CXX=em++ ./configure.py --cc=clang --cpu=llvm --os=emscripten
+  ./configure.py --cpu=wasm --os=emscripten
   make
 
-This will produce bitcode files ``botan-test.bc`` and ``botan.bc``
-along with a static archive ``libbotan-2.a`` which can linked with
-other modules.  To convert the tests into a WASM file which can be
-executed on a browser, use::
-
-  em++ -s ALLOW_MEMORY_GROWTH=1 -s DISABLE_EXCEPTION_CATCHING=0 -s WASM=1 \
-     --preload-file src/tests/data botan-test.bc -o botan-test.html
+This will produce HTML files ``botan-test.html`` and ``botan.html``
+along with a static archive ``libbotan-3.a`` which can be linked with
+other modules.
 
 Supporting Older Distros
 --------------------------
@@ -349,10 +420,6 @@ by the user using
  - ``--with-sqlite3`` enables using sqlite3 databases in various contexts
    (TLS session cache, PSK database, etc).
 
- - ``--with-openssl`` adds an engine that uses OpenSSL for some ciphers, hashes,
-   and public key operations. OpenSSL 1.0.2 or later is supported. LibreSSL can
-   also be used.
-
  - ``--with-tpm`` adds support for using TPM hardware via the TrouSerS library.
 
  - ``--with-boost`` enables using some Boost libraries. In particular
@@ -398,7 +465,7 @@ Botan uses compile-time flags to enable or disable use of certain operating
 specific functions. You can also override these at build time if desired.
 
 The default feature flags are given in the files in ``src/build-data/os`` in the
-``target_features`` block. For example Linux defines flags like ``proc_fs``,
+``target_features`` block. For example Linux defines flags like ``getrandom``,
 ``getauxval``, and ``sockets``.  The ``configure.py`` option
 ``--list-os-features`` will display all the feature flags for all operating
 system targets.
@@ -482,6 +549,21 @@ is less of a problem - only the developer needs to worry about it. As
 long as they can remember where they installed Botan, they just have
 to set the appropriate flags in their Makefile/project file.
 
+CMake
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Starting in Botan 3.3.0 we provide a ``botan-config.cmake`` module to
+discover the installed library binaries and headers. This hooks into
+CMake's ``find_package()`` and comes with common features like version
+detection. Also, library consumers may specify which botan modules they
+require in ``find_package()``.
+
+Examples::
+
+   find_package(Botan 3.3.0)
+   find_package(Botan 3.3.0 COMPONENTS rsa ecdsa tls13)
+   find_package(Botan 3.3.0 OPTIONAL_COMPONENTS tls13_pqc)
+
 Language Wrappers
 ----------------------------------------
 
@@ -489,7 +571,7 @@ Building the Python wrappers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The Python wrappers for Botan use ctypes and the C89 API so no special
-build step is required, just import botan2.py
+build step is required, just import botan3.py
 
 See :doc:`Python Bindings <api_ref/python>` for more information about
 the Python bindings.
@@ -609,6 +691,11 @@ If not provided, the value of the ``AR_OPTIONS`` environment variable is used if
 Specify the MSVC runtime to use (MT, MD, MTd, or MDd). If not specified,
 picks either MD or MDd depending on if debug mode is set.
 
+``--compiler-cache``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Specify a compiler cache (like ccache) to use for each compiler invocation.
+
 ``--with-endian=ORDER``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -627,6 +714,30 @@ Specify an OS feature to enable. See ``src/build-data/os`` and
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Specify an OS feature to disable.
+
+``--enable-experimental-features``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Enable all experimental modules and features. Note that these are unstable and
+may change or even be removed in future releases. Also note that individual
+experimental modules can be explicitly enabled using ``--enable-modules=MODS``.
+
+``--disable-experimental-features``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Disable all experimental modules and features. This is the default.
+
+``--enable-deprecated-features``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Enable all deprecated modules and features. Note that these are scheduled for
+removal in future releases. This is the default.
+
+``--disable-deprecated-features``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Disable all deprecated modules and features. Note that individual deprecated
+modules can be explicitly disabled using ``--disable-modules=MODS``.
 
 ``--disable-sse2``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -698,6 +809,12 @@ Disable use of ARMv8 Crypto intrinsics
 
 Disable use of POWER Crypto intrinsics
 
+``--system-cert-bundle=PATH``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Set a path to a file containing one or more trusted CA certificates in
+PEM format. If not given, some default locations are checked.
+
 ``--with-debug-info``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -759,11 +876,11 @@ Enable debug info and disable optimizations
 
 Use amalgamation to build
 
-``--system-cert-bundle=PATH``
+``--name-amalgamation``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Set a path to a file containing one or more trusted CA certificates in
-PEM format. If not given, some default locations are checked.
+Specify an alternative amalgamation file name. By default we use `botan_all`.
+
 
 ``--with-build-dir=DIR``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -793,11 +910,6 @@ definitions. Both KEY=VALUE and KEY (without specific value) are supported.
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Use specified dir for system root while cross-compiling
-
-``--with-openmp``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Enable use of OpenMP
 
 ``--link-method=METHOD``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -845,7 +957,7 @@ Skip installing Python module.
 ``--with-python-versions=N.M``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Where to install botan2.py. By default this is chosen to be the
+Where to install botan3.py. By default this is chosen to be the
 version of Python that is running ``configure.py``.
 
 ``--with-valgrind``
@@ -876,14 +988,6 @@ Specify an additional library that fuzzer binaries must link with.
 Build only the specific targets and tools
 (``static``, ``shared``, ``cli``, ``tests``, ``bogo_shim``).
 
-``--boost-library-name``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Provide an alternative name for a boost library. Depending on the platform and
-boost's build configuration these library names differ significantly (see `Boost docs
-<https://www.boost.org/doc/libs/1_70_0/more/getting_started/unix-variants.html#library-naming>`_).
-The provided library name must be suitable as identifier in a linker parameter,
-e.g on unix: ``boost_system`` or windows: ``libboost_regex-vc71-x86-1_70``.
 
 ``--without-documentation``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -958,11 +1062,6 @@ Enable lzma compression
 
 Enable using zlib compression
 
-``--with-openssl``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Enable using OpenSSL for certain operations
-
 ``--with-commoncrypto``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -1017,3 +1116,9 @@ Set the man page installation dir.
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Set the include file installation dir.
+
+``--list-modules``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+List all modules that could be enabled or disabled using `--enable-modules` or
+`--disable-modules`.

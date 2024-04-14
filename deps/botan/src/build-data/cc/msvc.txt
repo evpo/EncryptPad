@@ -1,5 +1,7 @@
 macro_name MSVC
 
+minimum_supported_version 19.30
+
 binary_name cl
 linker_name link
 
@@ -7,16 +9,17 @@ output_to_object "/Fo"
 output_to_exe "/OUT:"
 
 add_include_dir_option "/I"
+add_system_include_dir_option "/external:W0 /external:I"
 add_lib_dir_option "/LIBPATH:"
 add_compile_definition_option "/D"
 add_lib_option "%s.lib"
 
 compile_flags "/nologo /c"
 
-optimization_flags "/O2 /Oi"
+optimization_flags "/O2 /Oi /Zc:throwingNew"
 size_optimization_flags "/O1 /Os"
 
-# for debug info in the object file:
+# for debug info in the object file (required if using sccache):
 #debug_info_flags "/Z7"
 
 # for using a PDB file:
@@ -24,27 +27,32 @@ debug_info_flags "/Zi /FS"
 
 preproc_flags "/nologo /EP"
 
-lang_flags "/EHs /GR"
+lang_flags "/std:c++20 /EHs /GR"
 
-# 4250: diamond inheritence warning
 # 4251: STL types used in DLL interface
 # 4275: ???
-# 4127: conditional expression is constant, consider using if constexpr
-warning_flags "/W4 /wd4250 /wd4251 /wd4275 /wd4127"
+# 5072: ASan without debug info
+warning_flags "/W4 /wd4251 /wd4275 /wd5072"
 
 werror_flags "/WX"
 
 visibility_build_flags "/DBOTAN_DLL=__declspec(dllexport)"
 visibility_attribute "__declspec(dllimport)"
 
+# Include dependency tracking for Ninja
+# See: https://ninja-build.org/manual.html#ref_headers
+ninja_header_deps_style 'msvc'
+header_deps_flag '/showIncludes'
+
 ar_command lib
 ar_options "/nologo"
 ar_output_to "/OUT:"
 
 <sanitizers>
-default -> iterator
+default -> address
 
 iterator -> "/D_ITERATOR_DEBUG_LEVEL=1"
+address   -> "/fsanitize=address"
 </sanitizers>
 
 <isa_flags>
@@ -53,7 +61,7 @@ ssse3  -> ""
 sse41 -> ""
 sse42 -> ""
 x86_64:avx2   -> "/arch:AVX"
-bmi2   -> ""
+x86_64:avx512 -> "/arch:AVX512"
 aesni  -> ""
 clmul  -> ""
 rdrand -> ""
@@ -62,17 +70,17 @@ sha    -> ""
 </isa_flags>
 
 <lib_flags>
-debug -> "/Fd%{build_dir}/%{libname}%{lib_suffix}.pdb"
+debug -> "/Fd%{build_dir}/%{libname}.pdb"
 </lib_flags>
 
 <so_link_commands>
-default       -> "$(LINKER) /DLL"
-default-debug -> "$(LINKER) /DLL /DEBUG"
+default       -> "{linker} /DLL"
+default-debug -> "{linker} /DLL /DEBUG"
 </so_link_commands>
 
 <binary_link_commands>
-default       -> "$(LINKER)"
-default-debug -> "$(LINKER) /DEBUG"
+default       -> "{linker}"
+default-debug -> "{linker} /DEBUG"
 </binary_link_commands>
 
 <mach_abi_linking>

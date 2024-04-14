@@ -7,7 +7,7 @@
 * Botan is released under the Simplified BSD License (see license.txt)
 */
 
-#include <botan/sha160.h>
+#include <botan/internal/sha1.h>
 #include <arm_neon.h>
 
 namespace Botan {
@@ -16,10 +16,8 @@ namespace Botan {
 * SHA-1 using CPU instructions in ARMv8
 */
 //static
-#if defined(BOTAN_HAS_SHA1_ARMV8)
-BOTAN_FUNC_ISA("+crypto")
-void SHA_160::sha1_armv8_compress_n(secure_vector<uint32_t>& digest, const uint8_t input8[], size_t blocks)
-   {
+BOTAN_FUNC_ISA("+crypto+sha2")
+void SHA_1::sha1_armv8_compress_n(digest_type& digest, std::span<const uint8_t> input8, size_t blocks) {
    uint32x4_t ABCD;
    uint32_t E0;
 
@@ -33,10 +31,9 @@ void SHA_160::sha1_armv8_compress_n(secure_vector<uint32_t>& digest, const uint8
    E0 = digest[4];
 
    // Intermediate void* cast due to https://llvm.org/bugs/show_bug.cgi?id=20670
-   const uint32_t* input32 = reinterpret_cast<const uint32_t*>(reinterpret_cast<const void*>(input8));
+   const uint32_t* input32 = reinterpret_cast<const uint32_t*>(reinterpret_cast<const void*>(input8.data()));
 
-   while (blocks)
-      {
+   while(blocks) {
       // Save current hash
       const uint32x4_t ABCD_SAVED = ABCD;
       const uint32_t E0_SAVED = E0;
@@ -194,14 +191,13 @@ void SHA_160::sha1_armv8_compress_n(secure_vector<uint32_t>& digest, const uint8
       E0 += E0_SAVED;
       ABCD = vaddq_u32(ABCD_SAVED, ABCD);
 
-      input32 += 64/4;
+      input32 += 64 / 4;
       blocks--;
-      }
+   }
 
    // Save digest
    vst1q_u32(&digest[0], ABCD);
    digest[4] = E0;
-   }
-#endif
-
 }
+
+}  // namespace Botan

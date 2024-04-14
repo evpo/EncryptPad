@@ -2,7 +2,15 @@
 PBKDF_BCRYPT -> 20190531
 </defines>
 
+<module_info>
+name -> "BCrypt"
+</module_info>
+
 <requires>
 blowfish
 sha2_64
 </requires>
+
+<header:public>
+bcrypt_pbkdf.h
+</header:public>

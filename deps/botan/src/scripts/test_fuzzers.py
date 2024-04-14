@@ -1,6 +1,7 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 
 # (C) 2017,2018 Jack Lloyd
+# Botan is released under the Simplified BSD License (see license.txt)
 
 import sys
 import os
@@ -9,6 +10,7 @@ import optparse # pylint: disable=deprecated-module
 import stat
 import multiprocessing
 import time
+import tempfile
 
 def run_fuzzer_gdb(args):
     (fuzzer_bin, corpus_file) = args
@@ -30,7 +32,7 @@ def run_fuzzer_gdb(args):
 
 def run_fuzzer(args):
     (fuzzer_bin, corpus_file) = args
-    corpus_fd = open(corpus_file, 'r')
+    corpus_fd = open(corpus_file, 'rb')
     fuzzer_proc = subprocess.Popen([fuzzer_bin], stdin=corpus_fd,
                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=True)
     (stdout, stderr) = fuzzer_proc.communicate()
@@ -44,10 +46,6 @@ def run_fuzzer_many_files(fuzzer_bin, corpus_files):
     return (fuzzer_proc.returncode, stdout.decode('ascii'), stderr.decode('ascii'))
 
 def main(args=None):
-    #pylint: disable=too-many-branches
-    #pylint: disable=too-many-statements
-    #pylint: disable=too-many-locals
-
     if args is None:
         args = sys.argv
 
@@ -151,10 +149,31 @@ def main(args=None):
             crash_count = 0
             sys.stdout.flush()
     else:
-        for fuzzer in sorted(list(fuzzers_with_corpus)):
+        # Generate a random corpus for fuzzers without a corpus
+        random_corpus_dir = tempfile.mkdtemp(prefix='fuzzer_corpus_')
+
+        slow_fuzzers = ['invert', 'ecc_p521', 'pow_mod']
+        random_corpus_size = 1000
+        random_corpus_size_for_slow_fuzzers = 100
+
+        for i in range(random_corpus_size):
+            random_input = os.urandom(i)
+            fd = open(os.path.join(random_corpus_dir, 'input_%d' % (i)), 'wb')
+            fd.write(random_input)
+            fd.close()
+
+        for fuzzer in sorted(list(fuzzers)):
             fuzzer_bin = os.path.join(fuzzer_dir, fuzzer)
-            corpus_subdir = os.path.join(corpus_dir, fuzzer)
+
+            if fuzzer in fuzzers_with_corpus:
+                corpus_subdir = os.path.join(corpus_dir, fuzzer)
+            else:
+                corpus_subdir = random_corpus_dir
+
             corpus_files = [os.path.join(corpus_subdir, l) for l in sorted(list(os.listdir(corpus_subdir)))]
+
+            if fuzzer in slow_fuzzers:
+                corpus_files = corpus_files[:random_corpus_size_for_slow_fuzzers]
 
             start = time.time()
 

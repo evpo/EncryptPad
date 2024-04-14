@@ -7,48 +7,43 @@
 #ifndef BOTAN_TLS_ALGO_IDS_H_
 #define BOTAN_TLS_ALGO_IDS_H_
 
+#include <botan/asn1_obj.h>
+#include <botan/pk_keys.h>
 #include <botan/types.h>
+#include <optional>
 #include <string>
 #include <vector>
 
 //BOTAN_FUTURE_INTERNAL_HEADER(tls_algos.h)
 
-namespace Botan {
-
-namespace TLS {
+namespace Botan::TLS {
 
 enum class Cipher_Algo {
    CHACHA20_POLY1305,
 
-   AES_128_CBC_HMAC_SHA1 = 100,
-   AES_128_CBC_HMAC_SHA256,
-   AES_128_CCM,
-   AES_128_CCM_8,
    AES_128_GCM,
-   AES_128_OCB,
-
-   AES_256_CBC_HMAC_SHA1 = 200,
-   AES_256_CBC_HMAC_SHA256,
-   AES_256_CBC_HMAC_SHA384,
-   AES_256_CCM,
-   AES_256_CCM_8,
    AES_256_GCM,
+
    AES_256_OCB,
 
-   CAMELLIA_128_CBC_HMAC_SHA1 = 300,
-   CAMELLIA_128_CBC_HMAC_SHA256,
    CAMELLIA_128_GCM,
-
-   CAMELLIA_256_CBC_HMAC_SHA1 = 400,
-   CAMELLIA_256_CBC_HMAC_SHA256,
-   CAMELLIA_256_CBC_HMAC_SHA384,
    CAMELLIA_256_GCM,
 
-   ARIA_128_GCM = 500,
+   ARIA_128_GCM,
    ARIA_256_GCM,
 
-   DES_EDE_CBC_HMAC_SHA1 = 1000,
-   SEED_CBC_HMAC_SHA1,
+   AES_128_CCM,
+   AES_256_CCM,
+   AES_128_CCM_8,
+   AES_256_CCM_8,
+
+   AES_128_CBC_HMAC_SHA1,
+   AES_128_CBC_HMAC_SHA256,
+   AES_256_CBC_HMAC_SHA1,
+   AES_256_CBC_HMAC_SHA256,
+   AES_256_CBC_HMAC_SHA384,
+
+   DES_EDE_CBC_HMAC_SHA1,
 };
 
 enum class KDF_Algo {
@@ -69,58 +64,22 @@ enum class Nonce_Format {
 // TODO this should include hash etc as in TLS v1.3
 enum class Auth_Method {
    RSA,
-   DSA,
    ECDSA,
 
+   // To support TLS 1.3 ciphersuites, which do not determine the auth method
+   UNDEFINED,
+
    // These are placed outside the encodable range
-   IMPLICIT = 0x10000,
-   ANONYMOUS
+   IMPLICIT = 0x10000
 };
 
 std::string BOTAN_TEST_API auth_method_to_string(Auth_Method method);
-Auth_Method BOTAN_TEST_API auth_method_from_string(const std::string& str);
-
-/*
-* This matches the wire encoding
-*/
-enum class Signature_Scheme : uint16_t {
-   NONE             = 0x0000,
-
-   RSA_PKCS1_SHA1   = 0x0201,
-   RSA_PKCS1_SHA256 = 0x0401,
-   RSA_PKCS1_SHA384 = 0x0501,
-   RSA_PKCS1_SHA512 = 0x0601,
-
-   DSA_SHA1   = 0x0202,
-   DSA_SHA256 = 0x0402,
-   DSA_SHA384 = 0x0502,
-   DSA_SHA512 = 0x0602,
-
-   ECDSA_SHA1   = 0x0203,
-   ECDSA_SHA256 = 0x0403,
-   ECDSA_SHA384 = 0x0503,
-   ECDSA_SHA512 = 0x0603,
-
-   RSA_PSS_SHA256 = 0x0804,
-   RSA_PSS_SHA384 = 0x0805,
-   RSA_PSS_SHA512 = 0x0806,
-
-   EDDSA_25519 = 0x0807,
-   EDDSA_448   = 0x0808,
-};
-
-BOTAN_UNSTABLE_API const std::vector<Signature_Scheme>& all_signature_schemes();
-
-bool BOTAN_UNSTABLE_API signature_scheme_is_known(Signature_Scheme scheme);
-std::string BOTAN_UNSTABLE_API sig_scheme_to_string(Signature_Scheme scheme);
-std::string BOTAN_UNSTABLE_API hash_function_of_scheme(Signature_Scheme scheme);
-std::string BOTAN_UNSTABLE_API padding_string_for_scheme(Signature_Scheme scheme);
-std::string signature_algorithm_of_scheme(Signature_Scheme scheme);
+Auth_Method BOTAN_TEST_API auth_method_from_string(std::string_view str);
 
 /*
 * Matches with wire encoding
 */
-enum class Group_Params : uint16_t {
+enum class Group_Params_Code : uint16_t {
    NONE = 0,
 
    SECP256R1 = 23,
@@ -131,41 +90,181 @@ enum class Group_Params : uint16_t {
    BRAINPOOL512R1 = 28,
 
    X25519 = 29,
+   X448 = 30,
 
    FFDHE_2048 = 256,
    FFDHE_3072 = 257,
    FFDHE_4096 = 258,
    FFDHE_6144 = 259,
    FFDHE_8192 = 260,
+
+   // libOQS defines those in:
+   // https://github.com/open-quantum-safe/oqs-provider/blob/main/ALGORITHMS.md
+   KYBER_512_R3_OQS = 0x023A,
+   KYBER_768_R3_OQS = 0x023C,
+   KYBER_1024_R3_OQS = 0x023D,
+
+   eFRODOKEM_640_SHAKE_OQS = 0x0201,
+   eFRODOKEM_976_SHAKE_OQS = 0x0203,
+   eFRODOKEM_1344_SHAKE_OQS = 0x0205,
+   eFRODOKEM_640_AES_OQS = 0x0200,
+   eFRODOKEM_976_AES_OQS = 0x0202,
+   eFRODOKEM_1344_AES_OQS = 0x0204,
+
+   // Cloudflare code points for hybrid PQC
+   // https://blog.cloudflare.com/post-quantum-for-all/
+   HYBRID_X25519_KYBER_512_R3_CLOUDFLARE = 0xFE30,
+
+   // libOQS defines those in:
+   // https://github.com/open-quantum-safe/oqs-provider/blob/main/ALGORITHMS.md
+   //
+   // X25519/Kyber768 is also defined in:
+   // https://datatracker.ietf.org/doc/draft-tls-westerbaan-xyber768d00/03/
+   HYBRID_X25519_KYBER_512_R3_OQS = 0x2F39,
+   HYBRID_X25519_KYBER_768_R3_OQS = 0x6399,
+
+   HYBRID_X448_KYBER_768_R3_OQS = 0x2F90,
+
+   HYBRID_SECP256R1_KYBER_512_R3_OQS = 0x2F3A,
+   HYBRID_SECP256R1_KYBER_768_R3_OQS = 0x639A,
+
+   HYBRID_SECP384R1_KYBER_768_R3_OQS = 0x2F3C,
+
+   HYBRID_SECP521R1_KYBER_1024_R3_OQS = 0x2F3D,
+
+   HYBRID_X25519_eFRODOKEM_640_SHAKE_OQS = 0x2F81,
+   HYBRID_X25519_eFRODOKEM_640_AES_OQS = 0x2F80,
+
+   HYBRID_X448_eFRODOKEM_976_SHAKE_OQS = 0x2F83,
+   HYBRID_X448_eFRODOKEM_976_AES_OQS = 0x2F82,
+
+   HYBRID_SECP256R1_eFRODOKEM_640_SHAKE_OQS = 0x2F01,
+   HYBRID_SECP256R1_eFRODOKEM_640_AES_OQS = 0x2F00,
+
+   HYBRID_SECP384R1_eFRODOKEM_976_SHAKE_OQS = 0x2F03,
+   HYBRID_SECP384R1_eFRODOKEM_976_AES_OQS = 0x2F02,
+
+   HYBRID_SECP521R1_eFRODOKEM_1344_SHAKE_OQS = 0x2F05,
+   HYBRID_SECP521R1_eFRODOKEM_1344_AES_OQS = 0x2F04,
 };
 
-std::string group_param_to_string(Group_Params group);
-Group_Params group_param_from_string(const std::string& group_name);
-bool group_param_is_dh(Group_Params group);
+class BOTAN_PUBLIC_API(3, 2) Group_Params final {
+   public:
+      using enum Group_Params_Code;
+
+      constexpr Group_Params() : m_code(Group_Params_Code::NONE) {}
+
+      constexpr Group_Params(Group_Params_Code code) : m_code(code) {}
+
+      constexpr Group_Params(uint16_t code) : m_code(static_cast<Group_Params_Code>(code)) {}
+
+      /**
+      * @returns std::nullopt if an unknown name
+      */
+      static std::optional<Group_Params> from_string(std::string_view group_name);
+
+      constexpr bool operator==(Group_Params_Code code) const { return m_code == code; }
+
+      constexpr bool operator==(Group_Params other) const { return m_code == other.m_code; }
+
+      constexpr bool operator<(Group_Params other) const { return m_code < other.m_code; }
+
+      constexpr Group_Params_Code code() const { return m_code; }
+
+      constexpr uint16_t wire_code() const { return static_cast<uint16_t>(m_code); }
+
+      constexpr bool is_x25519() const { return m_code == Group_Params_Code::X25519; }
+
+      constexpr bool is_x448() const { return m_code == Group_Params_Code::X448; }
+
+      constexpr bool is_ecdh_named_curve() const {
+         return m_code == Group_Params_Code::SECP256R1 || m_code == Group_Params_Code::SECP384R1 ||
+                m_code == Group_Params_Code::SECP521R1 || m_code == Group_Params_Code::BRAINPOOL256R1 ||
+                m_code == Group_Params_Code::BRAINPOOL384R1 || m_code == Group_Params_Code::BRAINPOOL512R1;
+      }
+
+      constexpr bool is_in_ffdhe_range() const {
+         // See RFC 7919
+         return wire_code() >= 256 && wire_code() < 512;
+      }
+
+      constexpr bool is_dh_named_group() const {
+         return m_code == Group_Params_Code::FFDHE_2048 || m_code == Group_Params_Code::FFDHE_3072 ||
+                m_code == Group_Params_Code::FFDHE_4096 || m_code == Group_Params_Code::FFDHE_6144 ||
+                m_code == Group_Params_Code::FFDHE_8192;
+      }
+
+      constexpr bool is_pure_kyber() const {
+         return m_code == Group_Params_Code::KYBER_512_R3_OQS || m_code == Group_Params_Code::KYBER_768_R3_OQS ||
+                m_code == Group_Params_Code::KYBER_1024_R3_OQS;
+      }
+
+      constexpr bool is_pure_frodokem() const {
+         return m_code == Group_Params_Code::eFRODOKEM_640_SHAKE_OQS ||
+                m_code == Group_Params_Code::eFRODOKEM_976_SHAKE_OQS ||
+                m_code == Group_Params_Code::eFRODOKEM_1344_SHAKE_OQS ||
+                m_code == Group_Params_Code::eFRODOKEM_640_AES_OQS ||
+                m_code == Group_Params_Code::eFRODOKEM_976_AES_OQS ||
+                m_code == Group_Params_Code::eFRODOKEM_1344_AES_OQS;
+      }
+
+      constexpr bool is_pure_ecc_group() const { return is_x25519() || is_x448() || is_ecdh_named_curve(); }
+
+      constexpr bool is_post_quantum() const { return is_pure_kyber() || is_pure_frodokem() || is_pqc_hybrid(); }
+
+      constexpr bool is_pqc_hybrid() const {
+         return m_code == Group_Params_Code::HYBRID_X25519_KYBER_512_R3_CLOUDFLARE ||
+                m_code == Group_Params_Code::HYBRID_X25519_KYBER_512_R3_OQS ||
+                m_code == Group_Params_Code::HYBRID_X25519_KYBER_768_R3_OQS ||
+                m_code == Group_Params_Code::HYBRID_X448_KYBER_768_R3_OQS ||
+                m_code == Group_Params_Code::HYBRID_X25519_eFRODOKEM_640_SHAKE_OQS ||
+                m_code == Group_Params_Code::HYBRID_X25519_eFRODOKEM_640_AES_OQS ||
+                m_code == Group_Params_Code::HYBRID_X448_eFRODOKEM_976_SHAKE_OQS ||
+                m_code == Group_Params_Code::HYBRID_X448_eFRODOKEM_976_AES_OQS ||
+                m_code == Group_Params_Code::HYBRID_SECP256R1_KYBER_512_R3_OQS ||
+                m_code == Group_Params_Code::HYBRID_SECP256R1_KYBER_768_R3_OQS ||
+                m_code == Group_Params_Code::HYBRID_SECP256R1_eFRODOKEM_640_SHAKE_OQS ||
+                m_code == Group_Params_Code::HYBRID_SECP256R1_eFRODOKEM_640_AES_OQS ||
+                m_code == Group_Params_Code::HYBRID_SECP384R1_KYBER_768_R3_OQS ||
+                m_code == Group_Params_Code::HYBRID_SECP384R1_eFRODOKEM_976_SHAKE_OQS ||
+                m_code == Group_Params_Code::HYBRID_SECP384R1_eFRODOKEM_976_AES_OQS ||
+                m_code == Group_Params_Code::HYBRID_SECP521R1_KYBER_1024_R3_OQS ||
+                m_code == Group_Params_Code::HYBRID_SECP521R1_eFRODOKEM_1344_SHAKE_OQS ||
+                m_code == Group_Params_Code::HYBRID_SECP521R1_eFRODOKEM_1344_AES_OQS;
+      }
+
+      constexpr bool is_kem() const { return is_pure_kyber() || is_pure_frodokem() || is_pqc_hybrid(); }
+
+      // Returns std::nullopt if the param has no known name
+      std::optional<std::string> to_string() const;
+
+   private:
+      Group_Params_Code m_code;
+};
 
 enum class Kex_Algo {
    STATIC_RSA,
    DH,
    ECDH,
-   CECPQ1,
-   SRP_SHA,
    PSK,
-   DHE_PSK,
    ECDHE_PSK,
+   DHE_PSK,
+   KEM,
+   KEM_PSK,
+   HYBRID,
+   HYBRID_PSK,
+
+   // To support TLS 1.3 ciphersuites, which do not determine the kex algo
+   UNDEFINED
 };
 
 std::string BOTAN_TEST_API kex_method_to_string(Kex_Algo method);
-Kex_Algo BOTAN_TEST_API kex_method_from_string(const std::string& str);
+Kex_Algo BOTAN_TEST_API kex_method_from_string(std::string_view str);
 
-inline bool key_exchange_is_psk(Kex_Algo m)
-   {
-   return (m == Kex_Algo::PSK ||
-           m == Kex_Algo::DHE_PSK ||
-           m == Kex_Algo::ECDHE_PSK);
-   }
-
+inline bool key_exchange_is_psk(Kex_Algo m) {
+   return (m == Kex_Algo::PSK || m == Kex_Algo::ECDHE_PSK || m == Kex_Algo::DHE_PSK);
 }
 
-}
+}  // namespace Botan::TLS
 
 #endif

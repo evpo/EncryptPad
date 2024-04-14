@@ -26,15 +26,20 @@ kdf1_iso18033
 sp800_108
 sp800_56c
 
+# pbkdf
+argon2
+argon2fmt
+
 # pk_pad
 eme_oaep
 emsa_pssr
-emsa1
 iso9796
 
 # pubkey
 dlies
 dh
+#dilithium // not (yet) recommended
+#dilithium_aes // not (yet) recommended
 rsa
 dsa
 ecdsa
@@ -42,6 +47,8 @@ ecgdsa
 ecies
 eckcdsa
 ecdh
+#kyber // not (yet) recommended
+#kyber_90s // not (yet) recommended
 xmss
 
 # rng
@@ -65,13 +72,16 @@ sha2_32_x86
 sha2_32_armv8
 sha2_32_bmi2
 sha2_64_bmi2
-sha3_bmi2
+keccak_perm_bmi2
 
 # entropy sources
-dev_random
-proc_walk
+getentropy
 rdseed
 win32_stats
+
+# pbkdf
+argon2_avx2
+argon2_ssse3
 
 # rng
 processor_rng
@@ -90,28 +100,27 @@ blowfish
 camellia
 cascade
 cast128
-cast256
 des
 gost_28147
 idea
 idea_sse2
-kasumi
+kuznyechik
 lion
-misty1
 noekeon
 noekeon_simd
 seed
 serpent
-serpent_simd
 serpent_avx2
+serpent_simd
 shacal2
-shacal2_x86
+shacal2_armv8
+shacal2_avx2
 shacal2_simd
+shacal2_x86
 sm4
+sm4_armv8
 threefish_512
-threefish_512_avx2
 twofish
-xtea
 
 # modes
 chacha20poly1305
@@ -127,46 +136,45 @@ chacha_avx2
 ofb
 rc4
 salsa20
-shake_cipher
+#shake_cipher # not recommended, but needed for kyber
 
 # kdf
-hkdf
+#hkdf // needed for tls 1.3
 kdf1
 kdf2
 prf_x942
 sp800_56a
 
 # pubkey
-cecpq1
 curve25519
+x448
+ec_h2c
 ed25519
 elgamal
 gost_3410
 mce
-mceies
 rfc6979
-newhope
 sm2
 
 # pk_pad
 #eme_pkcs1 // needed for tls
 #emsa_pkcs1 // needed for tls
+#eme_raw // allows custom paddings
 emsa_raw
 emsa_x931
 
 # hash
-blake2
+#blake2 # not recommended, but needed for argon2
 comb4p
 gost_3411
 md4
 md5
 rmd160
-shake
+#shake # not recommended, but needed for kyber
 skein
 #sha1 // needed for x509
 sm3
 streebog
-tiger
 whirlpool
 keccak
 
@@ -174,15 +182,12 @@ keccak
 chacha_rng
 
 # mac
-cbc_mac
+blake2mac
 poly1305
 siphash
 x919_mac
 
-# misc
+# passhash
 bcrypt
-
-# tls
-tls_10
 
 </prohibited>

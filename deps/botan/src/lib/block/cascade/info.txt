@@ -2,6 +2,6 @@
 CASCADE -> 20131128
 </defines>
 
-<header:public>
-cascade.h
-</header:public>
+<module_info>
+name -> "Cascade"
+</module_info>

@@ -2,6 +2,8 @@
 * TLS Server
 * (C) 2004-2011 Jack Lloyd
 *     2016 Matthias Gierlings
+*     2021 Elektrobit Automotive GmbH
+*     2022 René Meusel, Hannes Rantzsch - neXenio GmbH
 *
 * Botan is released under the Simplified BSD License (see license.txt)
 */
@@ -9,30 +11,25 @@
 #ifndef BOTAN_TLS_SERVER_H_
 #define BOTAN_TLS_SERVER_H_
 
+#include <botan/credentials_manager.h>
 #include <botan/tls_channel.h>
 #include <botan/tls_policy.h>
-#include <botan/credentials_manager.h>
 #include <vector>
 
-namespace Botan {
+namespace Botan::TLS {
 
-namespace TLS {
-
-class Server_Handshake_State;
+class Channel_Impl;
 
 /**
 * TLS Server
 */
-class BOTAN_PUBLIC_API(2,0) Server final : public Channel
-   {
+class BOTAN_PUBLIC_API(2, 0) Server final : public Channel {
    public:
-      typedef std::function<std::string (std::vector<std::string>)> next_protocol_fn;
-
       /**
       * Server initialization
       *
       * @param callbacks contains a set of callback function references
-      *        required by the TLS client.
+      *        required by the TLS server.
       *
       * @param session_manager manages session state
       *
@@ -49,52 +46,15 @@ class BOTAN_PUBLIC_API(2,0) Server final : public Channel
       *        be preallocated for the read and write buffers. Smaller
       *        values just mean reallocations and copies are more likely.
       */
-      Server(Callbacks& callbacks,
-             Session_Manager& session_manager,
-             Credentials_Manager& creds,
-             const Policy& policy,
-             RandomNumberGenerator& rng,
+      Server(const std::shared_ptr<Callbacks>& callbacks,
+             const std::shared_ptr<Session_Manager>& session_manager,
+             const std::shared_ptr<Credentials_Manager>& creds,
+             const std::shared_ptr<const Policy>& policy,
+             const std::shared_ptr<RandomNumberGenerator>& rng,
              bool is_datagram = false,
-             size_t reserved_io_buffer_size = TLS::Server::IO_BUF_DEFAULT_SIZE
-         );
+             size_t reserved_io_buffer_size = TLS::Channel::IO_BUF_DEFAULT_SIZE);
 
-      /**
-       * DEPRECATED. This constructor is only provided for backward
-       * compatibility and should not be used in new implementations.
-       * It will be removed in a future release.
-       */
-      BOTAN_DEPRECATED("Use TLS::Server(TLS::Callbacks ...)")
-      Server(output_fn output,
-             data_cb data_cb,
-             alert_cb recv_alert_cb,
-             handshake_cb hs_cb,
-             Session_Manager& session_manager,
-             Credentials_Manager& creds,
-             const Policy& policy,
-             RandomNumberGenerator& rng,
-             next_protocol_fn next_proto = next_protocol_fn(),
-             bool is_datagram = false,
-             size_t reserved_io_buffer_size = TLS::Server::IO_BUF_DEFAULT_SIZE
-         );
-
-      /**
-       * DEPRECATED. This constructor is only provided for backward
-       * compatibility and should not be used in new implementations.
-       * It will be removed in a future release.
-       */
-      BOTAN_DEPRECATED("Use TLS::Server(TLS::Callbacks ...)")
-      Server(output_fn output,
-             data_cb data_cb,
-             alert_cb recv_alert_cb,
-             handshake_cb hs_cb,
-             handshake_msg_cb hs_msg_cb,
-             Session_Manager& session_manager,
-             Credentials_Manager& creds,
-             const Policy& policy,
-             RandomNumberGenerator& rng,
-             next_protocol_fn next_proto = next_protocol_fn(),
-             bool is_datagram = false
-         );
+      ~Server() override;
 
       /**
       * Return the protocol notification set by the client (using the
@@ -102,68 +62,49 @@ class BOTAN_PUBLIC_API(2,0) Server final : public Channel
       * tied to the session and a later renegotiation of the same
       * session can choose a new protocol.
       */
-      std::string next_protocol() const { return m_next_protocol; }
+      std::string application_protocol() const override;
 
-      /**
-      * Return the protocol notification set by the client (using the
-      * ALPN extension) for this connection, if any. This value is not
-      * tied to the session and a later renegotiation of the same
-      * session can choose a new protocol.
-      */
-      std::string application_protocol() const override { return m_next_protocol; }
+      size_t from_peer(std::span<const uint8_t> data) override;
+
+      bool is_handshake_complete() const override;
+
+      bool is_active() const override;
+
+      bool is_closed() const override;
+
+      bool is_closed_for_reading() const override;
+      bool is_closed_for_writing() const override;
+
+      std::vector<X509_Certificate> peer_cert_chain() const override;
+      std::shared_ptr<const Public_Key> peer_raw_public_key() const override;
+      std::optional<std::string> external_psk_identity() const override;
+
+      SymmetricKey key_material_export(std::string_view label, std::string_view context, size_t length) const override;
+
+      void renegotiate(bool force_full_renegotiation = false) override;
+
+      bool new_session_ticket_supported() const;
+      size_t send_new_session_tickets(size_t tickets = 1);
+
+      void update_traffic_keys(bool request_peer_update = false) override;
+
+      bool secure_renegotiation_supported() const override;
+
+      void to_peer(std::span<const uint8_t> data) override;
+
+      void send_alert(const Alert& alert) override;
+
+      void send_warning_alert(Alert::Type type) override;
+
+      void send_fatal_alert(Alert::Type type) override;
+
+      void close() override;
+
+      bool timeout_check() override;
 
    private:
-      std::vector<X509_Certificate>
-         get_peer_cert_chain(const Handshake_State& state) const override;
-
-      void initiate_handshake(Handshake_State& state,
-                              bool force_full_renegotiation) override;
-
-      void process_handshake_msg(const Handshake_State* active_state,
-                                 Handshake_State& pending_state,
-                                 Handshake_Type type,
-                                 const std::vector<uint8_t>& contents,
-                                 bool epoch0_restart) override;
-
-      void process_client_hello_msg(const Handshake_State* active_state,
-                                    Server_Handshake_State& pending_state,
-                                    const std::vector<uint8_t>& contents,
-                                    bool epoch0_restart);
-
-      void process_certificate_msg(Server_Handshake_State& pending_state,
-                                   const std::vector<uint8_t>& contents);
-
-      void process_client_key_exchange_msg(Server_Handshake_State& pending_state,
-                                           const std::vector<uint8_t>& contents);
-
-      void process_change_cipher_spec_msg(Server_Handshake_State& pending_state);
-
-      void process_certificate_verify_msg(Server_Handshake_State& pending_state,
-                                          Handshake_Type type,
-                                          const std::vector<uint8_t>& contents);
-
-      void process_finished_msg(Server_Handshake_State& pending_state,
-                                Handshake_Type type,
-                                const std::vector<uint8_t>& contents);
-
-      void session_resume(Server_Handshake_State& pending_state,
-                          bool have_session_ticket_key,
-                          Session& session_info);
-
-      void session_create(Server_Handshake_State& pending_state,
-                          bool have_session_ticket_key);
-
-      Handshake_State* new_handshake_state(Handshake_IO* io) override;
-
-      Credentials_Manager& m_creds;
-      std::string m_next_protocol;
-
-      // Set by deprecated constructor, Server calls both this fn and Callbacks version
-      next_protocol_fn m_choose_next_protocol;
-   };
-
-}
-
-}
+      std::unique_ptr<Channel_Impl> m_impl;
+};
+}  // namespace Botan::TLS
 
 #endif

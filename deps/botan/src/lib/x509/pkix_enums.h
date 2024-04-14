@@ -1,5 +1,5 @@
 /*
-* (C) 2013 Jack Lloyd
+* (C) 2013,2023 Jack Lloyd
 *
 * Botan is released under the Simplified BSD License (see license.txt)
 */
@@ -8,8 +8,11 @@
 #define BOTAN_X509_PKIX_ENUMS_H_
 
 #include <botan/types.h>
+#include <string>
 
 namespace Botan {
+
+class Public_Key;
 
 /**
 * Certificate validation status code
@@ -30,10 +33,8 @@ enum class Certificate_Status_Code {
    DN_TOO_LONG = 501,
    OCSP_NO_REVOCATION_URL = 502,
    OCSP_SERVER_NOT_AVAILABLE = 503,
-
-   // Typo versions of above - will be removed in future major release
-   OSCP_NO_REVOCATION_URL = 502,
-   OSCP_SERVER_NOT_AVAILABLE = 503,
+   TRUSTED_CERT_HAS_EXPIRED = 504,
+   TRUSTED_CERT_NOT_YET_VALID = 505,
 
    // Errors
    FIRST_ERROR_STATUS = 1000,
@@ -42,6 +43,7 @@ enum class Certificate_Status_Code {
    UNTRUSTED_HASH = 1001,
    NO_REVOCATION_DATA = 1002,
    NO_MATCHING_CRLDP = 1003,
+   OCSP_ISSUER_NOT_TRUSTED = 1004,
 
    // Time problems
    CERT_NOT_YET_VALID = 2000,
@@ -97,47 +99,104 @@ enum class Certificate_Status_Code {
 * @param code the certifcate status
 * @return string literal constant, or nullptr if code unknown
 */
-BOTAN_PUBLIC_API(2,0) const char* to_string(Certificate_Status_Code code);
+BOTAN_PUBLIC_API(2, 0) const char* to_string(Certificate_Status_Code code);
 
 /**
 * X.509v3 Key Constraints.
 * If updating update copy in ffi.h
 */
-enum Key_Constraints {
-   NO_CONSTRAINTS     = 0,
-   DIGITAL_SIGNATURE  = 1 << 15,
-   NON_REPUDIATION    = 1 << 14,
-   KEY_ENCIPHERMENT   = 1 << 13,
-   DATA_ENCIPHERMENT  = 1 << 12,
-   KEY_AGREEMENT      = 1 << 11,
-   KEY_CERT_SIGN      = 1 << 10,
-   CRL_SIGN           = 1 << 9,
-   ENCIPHER_ONLY      = 1 << 8,
-   DECIPHER_ONLY      = 1 << 7
+class BOTAN_PUBLIC_API(3, 0) Key_Constraints {
+   public:
+      enum Bits : uint32_t {
+         None = 0,
+         DigitalSignature = 1 << 15,
+         NonRepudiation = 1 << 14,
+         KeyEncipherment = 1 << 13,
+         DataEncipherment = 1 << 12,
+         KeyAgreement = 1 << 11,
+         KeyCertSign = 1 << 10,
+         CrlSign = 1 << 9,
+         EncipherOnly = 1 << 8,
+         DecipherOnly = 1 << 7,
+
+         // Deprecated SHOUTING_CASE names for Key_Constraints
+         // will be removed in a future major release
+         NO_CONSTRAINTS BOTAN_DEPRECATED("Use None") = None,
+         DIGITAL_SIGNATURE BOTAN_DEPRECATED("Use DigitalSignature") = DigitalSignature,
+         NON_REPUDIATION BOTAN_DEPRECATED("Use NonRepudiation") = NonRepudiation,
+         KEY_ENCIPHERMENT BOTAN_DEPRECATED("Use KeyEncipherment") = KeyEncipherment,
+         DATA_ENCIPHERMENT BOTAN_DEPRECATED("Use DataEncipherment") = DataEncipherment,
+         KEY_AGREEMENT BOTAN_DEPRECATED("Use KeyAgreement") = KeyAgreement,
+         KEY_CERT_SIGN BOTAN_DEPRECATED("Use KeyCertSign") = KeyCertSign,
+         CRL_SIGN BOTAN_DEPRECATED("Use CrlSign") = CrlSign,
+         ENCIPHER_ONLY BOTAN_DEPRECATED("Use EncipherOnly") = EncipherOnly,
+         DECIPHER_ONLY BOTAN_DEPRECATED("Use DecipherOnly") = DecipherOnly,
+      };
+
+      Key_Constraints(const Key_Constraints& other) = default;
+      Key_Constraints(Key_Constraints&& other) = default;
+      Key_Constraints& operator=(const Key_Constraints& other) = default;
+      Key_Constraints& operator=(Key_Constraints&& other) = default;
+
+      Key_Constraints(Key_Constraints::Bits bits) : m_value(bits) {}
+
+      explicit Key_Constraints(uint32_t bits) : m_value(bits) {}
+
+      Key_Constraints() : m_value(0) {}
+
+      /**
+      * Return typical constraints for a CA certificate, namely
+      * KeyCertSign and CrlSign
+      */
+      static Key_Constraints ca_constraints() {
+         return Key_Constraints(Key_Constraints::KeyCertSign | Key_Constraints::CrlSign);
+      }
+
+      bool operator==(const Key_Constraints&) const = default;
+
+      void operator|=(Key_Constraints::Bits other) { m_value |= other; }
+
+      // Return true if all bits in mask are set
+      bool includes(Key_Constraints::Bits other) const { return (m_value & other) == other; }
+
+      bool includes(Key_Constraints other) const { return (m_value & other.m_value) == other.m_value; }
+
+      // Return true if any of the bits provided are set
+      bool includes_any(auto&&... bits) const { return (m_value & (bits | ...)) > 0; }
+
+      bool empty() const { return m_value == 0; }
+
+      uint32_t value() const { return m_value; }
+
+      std::string to_string() const;
+
+      /**
+      * Check that key constraints are permitted for a specific public key.
+      * @param key the public key on which the constraints shall be enforced on
+      * @return false if the constraints are not permitted for this key
+      */
+      bool compatible_with(const Public_Key& key) const;
+
+   private:
+      uint32_t m_value;
 };
 
 /**
 * X.509v2 CRL Reason Code.
-* This will become an enum class in a future major release
 */
-enum CRL_Code : uint32_t {
-   UNSPECIFIED            = 0,
-   KEY_COMPROMISE         = 1,
-   CA_COMPROMISE          = 2,
-   AFFILIATION_CHANGED    = 3,
-   SUPERSEDED             = 4,
-   CESSATION_OF_OPERATION = 5,
-   CERTIFICATE_HOLD       = 6,
-   REMOVE_FROM_CRL        = 8,
-   PRIVLEDGE_WITHDRAWN    = 9,
-   PRIVILEGE_WITHDRAWN    = 9,
-   AA_COMPROMISE          = 10,
-
-   DELETE_CRL_ENTRY       = 0xFF00,
-   OCSP_GOOD              = 0xFF01,
-   OCSP_UNKNOWN           = 0xFF02
+enum class CRL_Code : uint32_t {
+   Unspecified = 0,
+   KeyCompromise = 1,
+   CaCompromise = 2,
+   AffiliationChanged = 3,
+   Superseded = 4,
+   CessationOfOperation = 5,
+   CertificateHold = 6,
+   RemoveFromCrl = 8,
+   PrivilegeWithdrawn = 9,
+   AaCompromise = 10,
 };
 
-}
+}  // namespace Botan
 
 #endif

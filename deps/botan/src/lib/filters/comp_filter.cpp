@@ -7,43 +7,37 @@
 */
 
 #include <botan/filters.h>
+
 #include <botan/exceptn.h>
+#include <botan/internal/fmt.h>
 
 #if defined(BOTAN_HAS_COMPRESSION)
-  #include <botan/compression.h>
+   #include <botan/compression.h>
 #endif
 
 namespace Botan {
 
 #if defined(BOTAN_HAS_COMPRESSION)
 
-Compression_Filter::Compression_Filter(const std::string& type, size_t level, size_t bs) :
-   m_comp(make_compressor(type)),
-   m_buffersize(std::max<size_t>(bs, 256)),
-   m_level(level)
-   {
-   if(!m_comp)
-      {
-      throw Invalid_Argument("Compression type '" + type + "' not found");
-      }
+Compression_Filter::Compression_Filter(std::string_view type, size_t level, size_t bs) :
+      m_comp(Compression_Algorithm::create(type)), m_buffersize(std::max<size_t>(bs, 256)), m_level(level) {
+   if(!m_comp) {
+      throw Invalid_Argument(fmt("Compression type '{}' not found", type));
    }
+}
 
-Compression_Filter::~Compression_Filter() { /* for unique_ptr */ }
+Compression_Filter::~Compression_Filter() = default;
 
-std::string Compression_Filter::name() const
-   {
+std::string Compression_Filter::name() const {
    return m_comp->name();
-   }
+}
 
-void Compression_Filter::start_msg()
-   {
+void Compression_Filter::start_msg() {
    m_comp->start(m_level);
-   }
+}
 
-void Compression_Filter::write(const uint8_t input[], size_t input_length)
-   {
-   while(input_length)
-      {
+void Compression_Filter::write(const uint8_t input[], size_t input_length) {
+   while(input_length) {
       const size_t take = std::min(m_buffersize, input_length);
       BOTAN_ASSERT(take > 0, "Consumed something");
 
@@ -54,49 +48,40 @@ void Compression_Filter::write(const uint8_t input[], size_t input_length)
 
       input += take;
       input_length -= take;
-      }
    }
+}
 
-void Compression_Filter::flush()
-   {
+void Compression_Filter::flush() {
    m_buffer.clear();
    m_comp->update(m_buffer, 0, true);
    send(m_buffer);
-   }
+}
 
-void Compression_Filter::end_msg()
-   {
+void Compression_Filter::end_msg() {
    m_buffer.clear();
    m_comp->finish(m_buffer);
    send(m_buffer);
+}
+
+Decompression_Filter::Decompression_Filter(std::string_view type, size_t bs) :
+      m_comp(Decompression_Algorithm::create(type)), m_buffersize(std::max<size_t>(bs, 256)) {
+   if(!m_comp) {
+      throw Invalid_Argument(fmt("Compression type '{}' not found", type));
    }
+}
 
-Decompression_Filter::Decompression_Filter(const std::string& type, size_t bs) :
-   m_comp(make_decompressor(type)),
-   m_buffersize(std::max<size_t>(bs, 256))
-   {
-   if(!m_comp)
-      {
-      throw Invalid_Argument("Compression type '" + type + "' not found");
-      }
-   }
+Decompression_Filter::~Decompression_Filter() = default;
 
-Decompression_Filter::~Decompression_Filter() { /* for unique_ptr */ }
-
-std::string Decompression_Filter::name() const
-   {
+std::string Decompression_Filter::name() const {
    return m_comp->name();
-   }
+}
 
-void Decompression_Filter::start_msg()
-   {
+void Decompression_Filter::start_msg() {
    m_comp->start();
-   }
+}
 
-void Decompression_Filter::write(const uint8_t input[], size_t input_length)
-   {
-   while(input_length)
-      {
+void Decompression_Filter::write(const uint8_t input[], size_t input_length) {
+   while(input_length) {
       const size_t take = std::min(m_buffersize, input_length);
       BOTAN_ASSERT(take > 0, "Consumed something");
 
@@ -107,16 +92,15 @@ void Decompression_Filter::write(const uint8_t input[], size_t input_length)
 
       input += take;
       input_length -= take;
-      }
    }
+}
 
-void Decompression_Filter::end_msg()
-   {
+void Decompression_Filter::end_msg() {
    m_buffer.clear();
    m_comp->finish(m_buffer);
    send(m_buffer);
-   }
+}
 
 #endif
 
-}
+}  // namespace Botan

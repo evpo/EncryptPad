@@ -11,20 +11,13 @@
 #include <botan/block_cipher.h>
 #include <botan/stream_cipher.h>
 
-BOTAN_FUTURE_INTERNAL_HEADER(ctr.h)
-
 namespace Botan {
 
 /**
 * CTR-BE (Counter mode, big-endian)
 */
-class BOTAN_PUBLIC_API(2,0) CTR_BE final : public StreamCipher
-   {
+class CTR_BE final : public StreamCipher {
    public:
-      void cipher(const uint8_t in[], uint8_t out[], size_t length) override;
-
-      void set_iv(const uint8_t iv[], size_t iv_len) override;
-
       size_t default_iv_length() const override;
 
       bool valid_iv_length(size_t iv_len) const override;
@@ -33,21 +26,29 @@ class BOTAN_PUBLIC_API(2,0) CTR_BE final : public StreamCipher
 
       std::string name() const override;
 
-      CTR_BE* clone() const override;
+      std::unique_ptr<StreamCipher> new_object() const override;
 
       void clear() override;
+
+      bool has_keying_material() const override;
+
+      size_t buffer_size() const override;
 
       /**
       * @param cipher the block cipher to use
       */
-      explicit CTR_BE(BlockCipher* cipher);
+      explicit CTR_BE(std::unique_ptr<BlockCipher> cipher);
 
-      CTR_BE(BlockCipher* cipher, size_t ctr_size);
+      CTR_BE(std::unique_ptr<BlockCipher> cipher, size_t ctr_size);
 
       void seek(uint64_t offset) override;
+
    private:
-      void key_schedule(const uint8_t key[], size_t key_len) override;
-      void add_counter(const uint64_t counter);
+      void key_schedule(std::span<const uint8_t> key) override;
+      void cipher_bytes(const uint8_t in[], uint8_t out[], size_t length) override;
+      void generate_keystream(uint8_t out[], size_t length) override;
+      void set_iv_bytes(const uint8_t iv[], size_t iv_len) override;
+      void add_counter(uint64_t counter);
 
       std::unique_ptr<BlockCipher> m_cipher;
 
@@ -58,8 +59,8 @@ class BOTAN_PUBLIC_API(2,0) CTR_BE final : public StreamCipher
       secure_vector<uint8_t> m_counter, m_pad;
       std::vector<uint8_t> m_iv;
       size_t m_pad_pos;
-   };
+};
 
-}
+}  // namespace Botan
 
 #endif

@@ -1,3 +1,12 @@
 <requires>
 entropy
 </requires>
+
+<module_info>
+name -> "Random Number Generators"
+brief -> "Implementations of Random Number Generators"
+</module_info>
+
+<header:public>
+rng.h
+</header:public>

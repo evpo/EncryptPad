@@ -8,35 +8,33 @@
 #ifndef BOTAN_TLS_CIPHER_SUITES_H_
 #define BOTAN_TLS_CIPHER_SUITES_H_
 
-#include <botan/types.h>
 #include <botan/tls_algos.h>
 #include <botan/tls_version.h>
+#include <botan/types.h>
+#include <optional>
 #include <string>
 #include <vector>
 
-namespace Botan {
-
-namespace TLS {
+namespace Botan::TLS {
 
 /**
 * Ciphersuite Information
 */
-class BOTAN_PUBLIC_API(2,0) Ciphersuite final
-   {
+class BOTAN_PUBLIC_API(2, 0) Ciphersuite final {
    public:
       /**
       * Convert an SSL/TLS ciphersuite to algorithm fields
       * @param suite the ciphersuite code number
-      * @return ciphersuite object
+      * @return ciphersuite object or std::nullopt if it is unknown to the library
       */
-      static Ciphersuite by_id(uint16_t suite);
+      static std::optional<Ciphersuite> by_id(uint16_t suite);
 
       /**
       * Convert an SSL/TLS ciphersuite name to algorithm fields
       * @param name the IANA name for the desired ciphersuite
-      * @return ciphersuite object
+      * @return ciphersuite object or std::nullopt if it is unknown to the library
       */
-      static Ciphersuite from_name(const std::string& name);
+      static std::optional<Ciphersuite> from_name(std::string_view name);
 
       /**
       * Returns true iff this suite is a known SCSV
@@ -54,7 +52,7 @@ class BOTAN_PUBLIC_API(2,0) Ciphersuite final
       * Formats the ciphersuite back to an RFC-style ciphersuite string
       * @return RFC ciphersuite string identifier
       */
-      std::string to_string() const { return m_iana_id; }
+      std::string to_string() const { return (!m_iana_id) ? "unknown cipher suite" : m_iana_id; }
 
       /**
       * @return ciphersuite number
@@ -75,6 +73,11 @@ class BOTAN_PUBLIC_API(2,0) Ciphersuite final
        * @return true if this suite uses a CBC cipher
        */
       bool cbc_ciphersuite() const;
+
+      /**
+       * @return true if this suite uses a AEAD cipher
+       */
+      bool aead_ciphersuite() const;
 
       bool signature_used() const;
 
@@ -102,10 +105,7 @@ class BOTAN_PUBLIC_API(2,0) Ciphersuite final
       */
       std::string mac_algo() const { return m_mac_algo; }
 
-      std::string prf_algo() const
-         {
-         return kdf_algo_to_string(m_prf_algo);
-         }
+      std::string prf_algo() const { return kdf_algo_to_string(m_prf_algo); }
 
       /**
       * @return cipher key length used by this ciphersuite
@@ -128,12 +128,10 @@ class BOTAN_PUBLIC_API(2,0) Ciphersuite final
       bool usable_in_version(Protocol_Version version) const;
 
       bool operator<(const Ciphersuite& o) const { return ciphersuite_code() < o.ciphersuite_code(); }
+
       bool operator<(const uint16_t c) const { return ciphersuite_code() < c; }
 
-      Ciphersuite() = default;
-
    private:
-
       bool is_usable() const;
 
       Ciphersuite(uint16_t ciphersuite_code,
@@ -146,19 +144,18 @@ class BOTAN_PUBLIC_API(2,0) Ciphersuite final
                   size_t mac_keylen,
                   KDF_Algo prf_algo,
                   Nonce_Format nonce_format) :
-         m_ciphersuite_code(ciphersuite_code),
-         m_iana_id(iana_id),
-         m_auth_method(auth_method),
-         m_kex_algo(kex_algo),
-         m_prf_algo(prf_algo),
-         m_nonce_format(nonce_format),
-         m_cipher_algo(cipher_algo),
-         m_mac_algo(mac_algo),
-         m_cipher_keylen(cipher_keylen),
-         m_mac_keylen(mac_keylen)
-         {
+            m_ciphersuite_code(ciphersuite_code),
+            m_iana_id(iana_id),
+            m_auth_method(auth_method),
+            m_kex_algo(kex_algo),
+            m_prf_algo(prf_algo),
+            m_nonce_format(nonce_format),
+            m_cipher_algo(cipher_algo),
+            m_mac_algo(mac_algo),
+            m_cipher_keylen(cipher_keylen),
+            m_mac_keylen(mac_keylen) {
          m_usable = is_usable();
-         }
+      }
 
       uint16_t m_ciphersuite_code = 0;
 
@@ -166,24 +163,22 @@ class BOTAN_PUBLIC_API(2,0) Ciphersuite final
       All of these const char* strings are references to compile time
       constants in tls_suite_info.cpp
       */
-      const char* m_iana_id = nullptr;
+      const char* m_iana_id;
 
-      Auth_Method m_auth_method = Auth_Method::ANONYMOUS;
-      Kex_Algo m_kex_algo = Kex_Algo::STATIC_RSA;
-      KDF_Algo m_prf_algo = KDF_Algo::SHA_1;
-      Nonce_Format m_nonce_format = Nonce_Format::CBC_MODE;
+      Auth_Method m_auth_method;
+      Kex_Algo m_kex_algo;
+      KDF_Algo m_prf_algo;
+      Nonce_Format m_nonce_format;
 
-      const char* m_cipher_algo = nullptr;
-      const char* m_mac_algo = nullptr;
+      const char* m_cipher_algo;
+      const char* m_mac_algo;
 
-      size_t m_cipher_keylen = 0;
-      size_t m_mac_keylen = 0;
+      size_t m_cipher_keylen;
+      size_t m_mac_keylen;
 
       bool m_usable = false;
-   };
+};
 
-}
-
-}
+}  // namespace Botan::TLS
 
 #endif

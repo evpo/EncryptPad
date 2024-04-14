@@ -11,42 +11,43 @@
 
 #include <botan/aead.h>
 #include <botan/block_cipher.h>
-#include <botan/stream_cipher.h>
 #include <botan/mac.h>
-
-BOTAN_FUTURE_INTERNAL_HEADER(eax.h)
+#include <botan/stream_cipher.h>
 
 namespace Botan {
 
 /**
 * EAX base class
 */
-class BOTAN_PUBLIC_API(2,0) EAX_Mode : public AEAD_Mode
-   {
+class EAX_Mode : public AEAD_Mode {
    public:
-      void set_associated_data(const uint8_t ad[], size_t ad_len) override;
+      void set_associated_data_n(size_t idx, std::span<const uint8_t> ad) final;
 
-      std::string name() const override;
+      std::string name() const final;
 
-      size_t update_granularity() const override;
+      size_t update_granularity() const final;
 
-      Key_Length_Specification key_spec() const override;
+      size_t ideal_granularity() const final;
+
+      Key_Length_Specification key_spec() const final;
 
       // EAX supports arbitrary nonce lengths
-      bool valid_nonce_length(size_t) const override { return true; }
+      bool valid_nonce_length(size_t) const final { return true; }
 
-      size_t tag_size() const override { return m_tag_size; }
+      size_t tag_size() const final { return m_tag_size; }
 
-      void clear() override;
+      void clear() final;
 
-      void reset() override;
+      void reset() final;
+
+      bool has_keying_material() const final;
 
    protected:
       /**
       * @param cipher the cipher to use
       * @param tag_size is how big the auth tag will be
       */
-      EAX_Mode(BlockCipher* cipher, size_t tag_size);
+      EAX_Mode(std::unique_ptr<BlockCipher> cipher, size_t tag_size);
 
       size_t block_size() const { return m_cipher->block_size(); }
 
@@ -59,61 +60,58 @@ class BOTAN_PUBLIC_API(2,0) EAX_Mode : public AEAD_Mode
       secure_vector<uint8_t> m_ad_mac;
 
       secure_vector<uint8_t> m_nonce_mac;
-   private:
-      void start_msg(const uint8_t nonce[], size_t nonce_len) override;
 
-      void key_schedule(const uint8_t key[], size_t length) override;
-   };
+   private:
+      void start_msg(const uint8_t nonce[], size_t nonce_len) final;
+
+      void key_schedule(std::span<const uint8_t> key) final;
+};
 
 /**
 * EAX Encryption
 */
-class BOTAN_PUBLIC_API(2,0) EAX_Encryption final : public EAX_Mode
-   {
+class EAX_Encryption final : public EAX_Mode {
    public:
       /**
       * @param cipher a 128-bit block cipher
       * @param tag_size is how big the auth tag will be
       */
-      EAX_Encryption(BlockCipher* cipher, size_t tag_size = 0) :
-         EAX_Mode(cipher, tag_size) {}
+      EAX_Encryption(std::unique_ptr<BlockCipher> cipher, size_t tag_size = 0) :
+            EAX_Mode(std::move(cipher), tag_size) {}
 
-      size_t output_length(size_t input_length) const override
-         { return input_length + tag_size(); }
+      size_t output_length(size_t input_length) const override { return input_length + tag_size(); }
 
       size_t minimum_final_size() const override { return 0; }
 
-      size_t process(uint8_t buf[], size_t size) override;
-
-      void finish(secure_vector<uint8_t>& final_block, size_t offset = 0) override;
-   };
+   private:
+      size_t process_msg(uint8_t buf[], size_t size) override;
+      void finish_msg(secure_vector<uint8_t>& final_block, size_t offset = 0) override;
+};
 
 /**
 * EAX Decryption
 */
-class BOTAN_PUBLIC_API(2,0) EAX_Decryption final : public EAX_Mode
-   {
+class EAX_Decryption final : public EAX_Mode {
    public:
       /**
       * @param cipher a 128-bit block cipher
       * @param tag_size is how big the auth tag will be
       */
-      EAX_Decryption(BlockCipher* cipher, size_t tag_size = 0) :
-         EAX_Mode(cipher, tag_size) {}
+      EAX_Decryption(std::unique_ptr<BlockCipher> cipher, size_t tag_size = 0) :
+            EAX_Mode(std::move(cipher), tag_size) {}
 
-      size_t output_length(size_t input_length) const override
-         {
-         BOTAN_ASSERT(input_length >= tag_size(), "Sufficient input");
+      size_t output_length(size_t input_length) const override {
+         BOTAN_ARG_CHECK(input_length >= tag_size(), "Sufficient input");
          return input_length - tag_size();
-         }
+      }
 
       size_t minimum_final_size() const override { return tag_size(); }
 
-      size_t process(uint8_t buf[], size_t size) override;
+   private:
+      size_t process_msg(uint8_t buf[], size_t size) override;
+      void finish_msg(secure_vector<uint8_t>& final_block, size_t offset = 0) override;
+};
 
-      void finish(secure_vector<uint8_t>& final_block, size_t offset = 0) override;
-   };
-
-}
+}  // namespace Botan
 
 #endif

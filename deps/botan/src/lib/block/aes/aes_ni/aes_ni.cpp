@@ -5,483 +5,438 @@
 * Botan is released under the Simplified BSD License (see license.txt)
 */
 
-#include <botan/aes.h>
-#include <botan/loadstor.h>
+#include <botan/internal/aes.h>
+
+#include <botan/internal/loadstor.h>
+#include <botan/internal/simd_32.h>
 #include <wmmintrin.h>
 
 namespace Botan {
 
 namespace {
 
-BOTAN_FUNC_ISA("ssse3")
-__m128i aes_128_key_expansion(__m128i key, __m128i key_with_rcon)
-   {
-   key_with_rcon = _mm_shuffle_epi32(key_with_rcon, _MM_SHUFFLE(3,3,3,3));
+template <uint8_t RC>
+BOTAN_FUNC_ISA("ssse3,aes")
+inline __m128i aes_128_key_expansion(__m128i key, __m128i key_getting_rcon) {
+   __m128i key_with_rcon = _mm_aeskeygenassist_si128(key_getting_rcon, RC);
+   key_with_rcon = _mm_shuffle_epi32(key_with_rcon, _MM_SHUFFLE(3, 3, 3, 3));
    key = _mm_xor_si128(key, _mm_slli_si128(key, 4));
    key = _mm_xor_si128(key, _mm_slli_si128(key, 4));
    key = _mm_xor_si128(key, _mm_slli_si128(key, 4));
    return _mm_xor_si128(key, key_with_rcon);
-   }
+}
 
 BOTAN_FUNC_ISA("ssse3")
-void aes_192_key_expansion(__m128i* K1, __m128i* K2, __m128i key2_with_rcon,
-                           uint32_t out[], bool last)
-   {
+void aes_192_key_expansion(
+   __m128i* K1, __m128i* K2, __m128i key2_with_rcon, secure_vector<uint32_t>& out, size_t offset) {
    __m128i key1 = *K1;
    __m128i key2 = *K2;
 
-   key2_with_rcon  = _mm_shuffle_epi32(key2_with_rcon, _MM_SHUFFLE(1,1,1,1));
+   key2_with_rcon = _mm_shuffle_epi32(key2_with_rcon, _MM_SHUFFLE(1, 1, 1, 1));
    key1 = _mm_xor_si128(key1, _mm_slli_si128(key1, 4));
    key1 = _mm_xor_si128(key1, _mm_slli_si128(key1, 4));
    key1 = _mm_xor_si128(key1, _mm_slli_si128(key1, 4));
    key1 = _mm_xor_si128(key1, key2_with_rcon);
 
    *K1 = key1;
-   _mm_storeu_si128(reinterpret_cast<__m128i*>(out), key1);
+   _mm_storeu_si128(reinterpret_cast<__m128i*>(&out[offset]), key1);
 
-   if(last)
+   if(offset == 48) {  // last key
       return;
+   }
 
    key2 = _mm_xor_si128(key2, _mm_slli_si128(key2, 4));
-   key2 = _mm_xor_si128(key2, _mm_shuffle_epi32(key1, _MM_SHUFFLE(3,3,3,3)));
+   key2 = _mm_xor_si128(key2, _mm_shuffle_epi32(key1, _MM_SHUFFLE(3, 3, 3, 3)));
 
    *K2 = key2;
-   out[4] = _mm_cvtsi128_si32(key2);
-   out[5] = _mm_cvtsi128_si32(_mm_srli_si128(key2, 4));
-   }
+   out[offset + 4] = _mm_cvtsi128_si32(key2);
+   out[offset + 5] = _mm_cvtsi128_si32(_mm_srli_si128(key2, 4));
+}
 
 /*
 * The second half of the AES-256 key expansion (other half same as AES-128)
 */
-BOTAN_FUNC_ISA("ssse3,aes")
-__m128i aes_256_key_expansion(__m128i key, __m128i key2)
-   {
+BOTAN_FUNC_ISA("ssse3,aes") __m128i aes_256_key_expansion(__m128i key, __m128i key2) {
    __m128i key_with_rcon = _mm_aeskeygenassist_si128(key2, 0x00);
-   key_with_rcon = _mm_shuffle_epi32(key_with_rcon, _MM_SHUFFLE(2,2,2,2));
+   key_with_rcon = _mm_shuffle_epi32(key_with_rcon, _MM_SHUFFLE(2, 2, 2, 2));
 
    key = _mm_xor_si128(key, _mm_slli_si128(key, 4));
    key = _mm_xor_si128(key, _mm_slli_si128(key, 4));
    key = _mm_xor_si128(key, _mm_slli_si128(key, 4));
    return _mm_xor_si128(key, key_with_rcon);
-   }
-
 }
 
-#define AES_ENC_4_ROUNDS(K)                     \
-   do                                           \
-      {                                         \
-      B0 = _mm_aesenc_si128(B0, K);             \
-      B1 = _mm_aesenc_si128(B1, K);             \
-      B2 = _mm_aesenc_si128(B2, K);             \
-      B3 = _mm_aesenc_si128(B3, K);             \
-      } while(0)
+BOTAN_FORCE_INLINE void keyxor(SIMD_4x32 K, SIMD_4x32& B0, SIMD_4x32& B1, SIMD_4x32& B2, SIMD_4x32& B3) {
+   B0 ^= K;
+   B1 ^= K;
+   B2 ^= K;
+   B3 ^= K;
+}
 
-#define AES_ENC_4_LAST_ROUNDS(K)                \
-   do                                           \
-      {                                         \
-      B0 = _mm_aesenclast_si128(B0, K);         \
-      B1 = _mm_aesenclast_si128(B1, K);         \
-      B2 = _mm_aesenclast_si128(B2, K);         \
-      B3 = _mm_aesenclast_si128(B3, K);         \
-      } while(0)
+BOTAN_FUNC_ISA_INLINE("aes") void aesenc(SIMD_4x32 K, SIMD_4x32& B) {
+   B = SIMD_4x32(_mm_aesenc_si128(B.raw(), K.raw()));
+}
 
-#define AES_DEC_4_ROUNDS(K)                     \
-   do                                           \
-      {                                         \
-      B0 = _mm_aesdec_si128(B0, K);             \
-      B1 = _mm_aesdec_si128(B1, K);             \
-      B2 = _mm_aesdec_si128(B2, K);             \
-      B3 = _mm_aesdec_si128(B3, K);             \
-      } while(0)
+BOTAN_FUNC_ISA_INLINE("aes") void aesenc(SIMD_4x32 K, SIMD_4x32& B0, SIMD_4x32& B1, SIMD_4x32& B2, SIMD_4x32& B3) {
+   B0 = SIMD_4x32(_mm_aesenc_si128(B0.raw(), K.raw()));
+   B1 = SIMD_4x32(_mm_aesenc_si128(B1.raw(), K.raw()));
+   B2 = SIMD_4x32(_mm_aesenc_si128(B2.raw(), K.raw()));
+   B3 = SIMD_4x32(_mm_aesenc_si128(B3.raw(), K.raw()));
+}
 
-#define AES_DEC_4_LAST_ROUNDS(K)                \
-   do                                           \
-      {                                         \
-      B0 = _mm_aesdeclast_si128(B0, K);         \
-      B1 = _mm_aesdeclast_si128(B1, K);         \
-      B2 = _mm_aesdeclast_si128(B2, K);         \
-      B3 = _mm_aesdeclast_si128(B3, K);         \
-      } while(0)
+BOTAN_FUNC_ISA_INLINE("aes") void aesenclast(SIMD_4x32 K, SIMD_4x32& B) {
+   B = SIMD_4x32(_mm_aesenclast_si128(B.raw(), K.raw()));
+}
+
+BOTAN_FUNC_ISA_INLINE("aes") void aesenclast(SIMD_4x32 K, SIMD_4x32& B0, SIMD_4x32& B1, SIMD_4x32& B2, SIMD_4x32& B3) {
+   B0 = SIMD_4x32(_mm_aesenclast_si128(B0.raw(), K.raw()));
+   B1 = SIMD_4x32(_mm_aesenclast_si128(B1.raw(), K.raw()));
+   B2 = SIMD_4x32(_mm_aesenclast_si128(B2.raw(), K.raw()));
+   B3 = SIMD_4x32(_mm_aesenclast_si128(B3.raw(), K.raw()));
+}
+
+BOTAN_FUNC_ISA_INLINE("aes") void aesdec(SIMD_4x32 K, SIMD_4x32& B) {
+   B = SIMD_4x32(_mm_aesdec_si128(B.raw(), K.raw()));
+}
+
+BOTAN_FUNC_ISA_INLINE("aes") void aesdec(SIMD_4x32 K, SIMD_4x32& B0, SIMD_4x32& B1, SIMD_4x32& B2, SIMD_4x32& B3) {
+   B0 = SIMD_4x32(_mm_aesdec_si128(B0.raw(), K.raw()));
+   B1 = SIMD_4x32(_mm_aesdec_si128(B1.raw(), K.raw()));
+   B2 = SIMD_4x32(_mm_aesdec_si128(B2.raw(), K.raw()));
+   B3 = SIMD_4x32(_mm_aesdec_si128(B3.raw(), K.raw()));
+}
+
+BOTAN_FUNC_ISA_INLINE("aes") void aesdeclast(SIMD_4x32 K, SIMD_4x32& B) {
+   B = SIMD_4x32(_mm_aesdeclast_si128(B.raw(), K.raw()));
+}
+
+BOTAN_FUNC_ISA_INLINE("aes") void aesdeclast(SIMD_4x32 K, SIMD_4x32& B0, SIMD_4x32& B1, SIMD_4x32& B2, SIMD_4x32& B3) {
+   B0 = SIMD_4x32(_mm_aesdeclast_si128(B0.raw(), K.raw()));
+   B1 = SIMD_4x32(_mm_aesdeclast_si128(B1.raw(), K.raw()));
+   B2 = SIMD_4x32(_mm_aesdeclast_si128(B2.raw(), K.raw()));
+   B3 = SIMD_4x32(_mm_aesdeclast_si128(B3.raw(), K.raw()));
+}
+
+}  // namespace
 
 /*
 * AES-128 Encryption
 */
-BOTAN_FUNC_ISA("ssse3,aes")
-void AES_128::hw_aes_encrypt_n(const uint8_t in[], uint8_t out[], size_t blocks) const
-   {
-   const __m128i* in_mm = reinterpret_cast<const __m128i*>(in);
-   __m128i* out_mm = reinterpret_cast<__m128i*>(out);
+BOTAN_FUNC_ISA("ssse3,aes") void AES_128::hw_aes_encrypt_n(const uint8_t in[], uint8_t out[], size_t blocks) const {
+   const SIMD_4x32 K0 = SIMD_4x32::load_le(&m_EK[4 * 0]);
+   const SIMD_4x32 K1 = SIMD_4x32::load_le(&m_EK[4 * 1]);
+   const SIMD_4x32 K2 = SIMD_4x32::load_le(&m_EK[4 * 2]);
+   const SIMD_4x32 K3 = SIMD_4x32::load_le(&m_EK[4 * 3]);
+   const SIMD_4x32 K4 = SIMD_4x32::load_le(&m_EK[4 * 4]);
+   const SIMD_4x32 K5 = SIMD_4x32::load_le(&m_EK[4 * 5]);
+   const SIMD_4x32 K6 = SIMD_4x32::load_le(&m_EK[4 * 6]);
+   const SIMD_4x32 K7 = SIMD_4x32::load_le(&m_EK[4 * 7]);
+   const SIMD_4x32 K8 = SIMD_4x32::load_le(&m_EK[4 * 8]);
+   const SIMD_4x32 K9 = SIMD_4x32::load_le(&m_EK[4 * 9]);
+   const SIMD_4x32 K10 = SIMD_4x32::load_le(&m_EK[4 * 10]);
 
-   const __m128i* key_mm = reinterpret_cast<const __m128i*>(m_EK.data());
+   while(blocks >= 4) {
+      SIMD_4x32 B0 = SIMD_4x32::load_le(in + 16 * 0);
+      SIMD_4x32 B1 = SIMD_4x32::load_le(in + 16 * 1);
+      SIMD_4x32 B2 = SIMD_4x32::load_le(in + 16 * 2);
+      SIMD_4x32 B3 = SIMD_4x32::load_le(in + 16 * 3);
 
-   const __m128i K0  = _mm_loadu_si128(key_mm);
-   const __m128i K1  = _mm_loadu_si128(key_mm + 1);
-   const __m128i K2  = _mm_loadu_si128(key_mm + 2);
-   const __m128i K3  = _mm_loadu_si128(key_mm + 3);
-   const __m128i K4  = _mm_loadu_si128(key_mm + 4);
-   const __m128i K5  = _mm_loadu_si128(key_mm + 5);
-   const __m128i K6  = _mm_loadu_si128(key_mm + 6);
-   const __m128i K7  = _mm_loadu_si128(key_mm + 7);
-   const __m128i K8  = _mm_loadu_si128(key_mm + 8);
-   const __m128i K9  = _mm_loadu_si128(key_mm + 9);
-   const __m128i K10 = _mm_loadu_si128(key_mm + 10);
+      keyxor(K0, B0, B1, B2, B3);
+      aesenc(K1, B0, B1, B2, B3);
+      aesenc(K2, B0, B1, B2, B3);
+      aesenc(K3, B0, B1, B2, B3);
+      aesenc(K4, B0, B1, B2, B3);
+      aesenc(K5, B0, B1, B2, B3);
+      aesenc(K6, B0, B1, B2, B3);
+      aesenc(K7, B0, B1, B2, B3);
+      aesenc(K8, B0, B1, B2, B3);
+      aesenc(K9, B0, B1, B2, B3);
+      aesenclast(K10, B0, B1, B2, B3);
 
-   while(blocks >= 4)
-      {
-      __m128i B0 = _mm_loadu_si128(in_mm + 0);
-      __m128i B1 = _mm_loadu_si128(in_mm + 1);
-      __m128i B2 = _mm_loadu_si128(in_mm + 2);
-      __m128i B3 = _mm_loadu_si128(in_mm + 3);
-
-      B0 = _mm_xor_si128(B0, K0);
-      B1 = _mm_xor_si128(B1, K0);
-      B2 = _mm_xor_si128(B2, K0);
-      B3 = _mm_xor_si128(B3, K0);
-
-      AES_ENC_4_ROUNDS(K1);
-      AES_ENC_4_ROUNDS(K2);
-      AES_ENC_4_ROUNDS(K3);
-      AES_ENC_4_ROUNDS(K4);
-      AES_ENC_4_ROUNDS(K5);
-      AES_ENC_4_ROUNDS(K6);
-      AES_ENC_4_ROUNDS(K7);
-      AES_ENC_4_ROUNDS(K8);
-      AES_ENC_4_ROUNDS(K9);
-      AES_ENC_4_LAST_ROUNDS(K10);
-
-      _mm_storeu_si128(out_mm + 0, B0);
-      _mm_storeu_si128(out_mm + 1, B1);
-      _mm_storeu_si128(out_mm + 2, B2);
-      _mm_storeu_si128(out_mm + 3, B3);
+      B0.store_le(out + 16 * 0);
+      B1.store_le(out + 16 * 1);
+      B2.store_le(out + 16 * 2);
+      B3.store_le(out + 16 * 3);
 
       blocks -= 4;
-      in_mm += 4;
-      out_mm += 4;
-      }
-
-   for(size_t i = 0; i != blocks; ++i)
-      {
-      __m128i B = _mm_loadu_si128(in_mm + i);
-
-      B = _mm_xor_si128(B, K0);
-
-      B = _mm_aesenc_si128(B, K1);
-      B = _mm_aesenc_si128(B, K2);
-      B = _mm_aesenc_si128(B, K3);
-      B = _mm_aesenc_si128(B, K4);
-      B = _mm_aesenc_si128(B, K5);
-      B = _mm_aesenc_si128(B, K6);
-      B = _mm_aesenc_si128(B, K7);
-      B = _mm_aesenc_si128(B, K8);
-      B = _mm_aesenc_si128(B, K9);
-      B = _mm_aesenclast_si128(B, K10);
-
-      _mm_storeu_si128(out_mm + i, B);
-      }
+      in += 4 * 16;
+      out += 4 * 16;
    }
+
+   for(size_t i = 0; i != blocks; ++i) {
+      SIMD_4x32 B0 = SIMD_4x32::load_le(in + 16 * i);
+
+      B0 ^= K0;
+      aesenc(K1, B0);
+      aesenc(K2, B0);
+      aesenc(K3, B0);
+      aesenc(K4, B0);
+      aesenc(K5, B0);
+      aesenc(K6, B0);
+      aesenc(K7, B0);
+      aesenc(K8, B0);
+      aesenc(K9, B0);
+      aesenclast(K10, B0);
+
+      B0.store_le(out + 16 * i);
+   }
+}
 
 /*
 * AES-128 Decryption
 */
-BOTAN_FUNC_ISA("ssse3,aes")
-void AES_128::hw_aes_decrypt_n(const uint8_t in[], uint8_t out[], size_t blocks) const
-   {
-   const __m128i* in_mm = reinterpret_cast<const __m128i*>(in);
-   __m128i* out_mm = reinterpret_cast<__m128i*>(out);
+BOTAN_FUNC_ISA("ssse3,aes") void AES_128::hw_aes_decrypt_n(const uint8_t in[], uint8_t out[], size_t blocks) const {
+   const SIMD_4x32 K0 = SIMD_4x32::load_le(&m_DK[4 * 0]);
+   const SIMD_4x32 K1 = SIMD_4x32::load_le(&m_DK[4 * 1]);
+   const SIMD_4x32 K2 = SIMD_4x32::load_le(&m_DK[4 * 2]);
+   const SIMD_4x32 K3 = SIMD_4x32::load_le(&m_DK[4 * 3]);
+   const SIMD_4x32 K4 = SIMD_4x32::load_le(&m_DK[4 * 4]);
+   const SIMD_4x32 K5 = SIMD_4x32::load_le(&m_DK[4 * 5]);
+   const SIMD_4x32 K6 = SIMD_4x32::load_le(&m_DK[4 * 6]);
+   const SIMD_4x32 K7 = SIMD_4x32::load_le(&m_DK[4 * 7]);
+   const SIMD_4x32 K8 = SIMD_4x32::load_le(&m_DK[4 * 8]);
+   const SIMD_4x32 K9 = SIMD_4x32::load_le(&m_DK[4 * 9]);
+   const SIMD_4x32 K10 = SIMD_4x32::load_le(&m_DK[4 * 10]);
 
-   const __m128i* key_mm = reinterpret_cast<const __m128i*>(m_DK.data());
+   while(blocks >= 4) {
+      SIMD_4x32 B0 = SIMD_4x32::load_le(in + 16 * 0);
+      SIMD_4x32 B1 = SIMD_4x32::load_le(in + 16 * 1);
+      SIMD_4x32 B2 = SIMD_4x32::load_le(in + 16 * 2);
+      SIMD_4x32 B3 = SIMD_4x32::load_le(in + 16 * 3);
 
-   const __m128i K0  = _mm_loadu_si128(key_mm);
-   const __m128i K1  = _mm_loadu_si128(key_mm + 1);
-   const __m128i K2  = _mm_loadu_si128(key_mm + 2);
-   const __m128i K3  = _mm_loadu_si128(key_mm + 3);
-   const __m128i K4  = _mm_loadu_si128(key_mm + 4);
-   const __m128i K5  = _mm_loadu_si128(key_mm + 5);
-   const __m128i K6  = _mm_loadu_si128(key_mm + 6);
-   const __m128i K7  = _mm_loadu_si128(key_mm + 7);
-   const __m128i K8  = _mm_loadu_si128(key_mm + 8);
-   const __m128i K9  = _mm_loadu_si128(key_mm + 9);
-   const __m128i K10 = _mm_loadu_si128(key_mm + 10);
+      keyxor(K0, B0, B1, B2, B3);
+      aesdec(K1, B0, B1, B2, B3);
+      aesdec(K2, B0, B1, B2, B3);
+      aesdec(K3, B0, B1, B2, B3);
+      aesdec(K4, B0, B1, B2, B3);
+      aesdec(K5, B0, B1, B2, B3);
+      aesdec(K6, B0, B1, B2, B3);
+      aesdec(K7, B0, B1, B2, B3);
+      aesdec(K8, B0, B1, B2, B3);
+      aesdec(K9, B0, B1, B2, B3);
+      aesdeclast(K10, B0, B1, B2, B3);
 
-   while(blocks >= 4)
-      {
-      __m128i B0 = _mm_loadu_si128(in_mm + 0);
-      __m128i B1 = _mm_loadu_si128(in_mm + 1);
-      __m128i B2 = _mm_loadu_si128(in_mm + 2);
-      __m128i B3 = _mm_loadu_si128(in_mm + 3);
-
-      B0 = _mm_xor_si128(B0, K0);
-      B1 = _mm_xor_si128(B1, K0);
-      B2 = _mm_xor_si128(B2, K0);
-      B3 = _mm_xor_si128(B3, K0);
-
-      AES_DEC_4_ROUNDS(K1);
-      AES_DEC_4_ROUNDS(K2);
-      AES_DEC_4_ROUNDS(K3);
-      AES_DEC_4_ROUNDS(K4);
-      AES_DEC_4_ROUNDS(K5);
-      AES_DEC_4_ROUNDS(K6);
-      AES_DEC_4_ROUNDS(K7);
-      AES_DEC_4_ROUNDS(K8);
-      AES_DEC_4_ROUNDS(K9);
-      AES_DEC_4_LAST_ROUNDS(K10);
-
-      _mm_storeu_si128(out_mm + 0, B0);
-      _mm_storeu_si128(out_mm + 1, B1);
-      _mm_storeu_si128(out_mm + 2, B2);
-      _mm_storeu_si128(out_mm + 3, B3);
+      B0.store_le(out + 16 * 0);
+      B1.store_le(out + 16 * 1);
+      B2.store_le(out + 16 * 2);
+      B3.store_le(out + 16 * 3);
 
       blocks -= 4;
-      in_mm += 4;
-      out_mm += 4;
-      }
-
-   for(size_t i = 0; i != blocks; ++i)
-      {
-      __m128i B = _mm_loadu_si128(in_mm + i);
-
-      B = _mm_xor_si128(B, K0);
-
-      B = _mm_aesdec_si128(B, K1);
-      B = _mm_aesdec_si128(B, K2);
-      B = _mm_aesdec_si128(B, K3);
-      B = _mm_aesdec_si128(B, K4);
-      B = _mm_aesdec_si128(B, K5);
-      B = _mm_aesdec_si128(B, K6);
-      B = _mm_aesdec_si128(B, K7);
-      B = _mm_aesdec_si128(B, K8);
-      B = _mm_aesdec_si128(B, K9);
-      B = _mm_aesdeclast_si128(B, K10);
-
-      _mm_storeu_si128(out_mm + i, B);
-      }
+      in += 4 * 16;
+      out += 4 * 16;
    }
+
+   for(size_t i = 0; i != blocks; ++i) {
+      SIMD_4x32 B0 = SIMD_4x32::load_le(in + 16 * i);
+
+      B0 ^= K0;
+      aesdec(K1, B0);
+      aesdec(K2, B0);
+      aesdec(K3, B0);
+      aesdec(K4, B0);
+      aesdec(K5, B0);
+      aesdec(K6, B0);
+      aesdec(K7, B0);
+      aesdec(K8, B0);
+      aesdec(K9, B0);
+      aesdeclast(K10, B0);
+
+      B0.store_le(out + 16 * i);
+   }
+}
 
 /*
 * AES-128 Key Schedule
 */
-BOTAN_FUNC_ISA("ssse3,aes")
-void AES_128::aesni_key_schedule(const uint8_t key[], size_t)
-   {
+BOTAN_FUNC_ISA("ssse3,aes") void AES_128::aesni_key_schedule(const uint8_t key[], size_t /*length*/) {
    m_EK.resize(44);
    m_DK.resize(44);
 
-   #define AES_128_key_exp(K, RCON) \
-      aes_128_key_expansion(K, _mm_aeskeygenassist_si128(K, RCON))
-
-   const __m128i K0  = _mm_loadu_si128(reinterpret_cast<const __m128i*>(key));
-   const __m128i K1  = AES_128_key_exp(K0, 0x01);
-   const __m128i K2  = AES_128_key_exp(K1, 0x02);
-   const __m128i K3  = AES_128_key_exp(K2, 0x04);
-   const __m128i K4  = AES_128_key_exp(K3, 0x08);
-   const __m128i K5  = AES_128_key_exp(K4, 0x10);
-   const __m128i K6  = AES_128_key_exp(K5, 0x20);
-   const __m128i K7  = AES_128_key_exp(K6, 0x40);
-   const __m128i K8  = AES_128_key_exp(K7, 0x80);
-   const __m128i K9  = AES_128_key_exp(K8, 0x1B);
-   const __m128i K10 = AES_128_key_exp(K9, 0x36);
+   const __m128i K0 = _mm_loadu_si128(reinterpret_cast<const __m128i*>(key));
+   const __m128i K1 = aes_128_key_expansion<0x01>(K0, K0);
+   const __m128i K2 = aes_128_key_expansion<0x02>(K1, K1);
+   const __m128i K3 = aes_128_key_expansion<0x04>(K2, K2);
+   const __m128i K4 = aes_128_key_expansion<0x08>(K3, K3);
+   const __m128i K5 = aes_128_key_expansion<0x10>(K4, K4);
+   const __m128i K6 = aes_128_key_expansion<0x20>(K5, K5);
+   const __m128i K7 = aes_128_key_expansion<0x40>(K6, K6);
+   const __m128i K8 = aes_128_key_expansion<0x80>(K7, K7);
+   const __m128i K9 = aes_128_key_expansion<0x1B>(K8, K8);
+   const __m128i K10 = aes_128_key_expansion<0x36>(K9, K9);
 
    __m128i* EK_mm = reinterpret_cast<__m128i*>(m_EK.data());
-   _mm_storeu_si128(EK_mm     , K0);
-   _mm_storeu_si128(EK_mm +  1, K1);
-   _mm_storeu_si128(EK_mm +  2, K2);
-   _mm_storeu_si128(EK_mm +  3, K3);
-   _mm_storeu_si128(EK_mm +  4, K4);
-   _mm_storeu_si128(EK_mm +  5, K5);
-   _mm_storeu_si128(EK_mm +  6, K6);
-   _mm_storeu_si128(EK_mm +  7, K7);
-   _mm_storeu_si128(EK_mm +  8, K8);
-   _mm_storeu_si128(EK_mm +  9, K9);
+   _mm_storeu_si128(EK_mm, K0);
+   _mm_storeu_si128(EK_mm + 1, K1);
+   _mm_storeu_si128(EK_mm + 2, K2);
+   _mm_storeu_si128(EK_mm + 3, K3);
+   _mm_storeu_si128(EK_mm + 4, K4);
+   _mm_storeu_si128(EK_mm + 5, K5);
+   _mm_storeu_si128(EK_mm + 6, K6);
+   _mm_storeu_si128(EK_mm + 7, K7);
+   _mm_storeu_si128(EK_mm + 8, K8);
+   _mm_storeu_si128(EK_mm + 9, K9);
    _mm_storeu_si128(EK_mm + 10, K10);
 
    // Now generate decryption keys
 
    __m128i* DK_mm = reinterpret_cast<__m128i*>(m_DK.data());
-   _mm_storeu_si128(DK_mm     , K10);
-   _mm_storeu_si128(DK_mm +  1, _mm_aesimc_si128(K9));
-   _mm_storeu_si128(DK_mm +  2, _mm_aesimc_si128(K8));
-   _mm_storeu_si128(DK_mm +  3, _mm_aesimc_si128(K7));
-   _mm_storeu_si128(DK_mm +  4, _mm_aesimc_si128(K6));
-   _mm_storeu_si128(DK_mm +  5, _mm_aesimc_si128(K5));
-   _mm_storeu_si128(DK_mm +  6, _mm_aesimc_si128(K4));
-   _mm_storeu_si128(DK_mm +  7, _mm_aesimc_si128(K3));
-   _mm_storeu_si128(DK_mm +  8, _mm_aesimc_si128(K2));
-   _mm_storeu_si128(DK_mm +  9, _mm_aesimc_si128(K1));
+   _mm_storeu_si128(DK_mm, K10);
+   _mm_storeu_si128(DK_mm + 1, _mm_aesimc_si128(K9));
+   _mm_storeu_si128(DK_mm + 2, _mm_aesimc_si128(K8));
+   _mm_storeu_si128(DK_mm + 3, _mm_aesimc_si128(K7));
+   _mm_storeu_si128(DK_mm + 4, _mm_aesimc_si128(K6));
+   _mm_storeu_si128(DK_mm + 5, _mm_aesimc_si128(K5));
+   _mm_storeu_si128(DK_mm + 6, _mm_aesimc_si128(K4));
+   _mm_storeu_si128(DK_mm + 7, _mm_aesimc_si128(K3));
+   _mm_storeu_si128(DK_mm + 8, _mm_aesimc_si128(K2));
+   _mm_storeu_si128(DK_mm + 9, _mm_aesimc_si128(K1));
    _mm_storeu_si128(DK_mm + 10, K0);
-   }
+}
 
 /*
 * AES-192 Encryption
 */
-BOTAN_FUNC_ISA("ssse3,aes")
-void AES_192::hw_aes_encrypt_n(const uint8_t in[], uint8_t out[], size_t blocks) const
-   {
-   const __m128i* in_mm = reinterpret_cast<const __m128i*>(in);
-   __m128i* out_mm = reinterpret_cast<__m128i*>(out);
+BOTAN_FUNC_ISA("ssse3,aes") void AES_192::hw_aes_encrypt_n(const uint8_t in[], uint8_t out[], size_t blocks) const {
+   const SIMD_4x32 K0 = SIMD_4x32::load_le(&m_EK[4 * 0]);
+   const SIMD_4x32 K1 = SIMD_4x32::load_le(&m_EK[4 * 1]);
+   const SIMD_4x32 K2 = SIMD_4x32::load_le(&m_EK[4 * 2]);
+   const SIMD_4x32 K3 = SIMD_4x32::load_le(&m_EK[4 * 3]);
+   const SIMD_4x32 K4 = SIMD_4x32::load_le(&m_EK[4 * 4]);
+   const SIMD_4x32 K5 = SIMD_4x32::load_le(&m_EK[4 * 5]);
+   const SIMD_4x32 K6 = SIMD_4x32::load_le(&m_EK[4 * 6]);
+   const SIMD_4x32 K7 = SIMD_4x32::load_le(&m_EK[4 * 7]);
+   const SIMD_4x32 K8 = SIMD_4x32::load_le(&m_EK[4 * 8]);
+   const SIMD_4x32 K9 = SIMD_4x32::load_le(&m_EK[4 * 9]);
+   const SIMD_4x32 K10 = SIMD_4x32::load_le(&m_EK[4 * 10]);
+   const SIMD_4x32 K11 = SIMD_4x32::load_le(&m_EK[4 * 11]);
+   const SIMD_4x32 K12 = SIMD_4x32::load_le(&m_EK[4 * 12]);
 
-   const __m128i* key_mm = reinterpret_cast<const __m128i*>(m_EK.data());
+   while(blocks >= 4) {
+      SIMD_4x32 B0 = SIMD_4x32::load_le(in + 16 * 0);
+      SIMD_4x32 B1 = SIMD_4x32::load_le(in + 16 * 1);
+      SIMD_4x32 B2 = SIMD_4x32::load_le(in + 16 * 2);
+      SIMD_4x32 B3 = SIMD_4x32::load_le(in + 16 * 3);
 
-   const __m128i K0  = _mm_loadu_si128(key_mm);
-   const __m128i K1  = _mm_loadu_si128(key_mm + 1);
-   const __m128i K2  = _mm_loadu_si128(key_mm + 2);
-   const __m128i K3  = _mm_loadu_si128(key_mm + 3);
-   const __m128i K4  = _mm_loadu_si128(key_mm + 4);
-   const __m128i K5  = _mm_loadu_si128(key_mm + 5);
-   const __m128i K6  = _mm_loadu_si128(key_mm + 6);
-   const __m128i K7  = _mm_loadu_si128(key_mm + 7);
-   const __m128i K8  = _mm_loadu_si128(key_mm + 8);
-   const __m128i K9  = _mm_loadu_si128(key_mm + 9);
-   const __m128i K10 = _mm_loadu_si128(key_mm + 10);
-   const __m128i K11 = _mm_loadu_si128(key_mm + 11);
-   const __m128i K12 = _mm_loadu_si128(key_mm + 12);
+      keyxor(K0, B0, B1, B2, B3);
+      aesenc(K1, B0, B1, B2, B3);
+      aesenc(K2, B0, B1, B2, B3);
+      aesenc(K3, B0, B1, B2, B3);
+      aesenc(K4, B0, B1, B2, B3);
+      aesenc(K5, B0, B1, B2, B3);
+      aesenc(K6, B0, B1, B2, B3);
+      aesenc(K7, B0, B1, B2, B3);
+      aesenc(K8, B0, B1, B2, B3);
+      aesenc(K9, B0, B1, B2, B3);
+      aesenc(K10, B0, B1, B2, B3);
+      aesenc(K11, B0, B1, B2, B3);
+      aesenclast(K12, B0, B1, B2, B3);
 
-   while(blocks >= 4)
-      {
-      __m128i B0 = _mm_loadu_si128(in_mm + 0);
-      __m128i B1 = _mm_loadu_si128(in_mm + 1);
-      __m128i B2 = _mm_loadu_si128(in_mm + 2);
-      __m128i B3 = _mm_loadu_si128(in_mm + 3);
-
-      B0 = _mm_xor_si128(B0, K0);
-      B1 = _mm_xor_si128(B1, K0);
-      B2 = _mm_xor_si128(B2, K0);
-      B3 = _mm_xor_si128(B3, K0);
-
-      AES_ENC_4_ROUNDS(K1);
-      AES_ENC_4_ROUNDS(K2);
-      AES_ENC_4_ROUNDS(K3);
-      AES_ENC_4_ROUNDS(K4);
-      AES_ENC_4_ROUNDS(K5);
-      AES_ENC_4_ROUNDS(K6);
-      AES_ENC_4_ROUNDS(K7);
-      AES_ENC_4_ROUNDS(K8);
-      AES_ENC_4_ROUNDS(K9);
-      AES_ENC_4_ROUNDS(K10);
-      AES_ENC_4_ROUNDS(K11);
-      AES_ENC_4_LAST_ROUNDS(K12);
-
-      _mm_storeu_si128(out_mm + 0, B0);
-      _mm_storeu_si128(out_mm + 1, B1);
-      _mm_storeu_si128(out_mm + 2, B2);
-      _mm_storeu_si128(out_mm + 3, B3);
+      B0.store_le(out + 16 * 0);
+      B1.store_le(out + 16 * 1);
+      B2.store_le(out + 16 * 2);
+      B3.store_le(out + 16 * 3);
 
       blocks -= 4;
-      in_mm += 4;
-      out_mm += 4;
-      }
-
-   for(size_t i = 0; i != blocks; ++i)
-      {
-      __m128i B = _mm_loadu_si128(in_mm + i);
-
-      B = _mm_xor_si128(B, K0);
-
-      B = _mm_aesenc_si128(B, K1);
-      B = _mm_aesenc_si128(B, K2);
-      B = _mm_aesenc_si128(B, K3);
-      B = _mm_aesenc_si128(B, K4);
-      B = _mm_aesenc_si128(B, K5);
-      B = _mm_aesenc_si128(B, K6);
-      B = _mm_aesenc_si128(B, K7);
-      B = _mm_aesenc_si128(B, K8);
-      B = _mm_aesenc_si128(B, K9);
-      B = _mm_aesenc_si128(B, K10);
-      B = _mm_aesenc_si128(B, K11);
-      B = _mm_aesenclast_si128(B, K12);
-
-      _mm_storeu_si128(out_mm + i, B);
-      }
+      in += 4 * 16;
+      out += 4 * 16;
    }
+
+   for(size_t i = 0; i != blocks; ++i) {
+      SIMD_4x32 B0 = SIMD_4x32::load_le(in + 16 * i);
+
+      B0 ^= K0;
+
+      aesenc(K1, B0);
+      aesenc(K2, B0);
+      aesenc(K3, B0);
+      aesenc(K4, B0);
+      aesenc(K5, B0);
+      aesenc(K6, B0);
+      aesenc(K7, B0);
+      aesenc(K8, B0);
+      aesenc(K9, B0);
+      aesenc(K10, B0);
+      aesenc(K11, B0);
+      aesenclast(K12, B0);
+
+      B0.store_le(out + 16 * i);
+   }
+}
 
 /*
 * AES-192 Decryption
 */
-BOTAN_FUNC_ISA("ssse3,aes")
-void AES_192::hw_aes_decrypt_n(const uint8_t in[], uint8_t out[], size_t blocks) const
-   {
-   const __m128i* in_mm = reinterpret_cast<const __m128i*>(in);
-   __m128i* out_mm = reinterpret_cast<__m128i*>(out);
+BOTAN_FUNC_ISA("ssse3,aes") void AES_192::hw_aes_decrypt_n(const uint8_t in[], uint8_t out[], size_t blocks) const {
+   const SIMD_4x32 K0 = SIMD_4x32::load_le(&m_DK[4 * 0]);
+   const SIMD_4x32 K1 = SIMD_4x32::load_le(&m_DK[4 * 1]);
+   const SIMD_4x32 K2 = SIMD_4x32::load_le(&m_DK[4 * 2]);
+   const SIMD_4x32 K3 = SIMD_4x32::load_le(&m_DK[4 * 3]);
+   const SIMD_4x32 K4 = SIMD_4x32::load_le(&m_DK[4 * 4]);
+   const SIMD_4x32 K5 = SIMD_4x32::load_le(&m_DK[4 * 5]);
+   const SIMD_4x32 K6 = SIMD_4x32::load_le(&m_DK[4 * 6]);
+   const SIMD_4x32 K7 = SIMD_4x32::load_le(&m_DK[4 * 7]);
+   const SIMD_4x32 K8 = SIMD_4x32::load_le(&m_DK[4 * 8]);
+   const SIMD_4x32 K9 = SIMD_4x32::load_le(&m_DK[4 * 9]);
+   const SIMD_4x32 K10 = SIMD_4x32::load_le(&m_DK[4 * 10]);
+   const SIMD_4x32 K11 = SIMD_4x32::load_le(&m_DK[4 * 11]);
+   const SIMD_4x32 K12 = SIMD_4x32::load_le(&m_DK[4 * 12]);
 
-   const __m128i* key_mm = reinterpret_cast<const __m128i*>(m_DK.data());
+   while(blocks >= 4) {
+      SIMD_4x32 B0 = SIMD_4x32::load_le(in + 16 * 0);
+      SIMD_4x32 B1 = SIMD_4x32::load_le(in + 16 * 1);
+      SIMD_4x32 B2 = SIMD_4x32::load_le(in + 16 * 2);
+      SIMD_4x32 B3 = SIMD_4x32::load_le(in + 16 * 3);
 
-   const __m128i K0  = _mm_loadu_si128(key_mm);
-   const __m128i K1  = _mm_loadu_si128(key_mm + 1);
-   const __m128i K2  = _mm_loadu_si128(key_mm + 2);
-   const __m128i K3  = _mm_loadu_si128(key_mm + 3);
-   const __m128i K4  = _mm_loadu_si128(key_mm + 4);
-   const __m128i K5  = _mm_loadu_si128(key_mm + 5);
-   const __m128i K6  = _mm_loadu_si128(key_mm + 6);
-   const __m128i K7  = _mm_loadu_si128(key_mm + 7);
-   const __m128i K8  = _mm_loadu_si128(key_mm + 8);
-   const __m128i K9  = _mm_loadu_si128(key_mm + 9);
-   const __m128i K10 = _mm_loadu_si128(key_mm + 10);
-   const __m128i K11 = _mm_loadu_si128(key_mm + 11);
-   const __m128i K12 = _mm_loadu_si128(key_mm + 12);
+      keyxor(K0, B0, B1, B2, B3);
+      aesdec(K1, B0, B1, B2, B3);
+      aesdec(K2, B0, B1, B2, B3);
+      aesdec(K3, B0, B1, B2, B3);
+      aesdec(K4, B0, B1, B2, B3);
+      aesdec(K5, B0, B1, B2, B3);
+      aesdec(K6, B0, B1, B2, B3);
+      aesdec(K7, B0, B1, B2, B3);
+      aesdec(K8, B0, B1, B2, B3);
+      aesdec(K9, B0, B1, B2, B3);
+      aesdec(K10, B0, B1, B2, B3);
+      aesdec(K11, B0, B1, B2, B3);
+      aesdeclast(K12, B0, B1, B2, B3);
 
-   while(blocks >= 4)
-      {
-      __m128i B0 = _mm_loadu_si128(in_mm + 0);
-      __m128i B1 = _mm_loadu_si128(in_mm + 1);
-      __m128i B2 = _mm_loadu_si128(in_mm + 2);
-      __m128i B3 = _mm_loadu_si128(in_mm + 3);
-
-      B0 = _mm_xor_si128(B0, K0);
-      B1 = _mm_xor_si128(B1, K0);
-      B2 = _mm_xor_si128(B2, K0);
-      B3 = _mm_xor_si128(B3, K0);
-
-      AES_DEC_4_ROUNDS(K1);
-      AES_DEC_4_ROUNDS(K2);
-      AES_DEC_4_ROUNDS(K3);
-      AES_DEC_4_ROUNDS(K4);
-      AES_DEC_4_ROUNDS(K5);
-      AES_DEC_4_ROUNDS(K6);
-      AES_DEC_4_ROUNDS(K7);
-      AES_DEC_4_ROUNDS(K8);
-      AES_DEC_4_ROUNDS(K9);
-      AES_DEC_4_ROUNDS(K10);
-      AES_DEC_4_ROUNDS(K11);
-      AES_DEC_4_LAST_ROUNDS(K12);
-
-      _mm_storeu_si128(out_mm + 0, B0);
-      _mm_storeu_si128(out_mm + 1, B1);
-      _mm_storeu_si128(out_mm + 2, B2);
-      _mm_storeu_si128(out_mm + 3, B3);
+      B0.store_le(out + 16 * 0);
+      B1.store_le(out + 16 * 1);
+      B2.store_le(out + 16 * 2);
+      B3.store_le(out + 16 * 3);
 
       blocks -= 4;
-      in_mm += 4;
-      out_mm += 4;
-      }
-
-   for(size_t i = 0; i != blocks; ++i)
-      {
-      __m128i B = _mm_loadu_si128(in_mm + i);
-
-      B = _mm_xor_si128(B, K0);
-
-      B = _mm_aesdec_si128(B, K1);
-      B = _mm_aesdec_si128(B, K2);
-      B = _mm_aesdec_si128(B, K3);
-      B = _mm_aesdec_si128(B, K4);
-      B = _mm_aesdec_si128(B, K5);
-      B = _mm_aesdec_si128(B, K6);
-      B = _mm_aesdec_si128(B, K7);
-      B = _mm_aesdec_si128(B, K8);
-      B = _mm_aesdec_si128(B, K9);
-      B = _mm_aesdec_si128(B, K10);
-      B = _mm_aesdec_si128(B, K11);
-      B = _mm_aesdeclast_si128(B, K12);
-
-      _mm_storeu_si128(out_mm + i, B);
-      }
+      in += 4 * 16;
+      out += 4 * 16;
    }
+
+   for(size_t i = 0; i != blocks; ++i) {
+      SIMD_4x32 B0 = SIMD_4x32::load_le(in + 16 * i);
+
+      B0 ^= K0;
+
+      aesdec(K1, B0);
+      aesdec(K2, B0);
+      aesdec(K3, B0);
+      aesdec(K4, B0);
+      aesdec(K5, B0);
+      aesdec(K6, B0);
+      aesdec(K7, B0);
+      aesdec(K8, B0);
+      aesdec(K9, B0);
+      aesdec(K10, B0);
+      aesdec(K11, B0);
+      aesdeclast(K12, B0);
+
+      B0.store_le(out + 16 * i);
+   }
+}
 
 /*
 * AES-192 Key Schedule
 */
-BOTAN_FUNC_ISA("ssse3,aes")
-void AES_192::aesni_key_schedule(const uint8_t key[], size_t)
-   {
+BOTAN_FUNC_ISA("ssse3,aes") void AES_192::aesni_key_schedule(const uint8_t key[], size_t /*length*/) {
    m_EK.resize(52);
    m_DK.resize(52);
 
@@ -491,262 +446,227 @@ void AES_192::aesni_key_schedule(const uint8_t key[], size_t)
 
    load_le(m_EK.data(), key, 6);
 
-   #define AES_192_key_exp(RCON, EK_OFF)                         \
-     aes_192_key_expansion(&K0, &K1,                             \
-                           _mm_aeskeygenassist_si128(K1, RCON),  \
-                           &m_EK[EK_OFF], EK_OFF == 48)
-
-   AES_192_key_exp(0x01, 6);
-   AES_192_key_exp(0x02, 12);
-   AES_192_key_exp(0x04, 18);
-   AES_192_key_exp(0x08, 24);
-   AES_192_key_exp(0x10, 30);
-   AES_192_key_exp(0x20, 36);
-   AES_192_key_exp(0x40, 42);
-   AES_192_key_exp(0x80, 48);
-
-   #undef AES_192_key_exp
+   aes_192_key_expansion(&K0, &K1, _mm_aeskeygenassist_si128(K1, 0x01), m_EK, 6);
+   aes_192_key_expansion(&K0, &K1, _mm_aeskeygenassist_si128(K1, 0x02), m_EK, 12);
+   aes_192_key_expansion(&K0, &K1, _mm_aeskeygenassist_si128(K1, 0x04), m_EK, 18);
+   aes_192_key_expansion(&K0, &K1, _mm_aeskeygenassist_si128(K1, 0x08), m_EK, 24);
+   aes_192_key_expansion(&K0, &K1, _mm_aeskeygenassist_si128(K1, 0x10), m_EK, 30);
+   aes_192_key_expansion(&K0, &K1, _mm_aeskeygenassist_si128(K1, 0x20), m_EK, 36);
+   aes_192_key_expansion(&K0, &K1, _mm_aeskeygenassist_si128(K1, 0x40), m_EK, 42);
+   aes_192_key_expansion(&K0, &K1, _mm_aeskeygenassist_si128(K1, 0x80), m_EK, 48);
 
    // Now generate decryption keys
    const __m128i* EK_mm = reinterpret_cast<const __m128i*>(m_EK.data());
 
    __m128i* DK_mm = reinterpret_cast<__m128i*>(m_DK.data());
-   _mm_storeu_si128(DK_mm     , _mm_loadu_si128(EK_mm + 12));
-   _mm_storeu_si128(DK_mm +  1, _mm_aesimc_si128(_mm_loadu_si128(EK_mm + 11)));
-   _mm_storeu_si128(DK_mm +  2, _mm_aesimc_si128(_mm_loadu_si128(EK_mm + 10)));
-   _mm_storeu_si128(DK_mm +  3, _mm_aesimc_si128(_mm_loadu_si128(EK_mm + 9)));
-   _mm_storeu_si128(DK_mm +  4, _mm_aesimc_si128(_mm_loadu_si128(EK_mm + 8)));
-   _mm_storeu_si128(DK_mm +  5, _mm_aesimc_si128(_mm_loadu_si128(EK_mm + 7)));
-   _mm_storeu_si128(DK_mm +  6, _mm_aesimc_si128(_mm_loadu_si128(EK_mm + 6)));
-   _mm_storeu_si128(DK_mm +  7, _mm_aesimc_si128(_mm_loadu_si128(EK_mm + 5)));
-   _mm_storeu_si128(DK_mm +  8, _mm_aesimc_si128(_mm_loadu_si128(EK_mm + 4)));
-   _mm_storeu_si128(DK_mm +  9, _mm_aesimc_si128(_mm_loadu_si128(EK_mm + 3)));
+   _mm_storeu_si128(DK_mm, _mm_loadu_si128(EK_mm + 12));
+   _mm_storeu_si128(DK_mm + 1, _mm_aesimc_si128(_mm_loadu_si128(EK_mm + 11)));
+   _mm_storeu_si128(DK_mm + 2, _mm_aesimc_si128(_mm_loadu_si128(EK_mm + 10)));
+   _mm_storeu_si128(DK_mm + 3, _mm_aesimc_si128(_mm_loadu_si128(EK_mm + 9)));
+   _mm_storeu_si128(DK_mm + 4, _mm_aesimc_si128(_mm_loadu_si128(EK_mm + 8)));
+   _mm_storeu_si128(DK_mm + 5, _mm_aesimc_si128(_mm_loadu_si128(EK_mm + 7)));
+   _mm_storeu_si128(DK_mm + 6, _mm_aesimc_si128(_mm_loadu_si128(EK_mm + 6)));
+   _mm_storeu_si128(DK_mm + 7, _mm_aesimc_si128(_mm_loadu_si128(EK_mm + 5)));
+   _mm_storeu_si128(DK_mm + 8, _mm_aesimc_si128(_mm_loadu_si128(EK_mm + 4)));
+   _mm_storeu_si128(DK_mm + 9, _mm_aesimc_si128(_mm_loadu_si128(EK_mm + 3)));
    _mm_storeu_si128(DK_mm + 10, _mm_aesimc_si128(_mm_loadu_si128(EK_mm + 2)));
    _mm_storeu_si128(DK_mm + 11, _mm_aesimc_si128(_mm_loadu_si128(EK_mm + 1)));
    _mm_storeu_si128(DK_mm + 12, _mm_loadu_si128(EK_mm + 0));
-   }
+}
 
 /*
 * AES-256 Encryption
 */
-BOTAN_FUNC_ISA("ssse3,aes")
-void AES_256::hw_aes_encrypt_n(const uint8_t in[], uint8_t out[], size_t blocks) const
-   {
-   const __m128i* in_mm = reinterpret_cast<const __m128i*>(in);
-   __m128i* out_mm = reinterpret_cast<__m128i*>(out);
+BOTAN_FUNC_ISA("ssse3,aes") void AES_256::hw_aes_encrypt_n(const uint8_t in[], uint8_t out[], size_t blocks) const {
+   const SIMD_4x32 K0 = SIMD_4x32::load_le(&m_EK[4 * 0]);
+   const SIMD_4x32 K1 = SIMD_4x32::load_le(&m_EK[4 * 1]);
+   const SIMD_4x32 K2 = SIMD_4x32::load_le(&m_EK[4 * 2]);
+   const SIMD_4x32 K3 = SIMD_4x32::load_le(&m_EK[4 * 3]);
+   const SIMD_4x32 K4 = SIMD_4x32::load_le(&m_EK[4 * 4]);
+   const SIMD_4x32 K5 = SIMD_4x32::load_le(&m_EK[4 * 5]);
+   const SIMD_4x32 K6 = SIMD_4x32::load_le(&m_EK[4 * 6]);
+   const SIMD_4x32 K7 = SIMD_4x32::load_le(&m_EK[4 * 7]);
+   const SIMD_4x32 K8 = SIMD_4x32::load_le(&m_EK[4 * 8]);
+   const SIMD_4x32 K9 = SIMD_4x32::load_le(&m_EK[4 * 9]);
+   const SIMD_4x32 K10 = SIMD_4x32::load_le(&m_EK[4 * 10]);
+   const SIMD_4x32 K11 = SIMD_4x32::load_le(&m_EK[4 * 11]);
+   const SIMD_4x32 K12 = SIMD_4x32::load_le(&m_EK[4 * 12]);
+   const SIMD_4x32 K13 = SIMD_4x32::load_le(&m_EK[4 * 13]);
+   const SIMD_4x32 K14 = SIMD_4x32::load_le(&m_EK[4 * 14]);
 
-   const __m128i* key_mm = reinterpret_cast<const __m128i*>(m_EK.data());
+   while(blocks >= 4) {
+      SIMD_4x32 B0 = SIMD_4x32::load_le(in + 16 * 0);
+      SIMD_4x32 B1 = SIMD_4x32::load_le(in + 16 * 1);
+      SIMD_4x32 B2 = SIMD_4x32::load_le(in + 16 * 2);
+      SIMD_4x32 B3 = SIMD_4x32::load_le(in + 16 * 3);
 
-   const __m128i K0  = _mm_loadu_si128(key_mm);
-   const __m128i K1  = _mm_loadu_si128(key_mm + 1);
-   const __m128i K2  = _mm_loadu_si128(key_mm + 2);
-   const __m128i K3  = _mm_loadu_si128(key_mm + 3);
-   const __m128i K4  = _mm_loadu_si128(key_mm + 4);
-   const __m128i K5  = _mm_loadu_si128(key_mm + 5);
-   const __m128i K6  = _mm_loadu_si128(key_mm + 6);
-   const __m128i K7  = _mm_loadu_si128(key_mm + 7);
-   const __m128i K8  = _mm_loadu_si128(key_mm + 8);
-   const __m128i K9  = _mm_loadu_si128(key_mm + 9);
-   const __m128i K10 = _mm_loadu_si128(key_mm + 10);
-   const __m128i K11 = _mm_loadu_si128(key_mm + 11);
-   const __m128i K12 = _mm_loadu_si128(key_mm + 12);
-   const __m128i K13 = _mm_loadu_si128(key_mm + 13);
-   const __m128i K14 = _mm_loadu_si128(key_mm + 14);
+      keyxor(K0, B0, B1, B2, B3);
+      aesenc(K1, B0, B1, B2, B3);
+      aesenc(K2, B0, B1, B2, B3);
+      aesenc(K3, B0, B1, B2, B3);
+      aesenc(K4, B0, B1, B2, B3);
+      aesenc(K5, B0, B1, B2, B3);
+      aesenc(K6, B0, B1, B2, B3);
+      aesenc(K7, B0, B1, B2, B3);
+      aesenc(K8, B0, B1, B2, B3);
+      aesenc(K9, B0, B1, B2, B3);
+      aesenc(K10, B0, B1, B2, B3);
+      aesenc(K11, B0, B1, B2, B3);
+      aesenc(K12, B0, B1, B2, B3);
+      aesenc(K13, B0, B1, B2, B3);
+      aesenclast(K14, B0, B1, B2, B3);
 
-   while(blocks >= 4)
-      {
-      __m128i B0 = _mm_loadu_si128(in_mm + 0);
-      __m128i B1 = _mm_loadu_si128(in_mm + 1);
-      __m128i B2 = _mm_loadu_si128(in_mm + 2);
-      __m128i B3 = _mm_loadu_si128(in_mm + 3);
-
-      B0 = _mm_xor_si128(B0, K0);
-      B1 = _mm_xor_si128(B1, K0);
-      B2 = _mm_xor_si128(B2, K0);
-      B3 = _mm_xor_si128(B3, K0);
-
-      AES_ENC_4_ROUNDS(K1);
-      AES_ENC_4_ROUNDS(K2);
-      AES_ENC_4_ROUNDS(K3);
-      AES_ENC_4_ROUNDS(K4);
-      AES_ENC_4_ROUNDS(K5);
-      AES_ENC_4_ROUNDS(K6);
-      AES_ENC_4_ROUNDS(K7);
-      AES_ENC_4_ROUNDS(K8);
-      AES_ENC_4_ROUNDS(K9);
-      AES_ENC_4_ROUNDS(K10);
-      AES_ENC_4_ROUNDS(K11);
-      AES_ENC_4_ROUNDS(K12);
-      AES_ENC_4_ROUNDS(K13);
-      AES_ENC_4_LAST_ROUNDS(K14);
-
-      _mm_storeu_si128(out_mm + 0, B0);
-      _mm_storeu_si128(out_mm + 1, B1);
-      _mm_storeu_si128(out_mm + 2, B2);
-      _mm_storeu_si128(out_mm + 3, B3);
+      B0.store_le(out + 16 * 0);
+      B1.store_le(out + 16 * 1);
+      B2.store_le(out + 16 * 2);
+      B3.store_le(out + 16 * 3);
 
       blocks -= 4;
-      in_mm += 4;
-      out_mm += 4;
-      }
-
-   for(size_t i = 0; i != blocks; ++i)
-      {
-      __m128i B = _mm_loadu_si128(in_mm + i);
-
-      B = _mm_xor_si128(B, K0);
-
-      B = _mm_aesenc_si128(B, K1);
-      B = _mm_aesenc_si128(B, K2);
-      B = _mm_aesenc_si128(B, K3);
-      B = _mm_aesenc_si128(B, K4);
-      B = _mm_aesenc_si128(B, K5);
-      B = _mm_aesenc_si128(B, K6);
-      B = _mm_aesenc_si128(B, K7);
-      B = _mm_aesenc_si128(B, K8);
-      B = _mm_aesenc_si128(B, K9);
-      B = _mm_aesenc_si128(B, K10);
-      B = _mm_aesenc_si128(B, K11);
-      B = _mm_aesenc_si128(B, K12);
-      B = _mm_aesenc_si128(B, K13);
-      B = _mm_aesenclast_si128(B, K14);
-
-      _mm_storeu_si128(out_mm + i, B);
-      }
+      in += 4 * 16;
+      out += 4 * 16;
    }
+
+   for(size_t i = 0; i != blocks; ++i) {
+      SIMD_4x32 B0 = SIMD_4x32::load_le(in + 16 * i);
+
+      B0 ^= K0;
+
+      aesenc(K1, B0);
+      aesenc(K2, B0);
+      aesenc(K3, B0);
+      aesenc(K4, B0);
+      aesenc(K5, B0);
+      aesenc(K6, B0);
+      aesenc(K7, B0);
+      aesenc(K8, B0);
+      aesenc(K9, B0);
+      aesenc(K10, B0);
+      aesenc(K11, B0);
+      aesenc(K12, B0);
+      aesenc(K13, B0);
+      aesenclast(K14, B0);
+
+      B0.store_le(out + 16 * i);
+   }
+}
 
 /*
 * AES-256 Decryption
 */
-BOTAN_FUNC_ISA("ssse3,aes")
-void AES_256::hw_aes_decrypt_n(const uint8_t in[], uint8_t out[], size_t blocks) const
-   {
-   const __m128i* in_mm = reinterpret_cast<const __m128i*>(in);
-   __m128i* out_mm = reinterpret_cast<__m128i*>(out);
+BOTAN_FUNC_ISA("ssse3,aes") void AES_256::hw_aes_decrypt_n(const uint8_t in[], uint8_t out[], size_t blocks) const {
+   const SIMD_4x32 K0 = SIMD_4x32::load_le(&m_DK[4 * 0]);
+   const SIMD_4x32 K1 = SIMD_4x32::load_le(&m_DK[4 * 1]);
+   const SIMD_4x32 K2 = SIMD_4x32::load_le(&m_DK[4 * 2]);
+   const SIMD_4x32 K3 = SIMD_4x32::load_le(&m_DK[4 * 3]);
+   const SIMD_4x32 K4 = SIMD_4x32::load_le(&m_DK[4 * 4]);
+   const SIMD_4x32 K5 = SIMD_4x32::load_le(&m_DK[4 * 5]);
+   const SIMD_4x32 K6 = SIMD_4x32::load_le(&m_DK[4 * 6]);
+   const SIMD_4x32 K7 = SIMD_4x32::load_le(&m_DK[4 * 7]);
+   const SIMD_4x32 K8 = SIMD_4x32::load_le(&m_DK[4 * 8]);
+   const SIMD_4x32 K9 = SIMD_4x32::load_le(&m_DK[4 * 9]);
+   const SIMD_4x32 K10 = SIMD_4x32::load_le(&m_DK[4 * 10]);
+   const SIMD_4x32 K11 = SIMD_4x32::load_le(&m_DK[4 * 11]);
+   const SIMD_4x32 K12 = SIMD_4x32::load_le(&m_DK[4 * 12]);
+   const SIMD_4x32 K13 = SIMD_4x32::load_le(&m_DK[4 * 13]);
+   const SIMD_4x32 K14 = SIMD_4x32::load_le(&m_DK[4 * 14]);
 
-   const __m128i* key_mm = reinterpret_cast<const __m128i*>(m_DK.data());
+   while(blocks >= 4) {
+      SIMD_4x32 B0 = SIMD_4x32::load_le(in + 16 * 0);
+      SIMD_4x32 B1 = SIMD_4x32::load_le(in + 16 * 1);
+      SIMD_4x32 B2 = SIMD_4x32::load_le(in + 16 * 2);
+      SIMD_4x32 B3 = SIMD_4x32::load_le(in + 16 * 3);
 
-   const __m128i K0  = _mm_loadu_si128(key_mm);
-   const __m128i K1  = _mm_loadu_si128(key_mm + 1);
-   const __m128i K2  = _mm_loadu_si128(key_mm + 2);
-   const __m128i K3  = _mm_loadu_si128(key_mm + 3);
-   const __m128i K4  = _mm_loadu_si128(key_mm + 4);
-   const __m128i K5  = _mm_loadu_si128(key_mm + 5);
-   const __m128i K6  = _mm_loadu_si128(key_mm + 6);
-   const __m128i K7  = _mm_loadu_si128(key_mm + 7);
-   const __m128i K8  = _mm_loadu_si128(key_mm + 8);
-   const __m128i K9  = _mm_loadu_si128(key_mm + 9);
-   const __m128i K10 = _mm_loadu_si128(key_mm + 10);
-   const __m128i K11 = _mm_loadu_si128(key_mm + 11);
-   const __m128i K12 = _mm_loadu_si128(key_mm + 12);
-   const __m128i K13 = _mm_loadu_si128(key_mm + 13);
-   const __m128i K14 = _mm_loadu_si128(key_mm + 14);
+      keyxor(K0, B0, B1, B2, B3);
+      aesdec(K1, B0, B1, B2, B3);
+      aesdec(K2, B0, B1, B2, B3);
+      aesdec(K3, B0, B1, B2, B3);
+      aesdec(K4, B0, B1, B2, B3);
+      aesdec(K5, B0, B1, B2, B3);
+      aesdec(K6, B0, B1, B2, B3);
+      aesdec(K7, B0, B1, B2, B3);
+      aesdec(K8, B0, B1, B2, B3);
+      aesdec(K9, B0, B1, B2, B3);
+      aesdec(K10, B0, B1, B2, B3);
+      aesdec(K11, B0, B1, B2, B3);
+      aesdec(K12, B0, B1, B2, B3);
+      aesdec(K13, B0, B1, B2, B3);
+      aesdeclast(K14, B0, B1, B2, B3);
 
-   while(blocks >= 4)
-      {
-      __m128i B0 = _mm_loadu_si128(in_mm + 0);
-      __m128i B1 = _mm_loadu_si128(in_mm + 1);
-      __m128i B2 = _mm_loadu_si128(in_mm + 2);
-      __m128i B3 = _mm_loadu_si128(in_mm + 3);
-
-      B0 = _mm_xor_si128(B0, K0);
-      B1 = _mm_xor_si128(B1, K0);
-      B2 = _mm_xor_si128(B2, K0);
-      B3 = _mm_xor_si128(B3, K0);
-
-      AES_DEC_4_ROUNDS(K1);
-      AES_DEC_4_ROUNDS(K2);
-      AES_DEC_4_ROUNDS(K3);
-      AES_DEC_4_ROUNDS(K4);
-      AES_DEC_4_ROUNDS(K5);
-      AES_DEC_4_ROUNDS(K6);
-      AES_DEC_4_ROUNDS(K7);
-      AES_DEC_4_ROUNDS(K8);
-      AES_DEC_4_ROUNDS(K9);
-      AES_DEC_4_ROUNDS(K10);
-      AES_DEC_4_ROUNDS(K11);
-      AES_DEC_4_ROUNDS(K12);
-      AES_DEC_4_ROUNDS(K13);
-      AES_DEC_4_LAST_ROUNDS(K14);
-
-      _mm_storeu_si128(out_mm + 0, B0);
-      _mm_storeu_si128(out_mm + 1, B1);
-      _mm_storeu_si128(out_mm + 2, B2);
-      _mm_storeu_si128(out_mm + 3, B3);
+      B0.store_le(out + 16 * 0);
+      B1.store_le(out + 16 * 1);
+      B2.store_le(out + 16 * 2);
+      B3.store_le(out + 16 * 3);
 
       blocks -= 4;
-      in_mm += 4;
-      out_mm += 4;
-      }
-
-   for(size_t i = 0; i != blocks; ++i)
-      {
-      __m128i B = _mm_loadu_si128(in_mm + i);
-
-      B = _mm_xor_si128(B, K0);
-
-      B = _mm_aesdec_si128(B, K1);
-      B = _mm_aesdec_si128(B, K2);
-      B = _mm_aesdec_si128(B, K3);
-      B = _mm_aesdec_si128(B, K4);
-      B = _mm_aesdec_si128(B, K5);
-      B = _mm_aesdec_si128(B, K6);
-      B = _mm_aesdec_si128(B, K7);
-      B = _mm_aesdec_si128(B, K8);
-      B = _mm_aesdec_si128(B, K9);
-      B = _mm_aesdec_si128(B, K10);
-      B = _mm_aesdec_si128(B, K11);
-      B = _mm_aesdec_si128(B, K12);
-      B = _mm_aesdec_si128(B, K13);
-      B = _mm_aesdeclast_si128(B, K14);
-
-      _mm_storeu_si128(out_mm + i, B);
-      }
+      in += 4 * 16;
+      out += 4 * 16;
    }
+
+   for(size_t i = 0; i != blocks; ++i) {
+      SIMD_4x32 B0 = SIMD_4x32::load_le(in + 16 * i);
+
+      B0 ^= K0;
+
+      aesdec(K1, B0);
+      aesdec(K2, B0);
+      aesdec(K3, B0);
+      aesdec(K4, B0);
+      aesdec(K5, B0);
+      aesdec(K6, B0);
+      aesdec(K7, B0);
+      aesdec(K8, B0);
+      aesdec(K9, B0);
+      aesdec(K10, B0);
+      aesdec(K11, B0);
+      aesdec(K12, B0);
+      aesdec(K13, B0);
+      aesdeclast(K14, B0);
+
+      B0.store_le(out + 16 * i);
+   }
+}
 
 /*
 * AES-256 Key Schedule
 */
-BOTAN_FUNC_ISA("ssse3,aes")
-void AES_256::aesni_key_schedule(const uint8_t key[], size_t)
-   {
+BOTAN_FUNC_ISA("ssse3,aes") void AES_256::aesni_key_schedule(const uint8_t key[], size_t /*length*/) {
    m_EK.resize(60);
    m_DK.resize(60);
 
    const __m128i K0 = _mm_loadu_si128(reinterpret_cast<const __m128i*>(key));
    const __m128i K1 = _mm_loadu_si128(reinterpret_cast<const __m128i*>(key + 16));
 
-   const __m128i K2 = aes_128_key_expansion(K0, _mm_aeskeygenassist_si128(K1, 0x01));
+   const __m128i K2 = aes_128_key_expansion<0x01>(K0, K1);
    const __m128i K3 = aes_256_key_expansion(K1, K2);
 
-   const __m128i K4 = aes_128_key_expansion(K2, _mm_aeskeygenassist_si128(K3, 0x02));
+   const __m128i K4 = aes_128_key_expansion<0x02>(K2, K3);
    const __m128i K5 = aes_256_key_expansion(K3, K4);
 
-   const __m128i K6 = aes_128_key_expansion(K4, _mm_aeskeygenassist_si128(K5, 0x04));
+   const __m128i K6 = aes_128_key_expansion<0x04>(K4, K5);
    const __m128i K7 = aes_256_key_expansion(K5, K6);
 
-   const __m128i K8 = aes_128_key_expansion(K6, _mm_aeskeygenassist_si128(K7, 0x08));
+   const __m128i K8 = aes_128_key_expansion<0x08>(K6, K7);
    const __m128i K9 = aes_256_key_expansion(K7, K8);
 
-   const __m128i K10 = aes_128_key_expansion(K8, _mm_aeskeygenassist_si128(K9, 0x10));
+   const __m128i K10 = aes_128_key_expansion<0x10>(K8, K9);
    const __m128i K11 = aes_256_key_expansion(K9, K10);
 
-   const __m128i K12 = aes_128_key_expansion(K10, _mm_aeskeygenassist_si128(K11, 0x20));
+   const __m128i K12 = aes_128_key_expansion<0x20>(K10, K11);
    const __m128i K13 = aes_256_key_expansion(K11, K12);
 
-   const __m128i K14 = aes_128_key_expansion(K12, _mm_aeskeygenassist_si128(K13, 0x40));
+   const __m128i K14 = aes_128_key_expansion<0x40>(K12, K13);
 
    __m128i* EK_mm = reinterpret_cast<__m128i*>(m_EK.data());
-   _mm_storeu_si128(EK_mm     , K0);
-   _mm_storeu_si128(EK_mm +  1, K1);
-   _mm_storeu_si128(EK_mm +  2, K2);
-   _mm_storeu_si128(EK_mm +  3, K3);
-   _mm_storeu_si128(EK_mm +  4, K4);
-   _mm_storeu_si128(EK_mm +  5, K5);
-   _mm_storeu_si128(EK_mm +  6, K6);
-   _mm_storeu_si128(EK_mm +  7, K7);
-   _mm_storeu_si128(EK_mm +  8, K8);
-   _mm_storeu_si128(EK_mm +  9, K9);
+   _mm_storeu_si128(EK_mm, K0);
+   _mm_storeu_si128(EK_mm + 1, K1);
+   _mm_storeu_si128(EK_mm + 2, K2);
+   _mm_storeu_si128(EK_mm + 3, K3);
+   _mm_storeu_si128(EK_mm + 4, K4);
+   _mm_storeu_si128(EK_mm + 5, K5);
+   _mm_storeu_si128(EK_mm + 6, K6);
+   _mm_storeu_si128(EK_mm + 7, K7);
+   _mm_storeu_si128(EK_mm + 8, K8);
+   _mm_storeu_si128(EK_mm + 9, K9);
    _mm_storeu_si128(EK_mm + 10, K10);
    _mm_storeu_si128(EK_mm + 11, K11);
    _mm_storeu_si128(EK_mm + 12, K12);
@@ -755,26 +675,21 @@ void AES_256::aesni_key_schedule(const uint8_t key[], size_t)
 
    // Now generate decryption keys
    __m128i* DK_mm = reinterpret_cast<__m128i*>(m_DK.data());
-   _mm_storeu_si128(DK_mm     , K14);
-   _mm_storeu_si128(DK_mm +  1, _mm_aesimc_si128(K13));
-   _mm_storeu_si128(DK_mm +  2, _mm_aesimc_si128(K12));
-   _mm_storeu_si128(DK_mm +  3, _mm_aesimc_si128(K11));
-   _mm_storeu_si128(DK_mm +  4, _mm_aesimc_si128(K10));
-   _mm_storeu_si128(DK_mm +  5, _mm_aesimc_si128(K9));
-   _mm_storeu_si128(DK_mm +  6, _mm_aesimc_si128(K8));
-   _mm_storeu_si128(DK_mm +  7, _mm_aesimc_si128(K7));
-   _mm_storeu_si128(DK_mm +  8, _mm_aesimc_si128(K6));
-   _mm_storeu_si128(DK_mm +  9, _mm_aesimc_si128(K5));
+   _mm_storeu_si128(DK_mm, K14);
+   _mm_storeu_si128(DK_mm + 1, _mm_aesimc_si128(K13));
+   _mm_storeu_si128(DK_mm + 2, _mm_aesimc_si128(K12));
+   _mm_storeu_si128(DK_mm + 3, _mm_aesimc_si128(K11));
+   _mm_storeu_si128(DK_mm + 4, _mm_aesimc_si128(K10));
+   _mm_storeu_si128(DK_mm + 5, _mm_aesimc_si128(K9));
+   _mm_storeu_si128(DK_mm + 6, _mm_aesimc_si128(K8));
+   _mm_storeu_si128(DK_mm + 7, _mm_aesimc_si128(K7));
+   _mm_storeu_si128(DK_mm + 8, _mm_aesimc_si128(K6));
+   _mm_storeu_si128(DK_mm + 9, _mm_aesimc_si128(K5));
    _mm_storeu_si128(DK_mm + 10, _mm_aesimc_si128(K4));
    _mm_storeu_si128(DK_mm + 11, _mm_aesimc_si128(K3));
    _mm_storeu_si128(DK_mm + 12, _mm_aesimc_si128(K2));
    _mm_storeu_si128(DK_mm + 13, _mm_aesimc_si128(K1));
    _mm_storeu_si128(DK_mm + 14, K0);
-   }
-
-#undef AES_ENC_4_ROUNDS
-#undef AES_ENC_4_LAST_ROUNDS
-#undef AES_DEC_4_ROUNDS
-#undef AES_DEC_4_LAST_ROUNDS
-
 }
+
+}  // namespace Botan

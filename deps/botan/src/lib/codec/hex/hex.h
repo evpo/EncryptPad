@@ -9,7 +9,9 @@
 #define BOTAN_HEX_CODEC_H_
 
 #include <botan/secmem.h>
+#include <span>
 #include <string>
+#include <string_view>
 
 namespace Botan {
 
@@ -20,10 +22,8 @@ namespace Botan {
 * @param input_length length of input in bytes
 * @param uppercase should output be upper or lower case?
 */
-void BOTAN_PUBLIC_API(2,0) hex_encode(char output[],
-                          const uint8_t input[],
-                          size_t input_length,
-                          bool uppercase = true);
+void BOTAN_PUBLIC_API(2, 0)
+   hex_encode(char output[], const uint8_t input[], size_t input_length, bool uppercase = true);
 
 /**
 * Perform hex encoding
@@ -32,9 +32,7 @@ void BOTAN_PUBLIC_API(2,0) hex_encode(char output[],
 * @param uppercase should output be upper or lower case?
 * @return hexadecimal representation of input
 */
-std::string BOTAN_PUBLIC_API(2,0) hex_encode(const uint8_t input[],
-                                 size_t input_length,
-                                 bool uppercase = true);
+std::string BOTAN_PUBLIC_API(2, 0) hex_encode(const uint8_t input[], size_t input_length, bool uppercase = true);
 
 /**
 * Perform hex encoding
@@ -42,12 +40,9 @@ std::string BOTAN_PUBLIC_API(2,0) hex_encode(const uint8_t input[],
 * @param uppercase should output be upper or lower case?
 * @return hexadecimal representation of input
 */
-template<typename Alloc>
-std::string hex_encode(const std::vector<uint8_t, Alloc>& input,
-                       bool uppercase = true)
-   {
+inline std::string hex_encode(std::span<const uint8_t> input, bool uppercase = true) {
    return hex_encode(input.data(), input.size(), uppercase);
-   }
+}
 
 /**
 * Perform hex decoding
@@ -62,11 +57,8 @@ std::string hex_encode(const std::vector<uint8_t, Alloc>& input,
                    exception if whitespace is encountered
 * @return number of bytes written to output
 */
-size_t BOTAN_PUBLIC_API(2,0) hex_decode(uint8_t output[],
-                            const char input[],
-                            size_t input_length,
-                            size_t& input_consumed,
-                            bool ignore_ws = true);
+size_t BOTAN_PUBLIC_API(2, 0)
+   hex_decode(uint8_t output[], const char input[], size_t input_length, size_t& input_consumed, bool ignore_ws = true);
 
 /**
 * Perform hex decoding
@@ -77,10 +69,8 @@ size_t BOTAN_PUBLIC_API(2,0) hex_decode(uint8_t output[],
                    exception if whitespace is encountered
 * @return number of bytes written to output
 */
-size_t BOTAN_PUBLIC_API(2,0) hex_decode(uint8_t output[],
-                            const char input[],
-                            size_t input_length,
-                            bool ignore_ws = true);
+size_t BOTAN_PUBLIC_API(2, 0)
+   hex_decode(uint8_t output[], const char input[], size_t input_length, bool ignore_ws = true);
 
 /**
 * Perform hex decoding
@@ -90,9 +80,17 @@ size_t BOTAN_PUBLIC_API(2,0) hex_decode(uint8_t output[],
                    exception if whitespace is encountered
 * @return number of bytes written to output
 */
-size_t BOTAN_PUBLIC_API(2,0) hex_decode(uint8_t output[],
-                            const std::string& input,
-                            bool ignore_ws = true);
+size_t BOTAN_PUBLIC_API(3, 0) hex_decode(uint8_t output[], std::string_view input, bool ignore_ws = true);
+
+/**
+* Perform hex decoding
+* @param output a contiguous byte buffer of at least input_length/2 bytes
+* @param input some hex input
+* @param ignore_ws ignore whitespace on input; if false, throw an
+*                  exception if whitespace is encountered
+* @return number of bytes written to output
+*/
+size_t BOTAN_PUBLIC_API(3, 0) hex_decode(std::span<uint8_t> output, std::string_view input, bool ignore_ws = true);
 
 /**
 * Perform hex decoding
@@ -102,10 +100,7 @@ size_t BOTAN_PUBLIC_API(2,0) hex_decode(uint8_t output[],
                    exception if whitespace is encountered
 * @return decoded hex output
 */
-std::vector<uint8_t> BOTAN_PUBLIC_API(2,0)
-hex_decode(const char input[],
-           size_t input_length,
-           bool ignore_ws = true);
+std::vector<uint8_t> BOTAN_PUBLIC_API(2, 0) hex_decode(const char input[], size_t input_length, bool ignore_ws = true);
 
 /**
 * Perform hex decoding
@@ -114,10 +109,7 @@ hex_decode(const char input[],
                    exception if whitespace is encountered
 * @return decoded hex output
 */
-std::vector<uint8_t> BOTAN_PUBLIC_API(2,0)
-hex_decode(const std::string& input,
-           bool ignore_ws = true);
-
+std::vector<uint8_t> BOTAN_PUBLIC_API(3, 0) hex_decode(std::string_view input, bool ignore_ws = true);
 
 /**
 * Perform hex decoding
@@ -127,10 +119,8 @@ hex_decode(const std::string& input,
                    exception if whitespace is encountered
 * @return decoded hex output
 */
-secure_vector<uint8_t> BOTAN_PUBLIC_API(2,0)
-hex_decode_locked(const char input[],
-                  size_t input_length,
-                  bool ignore_ws = true);
+secure_vector<uint8_t> BOTAN_PUBLIC_API(2, 0)
+   hex_decode_locked(const char input[], size_t input_length, bool ignore_ws = true);
 
 /**
 * Perform hex decoding
@@ -139,10 +129,8 @@ hex_decode_locked(const char input[],
                    exception if whitespace is encountered
 * @return decoded hex output
 */
-secure_vector<uint8_t> BOTAN_PUBLIC_API(2,0)
-hex_decode_locked(const std::string& input,
-                  bool ignore_ws = true);
+secure_vector<uint8_t> BOTAN_PUBLIC_API(3, 0) hex_decode_locked(std::string_view input, bool ignore_ws = true);
 
-}
+}  // namespace Botan
 
 #endif

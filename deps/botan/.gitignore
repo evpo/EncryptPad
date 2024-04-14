@@ -1,5 +1,6 @@
 /Makefile
-CMakeLists.txt*
+build.ninja
+.ninja_log
 libbotan*.so.*
 *.a
 *.so
@@ -12,9 +13,11 @@ libbotan*.so.*
 *.exe
 *.manifest
 build
+build_deps
 build.log
 botan
 botan-test
+botan-website/
 
 core.*
 vgcore.*
@@ -23,6 +26,11 @@ vgcore.*
 *~
 \#*\#
 .\#*
+
+# Editor configuration files (top level)
+/*.sublime-project
+/*.sublime-workspace
+/.editorconfig
 
 # Archive files
 *.tgz
@@ -41,6 +49,7 @@ vgcore.*
 *.pyc
 .DS_Store
 *.swp
+/*.cache
 
 # ctags/etags files
 /TAGS
@@ -84,3 +93,6 @@ callgrind.*
 !/readme.rst
 !/configure.py
 !/license.txt
+
+# cscope
+cscope.out

@@ -44,6 +44,7 @@ version_info = parse_version_file('../../build-data/version.txt')
 version_major = version_info['release_major']
 version_minor = version_info['release_minor']
 version_patch = version_info['release_patch']
+version_suffix = version_info['release_suffix']
 
 is_website_build = check_for_tag('website')
 
@@ -58,10 +59,10 @@ source_encoding = 'utf-8-sig'
 master_doc = 'contents'
 
 project = u'botan'
-copyright = u'2000-2017, The Botan Authors'
+copyright = u'2000-2023, The Botan Authors'
 
 version = '%d.%d' % (version_major, version_minor)
-release = '%d.%d.%d' % (version_major, version_minor, version_patch)
+release = '%d.%d.%d%s' % (version_major, version_minor, version_patch, version_suffix)
 
 #today = ''
 today_fmt = '%Y-%m-%d'
@@ -87,7 +88,7 @@ add_function_parentheses = False
 highlight_language = 'cpp'
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'sphinx'
+#pygments_style = 'sphinx'
 
 # A list of ignored prefixes for module index sorting.
 #modindex_common_prefix = []
@@ -99,10 +100,17 @@ pygments_style = 'sphinx'
 # a list of builtin themes.
 
 try:
-    # On Arch this is python-sphinx_rtd_theme
-    import sphinx_rtd_theme
-    html_theme = "sphinx_rtd_theme"
-    html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
+    # On Arch this is python-sphinx-furo
+    import furo
+    html_theme = "furo"
+
+    # Add a small edit button to each document to allow visitors to easily
+    # propose changes to that document using the repository’s source control system.
+    html_theme_options = {
+        'source_repository': 'https://github.com/randombit/botan/',
+        'source_branch': 'master',
+        'source_directory': 'doc/',
+    }
 except ImportError as e:
     html_theme = 'agogo'
     html_theme_path = []
@@ -187,7 +195,7 @@ htmlhelp_basename = 'botandoc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 
-authors = u'Jack Lloyd \\and Daniel Neus \\and Ren\u00e9 Korthaus \\and Juraj Somorovsky \\and Tobias Niemann'
+authors = u'The Botan Authors'
 latex_documents = [
     ('contents', 'botan.tex', u'Botan Reference Guide', authors, 'manual'),
 ]
@@ -218,3 +226,11 @@ latex_domain_indices = False
 latex_elements = {
     'printindex': '\\footnotesize\\raggedright\\printindex'
 }
+
+# Give all sections a label, so we can reference them
+extensions = [
+    "sphinx.ext.autosectionlabel",
+]
+
+# Make sure the target is unique
+autosectionlabel_prefix_document = True

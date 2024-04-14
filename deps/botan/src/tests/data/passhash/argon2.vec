@@ -1,4 +1,3 @@
-#test cpuid ssse3
 
 [Verify]
 Password = pass

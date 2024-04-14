@@ -3,7 +3,16 @@ HOTP -> 20180816
 TOTP -> 20180816
 </defines>
 
+<module_info>
+name -> "HOTP/TOTP"
+brief -> "HMAC/Time based One Time Password implementations"
+</module_info>
+
 <requires>
 hmac
 utils
 </requires>
+
+<header:public>
+otp.h
+</header:public>

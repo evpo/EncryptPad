@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """
 Implements the "make check" target
@@ -60,10 +60,10 @@ def parse_options(args):
 
 def read_config(config):
     try:
-        with open(config) as f:
+        with open(config, encoding='utf8') as f:
             return json.load(f)
-    except OSError:
-        raise Exception('Failed to load build config %s - is build dir correct?' % (config))
+    except OSError as ex:
+        raise Exception('Failed to load build config %s - is build dir correct?' % (config)) from ex
 
 
 def main(args=None):

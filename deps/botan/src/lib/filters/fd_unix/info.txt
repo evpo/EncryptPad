@@ -2,6 +2,14 @@
 PIPE_UNIXFD_IO -> 20131128
 </defines>
 
+<module_info>
+name -> "Unix File Descriptor Pipe I/O"
+</module_info>
+
 <os_features>
 posix1
 </os_features>
+
+<header:public>
+fd_unix.h
+</header:public>

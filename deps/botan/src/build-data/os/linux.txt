@@ -6,19 +6,19 @@ posix1
 posix_mlock
 
 dev_random
-proc_fs
 clock_gettime
 getauxval
 
-# these are not enabled by default as only available in newer kernel/glibc
-#getrandom
-#getentropy
+explicit_bzero
+getrandom
+getentropy
 
 atomics
 sockets
 threads
 thread_local
 filesystem
+prctl
 </target_features>
 
 <aliases>

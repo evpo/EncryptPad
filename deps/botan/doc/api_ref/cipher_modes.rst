@@ -87,7 +87,18 @@ All cipher mode implementations are are derived from the base class
   .. cpp:function:: virtual size_t update_granularity() const
 
     The :cpp:class:`Cipher_Mode` interface requires message processing in multiples of the block size.
-    Returns size of required blocks to update and 1, if the mode can process messages of any length.
+    Returns size of required blocks to update. Will return 1 if the mode implementation
+    does not require buffering.
+
+  .. cpp:function:: virtual size_t ideal_granularity() const
+
+    Returns a multiple of update_granularity sized for ideal performance.
+
+    In fact this is not truly the "ideal" buffer size but just reflects the
+    smallest possible buffer that can reasonably take advantage of available
+    parallelism (due to SIMD execution, etc). If you are concerned about
+    performance, it may be advisable to take this return value and scale it to
+    approximately 4 KB, and use buffers of that size.
 
   .. cpp:function:: virtual size_t process(uint8_t* msg, size_t msg_len)
 
@@ -102,12 +113,18 @@ All cipher mode implementations are are derived from the base class
 
   .. cpp:function:: size_t minimum_final_size() const
 
-    Returns the minimum size needed for :cpp:func:`finish`.
+    Returns the minimum size needed for :cpp:func:`finish`. This is used for
+    example when processing an AEAD message, to ensure the tag is available. In
+    that case, the encryption side will return 0 (since the tag is generated,
+    rather than being provided) while the decryption mode will return the size
+    of the tag.
 
   .. cpp:function:: void finish(secure_vector<uint8_t>& final_block, size_t offset = 0)
 
     Finalize the message processing with a final block of at least :cpp:func:`minimum_final_size` size.
     The first *offset* bytes of the passed final block will be ignored.
+
+.. _cipher_modes_example:
 
 Code Example
 ---------------------
@@ -122,36 +139,8 @@ with PKCS#7 padding.
    Simply replacing the string "AES-128/CBC/PKCS7" string in the example below
    with "AES-128/GCM" suffices to use authenticated encryption.
 
-.. code-block:: cpp
-
-    #include <botan/rng.h>
-    #include <botan/auto_rng.h>
-    #include <botan/cipher_mode.h>
-    #include <botan/hex.h>
-    #include <iostream>
-
-    int main()
-       {
-       Botan::AutoSeeded_RNG rng;
-
-       const std::string plaintext("Your great-grandfather gave this watch to your granddad for good luck. Unfortunately, Dane's luck wasn't as good as his old man's.");
-       const std::vector<uint8_t> key = Botan::hex_decode("2B7E151628AED2A6ABF7158809CF4F3C");
-
-       std::unique_ptr<Botan::Cipher_Mode> enc = Botan::Cipher_Mode::create("AES-128/CBC/PKCS7", Botan::ENCRYPTION);
-       enc->set_key(key);
-
-       //generate fresh nonce (IV)
-       Botan::secure_vector<uint8_t> iv = rng.random_vec(enc->default_nonce_length());
-
-       // Copy input data to a buffer that will be encrypted
-       Botan::secure_vector<uint8_t> pt(plaintext.data(), plaintext.data()+plaintext.length());
-
-       enc->start(iv);
-       enc->finish(pt);
-
-       std::cout << enc->name() << " with iv " << Botan::hex_encode(iv) << " " << Botan::hex_encode(pt) << "\n";
-       return 0;
-       }
+.. literalinclude:: /../src/examples/aes_cbc.cpp
+   :language: cpp
 
 
 Available Unauthenticated Cipher Modes
@@ -175,11 +164,34 @@ ANSI X9.23
   The last byte in the padded block defines the padding length, the remaining padding is filled with 0x00.
 OneAndZeros (ISO/IEC 7816-4)
   The first padding byte is set to 0x80, the remaining padding bytes are set to 0x00.
+ESP (RFC 4303)
+  The first padding byte is set to 0x01, the next ones to 0x02, 0x03, ... (monotonically increasing sequence).
 
 Ciphertext stealing (CTS) is also implemented. This scheme allows the
 ciphertext to have the same length as the plaintext, however using CTS
 requires the input be at least one full block plus one byte. It is
 also less commonly implemented.
+
+.. warning::
+   Using CBC with padding without an authentication mode exposes your
+   application to CBC padding oracle attacks, which allow recovering
+   the plaintext of arbitrary messages. Always pair CBC with a MAC such
+   as HMAC (or, preferably, use an AEAD such as GCM).
+
+Algorithm specification name:
+``<BlockCipher>/CBC/<optional padding scheme>`` (reported name) /
+``CBC(<BlockCipher>,<optional padding scheme>)``
+
+- Available padding schemes:
+
+  - ``NoPadding``
+  - ``PKCS7`` (default)
+  - ``OneAndZeros``
+  - ``X9.23``
+  - ``ESP``
+  - ``CTS``
+
+- Examples: ``AES-128/CBC/PKCS7``, ``AES-256/CBC``
 
 CFB
 ~~~~~~~~~~~~
@@ -190,6 +202,13 @@ CFB uses a block cipher to create a self-synchronizing stream cipher. It is used
 for example in the OpenPGP protocol. There is no reason to prefer it, as it has
 worse performance characteristics than modes such as CTR or CBC.
 
+Algorithm specification name:
+``<BlockCipher>/CFB(<optional feedback bits>)`` (reported name) /
+``CFB(<BlockCipher>,<optional feedback bits>)``
+
+- Feedback bits defaults to the size of the underlying block cipher.
+- Examples: ``AES-192/CFB``, ``AES-128/CFB(8)``
+
 XTS
 ~~~~~~~~~
 
@@ -199,6 +218,10 @@ XTS is a mode specialized for encrypting disk or database storage
 where ciphertext expansion is not possible. XTS requires all inputs be
 at least one full block (16 bytes for AES), however for any acceptable
 input length, there is no ciphertext expansion.
+
+Algorithm specification name:
+``<BlockCipher>/XTS`` (reported name) / ``XTS(<BlockCipher>)``,
+e.g. ``AES-256/XTS``
 
 .. _aead:
 
@@ -315,6 +338,22 @@ Both ChaCha20Poly1305 and AES with GCM are widely implemented. SIV is somewhat
 more obscure (and is slower than either GCM or ChaCha20Poly1305), but has
 excellent security properties.
 
+CCM
+~~~~~
+
+Available if ``BOTAN_HAS_AEAD_CCM`` is defined.
+
+A composition of CTR mode and CBC-MAC. Requires a 128-bit block cipher. This is
+a NIST standard mode, but that is about all to recommend it. Prefer EAX.
+
+Algorithm specification name:
+``<BlockCipher>/CCM(<optional tag size>,<optional L>)`` (reported name) /
+``CCM(<BlockCipher>,<optional tag size>,<optional L>)``
+
+- Tag size defaults to 16.
+- L defaults to 3.
+- Examples: ``AES-128/CCM``, ``AES-128/CCM(8)``, ``AES-128/CCM(8,2)``
+
 ChaCha20Poly1305
 ~~~~~~~~~~~~~~~~~~
 
@@ -338,23 +377,7 @@ If you are encrypting many messages under a single key and cannot maintain a cou
 the nonce, prefer XChaCha20Poly1305 since a 192 bit nonce is large enough that randomly
 chosen nonces are extremely unlikely to repeat.
 
-GCM
-~~~~~
-
-Available if ``BOTAN_HAS_AEAD_GCM`` is defined.
-
-NIST standard, commonly used. Requires a 128-bit block cipher. Fairly slow,
-unless hardware support for carryless multiplies is available.
-
-OCB
-~~~~~
-
-Available if ``BOTAN_HAS_AEAD_OCB`` is defined.
-
-A block cipher based AEAD. Supports 128-bit, 256-bit and 512-bit block ciphers.
-This mode is very fast and easily secured against side channels. Adoption has
-been poor because it is patented in the United States, though a license is
-available allowing it to be freely used by open source software.
+Algorithm specification name: ``ChaCha20Poly1305``
 
 EAX
 ~~~~~
@@ -363,6 +386,47 @@ Available if ``BOTAN_HAS_AEAD_EAX`` is defined.
 
 A secure composition of CTR mode and CMAC. Supports 128-bit, 256-bit and 512-bit
 block ciphers.
+
+Algorithm specification name:
+``<BlockCipher>/EAX(<optional tag size>)`` /
+``EAX(<BlockCipher>,<optional tag size>)``
+
+- Tag size defaults to 16.
+- Reports name as ``<BlockCipher>/EAX``, i.e. without the tag size.
+- Examples: e.g. ``AES-128/EAX``, ``AES-128/EAX(8)``
+
+GCM
+~~~~~
+
+Available if ``BOTAN_HAS_AEAD_GCM`` is defined.
+
+NIST standard, commonly used. Requires a 128-bit block cipher. Fairly slow,
+unless hardware support for carryless multiplies is available.
+
+Algorithm specification name:
+``<BlockCipher>/GCM(<optional tag size>)`` (reported name) /
+``GCM(<BlockCipher>,<optional tag size>)``
+
+- Tag size defaults to 16.
+- Examples: e.g. ``AES-128/GCM``, ``AES-128/GCM(12)``
+
+OCB
+~~~~~
+
+Available if ``BOTAN_HAS_AEAD_OCB`` is defined.
+
+A block cipher based AEAD. Supports 128-bit, 256-bit and 512-bit block ciphers.
+This mode is very fast and easily secured against side channels. Adoption has
+been poor because until 2021 it was patented in the United States. The patent
+was allowed to lapse in early 2021.
+
+Algorithm specification name:
+``<BlockCipher>/OCB(<optional tag size>)`` /
+``OCB(<BlockCipher>,<optional tag size>)``
+
+- Tag size defaults to 16.
+- Reports name as ``<BlockCipher>/OCB``, i.e. without the tag size.
+- Examples: e.g. ``AES-128/OCB``, ``AES-128/OCB(12)``
 
 SIV
 ~~~~~~
@@ -375,10 +439,6 @@ same nonce is used to encrypt the same message multiple times, an attacker can
 detect the fact that the message was duplicated (this is simply because if both
 the nonce and the message are reused, SIV will output identical ciphertexts).
 
-CCM
-~~~~~
-
-Available if ``BOTAN_HAS_AEAD_CCM`` is defined.
-
-A composition of CTR mode and CBC-MAC. Requires a 128-bit block cipher. This is
-a NIST standard mode, but that is about all to recommend it. Prefer EAX.
+Algorithm specification name:
+``<BlockCipher>/SIV`` (reported name) / ``SIV(<BlockCipher>)``,
+e.g. ``AES-128/SIV``

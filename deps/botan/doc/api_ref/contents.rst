@@ -5,6 +5,7 @@ API Reference
 .. toctree::
    :maxdepth: 1
 
+   footguns
    versions
    secmem
    rng
@@ -30,6 +31,7 @@ API Reference
    tss
    ecc
    compression
+   providers
    pkcs11
    tpm
    otp

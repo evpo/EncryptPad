@@ -1,9 +1,11 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 
 """
 Generate the Botan website
 
 (C) 2017 Jack Lloyd
+
+Botan is released under the Simplified BSD License (see license.txt)
 """
 
 import optparse # pylint: disable=deprecated-module
@@ -70,11 +72,11 @@ def run_sphinx(botan_dir, tmp_dir, output_dir):
    API Reference <https://botan.randombit.net/doxygen>
 """
 
-    contents_rst = open(os.path.join(sphinx_dir, 'contents.rst'), 'w')
+    contents_rst = open(os.path.join(sphinx_dir, 'contents.rst'), 'w', encoding='utf8')
     contents_rst.write(toc)
     contents_rst.close()
 
-    sphinx_invoke = ['sphinx-build', '-t', 'website', '-c', sphinx_config, '-b', 'html']
+    sphinx_invoke = ['sphinx-build', '-t', 'website', '-c', sphinx_config, '-b', 'html', '-j', 'auto', '-W']
 
     handbook_dir = os.path.join(botan_dir, 'doc')
 
@@ -154,7 +156,7 @@ def main(args):
     for f in ['doc/pgpkey.txt', 'license.txt']:
         shutil.copy(os.path.join(botan_dir, f), output_dir)
 
-    favicon = open(os.path.join(output_dir, 'favicon.ico'), 'w')
+    favicon = open(os.path.join(output_dir, 'favicon.ico'), 'w', encoding='utf8')
     # Create an empty favicon.ico file so it gets cached by browsers
     favicon.close()
 

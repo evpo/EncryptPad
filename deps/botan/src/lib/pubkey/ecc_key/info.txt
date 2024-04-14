@@ -3,9 +3,18 @@ ECC_PUBLIC_KEY_CRYPTO -> 20131128
 ECC_KEY -> 20190801
 </defines>
 
+<module_info>
+name -> "ECC Key"
+brief -> "Base class for elliptic curve cryptography keys"
+</module_info>
+
 <requires>
 asn1
 bigint
 ec_group
 numbertheory
 </requires>
+
+<header:public>
+ecc_key.h
+</header:public>

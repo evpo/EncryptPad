@@ -6,15 +6,14 @@ Python Binding
 
 .. highlight:: python
 
-.. py:module:: botan
+.. py:module:: botan3
 
 The Python binding is based on the `ffi` module of botan and the
 `ctypes` module of the Python standard library.
 
-Starting in 2.8, the class names were renamed to match Python standard
-conventions. However aliases are defined which allow older code to
-continue to work; the older names are mentioned as "previously X".
-These aliases will be removed in a future major release.
+The versioning of the Python module follows the major versioning of
+the C++ library. So for Botan 2, the module is named ``botan2`` while
+for Botan 3 it is ``botan3``.
 
 Versioning
 ----------------------------------------
@@ -345,8 +344,8 @@ Private Key
      Creates a new private key. The parameter type/value depends on
      the algorithm. For "rsa" is is the size of the key in bits.
      For "ecdsa" and "ecdh" it is a group name (for instance
-     "secp256r1"). For "ecdh" there is also a special case for group
-     "curve25519" (which is actually a completely distinct key type
+     "secp256r1"). For "ecdh" there is also a special case for groups
+     "curve25519" and "x448" (which are actually completely distinct key types
      with a non-standard encoding).
 
   .. py:classmethod:: load(val, passphrase="")
@@ -507,11 +506,11 @@ Format Preserving Encryption (FE1 scheme)
 
    .. py:method:: encrypt(msg, tweak)
 
-      The msg should be a botan2.MPI or an object which can be converted to one
+      The msg should be a botan3.MPI or an object which can be converted to one
 
    .. py:method:: decrypt(msg, tweak)
 
-      The msg should be a botan2.MPI or an object which can be converted to one
+      The msg should be a botan3.MPI or an object which can be converted to one
 
 HOTP
 -----------------------------------------
@@ -539,7 +538,7 @@ HOTP
 X509Cert
 -----------------------------------------
 
-.. py:class:: X509Cert(filename=None, buf=None) 
+.. py:class:: X509Cert(filename=None, buf=None)
 
    .. py:method:: time_starts()
 
@@ -551,7 +550,7 @@ X509Cert
 
       Return the time the certificate expires, as a string in form
       "YYYYMMDDHHMMSSZ" where Z is a literal character reflecting that this time is
-      relative to UTC.      
+      relative to UTC.
 
    .. py:method:: to_string()
 
@@ -587,7 +586,7 @@ X509Cert
 
       Get a value from the subject DN field.
 
-      ``key`` specifies a value to get, for instance ``"Name"`` or `"Country"`.  
+      ``key`` specifies a value to get, for instance ``"Name"`` or `"Country"`.
 
    .. py:method:: issuer_dn(key, index)
 
@@ -601,7 +600,7 @@ X509Cert
 
    .. py:method:: not_before()
 
-      Return the time the certificate becomes valid, as seconds since epoch.   
+      Return the time the certificate becomes valid, as seconds since epoch.
 
    .. py:method:: not_after()
 
@@ -621,7 +620,7 @@ X509Cert
                   reference_time=0 \
                   crls=None)
 
-      Verify a certificate. Returns 0 if validation was successful, returns a positive error code 
+      Verify a certificate. Returns 0 if validation was successful, returns a positive error code
       if the validation was unsuccesful.
 
       ``intermediates`` is a list of untrusted subauthorities.

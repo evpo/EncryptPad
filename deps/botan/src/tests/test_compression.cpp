@@ -16,7 +16,7 @@ namespace Botan_Tests {
 
 namespace {
 
-const char* text_str =
+const char* const COMPRESSION_TEST_TEXT =
    "'Twas brillig, and the slithy toves"
    "Did gyre and gimble in the wabe:"
    "All mimsy were the borogoves,"
@@ -52,37 +52,34 @@ const char* text_str =
    "All mimsy were the borogoves,"
    "And the mome raths outgrabe.";
 
-class Compression_Tests final : public Test
-   {
+class Compression_Tests final : public Test {
    public:
-      std::vector<Test::Result> run() override
-         {
+      std::vector<Test::Result> run() override {
          std::vector<Test::Result> results;
-         const size_t text_len = std::strlen(text_str);
+         const size_t text_len = std::strlen(COMPRESSION_TEST_TEXT);
 
-         for(std::string algo : { "zlib", "deflate", "gzip", "bz2", "lzma" })
-            {
-            try
-               {
+         for(std::string algo : {"zlib", "deflate", "gzip", "bz2", "lzma"}) {
+            try {
                Test::Result result(algo + " compression");
 
-               std::unique_ptr<Botan::Compression_Algorithm> c(Botan::make_compressor(algo));
-               std::unique_ptr<Botan::Decompression_Algorithm> d(Botan::make_decompressor(algo));
+               result.start_timer();
 
-               if(!c || !d)
-                  {
+               auto c = Botan::Compression_Algorithm::create(algo);
+               auto d = Botan::Decompression_Algorithm::create(algo);
+
+               if(!c || !d) {
                   result.note_missing(algo);
                   continue;
-                  }
+               }
 
                result.test_ne("Not the same name", c->name(), d->name());
 
                const Botan::secure_vector<uint8_t> empty;
                const Botan::secure_vector<uint8_t> all_zeros(text_len, 0);
-               const Botan::secure_vector<uint8_t> random_binary = Test::rng().random_vec(text_len);
-               const Botan::secure_vector<uint8_t> short_text = { 'f', 'o', 'o', '\n' };
+               const Botan::secure_vector<uint8_t> random_binary = this->rng().random_vec(text_len);
+               const Botan::secure_vector<uint8_t> short_text = {'f', 'o', 'o', '\n'};
 
-               const uint8_t* textb = reinterpret_cast<const uint8_t*>(text_str);
+               const uint8_t* textb = reinterpret_cast<const uint8_t*>(COMPRESSION_TEST_TEXT);
                const Botan::secure_vector<uint8_t> text(textb, textb + text_len);
 
                const size_t c1_e = run_compression(result, 1, *c, *d, empty);
@@ -99,52 +96,50 @@ class Compression_Tests final : public Test
                result.test_gte("Empty input L1 compresses to non-empty output", c1_e, 1);
                result.test_gte("Empty input L9 compresses to non-empty output", c9_e, 1);
 
-               result.test_gte("Level 9 compresses empty at least as well as level 1", c1_e, c9_e);
-               result.test_gte("Level 9 compresses zeros at least as well as level 1", c1_z, c9_z);
-               result.test_gte("Level 9 compresses random at least as well as level 1", c1_r, c9_r);
-               result.test_gte("Level 9 compresses text at least as well as level 1", c1_t, c9_t);
-               result.test_gte("Level 9 compresses short text at least as well as level 1", c1_s, c9_s);
+               // We assume that Level 9 is better than Level 1, but this is not
+               // guaranteed (see GitHub #3896). Hence, we assert that level 9
+               // it is at most 10% worse than level 1.
+               result.test_gte("Level 9 compresses empty at least as well as level 1", c1_e + (c1_e / 10), c9_e);
+               result.test_gte("Level 9 compresses zeros at least as well as level 1", c1_z + (c1_z / 10), c9_z);
+               result.test_gte("Level 9 compresses random at least as well as level 1", c1_r + (c1_r / 10), c9_r);
+               result.test_gte("Level 9 compresses text at least as well as level 1", c1_t + (c1_t / 10), c9_t);
+               result.test_gte("Level 9 compresses short text at least as well as level 1", c1_s + (c1_s / 10), c9_s);
 
                result.test_lt("Zeros compresses much better than text", c1_z / 8, c1_t);
                result.test_lt("Text compresses much better than random", c1_t / 2, c1_r);
 
-               results.emplace_back(result);
-               }
-            catch(std::exception& e)
-               {
-               results.emplace_back(Test::Result::Failure("testing " + algo, e.what()));
-               }
-            }
+               result.end_timer();
 
-         return results;
+               results.emplace_back(result);
+            } catch(std::exception& e) {
+               results.emplace_back(Test::Result::Failure("testing " + algo, e.what()));
+            }
          }
 
-   private:
+         return results;
+      }
 
+   private:
       // Returns # of bytes of compressed message
       size_t run_compression(Test::Result& result,
                              size_t level,
                              Botan::Compression_Algorithm& c,
                              Botan::Decompression_Algorithm& d,
-                             const Botan::secure_vector<uint8_t>& msg)
-         {
-         Botan::secure_vector<uint8_t> compressed(2*msg.size());
+                             const Botan::secure_vector<uint8_t>& msg) {
+         Botan::secure_vector<uint8_t> compressed(2 * msg.size());
 
-         for(bool with_flush : { true, false })
-            {
-            try
-               {
+         for(bool with_flush : {true, false}) {
+            try {
                compressed = msg;
 
                c.start(level);
                c.update(compressed, 0, false);
 
-               if(with_flush)
-                  {
+               if(with_flush) {
                   Botan::secure_vector<uint8_t> flush_bits;
                   c.update(flush_bits, 0, true);
                   compressed += flush_bits;
-                  }
+               }
 
                Botan::secure_vector<uint8_t> final_bits;
                c.finish(final_bits);
@@ -160,79 +155,69 @@ class Compression_Tests final : public Test
                decompressed += final_outputs;
 
                result.test_eq("compression round tripped", msg, decompressed);
-               }
-            catch(Botan::Exception& e)
-               {
+            } catch(Botan::Exception& e) {
                result.test_failure(e.what());
-               }
             }
+         }
 
          return compressed.size();
-         }
-   };
+      }
+};
 
-BOTAN_REGISTER_TEST("compression", "compression", Compression_Tests);
+BOTAN_REGISTER_TEST("compression", "compression_tests", Compression_Tests);
 
-class CompressionCreate_Tests final : public Test
-   {
+class CompressionCreate_Tests final : public Test {
    public:
-      std::vector<Test::Result> run() override
-         {
+      std::vector<Test::Result> run() override {
          std::vector<Test::Result> results;
 
-         for(std::string algo : { "zlib", "deflate", "gzip", "bz2", "lzma" })
-            {
-            try
-               {
+         for(std::string algo : {"zlib", "deflate", "gzip", "bz2", "lzma"}) {
+            try {
                Test::Result result(algo + " create compression");
 
-               std::unique_ptr<Botan::Compression_Algorithm> c1(Botan::Compression_Algorithm::create(algo));
-               std::unique_ptr<Botan::Decompression_Algorithm> d1(Botan::Decompression_Algorithm::create(algo));
+               auto c1 = Botan::Compression_Algorithm::create(algo);
+               auto d1 = Botan::Decompression_Algorithm::create(algo);
 
-               if(!c1 || !d1)
-                  {
+               if(!c1 || !d1) {
                   result.note_missing(algo);
                   continue;
-                  }
+               }
                result.test_ne("Not the same name after create", c1->name(), d1->name());
 
-               std::unique_ptr<Botan::Compression_Algorithm> c2(Botan::Compression_Algorithm::create_or_throw(algo));
-               std::unique_ptr<Botan::Decompression_Algorithm> d2(Botan::Decompression_Algorithm::create_or_throw(algo));
+               auto c2 = Botan::Compression_Algorithm::create_or_throw(algo);
+               auto d2 = Botan::Decompression_Algorithm::create_or_throw(algo);
 
-               if(!c2 || !d2)
-                  {
+               if(!c2 || !d2) {
                   result.note_missing(algo);
                   continue;
-                  }
+               }
                result.test_ne("Not the same name after create_or_throw", c2->name(), d2->name());
 
                results.emplace_back(result);
-               }
-            catch(std::exception& e)
-               {
+            } catch(std::exception& e) {
                results.emplace_back(Test::Result::Failure("testing " + algo, e.what()));
-               }
             }
+         }
 
-            {
+         {
             Test::Result result("create invalid compression");
-            result.test_throws("lookup error",
-                               "Unavailable Compression bogocompress",
-                               [&]() { Botan::Compression_Algorithm::create_or_throw("bogocompress"); });
-            result.test_throws("lookup error",
-                               "Unavailable Decompression bogocompress",
-                               [&]() { Botan::Decompression_Algorithm::create_or_throw("bogocompress"); });
+            result.test_throws("lookup error", "Unavailable Compression bogocompress", [&]() {
+               Botan::Compression_Algorithm::create_or_throw("bogocompress");
+            });
+            result.test_throws("lookup error", "Unavailable Decompression bogocompress", [&]() {
+               Botan::Decompression_Algorithm::create_or_throw("bogocompress");
+            });
             results.emplace_back(result);
-            }
+         }
 
          return results;
-         }
-   };
+      }
+};
 
 BOTAN_REGISTER_TEST("compression", "create_compression", CompressionCreate_Tests);
 
-}
+}  // namespace
 
 #endif
 
-}
+}  // namespace Botan_Tests

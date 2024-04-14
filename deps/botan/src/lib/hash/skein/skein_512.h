@@ -9,35 +9,35 @@
 #define BOTAN_SKEIN_512_H_
 
 #include <botan/hash.h>
-#include <botan/threefish_512.h>
-#include <string>
-#include <memory>
+#include <botan/internal/alignment_buffer.h>
+#include <botan/internal/threefish_512.h>
 
-BOTAN_FUTURE_INTERNAL_HEADER(skin_512.h)
+#include <memory>
+#include <string>
 
 namespace Botan {
 
 /**
 * Skein-512, a SHA-3 candidate
 */
-class BOTAN_PUBLIC_API(2,0) Skein_512 final : public HashFunction
-   {
+class Skein_512 final : public HashFunction {
    public:
       /**
       * @param output_bits the output size of Skein in bits
       * @param personalization is a string that will parameterize the
       * hash output
       */
-      Skein_512(size_t output_bits = 512,
-                const std::string& personalization = "");
+      Skein_512(size_t output_bits = 512, std::string_view personalization = "");
 
       size_t hash_block_size() const override { return 64; }
+
       size_t output_length() const override { return m_output_bits / 8; }
 
-      HashFunction* clone() const override;
+      std::unique_ptr<HashFunction> new_object() const override;
       std::unique_ptr<HashFunction> copy_state() const override;
       std::string name() const override;
       void clear() override;
+
    private:
       enum type_code {
          SKEIN_KEY = 0,
@@ -50,8 +50,8 @@ class BOTAN_PUBLIC_API(2,0) Skein_512 final : public HashFunction
          SKEIN_OUTPUT = 63
       };
 
-      void add_data(const uint8_t input[], size_t length) override;
-      void final_result(uint8_t out[]) override;
+      void add_data(std::span<const uint8_t> input) override;
+      void final_result(std::span<uint8_t> out) override;
 
       void ubi_512(const uint8_t msg[], size_t msg_len);
 
@@ -63,10 +63,9 @@ class BOTAN_PUBLIC_API(2,0) Skein_512 final : public HashFunction
 
       std::unique_ptr<Threefish_512> m_threefish;
       secure_vector<uint64_t> m_T;
-      secure_vector<uint8_t> m_buffer;
-      size_t m_buf_pos;
-   };
+      AlignmentBuffer<uint8_t, 64, AlignmentBufferFinalBlock::must_be_deferred> m_buffer;
+};
 
-}
+}  // namespace Botan
 
 #endif

@@ -10,12 +10,10 @@
 #define BOTAN_TLS_HANDSHAKE_MSG_H_
 
 #include <botan/tls_magic.h>
-#include <vector>
 #include <string>
+#include <vector>
 
-namespace Botan {
-
-namespace TLS {
+namespace Botan::TLS {
 
 class Handshake_IO;
 class Handshake_Hash;
@@ -23,8 +21,7 @@ class Handshake_Hash;
 /**
 * TLS Handshake Message Base Class
 */
-class BOTAN_PUBLIC_API(2,0) Handshake_Message
-   {
+class BOTAN_PUBLIC_API(2, 0) Handshake_Message {
    public:
       /**
       * @return string representation of this message type
@@ -37,15 +34,27 @@ class BOTAN_PUBLIC_API(2,0) Handshake_Message
       virtual Handshake_Type type() const = 0;
 
       /**
+       * @return the wire representation of the message's type
+       */
+      virtual Handshake_Type wire_type() const {
+         // Usually equal to the Handshake_Type enum value,
+         // with the exception of TLS 1.3 Hello Retry Request.
+         return type();
+      }
+
+      /**
       * @return DER representation of this message
       */
       virtual std::vector<uint8_t> serialize() const = 0;
 
-      virtual ~Handshake_Message() {}
-   };
+      virtual ~Handshake_Message() = default;
+      Handshake_Message() = default;
+      Handshake_Message(const Handshake_Message&) = delete;
+      Handshake_Message(Handshake_Message&&) = default;
+      Handshake_Message& operator=(const Handshake_Message&) = delete;
+      Handshake_Message& operator=(Handshake_Message&&) = default;
+};
 
-}
-
-}
+}  // namespace Botan::TLS
 
 #endif

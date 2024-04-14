@@ -2,17 +2,12 @@
 PK_PADDING -> 20131128
 </defines>
 
+<module_info>
+name -> "Public Key Paddings"
+brief -> "Implementations of public key padding schemes"
+</module_info>
+
 <requires>
-asn1
+hash
 rng
-pubkey
 </requires>
-
-<header:internal>
-padding.h
-</header:internal>
-
-<header:public>
-eme.h
-emsa.h
-</header:public>

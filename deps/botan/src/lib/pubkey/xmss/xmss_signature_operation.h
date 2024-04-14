@@ -12,7 +12,7 @@
 #include <botan/xmss.h>
 #include <botan/internal/xmss_address.h>
 #include <botan/internal/xmss_signature.h>
-#include <botan/xmss_wots.h>
+#include <botan/internal/xmss_wots.h>
 
 namespace Botan {
 
@@ -25,8 +25,7 @@ namespace Botan {
  *     Release: May 2018.
  *     https://datatracker.ietf.org/doc/rfc8391/
  **/
-class XMSS_Signature_Operation final : public virtual PK_Ops::Signature
-   {
+class XMSS_Signature_Operation final : public virtual PK_Ops::Signature {
    public:
       XMSS_Signature_Operation(const XMSS_PrivateKey& private_key);
 
@@ -42,6 +41,10 @@ class XMSS_Signature_Operation final : public virtual PK_Ops::Signature
 
       size_t signature_length() const override;
 
+      AlgorithmIdentifier algorithm_identifier() const override;
+
+      std::string hash_function() const override { return m_hash.hash_function(); }
+
    private:
       /**
        * Algorithm 11: "treeSig"
@@ -51,10 +54,9 @@ class XMSS_Signature_Operation final : public virtual PK_Ops::Signature
        * @param xmss_priv_key A XMSS private key.
        * @param adrs A XMSS Address.
        **/
-      XMSS_WOTS_PublicKey::TreeSignature generate_tree_signature(
-         const secure_vector<uint8_t>& msg,
-         XMSS_PrivateKey& xmss_priv_key,
-         XMSS_Address& adrs);
+      XMSS_Signature::TreeSignature generate_tree_signature(const secure_vector<uint8_t>& msg,
+                                                            XMSS_PrivateKey& xmss_priv_key,
+                                                            XMSS_Address& adrs);
 
       /**
        * Algorithm 12: "XMSS_sign"
@@ -66,24 +68,19 @@ class XMSS_Signature_Operation final : public virtual PK_Ops::Signature
        *
        * @return The signature of msg signed using xmss_priv_key.
        **/
-      XMSS_Signature sign(
-         const secure_vector<uint8_t>& msg,
-         XMSS_PrivateKey& xmss_priv_key);
+      XMSS_Signature sign(const secure_vector<uint8_t>& msg, XMSS_PrivateKey& xmss_priv_key);
 
-      wots_keysig_t build_auth_path(XMSS_PrivateKey& priv_key,
-                                    XMSS_Address& adrs);
+      wots_keysig_t build_auth_path(XMSS_PrivateKey& priv_key, XMSS_Address& adrs);
 
       void initialize();
 
       XMSS_PrivateKey m_priv_key;
-      const XMSS_Parameters m_xmss_params;
       XMSS_Hash m_hash;
       secure_vector<uint8_t> m_randomness;
       uint32_t m_leaf_idx;
       bool m_is_initialized;
-   };
+};
 
-}
+}  // namespace Botan
 
 #endif
-

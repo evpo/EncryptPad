@@ -2,9 +2,18 @@
 FPE_FE1 -> 20131128
 </defines>
 
+<module_info>
+name -> "FPE FE1"
+brief -> "Format Preserving Encryption (FE1 scheme)"
+</module_info>
+
 <requires>
 bigint
 hmac
 numbertheory
 sha2_32
 </requires>
+
+<header:public>
+fpe_fe1.h
+</header:public>

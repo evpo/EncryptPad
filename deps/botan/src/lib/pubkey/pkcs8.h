@@ -1,6 +1,6 @@
 /*
 * PKCS #8
-* (C) 1999-2007 Jack Lloyd
+* (C) 1999-2007,2023 Jack Lloyd
 *
 * Botan is released under the Simplified BSD License (see license.txt)
 */
@@ -8,27 +8,27 @@
 #ifndef BOTAN_PKCS8_H_
 #define BOTAN_PKCS8_H_
 
-#include <botan/pk_keys.h>
+#include <botan/data_src.h>
 #include <botan/exceptn.h>
+#include <botan/pk_keys.h>
 #include <botan/secmem.h>
-#include <functional>
 #include <chrono>
+#include <functional>
 #include <memory>
+#include <span>
+#include <string_view>
 
 namespace Botan {
 
-class DataSource;
 class RandomNumberGenerator;
 
 /**
 * PKCS #8 General Exception
 */
-class BOTAN_PUBLIC_API(2,0) PKCS8_Exception final : public Decoding_Error
-   {
+class BOTAN_PUBLIC_API(2, 0) PKCS8_Exception final : public Decoding_Error {
    public:
-      explicit PKCS8_Exception(const std::string& error) :
-         Decoding_Error("PKCS #8: " + error) {}
-   };
+      explicit PKCS8_Exception(std::string_view error) : Decoding_Error("PKCS #8", error) {}
+};
 
 /**
 * This namespace contains functions for handling PKCS #8 private keys
@@ -40,14 +40,16 @@ namespace PKCS8 {
 * @param key the private key to encode
 * @return BER encoded key
 */
-BOTAN_PUBLIC_API(2,0) secure_vector<uint8_t> BER_encode(const Private_Key& key);
+inline secure_vector<uint8_t> BER_encode(const Private_Key& key) {
+   return key.private_key_info();
+}
 
 /**
 * Get a string containing a PEM encoded private key.
 * @param key the key to encode
 * @return encoded key
 */
-BOTAN_PUBLIC_API(2,0) std::string PEM_encode(const Private_Key& key);
+BOTAN_PUBLIC_API(2, 0) std::string PEM_encode(const Private_Key& key);
 
 /**
 * Encrypt a key using PKCS #8 encryption
@@ -60,12 +62,12 @@ BOTAN_PUBLIC_API(2,0) std::string PEM_encode(const Private_Key& key);
 *        default will be chosen.
 * @return encrypted key in binary BER form
 */
-BOTAN_PUBLIC_API(2,0) std::vector<uint8_t>
-BER_encode(const Private_Key& key,
-           RandomNumberGenerator& rng,
-           const std::string& pass,
-           std::chrono::milliseconds msec = std::chrono::milliseconds(300),
-           const std::string& pbe_algo = "");
+BOTAN_PUBLIC_API(2, 0)
+std::vector<uint8_t> BER_encode(const Private_Key& key,
+                                RandomNumberGenerator& rng,
+                                std::string_view pass,
+                                std::chrono::milliseconds msec = std::chrono::milliseconds(300),
+                                std::string_view pbe_algo = "");
 
 /**
 * Get a string containing a PEM encoded private key, encrypting it with a
@@ -79,12 +81,12 @@ BER_encode(const Private_Key& key,
 *        default will be chosen.
 * @return encrypted key in PEM form
 */
-BOTAN_PUBLIC_API(2,0) std::string
-PEM_encode(const Private_Key& key,
-           RandomNumberGenerator& rng,
-           const std::string& pass,
-           std::chrono::milliseconds msec = std::chrono::milliseconds(300),
-           const std::string& pbe_algo = "");
+BOTAN_PUBLIC_API(2, 0)
+std::string PEM_encode(const Private_Key& key,
+                       RandomNumberGenerator& rng,
+                       std::string_view pass,
+                       std::chrono::milliseconds msec = std::chrono::milliseconds(300),
+                       std::string_view pbe_algo = "");
 
 /**
 * Encrypt a key using PKCS #8 encryption and a fixed iteration count
@@ -99,13 +101,13 @@ PEM_encode(const Private_Key& key,
 *   For example "SHA-256" or "SHA-384". If empty a suitable default is chosen.
 * @return encrypted key in binary BER form
 */
-BOTAN_PUBLIC_API(2,1) std::vector<uint8_t>
-BER_encode_encrypted_pbkdf_iter(const Private_Key& key,
-                                RandomNumberGenerator& rng,
-                                const std::string& pass,
-                                size_t pbkdf_iter,
-                                const std::string& cipher = "",
-                                const std::string& pbkdf_hash = "");
+BOTAN_PUBLIC_API(2, 1)
+std::vector<uint8_t> BER_encode_encrypted_pbkdf_iter(const Private_Key& key,
+                                                     RandomNumberGenerator& rng,
+                                                     std::string_view pass,
+                                                     size_t pbkdf_iter,
+                                                     std::string_view cipher = "",
+                                                     std::string_view pbkdf_hash = "");
 
 /**
 * Get a string containing a PEM encoded private key, encrypting it with a
@@ -121,13 +123,13 @@ BER_encode_encrypted_pbkdf_iter(const Private_Key& key,
 *   For example "SHA-256" or "SHA-384". If empty a suitable default is chosen.
 * @return encrypted key in PEM form
 */
-BOTAN_PUBLIC_API(2,1) std::string
-PEM_encode_encrypted_pbkdf_iter(const Private_Key& key,
-                                RandomNumberGenerator& rng,
-                                const std::string& pass,
-                                size_t pbkdf_iter,
-                                const std::string& cipher = "",
-                                const std::string& pbkdf_hash = "");
+BOTAN_PUBLIC_API(2, 1)
+std::string PEM_encode_encrypted_pbkdf_iter(const Private_Key& key,
+                                            RandomNumberGenerator& rng,
+                                            std::string_view pass,
+                                            size_t pbkdf_iter,
+                                            std::string_view cipher = "",
+                                            std::string_view pbkdf_hash = "");
 
 /**
 * Encrypt a key using PKCS #8 encryption and a variable iteration count
@@ -143,14 +145,14 @@ PEM_encode_encrypted_pbkdf_iter(const Private_Key& key,
 *   For example "SHA-256" or "SHA-384". If empty a suitable default is chosen.
 * @return encrypted key in binary BER form
 */
-BOTAN_PUBLIC_API(2,1) std::vector<uint8_t>
-BER_encode_encrypted_pbkdf_msec(const Private_Key& key,
-                                RandomNumberGenerator& rng,
-                                const std::string& pass,
-                                std::chrono::milliseconds pbkdf_msec,
-                                size_t* pbkdf_iterations,
-                                const std::string& cipher = "",
-                                const std::string& pbkdf_hash = "");
+BOTAN_PUBLIC_API(2, 1)
+std::vector<uint8_t> BER_encode_encrypted_pbkdf_msec(const Private_Key& key,
+                                                     RandomNumberGenerator& rng,
+                                                     std::string_view pass,
+                                                     std::chrono::milliseconds pbkdf_msec,
+                                                     size_t* pbkdf_iterations,
+                                                     std::string_view cipher = "",
+                                                     std::string_view pbkdf_hash = "");
 
 /**
 * Get a string containing a PEM encoded private key, encrypting it with a
@@ -168,84 +170,14 @@ BER_encode_encrypted_pbkdf_msec(const Private_Key& key,
 *   For example "SHA-256" or "SHA-384". If empty a suitable default is chosen.
 * @return encrypted key in PEM form
 */
-BOTAN_PUBLIC_API(2,1) std::string
-PEM_encode_encrypted_pbkdf_msec(const Private_Key& key,
-                                RandomNumberGenerator& rng,
-                                const std::string& pass,
-                                std::chrono::milliseconds pbkdf_msec,
-                                size_t* pbkdf_iterations,
-                                const std::string& cipher = "",
-                                const std::string& pbkdf_hash = "");
-
-/**
-* Load an encrypted key from a data source.
-* @param source the data source providing the encoded key
-* @param rng ignored for compatibility
-* @param get_passphrase a function that returns passphrases
-* @return loaded private key object
-*/
-BOTAN_PUBLIC_API(2,0) Private_Key* load_key(DataSource& source,
+BOTAN_PUBLIC_API(2, 1)
+std::string PEM_encode_encrypted_pbkdf_msec(const Private_Key& key,
                                             RandomNumberGenerator& rng,
-                                            std::function<std::string ()> get_passphrase);
-
-/** Load an encrypted key from a data source.
-* @param source the data source providing the encoded key
-* @param rng ignored for compatibility
-* @param pass the passphrase to decrypt the key
-* @return loaded private key object
-*/
-BOTAN_PUBLIC_API(2,0) Private_Key* load_key(DataSource& source,
-                                            RandomNumberGenerator& rng,
-                                            const std::string& pass);
-
-/** Load an unencrypted key from a data source.
-* @param source the data source providing the encoded key
-* @param rng ignored for compatibility
-* @return loaded private key object
-*/
-BOTAN_PUBLIC_API(2,0) Private_Key* load_key(DataSource& source,
-                                            RandomNumberGenerator& rng);
-
-#if defined(BOTAN_TARGET_OS_HAS_FILESYSTEM)
-/**
-* Load an encrypted key from a file.
-* @param filename the path to the file containing the encoded key
-* @param rng ignored for compatibility
-* @param get_passphrase a function that returns passphrases
-* @return loaded private key object
-*/
-BOTAN_PUBLIC_API(2,0) Private_Key* load_key(const std::string& filename,
-                                            RandomNumberGenerator& rng,
-                                            std::function<std::string ()> get_passphrase);
-
-/** Load an encrypted key from a file.
-* @param filename the path to the file containing the encoded key
-* @param rng ignored for compatibility
-* @param pass the passphrase to decrypt the key
-* @return loaded private key object
-*/
-BOTAN_PUBLIC_API(2,0) Private_Key* load_key(const std::string& filename,
-                                            RandomNumberGenerator& rng,
-                                            const std::string& pass);
-
-/** Load an unencrypted key from a file.
-* @param filename the path to the file containing the encoded key
-* @param rng ignored for compatibility
-* @return loaded private key object
-*/
-BOTAN_PUBLIC_API(2,0) Private_Key* load_key(const std::string& filename,
-                                            RandomNumberGenerator& rng);
-#endif
-
-/**
-* Copy an existing encoded key object.
-* @param key the key to copy
-* @param rng ignored for compatibility
-* @return new copy of the key
-*/
-BOTAN_PUBLIC_API(2,0) Private_Key* copy_key(const Private_Key& key,
-                                            RandomNumberGenerator& rng);
-
+                                            std::string_view pass,
+                                            std::chrono::milliseconds pbkdf_msec,
+                                            size_t* pbkdf_iterations,
+                                            std::string_view cipher = "",
+                                            std::string_view pbkdf_hash = "");
 
 /**
 * Load an encrypted key from a data source.
@@ -253,36 +185,61 @@ BOTAN_PUBLIC_API(2,0) Private_Key* copy_key(const Private_Key& key,
 * @param get_passphrase a function that returns passphrases
 * @return loaded private key object
 */
-BOTAN_PUBLIC_API(2,3)
-std::unique_ptr<Private_Key> load_key(DataSource& source,
-                                      std::function<std::string ()> get_passphrase);
+BOTAN_PUBLIC_API(2, 3)
+std::unique_ptr<Private_Key> load_key(DataSource& source, const std::function<std::string()>& get_passphrase);
 
 /** Load an encrypted key from a data source.
 * @param source the data source providing the encoded key
 * @param pass the passphrase to decrypt the key
 * @return loaded private key object
 */
-BOTAN_PUBLIC_API(2,3)
-std::unique_ptr<Private_Key> load_key(DataSource& source,
-                                      const std::string& pass);
+BOTAN_PUBLIC_API(2, 3)
+std::unique_ptr<Private_Key> load_key(DataSource& source, std::string_view pass);
 
 /** Load an unencrypted key from a data source.
 * @param source the data source providing the encoded key
 * @return loaded private key object
 */
-BOTAN_PUBLIC_API(2,3)
+BOTAN_PUBLIC_API(2, 3)
 std::unique_ptr<Private_Key> load_key(DataSource& source);
 
 /**
+* Load an encrypted key from memory.
+* @param source the byte buffer containing the encoded key
+* @param get_passphrase a function that returns passphrases
+* @return loaded private key object
+*/
+BOTAN_PUBLIC_API(3, 0)
+std::unique_ptr<Private_Key> load_key(std::span<const uint8_t> source,
+                                      const std::function<std::string()>& get_passphrase);
+
+/** Load an encrypted key from memory.
+* @param source the byte buffer containing the encoded key
+* @param pass the passphrase to decrypt the key
+* @return loaded private key object
+*/
+BOTAN_PUBLIC_API(3, 0)
+std::unique_ptr<Private_Key> load_key(std::span<const uint8_t> source, std::string_view pass);
+
+/** Load an unencrypted key from memory.
+* @param source the byte buffer containing the encoded key
+* @return loaded private key object
+*/
+BOTAN_PUBLIC_API(3, 0)
+std::unique_ptr<Private_Key> load_key(std::span<const uint8_t> source);
+
+/**
 * Copy an existing encoded key object.
 * @param key the key to copy
 * @return new copy of the key
 */
-BOTAN_PUBLIC_API(2,3)
-std::unique_ptr<Private_Key> copy_key(const Private_Key& key);
-
+inline std::unique_ptr<Private_Key> copy_key(const Private_Key& key) {
+   DataSource_Memory source(key.private_key_info());
+   return PKCS8::load_key(source);
 }
 
-}
+}  // namespace PKCS8
+
+}  // namespace Botan
 
 #endif

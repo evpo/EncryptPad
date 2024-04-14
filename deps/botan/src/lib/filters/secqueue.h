@@ -12,15 +12,13 @@
 #include <botan/data_src.h>
 #include <botan/filter.h>
 
-BOTAN_FUTURE_INTERNAL_HEADER(secqueue.h)
-
 namespace Botan {
 
 /**
 * A queue that knows how to zeroize itself
 */
-class BOTAN_PUBLIC_API(2,0) SecureQueue final : public Fanout_Filter, public DataSource
-   {
+class BOTAN_TEST_API SecureQueue final : public Fanout_Filter,
+                                         public DataSource {
    public:
       std::string name() const override { return "Queue"; }
 
@@ -49,6 +47,9 @@ class BOTAN_PUBLIC_API(2,0) SecureQueue final : public Fanout_Filter, public Dat
       */
       SecureQueue& operator=(const SecureQueue& other);
 
+      SecureQueue& operator=(SecureQueue&& other) = delete;
+      SecureQueue(SecureQueue&& other) = delete;
+
       /**
       * SecureQueue default constructor (creates empty queue)
       */
@@ -60,15 +61,15 @@ class BOTAN_PUBLIC_API(2,0) SecureQueue final : public Fanout_Filter, public Dat
       */
       SecureQueue(const SecureQueue& other);
 
-      ~SecureQueue() { destroy(); }
+      ~SecureQueue() override { destroy(); }
 
    private:
       void destroy();
       size_t m_bytes_read;
       class SecureQueueNode* m_head;
       class SecureQueueNode* m_tail;
-   };
+};
 
-}
+}  // namespace Botan
 
 #endif

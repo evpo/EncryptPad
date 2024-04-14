@@ -10,6 +10,8 @@
 
 #include <botan/cipher_mode.h>
 
+#include <span>
+
 namespace Botan {
 
 /**
@@ -19,8 +21,7 @@ namespace Botan {
 * which is not included in the ciphertext (for instance a sequence
 * number).
 */
-class BOTAN_PUBLIC_API(2,0) AEAD_Mode : public Cipher_Mode
-   {
+class BOTAN_PUBLIC_API(2, 0) AEAD_Mode : public Cipher_Mode {
    public:
       /**
       * Create an AEAD mode
@@ -29,9 +30,9 @@ class BOTAN_PUBLIC_API(2,0) AEAD_Mode : public Cipher_Mode
       * @param provider optional specification for provider to use
       * @return an AEAD mode or a null pointer if not available
       */
-      static std::unique_ptr<AEAD_Mode> create(const std::string& algo,
+      static std::unique_ptr<AEAD_Mode> create(std::string_view algo,
                                                Cipher_Dir direction,
-                                               const std::string& provider = "");
+                                               std::string_view provider = "");
 
       /**
       * Create an AEAD mode, or throw
@@ -40,11 +41,9 @@ class BOTAN_PUBLIC_API(2,0) AEAD_Mode : public Cipher_Mode
       * @param provider optional specification for provider to use
       * @return an AEAD mode, or throw an exception
       */
-      static std::unique_ptr<AEAD_Mode> create_or_throw(const std::string& algo,
+      static std::unique_ptr<AEAD_Mode> create_or_throw(std::string_view algo,
                                                         Cipher_Dir direction,
-                                                        const std::string& provider = "");
-
-      bool authenticated() const override { return true; }
+                                                        std::string_view provider = "");
 
       /**
       * Set associated data that is not included in the ciphertext but
@@ -56,9 +55,10 @@ class BOTAN_PUBLIC_API(2,0) AEAD_Mode : public Cipher_Mode
       * once (after set_key) is the optimum.
       *
       * @param ad the associated data
-      * @param ad_len length of add in bytes
       */
-      virtual void set_associated_data(const uint8_t ad[], size_t ad_len) = 0;
+      void set_associated_data(std::span<const uint8_t> ad) { set_associated_data_n(0, ad); }
+
+      void set_associated_data(const uint8_t ad[], size_t ad_len) { set_associated_data(std::span(ad, ad_len)); }
 
       /**
       * Set associated data that is not included in the ciphertext but
@@ -71,12 +71,16 @@ class BOTAN_PUBLIC_API(2,0) AEAD_Mode : public Cipher_Mode
       *
       * Some AEADs (namely SIV) support multiple AD inputs. For
       * all other modes only nominal AD input 0 is supported; all
-      * other values of i will cause an exception.
+      * other values of idx will cause an exception.
       *
+      * Derived AEADs must implement this. For AEADs where
+      * `maximum_associated_data_inputs()` returns 1 (the default), the
+      * @p idx must simply be ignored.
+      *
+      * @param idx which associated data to set
       * @param ad the associated data
-      * @param ad_len length of add in bytes
       */
-      virtual void set_associated_data_n(size_t i, const uint8_t ad[], size_t ad_len);
+      virtual void set_associated_data_n(size_t idx, std::span<const uint8_t> ad) = 0;
 
       /**
       * Returns the maximum supported number of associated data inputs which
@@ -102,11 +106,11 @@ class BOTAN_PUBLIC_API(2,0) AEAD_Mode : public Cipher_Mode
       *
       * @param ad the associated data
       */
-      template<typename Alloc>
-      void set_associated_data_vec(const std::vector<uint8_t, Alloc>& ad)
-         {
-         set_associated_data(ad.data(), ad.size());
-         }
+      template <typename Alloc>
+      BOTAN_DEPRECATED("Simply use set_associated_data")
+      void set_associated_data_vec(const std::vector<uint8_t, Alloc>& ad) {
+         set_associated_data(ad);
+      }
 
       /**
       * Set associated data that is not included in the ciphertext but
@@ -117,11 +121,9 @@ class BOTAN_PUBLIC_API(2,0) AEAD_Mode : public Cipher_Mode
       *
       * @param ad the associated data
       */
-      template<typename Alloc>
-      void set_ad(const std::vector<uint8_t, Alloc>& ad)
-         {
-         set_associated_data(ad.data(), ad.size());
-         }
+      BOTAN_DEPRECATED("Please use set_associated_data")
+
+      void set_ad(std::span<const uint8_t> ad) { set_associated_data(ad); }
 
       /**
       * @return default AEAD nonce size (a commonly supported value among AEAD
@@ -129,19 +131,20 @@ class BOTAN_PUBLIC_API(2,0) AEAD_Mode : public Cipher_Mode
       */
       size_t default_nonce_length() const override { return 12; }
 
-      virtual ~AEAD_Mode() {}
-   };
+      ~AEAD_Mode() override = default;
+};
 
 /**
 * Get an AEAD mode by name (eg "AES-128/GCM" or "Serpent/EAX")
 * @param name AEAD name
-* @param direction ENCRYPTION or DECRYPTION
+* @param direction Cipher_Dir::Encryption or Cipher_Dir::Decryption
 */
-inline AEAD_Mode* get_aead(const std::string& name, Cipher_Dir direction)
-   {
-   return AEAD_Mode::create(name, direction, "").release();
-   }
+BOTAN_DEPRECATED("Use AEAD_Mode::create")
 
+inline AEAD_Mode* get_aead(std::string_view name, Cipher_Dir direction) {
+   return AEAD_Mode::create(name, direction, "").release();
 }
+
+}  // namespace Botan
 
 #endif

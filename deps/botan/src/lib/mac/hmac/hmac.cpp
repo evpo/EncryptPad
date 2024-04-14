@@ -6,49 +6,50 @@
 * Botan is released under the Simplified BSD License (see license.txt)
 */
 
-#include <botan/hmac.h>
+#include <botan/internal/hmac.h>
+
 #include <botan/internal/ct_utils.h>
+#include <botan/internal/fmt.h>
 
 namespace Botan {
 
 /*
 * Update a HMAC Calculation
 */
-void HMAC::add_data(const uint8_t input[], size_t length)
-   {
-   verify_key_set(m_ikey.empty() == false);
-   m_hash->update(input, length);
-   }
+void HMAC::add_data(std::span<const uint8_t> input) {
+   assert_key_material_set();
+   m_hash->update(input);
+}
 
 /*
 * Finalize a HMAC Calculation
 */
-void HMAC::final_result(uint8_t mac[])
-   {
-   verify_key_set(m_okey.empty() == false);
+void HMAC::final_result(std::span<uint8_t> mac) {
+   assert_key_material_set();
    m_hash->final(mac);
    m_hash->update(m_okey);
-   m_hash->update(mac, m_hash_output_length);
+   m_hash->update(mac.first(m_hash_output_length));
    m_hash->final(mac);
    m_hash->update(m_ikey);
-   }
+}
 
-Key_Length_Specification HMAC::key_spec() const
-   {
+Key_Length_Specification HMAC::key_spec() const {
    // Support very long lengths for things like PBKDF2 and the TLS PRF
    return Key_Length_Specification(0, 4096);
-   }
+}
 
-size_t HMAC::output_length() const
-   {
+size_t HMAC::output_length() const {
    return m_hash_output_length;
-   }
+}
+
+bool HMAC::has_keying_material() const {
+   return !m_okey.empty();
+}
 
 /*
 * HMAC Key Schedule
 */
-void HMAC::key_schedule(const uint8_t key[], size_t length)
-   {
+void HMAC::key_schedule(std::span<const uint8_t> key) {
    const uint8_t ipad = 0x36;
    const uint8_t opad = 0x5C;
 
@@ -77,74 +78,64 @@ void HMAC::key_schedule(const uint8_t key[], size_t length)
    * trivial to simply check.
    */
 
-   if(length > m_hash_block_size)
-      {
-      m_hash->update(key, length);
+   if(key.size() > m_hash_block_size) {
+      m_hash->update(key);
       m_hash->final(m_ikey.data());
-      }
-   else if(length > 0)
-      {
-      for(size_t i = 0, i_mod_length = 0; i != m_hash_block_size; ++i)
-         {
+   } else if(!key.empty()) {
+      for(size_t i = 0, i_mod_length = 0; i != m_hash_block_size; ++i) {
          /*
          access key[i % length] but avoiding division due to variable
          time computation on some processors.
          */
-         auto needs_reduction = CT::Mask<size_t>::is_lte(length, i_mod_length);
+         auto needs_reduction = CT::Mask<size_t>::is_lte(key.size(), i_mod_length);
          i_mod_length = needs_reduction.select(0, i_mod_length);
          const uint8_t kb = key[i_mod_length];
 
-         auto in_range = CT::Mask<size_t>::is_lt(i, length);
+         auto in_range = CT::Mask<size_t>::is_lt(i, key.size());
          m_ikey[i] = static_cast<uint8_t>(in_range.if_set_return(kb));
          i_mod_length += 1;
-         }
       }
+   }
 
-   for(size_t i = 0; i != m_hash_block_size; ++i)
-      {
+   for(size_t i = 0; i != m_hash_block_size; ++i) {
       m_ikey[i] ^= ipad;
       m_okey[i] = m_ikey[i] ^ ipad ^ opad;
-      }
+   }
 
    m_hash->update(m_ikey);
-   }
+}
 
 /*
 * Clear memory of sensitive data
 */
-void HMAC::clear()
-   {
+void HMAC::clear() {
    m_hash->clear();
    zap(m_ikey);
    zap(m_okey);
-   }
+}
 
 /*
 * Return the name of this type
 */
-std::string HMAC::name() const
-   {
-   return "HMAC(" + m_hash->name() + ")";
-   }
+std::string HMAC::name() const {
+   return fmt("HMAC({})", m_hash->name());
+}
 
 /*
-* Return a clone of this object
+* Return a new_object of this object
 */
-MessageAuthenticationCode* HMAC::clone() const
-   {
-   return new HMAC(m_hash->clone());
-   }
+std::unique_ptr<MessageAuthenticationCode> HMAC::new_object() const {
+   return std::make_unique<HMAC>(m_hash->new_object());
+}
 
 /*
 * HMAC Constructor
 */
-HMAC::HMAC(HashFunction* hash) :
-   m_hash(hash),
-   m_hash_output_length(m_hash->output_length()),
-   m_hash_block_size(m_hash->hash_block_size())
-   {
-   BOTAN_ARG_CHECK(m_hash_block_size >= m_hash_output_length,
-                   "HMAC is not compatible with this hash function");
-   }
-
+HMAC::HMAC(std::unique_ptr<HashFunction> hash) :
+      m_hash(std::move(hash)),
+      m_hash_output_length(m_hash->output_length()),
+      m_hash_block_size(m_hash->hash_block_size()) {
+   BOTAN_ARG_CHECK(m_hash_block_size >= m_hash_output_length, "HMAC is not compatible with this hash function");
 }
+
+}  // namespace Botan

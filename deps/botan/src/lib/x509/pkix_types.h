@@ -13,48 +13,42 @@
 
 #include <botan/asn1_obj.h>
 #include <botan/pkix_enums.h>
-#include <vector>
-#include <string>
 #include <iosfwd>
 #include <map>
 #include <set>
+#include <string>
+#include <string_view>
+#include <vector>
 
 namespace Botan {
 
 class X509_Certificate;
-class Data_Store;
 class Public_Key;
 
-/**
-* Check that key constraints are permitted for a specific public key.
-* @param pub_key the public key on which the constraints shall be enforced on
-* @param constraints the constraints that shall be enforced on the key
-* @throw Invalid_Argument if the given constraints are not permitted for this key
-*/
-BOTAN_PUBLIC_API(2,0) void verify_cert_constraints_valid_for_key_type(const Public_Key& pub_key,
-                                                                      Key_Constraints constraints);
+BOTAN_DEPRECATED("Use Key_Constraints::to_string")
 
-std::string BOTAN_PUBLIC_API(2,0) key_constraints_to_string(Key_Constraints);
+inline std::string key_constraints_to_string(Key_Constraints c) {
+   return c.to_string();
+}
 
 /**
 * Distinguished Name
 */
-class BOTAN_PUBLIC_API(2,0) X509_DN final : public ASN1_Object
-   {
+class BOTAN_PUBLIC_API(2, 0) X509_DN final : public ASN1_Object {
    public:
       X509_DN() = default;
 
-      explicit X509_DN(const std::multimap<OID, std::string>& args)
-         {
-         for(auto i : args)
+      explicit X509_DN(const std::multimap<OID, std::string>& args) {
+         for(const auto& i : args) {
             add_attribute(i.first, i.second);
          }
+      }
 
-      explicit X509_DN(const std::multimap<std::string, std::string>& args)
-         {
-         for(auto i : args)
+      explicit X509_DN(const std::multimap<std::string, std::string>& args) {
+         for(const auto& i : args) {
             add_attribute(i.first, i.second);
          }
+      }
 
       void encode_into(DER_Encoder&) const override;
       void decode_from(BER_Decoder&) override;
@@ -67,29 +61,28 @@ class BOTAN_PUBLIC_API(2,0) X509_DN final : public ASN1_Object
       */
       const std::vector<uint8_t>& get_bits() const { return m_dn_bits; }
 
+      std::vector<uint8_t> DER_encode() const;
+
       bool empty() const { return m_rdn.empty(); }
 
       std::string to_string() const;
 
-      const std::vector<std::pair<OID,ASN1_String>>& dn_info() const { return m_rdn; }
+      const std::vector<std::pair<OID, ASN1_String>>& dn_info() const { return m_rdn; }
 
       std::multimap<OID, std::string> get_attributes() const;
       std::multimap<std::string, std::string> contents() const;
 
-      bool has_field(const std::string& attr) const;
-      std::vector<std::string> get_attribute(const std::string& attr) const;
-      std::string get_first_attribute(const std::string& attr) const;
+      bool has_field(std::string_view attr) const;
+      std::vector<std::string> get_attribute(std::string_view attr) const;
+      std::string get_first_attribute(std::string_view attr) const;
 
-      void add_attribute(const std::string& key, const std::string& val);
+      void add_attribute(std::string_view key, std::string_view val);
 
-      void add_attribute(const OID& oid, const std::string& val)
-         {
-         add_attribute(oid, ASN1_String(val));
-         }
+      void add_attribute(const OID& oid, std::string_view val) { add_attribute(oid, ASN1_String(val)); }
 
       void add_attribute(const OID& oid, const ASN1_String& val);
 
-      static std::string deref_info_field(const std::string& key);
+      static std::string deref_info_field(std::string_view key);
 
       /**
       * Lookup upper bounds in characters for the length of distinguished name fields
@@ -101,89 +94,82 @@ class BOTAN_PUBLIC_API(2,0) X509_DN final : public ASN1_Object
       static size_t lookup_ub(const OID& oid);
 
    private:
-      std::vector<std::pair<OID,ASN1_String>> m_rdn;
+      std::vector<std::pair<OID, ASN1_String>> m_rdn;
       std::vector<uint8_t> m_dn_bits;
-   };
+};
 
-bool BOTAN_PUBLIC_API(2,0) operator==(const X509_DN& dn1, const X509_DN& dn2);
-bool BOTAN_PUBLIC_API(2,0) operator!=(const X509_DN& dn1, const X509_DN& dn2);
+bool BOTAN_PUBLIC_API(2, 0) operator==(const X509_DN& dn1, const X509_DN& dn2);
+bool BOTAN_PUBLIC_API(2, 0) operator!=(const X509_DN& dn1, const X509_DN& dn2);
 
 /*
 The ordering here is arbitrary and may change from release to release.
 It is intended for allowing DNs as keys in std::map and similiar containers
 */
-bool BOTAN_PUBLIC_API(2,0) operator<(const X509_DN& dn1, const X509_DN& dn2);
+bool BOTAN_PUBLIC_API(2, 0) operator<(const X509_DN& dn1, const X509_DN& dn2);
 
-BOTAN_PUBLIC_API(2,0) std::ostream& operator<<(std::ostream& out, const X509_DN& dn);
-BOTAN_PUBLIC_API(2,0) std::istream& operator>>(std::istream& in, X509_DN& dn);
+BOTAN_PUBLIC_API(2, 0) std::ostream& operator<<(std::ostream& out, const X509_DN& dn);
+BOTAN_PUBLIC_API(2, 0) std::istream& operator>>(std::istream& in, X509_DN& dn);
 
 /**
 * Alternative Name
 */
-class BOTAN_PUBLIC_API(2,0) AlternativeName final : public ASN1_Object
-   {
+class BOTAN_PUBLIC_API(2, 0) AlternativeName final : public ASN1_Object {
    public:
       void encode_into(DER_Encoder&) const override;
       void decode_from(BER_Decoder&) override;
 
       std::multimap<std::string, std::string> contents() const;
 
-      bool has_field(const std::string& attr) const;
-      std::vector<std::string> get_attribute(const std::string& attr) const;
+      bool has_field(std::string_view attr) const;
+      std::vector<std::string> get_attribute(std::string_view attr) const;
 
-      std::string get_first_attribute(const std::string& attr) const;
+      std::string get_first_attribute(std::string_view attr) const;
 
-      void add_attribute(const std::string& type, const std::string& value);
-      void add_othername(const OID& oid, const std::string& value, ASN1_Tag type);
+      void add_attribute(std::string_view type, std::string_view value);
+      void add_othername(const OID& oid, std::string_view value, ASN1_Type type);
 
-      const std::multimap<std::string, std::string>& get_attributes() const
-         {
-         return m_alt_info;
-         }
+      const std::multimap<std::string, std::string, std::less<>>& get_attributes() const { return m_alt_info; }
 
-      const std::multimap<OID, ASN1_String>& get_othernames() const
-         {
-         return m_othernames;
-         }
+      const std::multimap<OID, ASN1_String>& get_othernames() const { return m_othernames; }
 
       X509_DN dn() const;
 
       bool has_items() const;
 
-      AlternativeName(const std::string& email_addr = "",
-                      const std::string& uri = "",
-                      const std::string& dns = "",
-                      const std::string& ip_address = "");
+      AlternativeName(std::string_view email_addr = "",
+                      std::string_view uri = "",
+                      std::string_view dns = "",
+                      std::string_view ip_address = "");
+
    private:
-      std::multimap<std::string, std::string> m_alt_info;
+      std::multimap<std::string, std::string, std::less<>> m_alt_info;
       std::multimap<OID, ASN1_String> m_othernames;
-   };
+};
 
 /**
 * Attribute
 */
-class BOTAN_PUBLIC_API(2,0) Attribute final : public ASN1_Object
-   {
+class BOTAN_PUBLIC_API(2, 0) Attribute final : public ASN1_Object {
    public:
       void encode_into(DER_Encoder& to) const override;
       void decode_from(BER_Decoder& from) override;
 
       Attribute() = default;
-      Attribute(const OID&, const std::vector<uint8_t>&);
-      Attribute(const std::string&, const std::vector<uint8_t>&);
+      Attribute(const OID& oid, const std::vector<uint8_t>& params);
+      Attribute(std::string_view oid_str, const std::vector<uint8_t>& params);
 
-      const OID& get_oid() const { return oid; }
+      const OID& oid() const { return m_oid; }
 
-      const std::vector<uint8_t>& get_parameters() const { return parameters; }
+      const std::vector<uint8_t>& parameters() const { return m_parameters; }
 
-   BOTAN_DEPRECATED_PUBLIC_MEMBER_VARIABLES:
-      /*
-      * These values are public for historical reasons, but in a future release
-      * they will be made private. Do not access them.
-      */
-      OID oid;
-      std::vector<uint8_t> parameters;
-   };
+      const OID& object_identifier() const { return m_oid; }
+
+      const std::vector<uint8_t>& get_parameters() const { return m_parameters; }
+
+   private:
+      OID m_oid;
+      std::vector<uint8_t> m_parameters;
+};
 
 /**
 * @brief X.509 GeneralName Type
@@ -192,17 +178,15 @@ class BOTAN_PUBLIC_API(2,0) Attribute final : public ASN1_Object
 * encoding. Allows matching GeneralNames against each other using
 * the rules laid out in the RFC 5280, sec. 4.2.1.10 (Name Contraints).
 */
-class BOTAN_PUBLIC_API(2,0) GeneralName final : public ASN1_Object
-   {
+class BOTAN_PUBLIC_API(2, 0) GeneralName final : public ASN1_Object {
    public:
-      enum MatchResult : int
-            {
-            All,
-            Some,
-            None,
-            NotFound,
-            UnknownType,
-            };
+      enum MatchResult : int {
+         All,
+         Some,
+         None,
+         NotFound,
+         UnknownType,
+      };
 
       /**
       * Creates an empty GeneralName.
@@ -243,7 +227,7 @@ class BOTAN_PUBLIC_API(2,0) GeneralName final : public ASN1_Object
       bool matches_dns(const std::string&) const;
       bool matches_dn(const std::string&) const;
       bool matches_ip(const std::string&) const;
-   };
+};
 
 std::ostream& operator<<(std::ostream& os, const GeneralName& gn);
 
@@ -254,14 +238,12 @@ std::ostream& operator<<(std::ostream& os, const GeneralName& gn);
 * length to a GeneralName to form a constraint. The length limits
 * are currently unused.
 */
-class BOTAN_PUBLIC_API(2,0) GeneralSubtree final : public ASN1_Object
-   {
+class BOTAN_PUBLIC_API(2, 0) GeneralSubtree final : public ASN1_Object {
    public:
       /**
       * Creates an empty name constraint.
       */
-      GeneralSubtree() : m_base(), m_minimum(0), m_maximum(std::numeric_limits<std::size_t>::max())
-      {}
+      GeneralSubtree() : m_base(), m_minimum(0), m_maximum(std::numeric_limits<std::size_t>::max()) {}
 
       /***
       * Creates a new name constraint.
@@ -269,9 +251,7 @@ class BOTAN_PUBLIC_API(2,0) GeneralSubtree final : public ASN1_Object
       * @param min minimum path length
       * @param max maximum path length
       */
-      GeneralSubtree(const GeneralName& base, size_t min, size_t max)
-      : m_base(base), m_minimum(min), m_maximum(max)
-      {}
+      GeneralSubtree(const GeneralName& base, size_t min, size_t max) : m_base(base), m_minimum(min), m_maximum(max) {}
 
       /**
       * Creates a new name constraint for its string format.
@@ -302,7 +282,7 @@ class BOTAN_PUBLIC_API(2,0) GeneralSubtree final : public ASN1_Object
       GeneralName m_base;
       size_t m_minimum;
       size_t m_maximum;
-   };
+};
 
 std::ostream& operator<<(std::ostream& os, const GeneralSubtree& gs);
 
@@ -311,8 +291,7 @@ std::ostream& operator<<(std::ostream& os, const GeneralSubtree& gs);
 *
 * Wraps the Name Constraints associated with a certificate.
 */
-class BOTAN_PUBLIC_API(2,0) NameConstraints final
-   {
+class BOTAN_PUBLIC_API(2, 0) NameConstraints final {
    public:
       /**
       * Creates an empty name NameConstraints.
@@ -325,9 +304,8 @@ class BOTAN_PUBLIC_API(2,0) NameConstraints final
       * @param excluded_subtrees names for which the certificate is not permitted
       */
       NameConstraints(std::vector<GeneralSubtree>&& permitted_subtrees,
-                    std::vector<GeneralSubtree>&& excluded_subtrees)
-      : m_permitted_subtrees(permitted_subtrees), m_excluded_subtrees(excluded_subtrees)
-      {}
+                      std::vector<GeneralSubtree>&& excluded_subtrees) :
+            m_permitted_subtrees(permitted_subtrees), m_excluded_subtrees(excluded_subtrees) {}
 
       /**
       * @return permitted names
@@ -342,13 +320,12 @@ class BOTAN_PUBLIC_API(2,0) NameConstraints final
    private:
       std::vector<GeneralSubtree> m_permitted_subtrees;
       std::vector<GeneralSubtree> m_excluded_subtrees;
-   };
+};
 
 /**
 * X.509 Certificate Extension
 */
-class BOTAN_PUBLIC_API(2,0) Certificate_Extension
-   {
+class BOTAN_PUBLIC_API(2, 0) Certificate_Extension {
    public:
       /**
       * @return OID representing this extension
@@ -367,16 +344,8 @@ class BOTAN_PUBLIC_API(2,0) Certificate_Extension
       * Make a copy of this extension
       * @return copy of this
       */
-      virtual Certificate_Extension* copy() const = 0;
 
-      /*
-      * Add the contents of this extension into the information
-      * for the subject and/or issuer, as necessary.
-      * @param subject the subject info
-      * @param issuer the issuer info
-      */
-      virtual void contents_to(Data_Store& subject,
-                               Data_Store& issuer) const = 0;
+      virtual std::unique_ptr<Certificate_Extension> copy() const = 0;
 
       /*
       * Callback visited during path validation.
@@ -393,24 +362,27 @@ class BOTAN_PUBLIC_API(2,0) Certificate_Extension
       * @param cert_path Certificate path which is currently validated
       * @param pos Position of subject certificate in cert_path
       */
-      virtual void validate(const X509_Certificate& subject, const X509_Certificate& issuer,
-            const std::vector<std::shared_ptr<const X509_Certificate>>& cert_path,
-            std::vector<std::set<Certificate_Status_Code>>& cert_status,
-            size_t pos);
+      virtual void validate(const X509_Certificate& subject,
+                            const X509_Certificate& issuer,
+                            const std::vector<X509_Certificate>& cert_path,
+                            std::vector<std::set<Certificate_Status_Code>>& cert_status,
+                            size_t pos);
 
-      virtual ~Certificate_Extension() {}
+      virtual ~Certificate_Extension() = default;
+
    protected:
       friend class Extensions;
+
       virtual bool should_encode() const { return true; }
+
       virtual std::vector<uint8_t> encode_inner() const = 0;
       virtual void decode_inner(const std::vector<uint8_t>&) = 0;
-   };
+};
 
 /**
 * X.509 Certificate Extension List
 */
-class BOTAN_PUBLIC_API(2,0) Extensions final : public ASN1_Object
-   {
+class BOTAN_PUBLIC_API(2, 0) Extensions final : public ASN1_Object {
    public:
       /**
       * Look up an object in the extensions, based on OID Returns
@@ -421,37 +393,27 @@ class BOTAN_PUBLIC_API(2,0) Extensions final : public ASN1_Object
       */
       const Certificate_Extension* get_extension_object(const OID& oid) const;
 
-      template<typename T>
-      const T* get_extension_object_as(const OID& oid = T::static_oid()) const
-         {
-         if(const Certificate_Extension* extn = get_extension_object(oid))
-            {
+      template <typename T>
+      const T* get_extension_object_as(const OID& oid = T::static_oid()) const {
+         if(const Certificate_Extension* extn = get_extension_object(oid)) {
             // Unknown_Extension oid_name is empty
-            if(extn->oid_name().empty())
-               {
+            if(extn->oid_name().empty()) {
                return nullptr;
-               }
-            else if(const T* extn_as_T = dynamic_cast<const T*>(extn))
-               {
+            } else if(const T* extn_as_T = dynamic_cast<const T*>(extn)) {
                return extn_as_T;
-               }
-            else
-               {
+            } else {
                throw Decoding_Error("Exception::get_extension_object_as dynamic_cast failed");
-               }
             }
+         }
 
          return nullptr;
-         }
+      }
 
       /**
       * Return the set of extensions in the order they appeared in the certificate
       * (or as they were added, if constructed)
       */
-      const std::vector<OID>& get_extension_oids() const
-         {
-         return m_extension_oids;
-         }
+      const std::vector<OID>& get_extension_oids() const { return m_extension_oids; }
 
       /**
       * Return true if an extension was set
@@ -469,9 +431,8 @@ class BOTAN_PUBLIC_API(2,0) Extensions final : public ASN1_Object
       */
       std::vector<uint8_t> get_extension_bits(const OID& oid) const;
 
-      void encode_into(class DER_Encoder&) const override;
-      void decode_from(class BER_Decoder&) override;
-      void contents_to(Data_Store&, Data_Store&) const;
+      void encode_into(DER_Encoder&) const override;
+      void decode_from(BER_Decoder&) override;
 
       /**
       * Adds a new extension to the list.
@@ -479,7 +440,7 @@ class BOTAN_PUBLIC_API(2,0) Extensions final : public ASN1_Object
       * @param critical whether this extension should be marked as critical
       * @throw Invalid_Argument if the extension is already present in the list
       */
-      void add(Certificate_Extension* extn, bool critical = false);
+      void add(std::unique_ptr<Certificate_Extension> extn, bool critical = false);
 
       /**
       * Adds a new extension to the list unless it already exists. If the extension
@@ -489,14 +450,14 @@ class BOTAN_PUBLIC_API(2,0) Extensions final : public ASN1_Object
       * @param critical whether this extension should be marked as critical
       * @return true if the object was added false if the extension was already used
       */
-      bool add_new(Certificate_Extension* extn, bool critical = false);
+      bool add_new(std::unique_ptr<Certificate_Extension> extn, bool critical = false);
 
       /**
       * Adds an extension to the list or replaces it.
       * @param extn the certificate extension
       * @param critical whether this extension should be marked as critical
       */
-      void replace(Certificate_Extension* extn, bool critical = false);
+      void replace(std::unique_ptr<Certificate_Extension> extn, bool critical = false);
 
       /**
       * Remove an extension from the list. Returns true if the
@@ -523,23 +484,20 @@ class BOTAN_PUBLIC_API(2,0) Extensions final : public ASN1_Object
       *
       * @return Pointer to new extension with oid, nullptr if not found.
       */
-      template<typename T>
-      std::unique_ptr<T> get_raw(const OID& oid) const
-         {
+      template <typename T>
+      std::unique_ptr<T> get_raw(const OID& oid) const {
          auto extn_info = m_extension_info.find(oid);
 
-         if(extn_info != m_extension_info.end())
-            {
+         if(extn_info != m_extension_info.end()) {
             // Unknown_Extension oid_name is empty
-            if(extn_info->second.obj().oid_name() == "")
-               {
-               std::unique_ptr<T> ext(new T);
+            if(extn_info->second.obj().oid_name().empty()) {
+               auto ext = std::make_unique<T>();
                ext->decode_inner(extn_info->second.bits());
                return ext;
-               }
             }
-         return nullptr;
          }
+         return nullptr;
+      }
 
       /**
       * Returns a copy of the list of extensions together with the corresponding
@@ -556,7 +514,7 @@ class BOTAN_PUBLIC_API(2,0) Extensions final : public ASN1_Object
       */
       std::map<OID, std::pair<std::vector<uint8_t>, bool>> extensions_raw() const;
 
-      Extensions() {}
+      Extensions() = default;
 
       Extensions(const Extensions&) = default;
       Extensions& operator=(const Extensions&) = default;
@@ -565,51 +523,39 @@ class BOTAN_PUBLIC_API(2,0) Extensions final : public ASN1_Object
       Extensions& operator=(Extensions&&) = default;
 
    private:
-      static std::unique_ptr<Certificate_Extension>
-         create_extn_obj(const OID& oid,
-                         bool critical,
-                         const std::vector<uint8_t>& body);
+      static std::unique_ptr<Certificate_Extension> create_extn_obj(const OID& oid,
+                                                                    bool critical,
+                                                                    const std::vector<uint8_t>& body);
 
-      class Extensions_Info
-         {
+      class Extensions_Info {
          public:
-            Extensions_Info() {}
-
-            Extensions_Info(bool critical,
-                            Certificate_Extension* ext) :
-               m_obj(ext),
-               m_bits(m_obj->encode_inner()),
-               m_critical(critical)
-               {
-               }
+            Extensions_Info(bool critical, std::unique_ptr<Certificate_Extension> ext) :
+                  m_obj(std::move(ext)), m_bits(m_obj->encode_inner()), m_critical(critical) {}
 
             Extensions_Info(bool critical,
                             const std::vector<uint8_t>& encoding,
-                            Certificate_Extension* ext) :
-               m_obj(ext),
-               m_bits(encoding),
-               m_critical(critical)
-               {
-               }
+                            std::unique_ptr<Certificate_Extension> ext) :
+                  m_obj(std::move(ext)), m_bits(encoding), m_critical(critical) {}
 
             bool is_critical() const { return m_critical; }
+
             const std::vector<uint8_t>& bits() const { return m_bits; }
-            const Certificate_Extension& obj() const
-               {
+
+            const Certificate_Extension& obj() const {
                BOTAN_ASSERT_NONNULL(m_obj.get());
-               return *m_obj.get();
-               }
+               return *m_obj;
+            }
 
          private:
             std::shared_ptr<Certificate_Extension> m_obj;
             std::vector<uint8_t> m_bits;
             bool m_critical = false;
-         };
+      };
 
       std::vector<OID> m_extension_oids;
       std::map<OID, Extensions_Info> m_extension_info;
-   };
+};
 
-}
+}  // namespace Botan
 
 #endif

@@ -8,28 +8,45 @@
 #ifndef BOTAN_X509_CA_H_
 #define BOTAN_X509_CA_H_
 
-#include <botan/x509cert.h>
 #include <botan/x509_crl.h>
+#include <botan/x509cert.h>
 #include <chrono>
 #include <map>
 
-#if defined(BOTAN_HAS_SYSTEM_RNG)
-  #include <botan/system_rng.h>
-#endif
-
 namespace Botan {
 
+class RandomNumberGenerator;
 class BigInt;
 class Private_Key;
 class PKCS10_Request;
 class PK_Signer;
 
 /**
-* This class represents X.509 Certificate Authorities (CAs).
+* An interface capable of creating new X.509 certificates
 */
-class BOTAN_PUBLIC_API(2,0) X509_CA final
-   {
+class BOTAN_PUBLIC_API(2, 0) X509_CA final {
    public:
+      /**
+      * Return the algorithm identifier used to identify signatures that
+      * this CA will create.
+      */
+      const AlgorithmIdentifier& algorithm_identifier() const { return m_ca_sig_algo; }
+
+      /**
+      * Return the CA's certificate
+      */
+      const X509_Certificate& ca_certificate() const { return m_ca_cert; }
+
+      /**
+      * Return the hash function the CA is using to sign with
+      */
+      const std::string& hash_function() const { return m_hash_fn; }
+
+      /**
+      * Return the signature object this CA uses to sign with
+      */
+      PK_Signer& signature_op() { return *m_signer; }
+
       /**
       * Sign a PKCS#10 Request.
       * @param req the request to sign
@@ -57,12 +74,6 @@ class BOTAN_PUBLIC_API(2,0) X509_CA final
                                     const BigInt& serial_number,
                                     const X509_Time& not_before,
                                     const X509_Time& not_after) const;
-
-      /**
-      * Get the certificate of this CA.
-      * @return CA certificate
-      */
-      X509_Certificate ca_certificate() const;
 
       /**
       * Create a new and empty CRL for this CA.
@@ -98,8 +109,7 @@ class BOTAN_PUBLIC_API(2,0) X509_CA final
       * as the offset from the current time
       * @return new CRL
       */
-      X509_CRL new_crl(RandomNumberGenerator& rng,
-                       uint32_t next_update = 604800) const;
+      X509_CRL new_crl(RandomNumberGenerator& rng, uint32_t next_update = 604800) const;
 
       /**
       * Create a new CRL by with additional entries.
@@ -115,6 +125,17 @@ class BOTAN_PUBLIC_API(2,0) X509_CA final
                           uint32_t next_update = 604800) const;
 
       /**
+      * Return the set of extensions that will be used for a certificate.
+      *
+      * This is a helper method that is used internally. It is also exposed
+      * so you can call it directly and then modify the extensions before
+      * creating a certificate using X509_CA::make_cert.
+      */
+      static Extensions choose_extensions(const PKCS10_Request& req,
+                                          const X509_Certificate& ca_certificate,
+                                          std::string_view hash_fn);
+
+      /**
       * Interface for creating new certificates
       * @param signer a signing object
       * @param rng a random number generator
@@ -127,7 +148,7 @@ class BOTAN_PUBLIC_API(2,0) X509_CA final
       * @param extensions an optional list of certificate extensions
       * @returns newly minted certificate
       */
-      static X509_Certificate make_cert(PK_Signer* signer,
+      static X509_Certificate make_cert(PK_Signer& signer,
                                         RandomNumberGenerator& rng,
                                         const AlgorithmIdentifier& sig_algo,
                                         const std::vector<uint8_t>& pub_key,
@@ -151,7 +172,7 @@ class BOTAN_PUBLIC_API(2,0) X509_CA final
       * @param extensions an optional list of certificate extensions
       * @returns newly minted certificate
       */
-      static X509_Certificate make_cert(PK_Signer* signer,
+      static X509_Certificate make_cert(PK_Signer& signer,
                                         RandomNumberGenerator& rng,
                                         const BigInt& serial_number,
                                         const AlgorithmIdentifier& sig_algo,
@@ -163,6 +184,23 @@ class BOTAN_PUBLIC_API(2,0) X509_CA final
                                         const Extensions& extensions);
 
       /**
+      * Create a new CA object with custom padding option
+      *
+      * This is mostly useful for creating RSA-PSS certificates
+      *
+      * @param ca_certificate the certificate of the CA
+      * @param key the private key of the CA
+      * @param hash_fn name of a hash function to use for signing
+      * @param padding_method name of the signature padding method to use
+      * @param rng the random generator to use
+      */
+      X509_CA(const X509_Certificate& ca_certificate,
+              const Private_Key& key,
+              std::string_view hash_fn,
+              std::string_view padding_method,
+              RandomNumberGenerator& rng);
+
+      /**
       * Create a new CA object.
       * @param ca_certificate the certificate of the CA
       * @param key the private key of the CA
@@ -171,8 +209,9 @@ class BOTAN_PUBLIC_API(2,0) X509_CA final
       */
       X509_CA(const X509_Certificate& ca_certificate,
               const Private_Key& key,
-              const std::string& hash_fn,
-              RandomNumberGenerator& rng);
+              std::string_view hash_fn,
+              RandomNumberGenerator& rng) :
+            X509_CA(ca_certificate, key, hash_fn, "", rng) {}
 
       /**
       * Create a new CA object.
@@ -182,20 +221,14 @@ class BOTAN_PUBLIC_API(2,0) X509_CA final
       * @param hash_fn name of a hash function to use for signing
       * @param rng the random generator to use
       */
-      X509_CA(const X509_Certificate& ca_certificate,
-              const Private_Key& key,
-              const std::map<std::string,std::string>& opts,
-              const std::string& hash_fn,
-              RandomNumberGenerator& rng);
+      BOTAN_DEPRECATED("Use version taking padding as an explicit arg")
 
-#if defined(BOTAN_HAS_SYSTEM_RNG)
-      BOTAN_DEPRECATED("Use version taking RNG object")
       X509_CA(const X509_Certificate& ca_certificate,
               const Private_Key& key,
-              const std::string& hash_fn) :
-         X509_CA(ca_certificate, key, hash_fn, system_rng())
-         {}
-#endif
+              const std::map<std::string, std::string>& opts,
+              std::string_view hash_fn,
+              RandomNumberGenerator& rng) :
+            X509_CA(ca_certificate, key, hash_fn, opts.at("padding"), rng) {}
 
       X509_CA(const X509_CA&) = delete;
       X509_CA& operator=(const X509_CA&) = delete;
@@ -216,46 +249,8 @@ class BOTAN_PUBLIC_API(2,0) X509_CA final
       X509_Certificate m_ca_cert;
       std::string m_hash_fn;
       std::unique_ptr<PK_Signer> m_signer;
-   };
+};
 
-/**
-* Choose the default signature format for a certain public key signature
-* scheme.
-* @param key will be the key to choose a padding scheme for
-* @param rng the random generator to use
-* @param hash_fn is the desired hash function
-* @param alg_id will be set to the chosen scheme
-* @return A PK_Signer object for generating signatures
-*/
-BOTAN_PUBLIC_API(2,0) PK_Signer* choose_sig_format(const Private_Key& key,
-                                       RandomNumberGenerator& rng,
-                                       const std::string& hash_fn,
-                                       AlgorithmIdentifier& alg_id);
-
-/**
-* @verbatim
-* Choose the default signature format for a certain public key signature
-* scheme.
-*
-* The only option recognized by opts at this moment is "padding"
-* Find an entry from src/build-data/oids.txt under [signature] of the form
-* <sig_algo>/<padding>[(<hash_algo>)] and add {"padding",<padding>}
-* to opts.
-* @endverbatim
-*
-* @param key will be the key to choose a padding scheme for
-* @param opts contains additional options for building the certificate
-* @param rng the random generator to use
-* @param hash_fn is the desired hash function
-* @param alg_id will be set to the chosen scheme
-* @return A PK_Signer object for generating signatures
-*/
-PK_Signer* choose_sig_format(const Private_Key& key,
-                             const std::map<std::string,std::string>& opts,
-                             RandomNumberGenerator& rng,
-                             const std::string& hash_fn,
-                             AlgorithmIdentifier& alg_id);
-
-}
+}  // namespace Botan
 
 #endif

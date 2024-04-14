@@ -9,17 +9,14 @@
 #define BOTAN_MLOCK_ALLOCATOR_H_
 
 #include <botan/types.h>
-#include <vector>
 #include <memory>
-
-BOTAN_FUTURE_INTERNAL_HEADER(locking_allocator.h)
+#include <vector>
 
 namespace Botan {
 
 class Memory_Pool;
 
-class BOTAN_PUBLIC_API(2,0) mlock_allocator final
-   {
+class mlock_allocator final {
    public:
       static mlock_allocator& instance();
 
@@ -31,15 +28,15 @@ class BOTAN_PUBLIC_API(2,0) mlock_allocator final
 
       mlock_allocator& operator=(const mlock_allocator&) = delete;
 
-   private:
       mlock_allocator();
 
       ~mlock_allocator();
 
+   private:
       std::unique_ptr<Memory_Pool> m_pool;
       std::vector<void*> m_locked_pages;
-   };
+};
 
-}
+}  // namespace Botan
 
 #endif

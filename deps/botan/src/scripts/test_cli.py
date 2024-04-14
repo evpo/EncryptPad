@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 """
 (C) 2018,2019 Jack Lloyd
@@ -6,31 +6,49 @@
 Botan is released under the Simplified BSD License (see license.txt)
 """
 
+import base64
+import binascii
+import json
+import logging
+import multiprocessing
+import optparse # pylint: disable=deprecated-module
+import os
+import platform
+import random
+import re
+import shutil
+import socket
+import ssl
 import subprocess
 import sys
-import os
-import logging
-import optparse # pylint: disable=deprecated-module
-import time
-import shutil
 import tempfile
-import re
-import random
-import json
-import binascii
-import multiprocessing
+import traceback
+import threading
+import time
 from multiprocessing.pool import ThreadPool
+from http.client import HTTPSConnection
+from http.server import HTTPServer, BaseHTTPRequestHandler
 
 # pylint: disable=global-statement,unused-argument
 
 CLI_PATH = None
+TEST_DATA_DIR = '.'
+ONLINE_TESTS = False
 TESTS_RUN = 0
 TESTS_FAILED = 0
 
-class TestLogHandler(logging.StreamHandler, object):
+def run_socket_tests():
+    # Some of the socket tests fail on FreeBSD CI, for reasons unknown.
+    # Connecting to the server port fails. Possibly a local firewall?
+    return platform.system().lower() != "freebsd"
+
+def run_online_tests():
+    return ONLINE_TESTS
+
+class TestLogHandler(logging.StreamHandler):
     def emit(self, record):
         # Do the default stuff first
-        super(TestLogHandler, self).emit(record)
+        super().emit(record)
         if record.levelno >= logging.ERROR:
             global TESTS_FAILED
             TESTS_FAILED += 1
@@ -48,10 +66,33 @@ def setup_logging(options):
     logging.getLogger().addHandler(lh)
     logging.getLogger().setLevel(log_level)
 
-def random_port_number():
-    return random.randint(1024, 65535)
+def port_for(service):
+    # use ports in range 63000-63100 for tests, which will hopefully
+    # avoid conflicts with local services
 
-def test_cli(cmd, cmd_options, expected_output=None, cmd_input=None, expected_stderr=None, use_drbg=True):
+    base_port = 63000
+
+    port_assignments = {
+        'tls_server': 0,
+        'tls_http_server': 1,
+        'tls_proxy': 2,
+        'tls_proxy_backend': 3,
+        'roughtime': 4,
+    }
+
+    if service in port_assignments:
+        return base_port + port_assignments.get(service)
+    else:
+        logging.warning("Unknown service '%s', update port_for function", service)
+        return base_port + random.randint(30, 100)
+
+def test_cli(cmd, cmd_options,
+             expected_output=None,
+             cmd_input=None,
+             expected_stderr=None,
+             use_drbg=True,
+             extra_env=None,
+             timeout=None):
     global TESTS_RUN
 
     TESTS_RUN += 1
@@ -71,34 +112,48 @@ def test_cli(cmd, cmd_options, expected_output=None, cmd_input=None, expected_st
 
     cmdline = [CLI_PATH, cmd] + drbg_options + opt_list
 
-    logging.debug("Executing '%s'" % (' '.join([CLI_PATH, cmd] + opt_list)))
+    logging.debug("Executing '%s'", ' '.join([CLI_PATH, cmd] + opt_list))
 
     stdout = None
     stderr = None
 
-    if cmd_input is None:
-        proc = subprocess.Popen(cmdline, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    try:
+        if cmd_input is None:
+            proc_env = None
+            if extra_env:
+                proc_env = os.environ
+                for (k,v) in extra_env.items():
+                    proc_env[k] = v
+
+            proc = subprocess.Popen(cmdline, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=proc_env)
+            (stdout, stderr) = proc.communicate(timeout=timeout)
+        else:
+            proc = subprocess.Popen(cmdline, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            (stdout, stderr) = proc.communicate(cmd_input.encode(), timeout=timeout)
+    except subprocess.TimeoutExpired:
+        logging.error("Reached timeout of %d seconds for command %s", timeout, cmdline)
+        proc.kill()
         (stdout, stderr) = proc.communicate()
-    else:
-        proc = subprocess.Popen(cmdline, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        (stdout, stderr) = proc.communicate(cmd_input.encode())
 
     stdout = stdout.decode('ascii').strip()
     stderr = stderr.decode('ascii').strip()
 
+    if "\r\n" in stdout:
+        stdout = stdout.replace("\r\n", "\n")
+
     if stderr:
         if expected_stderr is None:
-            logging.error("Got output on stderr %s (stdout was %s)", stderr, stdout)
+            logging.error("Got output on stderr %s (stdout was %s) for command %s", stderr, stdout, cmdline, stack_info=True)
         else:
             if stderr != expected_stderr:
-                logging.error("Got output on stderr %s which did not match expected value %s", stderr, expected_stderr)
+                logging.error("Got output on stderr %s which did not match expected value %s", stderr, expected_stderr, stack_info=True)
     else:
         if expected_stderr is not None:
-            logging.error('Expected output on stderr but got nothing')
+            logging.error('Expected output on stderr but got nothing', stack_info=True)
 
     if expected_output is not None:
         if stdout != expected_output:
-            logging.error("Got unexpected output running cmd %s %s", cmd, cmd_options)
+            logging.error("Got unexpected output running cmd %s %s", cmd, cmd_options, stack_info=True)
             logging.info("Output lengths %d vs expected %d", len(stdout), len(expected_output))
             logging.info("Got %s", stdout)
             logging.info("Exp %s", expected_output)
@@ -118,14 +173,20 @@ def cli_config_tests(_tmp_dir):
     ldflags = test_cli("config", "ldflags")
     libs = test_cli("config", "libs")
 
-    if len(prefix) < 4 or prefix[0] != '/':
-        logging.error("Bad prefix %s" % (prefix))
-    if ("-I%s/include/botan-2" % (prefix)) not in cflags:
-        logging.error("Bad cflags %s" % (cflags))
-    if not ldflags.endswith(("-L%s/lib" % (prefix))):
-        logging.error("Bad ldflags %s" % (ldflags))
-    if "-lbotan-2" not in libs:
-        logging.error("Bad libs %s" % (libs))
+    if platform.system() == 'Windows':
+        if len(prefix) < 4 or prefix[1] != ':' or prefix[2] != '\\':
+            logging.error("Bad prefix %s", prefix)
+        if not ldflags.endswith(("-L%s\\lib" % (prefix))):
+            logging.error("Bad ldflags %s", ldflags)
+    else:
+        if len(prefix) < 4 or prefix[0] != '/':
+            logging.error("Bad prefix %s", prefix)
+        if not ldflags.endswith(("-L%s/lib" % (prefix))):
+            logging.error("Bad ldflags %s", ldflags)
+    if ("-I%s/include/botan-3" % (prefix)) not in cflags:
+        logging.error("Bad cflags %s", cflags)
+    if "-lbotan-3" not in libs:
+        logging.error("Bad libs %s", libs)
 
 def cli_help_tests(_tmp_dir):
     output = test_cli("help", None, None)
@@ -137,14 +198,14 @@ def cli_help_tests(_tmp_dir):
 def cli_version_tests(_tmp_dir):
     output = test_cli("version", None, None)
 
-    version_re = re.compile(r'[0-9]\.[0-9]+\.[0-9]')
+    version_re = re.compile(r'[0-9]\.[0-9]+\.[0-9](\-[a-z]+[0-9]+)?')
     if not version_re.match(output):
-        logging.error("Unexpected version output %s" % (output))
+        logging.error("Unexpected version output %s", output)
 
     output = test_cli("version", ["--full"], None, None)
-    version_full_re = re.compile(r'Botan [0-9]\.[0-9]+\.[0-9] \(.* revision .*, distribution .*\)$')
+    version_full_re = re.compile(r'Botan [0-9]\.[0-9]+\.[0-9](\-[a-z]+[0-9]+)? \(.* revision .*, distribution .*\)$')
     if not version_full_re.match(output):
-        logging.error("Unexpected version output %s" % (output))
+        logging.error("Unexpected version output %s", output)
 
 def cli_is_prime_tests(_tmp_dir):
     test_cli("is_prime", "5", "5 is probably prime")
@@ -279,17 +340,17 @@ huVYFicDNQGzi+nEKAzrZ1L/VxtiSiw/qw0IyOuVtz8CFjgPiPatvmWssQw2AuZ9
 mFvAZ/8wal0=
 -----END X9.42 DH PARAMETERS-----"""
 
-    test_cli("gen_dl_group", "--pbits=1043", pem)
+    test_cli("gen_dl_group", ["--pbits=1043", "--qbits=174"], pem)
 
-    dsa_grp = """-----BEGIN X9.42 DH PARAMETERS-----
+    dsa_grp = """-----BEGIN DSA PARAMETERS-----
 MIIBHgKBgQCyP1vosC/axliM2hmJ9EOSdd1zBkuzMP25CYD8PFkRVrPLr1ClSUtn
 eXTIsHToJ7d7sRwtidQGW9BrvUEyiAWE06W/wnLPxB3/g2/l/P2EhbNmNHAO7rV7
-ZVz/uKR4Xcvzxg9uk5MpT1VsxA8H6VEwzefNF1Rya92rqGgBTNT3/wKBgC7HLL8A
-Gu3tqJxTk1iNgojjOiSreLn6ihA8R8kQnRXDTNtDKz996KHGInfMBurUI1zPM3xq
-bHc0CvU1Nf87enhPIretzJcFgiCWrNFUIC25zPEjp0s3/ERHT4Bi1TABZ3j6YUEQ
-fnnj+9XriKKHf2WtX0T4FXorvnKq30m934rzAhUAvwhWDK3yZEmphc7dwl4/J3Zp
-+MU=
------END X9.42 DH PARAMETERS-----"""
+ZVz/uKR4Xcvzxg9uk5MpT1VsxA8H6VEwzefNF1Rya92rqGgBTNT3/wIVAL8IVgyt
+8mRJqYXO3cJePyd2afjFAoGALscsvwAa7e2onFOTWI2CiOM6JKt4ufqKEDxHyRCd
+FcNM20MrP33oocYid8wG6tQjXM8zfGpsdzQK9TU1/zt6eE8it63MlwWCIJas0VQg
+LbnM8SOnSzf8REdPgGLVMAFnePphQRB+eeP71euIood/Za1fRPgVeiu+cqrfSb3f
+ivM=
+-----END DSA PARAMETERS-----"""
 
     test_cli("gen_dl_group", ["--type=dsa", "--pbits=1024"], dsa_grp)
 
@@ -318,8 +379,8 @@ mlLtJ5JvZ0/p6zP3x+Y9yPIrAR8L/acG5ItSrAKXzzuqQQZMv4aN
     test_cli("pkcs8", "--pub-out --output=%s %s" % (pub_key, priv_key), "")
     test_cli("pkcs8", "--pub-out --der-out --output=%s %s" % (pub_der_key, priv_key), "")
 
-    test_cli("pkcs8", "--pass-out=foof --der-out --output=%s %s" % (enc_der, priv_key), "")
-    test_cli("pkcs8", "--pass-out=foof --output=%s %s" % (enc_pem, priv_key), "")
+    test_cli("pkcs8", "--pass-out=foof --cipher=AES-128/CBC --der-out --output=%s %s" % (enc_der, priv_key), "")
+    test_cli("pkcs8", "--pass-out=foof --pbkdf=Scrypt --output=%s %s" % (enc_pem, priv_key), "")
 
     dec_pem = test_cli("pkcs8", ["--pass-in=foof", enc_pem], None)
     dec_der = test_cli("pkcs8", ["--pass-in=foof", enc_der], None)
@@ -387,32 +448,50 @@ def cli_xmss_sign_tests(tmp_dir):
     msg = os.path.join(tmp_dir, 'input')
     sig1 = os.path.join(tmp_dir, 'sig1')
     sig2 = os.path.join(tmp_dir, 'sig2')
+    root_crt = os.path.join(tmp_dir, 'root.crt')
+    int_csr = os.path.join(tmp_dir, 'int.csr')
+    int_crt = os.path.join(tmp_dir, 'int.crt')
 
     test_cli("rng", ['--output=%s' % (msg)], "")
     test_cli("hash", ["--no-fsname", msg], "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855")
 
     test_cli("keygen", ["--algo=XMSS", "--output=%s" % (priv_key)], "")
-    test_cli("hash", ["--no-fsname", priv_key], "5B38F737BA41BE7F40433DB30EAEF7C41ABB0F7D9E7A09DEB5FDCE7B6811693F")
+    test_cli("hash", ["--no-fsname", priv_key], "1F040283F0D7D2156B06B7BE03FA5861035FF3BCC059671DB288162C04A94CED")
 
     test_cli("pkcs8", "--pub-out --output=%s %s" % (pub_key, priv_key), "")
     test_cli("fingerprint", ['--no-fsname', pub_key],
-             "B0:F4:98:6E:D8:4E:05:63:A1:D8:4B:37:61:5A:A0:41:78:7E:DE:0E:72:46:E0:A8:D6:CF:09:54:08:DA:A4:22")
+             "6F:C4:08:CB:C3:61:CC:49:8A:25:90:3B:2F:D4:4D:B8:7F:2F:27:06:8C:8F:01:E0:01:DB:42:1F:B4:09:09:D9")
 
     # verify the key is updated after each signature:
     test_cli("sign", [priv_key, msg, "--output=%s" % (sig1)], "")
     test_cli("verify", [pub_key, msg, sig1], "Signature is valid")
-    test_cli("hash", ["--no-fsname", sig1], "04AF45451C7A9AF2D828E1AD6EC262E012436F4087C5DA6F32C689D781E597D0")
-    test_cli("hash", ["--no-fsname", priv_key], "67929FAEC636E43DE828C1CD7E2D11CE7C3388CE90DD0A0F687C6627FFA850CD")
+    test_cli("hash", ["--no-fsname", sig1], "9DEBA79CE9FDC4966D7BA7B05ABEC54E3C11BB1C2C2732F7658820F2CAE47646")
+    test_cli("hash", ["--no-fsname", priv_key], "A71507087530C85E9CF971CF3A305890B07B51519C405A2B3D0037C64D5802B1")
 
     test_cli("sign", [priv_key, msg, "--output=%s" % (sig2)], "")
     test_cli("verify", [pub_key, msg, sig2], "Signature is valid")
-    test_cli("hash", ["--no-fsname", sig2], "0785A6AD54CC7D01F2BE2BC6463A3EAA1159792E52210ED754992C5068E8F24F")
-    test_cli("hash", ["--no-fsname", priv_key], "1940945D68B1CF54D79E05DD7913A4D0B4959183F1E12B81A4E43EF4E63FBD20")
+    test_cli("hash", ["--no-fsname", sig2], "803EC5D6BECDFB9DC676EE2EDFEFE3D71EE924343A2ED9D2D7BFF0A9D97D704E")
+    test_cli("hash", ["--no-fsname", priv_key], "D581F5BFDA65669A825165C7A9CF17D6D5C5DF349004BCB7416DCD1A5C0349A0")
 
     # private key updates, public key is unchanged:
     test_cli("pkcs8", "--pub-out --output=%s %s" % (pub_key2, priv_key), "")
     test_cli("fingerprint", ['--no-fsname', pub_key2],
-             "B0:F4:98:6E:D8:4E:05:63:A1:D8:4B:37:61:5A:A0:41:78:7E:DE:0E:72:46:E0:A8:D6:CF:09:54:08:DA:A4:22")
+             "6F:C4:08:CB:C3:61:CC:49:8A:25:90:3B:2F:D4:4D:B8:7F:2F:27:06:8C:8F:01:E0:01:DB:42:1F:B4:09:09:D9")
+
+    # verify that key is updated when creating a self-signed certificate
+    test_cli("gen_self_signed",
+             [priv_key, "Root", "--ca", "--path-limit=2", "--output="+root_crt], "")
+    test_cli("hash", ["--no-fsname", priv_key], "ACFD94CDF5D0674EE5489039CF70850A1FFF95480A94E8C6C6FD2BF006909D07")
+
+    # verify that key is updated after signing a certificate request
+    test_cli("gen_pkcs10", "%s Intermediate --ca --output=%s" % (priv_key, int_csr))
+    test_cli("hash", ["--no-fsname", priv_key], "BE6F8F868DB495D95F73B50A370A218225253048E2F1C7C3E286568FDE203700")
+
+    # verify that key is updated after issuing a certificate
+    test_cli("sign_cert", "%s %s %s --output=%s" % (root_crt, priv_key, int_csr, int_crt))
+    test_cli("hash", ["--no-fsname", priv_key], "8D3B736D8A708C342F9263163E0E3BAFE4132F74AE53A8EDF78074422CF80496")
+
+    test_cli("cert_verify", "%s %s" % (int_crt, root_crt), "Certificate passes validation checks")
 
 def cli_pbkdf_tune_tests(_tmp_dir):
     if not check_for_command("pbkdf_tune"):
@@ -420,11 +499,11 @@ def cli_pbkdf_tune_tests(_tmp_dir):
 
     expected = re.compile(r'For (default|[1-9][0-9]*) ms selected Scrypt\([0-9]+,[0-9]+,[0-9]+\) using [0-9]+ MiB')
 
-    output = test_cli("pbkdf_tune", ["--check", "1", "10", "50", "default"], None).split('\n')
+    output = test_cli("pbkdf_tune", ["--tune-msec=1", "--check", "1", "10", "50", "default"], None).split('\n')
 
     for line in output:
         if expected.match(line) is None:
-            logging.error("Unexpected line '%s'" % (line))
+            logging.error("Unexpected line '%s'", line)
 
     expected_pbkdf2 = re.compile(r'For (default|[1-9][0-9]*) ms selected PBKDF2\(HMAC\(SHA-256\),[0-9]+\)')
 
@@ -432,7 +511,7 @@ def cli_pbkdf_tune_tests(_tmp_dir):
 
     for line in output:
         if expected_pbkdf2.match(line) is None:
-            logging.error("Unexpected line '%s'" % (line))
+            logging.error("Unexpected line '%s'", line)
 
     expected_argon2 = re.compile(r'For (default|[1-9][0-9]*) ms selected Argon2id\([0-9]+,[0-9]+,[0-9]+\)')
 
@@ -440,7 +519,7 @@ def cli_pbkdf_tune_tests(_tmp_dir):
 
     for line in output:
         if expected_argon2.match(line) is None:
-            logging.error("Unexpected line '%s'" % (line))
+            logging.error("Unexpected line '%s'", line)
 
 def cli_psk_db_tests(tmp_dir):
     if not check_for_command("psk_get"):
@@ -468,7 +547,7 @@ def cli_compress_tests(tmp_dir):
     input_file = os.path.join(tmp_dir, 'input.txt')
     output_file = os.path.join(tmp_dir, 'input.txt.gz')
 
-    with open(input_file, 'w') as f:
+    with open(input_file, 'w', encoding='utf8') as f:
         f.write("hi there")
         f.close()
 
@@ -477,16 +556,10 @@ def cli_compress_tests(tmp_dir):
     if not os.access(output_file, os.R_OK):
         logging.error("Compression did not created expected output file")
 
-    is_py3 = sys.version_info[0] == 3
-
     output_hdr = open(output_file, 'rb').read(2)
 
-    if is_py3:
-        if output_hdr[0] != 0x1F or output_hdr[1] != 0x8B:
-            logging.error("Did not see expected gzip header")
-    else:
-        if ord(output_hdr[0]) != 0x1F or ord(output_hdr[1]) != 0x8B:
-            logging.error("Did not see expected gzip header")
+    if output_hdr[0] != 0x1F or output_hdr[1] != 0x8B:
+        logging.error("Did not see expected gzip header")
 
     os.unlink(input_file)
 
@@ -495,7 +568,7 @@ def cli_compress_tests(tmp_dir):
     if not os.access(input_file, os.R_OK):
         logging.error("Decompression did not created expected output file")
 
-    recovered = open(input_file).read()
+    recovered = open(input_file, encoding='utf8').read()
     if recovered != "hi there":
         logging.error("Decompression did not recover original input")
 
@@ -515,7 +588,7 @@ def cli_rng_tests(_tmp_dir):
         if output == "D80F88F6ADBE65ACB10C":
             logging.error('RNG produced DRBG output')
         if hex_10.match(output) is None:
-            logging.error('Unexpected RNG output %s' % (output))
+            logging.error('Unexpected RNG output %s', output)
 
     has_rdrand = test_cli("cpuid", []).find(' rdrand ') > 0
 
@@ -525,15 +598,14 @@ def cli_rng_tests(_tmp_dir):
         if output == "D80F88F6ADBE65ACB10C":
             logging.error('RDRAND produced DRBG output')
         if hex_10.match(output) is None:
-            logging.error('Unexpected RNG output %s' % (output))
+            logging.error('Unexpected RNG output %s', output)
 
 def cli_roughtime_check_tests(tmp_dir):
-    # pylint: disable=line-too-long
     if not check_for_command("roughtime_check"):
         return
     chain = os.path.join(tmp_dir, 'roughtime-chain')
 
-    with open(chain, 'w') as f:
+    with open(chain, 'w', encoding='utf8') as f:
         f.write("""\
 ed25519 bbT+RPS7zKX6w71ssPibzmwWqU9ffRV5oj2OresSmhE= eu9yhsJfVfguVSqGZdE8WKIxaBBM0ZG3Vmuc+IyZmG2YVmrIktUByDdwIFw6F4rZqmSFsBO85ljoVPz5bVPCOw== BQAAAEAAAABAAAAApAAAADwBAABTSUcAUEFUSFNSRVBDRVJUSU5EWBnGOEajOwPA6G7oL47seBP4C7eEpr57H43C2/fK/kMA0UGZVUdf4KNX8oxOK6JIcsbVk8qhghTwA70qtwpYmQkDAAAABAAAAAwAAABSQURJTUlEUFJPT1RAQg8AJrA8tEqPBQAqisiuAxgy2Pj7UJAiWbCdzGz1xcCnja3T+AqhC8fwpeIwW4GPy/vEb/awXW2DgSLKJfzWIAz+2lsR7t4UjNPvAgAAAEAAAABTSUcAREVMRes9Ch4X0HIw5KdOTB8xK4VDFSJBD/G9t7Et/CU7UW61OiTBXYYQTG2JekWZmGa0OHX1JPGG+APkpbsNw0BKUgYDAAAAIAAAACgAAABQVUJLTUlOVE1BWFR/9BWjpsWTQ1f6iUJea3EfZ1MkX3ftJiV3ABqNLpncFwAAAAAAAAAA//////////8AAAAA
 ed25519 gD63hSj3ScS+wuOeGrubXlq35N1c5Lby/S+T7MNTjxo= uLeTON9D+2HqJMzK6sYWLNDEdtBl9t/9yw1cVAOm0/sONH5Oqdq9dVPkC9syjuWbglCiCPVF+FbOtcxCkrgMmA== BQAAAEAAAABAAAAApAAAADwBAABTSUcAUEFUSFNSRVBDRVJUSU5EWOw1jl0uSiBEH9HE8/6r7zxoSc01f48vw+UzH8+VJoPelnvVJBj4lnH8uRLh5Aw0i4Du7XM1dp2u0r/I5PzhMQoDAAAABAAAAAwAAABSQURJTUlEUFJPT1RAQg8AUBo+tEqPBQC47l77to7ESFTVhlw1SC74P5ssx6gpuJ6eP+1916GuUiySGE/x3Fp0c3otUGAdsRQou5p9PDTeane/YEeVq4/8AgAAAEAAAABTSUcAREVMRe5T1ml8wHyWAcEtHP/U5Rg/jFXTEXOSglngSa4aI/CECVdy4ZNWeP6vv+2//ZW7lQsrWo7ZkXpvm9BdBONRSQIDAAAAIAAAACgAAABQVUJLTUlOVE1BWFQpXlenV0OfVisvp9jDHXLw8vymZVK9Pgw9k6Edf8ZEhUgSGEc5jwUASHLvZE2PBQAAAAAA
@@ -549,25 +621,19 @@ ed25519 cj8GsiNlRkqiDElAeNMSBBMwrAl15hYPgX50+GWX/lA= Tsy82BBU2xxVqNe1ip11OyEGoKW
   4: UTC 2019-08-04T13:38:18 (+-1000000us)
   5: UTC 2019-08-04T13:38:18 (+-1000000us)""")
 
-    with open(chain, 'w') as f:
+    with open(chain, 'w', encoding='utf8') as f:
         f.write("ed25519 bbT+RPS7zKX6w71ssPibzmwWqU9ffRV5oj2OresSmhE= eu9yhsJfVfguVSqGZdE8WKIxaBBM0ZG3Vmuc+IyZmG2YVmrIktUByDdwIFw6F4rZqmSFsBO85ljoVPz5bVPCOw== BQAAAEAAAABAAAAApAAAADwBAABTSUcAUEFUSFNSRVBDRVJUSU5EWBnGOEajOwPA6G7oL47seBP4C7eEpr57H43C2/fK/kMA0UGZVUdf4KNX8oxOK6JIcsbVk8qhghTwA70qtwpYmQkDAAAABAAAAAwAAABSQURJTUlEUFJPT1RAQg8AJrA8tEqPBQAqisiuAxgy2Pj7UJAiWbCdzGz1xcCnja3T+AqhC8fwpeIwW4GPy/vEb/awXW2DgSLKJfzWIAz+2lsR7t4UjNPvAgAAAEAAAABTSUcAREVMRes9Ch4X0HIw5KdOTB8xK4VDFSJBD/G9t7Et/CU7UW61OiTBXYYQTG2JekWZmGa0OHX1JPGG+APkpbsNw0BKUgYDAAAAIAAAACgAAABQVUJLTUlOVE1BWFR/9BWjpsWTQ1f6iUJea3EfZ1MkX3ftJiV3ABqNLpncFwAAAAAAAAAA//////////8AAAAA")
     test_cli("roughtime_check", [chain, "--raw-time"], "1: UTC 1564925897781286 (+-1000000us)")
 
-    with open(chain, 'w') as f:
+    with open(chain, 'w', encoding='utf8') as f:
         f.write("ed25519 cbT+RPS7zKX6w71ssPibzmwWqU9ffRV5oj2OresSmhE= eu9yhsJfVfguVSqGZdE8WKIxaBBM0ZG3Vmuc+IyZmG2YVmrIktUByDdwIFw6F4rZqmSFsBO85ljoVPz5bVPCOw== BQAAAEAAAABAAAAApAAAADwBAABTSUcAUEFUSFNSRVBDRVJUSU5EWBnGOEajOwPA6G7oL47seBP4C7eEpr57H43C2/fK/kMA0UGZVUdf4KNX8oxOK6JIcsbVk8qhghTwA70qtwpYmQkDAAAABAAAAAwAAABSQURJTUlEUFJPT1RAQg8AJrA8tEqPBQAqisiuAxgy2Pj7UJAiWbCdzGz1xcCnja3T+AqhC8fwpeIwW4GPy/vEb/awXW2DgSLKJfzWIAz+2lsR7t4UjNPvAgAAAEAAAABTSUcAREVMRes9Ch4X0HIw5KdOTB8xK4VDFSJBD/G9t7Et/CU7UW61OiTBXYYQTG2JekWZmGa0OHX1JPGG+APkpbsNw0BKUgYDAAAAIAAAACgAAABQVUJLTUlOVE1BWFR/9BWjpsWTQ1f6iUJea3EfZ1MkX3ftJiV3ABqNLpncFwAAAAAAAAAA//////////8AAAAA")
-    test_cli("roughtime_check", chain, expected_stderr='Error: Roughtime Invalid signature or public key')
+    test_cli("roughtime_check", chain, expected_stderr='Error: Roughtime: Invalid signature or public key')
 
 def cli_roughtime_tests(tmp_dir):
-    # pylint: disable=line-too-long
-    # pylint: disable=too-many-locals
-    import socket
-    import base64
-    import threading
-
     if not check_for_command("roughtime"):
         return
 
-    server_port = random_port_number()
+    server_port = port_for('roughtime')
     chain_file = os.path.join(tmp_dir, 'roughtime-chain')
     ecosystem = os.path.join(tmp_dir, 'ecosystem')
 
@@ -617,7 +683,7 @@ ed25519 gD63hSj3ScS+wuOeGrubXlq35N1c5Lby/S+T7MNTjxo= 2A+I9q2+ZayxDDYC5n2YW8Bn/zB
     server_response = response[0]
     test_cli("roughtime", [], expected_stderr='Please specify either --servers-file or --host and --pubkey')
 
-    with open(ecosystem, 'w') as f:
+    with open(ecosystem, 'w', encoding='utf8') as f:
         f.write("Cloudflare-Roughtime ed25519 gD63hSj4ScS+wuOeGrubXlq35N1c5Lby/S+T7MNTjxo= udp 127.0.0.1:" + str(server_port))
 
     test_cli("roughtime", [
@@ -626,7 +692,7 @@ ed25519 gD63hSj3ScS+wuOeGrubXlq35N1c5Lby/S+T7MNTjxo= 2A+I9q2+ZayxDDYC5n2YW8Bn/zB
         "--servers-file=" + ecosystem]
              , expected_stderr='ERROR: Public key does not match!')
 
-    with open(ecosystem, 'w') as f:
+    with open(ecosystem, 'w', encoding='utf8') as f:
         f.write("Cloudflare-Roughtime ed25519 gD63hSj3ScS+wuOeGrubXlq35N1c5Lby/S+T7MNTjxo= udp 127.0.0.1:" + str(server_port))
 
     test_cli("roughtime", [
@@ -640,7 +706,7 @@ ed25519 gD63hSj3ScS+wuOeGrubXlq35N1c5Lby/S+T7MNTjxo= 2A+I9q2+ZayxDDYC5n2YW8Bn/zB
         "--servers-file=" + ecosystem]
              , "Cloudflare-Roughtime     : UTC 2019-09-12T08:00:11 (+-1000000us)")
 
-    with open(chain_file, 'r') as f:
+    with open(chain_file, 'r', encoding='utf8') as f:
         read_data = f.read()
     if read_data != chain[0]:
         logging.error("unexpected chain")
@@ -655,7 +721,7 @@ ed25519 gD63hSj3ScS+wuOeGrubXlq35N1c5Lby/S+T7MNTjxo= 2A+I9q2+ZayxDDYC5n2YW8Bn/zB
         "--raw-time"]
              , "UTC 1568275214691000 (+-1000000us)")
 
-    with open(chain_file, 'r') as f:
+    with open(chain_file, 'r', encoding='utf8') as f:
         read_data = f.read()
     if read_data != chain[1]:
         logging.error("unexpected chain")
@@ -670,7 +736,7 @@ ed25519 gD63hSj3ScS+wuOeGrubXlq35N1c5Lby/S+T7MNTjxo= 2A+I9q2+ZayxDDYC5n2YW8Bn/zB
         "--max-chain-size=2"]
              , "UTC 2019-09-12T08:00:42 (+-1000000us)")
 
-    with open(chain_file, 'r') as f:
+    with open(chain_file, 'r', encoding='utf8') as f:
         read_data = f.read()
     if read_data != chain[2]:
         logging.error("unexpected chain")
@@ -715,7 +781,7 @@ def cli_pk_workfactor_tests(_tmp_dir):
     test_cli("pk_workfactor", "2048", "111")
     test_cli("pk_workfactor", ["--type=rsa", "512"], "58")
     test_cli("pk_workfactor", ["--type=dl", "512"], "58")
-    test_cli("pk_workfactor", ["--type=dl_exp", "512"], "128")
+    test_cli("pk_workfactor", ["--type=dl_exp", "512"], "192")
 
 def cli_dl_group_info_tests(_tmp_dir):
 
@@ -736,12 +802,11 @@ def cli_dl_group_info_tests(_tmp_dir):
 
 def cli_ec_group_info_tests(_tmp_dir):
 
-    # pylint: disable=line-too-long
-    secp256r1_info = """P = FFFFFFFF00000001000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFF
-A = FFFFFFFF00000001000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFC
-B = 5AC635D8AA3A93E7B3EBBD55769886BC651D06B0CC53B0F63BCE3C3E27D2604B
-N = FFFFFFFF00000000FFFFFFFFFFFFFFFFBCE6FAADA7179E84F3B9CAC2FC632551
-G = 6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296,4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5"""
+    secp256r1_info = """P = 0xFFFFFFFF00000001000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFF
+A = 0xFFFFFFFF00000001000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFC
+B = 0x5AC635D8AA3A93E7B3EBBD55769886BC651D06B0CC53B0F63BCE3C3E27D2604B
+N = 0xFFFFFFFF00000000FFFFFFFFFFFFFFFFBCE6FAADA7179E84F3B9CAC2FC632551
+G = 0x6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296,0x4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5"""
 
     secp256r1_pem = """-----BEGIN EC PARAMETERS-----
 MIHgAgEBMCwGByqGSM49AQECIQD/////AAAAAQAAAAAAAAAAAAAAAP//////////
@@ -755,22 +820,34 @@ gS3rM6D0oTlF2JjClk/jQuL+Gn+bjufrSnwPnhYrzjNXazFezsu2QGg3v1H1AiEA
     test_cli("ec_group_info", "--pem secp256r1", secp256r1_pem)
 
 def cli_cpuid_tests(_tmp_dir):
+    def read_flags(cli_output):
+        if not cpuid_output.startswith('CPUID flags:'):
+            logging.error('Unexpected cpuid output "%s"', cpuid_output)
+
+        return cli_output[13:].split(' ') if cli_output[13:] != '' else []
+
     cpuid_output = test_cli("cpuid", [])
-
-    if not cpuid_output.startswith('CPUID flags:'):
-        logging.error('Unexpected cpuid output "%s"' % (cpuid_output))
-
     flag_re = re.compile('[a-z0-9_]+')
-    flags = cpuid_output[13:].split(' ')
+    flags = read_flags(cpuid_output)
     for flag in flags:
         if flag != '' and flag_re.match(flag) is None:
-            logging.error('Unexpected CPUID flag name "%s"' % (flag))
+            logging.error('Unexpected CPUID flag name "%s"', flag)
+
+        env = {'BOTAN_CLEAR_CPUID': flag}
+        cpuid_output = test_cli("cpuid", [], None, None, None, True, env)
+        mod_flags = read_flags(cpuid_output)
+
+        for f in mod_flags:
+            if f == flag:
+                logging.error('Clearing CPUID %s did not disable it', flag)
+            if f not in flags:
+                logging.error('Clearing CPUID %s caused flag %s to appear', flag, f)
 
 def cli_cc_enc_tests(_tmp_dir):
     test_cli("cc_encrypt", ["8028028028028029", "pass"], "4308989841607208")
     test_cli("cc_decrypt", ["4308989841607208", "pass"], "8028028028028027")
 
-def cli_cert_issuance_tests(tmp_dir):
+def cli_cert_issuance_tests(tmp_dir, algos=None):
     root_key = os.path.join(tmp_dir, 'root.key')
     root_crt = os.path.join(tmp_dir, 'root.crt')
     int_key = os.path.join(tmp_dir, 'int.key')
@@ -780,9 +857,12 @@ def cli_cert_issuance_tests(tmp_dir):
     leaf_crt = os.path.join(tmp_dir, 'leaf.crt')
     leaf_csr = os.path.join(tmp_dir, 'leaf.csr')
 
-    test_cli("keygen", ["--params=2048", "--output=" + root_key], "")
-    test_cli("keygen", ["--params=2048", "--output=" + int_key], "")
-    test_cli("keygen", ["--params=2048", "--output=" + leaf_key], "")
+    if algos is None:
+        algos = [("RSA", "2048"),("RSA", "2048"),("RSA", "2048")]
+
+    test_cli("keygen", ["--algo=%s" % algos[0][0], "--params=%s" % algos[0][1], "--output=" + root_key], "")
+    test_cli("keygen", ["--algo=%s" % algos[1][0], "--params=%s" % algos[1][1], "--output=" + int_key], "")
+    test_cli("keygen", ["--algo=%s" % algos[2][0], "--params=%s" % algos[2][1], "--output=" + leaf_key], "")
 
     test_cli("gen_self_signed",
              [root_key, "Root", "--ca", "--path-limit=2", "--output="+root_crt], "")
@@ -793,7 +873,61 @@ def cli_cert_issuance_tests(tmp_dir):
     test_cli("gen_pkcs10", "%s Leaf --output=%s" % (leaf_key, leaf_csr))
     test_cli("sign_cert", "%s %s %s --output=%s" % (int_crt, int_key, leaf_csr, leaf_crt))
 
-    test_cli("cert_verify" "%s %s %s" % (leaf_crt, int_crt, root_crt), "Certificate passes validation checks")
+    test_cli("cert_verify", "%s %s %s" % (leaf_crt, int_crt, root_crt), "Certificate passes validation checks")
+
+def cli_cert_issuance_alternative_algos_tests(tmp_dir):
+    for i, algo in enumerate([[("Dilithium", "Dilithium-8x7-AES-r3"), ("Dilithium", "Dilithium-8x7-AES-r3"), ("Dilithium", "Dilithium-8x7-AES-r3")],
+                              [("ECDSA",     "secp256r1"),            ("ECDSA",     "secp384r1"),            ("ECDSA",     "secp256r1")],
+                              [("Dilithium", "Dilithium-6x5-r3"),     ("ECDSA",     "secp256r1"),            ("RSA",       "2048")]]):
+        sub_tmp_dir = os.path.join(tmp_dir, str(i))
+        os.mkdir(sub_tmp_dir)
+        cli_cert_issuance_tests(sub_tmp_dir, algo)
+
+def cli_marvin_tests(tmp_dir):
+    if not check_for_command("marvin_test"):
+        return
+
+    rsa_key = os.path.join(tmp_dir, 'rsa.pem')
+    data_dir = os.path.join(tmp_dir, 'testcases')
+
+    test_cli("keygen", ["--algo=RSA", "--params=1024", "--output=" + rsa_key], "")
+
+    test_inputs = 4
+    runs = 32
+
+    # There is currently no way in CLI to do an RSA encryption with PKCS1 v1.5
+    # so for now just create some random (certainly invalid) ciphertexts
+    os.mkdir(data_dir)
+
+    for i in range(test_inputs):
+        output_file = os.path.join(data_dir, "invalid%d" % i)
+        ctext = bytes([i] * 128)
+
+        with open(output_file, 'bw') as out:
+            out.write(ctext)
+
+    output = test_cli("marvin_test", [rsa_key, data_dir, "--runs=%d" % (runs)])
+
+    first_line = True
+    total_lines = 0
+    for line in output.split('\n'):
+        res = line.split(',')
+
+        if len(res) != test_inputs:
+            logging.error("Unexpected output from MARVIN test: %s", line)
+
+        if not first_line:
+            try:
+                for r in res:
+                    float(r)
+            except ValueError:
+                logging.error("Unexpected output from MARVIN test: %s", line)
+
+        first_line = False
+        total_lines += 1
+
+    if total_lines != runs + 1:
+        logging.error("Unexpected number of lines from MARVIN test")
 
 def cli_timing_test_tests(_tmp_dir):
 
@@ -805,7 +939,7 @@ def cli_timing_test_tests(_tmp_dir):
     output_re = re.compile('[0-9]+;[0-9];[0-9]+')
 
     for suite in timing_tests:
-        output = test_cli("timing_test", [suite, "--measurement-runs=16", "--warmup-runs=3"], None).split('\n')
+        output = test_cli("timing_test", [suite, "--measurement-runs=16", "--warmup-runs=3", "--test-data-dir=%s" % TEST_DATA_DIR], None).split('\n')
 
         for line in output:
             if output_re.match(line) is None:
@@ -814,7 +948,7 @@ def cli_timing_test_tests(_tmp_dir):
 def cli_tls_ciphersuite_tests(_tmp_dir):
     policies = ['default', 'suiteb_128', 'suiteb_192', 'strict', 'all']
 
-    versions = ['tls1.0', 'tls1.1', 'tls1.2']
+    versions = ['tls1.2']
 
     ciphersuite_re = re.compile('^[A-Z0-9_]+$')
 
@@ -837,24 +971,36 @@ MCACAQUTBnN0cmluZzEGAQH/AgFjBAUAAAAAAAMEAP///w==
 """
 
     expected = """d= 0, l=  32: SEQUENCE
-  d= 1, l=   1:  INTEGER                                    05
+  d= 1, l=   1:  INTEGER                                    5
   d= 1, l=   6:  PRINTABLE STRING                           string
   d= 1, l=   6:  SET
   d= 2, l=   1:   BOOLEAN                                   true
-  d= 2, l=   1:   INTEGER                                   63
+  d= 2, l=   1:   INTEGER                                   99
   d= 1, l=   5:  OCTET STRING                               0000000000
   d= 1, l=   4:  BIT STRING                                 FFFFFF"""
 
     test_cli("asn1print", "--pem -", expected, input_pem)
 
+    test_cli("oid_info", "RSA", "The string 'RSA' is associated with OID 1.2.840.113549.1.1.1")
+    test_cli("oid_info", "1.2.840.113549.1.1.1", "OID 1.2.840.113549.1.1.1 is associated with RSA")
+    test_cli("oid_info", "1.2.3.4", "OID 1.2.3.4 is not recognized")
+
 def cli_tls_socket_tests(tmp_dir):
-    client_msg = b'Client message %d\n' % (random.randint(0, 2**128))
-    server_port = random_port_number()
+    if not run_socket_tests() or not check_for_command("tls_client") or not check_for_command("tls_server"):
+        return
+
+    client_msg = b'Client message %d with extra stuff to test record_size_limit: %s\n' % (random.randint(0, 2**128), b'oO' * 64)
+    server_port = port_for('tls_server')
+
+    psk = "FEEDFACECAFEBEEF"
+    psk_identity = "test-psk"
 
     priv_key = os.path.join(tmp_dir, 'priv.pem')
     ca_cert = os.path.join(tmp_dir, 'ca.crt')
     crt_req = os.path.join(tmp_dir, 'crt.req')
     server_cert = os.path.join(tmp_dir, 'server.crt')
+    tls_client_policy = os.path.join(tmp_dir, 'test_client_policy.txt')
+    tls_server_policy = os.path.join(tmp_dir, 'test_server_policy.txt')
 
     test_cli("keygen", ["--algo=ECDSA", "--params=secp256r1", "--output=" + priv_key], "")
 
@@ -869,52 +1015,255 @@ def cli_tls_socket_tests(tmp_dir):
 
     test_cli("sign_cert", "%s %s %s --output=%s" % (ca_cert, priv_key, crt_req, server_cert))
 
-    tls_server = subprocess.Popen([CLI_PATH, 'tls_server', '--max-clients=1',
-                                   '--port=%d' % (server_port), server_cert, priv_key],
+    class TestConfig:
+        def __init__(self, name, protocol_version, policy, **kwargs):
+            self.name = name
+            self.protocol_version = protocol_version
+            self.policy = policy
+            self.stdout_regex = kwargs.get("stdout_regex")
+            self.expect_error = kwargs.get("expect_error", False)
+            self.psk = kwargs.get("psk")
+            self.psk_identity = kwargs.get("psk_identity")
+
+    configs = [
+        # Explicitly testing x448-based key exchange against ourselves, as Bogo test
+        # don't cover that. Better than nothing...
+        TestConfig("x448", "1.2", "allow_tls12=true\nallow_tls13=false\nkey_exchange_groups=x448"),
+        TestConfig("x448", "1.3", "allow_tls12=false\nallow_tls13=true\nkey_exchange_groups=x448"),
+
+        # Regression test: TLS 1.3 server hit an assertion when no certificate
+        #                  chain was found. Here, we provoke this by requiring
+        #                  an RSA-based certificate (server uses ECDSA).
+        TestConfig("No server cert", "1.3", "allow_tls12=false\nallow_tls13=true\nsignature_methods=RSA\n",
+                   stdout_regex='Alert: handshake_failure', expect_error=True),
+
+        TestConfig("TLS 1.3", "1.3", "allow_tls12=false\nallow_tls13=true\n"),
+        TestConfig("TLS 1.2", "1.2", "allow_tls12=true\nallow_tls13=false\n"),
+
+        # At the moment, TLS 1.2 does not implement record_size_limit.
+        # Therefore, clients can offer it only with TLS 1.2 being disabled.
+        # Otherwise, a server negotiating TLS 1.2 and using the record_size_limit
+        # would not work for us.
+        #
+        # TODO: Remove this crutch after implementing record_size_limit for TLS 1.2
+        #       and extend the test to use it for both TLS 1.2 and 1.3.
+        TestConfig("Record size limit", "1.3", "allow_tls12=false\nallow_tls13=true\nrecord_size_limit=64\n"),
+
+        TestConfig("PSK TLS 1.2", "1.2", "allow_tls12=true\nallow_tls13=false\nkey_exchange_methods=ECDHE_PSK\n",
+                   psk=psk, psk_identity=psk_identity,
+                   stdout_regex=f'Handshake complete, TLS v1\\.2.*utilized PSK identity: {psk_identity}.*'),
+        TestConfig("PSK TLS 1.3", "1.3", "allow_tls12=false\nallow_tls13=true\nkey_exchange_methods=ECDHE_PSK\n",
+                   psk=psk, psk_identity=psk_identity,
+                   stdout_regex=f'Handshake complete, TLS v1\\.3.*utilized PSK identity: {psk_identity}.*'),
+
+        TestConfig("Kyber KEM", "1.3", "allow_tls12=false\nallow_tls13=true\nkey_exchange_groups=Kyber-512-r3"),
+        TestConfig("Hybrid PQ/T", "1.3", "allow_tls12=false\nallow_tls13=true\nkey_exchange_groups=x25519/Kyber-512-r3"),
+    ]
+
+    with open(tls_server_policy, 'w', encoding='utf8') as f:
+        f.write('key_exchange_methods = ECDH DH ECDHE_PSK\n')
+        f.write("key_exchange_groups = x25519 x448 secp256r1 ffdhe/ietf/2048 Kyber-512-r3 x25519/Kyber-512-r3")
+
+    tls_server = subprocess.Popen([CLI_PATH, 'tls_server', '--max-clients=%d' % (len(configs)),
+                                   '--port=%d' % (server_port), '--policy=%s' % (tls_server_policy),
+                                   '--psk=%s' % (psk), '--psk-identity=%s' % (psk_identity),
+                                   server_cert, priv_key],
                                   stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     wait_time = 1.0
 
     time.sleep(wait_time)
 
-    tls_client = subprocess.Popen([CLI_PATH, 'tls_client', 'localhost',
-                                   '--port=%d' % (server_port), '--trusted-cas=%s' % (ca_cert)],
-                                  stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    for tls_config in configs:
+        with open(tls_client_policy, 'w', encoding='utf8') as f:
+            f.write(tls_config.policy)
 
-    time.sleep(wait_time)
+        tls_client_cmd = [CLI_PATH, 'tls_client', 'localhost',
+                          '--port=%d' % (server_port), '--trusted-cas=%s' % (ca_cert),
+                          '--tls-version=%s' % (tls_config.protocol_version), '--policy=%s' % tls_client_policy]
+        if tls_config.psk and tls_config.psk_identity:
+            tls_client_cmd += ['--psk=%s' % tls_config.psk, '--psk-identity=%s' % tls_config.psk_identity]
 
-    tls_client.stdin.write(client_msg)
-    tls_client.stdin.flush()
+        tls_client = subprocess.Popen(tls_client_cmd,
+                                      stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-    time.sleep(wait_time)
+        time.sleep(wait_time)
 
-    (stdout, stderr) = tls_client.communicate()
+        try:
+            tls_client.stdin.write(client_msg)
+            tls_client.stdin.flush()
+        except BrokenPipeError:
+            pass # On handshake failure, the stdin pipe of is already closed here
+                # and error reporting below would not be reached.
 
-    if stderr:
-        logging.error("Got unexpected stderr output %s" % (stderr))
+        time.sleep(wait_time)
 
-    if b'Handshake complete' not in stdout:
-        logging.error('Failed to complete handshake: %s' % (stdout))
+        (stdout, stderr) = tls_client.communicate()
 
-    if client_msg not in stdout:
-        logging.error("Missing client message from stdout %s" % (stdout))
+        if not tls_config.expect_error:
+            if stderr:
+                logging.error("Got unexpected stderr output (%s) %s", tls_config.name, stderr)
 
-    tls_server.communicate()
+            if b'Handshake complete' not in stdout:
+                logging.error('Failed to complete handshake (%s): %s', tls_config.name, stdout)
 
-def cli_tls_http_server_tests(tmp_dir):
-    if not check_for_command("tls_http_server"):
-        return
+            if client_msg not in stdout:
+                logging.error("Missing client message from stdout (%s): %s", tls_config.name, stdout)
+        elif tls_client.returncode == 0:
+            logging.error('Expected an error, but tls_client finished with success')
+
+        if tls_config.stdout_regex:
+            match = re.search(tls_config.stdout_regex, stdout.decode('utf-8'))
+            if not match:
+                logging.error("Client log did not match expected regex (%s): %s", tls_config.name, tls_config.stdout_regex)
+                logging.error("Client said (stdout): %s", stdout)
 
     try:
-        from http.client import HTTPSConnection
-    except ImportError:
-        try:
-            from httplib import HTTPSConnection
-        except ImportError:
-            return
-    import ssl
+        (srv_stdout, srv_stderr) = tls_server.communicate(None, 5)
+    except subprocess.TimeoutExpired:
+        tls_server.kill()
+        tls_server.communicate()
+    logging.debug("server said (stdout): %s", srv_stdout)
+    logging.debug("server said (stderr): %s", srv_stderr)
 
-    server_port = random_port_number()
+def cli_tls_online_pqc_hybrid_tests(tmp_dir):
+    if not run_socket_tests() or not run_online_tests() or not check_for_command("tls_client"):
+        return
+
+    oqs_test_ca = '\n'.join([
+        "-----BEGIN CERTIFICATE-----"
+        "MIIFCzCCAvOgAwIBAgIUCpn6WBGVTKUeNehaBCnHK4AgfrUwDQYJKoZIhvcNAQEL"
+        "BQAwFTETMBEGA1UEAwwKb3FzdGVzdF9DQTAeFw0yMzA4MDgxMDQwMzRaFw0yNDEy"
+        "MjAxMDQwMzRaMBUxEzARBgNVBAMMCm9xc3Rlc3RfQ0EwggIiMA0GCSqGSIb3DQEB"
+        "AQUAA4ICDwAwggIKAoICAQCnUS9KCJuwwGbgdsYoVkU7pp/M5gApTHdURaSx1NN+"
+        "0f50155cJvk0FZjJibL5wOawGcsDXQ31ujaXvtZPEWDbW8wUNhM66vLUjY8SuWNW"
+        "AoK2O42EH8jxNBNTethojZxMs+IKijh25Iz8O8nrNXPV1kQAPts9y9XHL8KNAGcS"
+        "+6xpRb19dln83veoIGvwkLcde/xmkWtkhDKiaT4TkTTNSVMavP4X8nGlzVkWYxiT"
+        "XjY36G784rPz6bY8G7dyrxDk4awOCktY5Hmw6C1gy6FxVTFezCPqVJMlznO/vu42"
+        "DtzHis9ztT3Yo3j2vroywHNa8F4E6lQVZtMOnqPm+bo65imWCmDMYToWMuA22a4O"
+        "CWYy6riOSKhMh2h1bn+b+/F2PxN4m7rfF9EgNAWjDYoQI75bXpGgFswVYbV3NHwM"
+        "jiwKAt5lW0ZrHELwnXDg3YeozvL/aBxtknhhHv4e9cwr91LbDjPZYbiVrtjlIzLk"
+        "O8TqdjdanDPsFTvscMd6CGy6ZPuJta60FcsBazQOVLo6avkZlGvosPstmcM1Cmkb"
+        "uXHprdWjW5eCesf28LXl0zlJzAldcleHva8JFsgv9Qyjhz91n9YPb1pnSb5o9YY8"
+        "WNYqq6vZgQb9uxna99CmZtlbFKueusn0BWyOYldnbW0J/dhWA2J1f/smC80oRNnP"
+        "HQIDAQABo1MwUTAdBgNVHQ4EFgQUQuYEXbkQgyG7YNznz3zXpmDo0sowHwYDVR0j"
+        "BBgwFoAUQuYEXbkQgyG7YNznz3zXpmDo0sowDwYDVR0TAQH/BAUwAwEB/zANBgkq"
+        "hkiG9w0BAQsFAAOCAgEADkGyktZjsMQcRguJAV6ZS9et35rzRaBUmMqZ4rRnTGqA"
+        "q/z6gKArC6n2zm0w9DHbBpVrLKqCmC/F1Pyhmm975Y8mPiQl1BzO86ShsMhBtFLZ"
+        "YBmikWicZtt2bznLSCwyMB6WoaG4OrCgigqFkiPHX18SwblgRaI+6J4BxrKqEMRz"
+        "Qjo4BzpqBxepDGwe4xJVFA/KoO9QENSj35h+15RHNC33nMPmE068R4jwVFSvKmJe"
+        "9qVJjbMQqBtsbVW/1jcgYKUIlg2IPMzplbvrZzWX3EZ7vOZx6g3nI9gDEx2g2WKN"
+        "t4fDXpzsNpdqFOdol9eRzUpHbkg1N9SRZLB1HGZ3+5xgQq0o0alHdEp5I/du0ESE"
+        "SQASXOdZgrxjIErm3xq/cVms0JBhia1tYAJnW9CjM9I0YdG/zwH6BK/m5RWQzkNV"
+        "N6n5lsgHrtWjlcUPMgd8OGTR7F1HQW5q8LDMDhI6ebuiRoMc7BJD0OsZKrohpCLz"
+        "MgXtU+muFVWaRd6q+8KcX6NilSrG88+SMnTJCEyillQ578X3MlkJMSx/XHwDAS14"
+        "JK8yIcMmTLVxpc4RAMR7milNrCVBZHxLwhgTWvxf5BXw1Fiif4iyemBdS6W/m4h2"
+        "QiwOZdgXDK7NYwekF9H+vl4EGTYA6AiccaTuNiTVWS9hivRcucNZ92MJaomdypc="
+        "-----END CERTIFICATE-----"])
+
+    class TestConfig:
+        def __init__(self, host, kex_algo, port=443, ca=None):
+            self.host = host
+            self.kex_algo = kex_algo
+            self.port = port
+            self.ca = ca
+
+            self.policy_file = None
+            self.ca_file = None
+
+        def setup(self, tmp_dir):
+            self.policy_file = tempfile.NamedTemporaryFile(dir=tmp_dir, mode="w+", encoding="utf-8")
+            self.policy_file.write('\n'.join(["allow_tls13 = true",
+                                   "allow_tls12 = false",
+                                   "key_exchange_methods = HYBRID KEM",
+                                   f"key_exchange_groups = {self.kex_algo}"]))
+            self.policy_file.flush()
+
+            if self.ca:
+                self.ca_file =  tempfile.NamedTemporaryFile(dir=tmp_dir, mode="w+", encoding="utf-8")
+                self.ca_file.write(self.ca)
+                self.ca_file.flush()
+
+        def run(self):
+            cmd_options = []
+            if self.ca_file:
+                cmd_options += [f"--trusted-cas={self.ca_file.name}"]
+            if self.port:
+                cmd_options += [f"--port={self.port}"]
+            cmd_options += [f"--policy={self.policy_file.name}"]
+            cmd_options += [self.host]
+            return test_cli("tls_client", cmd_options, cmd_input="", timeout=5)
+
+    def get_oqs_ports():
+        try:
+            conn = HTTPSConnection("test.openquantumsafe.org")
+            conn.request("GET", "/assignments.json")
+            resp = conn.getresponse()
+            if resp.status != 200:
+                return None
+            return json.loads(resp.read().decode("utf-8"))['ecdsap256']
+        except Exception:
+            return None
+
+    test_cfg = [
+        TestConfig("pq.cloudflareresearch.com", "x25519/Kyber-512-r3/cloudflare"),
+        TestConfig("pq.cloudflareresearch.com", "x25519/Kyber-768-r3"),
+        TestConfig("google.com", "x25519/Kyber-768-r3"),
+
+        TestConfig("qsc.eu-de.kms.cloud.ibm.com", "secp256r1/Kyber-512-r3"),
+        TestConfig("qsc.eu-de.kms.cloud.ibm.com", "secp384r1/Kyber-768-r3"),
+        TestConfig("qsc.eu-de.kms.cloud.ibm.com", "secp521r1/Kyber-1024-r3"),
+        TestConfig("qsc.eu-de.kms.cloud.ibm.com", "Kyber-512-r3"),
+        TestConfig("qsc.eu-de.kms.cloud.ibm.com", "Kyber-768-r3"),
+        TestConfig("qsc.eu-de.kms.cloud.ibm.com", "Kyber-1024-r3"),
+    ]
+
+    oqsp = get_oqs_ports()
+    if oqsp:
+        # src/scripts/test_cli.py --run-online-tests ./botan pqc_hybrid_tests
+        test_cfg += [
+            TestConfig("test.openquantumsafe.org", "x25519/Kyber-512-r3", port=oqsp['x25519_kyber512'], ca=oqs_test_ca),
+            TestConfig("test.openquantumsafe.org", "x25519/Kyber-768-r3", port=oqsp['x25519_kyber768'], ca=oqs_test_ca),
+            TestConfig("test.openquantumsafe.org", "x448/Kyber-768-r3", port=oqsp['x448_kyber768'], ca=oqs_test_ca),
+            TestConfig("test.openquantumsafe.org", "secp256r1/Kyber-512-r3", port=oqsp['p256_kyber512'], ca=oqs_test_ca),
+            TestConfig("test.openquantumsafe.org", "secp256r1/Kyber-768-r3", port=oqsp['p256_kyber768'], ca=oqs_test_ca),
+            TestConfig("test.openquantumsafe.org", "secp384r1/Kyber-768-r3", port=oqsp['p384_kyber768'], ca=oqs_test_ca),
+            TestConfig("test.openquantumsafe.org", "secp521r1/Kyber-1024-r3", port=oqsp['p521_kyber1024'], ca=oqs_test_ca),
+            TestConfig("test.openquantumsafe.org", "Kyber-512-r3", port=oqsp['kyber512'], ca=oqs_test_ca),
+            TestConfig("test.openquantumsafe.org", "Kyber-768-r3", port=oqsp['kyber768'], ca=oqs_test_ca),
+            TestConfig("test.openquantumsafe.org", "Kyber-1024-r3", port=oqsp['kyber1024'], ca=oqs_test_ca),
+            TestConfig("test.openquantumsafe.org", "eFrodoKEM-640-SHAKE", port=oqsp['frodo640shake'], ca=oqs_test_ca),
+            TestConfig("test.openquantumsafe.org", "eFrodoKEM-976-SHAKE", port=oqsp['frodo976shake'], ca=oqs_test_ca),
+            TestConfig("test.openquantumsafe.org", "eFrodoKEM-1344-SHAKE", port=oqsp['frodo1344shake'], ca=oqs_test_ca),
+            TestConfig("test.openquantumsafe.org", "eFrodoKEM-640-AES", port=oqsp['frodo640aes'], ca=oqs_test_ca),
+            TestConfig("test.openquantumsafe.org", "eFrodoKEM-976-AES", port=oqsp['frodo976aes'], ca=oqs_test_ca),
+            TestConfig("test.openquantumsafe.org", "eFrodoKEM-1344-AES", port=oqsp['frodo1344aes'], ca=oqs_test_ca),
+            TestConfig("test.openquantumsafe.org", "x25519/eFrodoKEM-640-SHAKE", port=oqsp['x25519_frodo640shake'], ca=oqs_test_ca),
+            TestConfig("test.openquantumsafe.org", "x25519/eFrodoKEM-640-AES", port=oqsp['x25519_frodo640aes'], ca=oqs_test_ca),
+            TestConfig("test.openquantumsafe.org", "x448/eFrodoKEM-976-SHAKE", port=oqsp['x448_frodo976shake'], ca=oqs_test_ca),
+            TestConfig("test.openquantumsafe.org", "x448/eFrodoKEM-976-AES", port=oqsp['x448_frodo976aes'], ca=oqs_test_ca),
+            TestConfig("test.openquantumsafe.org", "secp256r1/eFrodoKEM-640-SHAKE", port=oqsp['p256_frodo640shake'], ca=oqs_test_ca),
+            TestConfig("test.openquantumsafe.org", "secp256r1/eFrodoKEM-640-AES", port=oqsp['p256_frodo640aes'], ca=oqs_test_ca),
+            TestConfig("test.openquantumsafe.org", "secp384r1/eFrodoKEM-976-SHAKE", port=oqsp['p384_frodo976shake'], ca=oqs_test_ca),
+            TestConfig("test.openquantumsafe.org", "secp384r1/eFrodoKEM-976-AES", port=oqsp['p384_frodo976aes'], ca=oqs_test_ca),
+            TestConfig("test.openquantumsafe.org", "secp521r1/eFrodoKEM-1344-SHAKE", port=oqsp['p521_frodo1344shake'], ca=oqs_test_ca),
+            TestConfig("test.openquantumsafe.org", "secp521r1/eFrodoKEM-1344-AES", port=oqsp['p521_frodo1344aes'], ca=oqs_test_ca),
+        ]
+    else:
+        logging.info("failed to pull OQS port assignment, skipping OQS...")
+
+    for cfg in test_cfg:
+        cfg.setup(tmp_dir)
+        stdout = cfg.run()
+        if "Handshake complete" not in stdout:
+            logging.error('Failed to complete handshake (%s with %s): %s', cfg.host, cfg.kex_algo, stdout)
+
+
+def cli_tls_http_server_tests(tmp_dir):
+    if not run_socket_tests() or not check_for_command("tls_http_server"):
+        return
+
+    server_port = port_for('tls_http_server')
 
     priv_key = os.path.join(tmp_dir, 'priv.pem')
     ca_cert = os.path.join(tmp_dir, 'ca.crt')
@@ -932,74 +1281,58 @@ def cli_tls_http_server_tests(tmp_dir):
 
     test_cli("sign_cert", "%s %s %s --output=%s" % (ca_cert, priv_key, crt_req, server_cert))
 
-    tls_server = subprocess.Popen([CLI_PATH, 'tls_http_server', '--max-clients=2',
+    tls_server = subprocess.Popen([CLI_PATH, 'tls_http_server', '--max-clients=4',
                                    '--port=%d' % (server_port), server_cert, priv_key],
                                   stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     wait_time = 1.0
     time.sleep(wait_time)
 
-    context = ssl.create_default_context(cafile=ca_cert)
-    conn = HTTPSConnection('localhost', port=server_port, context=context)
-    conn.request("GET", "/")
-    resp = conn.getresponse()
+    for tls_version in [ssl.TLSVersion.TLSv1_2, ssl.TLSVersion.TLSv1_3]:
+        context = ssl.create_default_context(cafile=ca_cert)
+        context.minimum_version = tls_version
+        context.maximum_version = tls_version
 
-    if resp.status != 200:
-        logging.error('Unexpected response status %d' % (resp.status))
+        conn = HTTPSConnection('localhost', port=server_port, context=context)
+        conn.request("GET", "/", headers={"Connection": "close"})
+        resp = conn.getresponse()
 
-    body = str(resp.read())
+        if resp.status != 200:
+            logging.error('Unexpected response status %d', resp.status)
 
-    if body.find('TLS negotiation with Botan 2.') < 0:
-        logging.error('Unexpected response body')
+        body = str(resp.read())
 
-    conn.request("POST", "/logout")
-    resp = conn.getresponse()
+        if body.find('TLS negotiation with Botan 3.') < 0:
+            logging.error('Unexpected response body %s', body)
 
-    if resp.status != 405:
-        logging.error('Unexpected response status %d' % (resp.status))
+        conn.request("POST", "/logout", headers={"Connection": "close"})
+        resp = conn.getresponse()
 
-    if sys.version_info.major >= 3:
-        rc = tls_server.wait(5) # pylint: disable=too-many-function-args
-    else:
-        rc = tls_server.wait()
+        if resp.status != 405:
+            logging.error('Unexpected response status %d', resp.status)
 
-    if rc != 0:
-        logging.error("Unexpected return code from https_server %d", rc)
+    try:
+        rc = tls_server.wait(5)
+        if rc != 0:
+            logging.error("Unexpected return code from https_server %d", rc)
+    except subprocess.TimeoutExpired:
+        logging.error("server did not terminate as expected")
+        tls_server.kill()
 
 def cli_tls_proxy_tests(tmp_dir):
-    # pylint: disable=too-many-locals,too-many-statements
-    if not check_for_command("tls_proxy"):
+    # In the Windows GitHub CI this sometimes fails, for reasons unknown.
+    # The connectionn to the TLS proxy is forcibly closed by the remote host.
+    if not run_socket_tests() or platform.system() == 'Windows' or not check_for_command("tls_proxy"):
         return
 
-    try:
-        from http.client import HTTPSConnection
-    except ImportError:
-        try:
-            from httplib import HTTPSConnection
-        except ImportError:
-            return
-
-    try:
-        from http.server import HTTPServer, BaseHTTPRequestHandler
-    except ImportError:
-        try:
-            from BaseHTTPServer import HTTPServer, BaseHTTPRequestHandler
-        except ImportError:
-            return
-
-    import ssl
-    import threading
-
-    server_port = random_port_number()
-    proxy_port = random_port_number()
-
-    while server_port == proxy_port:
-        proxy_port = random_port_number()
+    server_port = port_for('tls_proxy_backend')
+    proxy_port = port_for('tls_proxy')
 
     priv_key = os.path.join(tmp_dir, 'priv.pem')
     ca_cert = os.path.join(tmp_dir, 'ca.crt')
     crt_req = os.path.join(tmp_dir, 'crt.req')
     server_cert = os.path.join(tmp_dir, 'server.crt')
+    proxy_err = os.path.join(tmp_dir, 'proxy.err')
 
     test_cli("keygen", ["--algo=ECDSA", "--params=secp384r1", "--output=" + priv_key], "")
 
@@ -1013,7 +1346,7 @@ def cli_tls_proxy_tests(tmp_dir):
     test_cli("sign_cert", "%s %s %s --output=%s" % (ca_cert, priv_key, crt_req, server_cert))
 
     tls_proxy = subprocess.Popen([CLI_PATH, 'tls_proxy', str(proxy_port), '127.0.0.1', str(server_port),
-                                  server_cert, priv_key, '--output=/tmp/proxy.err', '--max-clients=2'],
+                                  server_cert, priv_key, f'--output={proxy_err}', '--max-clients=4'],
                                  stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     wait_time = 1.0
@@ -1024,6 +1357,8 @@ def cli_tls_proxy_tests(tmp_dir):
 
     def run_http_server():
         class Handler(BaseHTTPRequestHandler):
+            def log_message(self, _fmt, *_args): # pylint: disable=arguments-differ
+                pass  # muzzle log output
 
             def do_GET(self): # pylint: disable=invalid-name
                 self.send_response(200)
@@ -1040,27 +1375,31 @@ def cli_tls_proxy_tests(tmp_dir):
     time.sleep(wait_time)
 
     context = ssl.create_default_context(cafile=ca_cert)
+    context.minimum_version = ssl.TLSVersion.TLSv1_3
+    context.maximum_version = ssl.TLSVersion.TLSv1_3
 
-    for _i in range(2):
+    for i in range(4):
+        # Make sure that TLS protocol version downgrade works
+        if i > 2:
+            context.minimum_version = ssl.TLSVersion.TLSv1_2
+            context.maximum_version = ssl.TLSVersion.TLSv1_2
+
         conn = HTTPSConnection('localhost', port=proxy_port, context=context)
         conn.request("GET", "/")
         resp = conn.getresponse()
 
         if resp.status != 200:
-            logging.error('Unexpected response status %d' % (resp.status))
+            logging.error('Unexpected response status %d', resp.status)
 
         body = resp.read()
 
         if body != server_response:
-            logging.error('Unexpected response from server %s' % (body))
+            logging.error('Unexpected response from server %s', body)
 
-    if sys.version_info.major >= 3:
-        rc = tls_proxy.wait(5) # pylint: disable=too-many-function-args
-    else:
-        rc = tls_proxy.wait()
+    rc = tls_proxy.wait(5)
 
     if rc != 0:
-        logging.error('Unexpected return code %d', rc)
+        logging.error('Unexpected return code from tls_proxy %d', rc)
 
 def cli_trust_root_tests(tmp_dir):
     pem_file = os.path.join(tmp_dir, 'pems')
@@ -1068,8 +1407,9 @@ def cli_trust_root_tests(tmp_dir):
 
     test_cli("trust_roots", ['--dn-only', '--output=%s' % (dn_file)], "")
 
-    dn_re = re.compile('(.+=\".+\")(,.+=\".+\")')
-    for line in open(dn_file):
+    dn_re = re.compile('(.+=\".+\")(,.+=\".+\")?')
+
+    for line in open(dn_file, encoding='utf8'):
         if dn_re.match(line) is None:
             logging.error("Unexpected DN line %s", line)
 
@@ -1122,7 +1462,7 @@ def cli_pk_encrypt_tests(tmp_dir):
 
     test_cli("keygen", ["--algo=RSA", "--provider=base", "--params=2048", "--output=%s" % (rsa_priv_key)], "")
 
-    key_hash = "72AF3227EF57A728E894D54623EB8E2C0CD11A4A98BF2DF32DB052BF60897873"
+    key_hash = "D1621B7D1272545F8CCC220BC7F6F5BAF0150303B19299F0C5B79C095B3CDFC0"
     test_cli("hash", ["--no-fsname", "--algo=SHA-256", rsa_priv_key], key_hash)
 
     test_cli("pkcs8", ["--pub-out", "%s/rsa.priv" % (tmp_dir), "--output=%s" % (rsa_pub_key)], "")
@@ -1132,7 +1472,7 @@ def cli_pk_encrypt_tests(tmp_dir):
 
     # Because we used a fixed DRBG for each invocation the same ctext is generated each time
     rng_output_hash = "32F5E7B61357DE8397EFDA1E598379DFD5EE21767BDF4E2A435F05117B836AC6"
-    ctext_hash = "FF1F0EEC2C42DD61D78505C5DF624A19AE6FE2BAB0B8F7D878C7655D54C68FE0"
+    ctext_hash = "FD39EDCAEA56B0FD39AC5CF700EDA79CD80A938C964E78E56BAA6AF742D476A2"
 
     test_cli("hash", ["--no-fsname", "--algo=SHA-256", input_file], rng_output_hash)
 
@@ -1152,29 +1492,34 @@ def cli_uuid_tests(_tmp_dir):
     output = test_cli("uuid", [])
 
     if uuid_re.match(output) is None:
-        logging.error('Bad uuid output %s' % (output))
+        logging.error('Bad uuid output %s', output)
 
 def cli_tls_client_hello_tests(_tmp_dir):
 
-    # pylint: disable=line-too-long
-    chello = "16030100cf010000cb03035b3cf2457b864d7bef2a4b1f84fc3ced2b68d9551f3455ffdd305af277a91bb200003a16b816b716ba16b9cca9cca8c02cc030c02bc02fc0adc0acc024c00ac028c014c023c009c027c013ccaa009f009ec09fc09e006b003900670033010000680000000e000c000009676d61696c2e636f6d000500050100000000000a001a0018001d0017001a0018001b0019001c01000101010201030104000b00020100000d00140012080508040806050106010401050306030403001600000017000000230000ff01000100"
+    chellos = [
+        # TLS 1.2
+        ("6073536D3FA201A37C1F3944F6DCDD5A83FAA67DF4B1C9CBE4FA4399FDE7673C", "16030100cf010000cb03035b3cf2457b864d7bef2a4b1f84fc3ced2b68d9551f3455ffdd305af277a91bb200003a16b816b716ba16b9cca9cca8c02cc030c02bc02fc0adc0acc024c00ac028c014c023c009c027c013ccaa009f009ec09fc09e006b003900670033010000680000000e000c000009676d61696c2e636f6d000500050100000000000a001a0018001d0017001a0018001b0019001c01000101010201030104000b00020100000d00140012080508040806050106010401050306030403001600000017000000230000ff01000100"),
 
-    output = test_cli("tls_client_hello", ["--hex", "-"], None, chello)
+        # TLS 1.3
+        ("4D8BB87026C6AEB1356234A01BD62C7DEFB3FEA298B8C50900F5D3F3ADDAADEB", "1603010106010001020303657033B5C89B0356097C9D43B3917BC0D743E34CB118E1DD3FC806EC9CED2FB120657033B589AD50CADDC8CBA0B805A9841DB3A4F92334C1A44EE968DD4B2983450018130313021301CCA9CCA8C02CC030C02BC02FCCAA009F009E010000A10000000E000C0000096C6F63616C686F7374000A001A0018001D0017001A0018001B0019001C01000101010201030104003300260024001D002002CBD31A5D5754EFD5C8F5152E27302681278A710A22B04403EF9EF0F5F95C1E002B00050403040303000D00140012080508040806050106010401050306030403002D00020101000500050100000000FF01000100002300000017000000160000000B00020100"),
+    ]
 
-    output_hash = "8EBFC3205ACFA98461128FE5D081D19254237AF84F7DAF000A3C992C3CF6DE44"
-    test_cli("hash", ["--no-fsname", "--algo=SHA-256", "-"], output_hash, output)
+    for output_hash, chello in chellos:
+        output = test_cli("tls_client_hello", ["--hex", "-"], None, chello)
+        test_cli("hash", ["--no-fsname", "--algo=SHA-256", "-"], output_hash, output)
 
 def cli_speed_pk_tests(_tmp_dir):
     msec = 1
 
     pk_algos = ["ECDSA", "ECDH", "SM2", "ECKCDSA", "ECGDSA", "GOST-34.10",
-                "DH", "DSA", "ElGamal", "Ed25519", "Curve25519", "NEWHOPE", "McEliece",
-                "RSA", "RSA_keygen", "XMSS"]
+                "DH", "DSA", "ElGamal", "Ed25519", "Ed448", "Curve25519", "X448", "McEliece",
+                "RSA", "RSA_keygen", "XMSS", "ec_h2c", "Kyber", "Dilithium",
+                "SPHINCS+"]
 
     output = test_cli("speed", ["--msec=%d" % (msec)] + pk_algos, None).split('\n')
 
     # ECDSA-secp256r1 106 keygen/sec; 9.35 ms/op 37489733 cycles/op (1 op in 9 ms)
-    format_re = re.compile(r'^.* [0-9]+ ([A-Za-z ]+)/sec; [0-9]+\.[0-9]+ ms/op .*\([0-9]+ (op|ops) in [0-9\.]+ ms\)')
+    format_re = re.compile(r'^.* [0-9]+ ([A-Za-z0-9 ]+)/sec; [0-9]+\.[0-9]+ ms/op .*\([0-9]+ (op|ops) in [0-9\.]+ ms\)')
     for line in output:
         if format_re.match(line) is None:
             logging.error("Unexpected line %s", line)
@@ -1193,7 +1538,7 @@ def cli_speed_pbkdf_tests(_tmp_dir):
 def cli_speed_table_tests(_tmp_dir):
     msec = 1
 
-    version_re = re.compile(r'^Botan 2\.[0-9]+\.[0-9] \(.*, revision .*, distribution .*\)')
+    version_re = re.compile(r'^Botan 3\.[0-9]+\.[0-9](\-.*[0-9]+)? \(.*, revision .*, distribution .*\)')
     cpuid_re = re.compile(r'^CPUID: [a-z_0-9 ]*$')
     format_re = re.compile(r'^AES-128 .* buffer size [0-9]+ bytes: [0-9]+\.[0-9]+ MiB\/sec .*\([0-9]+\.[0-9]+ MiB in [0-9]+\.[0-9]+ ms\)')
     tbl_hdr_re = re.compile(r'^algo +operation +1024 bytes$')
@@ -1261,7 +1606,6 @@ def cli_speed_math_tests(_tmp_dir):
                 logging.error("Unexpected line %s", line)
 
 def cli_speed_tests(_tmp_dir):
-    # pylint: disable=too-many-branches
 
     msec = 1
 
@@ -1270,7 +1614,6 @@ def cli_speed_tests(_tmp_dir):
     if len(output) % 4 != 0:
         logging.error("Unexpected number of lines for AES-128 speed test")
 
-    # pylint: disable=line-too-long
     format_re = re.compile(r'^AES-128 .* buffer size [0-9]+ bytes: [0-9]+\.[0-9]+ MiB\/sec .*\([0-9]+\.[0-9]+ MiB in [0-9]+\.[0-9]+ ms\)')
     for line in output:
         if format_re.match(line) is None:
@@ -1278,7 +1621,6 @@ def cli_speed_tests(_tmp_dir):
 
     output = test_cli("speed", ["--msec=%d" % (msec), "ChaCha20", "SHA-256", "HMAC(SHA-256)"], None).split('\n')
 
-    # pylint: disable=line-too-long
     format_re = re.compile(r'^.* buffer size [0-9]+ bytes: [0-9]+\.[0-9]+ MiB\/sec .*\([0-9]+\.[0-9]+ MiB in [0-9]+\.[0-9]+ ms\)')
     for line in output:
         if format_re.match(line) is None:
@@ -1330,14 +1672,15 @@ def cli_speed_tests(_tmp_dir):
     for b in json_blob:
         for field in ['algo', 'op', 'events', 'bps', 'buf_size', 'nanos']:
             if field not in b:
-                logging.error('Missing field %s in JSON record %s' % (field, b))
+                logging.error('Missing field %s in JSON record %s', field, b)
 
 def run_test(fn_name, fn):
     start = time.time()
     tmp_dir = tempfile.mkdtemp(prefix='botan_cli_')
     try:
         fn(tmp_dir)
-    except Exception as e: # pylint: disable=broad-except
+    except Exception as e:
+        logging.info(traceback.format_exc())
         logging.error("Test %s threw exception: %s", fn_name, e)
 
     shutil.rmtree(tmp_dir)
@@ -1345,7 +1688,6 @@ def run_test(fn_name, fn):
     logging.info("Ran %s in %.02f sec", fn_name, end-start)
 
 def main(args=None):
-    # pylint: disable=too-many-branches,too-many-locals
     if args is None:
         args = sys.argv
 
@@ -1355,6 +1697,9 @@ def main(args=None):
     parser.add_option('--verbose', action='store_true', default=False)
     parser.add_option('--quiet', action='store_true', default=False)
     parser.add_option('--threads', action='store', type='int', default=0)
+    parser.add_option('--run-slow-tests', action='store_true', default=False)
+    parser.add_option('--run-online-tests', action='store_true', default=False)
+    parser.add_option('--test-data-dir', default='.')
 
     (options, args) = parser.parse_args(args)
 
@@ -1375,6 +1720,9 @@ def main(args=None):
     global CLI_PATH
     CLI_PATH = args[1]
 
+    global TEST_DATA_DIR
+    TEST_DATA_DIR = os.path.join(options.test_data_dir, 'src/tests/data/timing/')
+
     test_regex = None
     if len(args) == 3:
         try:
@@ -1383,8 +1731,7 @@ def main(args=None):
             logging.error("Invalid regex: %s", str(e))
             return 1
 
-    # some of the slowest tests are grouped up front
-    test_fns = [
+    slow_test_fns = [
         cli_speed_tests,
         cli_speed_pk_tests,
         cli_speed_math_tests,
@@ -1392,7 +1739,9 @@ def main(args=None):
         cli_speed_table_tests,
         cli_speed_invalid_option_tests,
         cli_xmss_sign_tests,
+    ]
 
+    fast_test_fns = [
         cli_argon2_tests,
         cli_asn1_tests,
         cli_base32_tests,
@@ -1402,6 +1751,7 @@ def main(args=None):
         cli_cc_enc_tests,
         cli_cycle_counter,
         cli_cert_issuance_tests,
+        cli_cert_issuance_alternative_algos_tests,
         cli_compress_tests,
         cli_config_tests,
         cli_cpuid_tests,
@@ -1417,6 +1767,7 @@ def main(args=None):
         cli_hmac_tests,
         cli_is_prime_tests,
         cli_key_tests,
+        cli_marvin_tests,
         cli_mod_inverse_tests,
         cli_pbkdf_tune_tests,
         cli_pk_encrypt_tests,
@@ -1431,12 +1782,23 @@ def main(args=None):
         cli_tls_http_server_tests,
         cli_tls_proxy_tests,
         cli_tls_socket_tests,
+        cli_tls_online_pqc_hybrid_tests,
         cli_trust_root_tests,
         cli_tss_tests,
         cli_uuid_tests,
         cli_version_tests,
         cli_zfec_tests,
         ]
+
+    test_fns = []
+
+    if options.run_slow_tests:
+        test_fns = slow_test_fns + fast_test_fns
+    else:
+        test_fns = fast_test_fns
+
+    global ONLINE_TESTS
+    ONLINE_TESTS = options.run_online_tests
 
     tests_to_run = []
     for fn in test_fns:

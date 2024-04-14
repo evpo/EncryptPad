@@ -4,26 +4,24 @@
 * Botan is released under the Simplified BSD License (see license.txt)
 */
 #include "fuzzers.h"
+
 #include <botan/ec_group.h>
-#include <botan/point_gfp.h>
+#include <botan/ec_point.h>
 
 namespace {
 
-void check_os2ecp(const Botan::EC_Group& group, const uint8_t in[], size_t len)
-   {
-   try
-      {
-      Botan::PointGFp point = group.OS2ECP(in, len);
-      }
-   catch(Botan::Exception& e) {}
-   }
-
+void check_os2ecp(const Botan::EC_Group& group, const uint8_t in[], size_t len) {
+   try {
+      Botan::EC_Point point = group.OS2ECP(in, len);
+   } catch(Botan::Exception& e) {}
 }
 
-void fuzz(const uint8_t in[], size_t len)
-   {
-   if(len >= 256)
+}  // namespace
+
+void fuzz(const uint8_t in[], size_t len) {
+   if(len >= 256) {
       return;
+   }
 
    static Botan::EC_Group p192("secp192r1");
    static Botan::EC_Group p224("secp224r1");
@@ -41,4 +39,4 @@ void fuzz(const uint8_t in[], size_t len)
    check_os2ecp(p521, in, len);
    check_os2ecp(bp256, in, len);
    check_os2ecp(bp512, in, len);
-   }
+}

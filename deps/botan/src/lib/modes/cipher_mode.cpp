@@ -6,183 +6,171 @@
 */
 
 #include <botan/cipher_mode.h>
-#include <botan/stream_mode.h>
-#include <botan/scan_name.h>
-#include <botan/parsing.h>
+
+#include <botan/internal/parsing.h>
+#include <botan/internal/scan_name.h>
+#include <botan/internal/stream_mode.h>
 #include <sstream>
 
 #if defined(BOTAN_HAS_BLOCK_CIPHER)
-  #include <botan/block_cipher.h>
+   #include <botan/block_cipher.h>
 #endif
 
 #if defined(BOTAN_HAS_AEAD_MODES)
-  #include <botan/aead.h>
+   #include <botan/aead.h>
 #endif
 
 #if defined(BOTAN_HAS_MODE_CBC)
-  #include <botan/cbc.h>
+   #include <botan/internal/cbc.h>
 #endif
 
 #if defined(BOTAN_HAS_MODE_CFB)
-  #include <botan/cfb.h>
+   #include <botan/internal/cfb.h>
 #endif
 
 #if defined(BOTAN_HAS_MODE_XTS)
-  #include <botan/xts.h>
+   #include <botan/internal/xts.h>
 #endif
 
 #if defined(BOTAN_HAS_COMMONCRYPTO)
-  #include <botan/internal/commoncrypto.h>
+   #include <botan/internal/commoncrypto.h>
 #endif
 
 namespace Botan {
 
-std::unique_ptr<Cipher_Mode> Cipher_Mode::create_or_throw(const std::string& algo,
+std::unique_ptr<Cipher_Mode> Cipher_Mode::create_or_throw(std::string_view algo,
                                                           Cipher_Dir direction,
-                                                          const std::string& provider)
-   {
-   if(auto mode = Cipher_Mode::create(algo, direction, provider))
+                                                          std::string_view provider) {
+   if(auto mode = Cipher_Mode::create(algo, direction, provider)) {
       return mode;
-
-   throw Lookup_Error("Cipher mode", algo, provider);
    }
 
-std::unique_ptr<Cipher_Mode> Cipher_Mode::create(const std::string& algo,
-                                                 Cipher_Dir direction,
-                                                 const std::string& provider)
-   {
-#if defined(BOTAN_HAS_COMMONCRYPTO)
-   if(provider.empty() || provider == "commoncrypto")
-      {
-      std::unique_ptr<Cipher_Mode> commoncrypto_cipher(make_commoncrypto_cipher_mode(algo, direction));
+   throw Lookup_Error("Cipher mode", algo, provider);
+}
 
-      if(commoncrypto_cipher)
-         return commoncrypto_cipher;
+std::unique_ptr<Cipher_Mode> Cipher_Mode::create(std::string_view algo,
+                                                 Cipher_Dir direction,
+                                                 std::string_view provider) {
+#if defined(BOTAN_HAS_COMMONCRYPTO)
+   if(provider.empty() || provider == "commoncrypto") {
+      if(auto cm = make_commoncrypto_cipher_mode(algo, direction))
+         return cm;
 
       if(!provider.empty())
-         return std::unique_ptr<Cipher_Mode>();
-      }
+         return nullptr;
+   }
 #endif
 
 #if defined(BOTAN_HAS_STREAM_CIPHER)
-   if(auto sc = StreamCipher::create(algo))
-      {
-      return std::unique_ptr<Cipher_Mode>(new Stream_Cipher_Mode(sc.release()));
-      }
+   if(auto sc = StreamCipher::create(algo)) {
+      return std::make_unique<Stream_Cipher_Mode>(std::move(sc));
+   }
 #endif
 
 #if defined(BOTAN_HAS_AEAD_MODES)
-   if(auto aead = AEAD_Mode::create(algo, direction))
-      {
-      return std::unique_ptr<Cipher_Mode>(aead.release());
-      }
+   if(auto aead = AEAD_Mode::create(algo, direction)) {
+      return aead;
+   }
 #endif
 
-   if(algo.find('/') != std::string::npos)
-      {
+   if(algo.find('/') != std::string::npos) {
       const std::vector<std::string> algo_parts = split_on(algo, '/');
-      const std::string cipher_name = algo_parts[0];
+      std::string_view cipher_name = algo_parts[0];
       const std::vector<std::string> mode_info = parse_algorithm_name(algo_parts[1]);
 
-      if(mode_info.empty())
+      if(mode_info.empty()) {
          return std::unique_ptr<Cipher_Mode>();
-
-      std::ostringstream alg_args;
-
-      alg_args << '(' << cipher_name;
-      for(size_t i = 1; i < mode_info.size(); ++i)
-         alg_args << ',' << mode_info[i];
-      for(size_t i = 2; i < algo_parts.size(); ++i)
-         alg_args << ',' << algo_parts[i];
-      alg_args << ')';
-
-      const std::string mode_name = mode_info[0] + alg_args.str();
-      return Cipher_Mode::create(mode_name, direction, provider);
       }
+
+      std::ostringstream mode_name;
+
+      mode_name << mode_info[0] << '(' << cipher_name;
+      for(size_t i = 1; i < mode_info.size(); ++i) {
+         mode_name << ',' << mode_info[i];
+      }
+      for(size_t i = 2; i < algo_parts.size(); ++i) {
+         mode_name << ',' << algo_parts[i];
+      }
+      mode_name << ')';
+
+      return Cipher_Mode::create(mode_name.str(), direction, provider);
+   }
 
 #if defined(BOTAN_HAS_BLOCK_CIPHER)
 
    SCAN_Name spec(algo);
 
-   if(spec.arg_count() == 0)
-      {
+   if(spec.arg_count() == 0) {
       return std::unique_ptr<Cipher_Mode>();
-      }
+   }
 
-   std::unique_ptr<BlockCipher> bc(BlockCipher::create(spec.arg(0), provider));
+   auto bc = BlockCipher::create(spec.arg(0), provider);
 
-   if(!bc)
-      {
+   if(!bc) {
       return std::unique_ptr<Cipher_Mode>();
-      }
+   }
 
-#if defined(BOTAN_HAS_MODE_CBC)
-   if(spec.algo_name() == "CBC")
-      {
+   #if defined(BOTAN_HAS_MODE_CBC)
+   if(spec.algo_name() == "CBC") {
       const std::string padding = spec.arg(1, "PKCS7");
 
-      if(padding == "CTS")
-         {
-         if(direction == ENCRYPTION)
-            return std::unique_ptr<Cipher_Mode>(new CTS_Encryption(bc.release()));
-         else
-            return std::unique_ptr<Cipher_Mode>(new CTS_Decryption(bc.release()));
+      if(padding == "CTS") {
+         if(direction == Cipher_Dir::Encryption) {
+            return std::make_unique<CTS_Encryption>(std::move(bc));
+         } else {
+            return std::make_unique<CTS_Decryption>(std::move(bc));
          }
-      else
-         {
-         std::unique_ptr<BlockCipherModePaddingMethod> pad(get_bc_pad(padding));
+      } else {
+         auto pad = BlockCipherModePaddingMethod::create(padding);
 
-         if(pad)
-            {
-            if(direction == ENCRYPTION)
-               return std::unique_ptr<Cipher_Mode>(new CBC_Encryption(bc.release(), pad.release()));
-            else
-               return std::unique_ptr<Cipher_Mode>(new CBC_Decryption(bc.release(), pad.release()));
+         if(pad) {
+            if(direction == Cipher_Dir::Encryption) {
+               return std::make_unique<CBC_Encryption>(std::move(bc), std::move(pad));
+            } else {
+               return std::make_unique<CBC_Decryption>(std::move(bc), std::move(pad));
             }
          }
       }
-#endif
+   }
+   #endif
 
-#if defined(BOTAN_HAS_MODE_XTS)
-   if(spec.algo_name() == "XTS")
-      {
-      if(direction == ENCRYPTION)
-         return std::unique_ptr<Cipher_Mode>(new XTS_Encryption(bc.release()));
-      else
-         return std::unique_ptr<Cipher_Mode>(new XTS_Decryption(bc.release()));
+   #if defined(BOTAN_HAS_MODE_XTS)
+   if(spec.algo_name() == "XTS") {
+      if(direction == Cipher_Dir::Encryption) {
+         return std::make_unique<XTS_Encryption>(std::move(bc));
+      } else {
+         return std::make_unique<XTS_Decryption>(std::move(bc));
       }
-#endif
+   }
+   #endif
 
-#if defined(BOTAN_HAS_MODE_CFB)
-   if(spec.algo_name() == "CFB")
-      {
-      const size_t feedback_bits = spec.arg_as_integer(1, 8*bc->block_size());
-      if(direction == ENCRYPTION)
-         return std::unique_ptr<Cipher_Mode>(new CFB_Encryption(bc.release(), feedback_bits));
-      else
-         return std::unique_ptr<Cipher_Mode>(new CFB_Decryption(bc.release(), feedback_bits));
+   #if defined(BOTAN_HAS_MODE_CFB)
+   if(spec.algo_name() == "CFB") {
+      const size_t feedback_bits = spec.arg_as_integer(1, 8 * bc->block_size());
+      if(direction == Cipher_Dir::Encryption) {
+         return std::make_unique<CFB_Encryption>(std::move(bc), feedback_bits);
+      } else {
+         return std::make_unique<CFB_Decryption>(std::move(bc), feedback_bits);
       }
-#endif
+   }
+   #endif
 
 #endif
 
    return std::unique_ptr<Cipher_Mode>();
-   }
+}
 
 //static
-std::vector<std::string> Cipher_Mode::providers(const std::string& algo_spec)
-   {
-   const std::vector<std::string>& possible = { "base", "openssl", "commoncrypto" };
+std::vector<std::string> Cipher_Mode::providers(std::string_view algo_spec) {
+   const std::vector<std::string>& possible = {"base", "commoncrypto"};
    std::vector<std::string> providers;
-   for(auto&& prov : possible)
-      {
-      std::unique_ptr<Cipher_Mode> mode = Cipher_Mode::create(algo_spec, ENCRYPTION, prov);
-      if(mode)
-         {
-         providers.push_back(prov); // available
-         }
+   for(auto&& prov : possible) {
+      auto mode = Cipher_Mode::create(algo_spec, Cipher_Dir::Encryption, prov);
+      if(mode) {
+         providers.push_back(prov);  // available
       }
-   return providers;
    }
-
+   return providers;
 }
+
+}  // namespace Botan

@@ -9,41 +9,44 @@
 #ifndef BOTAN_MODE_XTS_H_
 #define BOTAN_MODE_XTS_H_
 
-#include <botan/cipher_mode.h>
 #include <botan/block_cipher.h>
-
-BOTAN_FUTURE_INTERNAL_HEADER(xts.h)
+#include <botan/cipher_mode.h>
 
 namespace Botan {
 
 /**
 * IEEE P1619 XTS Mode
 */
-class BOTAN_PUBLIC_API(2,0) XTS_Mode : public Cipher_Mode
-   {
+class XTS_Mode : public Cipher_Mode {
    public:
-      std::string name() const override;
+      std::string name() const final;
 
-      size_t update_granularity() const override { return m_cipher_parallelism; }
+      size_t update_granularity() const final;
 
-      size_t minimum_final_size() const override;
+      size_t ideal_granularity() const final;
 
-      Key_Length_Specification key_spec() const override;
+      size_t minimum_final_size() const final;
 
-      size_t default_nonce_length() const override;
+      Key_Length_Specification key_spec() const final;
 
-      bool valid_nonce_length(size_t n) const override;
+      size_t default_nonce_length() const final;
 
-      void clear() override;
+      bool valid_nonce_length(size_t n) const final;
 
-      void reset() override;
+      void clear() final;
+
+      void reset() final;
+
+      bool has_keying_material() const final;
 
    protected:
-      explicit XTS_Mode(BlockCipher* cipher);
+      explicit XTS_Mode(std::unique_ptr<BlockCipher> cipher);
 
       const uint8_t* tweak() const { return m_tweak.data(); }
 
       bool tweak_set() const { return m_tweak.empty() == false; }
+
+      size_t tweak_blocks() const { return m_tweak_blocks; }
 
       const BlockCipher& cipher() const { return *m_cipher; }
 
@@ -53,51 +56,50 @@ class BOTAN_PUBLIC_API(2,0) XTS_Mode : public Cipher_Mode
 
    private:
       void start_msg(const uint8_t nonce[], size_t nonce_len) override;
-      void key_schedule(const uint8_t key[], size_t length) override;
+      void key_schedule(std::span<const uint8_t> key) override;
 
       std::unique_ptr<BlockCipher> m_cipher;
       std::unique_ptr<BlockCipher> m_tweak_cipher;
       secure_vector<uint8_t> m_tweak;
       const size_t m_cipher_block_size;
       const size_t m_cipher_parallelism;
-   };
+      const size_t m_tweak_blocks;
+};
 
 /**
 * IEEE P1619 XTS Encryption
 */
-class BOTAN_PUBLIC_API(2,0) XTS_Encryption final : public XTS_Mode
-   {
+class XTS_Encryption final : public XTS_Mode {
    public:
       /**
       * @param cipher underlying block cipher
       */
-      explicit XTS_Encryption(BlockCipher* cipher) : XTS_Mode(cipher) {}
-
-      size_t process(uint8_t buf[], size_t size) override;
-
-      void finish(secure_vector<uint8_t>& final_block, size_t offset = 0) override;
+      explicit XTS_Encryption(std::unique_ptr<BlockCipher> cipher) : XTS_Mode(std::move(cipher)) {}
 
       size_t output_length(size_t input_length) const override;
-   };
+
+   private:
+      size_t process_msg(uint8_t buf[], size_t size) override;
+      void finish_msg(secure_vector<uint8_t>& final_block, size_t offset = 0) override;
+};
 
 /**
 * IEEE P1619 XTS Decryption
 */
-class BOTAN_PUBLIC_API(2,0) XTS_Decryption final : public XTS_Mode
-   {
+class XTS_Decryption final : public XTS_Mode {
    public:
       /**
       * @param cipher underlying block cipher
       */
-      explicit XTS_Decryption(BlockCipher* cipher) : XTS_Mode(cipher) {}
-
-      size_t process(uint8_t buf[], size_t size) override;
-
-      void finish(secure_vector<uint8_t>& final_block, size_t offset = 0) override;
+      explicit XTS_Decryption(std::unique_ptr<BlockCipher> cipher) : XTS_Mode(std::move(cipher)) {}
 
       size_t output_length(size_t input_length) const override;
-   };
 
-}
+   private:
+      size_t process_msg(uint8_t buf[], size_t size) override;
+      void finish_msg(secure_vector<uint8_t>& final_block, size_t offset = 0) override;
+};
+
+}  // namespace Botan
 
 #endif

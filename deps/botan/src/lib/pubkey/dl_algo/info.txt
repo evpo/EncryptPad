@@ -1,6 +1,11 @@
 <defines>
-DL_PUBLIC_KEY_FAMILY -> 20131128
+DL_SCHEME -> 20230101
 </defines>
+
+<module_info>
+name -> "Discrete Logarithm"
+brief -> "Classes for discrete logarithm based schemes"
+</module_info>
 
 <requires>
 asn1
@@ -8,3 +13,7 @@ dl_group
 numbertheory
 rng
 </requires>
+
+<header:internal>
+dl_scheme.h
+</header:internal>

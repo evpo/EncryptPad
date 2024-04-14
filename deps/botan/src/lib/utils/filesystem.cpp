@@ -6,20 +6,22 @@
 */
 
 #include <botan/exceptn.h>
+
 #include <botan/internal/filesystem.h>
 #include <algorithm>
 #include <deque>
 #include <memory>
+#include <sstream>
 
 #if defined(BOTAN_TARGET_OS_HAS_POSIX1)
-  #include <sys/types.h>
-  #include <sys/stat.h>
-  #include <dirent.h>
-  #include <functional>
+   #include <dirent.h>
+   #include <functional>
+   #include <sys/stat.h>
+   #include <sys/types.h>
 #elif defined(BOTAN_TARGET_OS_HAS_WIN32)
-  #define NOMINMAX 1
-  #define _WINSOCKAPI_ // stop windows.h including winsock.h
-  #include <windows.h>
+   #define NOMINMAX 1
+   #define _WINSOCKAPI_  // stop windows.h including winsock.h
+   #include <windows.h>
 #endif
 
 namespace Botan {
@@ -28,92 +30,85 @@ namespace {
 
 #if defined(BOTAN_TARGET_OS_HAS_POSIX1)
 
-std::vector<std::string> impl_readdir(const std::string& dir_path)
-   {
+std::vector<std::string> impl_readdir(std::string_view dir_path) {
    std::vector<std::string> out;
    std::deque<std::string> dir_list;
-   dir_list.push_back(dir_path);
+   dir_list.push_back(std::string(dir_path));
 
-   while(!dir_list.empty())
-      {
+   while(!dir_list.empty()) {
       const std::string cur_path = dir_list[0];
       dir_list.pop_front();
 
-      std::unique_ptr<DIR, std::function<int (DIR*)>> dir(::opendir(cur_path.c_str()), ::closedir);
+      std::unique_ptr<DIR, std::function<int(DIR*)>> dir(::opendir(cur_path.c_str()), ::closedir);
 
-      if(dir)
-         {
-         while(struct dirent* dirent = ::readdir(dir.get()))
-            {
+      if(dir) {
+         while(struct dirent* dirent = ::readdir(dir.get())) {
             const std::string filename = dirent->d_name;
-            if(filename == "." || filename == "..")
+            if(filename == "." || filename == "..") {
                continue;
-            const std::string full_path = cur_path + "/" + filename;
+            }
+
+            std::ostringstream full_path_sstr;
+            full_path_sstr << cur_path << "/" << filename;
+            const std::string full_path = full_path_sstr.str();
 
             struct stat stat_buf;
 
-            if(::stat(full_path.c_str(), &stat_buf) == -1)
+            if(::stat(full_path.c_str(), &stat_buf) == -1) {
                continue;
+            }
 
-            if(S_ISDIR(stat_buf.st_mode))
+            if(S_ISDIR(stat_buf.st_mode)) {
                dir_list.push_back(full_path);
-            else if(S_ISREG(stat_buf.st_mode))
+            } else if(S_ISREG(stat_buf.st_mode)) {
                out.push_back(full_path);
             }
          }
       }
+   }
 
    return out;
-   }
+}
 
 #elif defined(BOTAN_TARGET_OS_HAS_WIN32)
 
-std::vector<std::string> impl_win32(const std::string& dir_path)
-   {
+std::vector<std::string> impl_win32(std::string_view dir_path) {
    std::vector<std::string> out;
    std::deque<std::string> dir_list;
-   dir_list.push_back(dir_path);
+   dir_list.push_back(std::string(dir_path));
 
-   while(!dir_list.empty())
-      {
+   while(!dir_list.empty()) {
       const std::string cur_path = dir_list[0];
       dir_list.pop_front();
 
       WIN32_FIND_DATAA find_data;
       HANDLE dir = ::FindFirstFileA((cur_path + "/*").c_str(), &find_data);
 
-      if(dir != INVALID_HANDLE_VALUE)
-         {
-         do
-            {
+      if(dir != INVALID_HANDLE_VALUE) {
+         do {
             const std::string filename = find_data.cFileName;
             if(filename == "." || filename == "..")
                continue;
             const std::string full_path = cur_path + "/" + filename;
 
-            if(find_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
-               {
+            if(find_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
                dir_list.push_back(full_path);
-               }
-            else
-               {
+            } else {
                out.push_back(full_path);
-               }
             }
-         while(::FindNextFileA(dir, &find_data));
-         }
+         } while(::FindNextFileA(dir, &find_data));
+      }
 
       ::FindClose(dir);
-      }
+   }
 
    return out;
 }
 #endif
 
-}
+}  // namespace
 
-bool has_filesystem_impl()
-   {
+bool has_filesystem_impl() {
 #if defined(BOTAN_TARGET_OS_HAS_POSIX1)
    return true;
 #elif defined(BOTAN_TARGET_OS_HAS_WIN32)
@@ -121,10 +116,9 @@ bool has_filesystem_impl()
 #else
    return false;
 #endif
-   }
+}
 
-std::vector<std::string> get_files_recursive(const std::string& dir)
-   {
+std::vector<std::string> get_files_recursive(std::string_view dir) {
    std::vector<std::string> files;
 
 #if defined(BOTAN_TARGET_OS_HAS_POSIX1)
@@ -139,6 +133,6 @@ std::vector<std::string> get_files_recursive(const std::string& dir)
    std::sort(files.begin(), files.end());
 
    return files;
-   }
-
 }
+
+}  // namespace Botan

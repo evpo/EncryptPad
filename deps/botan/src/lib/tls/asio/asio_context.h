@@ -9,40 +9,35 @@
 #ifndef BOTAN_ASIO_TLS_CONTEXT_H_
 #define BOTAN_ASIO_TLS_CONTEXT_H_
 
-#include <botan/build.h>
+#include <botan/asio_compat.h>
+#if defined(BOTAN_FOUND_COMPATIBLE_BOOST_ASIO_VERSION)
 
-#include <boost/version.hpp>
-#if BOOST_VERSION >= 106600
+   #include <functional>
 
-#include <functional>
+   #include <botan/credentials_manager.h>
+   #include <botan/ocsp.h>
+   #include <botan/rng.h>
+   #include <botan/tls_callbacks.h>
+   #include <botan/tls_policy.h>
+   #include <botan/tls_server_info.h>
+   #include <botan/tls_session_manager.h>
 
-#include <botan/credentials_manager.h>
-#include <botan/ocsp.h>
-#include <botan/rng.h>
-#include <botan/tls_callbacks.h>
-#include <botan/tls_policy.h>
-#include <botan/tls_server_info.h>
-#include <botan/tls_session_manager.h>
-
-namespace Botan {
-namespace TLS {
+namespace Botan::TLS {
 
 namespace detail {
 template <typename FunT>
 struct fn_signature_helper : public std::false_type {};
 
 template <typename R, typename D, typename... Args>
-struct fn_signature_helper<R(D::*)(Args...)>
-   {
-   using type = std::function<R(Args...)>;
-   };
+struct fn_signature_helper<R (D::*)(Args...)> {
+      using type = std::function<R(Args...)>;
+};
 }  // namespace detail
 
 /**
  * A helper class to initialize and configure Botan::TLS::Stream
  */
-class Context
-   {
+class Context {
    public:
       // statically extract the function signature type from Callbacks::tls_verify_cert_chain
       // and reuse it as an std::function<> for the verify callback signature
@@ -50,27 +45,25 @@ class Context
        * The signature of the callback function should correspond to the signature of
        * Callbacks::tls_verify_cert_chain
        */
-      using Verify_Callback =
-         detail::fn_signature_helper<decltype(&Callbacks::tls_verify_cert_chain)>::type;
+      using Verify_Callback = detail::fn_signature_helper<decltype(&Callbacks::tls_verify_cert_chain)>::type;
 
-      Context(Credentials_Manager&   credentials_manager,
-              RandomNumberGenerator& rng,
-              Session_Manager&       session_manager,
-              Policy&                policy,
-              Server_Information     server_info = Server_Information()) :
-         m_credentials_manager(credentials_manager),
-         m_rng(rng),
-         m_session_manager(session_manager),
-         m_policy(policy),
-         m_server_info(server_info)
-         {}
+      Context(std::shared_ptr<Credentials_Manager> credentials_manager,
+              std::shared_ptr<RandomNumberGenerator> rng,
+              std::shared_ptr<Session_Manager> session_manager,
+              std::shared_ptr<const Policy> policy,
+              Server_Information server_info = Server_Information()) :
+            m_credentials_manager(credentials_manager),
+            m_rng(rng),
+            m_session_manager(session_manager),
+            m_policy(policy),
+            m_server_info(std::move(server_info)) {}
 
-      virtual ~Context() {}
+      virtual ~Context() = default;
 
-      Context(Context&&)                 = default;
-      Context(const Context&)            = delete;
+      Context(Context&&) = default;
+      Context(const Context&) = delete;
       Context& operator=(const Context&) = delete;
-      Context& operator=(Context&&)      = delete;
+      Context& operator=(Context&&) = delete;
 
       /**
        * @brief Override the tls_verify_cert_chain callback
@@ -81,40 +74,28 @@ class Context
        *
        * @note This function should only be called before initiating the TLS handshake
        */
-      void set_verify_callback(Verify_Callback callback)
-         {
-         m_verify_callback = std::move(callback);
-         }
+      void set_verify_callback(Verify_Callback callback) { m_verify_callback = std::move(callback); }
 
-      bool has_verify_callback() const
-         {
-         return static_cast<bool>(m_verify_callback);
-         }
+      bool has_verify_callback() const { return static_cast<bool>(m_verify_callback); }
 
-      const Verify_Callback& get_verify_callback() const
-         {
-         return m_verify_callback;
-         }
+      const Verify_Callback& get_verify_callback() const { return m_verify_callback; }
 
-      void set_server_info(const Server_Information& server_info)
-         {
-         m_server_info = server_info;
-         }
+      void set_server_info(Server_Information server_info) { m_server_info = std::move(server_info); }
 
    protected:
-      template <class S, class C> friend class Stream;
+      template <class S, class C>
+      friend class Stream;
 
-      Credentials_Manager&   m_credentials_manager;
-      RandomNumberGenerator& m_rng;
-      Session_Manager&       m_session_manager;
-      Policy&                m_policy;
+      std::shared_ptr<Credentials_Manager> m_credentials_manager;
+      std::shared_ptr<RandomNumberGenerator> m_rng;
+      std::shared_ptr<Session_Manager> m_session_manager;
+      std::shared_ptr<const Policy> m_policy;
 
-      Server_Information     m_server_info;
-      Verify_Callback        m_verify_callback;
-   };
+      Server_Information m_server_info;
+      Verify_Callback m_verify_callback;
+};
 
-}  // namespace TLS
-}  // namespace Botan
+}  // namespace Botan::TLS
 
-#endif  // BOOST_VERSION
+#endif
 #endif  // BOTAN_ASIO_TLS_CONTEXT_H_
