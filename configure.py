@@ -1665,7 +1665,7 @@ def configure_botan(options):
             '--disable-shared',
             '--with-zlib',
             '--with-bzip2',
-            '--enable-modules', 'aes,cfb,pbkdf2,auto_rng,compression,base64,sha1,sha2_32,sha2_64,sha3,pgp_s2k,modes,crc24,blowfish,cast128,cast256,des,twofish,camellia,hmac,hmac_drbg,system_rng,entropy,chacha_rng,processor_rng,rdrand_rng',
+            '--enable-modules', 'aes,cfb,pbkdf2,auto_rng,compression,base64,sha1,sha2_32,sha2_64,sha3,pgp_s2k,modes,crc24,blowfish,cast128,des,twofish,camellia,hmac,hmac_drbg,system_rng,entropy,chacha_rng,processor_rng',
             '--disable-sse4.1',
             '--disable-sse4.2',
             '--minimized-build' ])
@@ -1826,7 +1826,7 @@ def set_zlib_variables(options, template_vars, cc):
         template_vars['zlib_ldflags'] = external_command(['pkg-config', '--libs', 'zlib'])
 
 def get_botan_include_dir():
-    return os.path.join(get_project_dir(), 'deps', 'botan', 'build', 'include')
+    return os.path.join(get_project_dir(), 'deps', 'botan', 'build', 'include', 'public')
 
 def set_botan_variables(options, template_vars, cc):
     template_vars['build_botan'] = options.build_botan
