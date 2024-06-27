@@ -73,7 +73,7 @@ void PlainTextEdit::leaveEvent(QEvent *event)
     leaveControl();
     super::leaveEvent(event);
 }
-void PlainTextEdit::enterEvent(QEvent *event)
+void PlainTextEdit::enterEvent(QEnterEvent *event)
 {
     enterControl();
     super::enterEvent(event);

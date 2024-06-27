@@ -16,6 +16,7 @@
 #include <QStandardPaths>
 #include <QDebug>
 #include <QDir>
+#include <QRegularExpression>
 
 #include "plog/Log.h"
 
@@ -208,7 +209,7 @@ void Proxy::highlightMatches(const QString &pattern)
     selection.format.setForeground(Qt::black);
 
     // Highlight matches.
-    QRegExp re(pattern);
+    QRegularExpression re(pattern);
     QTextCursor cur = doc->find(re);
 
     m_searchSelection.clear();

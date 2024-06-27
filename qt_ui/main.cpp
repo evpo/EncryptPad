@@ -18,7 +18,7 @@
 //along with EncryptPad.  If not, see <http://www.gnu.org/licenses/>.
 //**********************************************************************************
 #include <QApplication>
-#include <QTextCodec>
+//#include <QTextCodec>
 #include <QTranslator>
 #include <QResource>
 #include <QDirIterator>

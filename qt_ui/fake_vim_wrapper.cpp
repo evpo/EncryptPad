@@ -2,6 +2,7 @@
 #include "fakevimactions.h"
 #include "fakevimsavedaction.h"
 #include <QStandardPaths>
+#include <QFile>
 #include "plog/Log.h"
 
 FakeVimWrapper CreateFakeVimWrapper(PlainTextEdit *editor, QMainWindow *mainWindow)
