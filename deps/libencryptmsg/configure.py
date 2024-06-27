@@ -1747,7 +1747,7 @@ def set_bzip2_variables(options, template_vars, cc):
             bzip2_name = 'bz2'
             template_vars['bzip2_ldflags'] = '{0} {1} {2} {3}'.format(cc.add_lib_dir_option, options.bzip2_lib_dir, cc.add_lib_option, bzip2_name)
         else:
-            template_vars['bzip2_ldflags'] = external_command(['pkg-config', '--libs', 'bzip2'])
+            template_vars['bzip2_ldflags'] = external_command([options.pkg_config_binary, '--libs', 'bzip2'])
     else:
         template_vars['bzip2_ldflags'] = ''
 
@@ -1758,7 +1758,7 @@ def set_zlib_variables(options, template_vars, cc):
             zlib_name = 'z'
             template_vars['zlib_ldflags'] = '{0} {1} {2} {3}'.format(cc.add_lib_dir_option, options.zlib_lib_dir, cc.add_lib_option, zlib_name)
         else:
-            template_vars['zlib_ldflags'] = external_command(['pkg-config', '--libs', 'zlib'])
+            template_vars['zlib_ldflags'] = external_command([options.pkg_config_binary, '--libs', 'zlib'])
     else:
         template_vars['zlib_ldflags'] = ''
 
@@ -1766,14 +1766,14 @@ def set_botan_variables(options, template_vars, cc):
     if options.botan_include_dir:
         botan_cxxflags = '{0} {1}'.format(cc.add_include_dir_option, options.botan_include_dir)
     else:
-        botan_cxxflags = external_command(['pkg-config', '--cflags', 'botan-3'])
+        botan_cxxflags = external_command([options.pkg_config_binary, '--cflags', 'botan-3'])
 
     if options.build_cli or options.test:
         if options.botan_lib_dir:
             botan_lib_name = 'botan-3'
             botan_ldflags = '{0} {1} {2} {3}'.format(cc.add_lib_dir_option, options.botan_lib_dir, cc.add_lib_option, botan_lib_name)
         else:
-            botan_ldflags = external_command(['pkg-config', '--libs', 'botan-3'])
+            botan_ldflags = external_command([options.pkg_config_binary, '--libs', 'botan-3'])
     else:
         botan_ldflags = ''
 
@@ -1817,6 +1817,8 @@ def process_command_line(args):
     build_group.add_option('--cc', dest='compiler', help='set the desired build compiler')
     build_group.add_option('--cc-bin', dest='compiler_binary', metavar='BINARY',
                             help='set path to compiler binary')
+    build_group.add_option('--pkg-config-bin', dest='pkg_config_binary', metavar='BINARY', default='pkg-config',
+                            help='set path to pkg-config binary')
     build_group.add_option('--cpu', help='set the target CPU architecture')
     build_group.add_option('--with-build-dir', metavar='DIR', default='',
                            help='setup the build in DIR')

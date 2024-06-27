@@ -569,7 +569,8 @@ def set_defaults_for_unset_options(options, info_arch, info_cc): # pylint: disab
             options.cpu = "x86_32"
         logging.info('Guessing target processor is a %s (use --cpu to set)' % (options.cpu))
 
-    if is_windows(options) or options.os == 'darwin':
+    # if is_windows(options) or options.os == 'darwin':
+    if options.os == 'darwin':
         options.build_botan = True
         options.build_zlib = True
         options.build_bzip2 = True
@@ -1660,6 +1661,10 @@ def configure_botan(options):
         cmd.extend(['--cxxflags', options.cxxflags])
     if options.ldflags:
         cmd.extend(['--ldflags', options.ldflags])
+    if options.compiler_binary:
+        cmd.extend(['--cc-bin', options.compiler_binary])
+    if options.ar_command:
+        cmd.extend(['--ar-command', options.ar_command])
 
     cmd.extend(['--amalgamation',
             '--disable-shared',
@@ -1736,6 +1741,12 @@ def configure_encryptmsg(options):
         cmd.extend(['--cxxflags', options.cxxflags])
     if options.ldflags:
         cmd.extend(['--ldflags', options.ldflags])
+    if options.compiler_binary:
+        cmd.extend(['--cc-bin', options.compiler_binary])
+    if options.ar_command:
+        cmd.extend(['--ar-command', options.ar_command])
+    if options.pkg_config_binary:
+        cmd.extend(['--pkg-config-bin', options.pkg_config_binary])
     if options.build_botan:
         cmd.extend([
             '--botan-include-dir', get_botan_include_dir(),
@@ -1795,9 +1806,9 @@ def set_bzip2_variables(options, template_vars, cc):
         template_vars['bzip2_cxxflags'] =  cc.add_include_dir_option + bzip2_dir
         template_vars['bzip2_ldflags'] = os.path.join(bzip2_dir, 'libbz2.a')
     else:
-        if try_external_command(['pkg-config','--exists','bzip2']).success:
-            template_vars['bzip2_cxxflags'] = external_command(['pkg-config', '--cflags', 'bzip2'])
-            template_vars['bzip2_ldflags'] = external_command(['pkg-config', '--libs', 'bzip2'])
+        if try_external_command([options.pkg_config_binary,'--exists','bzip2']).success:
+            template_vars['bzip2_cxxflags'] = external_command([options.pkg_config_binary, '--cflags', 'bzip2'])
+            template_vars['bzip2_ldflags'] = external_command([options.pkg_config_binary, '--libs', 'bzip2'])
         else:
             template_vars['bzip2_ldflags'] = "-lbz2"
 
@@ -1822,8 +1833,8 @@ def set_zlib_variables(options, template_vars, cc):
             template_vars['zlib_makefile'] = ''
 
     else:
-        template_vars['zlib_cxxflags'] = external_command(['pkg-config', '--cflags', 'zlib'])
-        template_vars['zlib_ldflags'] = external_command(['pkg-config', '--libs', 'zlib'])
+        template_vars['zlib_cxxflags'] = external_command([options.pkg_config_binary, '--cflags', 'zlib'])
+        template_vars['zlib_ldflags'] = external_command([options.pkg_config_binary, '--libs', 'zlib'])
 
 def get_botan_include_dir():
     return os.path.join(get_project_dir(), 'deps', 'botan', 'build', 'include', 'public')
@@ -1831,8 +1842,8 @@ def get_botan_include_dir():
 def set_botan_variables(options, template_vars, cc):
     template_vars['build_botan'] = options.build_botan
     if not options.build_botan:
-        botan_cxxflags = external_command(['pkg-config', '--cflags', 'botan-3'])
-        botan_ldflags = external_command(['pkg-config', '--libs', 'botan-3'])
+        botan_cxxflags = external_command([options.pkg_config_binary, '--cflags', 'botan-3'])
+        botan_ldflags = external_command([options.pkg_config_binary, '--libs', 'botan-3'])
 
         # remove all existing flags to avoid repetition
         all_flags = []
@@ -1887,6 +1898,8 @@ def process_command_line(args):
     build_group.add_option('--cc', dest='compiler', help='set the desired build compiler')
     build_group.add_option('--cc-bin', dest='compiler_binary', metavar='BINARY',
                             help='set path to compiler binary')
+    build_group.add_option('--pkg-config-bin', dest='pkg_config_binary', metavar='BINARY', default='pkg-config',
+                            help='set path to pkg-config binary')
     build_group.add_option('--cpu', help='set the target CPU architecture')
     build_group.add_option('--with-build-dir', metavar='DIR', default='',
                            help='setup the build in DIR')
@@ -1973,13 +1986,13 @@ def probe_environment(options):
     if options.build_botan and options.build_zlib and options.build_bzip2:
         return
 
-    if not have_program('pkg-config'):
+    if not have_program(options.pkg_config_binary):
         raise UserError('pkg-config is not found. Enable all --build-... options')
 
-    if not options.build_botan and not try_external_command(['pkg-config','--exists','botan-3']).success:
+    if not options.build_botan and not try_external_command([options.pkg_config_binary,'--exists','botan-3']).success:
         raise UserError('botan-3 package is not found. Use --build-botan')
 
-    if not options.build_zlib and not try_external_command(['pkg-config','--exists','zlib']).success:
+    if not options.build_zlib and not try_external_command([options.pkg_config_binary,'--exists','zlib']).success:
         raise UserError('bzip2 package is not found. Use --build-zlib')
 
 
