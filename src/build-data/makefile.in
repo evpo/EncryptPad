@@ -19,7 +19,7 @@ EXE_LINK_CMD   = %{exe_link_cmd}
 POST_LINK_CMD  = %{post_link_cmd}
 
 LIB_LINKS_TO   = %{link_to}
-EXE_LINKS_TO   = %{library_target} $(LIB_LINKS_TO)
+EXE_LINKS_TO   = %{library_target}
 
 BUILD_FLAGS    = $(ABI_FLAGS) $(LANG_FLAGS) $(CXXFLAGS) $(WARN_FLAGS)
 TEST_BUILD_FLAGS = $(ABI_FLAGS) $(LANG_FLAGS) $(CXXFLAGS)
@@ -101,7 +101,7 @@ $(ZLIB) :
 	$(MAKE) %{zlib_makefile} -C $(ZLIB_DIR) RELEASE=$(RELEASE)
 %{endif}
 
-EXE_LINKS_TO += %{zlib_ldflags}
+LIB_LINKS_TO += %{zlib_ldflags}
 
 zlib_clean:
 %{if build_zlib}
@@ -121,7 +121,7 @@ $(BZIP2) :
 	$(MAKE) %{bzip2_make_target} -C $(BZIP2_DIR)
 %{endif}
 
-EXE_LINKS_TO += %{bzip2_ldflags}
+LIB_LINKS_TO += %{bzip2_ldflags}
 
 bzip2_clean:
 %{if build_bzip2}
@@ -239,11 +239,11 @@ TESTOBJS = %{join test_objs}
 # Executable targets
 
 $(CLI): $(LIBRARIES) $(CLIOBJS) $(BOTAN_TARGET) $(ENCRYPTMSG_TARGET) $(ZLIB) $(BZIP2)
-	$(EXE_LINK_CMD) $(ABI_FLAGS) $(LDFLAGS) $(CLIOBJS) $(EXE_LINKS_TO) $(ENCRYPTMSG_LDFLAGS) $(BOTAN_LDFLAGS) %{output_to_exe}$@
+	$(EXE_LINK_CMD) $(ABI_FLAGS) $(LDFLAGS) $(CLIOBJS) $(EXE_LINKS_TO) $(ENCRYPTMSG_LDFLAGS) $(BOTAN_LDFLAGS) $(LIB_LINKS_TO) %{output_to_exe}$@
 	$(POST_LINK_CMD)
 
 $(TEST): $(LIBRARIES) $(TESTOBJS) $(GTEST) $(BOTAN_TARGET) $(ENCRYPTMSG_TARGET) $(ZLIB) $(BZIP2)
-	$(EXE_LINK_CMD) $(ABI_FLAGS) $(LDFLAGS) $(TESTOBJS) $(TEST_LINKS_TO) $(EXE_LINKS_TO) $(ENCRYPTMSG_LDFLAGS) $(BOTAN_LDFLAGS) %{output_to_exe}$@
+	$(EXE_LINK_CMD) $(ABI_FLAGS) $(LDFLAGS) $(TESTOBJS) $(TEST_LINKS_TO) $(EXE_LINKS_TO) $(ENCRYPTMSG_LDFLAGS) $(BOTAN_LDFLAGS) $(LIB_LINKS_TO) %{output_to_exe}$@
 	$(POST_LINK_CMD)
 
 # Library targets
