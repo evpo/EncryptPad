@@ -1157,7 +1157,7 @@ public:
             return '\n';
         if (m_key == Key_Escape)
             return QChar(27);
-        return m_xkey;
+        return QChar(m_xkey & 0xffff);
     }
 
     QString toString() const
@@ -1174,7 +1174,7 @@ public:
             else if (m_xkey == '>')
                 key = "<GT>";
             else
-                key = QChar(m_xkey);
+                key = QChar(m_xkey & 0xffff);
         }
 
         bool shift = isShift();
@@ -1360,7 +1360,7 @@ class History final
 public:
     History() : m_items(QString()) {}
     void append(const QString &item);
-    const QString &move(const QStringRef &prefix, int skip);
+    const QString &move(QStringView prefix, int skip);
     const QString &current() const { return m_items[m_index]; }
     const QStringList &items() const { return m_items; }
     void restart() { m_index = m_items.size() - 1; }
@@ -1381,7 +1381,7 @@ void History::append(const QString &item)
     restart();
 }
 
-const QString &History::move(const QStringRef &prefix, int skip)
+const QString &History::move(QStringView prefix, int skip)
 {
     if (!current().startsWith(prefix))
         restart();
@@ -1411,7 +1411,7 @@ public:
         m_buffer = s; m_pos = m_userPos = pos; m_anchor = anchor >= 0 ? anchor : pos;
     }
 
-    QStringRef userContents() const { return m_buffer.leftRef(m_userPos); }
+    QStringView userContents() const { return QStringView{m_buffer}.left(m_userPos); }
     const QChar &prompt() const { return m_prompt; }
     const QString &contents() const { return m_buffer; }
     bool isEmpty() const { return m_buffer.isEmpty(); }
@@ -5561,14 +5561,14 @@ bool FakeVimHandler::Private::handleExSubstituteCommand(const ExCommand &cmd)
     QString line = cmd.args;
     const int countIndex = line.lastIndexOf(QRegularExpression("\\d+$"));
     if (countIndex != -1) {
-        count = line.midRef(countIndex).toInt();
+        count = line.mid(countIndex).toInt();
         line = line.mid(0, countIndex).trimmed();
     }
 
     if (cmd.cmd.isEmpty()) {
         // keep previous substitution flags on '&&' and '~&'
         if (line.size() > 1 && line[1] == '&')
-            g.lastSubstituteFlags += line.midRef(2);
+            g.lastSubstituteFlags += line.mid(2);
         else
             g.lastSubstituteFlags = line.mid(1);
         if (line[0] == '~')
@@ -7285,8 +7285,8 @@ void FakeVimHandler::Private::invertCase(const Range &range)
         [] (const QString &text) -> QString {
             QString result = text;
             for (int i = 0; i < result.length(); ++i) {
-                QCharRef c = result[i];
-                c = c.isUpper() ? c.toLower() : c.toUpper();
+                const QChar c = result[i];
+                result[i] = c.isUpper() ? c.toLower() : c.toUpper();
             }
             return result;
         });
@@ -8747,8 +8747,7 @@ void FakeVimHandler::disconnectFromEditor()
 
 void FakeVimHandler::updateGlobalMarksFilenames(const QString &oldFileName, const QString &newFileName)
 {
-    for (int i = 0; i < Private::g.marks.size(); ++i) {
-        Mark &mark = Private::g.marks[i];
+    for (Mark &mark : Private::g.marks) {
         if (mark.fileName() == oldFileName)
             mark.setFileName(newFileName);
     }
