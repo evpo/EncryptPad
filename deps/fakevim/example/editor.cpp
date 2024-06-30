@@ -34,6 +34,7 @@
 #include <QTemporaryFile>
 #include <QStandardPaths>
 #include <QDebug>
+#include <QRegularExpression>
 
 #define EDITOR(editor, call) \
     if (QPlainTextEdit *ed = qobject_cast<QPlainTextEdit *>(editor)) { \
@@ -228,7 +229,7 @@ void Proxy::highlightMatches(const QString &pattern)
     selection.format.setForeground(Qt::black);
 
     // Highlight matches.
-    QRegExp re(pattern);
+    QRegularExpression re(pattern);
     QTextCursor cur = doc->find(re);
 
     m_searchSelection.clear();

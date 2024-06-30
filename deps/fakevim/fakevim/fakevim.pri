@@ -1,6 +1,7 @@
 include($$PWD/utils/utils.pri)
 
 INCLUDEPATH += $$PWD
+INCLUDEPATH += $$PWD/..
 
 SOURCES += $$PWD/fakevimhandler.cpp \
            $$PWD/fakevimactions.cpp \
