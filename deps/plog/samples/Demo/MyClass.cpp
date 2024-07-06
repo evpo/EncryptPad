@@ -1,23 +1,23 @@
-﻿#include "MyClass.h"
+#include "MyClass.h"
 
 MyClass::MyClass()
 {
-    LOGD;
+    PLOGD;
 }
 
 MyClass::~MyClass()
 {
-    LOGD;
+    PLOGD;
 }
 
 void MyClass::method()
 {
-    LOGD;
+    PLOGD;
 }
 
 void MyClass::staticMethod()
 {
-    LOGD;
+    PLOGD;
 }
 
 MyClass::operator std::string() const

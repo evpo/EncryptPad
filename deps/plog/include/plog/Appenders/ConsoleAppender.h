@@ -6,23 +6,38 @@
 
 namespace plog
 {
+    enum OutputStream
+    {
+        streamStdOut,
+        streamStdErr
+    };
+
     template<class Formatter>
-    class ConsoleAppender : public IAppender
+    class PLOG_LINKAGE_HIDDEN ConsoleAppender : public IAppender
     {
     public:
 #ifdef _WIN32
-        ConsoleAppender() : m_isatty(!!_isatty(_fileno(stdout))), m_stdoutHandle()
+#   ifdef _MSC_VER
+#       pragma warning(suppress: 26812) //  Prefer 'enum class' over 'enum'
+#   endif
+        ConsoleAppender(OutputStream outStream = streamStdOut)
+            : m_isatty(!!_isatty(_fileno(outStream == streamStdOut ? stdout : stderr)))
+            , m_outputStream(outStream == streamStdOut ? std::cout : std::cerr)
+            , m_outputHandle()
         {
             if (m_isatty)
             {
-                m_stdoutHandle = GetStdHandle(stdHandle::kOutput);
+                m_outputHandle = GetStdHandle(outStream == streamStdOut ? stdHandle::kOutput : stdHandle::kErrorOutput);
             }
         }
 #else
-        ConsoleAppender() : m_isatty(!!isatty(fileno(stdout))) {}
+        ConsoleAppender(OutputStream outStream = streamStdOut)
+            : m_isatty(!!isatty(fileno(outStream == streamStdOut ? stdout : stderr)))
+            , m_outputStream(outStream == streamStdOut ? std::cout : std::cerr)
+        {}
 #endif
 
-        virtual void write(const Record& record)
+        virtual void write(const Record& record) PLOG_OVERRIDE
         {
             util::nstring str = Formatter::format(record);
             util::MutexLock lock(m_mutex);
@@ -36,14 +51,19 @@ namespace plog
 #ifdef _WIN32
             if (m_isatty)
             {
-                WriteConsoleW(m_stdoutHandle, str.c_str(), static_cast<DWORD>(str.size()), NULL, NULL);
+                const std::wstring& wstr = util::toWide(str);
+                WriteConsoleW(m_outputHandle, wstr.c_str(), static_cast<DWORD>(wstr.size()), NULL, NULL);
             }
             else
             {
-                std::cout << util::toNarrow(str, codePage::kActive) << std::flush;
+#   if PLOG_CHAR_IS_UTF8
+                m_outputStream << str << std::flush;
+#   else
+                m_outputStream << util::toNarrow(str, codePage::kActive) << std::flush;
+#   endif
             }
 #else
-            std::cout << str << std::flush;
+            m_outputStream << str << std::flush;
 #endif
         }
 
@@ -55,8 +75,9 @@ namespace plog
     protected:
         util::Mutex m_mutex;
         const bool  m_isatty;
+        std::ostream& m_outputStream;
 #ifdef _WIN32
-        HANDLE      m_stdoutHandle;
+        HANDLE      m_outputHandle;
 #endif
     };
 }

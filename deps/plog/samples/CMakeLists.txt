@@ -1,4 +1,8 @@
-cmake_minimum_required(VERSION 2.8)
+if(${CMAKE_VERSION} VERSION_LESS 3.27.0)
+    cmake_minimum_required(VERSION 3.0)
+else()
+    cmake_minimum_required(VERSION 3.6)
+endif()
 
 if(POLICY CMP0063) #Honor visibility properties for all target types
     cmake_policy(SET CMP0063 NEW)
@@ -27,7 +31,7 @@ project(Samples)
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     set(CMAKE_COMPILER_IS_CLANGXX 1)
-endif ()
+endif()
 
 if(MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /WX")
@@ -37,98 +41,42 @@ elseif(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_CLANGXX)
     set(CMAKE_CXX_VISIBILITY_PRESET hidden)
     set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
     checkObjCXX()
-endif()
-
-include_directories(${CMAKE_SOURCE_DIR}/../include)
-
-file(GLOB_RECURSE PLOG_HEADERS ${CMAKE_SOURCE_DIR}/../include/*.h)
-add_library(plog STATIC ${PLOG_HEADERS})
-set_target_properties(plog PROPERTIES LINKER_LANGUAGE CXX)
-set_target_properties(plog PROPERTIES FOLDER Include)
-
-add_executable(Demo Demo/Main.cpp Demo/MyClass.h Demo/MyClass.cpp Demo/Customer.h)
-set_target_properties(Demo PROPERTIES FOLDER Samples)
-
-if(MSVC AND NOT (MSVC_VERSION LESS 1700)) # Visual Studio 2012 and higher
-    add_executable(DemoManaged Demo/Main.cpp Demo/MyClass.h Demo/MyClass.cpp Demo/Customer.h)
-    set_target_properties(DemoManaged PROPERTIES FOLDER Samples)
-    set_property(TARGET DemoManaged PROPERTY COMPILE_FLAGS "/clr /EHa")
-endif()
-
-if(NOT WIN32)
-    add_executable(DemoWchar Demo/Main.cpp Demo/MyClass.h Demo/MyClass.cpp Demo/Customer.h)
-    set_target_properties(DemoWchar PROPERTIES FOLDER Samples)
-    set_target_properties(DemoWchar PROPERTIES COMPILE_FLAGS "-DPLOG_ENABLE_WCHAR_INPUT=1")
-    if(APPLE)
-        target_link_libraries(DemoWchar -liconv)
+    if(CMAKE_COMPILER_IS_GNUCXX AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 6.0)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wsuggest-override")
+    endif()
+    if(CMAKE_COMPILER_IS_CLANGXX)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wnewline-eof")
     endif()
 endif()
 
-add_executable(MultiAppender MultiAppender/Main.cpp)
-set_target_properties(MultiAppender PROPERTIES FOLDER Samples)
-
-add_executable(MultiInstance MultiInstance/Main.cpp)
-set_target_properties(MultiInstance PROPERTIES FOLDER Samples)
-
-add_executable(Facilities Facilities/Main.cpp)
-set_target_properties(Facilities PROPERTIES FOLDER Samples)
-
-add_executable(Hello Hello/Main.cpp)
-set_target_properties(Hello PROPERTIES FOLDER Samples)
-
-add_executable(Performance Performance/Main.cpp)
-set_target_properties(Performance PROPERTIES FOLDER Samples)
-
-add_executable(CustomConverter CustomConverter/Main.cpp)
-set_target_properties(CustomConverter PROPERTIES FOLDER Samples)
-
-add_executable(CustomFormatter CustomFormatter/Main.cpp)
-set_target_properties(CustomFormatter PROPERTIES FOLDER Samples)
-
-add_executable(CustomAppender CustomAppender/Main.cpp)
-set_target_properties(CustomAppender PROPERTIES FOLDER Samples)
-
-add_executable(CustomType CustomType/Main.cpp)
-set_target_properties(CustomType PROPERTIES FOLDER Samples)
-
-# some systems have no shared libraries support, so check it
-if(NOT DEFINED TARGET_SUPPORTS_SHARED_LIBS OR TARGET_SUPPORTS_SHARED_LIBS)
-    add_executable(ChainedApp Chained/ChainedApp/Main.cpp)
-    set_target_properties(ChainedApp PROPERTIES FOLDER Samples/Chained)
-    target_link_libraries(ChainedApp ChainedLib)
-
-    add_library(ChainedLib SHARED Chained/ChainedLib/Main.cpp)
-    set_target_properties(ChainedLib PROPERTIES FOLDER Samples/Chained)
-endif()
-
-if(CMAKE_OBJCXX_AVAILABLE AND NOT CMAKE_COMPILER_IS_CLANGXX)
-    add_executable(ObjectiveC ObjectiveC/Main.mm)
-    target_link_libraries(ObjectiveC objc)
-else()
-    add_custom_target(ObjectiveC SOURCES ObjectiveC/Main.mm)
-endif()
-set_target_properties(ObjectiveC PROPERTIES FOLDER Samples)
-
-add_custom_target(Android SOURCES Android/jni/Sample.cpp)
-set_target_properties(Android PROPERTIES FOLDER Samples)
-
-add_executable(LibraryApp Library/LibraryApp/Main.cpp)
-set_target_properties(LibraryApp PROPERTIES FOLDER Samples/Library)
-target_link_libraries(LibraryApp LibraryLib)
-
-add_library(LibraryLib STATIC Library/LibraryLib/Lib.cpp)
-set_target_properties(LibraryLib PROPERTIES FOLDER Samples/Library)
-
-add_executable(ColorConsole ColorConsole/Main.cpp)
-set_target_properties(ColorConsole PROPERTIES FOLDER Samples)
-
-add_executable(NativeEOL NativeEOL/Main.cpp)
-set_target_properties(NativeEOL PROPERTIES FOLDER Samples)
-
-if(WIN32)
-    add_executable(EventLog EventLog/Main.cpp)
-    set_target_properties(EventLog PROPERTIES FOLDER Samples)
-
-    add_executable(DebugOutput DebugOutput/Main.cpp)
-    set_target_properties(DebugOutput PROPERTIES FOLDER Samples)
-endif()
+add_subdirectory(Android)
+add_subdirectory(AscDump)
+add_subdirectory(Chained)
+add_subdirectory(ColorConsole)
+add_subdirectory(CustomAppender)
+add_subdirectory(CustomConverter)
+add_subdirectory(CustomFormatter)
+add_subdirectory(CustomType)
+add_subdirectory(CXX11)
+add_subdirectory(CXX17)
+add_subdirectory(DebugOutput)
+add_subdirectory(Demo)
+add_subdirectory(DisableLogging)
+add_subdirectory(DynamicAppender)
+add_subdirectory(EventLog)
+add_subdirectory(Facilities)
+add_subdirectory(Hello)
+add_subdirectory(HexDump)
+add_subdirectory(Library)
+add_subdirectory(MultiAppender)
+add_subdirectory(MultiInstance)
+add_subdirectory(NotShared)
+add_subdirectory(ObjectiveC)
+add_subdirectory(Path)
+add_subdirectory(Performance)
+add_subdirectory(PrintVar)
+add_subdirectory(SetFileName)
+add_subdirectory(Shared)
+add_subdirectory(SkipNativeEOL)
+add_subdirectory(UtcTime)
+add_subdirectory(Utf8Everywhere)

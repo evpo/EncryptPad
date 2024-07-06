@@ -5,12 +5,12 @@
 namespace plog
 {
     template<class Formatter>
-    class DebugOutputAppender : public IAppender
+    class PLOG_LINKAGE_HIDDEN DebugOutputAppender : public IAppender
     {
     public:
-        virtual void write(const Record& record)
+        virtual void write(const Record& record) PLOG_OVERRIDE
         {
-            OutputDebugStringW(Formatter::format(record).c_str());
+            OutputDebugStringW(util::toWide(Formatter::format(record)).c_str());
         }
     };
 }

@@ -1,8 +1,9 @@
-﻿//
+//
 // CustomAppender - shows how to implement a custom appender that stores log messages in memory.
 //
 
 #include <plog/Log.h>
+#include <plog/Init.h>
 #include <plog/Formatters/FuncMessageFormatter.h>
 #include <list>
 
@@ -12,7 +13,7 @@ namespace plog
     class MyAppender : public IAppender // All appenders MUST inherit IAppender interface.
     {
     public:
-        virtual void write(const Record& record) // This is a method from IAppender that MUST be implemented.
+        virtual void write(const Record& record) PLOG_OVERRIDE // This is a method from IAppender that MUST be implemented.
         {
             util::nstring str = Formatter::format(record); // Use the formatter to get a string from a record.
 
@@ -31,12 +32,12 @@ namespace plog
 
 int main()
 {
-    static plog::MyAppender<plog::FuncMessageFormatter> myAppender; // Create our custom appender. 
+    static plog::MyAppender<plog::FuncMessageFormatter> myAppender; // Create our custom appender.
     plog::init(plog::debug, &myAppender); // Initialize the logger with our appender.
 
-    LOGD << "A debug message!";
+    PLOGD << "A debug message!";
 
-    myAppender.getMessageList(); // This returns a list of stored log messages. 
+    myAppender.getMessageList(); // This returns a list of stored log messages.
 
     return 0;
 }

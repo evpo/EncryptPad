@@ -4,6 +4,7 @@
 
 #include <objc/Object.h>
 #include <plog/Log.h>
+#include <plog/Initializers/RollingFileInitializer.h>
 
 @interface Greeter : Object
 {
@@ -15,16 +16,16 @@
 @implementation Greeter
 +(void) greet
 {
-    LOGD << "Hello ObjC++!";
+    PLOGD << "Hello ObjC++!";
 }
 @end
 
 int main()
 {
     plog::init(plog::debug, "ObjectiveC.csv"); // Initialize the logger.
-    LOGD << "Hello ObjC++!";
-    
+    PLOGD << "Hello ObjC++!";
+
     [Greeter greet];
-    
+
     return 0;
 }

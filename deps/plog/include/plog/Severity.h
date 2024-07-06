@@ -1,4 +1,5 @@
 #pragma once
+#include <cctype>
 
 namespace plog
 {
@@ -13,6 +14,9 @@ namespace plog
         verbose = 6
     };
 
+#ifdef _MSC_VER
+#   pragma warning(suppress: 26812) //  Prefer 'enum class' over 'enum'
+#endif
     inline const char* severityToString(Severity severity)
     {
         switch (severity)
@@ -36,14 +40,22 @@ namespace plog
 
     inline Severity severityFromString(const char* str)
     {
-        for (Severity severity = fatal; severity <= verbose; severity = static_cast<Severity>(severity + 1))
+        switch (std::toupper(str[0]))
         {
-            if (severityToString(severity)[0] == str[0])
-            {
-                return severity;
-            }
+        case 'F':
+            return fatal;
+        case 'E':
+            return error;
+        case 'W':
+            return warning;
+        case 'I':
+            return info;
+        case 'D':
+            return debug;
+        case 'V':
+            return verbose;
+        default:
+            return none;
         }
-
-        return none;
     }
 }

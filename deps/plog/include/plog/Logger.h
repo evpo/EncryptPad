@@ -3,14 +3,18 @@
 #include <plog/Util.h>
 #include <vector>
 
-#ifndef PLOG_DEFAULT_INSTANCE
-#   define PLOG_DEFAULT_INSTANCE 0
+#ifdef PLOG_DEFAULT_INSTANCE // for backward compatibility
+#   define PLOG_DEFAULT_INSTANCE_ID PLOG_DEFAULT_INSTANCE
+#endif
+
+#ifndef PLOG_DEFAULT_INSTANCE_ID
+#   define PLOG_DEFAULT_INSTANCE_ID 0
 #endif
 
 namespace plog
 {
-    template<int instance>
-    class Logger : public util::Singleton<Logger<instance> >, public IAppender
+    template<int instanceId>
+    class PLOG_LINKAGE Logger : public util::Singleton<Logger<instanceId> >, public IAppender
     {
     public:
         Logger(Severity maxSeverity = none) : m_maxSeverity(maxSeverity)
@@ -39,7 +43,7 @@ namespace plog
             return severity <= m_maxSeverity;
         }
 
-        virtual void write(const Record& record)
+        virtual void write(const Record& record) PLOG_OVERRIDE
         {
             if (checkSeverity(record.getSeverity()))
             {
@@ -57,17 +61,24 @@ namespace plog
 
     private:
         Severity m_maxSeverity;
+#ifdef _MSC_VER
+#   pragma warning(push)
+#   pragma warning(disable:4251) // needs to have dll-interface to be used by clients of class
+#endif
         std::vector<IAppender*> m_appenders;
+#ifdef _MSC_VER
+#   pragma warning(pop)
+#endif
     };
 
-    template<int instance>
-    inline Logger<instance>* get()
+    template<int instanceId>
+    inline Logger<instanceId>* get()
     {
-        return Logger<instance>::getInstance();
+        return Logger<instanceId>::getInstance();
     }
 
-    inline Logger<PLOG_DEFAULT_INSTANCE>* get()
+    inline Logger<PLOG_DEFAULT_INSTANCE_ID>* get()
     {
-        return Logger<PLOG_DEFAULT_INSTANCE>::getInstance();
+        return Logger<PLOG_DEFAULT_INSTANCE_ID>::getInstance();
     }
 }

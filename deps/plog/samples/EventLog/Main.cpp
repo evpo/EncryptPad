@@ -1,8 +1,9 @@
-﻿//
+//
 // EventLog - shows how to use EventLogAppender to write to the windows event log.
 //
 
 #include <plog/Log.h>
+#include <plog/Init.h>
 #include <plog/Appenders/EventLogAppender.h>
 #include <plog/Formatters/MessageOnlyFormatter.h>
 #include <iostream>
@@ -49,12 +50,12 @@ int main(int argc, char* argv[])
     static plog::EventLogAppender<plog::MessageOnlyFormatter> eventLogAppender(kEventSourceName);
     plog::init(plog::verbose, &eventLogAppender);
 
-    LOG_VERBOSE << "This is a VERBOSE message";
-    LOG_DEBUG << "This is a DEBUG message";
-    LOG_INFO << "This is an INFO message";
-    LOG_WARNING << "This is a WARNING message";
-    LOG_ERROR << "This is an ERROR message";
-    LOG_FATAL << "This is a FATAL message";
+    PLOG_VERBOSE << "This is a VERBOSE message";
+    PLOG_DEBUG << "This is a DEBUG message";
+    PLOG_INFO << "This is an INFO message";
+    PLOG_WARNING << "This is a WARNING message";
+    PLOG_ERROR << "This is an ERROR message";
+    PLOG_FATAL << "This is a FATAL message";
 
     return 0;
 }

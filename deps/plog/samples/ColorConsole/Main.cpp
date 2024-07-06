@@ -1,8 +1,10 @@
-﻿//
+//
 // ColorConsole - shows how to use a color console appender.
 //
 
 #include <plog/Log.h>
+#include <plog/Init.h>
+#include <plog/Formatters/TxtFormatter.h>
 #include <plog/Appenders/ColorConsoleAppender.h>
 
 int main()
@@ -11,12 +13,12 @@ int main()
     plog::init(plog::verbose, &consoleAppender);
 
     // Log severity levels are printed in different colors.
-    LOG_VERBOSE << "This is a VERBOSE message";
-    LOG_DEBUG << "This is a DEBUG message";
-    LOG_INFO << "This is an INFO message";
-    LOG_WARNING << "This is a WARNING message";
-    LOG_ERROR << "This is an ERROR message";
-    LOG_FATAL << "This is a FATAL message";
+    PLOG_VERBOSE << "This is a VERBOSE message";
+    PLOG_DEBUG << "This is a DEBUG message";
+    PLOG_INFO << "This is an INFO message";
+    PLOG_WARNING << "This is a WARNING message";
+    PLOG_ERROR << "This is an ERROR message";
+    PLOG_FATAL << "This is a FATAL message";
 
     return 0;
 }
