@@ -33,6 +33,7 @@
 #include "repository.h"
 #include "diagnostic_log.h"
 #include "plog/Log.h"
+#include "plog/Initializers/RollingFileInitializer.h"
 
 namespace
 {

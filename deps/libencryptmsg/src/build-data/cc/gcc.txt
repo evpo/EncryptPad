@@ -76,7 +76,7 @@ arm64:neon    -> ""
 
 <cpu_flags_no_debug>
 x86_32 -> "-momit-leaf-frame-pointer"
-x86_64 -> "-momit-leaf-frame-pointer"
+x86_64 -> "-momit-leaf-frame-pointer -fPIC"
 </cpu_flags_no_debug>
 
 # Flags set here are included at compile and link time

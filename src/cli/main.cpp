@@ -38,6 +38,7 @@
 #include "encryptmsg/algo_spec.h"
 #include "algo_defaults.h"
 #include "plog/Log.h"
+#include "plog/Initializers/RollingFileInitializer.h"
 #include "encryptmsg_version.h"
 #include "repository.h"
 #include "diagnostic_log.h"

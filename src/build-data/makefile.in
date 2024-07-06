@@ -270,5 +270,5 @@ $(TEST): $(LIBRARIES) $(TESTOBJS) $(GTEST) $(BOTAN_TARGET) $(ENCRYPTMSG_TARGET) 
 
 %{for test_build_info}
 %{obj}: %{src}
-	$(CXX) $(TEST_BUILD_FLAGS) %{isa_flags} $(BOTAN_CXXFLAGS) $(INCLUDE_PATHS) $(TEST_INCLUDES) %{dash_c} %{src} %{dash_o}$@
+	$(CXX) $(SO_OBJ_FLAGS) $(TEST_BUILD_FLAGS) %{isa_flags} $(BOTAN_CXXFLAGS) $(INCLUDE_PATHS) $(TEST_INCLUDES) %{dash_c} %{src} %{dash_o}$@
 %{endfor}

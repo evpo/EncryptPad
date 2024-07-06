@@ -6,6 +6,7 @@
 //**********************************************************************************
 #include "logger_init.h"
 #include "plog/Log.h"
+#include "plog/Initializers/RollingFileInitializer.h"
 
 namespace EncryptMsg
 {

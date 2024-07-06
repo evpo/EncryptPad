@@ -1,5 +1,5 @@
 #pragma once
-#include "plog/Log.h"
+#include "plog/Severity.h"
 #include <string>
 
 namespace EncryptPad
