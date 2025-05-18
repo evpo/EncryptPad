@@ -1588,8 +1588,8 @@ def probe_qmake(options):
     if have_program(options.qmake_bin):
         qmake_found = True
 
-    if not qmake_found and have_program("qmake-qt5"):
-        options.qmake_bin = "qmake-qt5"
+    if not qmake_found and have_program("qmake6"):
+        options.qmake_bin = "qmake6"
         qmake_found = True
 
 def execute_qmake(options):

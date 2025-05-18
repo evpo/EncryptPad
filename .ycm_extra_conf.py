@@ -13,4 +13,5 @@ def Settings( **kwargs ):
     ops= []
     AppendLineFile(ops, os.getenv('HOME') + '/.ycm/system_flags.txt')
     AppendLineFile(ops, 'compiler_options.txt')
+    AppendLineFile(ops, 'compiler_options_extra.txt')
     return {'flags': ops}
