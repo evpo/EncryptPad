@@ -19,6 +19,7 @@
 //**********************************************************************************
 #include "x2_key_loader.h"
 #include <fstream>
+#include <algorithm>
 #include "file_system.hpp"
 #include "curl_loader.h"
 #include "os_api.h"
@@ -43,7 +44,7 @@ namespace EncryptPad
         if(pos > path.length() - 3) // pr://
             return false;
 
-        if(find_if(path.begin(), path.begin() + pos, [](char c){return isalpha((int)c) == 0;}) != path.begin() + pos)
+        if(std::find_if(path.begin(), path.begin() + pos, [](char c){return isalpha((int)c) == 0;}) != path.begin() + pos)
             return false;
 
         if(path[pos + 1] != '/' && path[pos + 2] != '/')

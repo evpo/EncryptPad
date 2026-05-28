@@ -7,6 +7,7 @@
 #pragma once
 
 #include <string>
+#include <memory>
 #include "emsg_types.h"
 #include "emsg_utility.h"
 #include "emsg_exception.h"

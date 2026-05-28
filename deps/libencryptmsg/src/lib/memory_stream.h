@@ -7,6 +7,7 @@
 #pragma once
 #include "emsg_mem.h"
 #include "emsg_utility.h"
+#include <memory>
 
 namespace EncryptMsg
 {
