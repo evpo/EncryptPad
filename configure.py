@@ -1588,8 +1588,8 @@ def probe_qmake(options):
     if have_program(options.qmake_bin):
         qmake_found = True
 
-    if not qmake_found and have_program("qmake6"):
-        options.qmake_bin = "qmake6"
+    if not qmake_found and have_program("qmake"):
+        options.qmake_bin = "qmake"
         qmake_found = True
 
 def execute_qmake(options):
@@ -1951,7 +1951,7 @@ def process_command_line(args):
     build_group.add_option('--static', action='store_true', dest='static_linking', default=False,
                             help='link the application statically')
 
-    build_group.add_option('--qmake-bin', dest='qmake_bin', metavar='QMAKE', default='qmake',
+    build_group.add_option('--qmake-bin', dest='qmake_bin', metavar='QMAKE', default='qmake6',
                             help='set path to qmake binary')
 
     build_group.add_option('--build-zlib', action='store_true', dest='build_zlib', default=False,
