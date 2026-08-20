@@ -130,6 +130,29 @@ namespace EncryptMsg
             ASSERT_TRUE(result);
         }
 
+        TEST_P(MessageEncryptionFixture, When_bz2_compressed_Then_message_matches)
+        {
+            //Arrange
+            MessageWriter writer;
+            string pwd_str("123456");
+            SafeVector passphrase(FromChar(pwd_str.data()), FromChar(pwd_str.data()) + pwd_str.size());
+            MessageConfig config = GetMessageConfig();
+            config.SetCompression(Compression::BZip2);
+
+            Salt salt = GenerateRandomSalt();
+
+            //Act
+            writer.Start(passphrase, config, salt);
+            auto buf = Update(writer);
+
+            //Assert
+            buf_ = buf;
+            auto output = Decrypt(passphrase);
+            ASSERT_EQ(plain_file_.size(), output.size());
+            bool result = std::equal(output.begin(), output.end(), plain_file_.begin());
+            ASSERT_TRUE(result);
+        }
+
         SafeVector MessageEncryptionFixture::Update(MessageWriter &writer)
         {
             SafeVector ret_val;
@@ -155,6 +178,14 @@ namespace EncryptMsg
             MessageReader reader;
             reader.Start(passphrase);
             reader.Finish(buf_);
+
+            secure_vector<uint8_t> tmp_buf;
+            while(reader.OutputBufferOverflow())
+            {
+                tmp_buf.clear();
+                reader.Finish(tmp_buf);
+                buf_.insert(buf_.end(), tmp_buf.begin(), tmp_buf.end());
+            }
             return buf_;
         }
     }

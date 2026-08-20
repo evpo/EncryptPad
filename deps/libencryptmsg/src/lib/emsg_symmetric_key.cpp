@@ -32,7 +32,7 @@ namespace EncryptMsg
         using namespace Botan;
         std::unique_ptr<EncryptionKey> key(new EncryptionKey());
         auto hash_spec = GetHashSpec(hash_algo);
-        std::unique_ptr<PBKDF> pbkdf(get_pbkdf(hash_spec.botan_name));
+        std::unique_ptr<PBKDF> pbkdf = Botan::PBKDF::create_or_throw(hash_spec.botan_name);
         const char *ptr = reinterpret_cast<const char*>(passphrase.data.data());
         //TODO: use unique_ptr to wipe out the string before exiting the function
         std::string str(ptr, ptr + passphrase.data.size());

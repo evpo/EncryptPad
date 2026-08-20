@@ -17,6 +17,8 @@ namespace EncryptMsg
             {StateID::Start, "Start"},
             {StateID::Init, "Init"},
             {StateID::Armor, "Armor"},
+            {StateID::OutputOverflowInit, "OutputOverflowInit"},
+            {StateID::OutputOverflow, "OutputOverflow"},
             {StateID::Header,"Header"},
             {StateID::Packet,"Packet"},
             {StateID::BufferEmpty, "BufferEmpty"},

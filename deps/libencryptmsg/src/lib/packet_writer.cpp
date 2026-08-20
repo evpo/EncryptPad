@@ -11,8 +11,9 @@
 #include "botan/hash.h"
 #include "botan/cipher_mode.h"
 #include "botan/auto_rng.h"
-#include "openpgp_conversions.h"
+#include "bzip2_session.h"
 #include "emsg_mem.h"
+#include "plog/Log.h"
 
 using namespace std;
 using namespace EncryptMsg;
@@ -120,6 +121,19 @@ namespace EncryptMsg
 
     };
 
+    class BufferedCompressedWriter : public PacketWriter
+    {
+        private:
+            bool write_compression_;
+            CompressBzip2Session session_;
+        protected:
+            void DoWrite(OutStream &out) override;
+            void DoFinish(OutStream &out) override;
+            void DoWriteHeader(OutStream &out) override;
+        public:
+            BufferedCompressedWriter(const MessageConfig &config, Salt salt, const EncryptionKey &encryption_key);
+    };
+
     class CompressedWriter : public PacketWriter
     {
         private:
@@ -160,7 +174,10 @@ namespace EncryptMsg
                     packet_ptr.reset(new SymmetricIntegProtectedWriter(config, salt, encryption_key));
                     break;
                 case PacketType::Compressed:
-                    packet_ptr.reset(new CompressedWriter(config, salt, encryption_key));
+                    if(config.GetCompression() != Compression::BZip2)
+                        packet_ptr.reset(new CompressedWriter(config, salt, encryption_key));
+                    else
+                        packet_ptr.reset(new BufferedCompressedWriter(config, salt, encryption_key));
                     break;
                 case PacketType::Literal:
                     packet_ptr.reset(new LiteralWriter(config, salt, encryption_key));
@@ -269,9 +286,45 @@ namespace EncryptMsg
         write_compression_(true)
     {
         auto &compression_spec = GetCompressionSpec(config_.GetCompression());
-        compression_.reset(Botan::make_compressor(compression_spec.botan_name));
+        compression_ = Botan::Compression_Algorithm::create(compression_spec.botan_name);
         if(compression_)
             compression_->start();
+    }
+
+    BufferedCompressedWriter::BufferedCompressedWriter(const MessageConfig &config, Salt salt, const EncryptionKey &encryption_key)
+        :PacketWriter(config, salt, encryption_key),
+        write_compression_(true)
+    {
+        if(session_.InitFailed())
+        {
+            LOG_ERROR << "bz init failed!";
+        }
+    }
+
+    void BufferedCompressedWriter::DoWriteHeader(OutStream &out)
+    {
+        PacketHeader header;
+        header.packet_type = PacketType::Compressed;
+        header.is_new_format = true;
+        header.is_partial_length = true;
+        WritePacketHeader(out, header);
+    }
+
+    void BufferedCompressedWriter::DoWrite(OutStream &out)
+    {
+        if(write_compression_)
+        {
+            out.Put(static_cast<uint8_t>(config_.GetCompression()));
+            write_compression_ = false;
+        }
+        auto result = session_.Read(in_, out, finish_);
+        (void)result;
+    }
+
+    void BufferedCompressedWriter::DoFinish(OutStream &out)
+    {
+        finish_ = true;
+        DoWrite(out);
     }
 
     void CompressedWriter::DoWriteHeader(OutStream &out)
@@ -320,7 +373,7 @@ namespace EncryptMsg
         write_version_(true)
     {
         auto &algo_spec = GetAlgoSpec(config_.GetCipherAlgo());
-        cipher_mode_.reset(Botan::get_cipher_mode(algo_spec.botan_name, Botan::Cipher_Dir::Encryption));
+        cipher_mode_ = Botan::Cipher_Mode::create(algo_spec.botan_name, Botan::Cipher_Dir::Encryption);
         cipher_mode_->set_key(encryption_key_.begin(), encryption_key_.size());
         SafeVector iv(algo_spec.block_size, 0);
         cipher_mode_->start(iv.data(), iv.size());

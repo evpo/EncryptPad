@@ -44,7 +44,7 @@ namespace EncryptMsg
     bool InitCanEnter(StateMachineContext &ctx)
     {
         Context &context = ToContext(ctx);
-        return !context.State().buffer_stack.empty() || context.State().finish_packets;
+        return !context.State().buffer_stack.empty() || context.State().finish_packets || context.State().output_buffer_overflow;
     }
 
     void InitOnEnter(StateMachineContext &ctx)
@@ -186,7 +186,7 @@ namespace EncryptMsg
     bool PacketCanEnter(StateMachineContext &ctx)
     {
         Context &context = ToContext(ctx);
-        if(context.State().buffer_stack.empty() && !context.State().finish_packets)
+        if(context.State().buffer_stack.empty() && !context.State().finish_packets && !context.State().output_buffer_overflow)
             return false;
 
         if(context.State().packet_chain_it == context.State().packet_chain.end() ||
@@ -259,12 +259,14 @@ namespace EncryptMsg
         if(packet.IsFinalPacket() && !output.empty())
         {
             state.output.insert(state.output.end(), output.begin(), output.end());
+            if(state.output_buffer_overflow)
+                state.packet_chain_it = state.packet_chain.end();
         }
         else if(!output.empty())
         {
             buffer_stack.push(move(output));
             // if finishing, we need to enter finish packet state before moving to the next packet
-            if(!state.finish_packets)
+            if(!state.finish_packets || state.output_buffer_overflow)
                 state.packet_chain_it++;
             assert(state.packet_chain.end() != state.packet_chain_it);
         }
@@ -282,6 +284,9 @@ namespace EncryptMsg
     {
         Context &context = ToContext(ctx);
         if(*context.State().packet_chain_it == PacketType::Unknown)
+            return false;
+
+        if(context.State().output_buffer_overflow)
             return false;
 
         return context.State().finish_packets;
@@ -328,11 +333,36 @@ namespace EncryptMsg
             context.State().buffer_stack.pop();
     }
 
+    bool OutputOverflowInitCanEnter(LightStateMachine::StateMachineContext &ctx)
+    {
+        Context &context = ToContext(ctx);
+        return context.State().output_buffer_overflow;
+    }
+
+    void OutputOverflowInitOnEnter(LightStateMachine::StateMachineContext &ctx)
+    {
+        auto &state = ToContext(ctx).State();
+        for(;state.packet_chain_it != state.packet_chain.end() && *state.packet_chain_it == PacketType::Unknown
+                ; state.packet_chain_it++)
+        {
+        }
+    }
+
+    bool OutputOverflowCanEnter(StateMachineContext &ctx)
+    {
+        Context &context = ToContext(ctx);
+        return context.State().output_buffer_overflow;
+    }
+
+    void OutputOverflowOnEnter(LightStateMachine::StateMachineContext &/*ctx*/)
+    {
+    }
+
     bool EndCanEnter(StateMachineContext &ctx)
     {
         Context &context = ToContext(ctx);
         auto &state = context.State();
-        if(state.finish_packets && !std::all_of(state.packet_chain.begin(), state.packet_chain.end(),
+        if(state.finish_packets && !state.output_buffer_overflow && !std::all_of(state.packet_chain.begin(), state.packet_chain.end(),
                     [](PacketType packet_type)
                     {
                         return packet_type == PacketType::Unknown;

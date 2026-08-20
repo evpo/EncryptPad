@@ -34,8 +34,18 @@ namespace EncryptMsg
         sg.Create(StateID::FinishPacket, FinishOnEnter, Stub, FinishCanEnter, FinishCanExit);
         sg.Create(StateID::Header, HeaderOnEnter, Stub, HeaderCanEnter, T);
         sg.Create(StateID::Armor, ArmorOnEnter, Stub, ArmorCanEnter, T);
+        sg.Create(StateID::OutputOverflowInit, OutputOverflowInitOnEnter, Stub, OutputOverflowInitCanEnter, T);
+        sg.Create(StateID::OutputOverflow, OutputOverflowOnEnter, Stub, OutputOverflowCanEnter, T);
 
         sg.Link(StateID::Start, StateID::Init);
+        sg.Link(StateID::Init, StateID::OutputOverflowInit);
+        sg.Link(StateID::OutputOverflowInit, StateID::Packet);
+
+        sg.Link(StateID::Packet, StateID::OutputOverflow);
+        sg.Link(StateID::OutputOverflow, StateID::Packet);
+        sg.Link(StateID::OutputOverflow, StateID::Header);
+        sg.Link(StateID::OutputOverflow, StateID::End);
+
         sg.Link(StateID::Init, StateID::Armor);
         sg.Link(StateID::Armor, StateID::Packet);
         sg.Link(StateID::Armor, StateID::Header);

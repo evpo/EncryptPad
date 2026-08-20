@@ -39,6 +39,8 @@ namespace EncryptMsg
         EmsgResult emsg_result;
         bool is_message_analyzed;
         bool finish_packets;
+        bool output_buffer_overflow;
+        unsigned output_buffer_size;
 
         SessionState();
     };

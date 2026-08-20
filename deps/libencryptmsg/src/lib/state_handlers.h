@@ -33,4 +33,11 @@ namespace EncryptMsg
     void FinishOnEnter(LightStateMachine::StateMachineContext &context);
 
     bool BufferEmptyCanEnter(LightStateMachine::StateMachineContext &context);
+
+    void OutputOverflowInitOnEnter(LightStateMachine::StateMachineContext &context);
+    bool OutputOverflowInitCanEnter(LightStateMachine::StateMachineContext &context);
+
+    void OutputOverflowOnEnter(LightStateMachine::StateMachineContext &context);
+    bool OutputOverflowCanEnter(LightStateMachine::StateMachineContext &context);
+
 }

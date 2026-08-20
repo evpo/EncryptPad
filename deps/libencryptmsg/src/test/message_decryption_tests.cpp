@@ -236,7 +236,7 @@ namespace EncryptMsg
             auto it = file.begin();
             while(it != file.end())
             {
-                auto it_next = std::min(it + buffer_size_, file.end());
+                auto it_next = !reader.OutputBufferOverflow() ? std::min(it + buffer_size_, file.end()) : it;
                 buf_.resize(it_next - it);
                 std::copy(it, it_next, buf_.begin());
                 if(it_next == file.end())

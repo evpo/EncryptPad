@@ -77,6 +77,11 @@ namespace EncryptMsg
             PUBIF const EncryptionKey &GetEncryptionKey() const;
             PUBIF const MessageConfig &GetMessageConfig() const;
             PUBIF const Salt &GetSalt() const;
+
+            PUBIF void SetOutputBufferSize(size_t size);
+            // input is not allowed. Pass empty buf to Update to collect output
+            // before proceeding with input
+            PUBIF bool OutputBufferOverflow() const;
         private:
             MessageReaderImpl *impl_;
     };

@@ -15,7 +15,9 @@ namespace EncryptMsg
         packet_factory(*this),
         emsg_result(EmsgResult::None),
         is_message_analyzed(false),
-        finish_packets(false)
+        finish_packets(false),
+        output_buffer_overflow(false),
+        output_buffer_size(kDefaultOutputBufferSize)
     {
     }
 }

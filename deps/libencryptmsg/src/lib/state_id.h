@@ -15,6 +15,8 @@ namespace EncryptMsg
         Start,
         Init,
         Armor,
+        OutputOverflowInit,
+        OutputOverflow,
         Header,
         Packet,
         FinishPacket,

@@ -130,7 +130,8 @@ namespace EncryptMsg
             const MessageConfig &GetMessageConfig() const;
             const EncryptionKey &GetEncryptionKey() const;
             const Salt &GetSalt() const;
-
+            void SetOutputBufferSize(size_t size);
+            bool OutputBufferOverflow() const;
             MessageReaderImpl(bool analyze_only);
     };
 
@@ -211,9 +212,8 @@ namespace EncryptMsg
     void MessageReaderImpl::Update(SafeVector &buf)
     {
         LOG_DEBUG << "Update called";
-        if(buf.empty())
-            return;
-        session_state_.buffer_stack.push(buf);
+        if(!buf.empty())
+            session_state_.buffer_stack.push(buf);
         state_machine_.Reset();
         while(state_machine_.NextState())
         {
@@ -269,6 +269,16 @@ namespace EncryptMsg
     const Salt &MessageReaderImpl::GetSalt() const
     {
         return session_state_.salt;
+    }
+
+    void MessageReaderImpl::SetOutputBufferSize(size_t size)
+    {
+        session_state_.output_buffer_size = size;
+    }
+
+    bool MessageReaderImpl::OutputBufferOverflow() const
+    {
+        return session_state_.output_buffer_overflow;
     }
 
     // Analyzer
@@ -408,6 +418,16 @@ namespace EncryptMsg
     const Salt &MessageReader::GetSalt() const
     {
         return impl_->GetSalt();
+    }
+
+    void MessageReader::SetOutputBufferSize(size_t size)
+    {
+        impl_->SetOutputBufferSize(size);
+    }
+
+    bool MessageReader::OutputBufferOverflow() const
+    {
+        return impl_->OutputBufferOverflow();
     }
 }
 
