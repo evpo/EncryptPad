@@ -278,6 +278,10 @@ namespace EncryptMsg
             }
             state.packet_chain_it = it;
         }
+        else if(output.empty() && state.output_buffer_overflow)
+        {
+            state.packet_chain_it++;
+        }
     }
 
     bool FinishCanEnter(StateMachineContext &ctx)
