@@ -1,5 +1,7 @@
 #include "decryption_state_machine.h"
 #include <limits>
+#include <algorithm>
+#include "state.h"
 #include "state_graph.h"
 #include "state_machine.h"
 #include "encryptmsg/emsg_exception.h"
@@ -32,6 +34,7 @@ namespace EncryptPad
         std::unique_ptr<DecryptionSession> passphrase_session_;
         std::unique_ptr<DecryptionSession> key_file_session_;
         ProgressEvent progress_event_;
+        std::array<bool, 2> output_buffer_overflow_;
 
         StateGraph graph_;
         StateMachineContext context_;
@@ -44,6 +47,7 @@ namespace EncryptPad
         bool GPG_CanEnter(StateMachineContext &ctx);
         bool WADHead_CanEnter(StateMachineContext &ctx);
         bool WriteOut_CanEnter(StateMachineContext &ctx);
+        bool OutputBufferOverflow_CanEnter(LightStateMachine::StateMachineContext &ctx);
         bool End_CanEnter(StateMachineContext &ctx);
 
         void ReadIn_OnEnter(StateMachineContext &ctx);
@@ -53,6 +57,7 @@ namespace EncryptPad
         void GPG_OnEnter(StateMachineContext &ctx);
         void WADHead_OnEnter(StateMachineContext &ctx);
         void WriteOut_OnEnter(StateMachineContext &ctx);
+        void OutputBufferOverflow_OnEnter(LightStateMachine::StateMachineContext &ctx);
         void Fail_OnEnter(StateMachineContext &ctx);
         void End_OnEnter(StateMachineContext &ctx);
 
@@ -74,6 +79,7 @@ namespace EncryptPad
         encrypt_params_(encrypt_params),
         metadata_(metadata),
         progress_event_(in_.GetCount(), 0),
+        output_buffer_overflow_{false, false},
         state_machine_(graph_, context_)
     {
         using Self = DecryptionStateMachine;
@@ -123,6 +129,10 @@ namespace EncryptPad
                 VoidF(this, &Self::WriteOut_OnEnter), StubVoidFunction,
                 BoolF(this, &Self::WriteOut_CanEnter), StubBoolFunction);
 
+        graph_.Create(StateID::OutputBufferOverflow,
+                VoidF(this, &Self::OutputBufferOverflow_OnEnter), StubVoidFunction,
+                BoolF(this, &Self::OutputBufferOverflow_CanEnter), StubBoolFunction);
+
         graph_.Create(StateID::End,
                 VoidF(this, &Self::End_OnEnter), StubVoidFunction,
                 BoolF(this, &Self::End_CanEnter), AlwaysFalseBoolFunction);
@@ -133,6 +143,8 @@ namespace EncryptPad
         graph_.Link(StateID::ReadIn, StateID::ParseFormat);
         graph_.Link(StateID::ReadIn, StateID::GPG);
         graph_.Link(StateID::ReadIn, StateID::WADHead);
+
+        graph_.Link(StateID::OutputBufferOverflow, StateID::GPG);
 
         graph_.Link(StateID::ParseFormat, StateID::ReadIn);
         graph_.Link(StateID::ParseFormat, StateID::GPG);
@@ -156,6 +168,7 @@ namespace EncryptPad
         graph_.Link(StateID::WADHead, StateID::GPG);
         graph_.Link(StateID::WADHead, StateID::ReadIn);
 
+        graph_.Link(StateID::WriteOut, StateID::OutputBufferOverflow);
         graph_.Link(StateID::WriteOut, StateID::ReadIn);
 
         state_machine_.SetStateIDToStringConverter(
@@ -377,7 +390,8 @@ namespace EncryptPad
 
         }
 
-        if(buffer_.size() == 0)
+        if(buffer_.size() == 0 &&
+                std::find(output_buffer_overflow_.begin(), output_buffer_overflow_.end(), 1) == output_buffer_overflow_.end())
             return false;
 
         return true;
@@ -421,6 +435,8 @@ namespace EncryptPad
             {
                 reader->Update(buffer_);
             }
+            assert(filter_count_ >=0 && filter_count_ <=1);
+            output_buffer_overflow_[filter_count_] = reader->OutputBufferOverflow();
         }
         catch(const EmsgException &e)
         {
@@ -496,6 +512,16 @@ namespace EncryptPad
     {
         out_.Write(buffer_.data(), buffer_.size());
         buffer_.clear();
+    }
+
+    void DecryptionStateMachine::OutputBufferOverflow_OnEnter(LightStateMachine::StateMachineContext &ctx)
+    {
+        filter_count_ = 0;
+    }
+
+    bool DecryptionStateMachine::OutputBufferOverflow_CanEnter(LightStateMachine::StateMachineContext &ctx)
+    {
+        return (filter_count_ == 1 || format_ != Format::NestedWAD) && std::find(output_buffer_overflow_.begin(), output_buffer_overflow_.end(), 1) != output_buffer_overflow_.end();
     }
 
     void DecryptionStateMachine::Fail_OnEnter(LightStateMachine::StateMachineContext &ctx)

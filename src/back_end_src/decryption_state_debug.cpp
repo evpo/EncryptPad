@@ -24,6 +24,8 @@ std::string PrintDecryptionStateMachineStateID(LightStateMachine::StateMachineSt
             return "WADHead";
         case StateID::WriteOut:
             return "WriteOut";
+        case StateID::OutputBufferOverflow:
+            return "OutputBufferOverflow";
         case StateID::Fail:
             return "Fail";
         default:

@@ -22,6 +22,7 @@ namespace EncryptPad
         GPG,
         WADHead,
         WriteOut,
+        OutputBufferOverflow,
         Fail,
     };
 
