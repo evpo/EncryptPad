@@ -547,6 +547,7 @@ EmsgResult CompressedRW::DoRead(OutStream &out)
         switch(result)
         {
             case Bzip2SessionResult::Ok:
+            case Bzip2SessionResult::StreamEnd:
                 state_.output_buffer_overflow = false;
                 return EmsgResult::Pending;
             case Bzip2SessionResult::OutputBufferOverflow:

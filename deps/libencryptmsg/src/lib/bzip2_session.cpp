@@ -17,7 +17,8 @@ namespace EncryptMsg
 
 Bzip2Session::Bzip2Session(size_t output_buffer_size):
     output_buffer_size_(output_buffer_size),
-    init_failed_(false)
+    init_failed_(false),
+    stream_end_(false)
 {
     bz_stm_.bzalloc = NULL;
     bz_stm_.bzfree = NULL;
@@ -48,6 +49,16 @@ bool Bzip2Session::InitFailed() const
 
 Bzip2SessionResult Bzip2Session::Read(InBufferStream &in, OutStream &out)
 {
+    if(stream_end_)
+    {
+        if(in.GetCount() > 0)
+        {
+            LOG_ERROR << "Unexpected input after stream end. Count: " << in.GetCount();
+            return Bzip2SessionResult::Error;
+        }
+
+        return Bzip2SessionResult::StreamEnd;
+    }
     bz_in_.resize(rejected_input_.size() + in.GetCount());
     std::copy(rejected_input_.begin(), rejected_input_.end(), bz_in_.begin());
     in.Read(bz_in_.data() + rejected_input_.size(), in.GetCount());
@@ -90,6 +101,11 @@ Bzip2SessionResult Bzip2Session::Read(InBufferStream &in, OutStream &out)
         rejected_input_.resize(bz_stm_.avail_in);
         std::copy_n(bz_stm_.next_in, bz_stm_.avail_in, ToChar(rejected_input_.data()));
         bz_in_.clear();
+    }
+    if(res == BZ_STREAM_END)
+    {
+        stream_end_ = true;
+        return Bzip2SessionResult::StreamEnd;
     }
     return !output_buffer_overflow ? Bzip2SessionResult::Ok : Bzip2SessionResult::OutputBufferOverflow;
 }

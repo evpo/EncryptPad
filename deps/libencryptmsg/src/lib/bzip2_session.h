@@ -17,6 +17,7 @@ enum class Bzip2SessionResult
 {
     Ok,
     OutputBufferOverflow,
+    StreamEnd,
     Error,
 };
 
@@ -30,6 +31,7 @@ private:
     SafeVector bz_out_;
     SafeVector rejected_input_;
     bool init_failed_;
+    bool stream_end_;
 
 public:
 
