@@ -11,6 +11,7 @@
 #include "wad_reader_writer.h"
 #include "epad_result.h"
 #include "encryptmsg/openpgp_conversions.h"
+#include "plog/Log.h"
 
 using namespace LightStateMachine;
 using namespace EncryptMsg;
@@ -244,6 +245,7 @@ namespace EncryptPad
 
             default:
                 result_ = EpadResult::UnexpectedError;
+                LOG_ERROR << "unknown format";
                 ctx.SetFailed(true);
                 return;
         }
@@ -528,7 +530,10 @@ namespace EncryptPad
     {
         // If we came here because no states can enter
         if(result_ == EpadResult::Success)
+        {
+            LOG_ERROR << "Fail state entered because no states can enter";
             result_ = EpadResult::UnexpectedError;
+        }
     }
 
     bool DecryptionStateMachine::ReadKeyFile_CanEnter(LightStateMachine::StateMachineContext &ctx)
