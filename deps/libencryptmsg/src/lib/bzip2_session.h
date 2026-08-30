@@ -24,7 +24,7 @@ enum class Bzip2SessionResult
 class Bzip2Session
 {
 private:
-    static const size_t kStreamBufferSize = 256;
+    static const size_t kStreamBufferSize = 64<<10; //64 Kb
     size_t output_buffer_size_;
     bz_stream bz_stm_;
     SafeVector bz_in_;
@@ -44,7 +44,7 @@ public:
 class CompressBzip2Session
 {
 private:
-    static const size_t kStreamBufferSize = 256;
+    static const size_t kStreamBufferSize = 64<<10; //64 Kb
     bz_stream bz_stm_;
     SafeVector bz_in_;
     SafeVector bz_out_;

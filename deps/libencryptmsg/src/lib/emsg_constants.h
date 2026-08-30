@@ -24,6 +24,6 @@ namespace EncryptMsg
     const uint8_t kDefaultPartialLengthPower = 4;
     const bool kDefaultBinary = true;
     const bool kDefaultArmor = false;
-    const size_t kDefaultOutputBufferSize = 256;
+    const size_t kDefaultOutputBufferSize = 8<<20; //8 Mb
 }
 
