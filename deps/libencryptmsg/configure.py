@@ -1745,8 +1745,10 @@ def set_bzip2_variables(options, template_vars, cc):
     if options.build_cli or options.test:
         if options.bzip2_lib_dir:
             bzip2_name = 'bz2'
+            template_vars['bzip2_cxxflags'] = '{0} {1}'.format(cc.add_include_dir_option, options.bzip2_lib_dir);
             template_vars['bzip2_ldflags'] = '{0} {1} {2} {3}'.format(cc.add_lib_dir_option, options.bzip2_lib_dir, cc.add_lib_option, bzip2_name)
         else:
+            template_vars['bzip2_cxxflags'] = ''
             template_vars['bzip2_ldflags'] = external_command([options.pkg_config_binary, '--libs', 'bzip2'])
     else:
         template_vars['bzip2_ldflags'] = ''
@@ -1756,8 +1758,10 @@ def set_zlib_variables(options, template_vars, cc):
     if options.build_cli or options.test:
         if options.zlib_lib_dir:
             zlib_name = 'z'
+            template_vars['zlib_cxxflags'] = '{0} {1}'.format(cc.add_include_dir_option, options.zlib_lib_dir);
             template_vars['zlib_ldflags'] = '{0} {1} {2} {3}'.format(cc.add_lib_dir_option, options.zlib_lib_dir, cc.add_lib_option, zlib_name)
         else:
+            template_vars['zlib_cxxflags'] = ''
             template_vars['zlib_ldflags'] = external_command([options.pkg_config_binary, '--libs', 'zlib'])
     else:
         template_vars['zlib_ldflags'] = ''

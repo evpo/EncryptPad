@@ -31,6 +31,9 @@ SCRIPTS_DIR = scripts
 BOTAN_CXXFLAGS = %{botan_cxxflags}
 BOTAN_LDFLAGS = %{botan_ldflags}
 
+ZLIB_CXXFLAGS = %{zlib_cxxflags}
+BZIP2_CXXFLAGS = %{bzip2_cxxflags}
+
 INCLUDE_PATHS = %{include_paths}
 
 %{if debug_mode}
@@ -163,20 +166,20 @@ $(SHAREDSO): $(LIBOBJS) $(DEPSOBJS)
 
 %{for lib_build_info}
 %{obj}: %{src}
-	$(CXX) $(SO_OBJ_FLAGS) $(BUILD_FLAGS) %{isa_flags} $(BOTAN_CXXFLAGS) $(INCLUDE_PATHS) %{dash_c} %{src} %{dash_o}$@
+	$(CXX) $(SO_OBJ_FLAGS) $(BUILD_FLAGS) %{isa_flags} $(ZLIB_CXXFLAGS) $(BZIP2_CXXFLAGS) $(BOTAN_CXXFLAGS) $(INCLUDE_PATHS) %{dash_c} %{src} %{dash_o}$@
 %{endfor}
 
 %{for deps_build_info}
 %{obj}: %{src}
-	$(CXX) $(SO_OBJ_FLAGS) $(DEPS_BUILD_FLAGS) $(BOTAN_CXXFLAGS) $(INCLUDE_PATHS) %{dash_c} %{src} %{dash_o}$@
+	$(CXX) $(SO_OBJ_FLAGS) $(DEPS_BUILD_FLAGS) $(ZLIB_CXXFLAGS) $(BZIP2_CXXFLAGS) $(BOTAN_CXXFLAGS) $(INCLUDE_PATHS) %{dash_c} %{src} %{dash_o}$@
 %{endfor}
 
 %{for cli_build_info}
 %{obj}: %{src}
-	$(CXX) $(BUILD_FLAGS) %{isa_flags} $(BOTAN_CXXFLAGS) $(INCLUDE_PATHS) %{dash_c} %{src} %{dash_o}$@
+	$(CXX) $(BUILD_FLAGS) %{isa_flags} $(ZLIB_CXXFLAGS) $(BZIP2_CXXFLAGS) $(BOTAN_CXXFLAGS) $(INCLUDE_PATHS) %{dash_c} %{src} %{dash_o}$@
 %{endfor}
 
 %{for test_build_info}
 %{obj}: %{src}
-	$(CXX) $(TEST_BUILD_FLAGS) %{isa_flags} $(BOTAN_CXXFLAGS) $(INCLUDE_PATHS) $(TEST_INCLUDES) %{dash_c} %{src} %{dash_o}$@
+	$(CXX) $(TEST_BUILD_FLAGS) %{isa_flags} $(ZLIB_CXXFLAGS) $(BZIP2_CXXFLAGS) $(BOTAN_CXXFLAGS) $(INCLUDE_PATHS) $(TEST_INCLUDES) %{dash_c} %{src} %{dash_o}$@
 %{endfor}
