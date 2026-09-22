@@ -382,17 +382,8 @@
        </item>
        <item row="9" column="1">
         <layout class="QHBoxLayout" name="layout_2">
-         <property name="spacing">
-          <number>0</number>
-         </property>
          <item>
           <widget class="QSpinBox" name="uiRecentFiles">
-           <property name="maximumSize">
-            <size>
-             <width>60</width>
-             <height>16777215</height>
-            </size>
-           </property>
            <property name="maximum">
             <number>10</number>
            </property>
