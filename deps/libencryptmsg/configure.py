@@ -1751,6 +1751,7 @@ def set_bzip2_variables(options, template_vars, cc):
             template_vars['bzip2_cxxflags'] = ''
             template_vars['bzip2_ldflags'] = external_command([options.pkg_config_binary, '--libs', 'bzip2'])
     else:
+        template_vars['bzip2_cxxflags'] = ''
         template_vars['bzip2_ldflags'] = ''
 
 
@@ -1764,6 +1765,7 @@ def set_zlib_variables(options, template_vars, cc):
             template_vars['zlib_cxxflags'] = ''
             template_vars['zlib_ldflags'] = external_command([options.pkg_config_binary, '--libs', 'zlib'])
     else:
+        template_vars['zlib_cxxflags'] = ''
         template_vars['zlib_ldflags'] = ''
 
 def set_botan_variables(options, template_vars, cc):
