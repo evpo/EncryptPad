@@ -1,5 +1,5 @@
 //**********************************************************************************
-//EncryptPad Copyright 2021 Evgeny Pokhilko 
+//EncryptPad Copyright 2026 Evgeny Pokhilko 
 //<http://www.evpo.net/encryptpad>
 //
 //This file is part of EncryptPad
@@ -18,7 +18,6 @@
 //along with EncryptPad.  If not, see <http://www.gnu.org/licenses/>.
 //**********************************************************************************
 #include <QApplication>
-//#include <QTextCodec>
 #include <QTranslator>
 #include <QResource>
 #include <QDirIterator>
@@ -26,10 +25,14 @@
 #include <QQueue>
 #include <QFile>
 #include <QFileInfo>
+#include <QtEnvironmentVariables>
 #include <string>
 #include <exception>
 #include "mainwindow.h"
 #include "application.h"
+#include "qdiriterator.h"
+#include "qfontdatabase.h"
+#include "qtenvironmentvariables.h"
 #include "repository.h"
 #include "diagnostic_log.h"
 #include "plog/Log.h"
@@ -71,6 +74,24 @@ namespace
         }
 
         return empty;
+    }
+
+    void loadFonts()
+    {
+        if(qEnvironmentVariable("APPIMAGE").isEmpty()) return;
+        auto appdir = qEnvironmentVariable("APPDIR");
+        if(appdir.isEmpty()) return;
+        LOG_INFO << "APPDIR=" << appdir.toStdString();
+        QString fontdir = QString(appdir) + "/" + "usr/lib/fonts";
+        LOG_INFO << "fontdir: " << fontdir.toStdString();
+        QDirIterator it(fontdir, {"*.ttf",}, QDir::Files);
+        unsigned count = 0;
+        while(it.hasNext())
+        {
+            QFontDatabase::addApplicationFont(it.next());
+            count++;
+        }
+        LOG_INFO << "loaded " << count << " fonts";
     }
 
     struct CommandArguments
@@ -169,6 +190,7 @@ int main(int argc, char *argv[])
     try
     {
         EncryptPad::InitializeRepositoryPath(argv[0]);
+        loadFonts();
 
         QStringList userLangs;
         if(arguments.language.isEmpty())
