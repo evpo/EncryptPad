@@ -434,7 +434,7 @@ int main(int argc, char *argv[])
     int key_file_length = kDefaultKeyFileKeyLength;
     std::string key_file_length_str;
     std::string log_file;
-    plog::Severity log_severity;
+    plog::Severity log_severity = plog::Severity::info;
 
     std::string libcurl_path;
 

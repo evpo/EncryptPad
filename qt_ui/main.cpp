@@ -78,7 +78,6 @@ namespace
 
     void loadFonts()
     {
-        if(qEnvironmentVariable("APPIMAGE").isEmpty()) return;
         auto appdir = qEnvironmentVariable("APPDIR");
         if(appdir.isEmpty()) return;
         LOG_INFO << "APPDIR=" << appdir.toStdString();
@@ -190,7 +189,8 @@ int main(int argc, char *argv[])
     try
     {
         EncryptPad::InitializeRepositoryPath(argv[0]);
-        loadFonts();
+        // Load fonts functionality is only for AppImages
+        if(app.platformName() == "xcb") loadFonts();
 
         QStringList userLangs;
         if(arguments.language.isEmpty())
