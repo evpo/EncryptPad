@@ -1,5 +1,11 @@
 ## Release Notes ##
 
+### Version 0.6.0.0
+
+* Support major version 3 of Botan
+* Support major version 6 of Qt
+* Fix bug in which decrypting and decompressing large binary files, such as a disk image, with bzip2 led to excessive consumption of memory and crash
+
 ### Version 0.5.0.4
 
 * Update Botan to 2.19.4
