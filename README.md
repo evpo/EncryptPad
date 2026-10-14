@@ -378,7 +378,7 @@ Open the EncryptPad directory:
 
 Install dependencies and tools:
 
-    apt-get install qt5-default qtbase5-dev libqt5svg5-dev gcc g++ make python3 pkg-config zlib1g-dev libbotan-2-dev libbz2-dev
+    apt install gcc g++ make python3 pkg-config zlib1g-dev libbz2-dev qt6-base-dev qt6-svg-dev libbotan-3-dev
 
 Open the EncryptPad source directory:
 
@@ -392,11 +392,11 @@ Open the EncryptPad source directory:
 
 Install dependencies and tools:
 
-    apt-get install qtbase5-dev libqt5svg5-dev gcc g++ make python3 zlib1g-dev pkg-config libbotan-2-dev libbz2-dev
+    apt install gcc g++ make python3 pkg-config zlib1g-dev libbz2-dev qt6-base-dev qt6-svg-dev libbotan-3-dev
 
 Open the EncryptPad source directory:
 
-    python3 ./configure.py
+    ./configure.py
     make
     sudo make install
 
@@ -406,7 +406,7 @@ Open the EncryptPad source directory:
 
 Install dependencies and tools:
 
-    zypper install gcc gcc-c++ make python3 pkg-config zlib-devel libqt5-qtbase-devel libqt5-qtsvg-devel libbotan-devel libbz2-devel
+    zypper install gcc gcc-c++ make python3 pkg-config zlib-devel libbz2-devel qt6-base-devel qt6-svg-devel libbotan-devel
 
 Open the EncryptPad source directory:
 
@@ -421,7 +421,8 @@ Open the EncryptPad source directory:
 Install dependencies and tools:
 
     pacman -S --needed base-devel
-    pacman -S qt5-base qt5-svg python3 botan zlib bzip2
+    pacman -S botan zlib bzip2 qt6-base qt6-svg
+
 
 Open the EncryptPad source directory:
 
@@ -429,13 +430,17 @@ Open the EncryptPad source directory:
     make
     sudo make install
 
+If fonts are not installed, you may need ::
+
+    pacman -S ttf-dejavu
+
 <div id="build-on-freebsd"></div>
 
 ### FreeBSD
 
 Install dependencies and tools:
 
-    pkg install python3 pkgconf botan2 qt5 qt5-svg
+    pkg install python3 pkgconf botan3 qt6-base qt6-svg
 
 Open the EncryptPad source directory:
 
@@ -448,11 +453,12 @@ Open the EncryptPad source directory:
 
 Install dependencies and tools: 
 
-    sudo xbps-install base-devel qt5-devel qt5-svg-devel python3 botan-devel bzip2-devel libzip-devel
+    sudo xbps-install base-devel python3 bzip2-devel libzip-devel botan-devel qt6-base-devel qt6-svg-devel
 
 Open the EncryptPad source directory:
 
     ./configure.py
+    make
     sudo make install
 	
 <div id="portable-mode"></div>

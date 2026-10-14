@@ -627,7 +627,7 @@ sudo make install</code></pre>
 </div>
 <h3 id="ubuntu">Ubuntu</h3>
 <p>Install dependencies and tools:</p>
-<pre><code>apt-get install qt5-default qtbase5-dev libqt5svg5-dev gcc g++ make python3 pkg-config zlib1g-dev libbotan-2-dev libbz2-dev</code></pre>
+<pre><code>apt install gcc g++ make python3 pkg-config zlib1g-dev libbz2-dev qt6-base-dev qt6-svg-dev libbotan-3-dev</code></pre>
 <p>Open the EncryptPad source directory:</p>
 <pre><code>./configure.py
 make
@@ -637,9 +637,9 @@ sudo make install</code></pre>
 </div>
 <h3 id="debian">Debian</h3>
 <p>Install dependencies and tools:</p>
-<pre><code>apt-get install qtbase5-dev libqt5svg5-dev gcc g++ make python3 zlib1g-dev pkg-config libbotan-2-dev libbz2-dev</code></pre>
+<pre><code>apt install gcc g++ make python3 pkg-config zlib1g-dev libbz2-dev qt6-base-dev qt6-svg-dev libbotan-3-dev</code></pre>
 <p>Open the EncryptPad source directory:</p>
-<pre><code>python3 ./configure.py
+<pre><code>./configure.py
 make
 sudo make install</code></pre>
 <div id="build-on-opensuse">
@@ -647,7 +647,7 @@ sudo make install</code></pre>
 </div>
 <h3 id="opensuse">openSUSE</h3>
 <p>Install dependencies and tools:</p>
-<pre><code>zypper install gcc gcc-c++ make python3 pkg-config zlib-devel libqt5-qtbase-devel libqt5-qtsvg-devel libbotan-devel libbz2-devel</code></pre>
+<pre><code>zypper install gcc gcc-c++ make python3 pkg-config zlib-devel libbz2-devel qt6-base-devel qt6-svg-devel libbotan-devel</code></pre>
 <p>Open the EncryptPad source directory:</p>
 <pre><code>./configure.py
 make
@@ -658,17 +658,19 @@ sudo make install</code></pre>
 <h3 id="archlinux">Archlinux</h3>
 <p>Install dependencies and tools:</p>
 <pre><code>pacman -S --needed base-devel
-pacman -S qt5-base qt5-svg python3 botan zlib bzip2</code></pre>
+pacman -S botan zlib bzip2 qt6-base qt6-svg</code></pre>
 <p>Open the EncryptPad source directory:</p>
 <pre><code>./configure.py
 make
 sudo make install</code></pre>
+<p>If fonts are not installed, you may need ::</p>
+<pre><code>pacman -S ttf-dejavu</code></pre>
 <div id="build-on-freebsd">
 
 </div>
 <h3 id="freebsd">FreeBSD</h3>
 <p>Install dependencies and tools:</p>
-<pre><code>pkg install python3 pkgconf botan2 qt5 qt5-svg</code></pre>
+<pre><code>pkg install python3 pkgconf botan3 qt6-base qt6-svg</code></pre>
 <p>Open the EncryptPad source directory:</p>
 <pre><code>./configure.py
 make</code></pre>
@@ -677,9 +679,10 @@ make</code></pre>
 </div>
 <h3 id="void-linux">Void Linux</h3>
 <p>Install dependencies and tools:</p>
-<pre><code>sudo xbps-install base-devel qt5-devel qt5-svg-devel python3 botan-devel bzip2-devel libzip-devel</code></pre>
+<pre><code>sudo xbps-install base-devel python3 bzip2-devel libzip-devel botan-devel qt6-base-devel qt6-svg-devel</code></pre>
 <p>Open the EncryptPad source directory:</p>
 <pre><code>./configure.py
+make
 sudo make install</code></pre>
 <div id="portable-mode">
 
