@@ -237,21 +237,21 @@ If this file gets into the hands of a wrongdoer, he or she will need to brute fo
 
 ## Command line interface
 
-
+### encryptcli
 <div id="command-line-encryptcli"></div>
 
 **encryptcli** is the executable to encrypt / decrypt files in command line. Run it without arguments to see available parameters. Below is an example of encrypting a file with a key:
 
     # generate a new key and protect it with the passphrase "key".
     # --key-pwd-fd 0 for reading the key passphrase from descriptor 0
-    
+    echo -n "key" | encryptcli --generate-key --key-pwd-fd 0 my_key.key
 
     # encrypt plain_text.txt with my_key.key created above.
     # The key passphrase is sent through file descriptor 3
     cat plain_text.txt | encryptcli -e --key-file my_key.key \
     --key-only --key-pwd-fd 3 -o plain_text.txt.gpg 3< <(echo -n "key")
 
-
+### encryptpad
 <div id="command-line-encryptpad"></div>
 
 **encryptpad** is the GUI executable. It has the command line parameters below:
@@ -295,13 +295,13 @@ Install the AUR packages below:
 
 There are several PPAs on Launchpad built on Canonical servers from EncryptPad source files. Use the commands below to install the packages:
 
-    
+    sudo add-apt-repository ppa:evpo/main
     sudo apt update
     sudo apt install encryptpad encryptcli
 
 For Ubuntu versions before Impish use Alin Andrei's PPA below:
 
-    
+    sudo add-apt-repository ppa:nilarimogard/webupd8
     sudo apt update
     sudo apt install encryptpad encryptcli
 
@@ -327,8 +327,8 @@ For Ubuntu versions before Impish use Alin Andrei's PPA below:
 
 3. Run **configure.py --help** script to see available options. To build everything:
 
-    
-    
+    ./configure.py --cpu x86 --os mingw --static
+    make
 
 The `configure.py` command will always work if your console is running with administrative privileges. If you don't want to run as administrator, add `--link-method hardlink` to the options.
 If the build is successful, you should see the executable **./bin/release/encryptpad.exe**
@@ -341,9 +341,9 @@ Note that if you want EncryptPad to work as a single executable without dlls, yo
 
 You need to install Qt 5, Python and run:
 
-    
-    
-    
+    export PATH=$HOME/Qt/5.12.11/clang_64/bin/:$PATH
+    ./configure.py --ldflags "-mmacosx-version-min=11.0" --cxxflags "-mmacosx-version-min=11.0"
+    make
 
 Change the Qt path and replace the minimal macOS versions as needed. The command will work without them, but the result will be limited to the current version.
 
@@ -357,13 +357,13 @@ Change the Qt path and replace the minimal macOS versions as needed. The command
 
 Install dependencies and tools:
 
-    
+    dnf install gcc make qt5-qtbase-devel qt5-qtsvg gcc-c++ python libstdc++-static glibc-static botan2-devel bzip2-devel zlib-devel
 
 Open the EncryptPad directory:
 
-    
-    
-    
+    ./configure.py
+    make
+    sudo make install
 
 <div id="build-on-ubuntu"></div>
 
@@ -371,13 +371,13 @@ Open the EncryptPad directory:
 
 Install dependencies and tools:
 
-    
+    apt install gcc g++ make python3 pkg-config zlib1g-dev libbz2-dev qt6-base-dev qt6-svg-dev libbotan-3-dev
 
 Open the EncryptPad source directory:
 
-    
-    
-    
+    ./configure.py
+    make
+    sudo make install
 
 <div id="build-on-debian"></div>
 
@@ -385,13 +385,13 @@ Open the EncryptPad source directory:
 
 Install dependencies and tools:
 
-    
+    apt install gcc g++ make python3 pkg-config zlib1g-dev libbz2-dev qt6-base-dev qt6-svg-dev libbotan-3-dev
 
 Open the EncryptPad source directory:
 
-    
-    
-    
+    ./configure.py
+    make
+    sudo make install
 
 <div id="build-on-opensuse"></div>
 
@@ -399,33 +399,33 @@ Open the EncryptPad source directory:
 
 Install dependencies and tools:
 
-    
+    zypper install gcc gcc-c++ make python3 pkg-config zlib-devel libbz2-devel qt6-base-devel qt6-svg-devel libbotan-devel
 
 Open the EncryptPad source directory:
 
-    
-    
-    
+    ./configure.py
+    make
+    sudo make install
 
 <div id="build-on-archlinux"></div>
 
-
+### Archlinux
 
 Install dependencies and tools:
 
-    
-    
+    pacman -S --needed base-devel
+    pacman -S botan zlib bzip2 qt6-base qt6-svg
 
 
 Open the EncryptPad source directory:
 
-    
-    
-    
+    ./configure.py
+    make
+    sudo make install
 
 If fonts are not installed, you may need:
 
-    
+    pacman -S ttf-dejavu
 
 <div id="build-on-freebsd"></div>
 
@@ -433,12 +433,12 @@ If fonts are not installed, you may need:
 
 Install dependencies and tools:
 
-    
+    pkg install python3 pkgconf botan3 qt6-base qt6-svg
 
 Open the EncryptPad source directory:
 
-    
-    
+    ./configure.py
+    make
 
 <div id="build-on-voidlinux"></div>
 
@@ -446,13 +446,13 @@ Open the EncryptPad source directory:
 
 Install dependencies and tools: 
 
-    
+    sudo xbps-install base-devel python3 bzip2-devel libzip-devel botan-devel qt6-base-devel qt6-svg-devel
 
 Open the EncryptPad source directory:
 
-    
-    
-    
+    ./configure.py
+    make
+    sudo make install
 	
 <div id="portable-mode"></div>
 
@@ -476,11 +476,11 @@ To configure FakeVim, create and edit the file at the location below:
 
 Linux and macOS:
 
-    
+    ~/.encryptpad/vimrc
 
 On Windows in the user profile directory:
 
-    
+    _encryptpad/vimrc
 
 You can find more information about the FakeVim interface on the [FakeVim library web page](https://github.com/hluk/FakeVim)
 
@@ -499,12 +499,12 @@ The ex mode supports commands to read and write files. The input and output comm
 
 The combinations of the above commands are also supported:
 
-    
+    :wq
     :wq <file>
 
 Vim’s + register integrates with the system clipboard. You can also add the below line to the vimrc file to integrate the unnamed register with the system clipboard:
 
-    
+    set clipboard=unnamedplus
 
 <div id="passphrases-in-memory"></div>
 
@@ -519,15 +519,15 @@ EncryptPad uses the following frameworks and libraries:
 
 1. [**Qt Framework**](http://www.qt.io/)
 2. [**Botan**](http://botan.randombit.net/)
-
+3. [**STLplus**](http://stlplus.sourceforge.net/)
 5. [**Makefiles**](http://stlplus.sourceforge.net/makefiles/docs/)
 4. [**zlib**](http://zlib.net/)
 6. [**gtest**](http://code.google.com/p/googletest/)
 7. [**famfamfam Silk iconset 1.3**](http://www.famfamfam.com/lab/icons/silk/)
-
-
+8. [**plog**](https://github.com/SergiusTheBest/plog)
+9. [**FakeVim**](https://github.com/hluk/FakeVim)
 10. [**Breeze Icons**](https://invent.kde.org/frameworks/breeze-icons)
-
+11. [**tinyexpr**](https://codeplea.com/tinyexpr)
 
 <div id="integrity-verification"></div>
 
