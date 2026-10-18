@@ -430,7 +430,7 @@ Open the EncryptPad source directory:
     make
     sudo make install
 
-If fonts are not installed, you may need ::
+If fonts are not installed, you may need:
 
     pacman -S ttf-dejavu
 

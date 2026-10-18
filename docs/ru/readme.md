@@ -244,7 +244,7 @@ If this file gets into the hands of a wrongdoer, he or she will need to brute fo
 
     # generate a new key and protect it with the passphrase "key".
     # --key-pwd-fd 0 for reading the key passphrase from descriptor 0
-    echo -n "key" | encryptcli --generate-key --key-pwd-fd 0 my_key.key
+    
 
     # encrypt plain_text.txt with my_key.key created above.
     # The key passphrase is sent through file descriptor 3
@@ -295,13 +295,13 @@ Install the AUR packages below:
 
 There are several PPAs on Launchpad built on Canonical servers from EncryptPad source files. Use the commands below to install the packages:
 
-    sudo add-apt-repository ppa:evpo/main
+    
     sudo apt update
     sudo apt install encryptpad encryptcli
 
 For Ubuntu versions before Impish use Alin Andrei's PPA below:
 
-    sudo add-apt-repository ppa:nilarimogard/webupd8
+    
     sudo apt update
     sudo apt install encryptpad encryptcli
 
@@ -327,8 +327,8 @@ For Ubuntu versions before Impish use Alin Andrei's PPA below:
 
 3. Run **configure.py --help** script to see available options. To build everything:
 
-    ./configure.py --cpu x86 --os mingw --static
-    make
+    
+    
 
 The `configure.py` command will always work if your console is running with administrative privileges. If you don't want to run as administrator, add `--link-method hardlink` to the options.
 If the build is successful, you should see the executable **./bin/release/encryptpad.exe**
@@ -343,7 +343,7 @@ You need to install Qt 5, Python and run:
 
     
     
-    make
+    
 
 Change the Qt path and replace the minimal macOS versions as needed. The command will work without them, but the result will be limited to the current version.
 
@@ -361,8 +361,8 @@ Install dependencies and tools:
 
 Open the EncryptPad directory:
 
-    ./configure.py
-    make
+    
+    
     
 
 <div id="build-on-ubuntu"></div>
@@ -371,12 +371,12 @@ Open the EncryptPad directory:
 
 Install dependencies and tools:
 
-    apt-get install qt5-default qtbase5-dev gcc g++ make python3 pkg-config zlib1g-dev libbotan-2-dev libbz2-dev
+    
 
 Open the EncryptPad source directory:
 
-    ./configure.py
-    make
+    
+    
     
 
 <div id="build-on-debian"></div>
@@ -385,12 +385,12 @@ Open the EncryptPad source directory:
 
 Install dependencies and tools:
 
-    apt-get install qtbase5-dev gcc g++ make python3 zlib1g-dev pkg-config libbotan-2-dev libbz2-dev
+    
 
 Open the EncryptPad source directory:
 
-    python3 ./configure.py
-    make
+    
+    
     
 
 <div id="build-on-opensuse"></div>
@@ -399,12 +399,12 @@ Open the EncryptPad source directory:
 
 Install dependencies and tools:
 
-    zypper install gcc gcc-c++ make python3 pkg-config zlib-devel libqt5-qtbase-devel libbotan-devel libbz2-devel
+    
 
 Open the EncryptPad source directory:
 
-    ./configure.py
-    make
+    
+    
     
 
 <div id="build-on-archlinux"></div>
@@ -414,12 +414,17 @@ Open the EncryptPad source directory:
 Install dependencies and tools:
 
     
-    pacman -S qt5-base python3 botan zlib bzip2
+    
+
 
 Open the EncryptPad source directory:
 
-    ./configure.py
-    make
+    
+    
+    
+
+If fonts are not installed, you may need:
+
     
 
 <div id="build-on-freebsd"></div>
@@ -428,24 +433,25 @@ Open the EncryptPad source directory:
 
 Install dependencies and tools:
 
-    pkg install python3 pkgconf botan2 qt5
+    
 
 Open the EncryptPad source directory:
 
-    ./configure.py
-    make
+    
+    
 
 <div id="build-on-voidlinux"></div>
 
 ### Void Linux
 
 Install dependencies and tools: 
-	
-	sudo xbps-install base-devel qt5-devel python3 botan-devel bzip2-devel libzip-devel
+
+    
 
 Open the EncryptPad source directory:
 
-    ./configure.py
+    
+    
     
 	
 <div id="portable-mode"></div>
@@ -493,7 +499,7 @@ The ex mode supports commands to read and write files. The input and output comm
 
 The combinations of the above commands are also supported:
 
-    :wq
+    
     :wq <file>
 
 Vim’s + register integrates with the system clipboard. You can also add the below line to the vimrc file to integrate the unnamed register with the system clipboard:
@@ -513,7 +519,7 @@ EncryptPad uses the following frameworks and libraries:
 
 1. [**Qt Framework**](http://www.qt.io/)
 2. [**Botan**](http://botan.randombit.net/)
-3. [**STLplus**](http://stlplus.sourceforge.net/)
+
 5. [**Makefiles**](http://stlplus.sourceforge.net/makefiles/docs/)
 4. [**zlib**](http://zlib.net/)
 6. [**gtest**](http://code.google.com/p/googletest/)
@@ -521,7 +527,7 @@ EncryptPad uses the following frameworks and libraries:
 
 
 10. [**Breeze Icons**](https://invent.kde.org/frameworks/breeze-icons)
-11. [**tinyexpr**](https://codeplea.com/tinyexpr)
+
 
 <div id="integrity-verification"></div>
 

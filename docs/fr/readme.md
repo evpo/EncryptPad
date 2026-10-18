@@ -357,7 +357,7 @@ Changez le chemin de Qt et remplacez les versions minimales de macOS suivant le 
 
 Installer les dépendances et outils :
 
-    dnf install gcc make qt5-qtbase-devel gcc-c++ python libstdc++-static glibc-static botan2-devel bzip2-devel zlib-devel
+    dnf install gcc make qt5-qtbase-devel qt5-qtsvg gcc-c++ python libstdc++-static glibc-static botan2-devel bzip2-devel zlib-devel
 
 Ouvrir le dossier encryptpad :
 
@@ -371,7 +371,7 @@ Ouvrir le dossier encryptpad :
 
 Installer les dépendances et outils :
 
-    apt-get install qt5-default qtbase5-dev gcc g++ make python3 pkg-config zlib1g-dev libbotan-2-dev libbz2-dev
+    apt install gcc g++ make python3 pkg-config zlib1g-dev libbz2-dev qt6-base-dev qt6-svg-dev libbotan-3-dev
 
 Ouvrir le dossier source d’Encryptpad :
 
@@ -385,11 +385,11 @@ Ouvrir le dossier source d’Encryptpad :
 
 Installer les dépendances et outils :
 
-    apt-get install qtbase5-dev gcc g++ make python3 zlib1g-dev pkg-config libbotan-2-dev libbz2-dev
+    apt install gcc g++ make python3 pkg-config zlib1g-dev libbz2-dev qt6-base-dev qt6-svg-dev libbotan-3-dev
 
 Ouvrir le dossier source d’Encryptpad :
 
-    python3 ./configure.py
+    ./configure.py
     make
     sudo make install
 
@@ -399,7 +399,7 @@ Ouvrir le dossier source d’Encryptpad :
 
 Installer les dépendances et outils :
 
-    zypper install gcc gcc-c++ make python3 pkg-config zlib-devel libqt5-qtbase-devel libbotan-devel libbz2-devel
+    zypper install gcc gcc-c++ make python3 pkg-config zlib-devel libbz2-devel qt6-base-devel qt6-svg-devel libbotan-devel
 
 Ouvrir le dossier source d’Encryptpad :
 
@@ -414,7 +414,8 @@ Ouvrir le dossier source d’Encryptpad :
 Installer les dépendances et outils :
 
     pacman -S --needed base-devel
-    pacman -S qt5-base python3 botan zlib bzip2
+    pacman -S botan zlib bzip2 qt6-base qt6-svg
+
 
 Ouvrir le dossier source d’Encryptpad :
 
@@ -422,13 +423,17 @@ Ouvrir le dossier source d’Encryptpad :
     make
     sudo make install
 
+Si les polices ne sont pas installées, vous devrez peut-être :
+
+    pacman -S ttf-dejavu
+
 <div id="build-on-freebsd"></div>
 
 ### FreeBSD
 
 Installer les dépendances et outils :
 
-    pkg install python3 pkgconf botan2 qt5
+    pkg install python3 pkgconf botan3 qt6-base qt6-svg
 
 Ouvrir le dossier source d’Encryptpad :
 
@@ -440,12 +445,13 @@ Ouvrir le dossier source d’Encryptpad :
 ### Void Linux
 
 Installer les dépendances et outils : 
-	
-	sudo xbps-install base-devel qt5-devel python3 botan-devel bzip2-devel libzip-devel
+
+    sudo xbps-install base-devel python3 bzip2-devel libzip-devel botan-devel qt6-base-devel qt6-svg-devel
 
 Ouvrir le dossier source d’Encryptpad :
 
     ./configure.py
+    make
     sudo make install
 	
 <div id="mode-portable"></div>
